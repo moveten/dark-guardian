@@ -77,7 +77,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
 .ally .bar{flex:1;height:8px}
 .tc{position:absolute;left:50%;transform:translateX(-50%);top:max(8px,env(safe-area-inset-top));width:min(300px,38vw);display:flex;flex-direction:column;align-items:center;gap:4px}
 #bVil{margin-top:2px;padding:6px 14px;min-height:34px;border-radius:17px;border:2px solid #d6aa4e;background:rgba(60,44,16,.9);color:#ffe7a8;font-weight:700;font-size:12.5px;box-shadow:0 0 14px rgba(214,170,78,.45)}
-#bSkip{position:absolute;left:50%;transform:translateX(-50%);bottom:84px;z-index:20;padding:8px 22px;min-height:46px;font-size:15px!important;border-radius:23px;border:2px solid #a3302a;background:rgba(70,16,12,.9);color:#ffd6c8;font-weight:700;font-size:12.5px}
+#bSkip{position:absolute;left:50%;transform:translateX(-50%);bottom:150px;z-index:20;padding:8px 22px;min-height:46px;font-size:15px!important;border-radius:23px;border:2px solid #a3302a;background:rgba(70,16,12,.9);color:#ffd6c8;font-weight:700;font-size:12.5px}
 #bVil.cool{border-color:#5a4634;color:#9a8c79;box-shadow:none;background:rgba(22,17,14,.85)}
 #hWave{font-family:var(--f-disp);font-weight:800;font-size:15px;letter-spacing:.06em;color:#e9d9b4;text-shadow:0 1px 3px #000;white-space:nowrap}
 .bar.vil{width:100%;height:12px} .bar.vil i{background:#8a6a3a}
@@ -164,7 +164,12 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
 #sheetTabs[hidden]{display:none}
 #ptsBar{margin:8px 12px 0;padding:8px 12px;border-radius:10px;border:1px solid #d6aa4e;background:rgba(80,58,16,.55);color:#ffe7a8;font-weight:800;font-size:13px;text-align:left}
 #ptsBar[hidden]{display:none}
-#sheetTabs button{flex:1;font-size:14px;min-height:54px;border:1px solid var(--line2);border-radius:10px;background:#0f0b09;font-size:16px;font-weight:800;position:relative;white-space:nowrap}
+#sheetTabs button{flex:1;padding:0 2px;font-size:13px;min-height:54px;border:1px solid var(--line2);border-radius:10px;background:#0f0b09;font-size:16px;font-weight:800;position:relative;white-space:nowrap}
+#sheet .tier{position:relative;margin:0 0 4px 8px;padding:2px 0 4px 14px;border-left:2px solid #6b5432}
+#sheet .tier.lock{border-left-color:#3a3026;opacity:.8}
+#sheet .tier .thd{display:flex;align-items:center;gap:6px;margin:4px 0;font-size:13px;color:#e9d9b4}
+#sheet .tier .tdot{position:absolute;left:-7px;width:12px;height:12px;border-radius:50%;background:#d6aa4e;border:2px solid #120d0b}
+#sheet .tier.lock .tdot{background:#4a4036}
 #sheetTabs .pl{position:absolute;top:-7px;right:6px;min-width:22px;height:20px;padding:0 5px;border-radius:10px;background:#d6401f;color:#fff;font-size:12px;font-weight:900;line-height:20px;box-shadow:0 0 8px rgba(255,90,50,.7)}
 #sheetTabs .pl[hidden]{display:none}
 #sheetTabs button[aria-pressed="true"]{border-color:var(--gold);color:var(--gold);background:var(--panel2)}
@@ -343,7 +348,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
       <header><h2 id="sheetT">가방</h2><button class="x" id="sheetX" aria-label="닫기">×</button></header>
       <button id="ptsBar" hidden></button>
       <div class="sbody" id="sheetB"></div>
-      <nav id="sheetTabs"><button data-m="bag">🎒 가방</button><button data-m="stat">📊 능력</button><button data-m="skill">✨ 스킬</button><button data-m="shop">🛒 상점</button></nav>
+      <nav id="sheetTabs"><button data-m="bag">🎒 가방</button><button data-m="stat">📊 능력</button><button data-m="skill">✨ 스킬</button><button data-m="passive">🔰 패시브</button><button data-m="shop">🛒 상점</button></nav>
     </div>
     <div class="ipop" id="itemPop" hidden></div>
   </div>
@@ -428,7 +433,7 @@ const MT0=[
 ];
 const MT=MT0.map(t=>({...t,r:t.r*MOBS}));
 const BOSSNAMES=MT.filter(m=>m.boss).map(m=>m.n.split(' ').pop());
-const VILMAX=[0,500,700,950,1250,1600], TOWERS=[0,0,1,2,3,3], VMCD=90;
+const VILMAX=[0,300,420,570,750,960], TOWERS=[0,0,1,2,3,3], VMCD=90;
 const TOWERPOS=[[-90],[150],[30]].map(a=>({x:VX+Math.cos(a[0]*Math.PI/180)*(VR-8),y:VY+Math.sin(a[0]*Math.PI/180)*(VR-8)}));
 
 const BASES={
@@ -1272,7 +1277,7 @@ function slamFx(x,y,r,col){ sfx('slam'); efx.push({k:'ring',x,y,r0:r*.3,r1:r,t:0
 function castVillageMagic(who){
   if(G.vil.tier<3||(G.vmCd||0)>0||!['prep','wave','boss'].includes(G.phase))return;
   const tier=G.vil.tier; G.vmCd=VMCD;
-  const dmg=(22+G.wave*5)*(1+(G.stageIdx|0)*.25)*(tier>=5?1.35:tier>=4?1.15:1);
+  const dmg=.6*(22+G.wave*5)*(1+(G.stageIdx|0)*.25)*(tier>=5?1.35:tier>=4?1.15:1);
   for(const m of G.mobs){ if(m.dead||hyp(m.x-VX,m.y-VY)>430)continue; applyDmg(m,dmg,tier>=4?3:0); }
   if(tier>=4&&!me.dead&&hyp(me.x-VX,me.y-VY)<430) me.buffs.vil={v:tier>=5?.25:.15,t:10};
   if(tier>=5) G.vil.hp=Math.min(G.vil.max,G.vil.hp+G.vil.max*.08);
@@ -1471,8 +1476,8 @@ let sheetMode=null, selItem=null;
 let shopMsg='';
 function openSheet(m){ if(!G.inGame&&!G.titleSheet)return; sheetMode=m; selItem=null; shopMsg=''; $('#sheet').hidden=false; if(G.inGame&&G.mode==='solo')G.paused=true; for(const k in held)held[k]=false; joy.active=false;
   rerender(); }
-function rerender(){ if(sheetMode==='bag')renderBag(); else if(sheetMode==='stat'||sheetMode==='skill')renderStat(); else if(sheetMode==='shop')renderShop(); else renderMenu(); }
-function markTabs(){ $('#itemPop').hidden=true; $('#ptsBar').hidden=true; const t=$('#sheetTabs'); t.hidden=sheetMode==='menu'; t.querySelectorAll('button').forEach(b=>{b.setAttribute('aria-pressed',b.dataset.m===sheetMode); if(b.dataset.m==='shop')b.hidden=!!G.inGame&&sheetMode!=='shop'; const n=b.dataset.m==='stat'?(me.statPts|0):b.dataset.m==='skill'?(me.skillPts|0):0; let bd=b.querySelector('.pl'); if(!bd){bd=document.createElement('span');bd.className='pl';b.appendChild(bd);} bd.textContent=n>0?'+'+n:''; bd.hidden=!(n>0); }); }
+function rerender(){ if(sheetMode==='bag')renderBag(); else if(sheetMode==='stat'||sheetMode==='skill'||sheetMode==='passive')renderStat(); else if(sheetMode==='shop')renderShop(); else renderMenu(); }
+function markTabs(){ $('#itemPop').hidden=true; $('#ptsBar').hidden=true; const t=$('#sheetTabs'); t.hidden=sheetMode==='menu'; t.querySelectorAll('button').forEach(b=>{b.setAttribute('aria-pressed',b.dataset.m===sheetMode); if(b.dataset.m==='shop')b.hidden=!!G.inGame&&sheetMode!=='shop'; const n=b.dataset.m==='stat'?(me.statPts|0):(b.dataset.m==='skill'||b.dataset.m==='passive')?(me.skillPts|0):0; let bd=b.querySelector('.pl'); if(!bd){bd=document.createElement('span');bd.className='pl';b.appendChild(bd);} bd.textContent=n>0?'+'+n:''; bd.hidden=!(n>0); }); }
 $('#ptsBar').onclick=()=>{ sheetMode='stat'; selItem=null; rerender(); };
 $('#sheetTabs').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; sheetMode=b.dataset.m; selItem=null; shopMsg=''; rerender(); });
 function openTitleSheet(m){ prepMe(); G.titleSheet=true; openSheet(m); }
@@ -1521,7 +1526,7 @@ function renderBag(){
   markTabs(); $('#sheetT').textContent=`🎒 ${me.gold}원`;
   const eqOrder=['weapon','armor','helm','amulet','ring1','ring2'].concat(me.cls==='pal'?['shield']:[]);
   let h='<div style="display:flex;flex-direction:column;gap:10px;min-width:0"><div class="eq">'+eqOrder.map(k=>{const it=me.eq[k]; return `<div style="position:relative">${cellHtml(it,'slot',`data-eq="${k}"`)}<div class="sl" style="position:absolute;bottom:2px;left:0;right:0;font-size:9.5px;color:var(--mute);text-align:center;pointer-events:none">${EQN[k]}</div></div>`;}).join('')+'</div>';
-  h+=`<div class="meta" style="font-size:12px;color:var(--mute)">⚔️ 전투력 <b style="color:#ffd84a">${calcCP(me).toLocaleString()}</b> · 빨간 칸은 아직 착용할 수 없어요</div><div style="display:flex;flex-wrap:wrap;gap:6px"><button class="btn sm" data-sort="type">🗂️ 종류별</button><button class="btn sm" data-sort="rar">💎 등급별</button><button class="btn sm" id="aAuto">⚔️ 자동 장착</button><button class="btn sm" id="aBulk">🧺 일괄 판매</button></div></div>`;
+  h+=`<div class="meta" style="font-size:12px;color:var(--mute)">⚔️ 전투력 <b style="color:#ffd84a">${calcCP(me).toLocaleString()}</b> · 빨간 칸은 아직 착용할 수 없어요</div><div style="display:flex;flex-wrap:nowrap;gap:5px"><button class="btn sm" style="flex:1;padding:8px 2px;font-size:13px;white-space:nowrap" data-sort="type">종류별</button><button class="btn sm" style="flex:1;padding:8px 2px;font-size:13px;white-space:nowrap" data-sort="rar">등급별</button><button class="btn sm" style="flex:1;padding:8px 2px;font-size:13px;white-space:nowrap" id="aAuto">자동 장착</button><button class="btn sm" style="flex:1;padding:8px 2px;font-size:13px;white-space:nowrap" id="aBulk">일괄 판매</button></div></div>`;
   h+='<div class="inv">'+me.inv.map((it,i)=>cellHtml(it,'cell',`data-inv="${i}"`)).join('')+'</div>';
   const b=$('#sheetB'); b.className='sbody bag'; b.innerHTML=h; showPop(detailHtml(),curCmpHtml());
   b.querySelectorAll('[data-eq]').forEach(el=>el.onclick=()=>{const k=el.dataset.eq; if(me.eq[k]){selItem={it:me.eq[k],eq:k};renderBag();}});
@@ -1619,7 +1624,7 @@ function unequip(k){
   selItem=null; saveChar(); renderBag(); buildSkills(); cpMsg(cp0,calcCP(me));
 }
 function renderStat(){
-  const SKM=sheetMode==='skill'; markTabs(); $('#sheetT').textContent=`${CLASSES[me.cls].n} · 레벨 ${me.lvl}`;
+  const SKM=sheetMode==='skill'||sheetMode==='passive', PAS=sheetMode==='passive'; markTabs(); $('#sheetT').textContent=`${CLASSES[me.cls].n} · 레벨 ${me.lvl}`;
   const D=me.D, S=[['str','힘','근접 피해 +1%'],['dex','민첩','방어력, 공격 속도'],['vit','체력','생명력 +3'],['ene','에너지','마나 +0.8, 마법 피해 +1%']];
   const mult=1+(D.str+D.dmgPct)/100, aMin=Math.round((D.wmn+D.dmg)*mult*(me.cls==='sorc'?1+D.ene/150:1)), aMax=Math.round((D.wmx+D.dmg)*mult*(me.cls==='sorc'?1+D.ene/150:1)), aAvg=(aMin+aMax)/2, cr=D.crit/100;
   const k1=SK[me.cls][0], l1=Math.max(1,skLv(me,k1.k)); let s1=aAvg;
@@ -1636,11 +1641,15 @@ if(!SKM){
   h+='</div>';
 }
 if(SKM){
-  h+=`<div class="box"><h3>✨ 스킬 · 남은 포인트 ${me.skillPts}</h3>`;
-  for(const s of SK[me.cls]){
-    const b=me.skills[s.k]||0, eff=skLv(me,s.k), bonus=eff-b, can=me.skillPts>0&&me.lvl>=s.req&&b<20;
-    h+=`<div class="skrow ${me.lvl<s.req?'lock':''}"><div class="skic" style="--c:${s.el};color:${s.el};font-size:19px">${s.e}</div><div><div class="skn">${esc(s.n)} <span class="k" style="font-weight:400;font-size:12px;color:var(--mute)">${b?`Lv ${b}${bonus?` (+${bonus})`:''}`:`레벨 ${s.req}부터`}${s.aura?' · 오라':''}${s.passive?' · 패시브':''}${s.cd>=1?` · 쿨타임 ${s.cd}초`:''}${s.mp?` · 마나 ${mpCost(s,eff||1)}${b&&b<20?` (다음 ${mpCost(s,(eff||1)+1)})`:''}`:''}</span></div><div class="skd">${esc(s.d(Math.max(1,eff||1)))}</div><div class="k" style="font-size:11px;color:#8fb6a0">🔗 시너지: 이 스킬 3레벨마다 ${(SYN[me.cls][s.k]||[]).map(x=>SKBY[x].n).join('·')} +1레벨${synBonus(me,s.k)?` (받는 시너지 +${synBonus(me,s.k)})`:''}</div></div><button class="plus" data-sk="${s.k}" ${can?'':'disabled'} aria-label="${esc(s.n)} 올리기">+</button></div>`;
-  }
+  h+=`<div class="box"><h3>${PAS?'🔰 패시브':'✨ 액티브 스킬'} · 남은 포인트 ${me.skillPts}</h3><div class="k" style="font-size:11.5px;margin-bottom:6px">${PAS?'항상 적용되는 능력이에요. 스킬 포인트로 올려요.':'위에서 아래로 레벨이 오르며 해금돼요. 🔗는 이 스킬을 올리면 함께 강해지는 스킬이에요.'}</div>`;
+  { const list=SK[me.cls].filter(s=>!!s.passive===PAS), tiers=[...new Set(list.map(s=>s.req))].sort((x,y)=>x-y);
+    for(const rq of tiers){ const unl=me.lvl>=rq;
+      h+=`<div class="tier ${unl?'':'lock'}"><div class="thd"><span class="tdot"></span><b>레벨 ${rq}</b><span class="k"> ${unl?'해금됨':'잠김'}</span></div>`;
+      for(const s of list.filter(s=>s.req===rq)){
+        const b=me.skills[s.k]||0, eff=skLv(me,s.k), bonus=eff-b, can=me.skillPts>0&&me.lvl>=s.req&&b<20;
+        h+=`<div class="skrow ${me.lvl<s.req?'lock':''}"><div class="skic" style="--c:${s.el};color:${s.el};font-size:19px">${s.e}</div><div><div class="skn">${esc(s.n)} <span class="k" style="font-weight:400;font-size:12px;color:var(--mute)">${b?`Lv ${b}${bonus?` (+${bonus})`:''}`:'미습득'}${s.aura?' · 오라':''}${s.cd>=1?` · 쿨 ${s.cd}초`:''}${s.mp?` · 마나 ${mpCost(s,eff||1)}`:''}</span></div><div class="skd">${esc(s.d(Math.max(1,eff||1)))}</div>${s.passive?'':`<div class="k" style="font-size:11px;color:#8fb6a0">🔗 ${(SYN[me.cls][s.k]||[]).map(x=>SKBY[x].n).join('·')} (3레벨마다 +1)${synBonus(me,s.k)?` · 받는 시너지 +${synBonus(me,s.k)}`:''}</div>`}</div><button class="plus" data-sk="${s.k}" ${can?'':'disabled'} aria-label="${esc(s.n)} 올리기">+</button></div>`;
+      }
+      h+='</div>'; } }
   h+='</div>';
 }
   h+=`<div class="box"><h3>🔄 초기화</h3><div class="row2" style="display:flex;gap:8px">${SKM?'':`<button class="btn" id="rsStat" style="flex:1">능력치 초기화<br><small>20,000원</small></button>`}${SKM?`<button class="btn" id="rsSk" style="flex:1">스킬 초기화<br><small>30,000원</small></button>`:''}</div><div class="k" style="font-size:11.5px;margin-top:6px">쓴 포인트를 모두 돌려받아요.</div></div>`;
@@ -1806,7 +1815,7 @@ function showEnd(msg){
   show('#sEnd');
 }
 function confirmExit(cb){ modal(`<h3>🚪 나갈까요?</h3><p style="margin:0 0 12px;font-size:14px">마을(타이틀)로 돌아갑니다.</p><div class="row2"><button class="btn" id="exN">취소</button><button class="btn primary" id="exY">나가기</button></div>`,m=>{ m.querySelector('#exN').onclick=closeModal; m.querySelector('#exY').onclick=()=>{ closeModal(); cb(); }; }); }
-$('#bToTitle').onclick=()=>confirmExit(()=>quitToTitle());
+$('#bToTitle').onclick=()=>quitToTitle();
 
 /* ================= WORLD DECOR ================= */
 function mulberry(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}}
@@ -2149,7 +2158,9 @@ function drawMinimap(){
   const sx=w/WW, sy=h/WH;
   ctx.fillStyle='#8a6a3a'; ctx.beginPath(); ctx.arc(x+VX*sx,y+VY*sy,VR*sx,0,6.283); ctx.fill();
   for(const m of G.mobs){ctx.fillStyle=m.boss?'#ff4a8a':m.elite?'#7d96ff':'#c2382e'; const r=m.boss?3:1.4; ctx.fillRect(x+m.x*sx-r,y+m.y*sy-r,r*2,r*2);}
-  for(const g of ground){ const q=g.it.rar, z=q>=2?2.4:1.7; ctx.fillStyle=RBD[q]; ctx.fillRect(x+g.x*sx-z,y+g.y*sy-z,z*2,z*2); if(q>=2){ctx.strokeStyle='#000';ctx.lineWidth=.8;ctx.strokeRect(x+g.x*sx-z,y+g.y*sy-z,z*2,z*2);} }
+  ctx.save(); ctx.beginPath(); ctx.rect(x,y,w,h); ctx.clip();
+  for(const g of ground){ const q=g.it.rar, z=q>=2?2.2:1.5, cx=x+g.x*sx, cy=y+g.y*sy, mx=[5,8,12,17][q], ph=((T*.9+(g.it.id||0)*.37)%1); ctx.fillStyle=RBD[q]; ctx.fillRect(cx-z,cy-z,z*2,z*2);
+    for(let k=0;k<2;k++){ const f=(ph+k*.5)%1; ctx.strokeStyle=RBD[q]; ctx.globalAlpha=(1-f)*.85; ctx.lineWidth=q>=2?1.6:1; ctx.beginPath(); ctx.arc(cx,cy,1+f*mx,0,6.283); ctx.stroke(); } ctx.globalAlpha=1; } ctx.restore();
   if(ally&&!ally.lobby&&ally.x!==undefined){ctx.fillStyle=CLASSES[ally.cls].col;ctx.fillRect(x+ally.x*sx-2,y+ally.y*sy-2,4,4);}
   for(const sd of laneActive()){const L=LANE[sd]; chevron(x+(L.x+L.dx*40)*sx,y+(L.y+L.dy*40)*sy,Math.atan2(L.dy,L.dx),7,`rgba(255,58,42,${.6+.4*Math.sin(T*7)})`);}
   ctx.fillStyle='#fff'; ctx.fillRect(x+me.x*sx-2,y+me.y*sy-2,4,4);
