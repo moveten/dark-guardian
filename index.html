@@ -33,7 +33,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
 #app,#hud{touch-action:none}
 
 /* screens */
-.screen{position:absolute;inset:0;overflow:auto;touch-action:pan-y;background:radial-gradient(ellipse at 50% 18%,#2b1813 0%,#120d0b 55%,var(--bg) 100%);display:flex;flex-direction:column;align-items:center;gap:16px;box-sizing:border-box;padding-block:max(22px,env(safe-area-inset-top)) max(22px,env(safe-area-inset-bottom));padding-inline:16px;z-index:20}
+.screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:none;touch-action:pan-y;background:radial-gradient(ellipse at 50% 18%,#2b1813 0%,#120d0b 55%,var(--bg) 100%);display:flex;flex-direction:column;align-items:center;gap:16px;box-sizing:border-box;padding-block:max(22px,env(safe-area-inset-top)) max(22px,env(safe-area-inset-bottom));padding-inline:16px;z-index:20}
 .screen h1{font-family:var(--f-disp);font-weight:800;font-size:clamp(30px,7vw,46px);letter-spacing:.06em;margin:4px 0 0;color:#e9d9b4;text-wrap:balance;text-align:center}
 .eyebrow{font-size:12px;letter-spacing:.24em;color:var(--blood);font-weight:700}
 .sub{color:var(--mute);font-size:14px;margin:0;text-align:center}
@@ -77,7 +77,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
 .ally .bar{flex:1;height:8px}
 .tc{position:absolute;left:50%;transform:translateX(-50%);top:max(8px,env(safe-area-inset-top));width:min(300px,38vw);display:flex;flex-direction:column;align-items:center;gap:4px}
 #bVil{margin-top:2px;padding:6px 14px;min-height:34px;border-radius:17px;border:2px solid #d6aa4e;background:rgba(60,44,16,.9);color:#ffe7a8;font-weight:700;font-size:12.5px;box-shadow:0 0 14px rgba(214,170,78,.45)}
-#bSkip{margin-top:2px;padding:6px 14px;min-height:34px;border-radius:17px;border:2px solid #a3302a;background:rgba(70,16,12,.9);color:#ffd6c8;font-weight:700;font-size:12.5px}
+#bSkip{position:absolute;left:50%;transform:translateX(-50%);bottom:84px;z-index:20;padding:8px 22px;min-height:46px;font-size:15px!important;border-radius:23px;border:2px solid #a3302a;background:rgba(70,16,12,.9);color:#ffd6c8;font-weight:700;font-size:12.5px}
 #bVil.cool{border-color:#5a4634;color:#9a8c79;box-shadow:none;background:rgba(22,17,14,.85)}
 #hWave{font-family:var(--f-disp);font-weight:800;font-size:15px;letter-spacing:.06em;color:#e9d9b4;text-shadow:0 1px 3px #000;white-space:nowrap}
 .bar.vil{width:100%;height:12px} .bar.vil i{background:#8a6a3a}
@@ -200,7 +200,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
 .crow .cm span{font-size:12.5px;color:var(--mute)}
 .crow .lvb{font-weight:700;color:var(--gold);font-size:15px;white-space:nowrap}
 .pp{display:flex;flex-direction:column;align-items:center;gap:10px;width:100%;max-width:440px}
-.stagebar{touch-action:pan-x;overscroll-behavior:contain;position:relative;display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x proximity;padding:4px calc(50% - 40px);-webkit-overflow-scrolling:touch;scrollbar-width:none}.stagebar::-webkit-scrollbar{display:none}.stagebar .stg{flex:0 0 auto}
+.stagebar{width:100%;max-width:100%;box-sizing:border-box;touch-action:pan-x;overscroll-behavior:contain;position:relative;display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x proximity;padding:4px calc(50% - 40px);-webkit-overflow-scrolling:touch;scrollbar-width:none}.stagebar::-webkit-scrollbar{display:none}.stagebar .stg{flex:0 0 auto}
 .stg{min-width:74px;min-height:44px;padding:0 10px;border-radius:10px;border:1px solid var(--line2);background:var(--panel);font-weight:700;font-size:15px}
 .stg[aria-pressed="true"]{border-color:var(--gold);color:var(--gold);background:var(--panel2)}
 .stg:disabled{opacity:.45}
@@ -243,6 +243,9 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
 .ipop .acts{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}.ipop .acts .btn{padding:8px 14px;min-height:40px;font-size:13px}
 .ipop .cx{position:absolute;right:8px;top:8px;width:34px;height:34px;border:1px solid var(--line2);border-radius:6px;background:none;font-size:16px}
 @media (max-width:560px){.hb{width:43px;height:48px}.qb button{width:52px;height:52px}}
+#sEnd{justify-content:center}
+#sEnd .modes{box-sizing:border-box;width:100%;max-width:none;margin:0;position:absolute;left:0;right:0;bottom:0;padding:0 18px calc(26px + env(safe-area-inset-bottom));display:flex;justify-content:center}
+#sEnd .modes .btn{box-sizing:border-box;width:100%;max-width:420px;min-height:56px;font-size:18px}
 </style>
 
 <nav id="dock" hidden>
@@ -268,7 +271,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
     <div class="tc">
       <div id="hWave">준비</div>
       <div class="bar vil"><i id="hVil"></i><span id="hVilT"></span></div>
-      <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap"><button id="bSkip" hidden aria-label="나가기">🚪 나가기</button></div>
+      
     </div>
     <div class="orbs">
       <div class="orb hp"><i id="hHp"></i><span><b id="hHpT"></b><small>❤️ 생명력</small></span></div>
@@ -277,7 +280,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
     <div class="br">
       <div id="skills"></div>
     </div>
-    <div id="emg" hidden></div><button id="bAll" hidden aria-label="ALL 연속 호출">ALL</button>
+    <button id="bSkip" hidden aria-label="나가기">🚪 나가기</button><div id="emg" hidden></div><button id="bAll" hidden aria-label="ALL 연속 호출">ALL</button>
     <button id="bRaid" hidden aria-label="다음 습격"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M5 4.5l10 7.5-10 7.5z" fill="currentColor"/><rect x="17" y="4.5" width="3" height="15" rx="1" fill="currentColor"/></svg></button>
     <div id="stoast"></div>
     <div class="qb">
@@ -376,6 +379,7 @@ const CLASSES={
 const SK={
  sorc:[
   {k:'fireball',e:'🔥',n:'화염구',s:'화염',req:1,mp:4,cd:1,el:'#ff7a2e',rg:300,d:l=>`폭발하는 화염구. 기본 피해 ${18+13*l}`},
+  {k:'arcane',e:'🔷',n:'비전 집중',s:'비전',req:3,mp:0,cd:0,el:'#8fb0ff',passive:1,d:l=>`패시브: 에너지 +${2*l}, 마나 회복 +${3*l}%`},
   {k:'frostnova',e:'❄️',n:'서리 고리',s:'서리',req:6,mp:10,cd:6,el:'#8fdcff',d:l=>`주변 적에게 피해 ${14+10*l}, 3초간 감속`},
   {k:'chain',e:'⚡',n:'연쇄 번개',s:'번개',req:12,mp:9,cd:3,el:'#dfe7ff',rg:280,d:l=>`적 사이를 ${3+Math.floor(l/4)}번 튀는 번개. 기본 피해 ${22+16*l}`},
   {k:'teleport',e:'🔮',n:'순간이동',s:'순간',req:18,mp:12,cd:4,el:'#b98bff',d:l=>`이동 방향으로 ${240+4*l} 거리 순간이동`},
@@ -383,14 +387,16 @@ const SK={
   {k:'blizzard',e:'🌨️',n:'눈보라',s:'눈보',req:30,mp:24,cd:12,el:'#bfe9ff',rg:300,d:l=>`4초간 0.5초마다 피해 ${22+13*l}, 감속`}],
  war:[
   {k:'bash',e:'💥',n:'강타',s:'강타',req:1,mp:4,cd:2,el:'#e2694c',rg:95,d:l=>`무기 피해 ${300+50*l}%의 일격, 적을 밀쳐냄 · 범위 +${Math.round((RS(l)-1)*100)}%`},
+  {k:'ironbody',e:'🏋️',n:'강철 육체',s:'강철',req:3,mp:0,cd:0,el:'#e08a6a',passive:1,d:l=>`패시브: 최대 생명력 +${2*l}%, 방어력 +${3*l}`},
   {k:'rend',e:'🌪️',n:'폭풍 베기',s:'폭풍',req:6,mp:9,cd:5,el:'#ff8a4a',d:l=>`내 주변 넓은 범위의 모든 적에게 무기 피해 ${450+70*l}%`},
-  {k:'shout',e:'📣',n:'전투 함성',s:'함성',req:6,mp:10,cd:20,el:'#ffb259',d:l=>`10초간 나와 주변 동료 피해 +${20+5*l}%`},
+  {k:'shout',e:'📣',n:'전투 함성',s:'함성',req:6,mp:10,cd:20,el:'#ffb259',d:l=>`10초간 나와 주변 동료 피해 +${20+5*l}%. 주변 적 ${3+Math.floor(l/3)}명을 겁먹게 해 피해와 감속 (3레벨마다 대상 +1)`},
   {k:'whirl',e:'🌀',n:'회전베기',s:'회전',req:12,mp:8,cd:4,el:'#e8e0d0',d:l=>`주변 모든 적에게 무기 피해 ${180+30*l}%`},
   {k:'leap',e:'🦘',n:'도약 강타',s:'도약',req:18,mp:10,cd:6,el:'#c98b4a',rg:300,d:l=>`적에게 뛰어들어 범위 피해 ${280+45*l}%`},
   {k:'berserk',e:'😡',n:'광폭화',s:'광폭',req:24,mp:14,cd:25,el:'#ff3b2f',d:l=>`8초간 공격 속도 +40%, 피해 +${30+5*l}%`},
   {k:'quake',e:'🌋',n:'대지 분쇄',s:'분쇄',req:30,mp:18,cd:9,el:'#b88a5a',rg:300,d:l=>`앞으로 갈라지는 충격파, 무기 피해 ${400+65*l}%`}],
  pal:[
   {k:'smite',e:'✨',n:'신성 타격',s:'신성',req:1,mp:4,cd:2,el:'#f0cf75',rg:95,d:l=>`무기 피해 ${260+40*l}% + 신성 피해 ${8+7*l}`},
+  {k:'bulwark',e:'🛡️',n:'방패 수호',s:'수호',req:3,mp:0,cd:0,el:'#a9c4ff',passive:1,d:l=>`패시브: 막기 확률 +${l}%, 방어력 +${2*l}`},
   {k:'holyfire',e:'☀️',n:'성화 오라',s:'성화',req:9,mp:0,cd:.3,el:'#ffb347',aura:1,d:l=>`켜면 기본 공격이 범위 공격으로 바뀌어요. 범위 ${50+9*l} (레벨마다 커짐)`},
   {k:'healaura',e:'💚',n:'치유 오라',s:'치유',req:6,mp:0,cd:.3,el:'#9be38a',aura:1,d:l=>`켜면 나와 주변 동료가 초당 ${(1+.6*l).toFixed(1)} 회복`},
   {k:'hammer',e:'🔨',n:'축복의 망치',s:'망치',req:12,mp:8,cd:3,el:'#ffe08a',d:l=>`나선형으로 도는 망치 2.2초 지속. 기본 피해 ${16+13*l}`},
@@ -449,6 +455,7 @@ const AFX=[
  {t:'pr',n:'아이템 획득 범위 +{v}',sl:'ring amulet armor helm shield',r:i=>[8,20+i]},
  {t:'mr',n:'마나 회복 +{v}%',sl:'*',r:()=>[10,30]},
  {t:'cls',n:'+{v} {c} 스킬',sl:'amulet helm weapon'},
+ {t:'all',n:'모든 스킬 +{v}',sl:'amulet helm weapon ring armor'},
  {t:'sk',n:'+{v} {s} ({c} 전용)',sl:'*'}];
 const AFXBY={}; AFX.forEach(a=>AFXBY[a.t]=a);
 const PREF={dmg:'날카로운',dmgPct:'잔혹한',str:'거인의',dex:'재빠른',vit:'강인한',ene:'현자의',life:'활력의',mana:'마력의',def:'견고한',ias:'신속한',ms:'바람의',ls:'흡혈의',crit:'치명적인',cls:'숙련된',sk:'숙련된'};
@@ -551,6 +558,7 @@ let ITEMID=Math.floor(Math.random()*1e6);
 function biased(lo,hi,q){return Math.min(hi,lo+Math.floor((hi-lo+1)*Math.pow(Math.random(),1/q)))}
 function rollAff(a,rar,ilvl,q,rng){
   const R=rng||Math.random;
+  if(a.t==='all'){ const v=(rar>=2&&R()<.35)?2:1; rollAff.lq=(v-1); return {t:'all',v}; }
   if(a.t==='cls'||a.t==='sk'){
     const cap=rar<=1?3:2, r=Math.random(); let v=r<.6?1:r<.9?2:3; v=Math.min(v,cap);
     const ks=Object.keys(CLASSES), cls=ks[Math.floor(R()*ks.length)], o={t:a.t,v,cls};
@@ -643,7 +651,7 @@ function packChar(p){ const {id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,
 function saveChar(){ if(!me||!me.id)return; lsSet(charKey(me.id),JSON.stringify(packChar(me))); }
 const dispName=p=>(p&&p.name)||CLASSES[p.cls].n;
 const SELLBASE=[100,200,400,800], ADVAFX=['ls','crit','ias','ms','mf','pr','mr'];
-function sellInfo(it){ let base=SELLBASE[it.rar]||100, ex=0; for(const a of it.aff){ if(a.t==='cls'||a.t==='sk')ex+=100+100*a.v; else if(ADVAFX.includes(a.t))ex+=200; } return {base,ex,total:base+ex}; }
+function sellInfo(it){ let base=SELLBASE[it.rar]||100, ex=0; for(const a of it.aff){ if(a.t==='all')ex+=200+150*a.v; else if(a.t==='cls'||a.t==='sk')ex+=100+100*a.v; else if(ADVAFX.includes(a.t))ex+=200; } return {base,ex,total:base+ex}; }
 const need=l=>l<=30?Math.floor(24*Math.pow(l,1.95)):Math.floor(24*Math.pow(30,1.95)*Math.pow(l/30,2.6));
 
 function derive(p){
@@ -652,13 +660,15 @@ function derive(p){
     if(it.slot==='weapon'){d.wmn=it.mn;d.wmx=it.mx;}
     if(it.df)d.def+=it.df; if(it.blk)d.blk+=it.blk;
     for(const a of it.aff){
-      if(a.t==='cls'){if(a.cls===p.cls)d.cls+=a.v;}
+      if(a.t==='all'){d.cls+=a.v;}
+      else if(a.t==='cls'){if(a.cls===p.cls)d.cls+=a.v;}
       else if(a.t==='sk'){if(a.cls===p.cls)d.sk[a.key]=(d.sk[a.key]||0)+a.v;}
       else d[a.t]+=a.v;
     }}
   if(p.mb){ for(const k of MIGHTK)d[k]+=p.mb[k]||0; }
   const C=CLASSES[p.cls];
-  d.maxHp=Math.round(C.hp+d.vit*3+(p.lvl-1)*3+d.life);
+  { const pl=k=>{const b=(p.skills&&p.skills[k])||0; return b>0?b+d.cls+(d.sk[k]||0):0;}; const a1=pl('ironbody'),a2=pl('bulwark'),a3=pl('arcane'); d.def+=a1*3+a2*2; d.ene+=a3*2; d.mr+=a3*3; d.blk=Math.min(60,d.blk+a2); d._hpm=1+a1*.02; }
+  d.maxHp=Math.round((C.hp+d.vit*3+(p.lvl-1)*3+d.life)*(d._hpm||1));
   d.maxMp=Math.round(C.mp+d.ene*.8+(p.lvl-1)*1+d.mana);
   d.def+=Math.floor(d.dex/2)+(C.def||0); d.dmgPct+=(C.dp||0);
   d.spd=125*(1+d.ms/100);
@@ -1038,7 +1048,7 @@ function guardMul(){let g=0; if(me.aura==='guard')g=Math.max(g,(30+6*skLv(me,'gu
   if(ally&&!ally.lobby&&!ally.dead&&ally.aura==='guard'&&hyp(ally.x-me.x,ally.y-me.y)<320)g=Math.max(g,(30+6*ally.al)/100); return 1+g;}
 function takeDmg(raw){
   if(me.dead||G.phase==='win'||G.phase==='clear')return;
-  if(me.D.blk>0&&Math.random()*100<me.D.blk){ addNum(me.x,me.y-24,'막기!','#9fd0ff',false); spark(me.x,me.y,'#9fd0ff',8); sfx('block'); return; }
+  if(me.D.blk>0&&Math.random()*100<me.D.blk){ addNum(me.x,me.y-30,'🛡️ 막기!','#9fd0ff',true); spark(me.x,me.y,'#9fd0ff',12); efx.push({k:'ring',x:me.x,y:me.y,r0:8,r1:34,t:0,life:.3,col:'#9fd0ff',w:5}); sfx('block'); return; }
   const def=me.D.def*guardMul(), red=Math.min(.75,def/(def+60+G.wave*12));
   const d=raw*(1-red); me.hp-=d; me.hurt=.15; sfx('hurt'); G.shake=Math.max(G.shake,.2);
   addNum(me.x,me.y-24,Math.round(d),'#ff5a4a',false);
@@ -1170,7 +1180,7 @@ function castSkill(o,key,real,tx,ty,lv,tgt){
     break;
   case 'shout':
     efx.push({k:'ring',x:o.x,y:o.y,r0:20,r1:320,t:0,life:.6,col:'#ffb259',w:7}); impact(o.x,o.y,'255,180,90',100); burst(o.x,o.y,'#ffcf7a',20,180);
-    if(real) me.buffs.shout={v:(20+5*lv)/100,t:10};
+    if(real){ me.buffs.shout={v:(20+5*lv)/100,t:10}; const sk=new Set(), n=3+Math.floor(lv/3); for(let i=0;i<n;i++){ const q=nearestMob(o.x,o.y,320,sk); if(!q)break; sk.add(q); hitMob(q,physDmg(1+.12*lv),3); knock(q,o.x,o.y,10); efx.push({k:'ring',x:q.x,y:q.y,r0:6,r1:34,t:0,life:.35,col:'#ffb259',w:5}); } }
     else if(!me.dead&&hyp(me.x-o.x,me.y-o.y)<320){me.buffs.shout={v:(20+5*lv)/100,t:10}; toast('동료의 전투 함성: 피해 증가','#ffb259');}
     break;
   case 'whirl':
