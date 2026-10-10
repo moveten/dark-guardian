@@ -425,7 +425,7 @@ const SK={
   {k:'fireball',e:'🔥',n:'화염구',s:'화염',req:1,mp:4,cd:1,el:'#ff7a2e',rg:300,d:l=>`폭발하는 화염구. 기본 피해 ${18+13*l}`},
   {k:'arcane',e:'🔷',n:'비전 집중',s:'비전',req:3,mp:0,cd:0,el:'#8fb0ff',passive:1,d:l=>`패시브: 마나 회복 +${3*l}%, 스킬 재사용 대기시간 -${Math.min(25,l)}%`},
   {k:'frostnova',e:'❄️',n:'서리 고리',s:'서리',req:6,mp:10,cd:6,el:'#8fdcff',d:l=>`주변 적에게 피해 ${14+10*l}, 3초간 감속`},
-  {k:'teleport',e:'🌀',n:'순간이동',s:'이동',req:6,mp:12,cd:5,el:'#b98bff',d:l=>`누른 곳으로 순간이동 (최대 거리 ${240+4*l})`},
+  {k:'teleport',e:'🌀',n:'순간이동',s:'이동',req:6,mp:12,cd:5,el:'#b98bff',d:l=>`누른 곳으로 순간이동 (최대 거리 ${240+4*l}) · 도착 직후 0.4초 무적 (스킬 레벨과 무관)`},
   {k:'chain',e:'⚡',n:'연쇄 번개',s:'번개',req:12,mp:9,cd:3,el:'#dfe7ff',rg:280,d:l=>`적 사이를 ${3+Math.floor(l/4)}번 튀는 번개. 기본 피해 ${22+16*l}`},
   {k:'barrier',e:'🔷',n:'마력 방벽',s:'방벽',req:18,mp:14,cd:16,el:'#8fb6ff',d:l=>`${6+Math.floor(l/3)}초간 받는 피해 ${Math.min(70,30+2*l)}% 감소`},
   {k:'meteor',e:'☄️',n:'유성',s:'유성',req:24,mp:18,cd:7,el:'#ff5a1f',rg:300,d:l=>`잠시 뒤 떨어지는 유성. 기본 피해 ${80+40*l}, 맞은 적은 ${(.5+.02*l).toFixed(1)}초 기절 후 0.9초간 화상 (우두머리는 기절 면역)`},
@@ -641,6 +641,7 @@ function genItem(rar,ilvl,slot,baseName){
   const qs=[];
   if(rar===3){ it.name=nameItem(it,rar);
     const rng=mulberry(hashStr(it.name+'|'+slot+'|'+it.base)), pool=AFX.filter(a=>a.sl==='*'||a.sl.split(' ').includes(slot));
+    for(let k=pool.length-1;k>=0;k--){ if(pool[k].t==='all'&&rng()>.25)pool.splice(k,1); }
     for(let k=pool.length-1;k>0;k--){ const j=Math.floor(rng()*(k+1)); [pool[k],pool[j]]=[pool[j],pool[k]]; }
     for(const a of pool.slice(0,5)){ it.aff.push(rollAff(a,rar,ilvl,q,rng)); qs.push(rollAff.lq); }
   } else {
@@ -648,6 +649,7 @@ function genItem(rar,ilvl,slot,baseName){
     while(it.aff.length<n&&g++<80){
       const a=pick(AFX); if(used.has(a.t))continue;
       if(a.sl!=='*'&&!a.sl.split(' ').includes(slot))continue;
+      if(a.t==='all'&&Math.random()<.8)continue; /* 모든 스킬 옵션은 드물게 */
       used.add(a.t); it.aff.push(rollAff(a,rar,ilvl,q)); qs.push(rollAff.lq);
     }
   }
@@ -925,9 +927,9 @@ function spawnPoint(){
   return {x:-20,y:VY+rand(-140,140)};
 }
 function spawnMob(type,x,y,elite){
-  const S=G.stg||STAGES[0], w=Math.max(1,G.wave), hm=(1+.12*(w-1))*(G.coop?1.4:1)*(elite?6:1)*S.hpM*1.2, dm=(1+.08*(w-1))*(elite?3.5:1)*S.dmgM*1.45;
-  const t=MT[type], m={id:G.mobId++,type,x,y,hp:t.hp*hm,max:t.hp*hm,dmg:t.dmg*dm,spd:t.spd*(elite?1.2:S.spdM)*(t.boss?1:.55),r:t.r*(elite?1.5:1),xp:Math.round(t.xp*(1+.1*(w-1))*S.xpM*(elite?4:1)),elite:!!elite,boss:!!t.boss,fly:!!t.fly,cd:rand(0,1),slowT:0,tgt:0,rt:0,atk:0,fa:0,flash:0,anim:Math.random()*6,kx:0,ky:0,sq:0};
-  if(m.boss){const sq=Math.sqrt(S.hpM); m.hp=m.max=t.hp*sq*1.6*(G.coop?1.5:1);m.dmg=t.dmg*1.45*1.25*Math.sqrt(S.dmgM);m.xp=Math.round(t.xp*S.xpM);m.spd=t.spd;m.bt=3;m.sum1=false;m.sum2=false;m.tel=null;m.charge=null;}
+  const S=G.stg||STAGES[0], w=Math.max(1,G.wave), hm=(1+.12*(w-1))*(G.coop?1.4:1)*(elite?6:1)*S.hpM*1.2, dm=(1+.08*(w-1))*(elite?3.5:1)*S.dmgM*1.6;
+  const t=MT[type], m={id:G.mobId++,type,x,y,hp:t.hp*hm,max:t.hp*hm,dmg:t.dmg*dm,spd:t.spd*(elite?1.2:S.spdM)*(t.boss?.95:.5),r:t.r*(elite?1.5:1),xp:Math.round(t.xp*(1+.1*(w-1))*S.xpM*(elite?4:1)),elite:!!elite,boss:!!t.boss,fly:!!t.fly,cd:rand(0,1),slowT:0,tgt:0,rt:0,atk:0,fa:0,flash:0,anim:Math.random()*6,kx:0,ky:0,sq:0};
+  if(m.boss){const sq=Math.sqrt(S.hpM); m.hp=m.max=t.hp*sq*1.6*(G.coop?1.5:1);m.dmg=t.dmg*1.6*1.25*Math.sqrt(S.dmgM);m.xp=Math.round(t.xp*S.xpM);m.spd=t.spd*.95;m.bt=3;m.sum1=false;m.sum2=false;m.tel=null;m.charge=null;}
   if(m.elite&&type<=2)m.af=1+Math.floor(Math.random()*3);
   G.mobs.push(m); return m;
 }
@@ -1218,6 +1220,7 @@ function takeDmg(raw,fire){
 }
 function revItems(){ return (G.freeRev|0)+(me.rev|0); }
 function goDown(){ me.hp=0; me.dead=true; me.leap=null; me.rvT=0; spark(me.x,me.y,'#7a1010',20);
+  { const lost=Math.floor((me.gold|0)*.3); if(lost>0){ me.gold-=lost; saveChar(); uiDirty=true; later(.6,()=>toast(`💸 쓰러져서 ${lost}원을 잃었어요 (보유금의 30%)`,'#e0a070')); } }
   const coopAlive=ally&&!ally.lobby&&!ally.dead;
   me.respawn=coopAlive?30:revItems()>0?12:1.6;
   toast(revItems()>0?'쓰러졌습니다! 부활 버튼으로 일어나세요':coopAlive?'쓰러졌습니다! 동료가 구해주길 기다려요':'쓰러졌습니다…','#e07060'); }
@@ -1427,7 +1430,7 @@ function castSkill(o,key,real,tx,ty,lv,tgt){
     efx.push({k:'ring',x:o.x,y:o.y,r0:30,r1:4,t:0,life:.3,col:'#b98bff',w:6});
     efx.push({k:'ring',x:tx,y:ty,r0:4,r1:40,t:0,life:.35,col:'#b98bff',w:6});
     burst(o.x,o.y,'#c9a8ff',20,200); burst(tx,ty,'#c9a8ff',20,200); impact(tx,ty,'185,140,255',70);
-    if(real){me.x=tx;me.y=ty;me.pickT=null;}
+    if(real){me.x=tx;me.y=ty;me.pickT=null;me.god=Math.max(me.god||0,.4);}
     break;
   case 'meteor':
     efx.push({k:'tele',x:tx,y:ty,r:90,t:0,life:.9,col:'#ff5a1f'});
@@ -1926,9 +1929,9 @@ $('#bSolo').onclick=()=>{ G.mode='solo';  prepMe(); ally=null; resetWorld(); sta
 $('#bHost').onclick=async()=>{
   if(!room)return; G.mode='host';  prepMe();
   roomCode=String(ri(1000,9999));
-  $('#lobbyEye').textContent='방 만들기'; $('#lobbyCode').textContent=roomCode; $('#lobbyHint').textContent='친구에게 이 코드를 알려주세요'; $('#bStart').hidden=false; $('#lobbyNote').textContent='연결 중…';
+  $('#lobbyEye').textContent='방 만들기'; $('#lobbyCode').textContent=roomCode; $('#lobbyHint').textContent='친구에게 이 코드를 알려주세요'; $('#bStart').hidden=false; $('#bStart').disabled=true; $('#bStart').textContent='친구를 기다리는 중…'; $('#lobbyNote').textContent='연결 중…';
   G.phase='lobby'; show('#sLobby');
-  try{ await openRoom(roomCode); $('#lobbyNote').textContent='친구가 참가하지 않아도 시작할 수 있어요. 시작 뒤에는 새로 참가할 수 없어요.'; }
+  try{ await openRoom(roomCode); $('#lobbyNote').textContent='친구가 코드를 입력해 들어오면 시작할 수 있어요. 시작 뒤에는 새로 참가할 수 없어요.'; }
   catch(e){ $('#lobbyNote').textContent='방을 열지 못했어요. 잠시 뒤 다시 시도해 주세요.'; }
   renderLobby();
 };
@@ -1946,8 +1949,9 @@ function renderLobby(){
   for(const p of ps){const pl=p.presence.pl||{}; const c=CLASSES[pl.c]; rows.push(`<div><span>${p.presence.role==='host'?'호스트':'동료'} · ${esc(String(pl.nm||'').slice(0,8))}</span><span>${c?c.n:'?'} · 레벨 ${pl.l|0}</span></div>`);}
   l.innerHTML=rows.join('');
   if(G.mode==='guest'&&ps.some(p=>p.presence.role==='host')) $('#lobbyNote').textContent='호스트와 연결됐어요. 곧 시작합니다.';
+  if(G.mode==='host'){ const has=ps.some(p=>p.presence.role==='guest'), bs=$('#bStart'); bs.disabled=!has; bs.textContent=has?'🤝 함께 시작':'친구를 기다리는 중…'; if(has) $('#lobbyNote').textContent='친구가 들어왔어요! 시작을 눌러 함께 출발하세요.'; }
 }
-$('#bStart').onclick=()=>{ if(G.mode!=='host')return; ally=null; const gp=others().find(p=>p.presence&&p.presence.role==='guest'); guestPeer=gp||null; lastGuestPres=null; resetWorld(); startStage(); if(gp)syncAlly(gp.presence.pl); };
+$('#bStart').onclick=()=>{ if(G.mode!=='host')return; ally=null; const gp=others().find(p=>p.presence&&p.presence.role==='guest'); if(!gp){ $('#lobbyNote').textContent='친구가 들어와야 시작할 수 있어요.'; return; } guestPeer=gp; lastGuestPres=null; resetWorld(); startStage(); if(gp)syncAlly(gp.presence.pl); };
 $('#bLeave').onclick=()=>quitToTitle();
 function startGuestGame(pr){ resetWorld(); G.phase=pr.ph; toast('게임이 시작됐어요'); }
 async function quitToTitle(){
