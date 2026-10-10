@@ -297,10 +297,13 @@ const SK={
   {k:'smite',n:'신성 타격',s:'신성',req:1,mp:4,cd:2,el:'#f0cf75',rg:95,d:l=>`무기 피해 ${260+25*l}% + 신성 피해 ${8+4*l}`},
   {k:'healaura',n:'치유 오라',s:'치유',req:6,mp:0,cd:.3,el:'#9be38a',aura:1,d:l=>`켜면 나와 주변 동료가 초당 ${(1+.6*l).toFixed(1)} 회복`},
   {k:'hammer',n:'축복의 망치',s:'망치',req:12,mp:8,cd:3,el:'#ffe08a',d:l=>`나선형으로 도는 망치 2.2초 지속. 기본 피해 ${16+8*l}`},
+  {k:'might',n:'신념의 오라',s:'신념',req:15,mp:0,cd:.3,el:'#ffb86b',aura:1,d:l=>{const b=mightBonus(l);return `켜면 나와 주변 동료에게 적용. 레벨마다 힘→민첩→체력→에너지→이동속도(%) 순으로 +5씩 올라요. 지금: 힘 +${b.str} 민첩 +${b.dex} 체력 +${b.vit} 에너지 +${b.ene} 이동속도 +${b.ms}%`}},
   {k:'guard',n:'수호 오라',s:'수호',req:18,mp:0,cd:.3,el:'#8fb6ff',aura:1,d:l=>`켜면 나와 주변 동료 방어력 +${30+6*l}%`},
   {k:'zeal',n:'신앙 증폭',s:'증폭',req:24,mp:0,cd:0,el:'#ffd76a',passive:1,d:l=>`패시브: 내 팔라딘 스킬 피해 +${15+5*l}%, 지속시간 +${10+4*l}%`},
   {k:'judgment',n:'천벌',s:'천벌',req:30,mp:20,cd:10,el:'#fff7d6',rg:380,d:l=>`적 최대 5명에게 빛기둥, 기본 피해 ${110+30*l}. 성역이 2초간 남아 0.5초마다 ${18+6*l}`}]
 };
+const MIGHTK=['str','dex','vit','ene','ms'];
+function mightBonus(l){ const o={str:0,dex:0,vit:0,ene:0,ms:0}; for(let i=0;i<l;i++)o[MIGHTK[i%5]]+=5; return o; }
 const SKBY={}; for(const c in SK) for(const s of SK[c]) SKBY[s.k]=s;
 const ATKRG={sorc:250,war:100,pal:100};
 const MT=[
@@ -497,6 +500,7 @@ function derive(p){
       else if(a.t==='sk'){if(a.cls===p.cls)d.sk[a.key]=(d.sk[a.key]||0)+a.v;}
       else d[a.t]+=a.v;
     }}
+  if(p.mb){ for(const k of MIGHTK)d[k]+=p.mb[k]||0; }
   const C=CLASSES[p.cls];
   d.maxHp=Math.round(C.hp+d.vit*3+(p.lvl-1)*3+d.life);
   d.maxMp=Math.round(C.mp+d.ene*.8+(p.lvl-1)*1+d.mana);
@@ -654,7 +658,7 @@ function syncAlly(pl){
   if(ally.lvl&&(pl.l|0)>ally.lvl&&ally.x!==undefined){ally.cls=CLASSES[pl.c]?pl.c:'war'; levelFx(ally,false); toast(`동료가 레벨 ${pl.l|0}이 되었어요`,'#d6aa4e');}
   ally.name=String(pl.nm||'').slice(0,8); ally.cls=CLASSES[pl.c]?pl.c:'war'; ally.lvl=pl.l|0; ally.tx=pl.x; ally.ty=pl.y; ally.hp=pl.hp; ally.mh=pl.mh||1; ally.dead=!!pl.d;
   if(Array.isArray(pl.q)&&pl.q.length===6){const q=pl.q; ally.look=[ALLBASE.has(q[0])?q[0]:'',ALLBASE.has(q[1])?q[1]:'',ALLBASE.has(q[2])?q[2]:'',clamp(q[3]|0,0,3),clamp(q[4]|0,0,3),clamp(q[5]|0,0,3)];}
-  ally.aura=(pl.a==='healaura'||pl.a==='guard')?pl.a:0; ally.al=pl.al|0; ally.face=(pl.f|0)/100; ally.lobby=false;
+  ally.aura=(pl.a==='healaura'||pl.a==='guard'||pl.a==='might')?pl.a:0; ally.al=pl.al|0; ally.face=(pl.f|0)/100; ally.lobby=false;
   const fx=Array.isArray(pl.fx)?pl.fx:[];
   if(lastAllyFx<0){lastAllyFx=fx.length?fx[fx.length-1][0]:0;}
   for(const f of fx){ if(f[0]<=lastAllyFx)continue; lastAllyFx=f[0];
@@ -869,7 +873,10 @@ function takeDmg(raw){
   addNum(me.x,me.y-24,Math.round(d),'#ff5a4a',false);
   if(me.hp<=0){me.hp=0;me.dead=true;me.respawn=6;me.leap=null;toast('쓰러졌습니다. 6초 뒤 마을에서 부활합니다'+(me.rev>0?' (부활 버튼으로 즉시 부활)':''),'#e07060');spark(me.x,me.y,'#7a1010',20);}
 }
+function mightLevel(){ let l=0; if(me.aura==='might')l=skLv(me,'might');
+  if(ally&&!ally.lobby&&!ally.dead&&ally.aura==='might'&&hyp(ally.x-me.x,ally.y-me.y)<320) l=Math.max(l,ally.al|0); return l; }
 function updateMe(dt){
+  if(!me.dead){ const ml=mightLevel(); if(ml!==(me.mightL|0)){ me.mightL=ml; me.mb=ml?mightBonus(ml):null; const hr=me.hp/me.D.maxHp, mr=me.mp/me.D.maxMp; me.D=derive(me); me.hp=me.D.maxHp*hr; me.mp=me.D.maxMp*mr; uiDirty=true; } }
   const D=me.D;
   for(const k in me.cds) me.cds[k]=Math.max(0,me.cds[k]-dt);
   for(const k in me.buffs){me.buffs[k].t-=dt; if(me.buffs[k].t<=0)delete me.buffs[k];}
@@ -1119,7 +1126,7 @@ function useRevive(){ if(!G.inGame)return; if(!me.dead){toast('쓰러졌을 때 
   me.rev--; const a=me.aura,pot=me.pot; spawnMe(); me.aura=a; me.pot=pot; saveChar(); spark(me.x,me.y,'#ffd84a',30); burst(me.x,me.y,'#ffe08a',30,260); toast('즉시 부활!','#ffd84a'); uiDirty=true; }
 addEventListener('keydown',e=>{ if(e.target.tagName==='INPUT')return; const k=e.key.toLowerCase(); keys[k]=true;
   if(!G.inGame)return;
-  if(k>='1'&&k<='6'&&!e.repeat){const s=SK[me.cls][+k-1]; if(s)tryUse(s.k,false);}
+  if(k>='1'&&k<='7'&&!e.repeat){const s=SK[me.cls][+k-1]; if(s)tryUse(s.k,false);}
   if(k==='q')usePot(); if(k==='r')useRevive(); if(k==='i')openSheet('bag'); if(k==='c')openSheet('stat'); if(k==='escape')closeSheet(); });
 addEventListener('keyup',e=>{ keys[e.key.toLowerCase()]=false; });
 addEventListener('blur',()=>{for(const k in keys)keys[k]=false; for(const k in held)held[k]=false;});
@@ -1430,7 +1437,7 @@ function drawPlayer(o,isMe,t){
   const C=CLASSES[o.cls], x=o.x, y=o.y-(o.z||0);
   if(o.dead){ ctx.fillStyle='#4a4640';ctx.fillRect(x-7,y-10,14,18);ctx.fillStyle='#2e2a26';ctx.fillRect(x-1,y-7,2,11);ctx.fillRect(x-5,y-3,10,2); return; }
   ctx.fillStyle='rgba(0,0,0,.45)';ctx.beginPath();ctx.ellipse(o.x+2,o.y+10,17,8,0,0,6.283);ctx.fill();
-  if(o.aura){ const col=o.aura==='healaura'?'155,227,138':'143,182,255';
+  if(o.aura){ const col=o.aura==='healaura'?'155,227,138':o.aura==='might'?'255,170,80':'143,182,255';
     ctx.strokeStyle=`rgba(${col},.18)`;ctx.lineWidth=1;ctx.beginPath();ctx.arc(o.x,o.y,320,0,6.283);ctx.stroke();
     ctx.strokeStyle=`rgba(${col},.75)`;ctx.lineWidth=2;ctx.setLineDash([6,8]);ctx.lineDashOffset=-t*30;ctx.beginPath();ctx.arc(o.x,o.y,28,0,6.283);ctx.stroke();ctx.setLineDash([]); }
   const a=o.face||0, ca=Math.cos(a), sa=Math.sin(a);
