@@ -310,14 +310,14 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
-    <div class="ver" id="verT">v0.1.0.0024</div>
+    <div class="ver" id="verT">v0.1.0.0025</div>
     <div class="clist" id="charList"></div>
     <button class="btn" id="bNew">➕ 새 캐릭터</button>
     <div class="pp" id="playPanel" hidden>
       <div class="stagebar" id="stageBar"></div>
       <p class="sub" id="stageInfo"></p>
       <div class="modes"><button class="btn primary" id="bSolo">▶ 혼자 하기</button><button class="btn" id="bHost" disabled>🤝 방 만들기</button></div>
-      <div class="modes"><div class="join"><input id="joinCode" inputmode="numeric" maxlength="4" placeholder="방 코드" aria-label="방 코드"><button class="btn" id="bJoin" disabled>🔑 참가</button></div></div>
+      <div class="modes"><button class="btn" id="bJoin" disabled>🔑 방 참가</button></div>
     </div>
     <p class="note" id="netNote">온라인 연결 확인 중…</p>
     <p class="note">왼쪽 화면을 끌어 이동 · 기본 공격은 자동 · 스킬 버튼은 직접 누르기 · 아이템은 가까이 가면 자동으로 주워요. 가로 화면을 추천해요.</p>
@@ -1167,14 +1167,14 @@ function onKill(x,y,xp,tier,ilvl,type){
   for(let i=0;i<rolls;i++){
     let r=rollRarity(tier,ilvl);
     if(tier>=1&&i===0&&r<1&&ilvl<10) r=1;
-    if(tier>=2){ if(i===1&&r<1&&ilvl<10)r=1; if(i===2&&r<2)r=Math.random()<.9?2:3; }
+    if(tier>=2){ if(i===1&&r<1&&ilvl<10)r=1; if(i===2&&r<2)r=Math.random()<.94?2:3; }
     if(r>=0) dropItem(genItem(r,ilvl),x+rand(-24,24),y+rand(-24,24));
   }
 }
 function rollRarity(tier,ilvl){
   const il=ilvl||1, m=(tier===2?20:tier===1?4:1)*(1+((me.D.mf||0)+3*vupLv('luck'))/100)*comboMul(), t=G.testDrop?50:1;
   const kn=Math.max(.12,1-il/10), km=Math.max(.35,1-(il-5)/25); /* 레벨이 오를수록 일반·매직은 줄어듦 */
-  const pu=Math.min(1,.0012*m*t), pr=Math.min(1-pu,.012*m*t), pm=Math.min(1-pu-pr,.07*m*t*km), pn=Math.min(1-pu-pr-pm,.16*m*kn);
+  const pu=Math.min(1,.0009*m*t), pr=Math.min(1-pu,.012*m*t), pm=Math.min(1-pu-pr,.07*m*t*km), pn=Math.min(1-pu-pr-pm,.16*m*kn);
   const r=Math.random();
   if(r<pu)return 3; if(r<pu+pr)return 2; if(r<pu+pr+pm)return 1; if(r<pu+pr+pm+pn)return 0; return -1;
 }
@@ -1630,7 +1630,7 @@ function updateHud(){
   const ph=G.phase;
   $('#hWave').textContent= ph==='prep'?(G.wave>=G.TW?`우두머리 출현까지 ${Math.max(0,Math.ceil(G.timer))}초`:`${G.stg.id} · 습격 ${G.wave+1}/${G.TW} 까지 ${Math.max(0,Math.ceil(G.timer))}초`)
     : ph==='wave'?`${G.stg.id} · 습격 ${G.wave}/${G.TW}` : ph==='boss'?'우두머리 토벌' : ph==='clear'?(G.mode==='guest'?'전리품 줍기':`전리품 줍기 ${Math.max(0,Math.ceil(G.clearT||0))}초`) : ph==='win'?'승리':'함락';
-  $('#bSkip').hidden=!(G.phase==='clear'&&G.mode!=='guest');
+  $('#bSkip').hidden=!(G.phase==='clear');
   const sb=$('#bRaid'), cs=G.mode==='guest'?G.canSkip:canSkip(); sb.hidden=!cs||!!G.allMode; sb.textContent=G.wave>=G.TW?'⏭ 우두머리 소환':'⏭ 습격 스킵';
   const al=$('#hAlly');
   if(ally&&!ally.lobby){al.hidden=false; $('#hAllyN').textContent=`${ally.name||CLASSES[ally.cls].n} ${ally.lvl}`; $('#hAllyHp').style.transform=`scaleX(${clamp((ally.hp||0)/(ally.mh||1),0,1)})`;} else al.hidden=true;
@@ -1656,7 +1656,7 @@ function openTitleSheet(m){ prepMe(); G.titleSheet=true; openSheet(m); }
 function closeSheet(){ const was=G.titleSheet; sheetMode=null; $('#sheet').hidden=true; G.paused=false; if(was){ G.titleSheet=false; renderClassCards(); } }
 $('#sheetX').onclick=closeSheet;
 $('#sheet').addEventListener('pointerdown',e=>{ if(e.target.id==='sheet')closeSheet(); });
-$('#bSkip').addEventListener('click',e=>{e.preventDefault(); if(G.inGame&&G.mode!=='guest'&&G.phase==='clear'){ confirmExit(()=>{ G.phase='win'; G.endShown=true; markClear(); quitToTitle(); }); } });
+$('#bSkip').addEventListener('click',e=>{e.preventDefault(); if(G.inGame&&G.phase==='clear'){ confirmExit(()=>{ G.phase='win'; G.endShown=true; markClear(); quitToTitle(); }); } });
 $('#bAll').addEventListener('click',e=>{ e.preventDefault(); e.stopPropagation(); if(G.allMode)return; const wasP=G.paused; if(G.mode==='solo')G.paused=true;
   modal(`<h3>🔥 총공세</h3><p style="margin:0 0 12px;font-size:14px;line-height:1.5">남은 습격을 쉬지 않고 연속으로 호출해요.<br>시작하면 중간에 멈출 수 없고, 모두 처치하면 우두머리가 나타나요.<br><b style="color:#ff9a6a">🔥 바닥에 불이 번져요. 밟으면 피해를 입으니 피하세요!</b><br>시작할까요?</p><div class="row2"><button class="btn" id="alNo">취소</button><button class="btn primary" id="alOk">🚨 시작</button></div>`,m=>{ m.querySelector('#alNo').onclick=()=>{ closeModal(); G.paused=wasP; }; m.querySelector('#alOk').onclick=()=>{ closeModal(); G.paused=wasP; G.allMode=true; G.fireT=1.5; G.shake=Math.max(G.shake,.5); sfx('boss'); allSpawn(); announce('🔥 총공세! 바닥에 불이 번집니다','#ff9a6a'); pushEv(['ann',1]); }; }); });
 $('#bRaid').addEventListener('click',e=>{e.preventDefault(); e.stopPropagation(); if(!G.inGame)return; if(G.mode==='guest'){G.sq=(G.sq||0)+1; toast('다음 습격 요청을 보냈어요');} else skipWave('');});
@@ -1896,6 +1896,12 @@ function renderClassCards(){ renderTitle(); }
 function modal(html,bind){ const m=$('#modal'); m.className='ipop mdl'; m.innerHTML=`<div class="card">${html}</div>`; m.hidden=false; m.onclick=e=>{ if(e.target===m)closeModal(); }; if(bind)bind(m); }
 function closeModal(){ const m=$('#modal'); m.hidden=true; m.innerHTML=''; }
 const cleanName=v=>String(v||'').replace(/[<>&"]/g,'').trim().slice(0,8);
+function askCode(cb){
+  modal(`<h3>🔑 방 참가</h3><p class="meta" style="margin:0 0 8px">친구가 알려준 4자리 방 코드를 입력하세요.</p><div class="col"><input type="text" id="cdIn" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="0000" autocomplete="off" style="text-align:center;font-size:26px;letter-spacing:.4em"><div class="err" id="cdErr"></div><div class="row2"><button class="btn" id="cdNo">취소</button><button class="btn primary" id="cdOk">참가</button></div></div>`,m=>{
+    const inp=m.querySelector('#cdIn'); setTimeout(()=>inp.focus(),60); inp.oninput=()=>{ inp.value=inp.value.replace(/\D/g,'').slice(0,4); m.querySelector('#cdErr').textContent=''; };
+    const go=()=>{ const v=inp.value.replace(/\D/g,''); if(v.length!==4){ m.querySelector('#cdErr').textContent='4자리 숫자를 입력해 주세요'; return; } closeModal(); cb(v); };
+    m.querySelector('#cdOk').onclick=go; m.querySelector('#cdNo').onclick=closeModal; inp.onkeydown=e=>{ if(e.key==='Enter')go(); }; });
+}
 function askName(title,init,okTxt,cb){
   modal(`<h3>${title}</h3><div class="col"><input type="text" id="nmIn" maxlength="8" placeholder="닉네임 (최대 8자)" autocomplete="off" value="${esc(init||'')}"><div class="err" id="nmErr"></div><div class="row2"><button class="btn" id="nmNo">취소</button><button class="btn primary" id="nmOk">${okTxt}</button></div></div>`,m=>{
     const inp=m.querySelector('#nmIn'); inp.focus(); inp.select(); setTimeout(()=>inp.focus(),80);
@@ -1939,7 +1945,8 @@ $('#bHost').onclick=async()=>{
   renderLobby();
 };
 $('#bJoin').onclick=async()=>{
-  const code=$('#joinCode').value.replace(/\D/g,''); if(code.length!==4){$('#netNote').textContent='4자리 방 코드를 입력해 주세요.';return;}
+  askCode(doJoin); };
+async function doJoin(code){
   G.mode='guest'; prepMe(); roomCode=code; hostPeer=null; lastHostPres=null;
   showLobbyGuest(); $('#lobbyNote').textContent='연결 중…';
   try{ await openRoom(code); $('#lobbyNote').textContent='호스트를 찾는 중… 코드가 맞는지 확인해 주세요.'; }
