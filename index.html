@@ -322,7 +322,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
 </style>
 
 <nav id="dock" hidden>
-  <button class="hb" id="bBag" aria-label="가방"><i class="ic">🎒</i><i class="lb">가방</i></button>
+  <button class="hb" id="bBag" aria-label="가방"><i class="ic">🎒</i><i class="lb">가방</i><span class="badge" id="bagNew" hidden>N</span></button>
   <button class="hb" id="bStat" aria-label="능력치"><i class="ic">📊</i><i class="lb">능력</i><span class="badge" id="statBadge" hidden>0</span></button>
   <button class="hb" id="bSkillT" aria-label="스킬"><i class="ic">✨</i><i class="lb">스킬</i><span class="badge" id="skillBadge" hidden>0</span></button>
   <button class="hb" id="bPas" aria-label="패시브"><i class="ic">🔰</i><i class="lb">패시브</i></button>
@@ -374,14 +374,14 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
     <button class="gearT rankT" id="bRank" aria-label="랭킹">🏆</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
-    <div class="ver" id="verT">v0.1.0.0047</div>
+    <div class="ver" id="verT">v0.1.0.0048</div>
     <div class="clist car" id="charList"></div>
     <button id="bNew" hidden></button>
     <div class="pp" id="playPanel" hidden>
       <div class="stbig" id="stageBig"></div>
       <div class="stagebar" id="stageBar"></div>
+      <div class="modes"><button class="btn primary" id="bSolo" style="min-width:210px;min-height:48px;font-size:17px">▶ 시작하기</button></div>
       <p class="sub" id="stageInfo"></p>
-      <div class="modes"><button class="btn primary" id="bSolo" style="width:100%;min-height:56px;font-size:19px">▶ 바로 시작하기</button></div>
       <div class="modes" style="flex-wrap:nowrap"><button class="btn" id="bHost" disabled style="flex:1">🤝 방 만들기</button><button class="btn" id="bJoin" disabled style="flex:1">🔑 방 참가</button></div>
     </div>
     <p class="note" id="netNote">온라인 연결 확인 중…</p>
@@ -1877,6 +1877,7 @@ function updateHud(){
     if(gp.wm<.97||gp.tk>1.03){ bad=true; L.push(`⚔️ 장비 아이템 Lv 합 ${gp.sum} / 권장 ${gp.need}↑ — 공격력 -${Math.round((1-gp.wm)*100)}% · 받는 피해 +${Math.round((gp.tk-1)*100)}%`); }
     else if(gp.wm>1.03||gp.tk<.97)L.push(`✨ 장비 아이템 Lv 합 ${gp.sum} (권장 ${gp.need}) — 공격력 +${Math.round((gp.wm-1)*100)}% · 받는 피해 -${Math.round((1-gp.tk)*100)}%`);
     el.hidden=!L.length; el.style.background=bad?'':'rgba(14,60,30,.82)'; el.style.borderColor=bad?'':'#3fae6a'; el.style.color=bad?'':'#a6f0c0'; el.innerHTML=L.join('<br>'); } }
+  { const nb=$('#bagNew'); if(nb){ const n=me.inv.reduce((t,x)=>t+(x&&x.isNew?1:0),0); nb.hidden=!n; nb.textContent=n>9?'9+':n; } }
   { const bd=$('#statBadge'), b2=$('#skillBadge'), a=me.statPts|0, k=me.skillPts|0; bd.hidden=a<=0; bd.textContent='+'+a; b2.hidden=k<=0; b2.textContent='+'+k; }
   for(const b of $('#skills').children){ const k=b.dataset.k, s=SKBY[k];
     const rem=me.cds[k]||0, cd=rem/s.cd; b.querySelector('.cdv').style.setProperty('--p',s.aura?0:clamp(cd,0,1));
@@ -1891,7 +1892,7 @@ let shopMsg='';
 function openSheet(m){ if(!G.inGame&&!G.titleSheet)return; sheetMode=m; selItem=null; shopMsg=''; $('#sheet').hidden=false; if(G.inGame&&G.mode==='solo')G.paused=true; for(const k in held)held[k]=false; joy.active=false;
   rerender(); $('#sheetB').scrollTop=0; }
 function rerender(){ if(sheetMode==='bag')renderBag(); else if(sheetMode==='stat'||sheetMode==='skill'||sheetMode==='passive')renderStat(); else if(sheetMode==='shop')renderShop(); else renderMenu(); }
-function markTabs(){ $('#itemPop').hidden=true; $('#ptsBar').hidden=true; const t=$('#sheetTabs'); t.hidden=sheetMode==='menu'; t.querySelectorAll('button').forEach(b=>{b.setAttribute('aria-pressed',b.dataset.m===sheetMode); if(b.dataset.m==='shop')b.hidden=!!G.inGame&&sheetMode!=='shop'; const n=b.dataset.m==='stat'?(me.statPts|0):(b.dataset.m==='skill'||b.dataset.m==='passive')?(me.skillPts|0):0; let bd=b.querySelector('.pl'); if(!bd){bd=document.createElement('span');bd.className='pl';b.appendChild(bd);} bd.textContent=n>0?'+'+n:''; bd.hidden=!(n>0); }); }
+function markTabs(){ $('#itemPop').hidden=true; $('#ptsBar').hidden=true; const t=$('#sheetTabs'); t.hidden=sheetMode==='menu'; t.querySelectorAll('button').forEach(b=>{b.setAttribute('aria-pressed',b.dataset.m===sheetMode); if(b.dataset.m==='shop')b.hidden=!!G.inGame&&sheetMode!=='shop'; const n=b.dataset.m==='bag'?me.inv.reduce((t,x)=>t+(x&&x.isNew?1:0),0):b.dataset.m==='stat'?(me.statPts|0):(b.dataset.m==='skill'||b.dataset.m==='passive')?(me.skillPts|0):0; let bd=b.querySelector('.pl'); if(!bd){bd=document.createElement('span');bd.className='pl';b.appendChild(bd);} bd.textContent=n>0?(b.dataset.m==='bag'?'NEW':'+'+n):''; bd.hidden=!(n>0); }); }
 $('#ptsBar').onclick=()=>{ sheetMode='stat'; selItem=null; rerender(); };
 $('#sheetTabs').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; sheetMode=b.dataset.m; selItem=null; shopMsg=''; rerender(); $('#sheetB').scrollTop=0; });
 function openTitleSheet(m){ prepMe(); G.titleSheet=true; openSheet(m); }
@@ -2301,7 +2302,7 @@ function carFx(box){ const mid=box.scrollLeft+box.clientWidth/2; let best=null,b
 function buildCarousel(chars){
   const box=$('#charList'); box.innerHTML='';
   for(const c of chars){ const el=document.createElement('div'); el.className='cc'; el.dataset.id=c.id; el.setAttribute('role','button');
-    el.innerHTML=`<div class="cpic"><span class="cem">${CLSE[c.cls]}</span><img src="img/hero_${c.cls}.png" alt="" onload="this.previousElementSibling.style.display='none'" onerror="this.remove()"></div><b>${esc(dispName(c))}</b><span class="cl">${CLASSES[c.cls].n} · <em>Lv ${c.lvl}</em></span><span class="cl">💰 ${(c.gold|0).toLocaleString()}</span><span class="cpt">${c.statPts+c.skillPts?`포인트 ${c.statPts+c.skillPts}`:'&nbsp;'}</span><button class="cgear2">🎒 정비</button>`;
+    el.innerHTML=`<div class="cpic"><span class="cem">${CLSE[c.cls]}</span><img src="img/hero_${c.cls}.png" alt="" onload="this.previousElementSibling.style.display='none'" onerror="this.remove()"></div><b>${esc(dispName(c))}</b><span class="cl">${CLASSES[c.cls].n} · <em>Lv ${c.lvl}</em></span><span class="cl">💰 ${(c.gold|0).toLocaleString()}</span><span class="cpt">${c.statPts+c.skillPts?`포인트 ${c.statPts+c.skillPts}`:'&nbsp;'}</span><button class="cgear2">🎒 정비${(c.inv||[]).some(x=>x&&x.isNew)?' <i class="nw" style="position:static;margin-left:4px;vertical-align:middle">NEW</i>':''}</button>`;
     el.querySelector('.cgear2').onclick=e=>{ e.stopPropagation(); selId=c.id; lsSet('dkdef2.sel',selId); renderTitle(); openTitleSheet('bag'); };
     el.onclick=()=>{ if(el.getAttribute('aria-current')==='true'&&c.id===selId) charMenu(c.id); else carCenter(box,true); };
     box.appendChild(el); }
