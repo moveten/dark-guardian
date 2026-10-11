@@ -381,7 +381,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
-    <div class="ver" id="verT">v0.1.0.0053</div>
+    <div class="ver" id="verT">v0.1.0.0054</div>
     <div class="clist car" id="charList"></div>
     <button id="bNew" hidden></button>
     <div class="pp" id="playPanel" hidden>
@@ -551,7 +551,7 @@ const SK={
   {k:'might',e:'💪',n:'신념의 오라',s:'신념',req:15,mp:0,cd:.3,el:'#ffb86b',aura:1,d:l=>{const b=mightBonus(l);return `켜면 나와 주변 동료에게 적용. 주는 피해 +${b.dmg}%, 공격 속도 +${b.ias}%, 이동 속도 +${b.ms}%`}},
   {k:'guard',e:'🛡️',n:'수호 오라',s:'수호',req:18,mp:0,cd:.3,el:'#8fb6ff',aura:1,d:l=>`켜면 나와 주변 동료 방어력 +${30+6*l}%`},
   {k:'zeal',e:'🙏',n:'신앙 증폭',s:'증폭',req:24,mp:0,cd:0,el:'#ffd76a',passive:1,d:l=>`패시브: 내 팔라딘 스킬 피해 +${15+5*l}%, 지속시간 +${10+4*l}%`},
-  {k:'divine',e:'🌟',n:'신의 강림',s:'강림',req:99,mp:60,cd:80,el:'#fff2b0',rg:400,d:l=>`[궁극기] 3초간 무적, 생명력 50% 회복, 주변 모든 적에게 신성 피해 ${300+60*l}`},
+  {k:'divine',e:'🩸',n:'세크리파이스',s:'희생',req:99,mp:0,cd:100,el:'#ff4a4a',rg:400,d:l=>`[궁극기] 자신의 생명력과 마나를 절반으로 희생해, 필드 위 모든 적(우두머리 포함)의 현재 생명력을 절반으로 만들어요. (내 생명력은 최소 1이 남아요)`},
   {k:'judgment',e:'⚖️',n:'천벌',s:'천벌',req:30,mp:20,cd:15,el:'#fff7d6',rg:380,d:l=>`적 최대 5명에게 빛기둥, 기본 피해 ${110+50*l}. 성역이 2초간 남아 0.5초마다 ${18+10*l}`}]
 };
 const HMN=l=>l>=14?3:l>=7?2:1, HMF=n=>[1,.7,.55][n-1]||.55; /* 망치 개수/개당 피해 배율 */
@@ -743,10 +743,10 @@ function rollAff(a,rar,ilvl,q,rng){
   const [lo,hi]=a.r(ilvl), v=biased(lo,hi,q); rollAff.lq=(v-lo)/Math.max(1,hi-lo); return {t:a.t,v};
 }
 function hashStr(t){ let h=2166136261; for(let i=0;i<t.length;i++){ h^=t.charCodeAt(i); h=Math.imul(h,16777619); } return h>>>0; }
-const BREQ={'낡은 단검':{dex:[6,.5]},'장검':{str:[10,.65]},'철퇴':{str:[10,.65]},'참나무 지팡이':{ene:[10,.65]},'마법서':{ene:[14,.7]},'전투 도끼':{str:[16,.75]},'대검':{str:[20,.85]},
- '철 투구':{str:[10,.4]},'뿔 달린 투구':{str:[14,.5]},'누비 갑옷':{vit:[8,.4]},'가죽 갑옷':{dex:[12,.45]},'사슬 갑옷':{str:[16,.6]},
- '나무 방패':{str:[8,.35]},'철 방패':{str:[14,.5]},'성스러운 방패':{str:[18,.55],vit:[10,.3]},
- '손도끼':{str:[8,.35]},'쌍날 단검':{dex:[10,.4]},'전쟁의 뿔':{str:[14,.5],vit:[8,.3]},'수정구':{ene:[8,.35]},'마력의 오브':{ene:[14,.5]},'별빛 오브':{ene:[18,.55],vit:[8,.3]}};
+const BREQ={'낡은 단검':{dex:[6,.55],str:[0,.2]},'장검':{str:[10,.7],dex:[0,.25]},'철퇴':{str:[10,.7],vit:[0,.2]},'참나무 지팡이':{ene:[8,.5],vit:[0,.15]},'마법서':{ene:[12,.55],vit:[0,.15]},'전투 도끼':{str:[16,.8],vit:[0,.2]},'대검':{str:[20,.9],vit:[0,.25]},
+ '가죽 투구':{vit:[0,.25]},'철 투구':{str:[10,.45],vit:[0,.2]},'뿔 달린 투구':{str:[14,.55],vit:[0,.25]},'누비 갑옷':{vit:[8,.5]},'가죽 갑옷':{dex:[12,.5],vit:[0,.2]},'사슬 갑옷':{str:[16,.65],vit:[0,.3]},
+ '나무 방패':{str:[8,.4]},'철 방패':{str:[14,.55],vit:[0,.2]},'성스러운 방패':{str:[18,.6],vit:[10,.35]},
+ '손도끼':{str:[8,.4]},'쌍날 단검':{dex:[10,.5]},'전쟁의 뿔':{str:[14,.55],vit:[8,.3]},'수정구':{ene:[8,.35]},'마력의 오브':{ene:[14,.5]},'별빛 오브':{ene:[18,.55],vit:[8,.2]}};
 const SPBASE={'마법서':{n:'마법서',mn:3,mx:7}};
 const BASEFX={'마법서':{mana:25,mr:20,t:'마도서: 마나 +25, 마나 회복 +20%'},'낡은 단검':{ias:12,crit:4,t:'날렵함: 공격 속도 +12%, 치명타 +4%'},'장검':{dmgPct:6,def:4,t:'균형: 피해 +6%, 방어력 +4'},'철퇴':{dmgPct:10,ias:-6,t:'묵직함: 피해 +10%, 공격 속도 -6%'},
  '참나무 지팡이':{mana:18,mr:15,t:'마력 증폭: 마나 +18, 마나 회복 +15%'},'전투 도끼':{dmgPct:12,ias:-4,t:'쪼개기: 피해 +12%, 공격 속도 -4%'},'대검':{dmgPct:20,ias:-10,t:'파괴력: 피해 +20%, 공격 속도 -10%'}};
@@ -774,7 +774,7 @@ const PRMAX=60; /* 아이템 획득 범위 보너스 최대치 (기본 42 + 최�
 const BLKMAX=30; /* 막기 확률 최대치 */
 const SPCH=.15; /* 유니크 중 이름 고정 유니크 비율 (특수 효과 포함) */
 const STN={str:'힘',dex:'민첩',vit:'체력',ene:'에너지'};
-function reqStats(it){ const b=BREQ[it.base]; if(!b)return {}; const o={}, k=it.rar===3?1.1:1; for(const s in b) o[s]=Math.round((b[s][0]+b[s][1]*(it.ilvl||1))*k); return o; }
+function reqStats(it){ const b=BREQ[it.base]; if(!b)return {}; const o={}, k=it.rar===3?1.1:1, L=it.ilvl||1, e=L>30?30+(L-30)*1.25:L; /* 아이템 레벨 30 위부터는 요구 능력치가 더 가파르게 올라요 */ for(const s in b){ const v=Math.round((b[s][0]+b[s][1]*e)*k); if(v>0)o[s]=v; } return o; }
 const curStat=s=>me?((me.D&&me.D[s]!=null)?Math.floor(me.D[s]):(me.stats[s]|0)):0;
 function statLack(it){ const r=reqStats(it), out=[]; if(!me||!me.stats)return out; for(const s in r){ const c=curStat(s); if(c<r[s]) out.push([s,r[s],c]); } return out; }
 function reqHtml(it){ const r=reqStats(it); const lv=me&&me.lvl<reqLv(it); let h=`<span style="color:${lv?'#e07060':'#9fd18b'}">필요 레벨 ${reqLv(it)}${lv?` (현재 ${me.lvl})`:''}</span>`;
@@ -1532,9 +1532,10 @@ function gearPen(){ const S=G.stg; if(!S||!me||!me.eq)return GP0; return gearPen
 function lvPen(){ const S=G.stg, ml=(S&&S.rl)|0; if(!ml||!me)return LVP0; const gap=ml-(me.lvl|0), ex=Math.max(0,gap-5); if(!ex){ const ov=Math.max(0,-gap-5); if(ov)return {ex:0,gap,over:ov,dm:Math.min(2,1+.03*ov),tk:Math.max(.4,1-.02*ov),miss:0}; return {ex:0,gap,dm:1,tk:1,miss:0}; }
   return {ex,gap,dm:Math.max(.3,1-.05*ex),tk:Math.min(2.2,1+.06*ex),miss:Math.min(.5,.04*ex)}; }
 function hitMob(m,r,slow,tn,fx){
-  { const gp=gearPen(); if(gp.wm!==1)r={v:r.v*gp.wm,crit:r.crit}; }
-  { const P=lvPen(); if(P.ex){ if(Math.random()<P.miss){ addNum(m.x,m.y-m.r-6,'MISS','#9aa0aa',false); return; } r={v:r.v*P.dm,crit:r.crit}; } else if(P.over){ r={v:r.v*P.dm,crit:r.crit}; } }
-  if(m.boss&&m.counter>0){ counterHit(m); r={v:r.v*.05,crit:false}; }
+  const raw=!!(fx&&fx.raw); /* 고정 비율 피해(세크리파이스)는 장비·레벨 보정과 반격 태세를 무시 */
+  if(!raw){ const gp=gearPen(); if(gp.wm!==1)r={v:r.v*gp.wm,crit:r.crit}; }
+  if(!raw){ const P=lvPen(); if(P.ex){ if(Math.random()<P.miss){ addNum(m.x,m.y-m.r-6,'MISS','#9aa0aa',false); return; } r={v:r.v*P.dm,crit:r.crit}; } else if(P.over){ r={v:r.v*P.dm,crit:r.crit}; } }
+  if(!raw&&m.boss&&m.counter>0){ counterHit(m); r={v:r.v*.05,crit:false}; }
   const dmg=Math.max(1,Math.round(r.v)); const sp=me.D&&me.D.sp; if(sp&&sp.frost&&Math.random()<.2&&!G.inProc) slow=Math.max(slow||0,2);
   m.flash=.12; addNum(m.x,m.y-m.r-6,dmg,r.crit?'#ffd34d':'#f3eadb',r.crit);
   m.sq=r.crit?.14:.09; sfx(r.crit?'crit':'hit');
@@ -1633,11 +1634,12 @@ function castSkill(o,key,real,tx,ty,lv,tgt){
       if(real) for(const m of mobsIn(o.x,o.y,380)){ hitMob(m,physDmg(14+1*lv),0,false,{stun:2.5}); const dd=hyp(m.x-o.x,m.y-o.y)||1; m.kx=(m.kx||0)+(m.x-o.x)/dd*(m.boss?120:520); m.ky=(m.ky||0)+(m.y-o.y)/dd*(m.boss?120:520); } });
     break;
   case 'divine':
-    efx.push({k:'pillar',x:o.x,y:o.y,t:0,life:1.2,col:'#fff7d6'}); efx.push({k:'cross',x:o.x,y:o.y,t:0,life:.9}); sfx('revive');
-    for(let i=0;i<3;i++) later(i*.18,()=>{ efx.push({k:'ring',x:o.x,y:o.y,r0:20,r1:400,t:0,life:.7,col:i===1?'#ffe08a':'#fff7d6',w:12}); impact(o.x,o.y,'255,245,200',260); burst(o.x,o.y,'#fff3c0',36,400); });
-    G.shake=Math.max(G.shake,.6);
-    if(real){ const Z=zealMul(); me.god=Math.max(me.god||0,3); me.hp=Math.min(me.D.maxHp,me.hp+me.D.maxHp*.5); addNum(me.x,me.y-44,'🌟 신의 강림','#fff2b0',true);
-      later(.2,()=>{ for(const m of mobsIn(o.x,o.y,400)){ const r=spellDmg(300+60*lv); r.v*=Z.d; hitMob(m,r,0,false,{stun:1}); } }); }
+    efx.push({k:'pillar',x:o.x,y:o.y,t:0,life:1.3,col:'#ff5a5a'}); efx.push({k:'cross',x:o.x,y:o.y,t:0,life:.9}); sfx('boss');
+    for(let i=0;i<3;i++) later(i*.2,()=>{ efx.push({k:'ring',x:o.x,y:o.y,r0:20,r1:520,t:0,life:.8,col:i===1?'#ffb0a0':'#ff3a3a',w:12}); impact(o.x,o.y,'255,70,70',280); burst(o.x,o.y,'#ff8a8a',36,420); });
+    G.shake=Math.max(G.shake,.9);
+    if(real){ me.hp=Math.max(1,me.hp*.5); me.mp=me.mp*.5; addNum(me.x,me.y-44,'🩸 세크리파이스','#ff8a8a',true);
+      later(.35,()=>{ let n=0; for(const m of G.mobs){ if(m.dead)continue; const dm=Math.floor(m.hp*.5); if(dm<1)continue; n++; hitMob(m,{v:dm,crit:false},0,false,{raw:1}); burst(m.x,m.y,'#ff4a4a',12,260); efx.push({k:'ring',x:m.x,y:m.y,r0:10,r1:m.r*2.4,t:0,life:.5,col:'#ff6a6a',w:6}); }
+        if(n)toast(`세크리파이스! 적 ${n}마리의 생명력이 절반이 되었어요`,'#ff8a8a'); }); }
     break;
   case 'armageddon':
     for(let i=0;i<14;i++) later(i*.28,()=>{

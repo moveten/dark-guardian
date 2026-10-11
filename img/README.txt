@@ -23,3 +23,6 @@
   스테이지 2·3 보스도 boss_2_1.png / boss_2_1_atk.png / boss_2_1_sk.png 처럼 _atk, _sk를 붙여 올리면 같은 방식으로 적용돼요.
 
 스테이지 2 보스 일러스트 프롬프트: img/boss_prompt_stage2.txt (15컷 → boss_2_1~boss_2_5 + _atk/_sk 로 저장)
+
+[스테이지 2 보스 동작 이미지 — 적용 완료] boss_2_1~boss_2_5 .png / _atk / _sk
+스테이지 3 보스 일러스트 프롬프트: img/boss_prompt_stage3.txt (15컷 → boss_3_1~boss_3_5 + _atk/_sk 로 저장)
