@@ -10,3 +10,8 @@
        boss_2_1.png (빙결의 여왕 프로스티아)  boss_2_2.png (용암의 거인 이그니스)  boss_2_3.png (썩은 고목 트렌가)
        boss_2_4.png (모래의 파라오 세케르)  boss_2_5.png (혼돈의 군주 벨제르)
 스테이지 1 보스는 위의 mob_grak(1-1) / mob_malek(1-2) / mob_morg(1-3) / mob_kargon(1-4) / mob_izra(1-5) 입니다.
+
+스테이지 3 보스 (신규):
+       boss_3_1.png (잿불의 장군 라그나)  boss_3_2.png (핏빛 여왕 사나리아)  boss_3_3.png (묵시록의 기사 데스락)
+       boss_3_4.png (공허의 포식자 니아)  boss_3_5.png (지옥의 대공 아자젤)
+스테이지 1 보스 일러스트 프롬프트 한 방: img/boss_prompt_stage1.txt (한 장에 5명 → 잘라서 mob_grak/malek/morg/kargon/izra.png 로 저장)
