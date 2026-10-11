@@ -1,0 +1,5 @@
+-- 클라우드 저장(복구 코드) — Supabase 에 이미 적용됨 (migration: dd_cloud_save)
+-- 테이블은 RLS 로 막혀 있고, 복구 코드(해시)를 아는 쪽만 RPC 로 읽고 쓸 수 있어요.
+-- dd_save_put(p_code, p_data, p_ver) : 저장 (새 코드는 p_ver=0, 기존은 마지막으로 받은 ver. 다르면 conflict)
+-- dd_save_get(p_code)                : 불러오기 → {ver, at, data}
+-- dd_save_ver(p_code)                : 버전만 확인
