@@ -6,3 +6,7 @@
        mob_archer.png (궁수)  mob_bomber.png (폭탄병)  mob_healer.png (치유사)
 보스:  mob_grak.png (묘지기 그라크)  mob_malek.png (역병 사제 말렉)  mob_morg.png (썩은 군주 모르그)
        mob_kargon.png (뼈의 군주 카르곤)  mob_izra.png (심연의 마녀 이즈라)
+       (스테이지 2 보스: 스테이지마다 이름이 고정이에요)
+       boss_2_1.png (빙결의 여왕 프로스티아)  boss_2_2.png (용암의 거인 이그니스)  boss_2_3.png (썩은 고목 트렌가)
+       boss_2_4.png (모래의 파라오 세케르)  boss_2_5.png (혼돈의 군주 벨제르)
+스테이지 1 보스는 위의 mob_grak(1-1) / mob_malek(1-2) / mob_morg(1-3) / mob_kargon(1-4) / mob_izra(1-5) 입니다.
