@@ -15,3 +15,9 @@
        boss_3_1.png (잿불의 장군 라그나)  boss_3_2.png (핏빛 여왕 사나리아)  boss_3_3.png (묵시록의 기사 데스락)
        boss_3_4.png (공허의 포식자 니아)  boss_3_5.png (지옥의 대공 아자젤)
 스테이지 1 보스 일러스트 프롬프트 한 방: img/boss_prompt_stage1.txt (한 장에 5명 → 잘라서 mob_grak/malek/morg/kargon/izra.png 로 저장)
+
+
+[스테이지 1 보스 동작 이미지 — 적용 완료]
+  mob_grak / mob_malek / mob_morg / mob_kargon / mob_izra .png = 평소(대기) 포즈
+  *_atk.png = 기본 공격 포즈, *_sk.png = 스킬 준비·돌진 포즈 (같은 크기·같은 발 위치로 잘려 있어 게임이 상황에 맞게 바꿔 보여줘요)
+  스테이지 2·3 보스도 boss_2_1.png / boss_2_1_atk.png / boss_2_1_sk.png 처럼 _atk, _sk를 붙여 올리면 같은 방식으로 적용돼요.
