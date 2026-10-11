@@ -35,6 +35,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
 /* screens */
 .screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:none;touch-action:pan-y;background:radial-gradient(ellipse at 50% 18%,#2b1813 0%,#120d0b 55%,var(--bg) 100%);display:flex;flex-direction:column;align-items:center;gap:16px;box-sizing:border-box;padding-block:max(22px,env(safe-area-inset-top)) max(22px,env(safe-area-inset-bottom));padding-inline:16px;z-index:20}
 .screen h1{font-family:var(--f-disp);font-weight:800;font-size:clamp(30px,7vw,46px);letter-spacing:.06em;margin:4px 0 0;color:#e9d9b4;text-wrap:balance;text-align:center}
+.ver{font-size:11px;color:var(--mute);letter-spacing:.08em;margin:-2px 0 4px;opacity:.8}
 .eyebrow{font-size:12px;letter-spacing:.24em;color:var(--blood);font-weight:700}
 .sub{color:var(--mute);font-size:14px;margin:0;text-align:center}
 .classes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;width:100%;max-width:640px}
@@ -309,6 +310,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
+    <div class="ver" id="verT">v0.1.0.0024</div>
     <div class="clist" id="charList"></div>
     <button class="btn" id="bNew">➕ 새 캐릭터</button>
     <div class="pp" id="playPanel" hidden>
@@ -1718,8 +1720,9 @@ function renderBag(){
   const au=pq('#aUnequip'); if(au)au.onclick=()=>{unequip(selItem.eq);};
 }
 const SLOTO={weapon:0,shield:1,helm:2,armor:3,amulet:4,ring:5};
+const bk=(a,b)=>(a.base||'')<(b.base||'')?-1:(a.base||'')>(b.base||'')?1:0;
 function sortInv(mode){ const its=me.inv.filter(Boolean);
-  its.sort(mode==='type'?((a,b)=>SLOTO[a.slot]-SLOTO[b.slot]||b.rar-a.rar||b.ilvl-a.ilvl):((a,b)=>b.rar-a.rar||SLOTO[a.slot]-SLOTO[b.slot]||b.ilvl-a.ilvl));
+  its.sort(mode==='type'?((a,b)=>(SLOTO[a.slot]|0)-(SLOTO[b.slot]|0)||(b.rar|0)-(a.rar|0)||bk(a,b)||(b.ilvl|0)-(a.ilvl|0)||String(a.name).localeCompare(String(b.name))):((a,b)=>(b.rar|0)-(a.rar|0)||(SLOTO[a.slot]|0)-(SLOTO[b.slot]|0)||bk(a,b)||(b.ilvl|0)-(a.ilvl|0)||String(a.name).localeCompare(String(b.name))));
   me.inv=its.concat(Array(30-its.length).fill(null)); selItem=null; saveChar(); renderBag(); sheetToast(mode==='type'?'종류별로 정리했어요':'등급별로 정리했어요'); }
 function sendPick(){
   const it=selItem&&selItem.it; if(!it||(selItem.inv===undefined&&selItem.eq===undefined))return;
@@ -1832,16 +1835,16 @@ function renderShop(){
   const aa=b.querySelector('#aSellAll'); if(aa)aa.onclick=bulkSell;
 }
 function bulkSell(){
-  const sel=new Set([0]);
+  const sel=new Set([0,1]);
   const info=()=>{ let n=0,v=0; me.inv.forEach(it=>{ if(it&&!it.lock&&sel.has(it.rar)){n++;v+=sellInfo(it).total;} }); return {n,v}; };
   const cnt=r=>me.inv.filter(it=>it&&!it.lock&&it.rar===r).length, val=r=>me.inv.reduce((a,it)=>a+(it&&!it.lock&&it.rar===r?sellInfo(it).total:0),0);
   const draw=m=>{ const f=info();
     m.querySelector('#bsSum').innerHTML=f.n?`선택한 <b>${f.n}개</b> · <b style="color:#ffd84a">${f.v}원</b>`:'<span class="meta">판매할 등급을 선택하세요</span>';
     m.querySelector('#bsGo').disabled=!f.n; };
-  modal(`<h3>🧺 일괄 판매</h3><p class="meta" style="margin:0 0 8px">가방의 아이템만 팔아요. 장착 중인 장비, 유니크, 🔒잠근 아이템은 제외돼요.</p><div class="col">${[0,1,2].map(r=>`<label class="toggle" style="display:flex;gap:8px;align-items:center;font-size:14px;padding:8px;border:1px solid var(--line2);border-radius:8px"><input type="checkbox" data-r="${r}" ${r===0?'checked':''} ${cnt(r)?'':'disabled'}> <span style="color:${RARC[r]};font-weight:700">${RARN[r]}</span> <span style="margin-left:auto;color:var(--mute)">${cnt(r)}개 · ${val(r)}원</span></label>`).join('')}<div id="bsSum" style="min-height:22px;font-size:14px"></div><div class="row2"><button class="btn" id="bsNo">취소</button><button class="btn primary" id="bsGo">일괄 판매하기</button></div></div>`,m=>{
+  modal(`<h3>🧺 일괄 판매</h3><p class="meta" style="margin:0 0 8px">가방의 아이템만 팔아요. 장착 중인 장비, 유니크, 🔒잠근 아이템은 제외돼요.</p><div class="col">${[0,1,2].map(r=>`<label class="toggle" style="display:flex;gap:8px;align-items:center;font-size:14px;padding:8px;border:1px solid var(--line2);border-radius:8px"><input type="checkbox" data-r="${r}" ${r<=1&&cnt(r)?'checked':''} ${cnt(r)?'':'disabled'}> <span style="color:${RARC[r]};font-weight:700">${RARN[r]}</span> <span style="margin-left:auto;color:var(--mute)">${cnt(r)}개 · ${val(r)}원</span></label>`).join('')}<div id="bsSum" style="min-height:22px;font-size:14px"></div><div class="row2"><button class="btn" id="bsNo">취소</button><button class="btn primary" id="bsGo">일괄 판매하기</button></div></div>`,m=>{
     m.querySelectorAll('[data-r]').forEach(c=>c.onchange=()=>{ const r=+c.dataset.r; if(c.checked)sel.add(r); else sel.delete(r); draw(m); });
-    m.querySelector('#bsNo').onclick=closeModal; draw(m);
-    if(!cnt(0)) sel.delete(0);
+    m.querySelector('#bsNo').onclick=closeModal;
+    if(!cnt(0)) sel.delete(0); if(!cnt(1)) sel.delete(1); draw(m);
     m.querySelector('#bsGo').onclick=()=>{ const f=info(); if(!f.n)return; const names=[...sel].sort().map(r=>RARN[r]).join('·');
       modal(`<h3>⚠️ 정말 판매할까요?</h3><p style="margin:0 0 12px;font-size:14px"><b>${names}</b> 아이템 <b>${f.n}개</b>를<br><b style="color:#ffd84a">${f.v}원</b>에 판매합니다.<br><span class="meta">판매한 아이템은 되돌릴 수 없어요.</span></p><div class="row2"><button class="btn" id="cNo">취소</button><button class="btn primary" id="cYes">판매 확인</button></div>`,m2=>{
         m2.querySelector('#cNo').onclick=closeModal;
