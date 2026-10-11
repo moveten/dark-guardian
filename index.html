@@ -115,6 +115,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
 .atkcol{display:flex;flex-direction:column;align-items:center;gap:8px}
 #bAtk{width:78px;height:78px;border-radius:50%;border:2px solid var(--blood);background:rgba(60,18,14,.85);font-family:var(--f-disp);font-weight:800;font-size:16px;touch-action:none}
 #bPot{border:2px solid #b8322b}
+.qb .lb b{font-style:normal;font-weight:900;font-size:12.5px;color:#ffd84a;text-shadow:0 1px 2px #000;margin-left:1px}.qb .lb.z b{color:#8a8277}
+.qb #bPot,.qb #bRev{gap:0}.qb #bPot .ic,.qb #bRev .ic{margin-top:-1px}
 #lvPen{position:absolute;left:10px;bottom:calc(max(10px,env(safe-area-inset-bottom)) + 168px);max-width:min(60vw,260px);padding:3px 8px;border-radius:6px;background:rgba(80,14,10,.82);border:1px solid #c0392b;color:#ffb3a6;font-size:11.5px;font-weight:700;line-height:1.35;pointer-events:none;z-index:5}#lvPen[hidden]{display:none}
 #banner{position:absolute;left:0;right:0;top:30%;text-align:center;font-family:var(--f-disp);font-weight:800;font-size:clamp(26px,6vw,44px);color:#efdcae;text-shadow:0 2px 12px #000,0 0 30px rgba(163,48,42,.6);opacity:0;transition:opacity .4s;pointer-events:none}
 #banner small{display:block;font-family:var(--f-body);font-size:14px;font-weight:500;color:var(--mute);margin-top:6px}
@@ -367,8 +369,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
     <div id="combo" hidden><b>0</b><span>COMBO</span></div>
     <div id="stoast"></div>
     <div class="qb">
-      <button id="bPot" aria-label="물약"><i class="ic">🧪</i><i class="lb">물약</i><span class="badge" id="potN">3</span></button>
-      <button id="bRev" aria-label="즉시 부활"><i class="ic">✨</i><i class="lb">부활</i><span class="badge" id="revN">0</span></button>
+      <button id="bPot" aria-label="물약"><i class="ic">🧪</i><i class="lb">물약 <b id="potN">3</b></i></button>
+      <button id="bRev" aria-label="즉시 부활"><i class="ic">✨</i><i class="lb">부활 <b id="revN">0</b></i></button>
       <button id="bEmo" aria-label="감정 표현"><i class="ic">💬</i><i class="lb">감정</i></button>
     </div>
     <div id="emoP" hidden></div>
@@ -381,7 +383,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
-    <div class="ver" id="verT">v0.1.0.0062</div>
+    <div class="ver" id="verT">v0.1.0.0063</div>
     <div class="clist car" id="charList"></div>
     <button id="bNew" hidden></button>
     <div class="pp" id="playPanel" hidden>
@@ -770,6 +772,7 @@ const enhRate=L=>Math.max(5,100-8*(L-1)), enhNeed=L=>L, enhCost=(it,L)=>1000+100
 function enhApply(it){ if(it.slot==='ring'||it.slot==='amulet')return; if(!it.b0)it.b0={mn:it.mn,mx:it.mx,df:it.df,dm:it.dm,om:it.om}; const k=1+.1*(it.enh|0);
   if(it.b0.mx){ it.mn=Math.max(1,Math.round(it.b0.mn*k)); it.mx=Math.max(it.mn+1,Math.round(it.b0.mx*k)); } if(it.b0.df)it.df=Math.round(it.b0.df*k); if(it.b0.dm)it.dm=Math.round(it.b0.dm*k); if(it.b0.om)it.om=Math.round(it.b0.om*k); }
 function enhFxText(it){ if(it.slot==='amulet')return it.enh>0?`강화 보너스(옵션 아님): 힘·민첩·체력·에너지 +${it.enh}`:'강화 시 보너스(옵션 아님): 올스탯 단계당 +1'; if(it.slot==='ring')return it.enh>=10?'강화 보너스(옵션 아님): 모든 스킬 +1':it.enh>0?`+10강 달성 시 보너스: 모든 스킬 +1 (현재 +${it.enh})`:'+10강 달성 시 보너스: 모든 스킬 +1'; return ''; }
+function enhOptText(it){ const e=it&&it.enh|0; if(!e)return ''; if(it.slot==='amulet')return `올스탯 +${e} <span class="meta">(강화)</span>`; if(it.slot==='ring'&&e>=10)return `모든 스킬 +1 <span class="meta">(강화)</span>`; return ''; }
 const PRMAX=60; /* 아이템 획득 범위 보너스 최대치 (기본 42 + 최대 60) */
 const BLKMAX=30; /* 막기 확률 최대치 */
 const SPCH=.15; /* 유니크 중 이름 고정 유니크 비율 (특수 효과 포함) */
@@ -1882,7 +1885,7 @@ function updateHud(){
   const sb=$('#bRaid'), cs=G.mode==='guest'?G.canSkip:canSkip(); sb.hidden=!cs||!!G.allMode; sb.textContent=G.wave>=G.TW?'⏭ 우두머리 소환':'⏭ 습격 스킵';
   const al=$('#hAlly');
   if(ally&&!ally.lobby){al.hidden=false; $('#hAllyN').textContent=`${ally.name||CLASSES[ally.cls].n} ${ally.lvl}`; $('#hAllyHp').style.transform=`scaleX(${clamp((ally.hp||0)/(ally.mh||1),0,1)})`;} else al.hidden=true;
-  $('#potN').textContent=me.pot+me.potBuy; $('#revN').textContent=revItems(); $('#bRev').classList.toggle('rdy',!!me.dead&&revItems()>0); $('#hGold').textContent=`💰 ${(me.gold|0).toLocaleString()}원`; { const P=lvPen(), gp=gearPen(), el=$('#lvPen'); if(el){ const L=[]; let bad=false;
+  { const pn=me.pot+me.potBuy, rn=revItems(); $('#potN').textContent=pn; $('#revN').textContent=rn; $('#potN').parentNode.classList.toggle('z',pn<=0); $('#revN').parentNode.classList.toggle('z',rn<=0); } $('#bRev').classList.toggle('rdy',!!me.dead&&revItems()>0); $('#hGold').textContent=`💰 ${(me.gold|0).toLocaleString()}원`; { const P=lvPen(), gp=gearPen(), el=$('#lvPen'); if(el){ const L=[]; let bad=false;
     if(P.over)L.push(`✨ 몹 Lv ${G.stg.rl} · 레벨 우위 ${-P.gap} — 공격력 +${Math.round((P.dm-1)*100)}% · 받는 피해 -${Math.round((1-P.tk)*100)}%`);
     else if(P.ex){ bad=true; L.push(`⚠️ 몹 Lv ${G.stg.rl} · 격차 ${P.gap} — 공격력 -${Math.round((1-P.dm)*100)}% · 빗나감 ${Math.round(P.miss*100)}% · 받는 피해 +${Math.round((P.tk-1)*100)}%`); }
     if(gp.wm<.97||gp.tk>1.03){ bad=true; L.push(`⚔️ 장비 아이템 Lv 합 ${gp.sum} / 권장 ${gp.need}↑ — 공격력 -${Math.round((1-gp.wm)*100)}% · 받는 피해 +${Math.round((gp.tk-1)*100)}%`); }
@@ -2022,11 +2025,12 @@ function itemLines(it){
   const bt=baseText(it); if(bt)s+=`<div>${bt}</div>`;
   if(BASEFX[it.base]&&it.slot==='weapon') s+=`<div class="meta" style="color:#9fd0ff">▪ ${BASEFX[it.base].t}</div>`;
   if(it.sp&&SPFX[it.sp]) s+=`<div style="margin:4px 0;color:#ffb14a;font-weight:700">★ 특수 효과: ${SPFX[it.sp].d}</div>`;
-  if(it.aff.length) s+='<ul>'+it.aff.map(a=>`<li>${esc(affText(a))}${(a.cls&&a.cls!==me.cls)?' <span class="meta">(효과 없음)</span>':''}</li>`).join('')+'</ul>';
+  const ex=enhOptText(it);
+  if(it.aff.length||ex) s+='<ul>'+it.aff.map(a=>`<li>${esc(affText(a))}${(a.cls&&a.cls!==me.cls)?' <span class="meta">(효과 없음)</span>':''}</li>`).join('')+(ex?`<li style="color:#ffe27a">${ex}</li>`:'')+'</ul>';
   return s;
 }
 function warn(msg){ if(G.titleSheet||!G.inGame) modal(`<h3>⚠️ 알림</h3><p style="margin:0 0 12px;font-size:14px">${esc(msg)}</p><div class="row2"><button class="btn primary" id="wOk">확인</button></div>`,m=>{m.querySelector('#wOk').onclick=closeModal;}); else toast(msg,'#e07060'); }
-function cmpMini(it){ let t=`<div style="color:${RARC[it.rar]};font-weight:700">${esc(it.name)}</div><div class="meta" style="color:#fff">아이템 레벨 ${it.ilvl}</div><div class="meta">${reqHtml(it)}</div>`; const bt=baseText(it); if(bt)t+=`<div>${bt}</div>`; if(it.aff.length)t+='<ul style="margin:4px 0">'+it.aff.map(a=>`<li>${esc(affText(a))}</li>`).join('')+'</ul>'; return t; }
+function cmpMini(it){ let t=`<div style="color:${RARC[it.rar]};font-weight:700">${esc(it.name)}</div><div class="meta" style="color:#fff">아이템 레벨 ${it.ilvl}</div><div class="meta">${reqHtml(it)}</div>`; const bt=baseText(it); if(bt)t+=`<div>${bt}</div>`; { const ex=enhOptText(it); if(it.aff.length||ex)t+='<ul style="margin:4px 0">'+it.aff.map(a=>`<li>${esc(affText(a))}</li>`).join('')+(ex?`<li style="color:#ffe27a">${ex}</li>`:'')+'</ul>'; } return t; }
 function calcCP(p){ const D=derive(p); const dps=((D.wmn+D.wmx)/2+D.dmg)*(1+(D.str+D.dmgPct)/100)/D.atkInt; return Math.round(dps*8+D.maxHp*.6+D.maxMp*.2+D.def*3+D.blk*8+D.crit*5+D.ms*6+D.ls*10+(D.dr||0)*300+(D.cdr||0)*150); }
 let stT=null;
 function sheetToast(msg,col){ const e=$('#stoast'); e.textContent=msg; e.style.color=col||'#eadfcc'; e.classList.add('on'); clearTimeout(stT); stT=setTimeout(()=>e.classList.remove('on'),2600); }
