@@ -333,7 +333,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
-    <div class="ver" id="verT">v0.1.0.0039</div>
+    <div class="ver" id="verT">v0.1.0.0040</div>
     <div class="clist" id="charList"></div>
     <div class="modes" style="margin-top:2px"><button class="btn" id="bNew">➕ 새 캐릭터</button><button class="btn" id="bRank">🏆 랭킹</button></div>
     <div class="pp" id="playPanel" hidden>
@@ -1244,7 +1244,7 @@ function applyDmg(m,dmg,slow,fx){
   if(m.hp<=0) killMob(m);
 }
 function killMob(m){
-  m.dead=true; if(G.mode!=='guest'&&!m.boss&&Math.random()<.1+Math.min(.12,((G.combo&&G.combo.n)||0)*.003)&&(m.xd||0)<3&&Math.random()<Math.pow(.65,m.xd||0)) later(.12,()=>explodeMob(m)); if(m.boss&&G.mode==='solo')G.slowT=1.2;
+  m.dead=true; if(G.mode!=='guest'&&!m.boss&&Math.random()<.1+Math.min(.12,((G.combo&&G.combo.n)||0)*.003)&&(m.xd||0)<3&&Math.random()<Math.pow(.65,m.xd||0)) later(.12,()=>explodeMob(m));
   if(G.mode!=='guest'&&m.af===3)spawnFire(m.x,m.y,64,6,.8);
   const tier=m.boss?2:m.elite?1:0, S=G.stg||STAGES[0], ilvl=m.boss?S.icap:Math.min(S.icap,Math.max(1,G.wave)+S.ilo);
   pushEv(['k',m.id,Math.round(m.x),Math.round(m.y),m.xp,tier,ilvl,m.type]);
@@ -1255,7 +1255,7 @@ function killMob(m){
 /* ================= KILL / LOOT / XP ================= */
 function comboMul(){ return 1+Math.min(.5,((G.combo&&G.combo.n)||0)*.01); }
 function bumpCombo(){ const c=G.combo||(G.combo={n:0,t:0}); c.n++; c.t=3.2; const el=$('#combo'); el.hidden=false; el.firstElementChild.textContent=c.n; el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop');
-  if([10,25,50,100,200].includes(c.n)){ G.shake=Math.max(G.shake,.4); if(G.mode==='solo')G.slowT=.45; sfx('lvl'); } }
+  if([10,25,50,100,200].includes(c.n)){ G.shake=Math.max(G.shake,.4); sfx('lvl'); } }
 function explodeMob(m){ const depth=m.xd||0; const R2=80, dm=Math.max(10,((me.D.wmn+me.D.wmx)/2+me.D.dmg)*1.4*(1+(me.D.str+me.D.dmgPct)/100)); bombFx(m.x,m.y,R2); pushEv(['bx',Math.round(m.x),Math.round(m.y),R2]);
   for(const q of G.mobs){ if(q.dead||q===m||hyp(q.x-m.x,q.y-m.y)>R2+q.r)continue; q.xd=depth+1; applyDmg(q,dm,0); } }
 function onKill(x,y,xp,tier,ilvl,type){
@@ -1381,6 +1381,12 @@ let annQ=[], annSeq=0;
 function announce(t,col){ const box=$('#ann'); if(!box)return; const d=document.createElement('div'); d.textContent=t; if(col)d.style.color=col; box.appendChild(d); while(box.children.length>3)box.firstChild.remove(); setTimeout(()=>d.remove(),5200); }
 const ASELL=[-1,0,1,2], ASN=['끔','일반↓','매직↓','레어↓'];
 let asLv=(()=>{ const v=parseInt(lsGet('dkdef2.asell')); return isNaN(v)?-1:clamp(v,-1,2); })();
+function autoSellModal(){
+  const opts=[[-1,'꺼짐','줍는 아이템을 가방에 넣어요'],[0,'일반 이하','일반 등급은 줍자마자 판매'],[1,'매직 이하','일반·매직 등급은 줍자마자 판매'],[2,'레어 이하','일반·매직·레어 등급은 줍자마자 판매']];
+  modal(`<h3>🪙 자동 판매</h3><p class="meta" style="margin:0 0 10px">고른 등급 이하의 아이템은 줍는 순간 바로 팔려요.<br>유니크·잠근 아이템, 비어 있는 칸에 자동 장착될 아이템은 제외돼요.</p><div class="col">${opts.map(o=>`<button class="btn${asLv===o[0]?' primary':''}" data-a="${o[0]}" style="text-align:left"><b style="${o[0]>=0?'color:'+RARC[o[0]]:''}">${asLv===o[0]?'✔ ':''}${o[1]}</b> <span style="font-weight:400;font-size:12px;opacity:.8">${o[2]}</span></button>`).join('')}<button class="btn" id="asX">닫기</button></div>`,m=>{
+    m.querySelector('#asX').onclick=closeModal;
+    m.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{ asLv=+b.dataset.a; lsSet('dkdef2.asell',String(asLv)); closeModal(); if(sheetMode==='bag')renderBag(); sheetToast&&sheetToast(asLv<0?'자동 판매를 껐어요':`${RARN[asLv]} 이하는 줍자마자 판매돼요`); }); });
+}
 function pickUp(g){
   { const it0=g.it; if(asLv>=0&&it0.rar<=asLv&&!it0.lock){ const k0=it0.slot==='ring'?(!me.eq.ring1?'ring1':!me.eq.ring2?'ring2':null):(me.eq[it0.slot]?null:it0.slot);
       if(!(k0&&canWear(it0))){ ground.splice(ground.indexOf(g),1); const v=sellInfo(it0).total; me.gold+=v; sfx('coin'); addNum(me.x,me.y-34,'+'+v+'원','#ffd84a',false); G.asold=(G.asold|0)+v; saveChar(); uiDirty=true; if(sheetMode==='bag')renderBag(); return; } } }
@@ -1855,7 +1861,7 @@ function renderBag(){
   const alk=pq('#aLock'); if(alk)alk.onclick=()=>{ const it=selItem&&selItem.it; if(!it)return; it.lock=!it.lock; saveChar(); sheetToast(it.lock?'🔒 잠갔어요. 일괄 판매에서 제외돼요':'🔓 잠금을 풀었어요'); renderBag(); };
   b.querySelectorAll('[data-sort]').forEach(e=>e.onclick=()=>{ sortInv(e.dataset.sort); });
   b.querySelector('#aBulk').onclick=bulkSell;
-  b.querySelector('#aAuto').onclick=()=>{ asLv=asLv>=2?-1:asLv+1; lsSet('dkdef2.asell',String(asLv)); sheetToast(asLv<0?'자동 판매를 껐어요':`주울 때 ${RARN[asLv]} 이하는 바로 판매돼요 (잠금·빈 장비칸 제외)`); renderBag(); };
+  b.querySelector('#aAuto').onclick=autoSellModal;
   enableDrag(b);
   const asn=pq('#aSend'); if(asn)asn.onclick=()=>sendPick();
   const aen=pq('#aEnh'); if(aen)aen.onclick=()=>enhModal();
@@ -2364,8 +2370,8 @@ function heroAnim(o,t,melee){
   const sw=o.swing||0; if(sw>(o._ps||0)+.001)o._a0=t; o._ps=sw;
   const ap=o._a0===undefined?9:(t-o._a0)/.36, c=atkCurve(ap), wa=o._wa, wp=o._wp;
   /* 좌우 반전은 즉시 뒤집지 않고 부드럽게 돌아서기 */
-  const cf=Math.cos(o.face||0); if(o._fd===undefined)o._fd=cf<0?-1:1; if(cf>.2)o._fd=1; else if(cf<-.2)o._fd=-1;
-  o._fl=(o._fl===undefined?o._fd:o._fl)+(o._fd-o._fl)*(1-Math.exp(-dt*24)); const flip=Math.abs(o._fl)<.1?(o._fl<0?-.1:.1):o._fl;
+  const cf=Math.cos(o.face||0); if(o._fd===undefined)o._fd=cf<0?-1:1; const dbd=(o.swing>0||o.faceT>0)?.03:.2; if(cf>dbd)o._fd=1; else if(cf<-dbd)o._fd=-1;
+  if(!isFinite(o._fl))o._fl=o._fd; o._fl+=(o._fd-o._fl)*(1-Math.exp(-dt*24)); const flip=Math.abs(o._fl)<.1?(o._fl<0?-.1:.1):o._fl;
   const bob=(1-Math.cos(wp*2))/2;
   let rot=Math.sin(wp)*.08*wa+.04*wa, hop=bob*5*wa, sx=1, sy=1+Math.sin(wp*2)*.022*wa+Math.sin(t*2.2)*.012*(1-wa), fx=0;
   if(melee){ rot+=c*.3; fx=c>0?c*13:c*4; sy*=1+Math.max(0,c)*.05; sx*=1-Math.max(0,c)*.03; if(c>0)hop+=c*3; }
@@ -2763,7 +2769,7 @@ function render(t){
 let last=performance.now(), T=0;
 function step(now){
   requestAnimationFrame(step);
-  let dt=Math.min(.05,(now-last)/1000); last=now; if(G.slowT>0){ G.slowT-=dt; dt*=.35; } T+=dt/1;
+  let dt=Math.min(.05,(now-last)/1000); last=now; T+=dt/1;
   if(R){ if(G.mode==='host')hostNet(); else if(G.mode==='guest')guestNet(); if(G.phase==='lobby'){ netT-=dt; if(netT<=0){netT=.5; netSend(); renderLobby();} } }
   if(bannerT>0){bannerT-=dt; if(bannerT<=0)$('#banner').style.opacity=0;}
   AUD.setMood(G.inGame?(G.phase==='boss'?'boss':G.phase==='wave'?'battle':'calm'):'calm');
