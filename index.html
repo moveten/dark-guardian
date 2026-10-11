@@ -140,6 +140,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
 .cell.lock::after{content:'';position:absolute;inset:0;border-radius:5px;background:rgba(190,30,20,.13);pointer-events:none}
 .nw{position:absolute;left:1px;bottom:0;font-size:8.5px;font-style:normal;font-weight:900;color:#fff;background:#d6382c;border-radius:4px;padding:0 3px;line-height:12px;z-index:2;box-shadow:0 0 4px rgba(255,80,60,.7)}.lk{position:absolute;left:1px;top:0;font-size:11px;font-style:normal;z-index:1;filter:drop-shadow(0 0 2px #000)}.rq{position:absolute;right:1px;bottom:0;font-size:9.5px;font-style:normal;font-weight:800;color:#fff;background:#a33a30;border-radius:4px;padding:0 3px;line-height:13px;z-index:1}
 .slot.sel,.cell.sel{outline:2px solid var(--gold);outline-offset:1px}
+.sktabs{display:flex;gap:8px}.sktabs button{flex:1;min-height:46px;border:1px solid var(--line2);border-radius:10px;background:#0f0b09;font-size:15px;font-weight:800}.sktabs button[aria-pressed="true"]{border-color:var(--gold);color:var(--gold);background:var(--panel2)}
+#dock .hb[aria-pressed="true"]{border-color:var(--gold);background:var(--panel2)}#dock .hb[aria-pressed="true"] .lb{color:var(--gold)}
 .sbody.bag .bagtop{position:sticky;top:-8px;z-index:3;background:var(--panel);padding:8px 0 6px;margin:-8px 0 0;box-shadow:0 6px 8px -4px rgba(0,0,0,.6)}.sbody.bag{padding:8px 12px;gap:8px}.sbody.bag .eq{grid-template-columns:repeat(7,1fr);gap:4px;justify-content:stretch}.sbody.bag .inv{gap:4px}.sbody.bag .eq .slot .sl{font-size:8.5px}
 .inv{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:5px;align-content:start}
 .detail{background:#0f0b09;border:1px solid var(--line);border-radius:8px;padding:12px;font-size:13px;line-height:1.6;min-height:60px}
@@ -332,7 +334,6 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
   <button class="hb" id="bBag" aria-label="가방"><i class="ic">🎒</i><i class="lb">가방</i><span class="badge" id="bagNew" hidden>N</span></button>
   <button class="hb" id="bStat" aria-label="능력치"><i class="ic">📊</i><i class="lb">능력</i><span class="badge" id="statBadge" hidden>0</span></button>
   <button class="hb" id="bSkillT" aria-label="스킬"><i class="ic">✨</i><i class="lb">스킬</i><span class="badge" id="skillBadge" hidden>0</span></button>
-  <button class="hb" id="bPas" aria-label="패시브"><i class="ic">🔰</i><i class="lb">패시브</i></button>
   <button class="hb" id="bMenu" aria-label="메뉴"><i class="ic">⚙️</i><i class="lb">메뉴</i></button>
 </nav>
 <div id="app">
@@ -380,7 +381,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
-    <div class="ver" id="verT">v0.1.0.0052</div>
+    <div class="ver" id="verT">v0.1.0.0053</div>
     <div class="clist car" id="charList"></div>
     <button id="bNew" hidden></button>
     <div class="pp" id="playPanel" hidden>
@@ -429,7 +430,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
       <header><h2 id="sheetT">가방</h2><button class="x" id="sheetX" aria-label="닫기">×</button></header>
       <button id="ptsBar" hidden></button>
       <div class="sbody" id="sheetB"></div>
-      <nav id="sheetTabs"><button data-m="bag">🎒 가방</button><button data-m="stat">📊 능력</button><button data-m="skill">✨ 스킬</button><button data-m="passive">🔰 패시브</button><button data-m="shop">🛒 상점</button></nav>
+      <nav id="sheetTabs"><button data-m="bag">🎒 가방</button><button data-m="stat">📊 능력</button><button data-m="skill">✨ 스킬</button><button data-m="shop">🛒 상점</button></nav>
     </div>
     <div class="ipop" id="itemPop" hidden></div>
   </div>
@@ -1899,18 +1900,18 @@ let shopMsg='';
 function openSheet(m){ if(!G.inGame&&!G.titleSheet)return; sheetMode=m; selItem=null; shopMsg=''; $('#sheet').hidden=false; if(G.inGame&&G.mode==='solo')G.paused=true; for(const k in held)held[k]=false; joy.active=false;
   rerender(); $('#sheetB').scrollTop=0; }
 function rerender(){ if(sheetMode==='bag')renderBag(); else if(sheetMode==='stat'||sheetMode==='skill'||sheetMode==='passive')renderStat(); else if(sheetMode==='shop')renderShop(); else renderMenu(); }
-function markTabs(){ $('#itemPop').hidden=true; $('#ptsBar').hidden=true; const t=$('#sheetTabs'); t.hidden=sheetMode==='menu'; t.querySelectorAll('button').forEach(b=>{b.setAttribute('aria-pressed',b.dataset.m===sheetMode); if(b.dataset.m==='shop')b.hidden=!!G.inGame&&sheetMode!=='shop'; const n=b.dataset.m==='bag'?me.inv.reduce((t,x)=>t+(x&&x.isNew?1:0),0):b.dataset.m==='stat'?(me.statPts|0):(b.dataset.m==='skill'||b.dataset.m==='passive')?(me.skillPts|0):0; let bd=b.querySelector('.pl'); if(!bd){bd=document.createElement('span');bd.className='pl';b.appendChild(bd);} bd.textContent=n>0?(b.dataset.m==='bag'?'NEW':'+'+n):''; bd.hidden=!(n>0); }); }
+function markTabs(){ $('#itemPop').hidden=true; $('#ptsBar').hidden=true; const t=$('#sheetTabs'), cm=sheetMode==='passive'?'skill':sheetMode; t.hidden=sheetMode==='menu'||!!G.inGame; /* 게임 중에는 하단 독 하나만 사용 */ for(const [id,m] of [['bBag','bag'],['bStat','stat'],['bSkillT','skill'],['bMenu','menu']]){ const e=$('#'+id); if(e)e.setAttribute('aria-pressed',cm===m); } t.querySelectorAll('button').forEach(b=>{b.setAttribute('aria-pressed',b.dataset.m===cm); if(b.dataset.m==='shop')b.hidden=!!G.inGame&&sheetMode!=='shop'; const n=b.dataset.m==='bag'?me.inv.reduce((t,x)=>t+(x&&x.isNew?1:0),0):b.dataset.m==='stat'?(me.statPts|0):b.dataset.m==='skill'?(me.skillPts|0):0; let bd=b.querySelector('.pl'); if(!bd){bd=document.createElement('span');bd.className='pl';b.appendChild(bd);} bd.textContent=n>0?(b.dataset.m==='bag'?'NEW':'+'+n):''; bd.hidden=!(n>0); }); }
 $('#ptsBar').onclick=()=>{ sheetMode='stat'; selItem=null; rerender(); };
 $('#sheetTabs').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; sheetMode=b.dataset.m; selItem=null; shopMsg=''; rerender(); $('#sheetB').scrollTop=0; });
 function openTitleSheet(m){ prepMe(); G.titleSheet=true; openSheet(m); }
-function closeSheet(){ const was=G.titleSheet; sheetMode=null; $('#sheet').hidden=true; G.paused=false; if(was){ G.titleSheet=false; renderClassCards(); } }
+function closeSheet(){ for(const id of ['bBag','bStat','bSkillT','bMenu']){ const e=$('#'+id); if(e)e.setAttribute('aria-pressed','false'); } const was=G.titleSheet; sheetMode=null; $('#sheet').hidden=true; G.paused=false; if(was){ G.titleSheet=false; renderClassCards(); } }
 $('#sheetX').onclick=closeSheet;
 $('#sheet').addEventListener('pointerdown',e=>{ if(e.target.id==='sheet')closeSheet(); });
 $('#bSkip').addEventListener('click',e=>{e.preventDefault(); if(G.inGame&&G.phase==='clear'){ confirmExit(()=>{ G.phase='win'; G.endShown=true; markClear(); quitToTitle(); }); } });
 $('#bAll').addEventListener('click',e=>{ e.preventDefault(); e.stopPropagation(); if(G.allMode)return; const wasP=G.paused; if(G.mode==='solo')G.paused=true;
   modal(`<h3>🔥 총공세</h3><p style="margin:0 0 12px;font-size:14px;line-height:1.5">남은 습격을 쉬지 않고 연속으로 호출해요.<br>시작하면 중간에 멈출 수 없고, 모두 처치하면 우두머리가 나타나요.<br><b style="color:#ff9a6a">🔥 바닥에 불이 번져요. 밟으면 피해를 입으니 피하세요!</b><br>시작할까요?</p><div class="row2"><button class="btn" id="alNo">취소</button><button class="btn primary" id="alOk">🚨 시작</button></div>`,m=>{ m.querySelector('#alNo').onclick=()=>{ closeModal(); G.paused=wasP; }; m.querySelector('#alOk').onclick=()=>{ closeModal(); G.paused=wasP; G.allMode=true; G.fireT=1.5; G.shake=Math.max(G.shake,.5); sfx('boss'); allSpawn(); announce('🔥 총공세! 바닥에 불이 번집니다','#ff9a6a'); pushEv(['ann',1]); }; }); });
 $('#bRaid').addEventListener('click',e=>{e.preventDefault(); e.stopPropagation(); if(!G.inGame)return; if(G.mode==='guest'){G.sq=(G.sq||0)+1; toast('다음 습격 요청을 보냈어요');} else skipWave('');});
-$('#bBag').onclick=()=>openSheet('bag'); $('#bStat').onclick=()=>openSheet('stat'); $('#bSkillT').onclick=()=>openSheet('skill'); $('#bPas').onclick=()=>openSheet('passive'); $('#bMenu').onclick=()=>openSheet('menu');
+$('#bBag').onclick=()=>openSheet('bag'); $('#bStat').onclick=()=>openSheet('stat'); $('#bSkillT').onclick=()=>openSheet('skill'); $('#bMenu').onclick=()=>openSheet('menu');
 const RBG=['linear-gradient(160deg,#25201a,#0f0b09)','radial-gradient(circle at 35% 30%,#33407a,#10142a 75%)','radial-gradient(circle at 35% 30%,#5e4f12,#1c1606 75%)','radial-gradient(circle at 35% 30%,#7a4414,#24120a 75%)'];
 const RBD=['#b4aea0','#4a7bff','#ffe24d','#ff8a2a'];
 function canWear(it){ return !(it.slot==='shield'&&ocOf(it)!==me.cls)&&me.lvl>=reqLv(it)&&!statLack(it).length; }
@@ -2072,6 +2073,7 @@ if(!SKM){
   h+='</div>';
 }
 if(SKM){
+  h+=`<div class="sktabs"><button data-pm="skill" aria-pressed="${!PAS}">✨ 액티브</button><button data-pm="passive" aria-pressed="${PAS}">🔰 패시브</button></div>`;
   h+=`<div class="box"><h3 class="bh"><span>${PAS?'🔰 패시브':'✨ 액티브 스킬'} · 남은 포인트 ${me.skillPts}</span><button class="rsb" id="rsSk">↺ 초기화 30,000원</button></h3><div class="k" style="font-size:11.5px;margin-bottom:6px">${PAS?'항상 적용되는 능력이에요. 스킬 포인트로 올려요.':'위에서 아래로 레벨이 오르며 해금돼요. 🔗는 이 스킬을 올리면 함께 강해지는 스킬이에요.'}</div>`;
   { const list=SK[me.cls].filter(s=>!!s.passive===PAS), tiers=[...new Set(list.map(s=>s.req))].sort((x,y)=>x-y);
     for(const rq of tiers){ const unl=me.lvl>=rq;
@@ -2085,6 +2087,7 @@ if(SKM){
 }
   const bo=$('#sheetB'); bo.className='sbody stats'; bo.innerHTML=h;
   {const r1=bo.querySelector('#rsStat'),r2=bo.querySelector('#rsSk'); if(r1)r1.onclick=()=>askReset('stat'); if(r2)r2.onclick=()=>askReset('sk');}
+  bo.querySelectorAll('[data-pm]').forEach(el=>el.onclick=()=>{ sheetMode=el.dataset.pm; rerender(); bo.scrollTop=0; });
   bo.querySelectorAll('[data-sd]').forEach(el=>el.onclick=()=>{ const d=bo.querySelector(`[data-sdd="${el.dataset.sd}"]`); if(d)d.hidden=!d.hidden; });
   bo.querySelectorAll('[data-st]').forEach(el=>el.onclick=()=>{ if(me.statPts<=0)return; me.statPts--; me.stats[el.dataset.st]++; const hp=me.hp,mp=me.mp; me.D=derive(me); me.hp=Math.min(hp,me.D.maxHp); me.mp=Math.min(mp,me.D.maxMp); saveChar(); renderStat(); });
   bo.querySelectorAll('[data-sk]').forEach(el=>el.onclick=()=>{ const k=el.dataset.sk, s=SKBY[k]; if(me.skillPts<=0||me.lvl<s.req||(me.skills[k]||0)>=20)return; me.skillPts--; me.skills[k]=(me.skills[k]||0)+1; saveChar(); buildSkills(); renderStat(); });

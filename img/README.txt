@@ -21,3 +21,5 @@
   mob_grak / mob_malek / mob_morg / mob_kargon / mob_izra .png = 평소(대기) 포즈
   *_atk.png = 기본 공격 포즈, *_sk.png = 스킬 준비·돌진 포즈 (같은 크기·같은 발 위치로 잘려 있어 게임이 상황에 맞게 바꿔 보여줘요)
   스테이지 2·3 보스도 boss_2_1.png / boss_2_1_atk.png / boss_2_1_sk.png 처럼 _atk, _sk를 붙여 올리면 같은 방식으로 적용돼요.
+
+스테이지 2 보스 일러스트 프롬프트: img/boss_prompt_stage2.txt (15컷 → boss_2_1~boss_2_5 + _atk/_sk 로 저장)
