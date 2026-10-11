@@ -30,3 +30,4 @@
 [스테이지 3 보스 동작 이미지 — 적용 완료] boss_3_1~boss_3_5 .png / _atk / _sk
 
 스테이지 1 일반 몹 일러스트 프롬프트: img/mob_prompt_stage1.txt (7종×대기/공격 14컷 → mob_imp/zombie/skeleton/bat/archer/bomber/healer .png + _atk.png)
+스테이지 2·3 일반 몹 프롬프트: img/mob_prompt_stage2.txt / mob_prompt_stage3.txt (각 7종×대기/공격 → mob_<이름>_s2.png, _s2_atk.png / _s3 ...)
