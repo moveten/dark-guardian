@@ -225,6 +225,14 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
 .cc[aria-current="true"]{border-color:var(--gold);background:var(--panel2);box-shadow:0 0 0 1px var(--gold) inset,0 8px 26px rgba(214,170,78,.22)}
 .cc .cpic{position:relative;width:96px;height:100px;display:flex;align-items:flex-end;justify-content:center}
 .cc .cpic img{max-width:100%;max-height:100%;object-fit:contain;filter:drop-shadow(0 6px 8px rgba(0,0,0,.6))}
+.cc .cpic img{transform-origin:50% 100%;animation:idleB 3.2s ease-in-out infinite}
+.cc .cpic.sorc img{animation-name:idleF;animation-duration:3.6s}
+.cc .cpic.pal img{animation-duration:3.8s}
+.cc:nth-child(2n) .cpic img{animation-delay:-1.1s}.cc:nth-child(3n) .cpic img{animation-delay:-2.2s}
+.cc[aria-current="true"] .cpic img{animation-duration:2.4s}.cc[aria-current="true"] .cpic.sorc img{animation-duration:2.9s}
+@keyframes idleB{0%,100%{transform:translateY(0) scale(1,1)}50%{transform:translateY(-3px) scale(.985,1.035)}}
+@keyframes idleF{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-7px) rotate(1.2deg)}}
+@media (prefers-reduced-motion:reduce){.cc .cpic img{animation:none!important}}
 .cc .cpic .cem{font-size:52px;line-height:1}
 .cc b{display:block;max-width:100%;font-family:var(--f-disp);font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cc .cl{font-size:12.5px;color:var(--mute)}.cc .cl em{font-style:normal;color:var(--gold);font-weight:700}
@@ -372,7 +380,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
-    <div class="ver" id="verT">v0.1.0.0050</div>
+    <div class="ver" id="verT">v0.1.0.0051</div>
     <div class="clist car" id="charList"></div>
     <button id="bNew" hidden></button>
     <div class="pp" id="playPanel" hidden>
@@ -2301,7 +2309,7 @@ function carFx(box){ const mid=box.scrollLeft+box.clientWidth/2; let best=null,b
 function buildCarousel(chars){
   const box=$('#charList'); box.innerHTML='';
   for(const c of chars){ const el=document.createElement('div'); el.className='cc'; el.dataset.id=c.id; el.setAttribute('role','button');
-    el.innerHTML=`<div class="cpic"><span class="cem">${CLSE[c.cls]}</span><img src="img/hero_${c.cls}.png" alt="" onload="this.previousElementSibling.style.display='none'" onerror="this.remove()"></div><b>${esc(dispName(c))}</b><span class="cl">${CLASSES[c.cls].n} · <em>Lv ${c.lvl}</em></span><span class="cl">💰 ${(c.gold|0).toLocaleString()}</span><span class="cpt">${c.statPts+c.skillPts?`포인트 ${c.statPts+c.skillPts}`:'&nbsp;'}</span><button class="cgear2">🎒 정비${(c.inv||[]).some(x=>x&&x.isNew)?' <i class="nw" style="position:static;margin-left:4px;vertical-align:middle">NEW</i>':''}</button>`;
+    el.innerHTML=`<div class="cpic ${c.cls}"><span class="cem">${CLSE[c.cls]}</span><img src="img/hero_${c.cls}.png" alt="" onload="this.previousElementSibling.style.display='none'" onerror="this.remove()"></div><b>${esc(dispName(c))}</b><span class="cl">${CLASSES[c.cls].n} · <em>Lv ${c.lvl}</em></span><span class="cl">💰 ${(c.gold|0).toLocaleString()}</span><span class="cpt">${c.statPts+c.skillPts?`포인트 ${c.statPts+c.skillPts}`:'&nbsp;'}</span><button class="cgear2">🎒 정비${(c.inv||[]).some(x=>x&&x.isNew)?' <i class="nw" style="position:static;margin-left:4px;vertical-align:middle">NEW</i>':''}</button>`;
     el.querySelector('.cgear2').onclick=e=>{ e.stopPropagation(); selId=c.id; lsSet('dkdef2.sel',selId); renderTitle(); openTitleSheet('bag'); };
     el.onclick=()=>{ if(el.getAttribute('aria-current')==='true'&&c.id===selId) charMenu(c.id); else carCenter(box,true); };
     box.appendChild(el); }
