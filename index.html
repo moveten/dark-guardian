@@ -333,7 +333,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
-    <div class="ver" id="verT">v0.1.0.0042</div>
+    <div class="ver" id="verT">v0.1.0.0043</div>
     <div class="clist" id="charList"></div>
     <div class="modes" style="margin-top:2px"><button class="btn" id="bNew">➕ 새 캐릭터</button><button class="btn" id="bRank">🏆 랭킹</button></div>
     <div class="pp" id="playPanel" hidden>
@@ -471,7 +471,7 @@ const CLASSES={
 };
 const SK={
  sorc:[
-  {k:'fireball',e:'🔥',n:'화염구',s:'화염',req:1,mp:4,cd:1,el:'#ff7a2e',rg:300,d:l=>`폭발하는 화염구. 기본 피해 ${18+13*l}`},
+  {k:'fireball',e:'🔥',n:'화염구',s:'화염',req:1,mp:4,cd:1,el:'#ff7a2e',rg:300,d:l=>`폭발하는 화염구. 화염구 ${HMN(l)}발 (7레벨 2발, 14레벨 3발, 0.16초 간격) · 발당 기본 피해 ${Math.round((18+13*l)*HMF(HMN(l)))}`},
   {k:'arcane',e:'🔷',n:'비전 집중',s:'비전',req:3,mp:0,cd:0,el:'#8fb0ff',passive:1,d:l=>`패시브: 마나 회복 +${3*l}%, 스킬 재사용 대기시간 -${Math.min(25,l)}%`},
   {k:'mshield',e:'🔮',n:'에너지 실드',s:'실드',req:9,mp:0,cd:0,el:'#7fb4ff',passive:1,d:l=>`패시브: 받는 피해의 ${Math.round(Math.min(.65,.2+.02*l)*100)}%를 마나가 대신 받음 (피해 1당 마나 ${Math.max(.5,1.6-.04*l).toFixed(2)} 소모, 마나가 없으면 효과 없음)`},
   {k:'frostnova',e:'❄️',n:'서리 고리',s:'서리',req:6,mp:10,cd:6,el:'#8fdcff',d:l=>`주변 적에게 피해 ${14+10*l}, 3초간 감속`},
@@ -704,7 +704,7 @@ const MAXENH=10, ENHBASE=[5000,7000,10000,15000];
 const enhRate=L=>Math.max(5,100-8*(L-1)), enhNeed=L=>L, enhCost=(it,L)=>1000+1000*L, canEnh=it=>!!(it&&(it.mx||it.df||it.slot==='ring'||it.slot==='amulet'));
 function enhApply(it){ if(it.slot==='ring'||it.slot==='amulet')return; if(!it.b0)it.b0={mn:it.mn,mx:it.mx,df:it.df}; const k=1+.1*(it.enh|0);
   if(it.b0.mx){ it.mn=Math.max(1,Math.round(it.b0.mn*k)); it.mx=Math.max(it.mn+1,Math.round(it.b0.mx*k)); } if(it.b0.df)it.df=Math.round(it.b0.df*k); }
-function enhFxText(it){ if(it.slot==='amulet')return it.enh>0?`강화 효과: 힘·민첩·체력·에너지 +${it.enh}`:'강화하면 올스탯이 1단계마다 +1'; if(it.slot==='ring')return it.enh>=10?'강화 효과: 모든 스킬 +1':it.enh>0?`+10강 달성 시 모든 스킬 +1 (현재 +${it.enh})`:'+10강 달성 시 모든 스킬 +1'; return ''; }
+function enhFxText(it){ if(it.slot==='amulet')return it.enh>0?`강화 보너스(옵션 아님): 힘·민첩·체력·에너지 +${it.enh}`:'강화 시 보너스(옵션 아님): 올스탯 단계당 +1'; if(it.slot==='ring')return it.enh>=10?'강화 보너스(옵션 아님): 모든 스킬 +1':it.enh>0?`+10강 달성 시 보너스: 모든 스킬 +1 (현재 +${it.enh})`:'+10강 달성 시 보너스: 모든 스킬 +1'; return ''; }
 const BLKMAX=30; /* 막기 확률 최대치 */
 const SPCH=.15; /* 유니크 중 이름 고정 유니크 비율 (특수 효과 포함) */
 const STN={str:'힘',dex:'민첩',vit:'체력',ene:'에너지'};
@@ -1031,7 +1031,7 @@ function spawnPoint(){
 function spawnMob(type,x,y,elite){
   const S=G.stg||STAGES[0], w=Math.max(1,G.wave), hm=(1+.12*(w-1))*(G.coop?1.4:1)*(elite?8:1)*S.hpM*1.2, dm=(1+.08*(w-1))*(elite?4.6:1)*S.dmgM*1.6;
   const t=MT[type], m={id:G.mobId++,type,x,y,hp:t.hp*hm,max:t.hp*hm,dmg:t.dmg*dm,spd:t.spd*(elite?1.3:S.spdM)*(t.boss?.95:.5),r:t.r*(elite?1.5:1),xp:Math.round(t.xp*(1+.1*(w-1))*S.xpM*(elite?4:1)),elite:!!elite,boss:!!t.boss,fly:!!t.fly,cd:rand(0,1),slowT:0,tgt:0,rt:0,atk:0,fa:0,flash:0,anim:Math.random()*6,kx:0,ky:0,sq:0};
-  if(m.boss){const sq=Math.sqrt(S.hpM); m.hp=m.max=Math.max(t.hp*sq*1.6,32*S.hpM*1.2*(1+.12*((G.TW||8)-1))*(14+.3*(G.stageIdx|0)))*(G.coop?1.5:1);m.dmg=t.dmg*1.6*1.25*Math.pow(S.dmgM,.8);m.xp=Math.round(t.xp*S.xpM);m.spd=t.spd*.95;m.bt=3;m.sum1=false;m.sum2=false;m.tel=null;m.charge=null;}
+  if(m.boss){const sq=Math.sqrt(S.hpM); m.hp=m.max=Math.max(t.hp*sq*1.6,32*S.hpM*1.2*(1+.12*((G.TW||8)-1))*(28+.6*(G.stageIdx|0)))*(G.coop?1.5:1);m.dmg=t.dmg*1.6*1.25*Math.pow(S.dmgM,.8);m.xp=Math.round(t.xp*S.xpM);m.spd=t.spd*.95;m.bt=3;m.sum1=false;m.sum2=false;m.tel=null;m.charge=null;}
   if(m.elite&&type<=2)m.af=1+Math.floor(Math.random()*4);
   G.mobs.push(m); return m;
 }
@@ -1064,7 +1064,7 @@ function gimmick(dt){
   });
 }
 function startStage(){
-  G.stageIdx=selStage; G.stg=STAGES[selStage]; G.TW=G.stg.waves.length; setTheme(selStage); G.gts=[]; later(.5,()=>{ if(G.inGame)banner(`${G.stg.id} ${G.stg.n}`,`권장 Lv ${G.stg.rl} · 장비 Lv ${Math.max(1,G.stg.icap-10)}↑ · ${G.stg.tag||''}`); });
+  G.stageIdx=selStage; G.stg=STAGES[selStage]; G.TW=G.stg.waves.length; setTheme(selStage); G.gts=[]; later(.5,()=>{ if(G.inGame)banner(`${G.stg.id} ${G.stg.n}`,`권장 Lv ${G.stg.rl} · 아이템 Lv ${Math.max(1,G.stg.icap-10)}↑ · ${G.stg.tag||''}`); });
   G.allMode=false; G.allQ=[]; G.fires=[]; G.freeRev=1; me.rvGiven=0; me.seenRg=0; me.out=false; me.rvT=0;
   G.wave=0;G.skipUsed=false;G.phase='prep';G.timer=10;G.mobs.length=0;G.ev=[];G.spawnQ=0;G.lastSq=-1;G.endShown=false;G.coop=!!guestPeer;
   G.waveSides=[0,1,3]; G.nextSides=sidesFor(1); G.laneShow=G.nextSides;
@@ -1451,12 +1451,14 @@ const LVP0={ex:0,gap:0,dm:1,tk:1,miss:0};
 /* 장비 레벨 페널티: 스테이지 권장 장비 레벨(icap)보다 10 넘게 낮으면 무기는 피해 감소, 방어구는 받는 피해 증가. 강화 1단계 = 장비 레벨 +1.5 */
 const GP0={wm:1,tk:1,gl:0};
 function gearPen(){ const S=G.stg; if(!S||!me||!me.eq)return GP0; const gl=S.icap|0, ei=it=>it?(it.ilvl|0)+1.5*(it.enh|0):0;
-  const wd=Math.max(0,gl-ei(me.eq.weapon)-10), ad=Math.max(0,gl-(ei(me.eq.helm)+ei(me.eq.armor))/2-10);
-  return {wm:Math.max(.08,Math.pow(.55,wd/6)),tk:Math.min(2.5,Math.pow(1.2,ad/6)),gl}; }
+  const ws=ei(me.eq.weapon)-gl, as=(ei(me.eq.helm)+ei(me.eq.armor))/2-gl;  /* 스테이지 아이템 레벨 대비 내 장비의 우열 */
+  const wm=ws<-10?Math.max(.08,Math.pow(.55,(-ws-10)/6)):ws>5?Math.min(1.6,1+.015*(ws-5)):1;
+  const tk=as<-10?Math.min(2.5,Math.pow(1.2,(-as-10)/6)):as>5?Math.max(.6,1-.01*(as-5)):1;
+  return {wm,tk,gl}; }
 function lvPen(){ const S=G.stg, ml=(S&&S.rl)|0; if(!ml||!me)return LVP0; const gap=ml-(me.lvl|0), ex=Math.max(0,gap-5); if(!ex){ const ov=Math.max(0,-gap-5); if(ov)return {ex:0,gap,over:ov,dm:Math.min(2,1+.03*ov),tk:Math.max(.4,1-.02*ov),miss:0}; return {ex:0,gap,dm:1,tk:1,miss:0}; }
   return {ex,gap,dm:Math.max(.3,1-.05*ex),tk:Math.min(2.2,1+.06*ex),miss:Math.min(.5,.04*ex)}; }
 function hitMob(m,r,slow,tn,fx){
-  { const gp=gearPen(); if(gp.wm<1)r={v:r.v*gp.wm,crit:r.crit}; }
+  { const gp=gearPen(); if(gp.wm!==1)r={v:r.v*gp.wm,crit:r.crit}; }
   { const P=lvPen(); if(P.ex){ if(Math.random()<P.miss){ addNum(m.x,m.y-m.r-6,'MISS','#9aa0aa',false); return; } r={v:r.v*P.dm,crit:r.crit}; } else if(P.over){ r={v:r.v*P.dm,crit:r.crit}; } }
   if(m.boss&&m.counter>0){ counterHit(m); r={v:r.v*.05,crit:false}; }
   const dmg=Math.max(1,Math.round(r.v)); const sp=me.D&&me.D.sp; if(sp&&sp.frost&&Math.random()<.2&&!G.inProc) slow=Math.max(slow||0,2);
@@ -1571,10 +1573,11 @@ function castSkill(o,key,real,tx,ty,lv,tgt){
       later(.7,()=>{ slamFx(px,py,95,'#ff5a1f'); impact(px,py,'255,120,30',180); burst(px,py,'#ffb04a',34,380); G.shake=Math.max(G.shake,.4); efx.push({k:'ring',x:px,y:py,r0:20,r1:130,t:0,life:.5,col:'#ffd08a',w:9});
         if(real) for(const m of mobsIn(px,py,95)){ const rr=spellDmg(150+45*lv); hitMob(m,rr,0,false,{stun:.8,burn:.8,bd:rr.v*.3}); } }); });
     break;
-  case 'fireball':
-    proj({x:o.x+dx*14,y:o.y+dy*14,vx:dx*430,vy:dy*430,r:9,life:.75,col:'#ff7a2e',kind:'fire',real,trail:'255,130,40',
-      boom:(x,y)=>{ efx.push({k:'boom',x,y,r:60*RS(lv),t:0,life:.45,col:'#ff7a2e'}); impact(x,y,'255,140,40',110); burst(x,y,'#ffb04a',26,260); G.shake=Math.max(G.shake,.15);
-        if(real) for(const m of mobsIn(x,y,60*RS(lv))) hitMob(m,spellDmg(18+13*lv)); }});
+  case 'fireball':{ const fn=HMN(lv), ff=HMF(fn);
+    for(let i=0;i<fn;i++) later(i*.16,()=>{ if(o===me&&me.dead)return; let a2=ang; if(real&&i>0){ const t2=nearestMob(o.x,o.y,320); if(t2)a2=Math.atan2(t2.y-o.y,t2.x-o.x); } const ddx=Math.cos(a2), ddy=Math.sin(a2); if(i>0)sfx('fire');
+      proj({x:o.x+ddx*14,y:o.y+ddy*14,vx:ddx*430,vy:ddy*430,r:9,life:.75,col:'#ff7a2e',kind:'fire',real,trail:'255,130,40',
+        boom:(x,y)=>{ efx.push({k:'boom',x,y,r:60*RS(lv),t:0,life:.45,col:'#ff7a2e'}); impact(x,y,'255,140,40',110); burst(x,y,'#ffb04a',26,260); G.shake=Math.max(G.shake,.15);
+          if(real) for(const m of mobsIn(x,y,60*RS(lv))){ const r=spellDmg(18+13*lv); r.v*=ff; hitMob(m,r); } }}); }); }
     break;
   case 'frostnova':
     efx.push({k:'ring',x:o.x,y:o.y,r0:20,r1:160*RS(lv),t:0,life:.5,col:'#8fdcff',w:14}); efx.push({k:'shards',x:o.x,y:o.y,r:160*RS(lv),t:0,life:.6}); impact(o.x,o.y,'150,220,255',170); burst(o.x,o.y,'#dff6ff',36,420);
@@ -1802,8 +1805,10 @@ function updateHud(){
   $('#potN').textContent=me.pot+me.potBuy; $('#revN').textContent=revItems(); $('#bRev').classList.toggle('rdy',!!me.dead&&revItems()>0); $('#hGold').textContent=`💰 ${(me.gold|0).toLocaleString()}원`; { const P=lvPen(), gp=gearPen(), el=$('#lvPen'); if(el){ const L=[]; let bad=false;
     if(P.over)L.push(`✨ 몹 Lv ${G.stg.rl} · 레벨 우위 ${-P.gap} — 공격력 +${Math.round((P.dm-1)*100)}% · 받는 피해 -${Math.round((1-P.tk)*100)}%`);
     else if(P.ex){ bad=true; L.push(`⚠️ 몹 Lv ${G.stg.rl} · 격차 ${P.gap} — 공격력 -${Math.round((1-P.dm)*100)}% · 빗나감 ${Math.round(P.miss*100)}% · 받는 피해 +${Math.round((P.tk-1)*100)}%`); }
-    if(gp.wm<.97){ bad=true; L.push(`🗡️ 무기가 약해요 (권장 장비 Lv ${Math.max(1,gp.gl-10)}↑) — 공격력 -${Math.round((1-gp.wm)*100)}%`); }
-    if(gp.tk>1.03){ bad=true; L.push(`🛡️ 방어구가 약해요 (권장 장비 Lv ${Math.max(1,gp.gl-10)}↑) — 받는 피해 +${Math.round((gp.tk-1)*100)}%`); }
+    if(gp.wm<.97){ bad=true; L.push(`🗡️ 무기 아이템 Lv가 낮아요 (권장 ${Math.max(1,gp.gl-10)}↑) — 공격력 -${Math.round((1-gp.wm)*100)}%`); }
+    else if(gp.wm>1.03)L.push(`🗡️ 무기 아이템 Lv 우위 — 공격력 +${Math.round((gp.wm-1)*100)}%`);
+    if(gp.tk>1.03){ bad=true; L.push(`🛡️ 방어구 아이템 Lv가 낮아요 (권장 ${Math.max(1,gp.gl-10)}↑) — 받는 피해 +${Math.round((gp.tk-1)*100)}%`); }
+    else if(gp.tk<.97)L.push(`🛡️ 방어구 아이템 Lv 우위 — 받는 피해 -${Math.round((1-gp.tk)*100)}%`);
     el.hidden=!L.length; el.style.background=bad?'':'rgba(14,60,30,.82)'; el.style.borderColor=bad?'':'#3fae6a'; el.style.color=bad?'':'#a6f0c0'; el.innerHTML=L.join('<br>'); } }
   { const bd=$('#statBadge'), b2=$('#skillBadge'), a=me.statPts|0, k=me.skillPts|0; bd.hidden=a<=0; bd.textContent='+'+a; b2.hidden=k<=0; b2.textContent='+'+k; }
   for(const b of $('#skills').children){ const k=b.dataset.k, s=SKBY[k];
@@ -1937,7 +1942,7 @@ function itemLines(it){
   let s=`<div style="display:flex;gap:10px;align-items:center"><img src="${itemIcon(it).url}" alt="" style="width:56px;height:56px;flex:none;background:#0a0807;border:1px solid ${RARC[it.rar]};border-radius:8px"><div><div class="in" style="color:${RARC[it.rar]}">${it.enh>0?'+'+it.enh+' ':''}${esc(dn(it))}</div><div class="meta">${RARN[it.rar]} ${SLOTN[it.slot]} · ${esc(it.base)} · 아이템 레벨 ${it.ilvl}</div><div class="meta">${it.slot==='shield'?'팔라딘 전용':''}</div><div class="meta">${reqHtml(it)}</div></div></div>`;
   const bt=baseText(it); if(bt)s+=`<div>${bt}</div>`;
   if(BASEFX[it.base]&&it.slot==='weapon') s+=`<div class="meta" style="color:#9fd0ff">▪ ${BASEFX[it.base].t}</div>`;
-  { const ee=enhFxText(it); if(ee)s+=`<div class="meta" style="color:#ffd84a">⚒ ${ee}</div>`; }
+  { const ee=enhFxText(it); if(ee)s+=`<div class="meta" style="font-size:11px;font-style:italic;color:#7d725f;margin-top:2px">※ ${ee}</div>`; }
   if(it.sp&&SPFX[it.sp]) s+=`<div style="margin:4px 0;color:#ffb14a;font-weight:700">★ 특수 효과: ${SPFX[it.sp].d}</div>`;
   if(it.aff.length) s+='<ul>'+it.aff.map(a=>`<li>${esc(affText(a))}${(a.cls&&a.cls!==me.cls)?' <span class="meta">(효과 없음)</span>':''}</li>`).join('')+'</ul>';
   return s;
@@ -2168,7 +2173,7 @@ function rkItemDetail(row,k,back){
   let bt=''; try{ bt=baseText(it); }catch(e){}
   let af=''; for(const a of it.aff){ try{ af+=`<li>${esc(affText(a))}</li>`; }catch(e){} }
   modal(`<div class="rkit" style="border:0"><img src="${ic}" alt="" style="border-color:${it.enh>0?ENHBD(it.enh):RBD[it.rar]}"><div class="rkib"><div style="font-size:16px"><b style="color:${RARC[it.rar]}">${esc(dn(it))}</b>${it.enh>0?` <span style="color:#ffd84a;font-weight:800">+${it.enh}</span>`:''}</div><div class="meta">${RKSN[k]} · ${RARN[it.rar]} · 아이템 레벨 ${it.ilvl}</div>${it.req?`<div class="meta">필요 레벨 ${it.req}</div>`:''}</div></div>
-    ${bt?`<div style="margin:6px 0">${bt}</div>`:''}${BASEFX[it.base]&&it.slot==='weapon'?`<div class="meta" style="color:#9fd0ff">▪ ${esc(BASEFX[it.base].t)}</div>`:''}${(it.enh>0&&enhFxText(it))?`<div class="meta" style="color:#ffd84a">⚒ ${enhFxText(it)}</div>`:''}${af?`<ul style="margin:6px 0;padding-left:18px;line-height:1.55">${af}</ul>`:''}${it.sp&&SPFX[it.sp]?`<div style="margin:6px 0;color:#ffb14a;font-weight:700">★ 특수 효과: ${esc(SPFX[it.sp].d)}</div>`:''}
+    ${bt?`<div style="margin:6px 0">${bt}</div>`:''}${BASEFX[it.base]&&it.slot==='weapon'?`<div class="meta" style="color:#9fd0ff">▪ ${esc(BASEFX[it.base].t)}</div>`:''}${(it.enh>0&&enhFxText(it))?`<div class="meta" style="font-size:11px;font-style:italic;color:#7d725f">※ ${enhFxText(it)}</div>`:''}${af?`<ul style="margin:6px 0;padding-left:18px;line-height:1.55">${af}</ul>`:''}${it.sp&&SPFX[it.sp]?`<div style="margin:6px 0;color:#ffb14a;font-weight:700">★ 특수 효과: ${esc(SPFX[it.sp].d)}</div>`:''}
     <div class="row2" style="margin-top:10px"><button class="btn" id="rkBack">← 장비 보기</button><button class="btn primary" id="rkNo">랭킹으로</button></div>`,m=>{
     m.onclick=e=>{ if(e.target===m)openRank(back); }; m.querySelector('#rkBack').onclick=()=>rkProfile(row,back); m.querySelector('#rkNo').onclick=()=>openRank(back); });
 }
@@ -2213,7 +2218,7 @@ function renderTitle(){
   const sb=$('#stageBar'); sb.innerHTML='';
   STAGES.forEach((st,i)=>{ const b=document.createElement('button'); b.className='stg'; b.setAttribute('aria-pressed',i===selStage); b.disabled=i>stageClear; b.textContent=(i>stageClear?'🔒 ':'')+st.id; b.onclick=()=>{ selStage=i; lsSet('dkdef2.stage',String(i)); renderTitle(); }; sb.appendChild(b); });
   { const ctr=()=>{ const cb=sb.children[selStage]; if(cb&&sb.clientWidth) sb.scrollLeft=cb.offsetLeft+cb.offsetWidth/2-sb.clientWidth/2; }; ctr(); requestAnimationFrame(ctr); setTimeout(ctr,120); }
-  const S=STAGES[selStage]; { const cur=chars.find(c=>c.id===selId), low=cur&&cur.lvl<S.rl, w0=cur&&cur.eq&&cur.eq.weapon, gw=cur&&((w0?(w0.ilvl|0)+1.5*(w0.enh|0):0)<S.icap-10); $('#stageInfo').innerHTML=`<b>${esc(S.id)} ${esc(S.n)}</b> · <span style="color:${low?'#e07060':'#9fd18b'};font-weight:700">권장 Lv ${S.rl}${low?` (현재 ${cur.lvl})`:''}</span> · <span style="color:${gw?'#e07060':'#9fd18b'};font-weight:700">장비 Lv ${Math.max(1,S.icap-10)}↑${gw?' (무기 부족)':''}</span><br>${esc(S.d)}`; }
+  const S=STAGES[selStage]; { const cur=chars.find(c=>c.id===selId), low=cur&&cur.lvl<S.rl, w0=cur&&cur.eq&&cur.eq.weapon, gw=cur&&((w0?(w0.ilvl|0)+1.5*(w0.enh|0):0)<S.icap-10); $('#stageInfo').innerHTML=`<b>${esc(S.id)} ${esc(S.n)}</b> · <span style="color:${low?'#e07060':'#9fd18b'};font-weight:700">권장 Lv ${S.rl}${low?` (현재 ${cur.lvl})`:''}</span> · <span style="color:${gw?'#e07060':'#9fd18b'};font-weight:700">아이템 Lv ${Math.max(1,S.icap-10)}↑${gw?' (무기 부족)':''}</span><br>${esc(S.d)}`; }
   $('#bSolo').disabled=!selId; if(room){ $('#bHost').disabled=!selId; $('#bJoin').disabled=!selId; }
   if(!chars.length) showNew(false);
   rkSubmit(chars,false); setTimeout(rkPrefetch,1200);
