@@ -327,7 +327,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
-    <div class="ver" id="verT">v0.1.0.0036</div>
+    <div class="ver" id="verT">v0.1.0.0037</div>
     <div class="clist" id="charList"></div>
     <div class="modes" style="margin-top:2px"><button class="btn" id="bNew">➕ 새 캐릭터</button><button class="btn" id="bRank">🏆 랭킹</button></div>
     <div class="pp" id="playPanel" hidden>
@@ -466,6 +466,7 @@ const SK={
  sorc:[
   {k:'fireball',e:'🔥',n:'화염구',s:'화염',req:1,mp:4,cd:1,el:'#ff7a2e',rg:300,d:l=>`폭발하는 화염구. 기본 피해 ${18+13*l}`},
   {k:'arcane',e:'🔷',n:'비전 집중',s:'비전',req:3,mp:0,cd:0,el:'#8fb0ff',passive:1,d:l=>`패시브: 마나 회복 +${3*l}%, 스킬 재사용 대기시간 -${Math.min(25,l)}%`},
+  {k:'mshield',e:'🔮',n:'에너지 실드',s:'실드',req:9,mp:0,cd:0,el:'#7fb4ff',passive:1,d:l=>`패시브: 받는 피해의 ${Math.round(Math.min(.65,.2+.02*l)*100)}%를 마나가 대신 받음 (피해 1당 마나 ${Math.max(.5,1.6-.04*l).toFixed(2)} 소모, 마나가 없으면 효과 없음)`},
   {k:'frostnova',e:'❄️',n:'서리 고리',s:'서리',req:6,mp:10,cd:6,el:'#8fdcff',d:l=>`주변 적에게 피해 ${14+10*l}, 3초간 감속`},
   {k:'teleport',e:'🌀',n:'순간이동',s:'이동',req:6,mp:12,cd:5,el:'#b98bff',d:l=>`누른 곳으로 순간이동 (최대 거리 ${240+4*l}) · 도착 직후 0.4초 무적 (스킬 레벨과 무관)`},
   {k:'chain',e:'⚡',n:'연쇄 번개',s:'번개',req:12,mp:9,cd:4,el:'#dfe7ff',rg:280,d:l=>`적 사이를 ${3+Math.floor(l/4)}번 튀는 번개. 기본 피해 ${22+16*l}`},
@@ -689,7 +690,7 @@ const SPFX={
  rage:{n:'광전사의 훈장',slot:'amulet',base:'목걸이',il:12,fx:['str','vit','dmgPct','life'],d:'생명력 50% 이하에서 피해 +30%, 생명력 흡수 +3% (옵션 종류 고정, 수치만 변동)',ap:d=>{d.ls+=3;}},
  eye:{n:'영겁의 눈',slot:'amulet',base:'목걸이',il:10,d:'아이템 드롭률 +30%, 획득 범위 +40, 치명타 확률 +5%',ap:d=>{d.mf+=30;d.pr+=40;d.crit+=5;}}};
 const MAXENH=10, ENHBASE=[5000,7000,10000,15000];
-const enhRate=L=>Math.max(5,100-8*(L-1)), enhNeed=L=>L, enhCost=(it,L)=>Math.round(ENHBASE[it.rar|0]*Math.pow(L,1.4)/100)*100, canEnh=it=>!!(it&&(it.mx||it.df));
+const enhRate=L=>Math.max(5,100-8*(L-1)), enhNeed=L=>L, enhCost=(it,L)=>1000+1000*L, canEnh=it=>!!(it&&(it.mx||it.df));
 function enhApply(it){ if(!it.b0)it.b0={mn:it.mn,mx:it.mx,df:it.df}; const k=1+.1*(it.enh|0);
   if(it.b0.mx){ it.mn=Math.max(1,Math.round(it.b0.mn*k)); it.mx=Math.max(it.mn+1,Math.round(it.b0.mx*k)); } if(it.b0.df)it.df=Math.round(it.b0.df*k); }
 const BLKMAX=30; /* 막기 확률 최대치 */
@@ -719,6 +720,7 @@ function genItem(rar,ilvl,slot,baseName){
     else { pool=AFX.filter(a=>a.sl==='*'||a.sl.split(' ').includes(slot));
       for(let k=pool.length-1;k>=0;k--){ if(pool[k].t==='all'&&rng()>.25)pool.splice(k,1); }
       for(let k=pool.length-1;k>0;k--){ const j=Math.floor(rng()*(k+1)); [pool[k],pool[j]]=[pool[j],pool[k]]; } }
+    { const pk=[]; let hasAll=false,hasSk=false; for(const a of pool){ if(pk.length>=5)break; if(a.t==='all'&&hasSk)continue; if(a.t==='sk'&&hasAll)continue; if(a.t==='all')hasAll=true; if(a.t==='sk')hasSk=true; pk.push(a); } pool=pk; }
     for(const a of pool.slice(0,5)){ const o=rollAff(a,rar,ilvl,q,rng); if(o.t==='cls'&&spk&&SPFX[spk].fcls)o.cls=SPFX[spk].fcls; it.aff.push(o); qs.push(rollAff.lq); }
   } else {
     const n=rar<0?0:rar===1?1:rar+1, used=new Set(); let g=0;
@@ -772,7 +774,7 @@ function loadChar(id){
     if(p.clear===undefined)p.clear=Math.max(0,+(lsGet('dkdef2.clear')||0));
     p.eq=p.eq||{}; if(p.eq.shield===undefined)p.eq.shield=null;
     p.inv=p.inv||Array(INVN).fill(null); while(p.inv.length<INVN)p.inv.push(null);
-    const fx=it=>{ if(!it)return; if(!Array.isArray(it.aff))it.aff=[]; it.aff=it.aff.filter(a=>a&&AFXBY[a.t]&&!(it.slot==='armor'&&a.t==='ms')&&!(a.cls&&!CLASSES[a.cls])&&!(a.t==='sk'&&!(SKBY[a.key]&&SK[a.cls]&&SK[a.cls].includes(SKBY[a.key])))); }; p.inv.forEach(fx); p.eq=p.eq||{}; for(const k in p.eq)fx(p.eq[k]);
+    const fx=it=>{ if(!it)return; if(!Array.isArray(it.aff))it.aff=[]; if(it.rar===3&&it.aff.some(a=>a&&a.t==='all'))it.aff=it.aff.filter(a=>!(a&&a.t==='sk')); it.aff=it.aff.filter(a=>a&&AFXBY[a.t]&&!(it.slot==='armor'&&a.t==='ms')&&!(a.cls&&!CLASSES[a.cls])&&!(a.t==='sk'&&!(SKBY[a.key]&&SK[a.cls]&&SK[a.cls].includes(SKBY[a.key])))); }; p.inv.forEach(fx); p.eq=p.eq||{}; for(const k in p.eq)fx(p.eq[k]);
     p.name=String(p.name||'').slice(0,8); p.gold=Number.isFinite(p.gold)?p.gold:500; p.potBuy=p.potBuy|0; p.rev=p.rev|0; return p;
   }catch(e){ return null; }
 }
@@ -1303,7 +1305,9 @@ function takeDmg(raw,fire){
   if(me.dead||G.phase==='win'||G.phase==='clear'||me.god>0)return;
   if(!fire&&me.D.blk>0&&Math.random()*100<me.D.blk){ if(me.cls==='pal'&&skLv(me,'bulwark'))me.mp=Math.min(me.D.maxMp,me.mp+3);  addNum(me.x,me.y-30,'🛡️ 막기!','#9fd0ff',true); spark(me.x,me.y,'#9fd0ff',12); efx.push({k:'ring',x:me.x,y:me.y,r0:8,r1:34,t:0,life:.3,col:'#9fd0ff',w:5}); sfx('block'); return; }
   const def=me.D.def*guardMul(), red=Math.min(.8,def/(def+50+G.wave*8));
-  let d=raw*lvPen().tk*(1-red)*(1-(me.D.dr||0))*(me.buffs.barrier&&me.buffs.barrier.t>0?1-me.buffs.barrier.v:1); if(me.D.sp&&me.D.sp.martyr&&me.hp<me.D.maxHp*.35) d*=.6; me.hp-=d; me.hurt=.15; sfx('hurt'); G.shake=Math.max(G.shake,.2);
+  let d=raw*lvPen().tk*(1-red)*(1-(me.D.dr||0))*(me.buffs.barrier&&me.buffs.barrier.t>0?1-me.buffs.barrier.v:1); if(me.D.sp&&me.D.sp.martyr&&me.hp<me.D.maxHp*.35) d*=.6;
+  { const ms=skLv(me,'mshield'); if(ms&&me.mp>0&&d>0){ const sh=Math.min(.65,.2+.02*ms), cost=Math.max(.5,1.6-.04*ms), ab=Math.min(d*sh,me.mp/cost); me.mp-=ab*cost; d-=ab; if(ab>=1){ addNum(me.x+10,me.y-38,Math.round(ab),'#6fb0ff',false); efx.push({k:'ring',x:me.x,y:me.y,r0:10,r1:30,t:0,life:.25,col:'#7fb4ff',w:4}); } } }
+  me.hp-=d; me.hurt=.15; sfx('hurt'); G.shake=Math.max(G.shake,.2);
   addNum(me.x,me.y-24,Math.round(d),'#ff5a4a',false);
   if(me.hp<=0){ goDown(); }
 }
@@ -1801,7 +1805,24 @@ function dragDrop(a,b){
   if(a.t==='eq'&&b.t==='inv'){ if(me.inv[b.i]){ renderBag(); return; } unequip(a.k); return; }
   renderBag();
 }
-function sheetHead(){ $('#sheetT').innerHTML=`${CLSE[me.cls]} ${CLASSES[me.cls].n} <span style="color:var(--gold)">Lv ${me.lvl}</span> <span style="color:#ffd84a;margin-left:6px">💰 ${(me.gold|0).toLocaleString('ko-KR')}원</span>`; }
+function sheetHead(){ $('#sheetT').innerHTML=`${CLSE[me.cls]} ${CLASSES[me.cls].n} <span style="color:var(--gold)">Lv ${me.lvl}</span> <span id="goldSend" style="color:#ffd84a;margin-left:6px;cursor:pointer;border-bottom:1px dashed #ffd84a88">💰 ${(me.gold|0).toLocaleString('ko-KR')}원</span>`; }
+function sendGold(){
+  if(G.mode!=='solo'&&!G.titleSheet&&G.inGame){ sheetToast('온라인 중에는 골드를 보낼 수 없어요','#ff8a7a'); return; }
+  const others_=charIds().filter(x=>x!==me.id).map(loadChar).filter(Boolean);
+  if(!others_.length){ sheetToast('보낼 다른 캐릭터가 없어요','#ff8a7a'); return; }
+  const have=me.gold|0; let to=others_[0].id;
+  const rows=others_.map(c=>`<button class="btn gsT" data-to="${c.id}" style="text-align:left">${CLSE[c.cls]} ${esc(dispName(c))} · Lv ${c.lvl} <span style="color:var(--mute);font-weight:400">(${(c.gold|0).toLocaleString()}원)</span></button>`).join('');
+  modal(`<h3>💰 골드 보내기</h3><p class="meta" style="margin:0 0 8px">보유 ${have.toLocaleString()}원 · 받을 캐릭터를 고르세요</p><div class="col" style="margin-bottom:8px">${rows}</div><input id="gsAmt" type="number" inputmode="numeric" min="1" max="${have}" placeholder="보낼 금액" style="width:100%;box-sizing:border-box;padding:11px;font-size:16px;border-radius:8px;border:1px solid var(--line2);background:#0f0b09;color:#fff"><div class="row2" style="margin:8px 0"><button class="btn" data-q="1000">+1,000</button><button class="btn" data-q="10000">+10,000</button><button class="btn" data-q="all">전부</button></div><p class="meta" id="gsMsg" style="min-height:18px;margin:0 0 6px;color:#ff8a7a"></p><div class="row2"><button class="btn" id="gsNo">취소</button><button class="btn primary" id="gsGo">보내기</button></div>`,m=>{
+    const mark=()=>m.querySelectorAll('.gsT').forEach(b=>{ b.style.borderColor=b.dataset.to===to?'var(--gold)':''; b.style.color=b.dataset.to===to?'var(--gold)':''; }); mark();
+    m.querySelectorAll('.gsT').forEach(b=>b.onclick=()=>{ to=b.dataset.to; mark(); });
+    const inp=m.querySelector('#gsAmt');
+    m.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{ const q=b.dataset.q; inp.value=q==='all'?(me.gold|0):Math.min(me.gold|0,(+inp.value||0)+(+q)); });
+    m.querySelector('#gsNo').onclick=closeModal;
+    m.querySelector('#gsGo').onclick=()=>{ const v=Math.floor(+inp.value||0); if(v<=0){ m.querySelector('#gsMsg').textContent='금액을 입력해 주세요'; return; } if(v>(me.gold|0)){ m.querySelector('#gsMsg').textContent='보유 골드가 부족해요'; return; }
+      const t=loadChar(to); if(!t){ m.querySelector('#gsMsg').textContent='캐릭터를 찾을 수 없어요'; return; }
+      t.gold=(t.gold|0)+v; lsSet(charKey(t.id),JSON.stringify(packChar(t))); me.gold-=v; saveChar(); uiDirty=true; sfx('coin'); closeModal(); rerender(); toast(`${dispName(t)}에게 ${v.toLocaleString()}원을 보냈어요`,'#ffd84a'); }; });
+}
+document.addEventListener('click',e=>{ if(e.target.closest&&e.target.closest('#goldSend'))sendGold(); });
 function renderBag(){
   markTabs(); sheetHead();
   const eqOrder=['weapon','armor','helm','amulet','ring1','ring2'].concat(me.cls==='pal'?['shield']:[]);
@@ -1835,7 +1856,7 @@ function sendPick(){
     m.querySelectorAll('[data-to]').forEach(b=>b.onclick=()=>{ const t=loadChar(b.dataset.to); if(!t)return; const i=t.inv.indexOf(null); if(i<0)return; t.inv[i]=it; lsSet(charKey(t.id),JSON.stringify(packChar(t))); if(selItem.inv!==undefined)me.inv[selItem.inv]=null; else { me.eq[selItem.eq]=null; me.D=derive(me); me.hp=Math.min(me.hp,me.D.maxHp); me.mp=Math.min(me.mp,me.D.maxMp); } selItem=null; saveChar(); closeModal(); sfx('pick'); shopMsg=''; renderBag(); toast(`${dispName(t)}에게 보냈어요`,'#9fd18b'); });
   });
 }
-function sellBtn(btn){ const it=selItem&&selItem.it; if(!it||selItem.inv===undefined)return; if(it.lock){ sheetToast('🔒 잠긴 아이템이에요. 잠금을 먼저 풀어 주세요','#ff8a7a'); return; } if(it.rar>=2&&!btn.dataset.confirm){ btn.dataset.confirm=1; btn.textContent=`${RARN[it.rar]} 아이템이에요. 한 번 더 누르면 판매`; return; } sellItem(selItem.inv); }
+function sellBtn(btn){ const it=selItem&&selItem.it; if(!it||selItem.inv===undefined)return; if(it.lock){ sheetToast('🔒 잠긴 아이템이에요. 잠금을 먼저 풀어 주세요','#ff8a7a'); return; } sellItem(selItem.inv); }
 function sellItem(i){ const it=me.inv[i]; if(!it)return; sfx('coin'); const v=sellInfo(it).total; me.gold+=v; me.inv[i]=null; selItem=null; shopMsg=`${it.name} 판매 +${v}원`; saveChar(); uiDirty=true; rerender(); }
 const pq=sel=>$('#itemPop').querySelector(sel);
 function showPop(html,pre){ const p=$('#itemPop'); if(!selItem||!html){ p.hidden=true; p.innerHTML=''; p.classList.remove('two'); return; }
@@ -1869,7 +1890,7 @@ function detailHtml(){
     const diff=(lbl,a,b)=>{const d=a-b; return d?` <span class="${d>0?'up':'dn'}">${lbl} ${d>0?'+':''}${d}</span>`:'';};
     s+=`<div class="cmp">${cur?'바꾸면':'빈 칸에 장착하면'} ·${diff('생명력',after.maxHp,now.maxHp)}${diff('방어력',after.def,now.def)}${diff('최대 공격력',after.wmx+after.dmg,now.wmx+now.dmg)}${diff('막기%',after.blk,now.blk)}</div>`;
     s+=`<div class="acts"><button class="btn primary" id="aEquip"${!canWear(it)?' style="opacity:.5"':''}>장착</button><button class="btn" id="aLock">${it.lock?'🔓 잠금 해제':'🔒 잠금'}</button>${canEnh(it)?`<button class="btn" id="aEnh">⚒ 강화${it.enh>0?' +'+it.enh:''}</button>`:''}<button class="btn" id="aSell"${it.lock?' style="opacity:.45"':''}>판매 ${sellInfo(it).total}원</button>${(G.titleSheet&&charIds().length>1)?'<button class="btn" id="aSend">📤 보내기</button>':''}</div>`;
-  }else s+=`<div class="acts"><button class="btn" id="aUnequip">해제</button>${canEnh(it)?`<button class="btn" id="aEnh">⚒ 강화${it.enh>0?' +'+it.enh:''}</button>`:''}${(G.titleSheet&&charIds().length>1)?'<button class="btn" id="aSend">📤 보내기</button>':''}</div>`;
+  }else s+=`<div class="acts"><button class="btn" id="aUnequip">해제</button><button class="btn" id="aLock">${it.lock?'🔓 잠금 해제':'🔒 잠금'}</button>${canEnh(it)?`<button class="btn" id="aEnh">⚒ 강화${it.enh>0?' +'+it.enh:''}</button>`:''}${(G.titleSheet&&charIds().length>1)?'<button class="btn" id="aSend">📤 보내기</button>':''}</div>`;
   return s;
 }
 function askRingSlot(i){ const it=me.inv[i]; const cp0=calcCP(me); modal(`<h3>💍 어느 반지를 바꿀까요?</h3><div class="col">${['ring1','ring2'].map((k,n)=>{ const cur=me.eq[k], cp=calcCP({...me,eq:{...me.eq,[k]:it}}), d=cp-cp0; return `<button class="btn" data-rk="${k}" style="text-align:left">반지 ${n+1}: <b style="color:${RARC[cur.rar]}">${esc(cur.name)}</b><br><small style="color:${d>0?'#9fd18b':d<0?'#ff8a7a':'#bbb'}">바꾸면 전투력 ${d>0?'+':''}${d}</small></button>`; }).join('')}<button class="btn" id="rkX">취소</button></div>`,m=>{ m.querySelectorAll('[data-rk]').forEach(b=>b.onclick=()=>{ closeModal(); equip(i,b.dataset.rk); }); m.querySelector('#rkX').onclick=closeModal; }); }
@@ -1951,10 +1972,7 @@ function bulkSell(){
     m.querySelectorAll('[data-r]').forEach(c=>c.onchange=()=>{ const r=+c.dataset.r; if(c.checked)sel.add(r); else sel.delete(r); draw(m); });
     m.querySelector('#bsNo').onclick=closeModal;
     if(!cnt(0)) sel.delete(0); if(!cnt(1)) sel.delete(1); draw(m);
-    m.querySelector('#bsGo').onclick=()=>{ const f=info(); if(!f.n)return; const names=[...sel].sort().map(r=>RARN[r]).join('·');
-      modal(`<h3>⚠️ 정말 판매할까요?</h3><p style="margin:0 0 12px;font-size:14px"><b>${names}</b> 아이템 <b>${f.n}개</b>를<br><b style="color:#ffd84a">${f.v}원</b>에 판매합니다.<br><span class="meta">판매한 아이템은 되돌릴 수 없어요.</span></p><div class="row2"><button class="btn" id="cNo">취소</button><button class="btn primary" id="cYes">판매 확인</button></div>`,m2=>{
-        m2.querySelector('#cNo').onclick=closeModal;
-        m2.querySelector('#cYes').onclick=()=>{ let g=0,n=0; me.inv.forEach((it,i)=>{ if(it&&!it.lock&&!(it.enh>0)&&sel.has(it.rar)){g+=sellInfo(it).total;n++;me.inv[i]=null;} }); me.gold+=g; selItem=null; shopMsg=`${n}개 판매 +${g}원`; sfx('coin'); saveChar(); uiDirty=true; closeModal(); rerender(); }; }); };
+    m.querySelector('#bsGo').onclick=()=>{ const f=info(); if(!f.n)return; let g=0,n=0; me.inv.forEach((it,i)=>{ if(it&&!it.lock&&!(it.enh>0)&&sel.has(it.rar)){g+=sellInfo(it).total;n++;me.inv[i]=null;} }); me.gold+=g; selItem=null; shopMsg=`${n}개 판매 +${g}원`; sfx('coin'); saveChar(); uiDirty=true; closeModal(); rerender(); sheetToast&&sheetToast(`${n}개 판매 +${g.toLocaleString()}원`); };
   });
 }
 function enhModal(){
