@@ -46,6 +46,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
 .ccard .dot{width:12px;height:12px;border-radius:50%}
 .ccard .cl{font-size:12px;color:var(--gold);font-variant-numeric:tabular-nums}
 .ccard .cd{font-size:12.5px;color:var(--mute);line-height:1.5}
+.rktabs{display:flex;gap:8px;margin:0 0 10px}.rktabs button{flex:1;min-height:42px;border-radius:8px;border:1px solid var(--line);background:#14100d;color:#cbbfae;font:700 14px 'Noto Sans KR',sans-serif}.rktabs button[aria-pressed=true]{background:#3a2a14;border-color:var(--gold);color:#ffe0a0}
+.rklist{max-height:52vh;overflow-y:auto;margin:0 0 10px;-webkit-overflow-scrolling:touch}.rkrow{display:flex;align-items:center;gap:8px;padding:7px 8px;border-bottom:1px solid #2a211a;font-size:14px}.rkrow.own{background:rgba(255,200,80,.13);border-radius:6px}.rkrow.own b{color:#ffd870}.rkn{width:26px;text-align:center;font-weight:800;color:#a89a86}.rkrow.top .rkn{font-size:18px}.rke{font-size:20px}.rkm{flex:1;display:flex;flex-direction:column;line-height:1.2;min-width:0}.rkm small{color:#9a8d7a;font-size:11.5px}.rkv{font-weight:800;color:#e8d6b4;white-space:nowrap}
 .modes{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;width:100%;max-width:640px}
 .btn{background:var(--panel2);border:1px solid var(--line2);border-radius:8px;padding:12px 18px;font-size:15px;font-weight:700;min-height:46px}
 .btn.primary{background:var(--blood);border-color:#c5463d;color:#fff4ea}
@@ -321,9 +323,9 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
-    <div class="ver" id="verT">v0.1.0.0029</div>
+    <div class="ver" id="verT">v0.1.0.0030</div>
     <div class="clist" id="charList"></div>
-    <button class="btn" id="bNew">➕ 새 캐릭터</button>
+    <div class="modes" style="margin-top:2px"><button class="btn" id="bNew">➕ 새 캐릭터</button><button class="btn" id="bRank">🏆 랭킹</button></div>
     <div class="pp" id="playPanel" hidden>
       <div class="stagebar" id="stageBar"></div>
       <p class="sub" id="stageInfo"></p>
@@ -401,7 +403,7 @@ const STAGES=[
  {id:'1-4',bn:'뼈의 군주 카르곤',rl:22,n:'핏빛 늪지',d:'독안개 늪. 늪에 들어가면 느려지고 좀비에게 맞으면 중독돼요. 뼈의 군주 카르곤이 군대를 이끌고 옵니다.',tag:'🐸 늪에 들어가면 이동 둔화 · 좀비의 독 · 치유 사제 다수',waves:[14,16,19,22,25,28,31,35],ilo:17,icap:26,boss:7,spdM:1.3,hpM:3.2,dmgM:2.1,xpM:3,fly:.04,zp:1,hz:'swamp',
   mix:w=>({imp:14,zom:48,sk:6+w*2,ar:0,bo:w>=3?6+w:0,he:w>=2?8+w*2:0}),
   th:{g:'#1c2820',gd:'rgba(30,52,38,.55)',gl:'rgba(5,10,7,.55)',tuft:'rgba(90,140,70,.4)',road:['#27301f','#303b26'],tint:'rgba(70,170,90,.06)',amb:'spore',dec:[['reed',.34],['tree',.24],['shroom',.2],['bones',.1],['rock',.12]]}},
- {id:'1-5',bn:'심연의 마녀 이즈라',rl:30,n:'심연의 문',d:'마지막 관문. 차원의 균열에서 정예가 쏟아져 나와요. 심연의 마녀 이즈라가 문을 열려 합니다.',tag:'🌀 주기적으로 균열이 열려 정예 출현 · 정예가 더 자주 등장',waves:[16,19,22,26,30,34,38,44],ilo:23,icap:32,boss:8,spdM:1.38,hpM:4.5,dmgM:2.7,xpM:3.8,fly:.22,gim:'rift',el:4,
+ {id:'1-5',bn:'심연의 마녀 이즈라',rl:30,n:'심연의 문',d:'마지막 관문. 차원의 균열에서 정예가 쏟아져 나와요. 심연의 마녀 이즈라가 문을 열려 합니다.',tag:'🌀 주기적으로 균열이 열려 정예 출현 · 정예가 더 자주 등장 · ☠️ 보스 생명 붕괴',waves:[16,19,22,26,30,34,38,44],ilo:23,icap:32,halve:5,boss:8,spdM:1.38,hpM:4.5,dmgM:2.7,xpM:3.8,fly:.22,gim:'rift',el:4,
   mix:w=>({imp:26,zom:8,sk:12+w*2,ar:14+w*2,bo:22+w*2,he:5+w}),
   th:{g:'#1b1522',gd:'rgba(52,34,70,.55)',gl:'rgba(6,3,10,.6)',tuft:'rgba(150,70,200,.3)',road:['#271d31','#30253d'],tint:'rgba(150,60,210,.07)',amb:'void',crack:1,dec:[['crystal',.3],['crack',.22],['rock',.14],['bones',.14],['pillar',.12],['grave',.08]]}},
  {id:'2-1',bn:'빙결의 여왕 프로스티아',bs:'boss_2_1',rl:38,n:'서리 고원',d:'눈보라 몰아치는 고원. 얼어붙은 호수가 발을 묶고 우박이 쏟아져요. 빙결의 여왕 프로스티아가 얼음 위에서 기다려요.',tag:'🧊 우박 낙하 · 얼음 호수(이동 둔화) · 해골과 박쥐 떼',waves:[18,21,24,28,32,36,40,44],ilo:29,icap:38,boss:5,spdM:1.42,hpM:6.5,dmgM:3.4,xpM:4.8,fly:.18,gim:'rain',hz:'ice',hzn:6,el:3,
@@ -412,7 +414,7 @@ const STAGES=[
   rn:{sty:2,n:7,r:50,iv:14,txt:'☄️ 불덩이가 떨어져요! 붉은 원에서 벗어나세요'},
   mix:w=>({imp:30,zom:6,sk:10+w*2,ar:8+w,bo:26+w*3,he:5}),
   th:{g:'#2a1c18',gd:'rgba(70,30,20,.5)',gl:'rgba(10,4,3,.6)',tuft:'rgba(160,70,30,.3)',road:['#3a2620','#46302a'],tint:'rgba(255,90,30,.1)',amb:'ember',pc:'255,150,70',dec:[['lrock',.42],['rock',.2],['bones',.16],['pillar',.1],['torch',.12]]}},
- {id:'2-3',bn:'썩은 고목 트렌가',bs:'boss_2_3',rl:54,n:'독안개 숲',d:'독포자가 가득한 죽은 숲. 나무 사이에서 좀비가 기어 나오고 독 늪이 곳곳에 있어요. 썩은 고목 트렌가가 숲을 지킵니다.',tag:'🍄 숲에서 좀비가 기어 나옴 · 독 늪 · 좀비의 독과 치유 사제',waves:[20,23,27,31,35,39,44,48],ilo:40,icap:50,boss:4,spdM:1.5,hpM:12.5,dmgM:5.4,xpM:7.5,fly:.06,zp:1,gim:'rise',hz:'swamp',hzn:8,el:3,
+ {id:'2-3',bn:'썩은 고목 트렌가',bs:'boss_2_3',rl:54,n:'독안개 숲',d:'독포자가 가득한 죽은 숲. 나무 사이에서 좀비가 기어 나오고 독 늪이 곳곳에 있어요. 썩은 고목 트렌가가 숲을 지킵니다.',tag:'🍄 숲에서 좀비가 기어 나옴 · 독 늪 · 좀비의 독과 치유 사제 · ☠️ 보스 생명 붕괴',waves:[20,23,27,31,35,39,44,48],ilo:40,icap:50,halve:4.6,boss:4,spdM:1.5,hpM:12.5,dmgM:5.4,xpM:7.5,fly:.06,zp:1,gim:'rise',hz:'swamp',hzn:8,el:3,
   rs:{src:['shroom','tree','reed'],mob:1,n:3,iv:20,txt:'🍄 숲에서 좀비가 기어 나와요!'},
   mix:w=>({imp:10,zom:46,sk:6+w*2,ar:6+w,bo:w>=3?6+w:0,he:8+w*2}),
   th:{g:'#17261d',gd:'rgba(40,90,50,.5)',gl:'rgba(3,10,5,.6)',tuft:'rgba(120,200,90,.45)',road:['#202d1d','#2a3a26'],tint:'rgba(90,220,110,.09)',amb:'spore',pc:'130,240,150',dec:[['tree',.34],['shroom',.28],['reed',.16],['bones',.1],['rock',.12]]}},
@@ -421,7 +423,7 @@ const STAGES=[
   rn:{sty:0,n:8,r:42,iv:16},
   mix:w=>({imp:6,zom:8,sk:34+w*4,ar:26+w*3,bo:12+w,he:5+w}),
   th:{g:'#40331f',gd:'rgba(150,110,60,.28)',gl:'rgba(20,12,4,.5)',tuft:'rgba(200,170,100,.3)',road:['#554427','#62502f'],tint:'rgba(255,200,90,.09)',amb:'dust',pc:'255,215,130',dec:[['cactus',.26],['bones',.26],['pillar',.2],['rock',.18],['grave',.1]]}},
- {id:'2-5',bn:'혼돈의 군주 벨제르',bs:'boss_2_5',rl:70,n:'혼돈의 균열',d:'현실이 갈라진 마지막 전장. 균열에서 정예가 끊임없이 쏟아지고 불덩이가 떨어져요. 혼돈의 군주 벨제르가 기다립니다.',tag:'🌀 균열에서 정예 출현 · 불덩이 낙하 · 모든 몬스터 총출동',waves:[22,26,30,35,40,45,50,56],ilo:52,icap:62,boss:8,spdM:1.58,hpM:23,dmgM:8.5,xpM:11,fly:.2,gim:['rift','rain'],el:4,
+ {id:'2-5',bn:'혼돈의 군주 벨제르',bs:'boss_2_5',rl:70,n:'혼돈의 균열',d:'현실이 갈라진 마지막 전장. 균열에서 정예가 끊임없이 쏟아지고 불덩이가 떨어져요. 혼돈의 군주 벨제르가 기다립니다.',tag:'🌀 균열에서 정예 출현 · 불덩이 낙하 · 모든 몬스터 총출동 · ☠️ 보스 생명 붕괴',waves:[22,26,30,35,40,45,50,56],ilo:52,icap:62,halve:4.2,boss:8,spdM:1.58,hpM:23,dmgM:8.5,xpM:11,fly:.2,gim:['rift','rain'],el:4,
   rn:{sty:2,n:8,r:50,iv:15,txt:'☄️ 혼돈의 불덩이가 떨어져요!'},
   mix:w=>({imp:22,zom:12,sk:14+w*2,ar:16+w*2,bo:22+w*2,he:6+w}),
   th:{g:'#1a1224',gd:'rgba(80,30,110,.5)',gl:'rgba(6,2,10,.65)',tuft:'rgba(200,80,240,.3)',road:['#2a1c36','#352445'],tint:'rgba(200,60,255,.1)',amb:'void',pc:'230,130,255',crack:1,dec:[['crystal',.3],['crack',.28],['lrock',.12],['pillar',.12],['bones',.1],['rock',.08]]}}];
@@ -871,7 +873,7 @@ function snapMobs(){
 function bossTel(){
   const b=G.mobs.find(m=>m.boss&&!m.dead);
   if(!b||!b.tel) return null;
-  const t=b.tel; return [t.kind==='stack'?3:t.kind==='counter'?4:t.k==='slam'?1:2,Math.round(t.x),Math.round(t.y),Math.round(t.tx||0),Math.round(t.ty||0),t.r||0,Math.round(t.t/t.dur*100)];
+  const t=b.tel; return [t.kind==='stack'?3:t.kind==='counter'?4:t.kind==='halve'?5:t.k==='slam'?1:2,Math.round(t.x),Math.round(t.y),Math.round(t.tx||0),Math.round(t.ty||0),t.r||0,Math.round(t.t/t.dur*100)];
 }
 function pushEv(a){ G.ev.push([++G.evSeq,...a]); if(G.ev.length>24)G.ev.shift(); }
 
@@ -930,6 +932,7 @@ function guestEvent(e){
   else if(t==='x'){ applyStatus(e[3],e[4]); }
   else if(t==='bx'){ bombFx(e[2],e[3],e[4]); }
   else if(t==='ann'){ announce('🔥 총공세! 바닥에 불이 번집니다','#ff9a6a'); }
+  else if(t==='hv'){ halveWarn(); }
   else if(t==='cn'){ announce('⚔️ 반격 태세! 공격을 멈추세요!','#ffb347'); sfx('block'); }
   else if(t==='ag'){ announce('👁️ 우두머리가 시선을 돌렸어요! 도발로 되찾으세요','#ff9a7a'); }
   else if(t==='f'){ spawnFire(e[2],e[3],e[4],e[5],e[6],true); }
@@ -1111,6 +1114,7 @@ function bossTarget(m,pls){
   const thr=m.thr||(m.thr={1:0,2:0}); let best=null,bv=-1,bd=1e9;
   for(const p of pls){ let v=thr[p.i]||0; if(m.tg===p.i)v*=1.2; const d=hyp(p.x-m.x,p.y-m.y); if(v>bv+.001||(Math.abs(v-bv)<=.001&&d<bd)){bv=v;best=p;bd=d;} }
   return best; }
+function halveWarn(){ announce('☠️ 생명 붕괴! 보라색 영역 밖으로 벗어나세요!','#e070ff'); banner('☠️ 생명 붕괴','영역 안에 있으면 체력이 절반으로!'); sfx('boss'); G.shake=Math.max(G.shake,.6); }
 function bossAI(m,dt,pls,sf){
   if(m.taunt)m.taunt.t-=dt; if(m.lock)m.lock.t-=dt;
   const best=bossTarget(m,pls), bd=best?hyp(best.x-m.x,best.y-m.y):1e9; m.tg=best?best.i:0;
@@ -1128,6 +1132,7 @@ function bossAI(m,dt,pls,sf){
       if(t.kind==='barrage'){ for(const q of t.pts){ for(const p of pls){ if(hyp(p.x-q.x,p.y-q.y)<t.r) mobHitPlayer(p.i,m.dmg*1.3,'poison',4); } pushEv(['s',Math.round(q.x),Math.round(q.y),t.r]); slamFx(q.x,q.y,t.r,'#6fbf3a'); } }
       else if(t.kind==='nova'){ for(const p of pls){ if(hyp(p.x-t.x,p.y-t.y)<t.r) mobHitPlayer(p.i,m.dmg*1.2,'slow',3); } pushEv(['s',Math.round(t.x),Math.round(t.y),t.r]); slamFx(t.x,t.y,t.r,'#8a5ad0'); }
       else if(t.kind==='stack'){ const ins=pls.filter(p=>hyp(p.x-t.x,p.y-t.y)<t.r); const tot=pls.length>1?m.dmg*3.6:m.dmg*1.9; if(ins.length){ for(const p of ins) mobHitPlayer(p.i,tot/ins.length); if(pls.length>1&&ins.length>1&&G.mode!=='guest')announce('🤝 함께 맞아서 피해를 나눴어요','#9fd0ff'); } pushEv(['s',Math.round(t.x),Math.round(t.y),t.r]); slamFx(t.x,t.y,t.r,'#5a8aff'); }
+      else if(t.kind==='halve'){ for(const p of pls){ if(hyp(p.x-t.x,p.y-t.y)<t.r){ if(p.i===1)applyStatus('halve',0); else pushEv(['x',2,'halve',0]); } } pushEv(['s',Math.round(t.x),Math.round(t.y),t.r]); slamFx(t.x,t.y,t.r,'#c040e0'); G.shake=1; }
       else if(t.kind==='counter'){ m.counter=2.6; pushEv(['cn',1]); announce('⚔️ 반격 태세! 공격을 멈추세요!','#ffb347'); sfx('block'); }
       else if(t.k==='slam'){ for(const p of pls){ if(hyp(p.x-t.x,p.y-t.y)<t.r) mobHitPlayer(p.i,m.dmg*1.6,'stun',1.2); }
         pushEv(['s',Math.round(t.x),Math.round(t.y),t.r]); slamFx(t.x,t.y,t.r); }
@@ -1139,6 +1144,9 @@ function bossAI(m,dt,pls,sf){
   const tx=best.x,ty=best.y,reach=m.r+24;
   const dx=tx-m.x,dy=ty-m.y,d=hyp(dx,dy)||1; m.fa=Math.atan2(dy,dx);
   m.bt-=dt;
+  const hvC=G.stg&&G.stg.halve; if(hvC){ m.hvT=(m.hvT==null?rand(9,13):m.hvT)-dt; }
+  if(hvC&&m.hvT<=0&&m.bt<=0){ m.hvT=m.enr?rand(17,23):rand(24,32); const du=m.enr?.85:1;
+    m.tel={k:'slam',kind:'halve',x:m.x,y:m.y,r:285,t:0,dur:hvC*du}; pushEv(['hv',Math.round(m.tel.dur*10)]); halveWarn(); return; }
   if(m.bt<=0&&bd<520){
     const rr=Math.random(), du=m.enr?.8:1;
     if(rr<.14) m.tel={k:'slam',kind:'counter',x:m.x,y:m.y,r:Math.round(m.r*1.6),t:0,dur:.8};
@@ -1245,6 +1253,7 @@ function guardMul(){let g=0; if(me.aura==='guard')g=Math.max(g,(30+6*skLv(me,'gu
 function applyStatus(kind,dur){ if(me.dead||me.god>0)return;
   if(kind==='stun'){ if(me.stunImm>0)return; me.stun=dur; me.stunImm=dur+2.5; addNum(me.x,me.y-40,'💫 기절!','#ffd84a',true); }
   else if(kind==='slow'){ me.slowP=Math.max(me.slowP||0,dur); addNum(me.x,me.y-40,'🐌 둔화','#8fdcff',false); }
+  else if(kind==='halve'){ const loss=Math.floor(me.hp/2); if(loss>0){ me.hp=Math.max(1,me.hp-loss); me.hurt=.3; addNum(me.x,me.y-44,'☠️ -50%','#e070ff',true); spark(me.x,me.y,'#c040e0',24); sfx('hurt'); } }
   else if(kind==='poison'){ me.poison=Math.max(me.poison||0,dur); addNum(me.x,me.y-40,'☠️ 중독','#7ad04a',false); } }
 function takeDmg(raw,fire){
   if(me.dead||G.phase==='win'||G.phase==='clear'||me.god>0)return;
@@ -1704,10 +1713,11 @@ $('#bBag').onclick=()=>openSheet('bag'); $('#bStat').onclick=()=>openSheet('stat
 const RBG=['linear-gradient(160deg,#25201a,#0f0b09)','radial-gradient(circle at 35% 30%,#33407a,#10142a 75%)','radial-gradient(circle at 35% 30%,#5e4f12,#1c1606 75%)','radial-gradient(circle at 35% 30%,#7a4414,#24120a 75%)'];
 const RBD=['#b4aea0','#4a7bff','#ffe24d','#ff8a2a'];
 function canWear(it){ return !(it.slot==='shield'&&me.cls!=='pal')&&me.lvl>=reqLv(it)&&!statLack(it).length; }
+const ENHBD=n=>n>=10?'#ffe27a':n>=9?'#ff7ad9':n>=7?'#b57aff':n>=5?'#5ab0ff':n>=3?'#6fd08a':'#c8c8d0';
 function cellHtml(it,cls,extra){
   if(!it) return `<button class="${cls}" ${extra||''}></button>`;
   const lock=!canWear(it);
-  return `<button class="${cls}${selItem&&selItem.it===it?' sel':''}${lock?' lock':''}" ${extra||''} style="border:2px solid ${lock?'#a33a30':RBD[it.rar]};background:${RBG[it.rar]};${it.rar===3?'box-shadow:0 0 8px rgba(255,150,50,.5) inset;':it.rar===2?'box-shadow:0 0 6px rgba(255,226,77,.3) inset;':''}" aria-label="${esc(it.name)}"><img src="${itemIcon(it).url}" alt="" style="width:86%;height:86%;pointer-events:none;${lock?'filter:grayscale(.6) brightness(.7)':''}">${lock?`<i class="rq">${it.slot==='shield'&&me.cls!=='pal'?'🚫':me.lvl<reqLv(it)?'Lv'+reqLv(it):STN[statLack(it)[0][0]]+statLack(it)[0][1]}</i>`:''}${it.lock?'<i class="lk">🔒</i>':''}${it.enh>0?`<i class="en">+${it.enh}</i>`:''}${it.enh>=5?`<i class="gl ${it.enh>=10?'t10':it.enh>=7?'t7':'t5'}"></i>`:''}</button>`;
+  return `<button class="${cls}${selItem&&selItem.it===it?' sel':''}${lock?' lock':''}" ${extra||''} style="border:2px solid ${lock?'#a33a30':it.enh>0?ENHBD(it.enh):RBD[it.rar]};background:${RBG[it.rar]};${it.enh>=3?`box-shadow:0 0 ${it.enh>=10?9:it.enh>=7?7:5}px ${ENHBD(it.enh)}${it.enh>=5?'':' inset'};`:''}${it.enh>=3?'':it.rar===3?'box-shadow:0 0 8px rgba(255,150,50,.5) inset;':it.rar===2?'box-shadow:0 0 6px rgba(255,226,77,.3) inset;':''}" aria-label="${esc(it.name)}"><img src="${itemIcon(it).url}" alt="" style="width:86%;height:86%;pointer-events:none;${lock?'filter:grayscale(.6) brightness(.7)':''}">${lock?`<i class="rq">${it.slot==='shield'&&me.cls!=='pal'?'🚫':me.lvl<reqLv(it)?'Lv'+reqLv(it):STN[statLack(it)[0][0]]+statLack(it)[0][1]}</i>`:''}${it.lock?'<i class="lk">🔒</i>':''}${it.enh>0?`<i class="en">+${it.enh}</i>`:''}${it.enh>=5?`<i class="gl ${it.enh>=10?'t10':it.enh>=7?'t7':'t5'}"></i>`:''}</button>`;
 }
 let dragSup=0;
 function enableDrag(b){
@@ -1946,6 +1956,48 @@ function renderMenu(){
 
 /* ================= SCREENS / FLOW ================= */
 function show(id){ for(const s of ['#sTitle','#sNew','#sLobby','#sEnd']) $(s).hidden=s!==id; $('#hud').hidden=id!==null; $('#dock').hidden=id!==null; resize(); }
+/* ===== 랭킹 (Supabase REST: dd_rank) ===== */
+const RK_URL=SB_URL+'/rest/v1/dd_rank';
+function rkHead(extra){ const h={apikey:SB_KEY,'Content-Type':'application/json'}; if(!/^sb_/.test(SB_KEY))h.Authorization='Bearer '+SB_KEY; return Object.assign(h,extra||{}); }
+function rkSig(c){ return [c.lvl|0,c.kills|0,c.clear|0,c.name].join('|'); }
+let rkFailT=0;
+async function rkSubmit(list,force){
+  if(!force&&Date.now()<rkFailT)return;
+  try{
+    const rows=[]; for(const c of list){ if(!c||!c.id||!CLASSES[c.cls])continue; const sig=rkSig(c); if(!force&&lsGet('dkdef2.rk.'+c.id)===sig)continue;
+      rows.push({id:String(c.id).slice(0,40),name:dispName(c).slice(0,8),cls:c.cls,lvl:Math.max(1,c.lvl|0),kills:Math.max(0,c.kills|0),clear:Math.max(0,Math.min(STAGES.length,c.clear|0)),updated_at:new Date().toISOString(),_sig:sig}); }
+    if(!rows.length)return;
+    const body=rows.map(({_sig,...r})=>r);
+    const r=await fetch(RK_URL+'?on_conflict=id',{method:'POST',headers:rkHead({Prefer:'resolution=merge-duplicates,return=minimal'}),body:JSON.stringify(body)});
+    if(r.ok) for(const x of rows) lsSet('dkdef2.rk.'+x.id,x._sig); else rkFailT=Date.now()+60000;
+  }catch(e){ rkFailT=Date.now()+60000; }
+}
+function rkSubmitAll(force){ const chars=charIds().map(loadChar).filter(Boolean); if(me&&me.id){ const i=chars.findIndex(c=>c.id===me.id); if(i>=0)chars[i]=me; } return rkSubmit(chars,force); }
+async function rkFetch(mode){
+  const order=mode==='kills'?'kills.desc,lvl.desc':'clear.desc,lvl.desc,kills.desc';
+  const flt=mode==='kills'?'&kills=gt.0':'&clear=gt.0';
+  const r=await fetch(RK_URL+'?select=id,name,cls,lvl,kills,clear&order='+order+flt+'&limit=30',{headers:rkHead()});
+  if(!r.ok) throw new Error('rank '+r.status);
+  return await r.json();
+}
+function openRank(){
+  let mode='kills'; const mine=new Set(charIds());
+  const fmt=n=>(n|0).toLocaleString('ko-KR');
+  modal(`<h3>🏆 랭킹</h3><div class="rktabs"><button id="rkK" aria-pressed="true">⚔️ 처치 수</button><button id="rkS" aria-pressed="false">🗺️ 스테이지</button></div><div class="rklist" id="rkBox"><p class="meta">불러오는 중…</p></div><div class="row2"><button class="btn" id="rkRe">🔄 새로고침</button><button class="btn" id="rkNo">닫기</button></div><p class="meta" style="margin:8px 0 0;font-size:11.5px">내 캐릭터는 금색으로 표시돼요 · 캐릭터 정보는 타이틀/게임 종료 때 올라가요</p>`,m=>{
+    const box=m.querySelector('#rkBox'); let seq=0;
+    const load=async()=>{ const my=++seq; box.innerHTML='<p class="meta">불러오는 중…</p>';
+      await rkSubmitAll(false);
+      try{ const rows=await rkFetch(mode); if(my!==seq)return;
+        if(!rows.length){ box.innerHTML='<p class="meta">아직 등록된 기록이 없어요. 먼저 사냥해 보세요!</p>'; return; }
+        box.innerHTML=rows.map((r,i)=>{ const c=CLASSES[r.cls]?r.cls:'war', own=mine.has(r.id), v=mode==='kills'?fmt(r.kills)+'마리':(r.clear>0?(STAGES[Math.min(STAGES.length,r.clear)-1].id+' 클리어'):'-');
+          return `<div class="rkrow${own?' own':''}${i<3?' top':''}"><span class="rkn">${i<3?['🥇','🥈','🥉'][i]:i+1}</span><span class="rke">${CLSE[c]}</span><span class="rkm"><b>${esc(String(r.name||CLASSES[c].n).slice(0,8))}</b><small>Lv ${r.lvl|0}</small></span><span class="rkv">${esc(v)}</span></div>`; }).join('');
+      }catch(e){ if(my!==seq)return;
+        const loc=charIds().map(loadChar).filter(Boolean).sort((a,b)=>mode==='kills'?(b.kills|0)-(a.kills|0):((b.clear|0)-(a.clear|0)||b.lvl-a.lvl));
+        box.innerHTML=`<p class="meta" style="color:#e0a070">랭킹 서버에 연결하지 못했어요. (준비 중이거나 오프라인)</p>`+loc.map((c,i)=>`<div class="rkrow own"><span class="rkn">${i+1}</span><span class="rke">${CLSE[c.cls]}</span><span class="rkm"><b>${esc(dispName(c))}</b><small>Lv ${c.lvl}</small></span><span class="rkv">${mode==='kills'?fmt(c.kills)+'마리':(c.clear>0?STAGES[Math.min(STAGES.length,c.clear)-1].id+' 클리어':'-')}</span></div>`).join(''); } };
+    const setTab=k=>{ mode=k; m.querySelector('#rkK').setAttribute('aria-pressed',k==='kills'); m.querySelector('#rkS').setAttribute('aria-pressed',k==='stage'); load(); };
+    m.querySelector('#rkK').onclick=()=>setTab('kills'); m.querySelector('#rkS').onclick=()=>setTab('stage'); m.querySelector('#rkRe').onclick=load; m.querySelector('#rkNo').onclick=closeModal; load(); });
+}
+$('#bRank').onclick=openRank;
 function renderTitle(){
   migrateChars();
   const chars=charIds().map(loadChar).filter(Boolean);
@@ -1965,6 +2017,7 @@ function renderTitle(){
   const S=STAGES[selStage]; { const cur=chars.find(c=>c.id===selId), low=cur&&cur.lvl<S.rl; $('#stageInfo').innerHTML=`<b>${esc(S.id)} ${esc(S.n)}</b> · <span style="color:${low?'#e07060':'#9fd18b'};font-weight:700">권장 Lv ${S.rl}${low?` (현재 ${cur.lvl})`:''}</span><br>${esc(S.d)}`; }
   $('#bSolo').disabled=!selId; if(room){ $('#bHost').disabled=!selId; $('#bJoin').disabled=!selId; }
   if(!chars.length) showNew(false);
+  rkSubmit(chars,false);
 }
 function renderClassCards(){ renderTitle(); }
 function modal(html,bind){ const m=$('#modal'); m.className='ipop mdl'; m.innerHTML=`<div class="card">${html}</div>`; m.hidden=false; m.onclick=e=>{ if(e.target===m)closeModal(); }; if(bind)bind(m); }
@@ -2041,12 +2094,12 @@ function startGuestGame(pr){ resetWorld(); G.phase=pr.ph; toast('게임이 시�
 async function quitToTitle(){
   G.inGame=false; G.phase='title'; G.aim=null; saveChar(); ally=null; if(me){ selStage=Math.max(0,Math.min(STAGES.length-1,(me.clear|0)-1)); }
   if(R){try{R.presence({role:null,pl:null,m:null,ev:null,h:null,bt:null}).catch(()=>{}); await R.leave();}catch(e){} R=null;}
-  show('#sTitle'); renderClassCards();
+  show('#sTitle'); renderClassCards(); rkSubmitAll();
 }
-function markClear(){ if((G.stageIdx|0)+1>(me.clear|0)){ me.clear=Math.min(STAGES.length,(G.stageIdx|0)+1); stageClear=me.clear; saveChar(); } }
+function markClear(){ if((G.stageIdx|0)+1>(me.clear|0)){ me.clear=Math.min(STAGES.length,(G.stageIdx|0)+1); stageClear=me.clear; saveChar(); rkSubmitAll(); } }
 function showEnd(msg){
   sfx(G.phase==='win'?'win':'lose');
-  if(G.endShown)return; G.endShown=true; G.inGame=false; saveChar(); closeSheet(); for(const k in held)held[k]=false;
+  if(G.endShown)return; G.endShown=true; G.inGame=false; saveChar(); rkSubmitAll(); closeSheet(); for(const k in held)held[k]=false;
   const win=G.phase==='win';
   if(win&&!msg) markClear();
   $('#endTitle').textContent=msg?'연결 끊김':(win?'스테이지를 정복했습니다':'쓰러졌습니다');
@@ -2394,11 +2447,14 @@ function drawEfx(t){
 function drawBossTel(){
   for(const e of etels){ const p=Math.min(1,e.t/e.dur); circle(e.x,e.y,e.r,'rgba(60,80,200,.14)'); circle(e.x,e.y,e.r*p,'rgba(110,140,255,.26)'); ctx.strokeStyle='rgba(150,175,255,.85)'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(e.x,e.y,e.r,0,6.283); ctx.stroke(); }
   let tl=null;
-  if(G.mode==='guest'){ if(G.bt){const b=G.bt; tl={k:b[0]===3?'slam':b[0]===4?'slam':b[0]===1?'slam':'charge',kind:b[0]===3?'stack':b[0]===4?'counter':'',x:b[1],y:b[2],tx:b[3],ty:b[4],r:b[5],p:b[6]/100};} }
+  if(G.mode==='guest'){ if(G.bt){const b=G.bt; tl={k:b[0]===3||b[0]===4||b[0]===5||b[0]===1?'slam':'charge',kind:b[0]===3?'stack':b[0]===4?'counter':b[0]===5?'halve':'',x:b[1],y:b[2],tx:b[3],ty:b[4],r:b[5],p:b[6]/100};} }
   else { const b=G.mobs.find(m=>m.boss&&!m.dead&&m.tel); if(b){const t=b.tel; tl={...t,p:t.t/t.dur};} for(const sh of shots){ const p=sh.t/sh.dur; circle(sh.x,sh.y,sh.r,sh.rift?'rgba(120,40,180,.25)':'rgba(170,30,30,.2)'); circle(sh.x,sh.y,sh.r*p,sh.rift?'rgba(190,100,255,.4)':'rgba(230,60,40,.35)'); } }
   if(!tl)return;
   if(tl.pts){ for(const q of tl.pts){ circle(q.x,q.y,tl.r,'rgba(70,160,40,.16)'); circle(q.x,q.y,tl.r*tl.p,'rgba(90,200,50,.3)'); ctx.strokeStyle='rgba(130,230,80,.85)'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(q.x,q.y,tl.r,0,6.283); ctx.stroke(); } return; }
-  if(tl.kind==='stack'){ circle(tl.x,tl.y,tl.r,'rgba(50,90,220,.18)'); circle(tl.x,tl.y,tl.r*tl.p,'rgba(80,130,255,.32)'); ctx.strokeStyle='rgba(140,180,255,.95)'; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(tl.x,tl.y,tl.r,0,6.283); ctx.stroke(); ctx.font='700 14px "Noto Sans KR",sans-serif'; ctx.textAlign='center'; ctx.lineWidth=3.5; ctx.strokeStyle='#000'; ctx.strokeText('🤝 함께 서기!',tl.x,tl.y-tl.r-8); ctx.fillStyle='#bcd2ff'; ctx.fillText('🤝 함께 서기!',tl.x,tl.y-tl.r-8); }
+  if(tl.kind==='halve'){ const pu=.5+.5*Math.sin(T*(8+tl.p*14)); circle(tl.x,tl.y,tl.r,`rgba(110,20,150,${.16+.1*pu})`); circle(tl.x,tl.y,tl.r*tl.p,'rgba(190,60,230,.26)');
+    ctx.strokeStyle=`rgba(225,120,255,${.6+.35*pu})`; ctx.lineWidth=4; ctx.setLineDash([14,9]); ctx.beginPath(); ctx.arc(tl.x,tl.y,tl.r,0,6.283); ctx.stroke(); ctx.setLineDash([]);
+    ctx.font='800 17px "Noto Sans KR",sans-serif'; ctx.textAlign='center'; ctx.lineWidth=4; ctx.strokeStyle='#000'; const msg='☠️ 생명 붕괴 · 밖으로!'; ctx.strokeText(msg,tl.x,tl.y-tl.r*.18); ctx.fillStyle='#f0b0ff'; ctx.fillText(msg,tl.x,tl.y-tl.r*.18); }
+  else if(tl.kind==='stack'){ circle(tl.x,tl.y,tl.r,'rgba(50,90,220,.18)'); circle(tl.x,tl.y,tl.r*tl.p,'rgba(80,130,255,.32)'); ctx.strokeStyle='rgba(140,180,255,.95)'; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(tl.x,tl.y,tl.r,0,6.283); ctx.stroke(); ctx.font='700 14px "Noto Sans KR",sans-serif'; ctx.textAlign='center'; ctx.lineWidth=3.5; ctx.strokeStyle='#000'; ctx.strokeText('🤝 함께 서기!',tl.x,tl.y-tl.r-8); ctx.fillStyle='#bcd2ff'; ctx.fillText('🤝 함께 서기!',tl.x,tl.y-tl.r-8); }
   else if(tl.kind==='counter'){ circle(tl.x,tl.y,tl.r,'rgba(255,150,40,.18)'); ctx.strokeStyle='rgba(255,180,70,.9)'; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(tl.x,tl.y,tl.r*(1+.15*Math.sin(T*18)),0,6.283); ctx.stroke(); }
   else if(tl.k==='slam'){ circle(tl.x,tl.y,tl.r,'rgba(170,30,30,.16)'); circle(tl.x,tl.y,tl.r*tl.p,'rgba(200,40,40,.28)'); ctx.strokeStyle='rgba(255,70,60,.8)'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(tl.x,tl.y,tl.r,0,6.283); ctx.stroke(); }
   else { const a=Math.atan2(tl.ty-tl.y,tl.tx-tl.x); ctx.save(); ctx.translate(tl.x,tl.y); ctx.rotate(a); ctx.fillStyle='rgba(170,30,30,.18)'; ctx.fillRect(0,-46,450,92); ctx.fillStyle='rgba(220,50,40,.3)'; ctx.fillRect(0,-46,450*tl.p,92); ctx.restore(); }
