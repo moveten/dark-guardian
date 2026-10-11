@@ -232,7 +232,6 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
 .cc .cgear2{margin-top:4px;width:100%;min-height:36px;border-radius:9px;border:1px solid var(--line2);background:#0f0b09;color:var(--ink);font-size:13px;font-weight:700}
 .cc.add{justify-content:center;border-style:dashed;min-height:204px;color:var(--mute)}.cc.add .plus2{font-size:44px;line-height:1;color:var(--gold)}.cc.add small{font-size:12px}
 .stbig{width:100%;text-align:center;font-family:var(--f-disp);font-weight:800;font-size:22px;color:#ffd36a;letter-spacing:.04em;text-shadow:0 2px 12px rgba(214,170,78,.35)}.stbig small{display:block;font-size:12px;color:var(--mute);font-weight:500;letter-spacing:.2em;margin-bottom:2px}
-#bSet{right:auto;left:max(14px,env(safe-area-inset-left))}
 .pp #stageInfo{padding:8px 10px;border:1px solid var(--line2);border-radius:10px;background:rgba(15,11,9,.55);width:100%;box-sizing:border-box}
 .clist{display:flex;flex-direction:column;gap:8px;width:100%;max-width:440px}
 .crow{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px;text-align:left;min-height:58px;width:100%}
@@ -371,16 +370,15 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
 
   <section class="screen" id="sTitle">
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
-    <button class="gearT rankT" id="bRank" aria-label="랭킹">🏆</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
-    <div class="ver" id="verT">v0.1.0.0048</div>
+    <div class="ver" id="verT">v0.1.0.0049</div>
     <div class="clist car" id="charList"></div>
     <button id="bNew" hidden></button>
     <div class="pp" id="playPanel" hidden>
       <div class="stbig" id="stageBig"></div>
       <div class="stagebar" id="stageBar"></div>
-      <div class="modes"><button class="btn primary" id="bSolo" style="min-width:210px;min-height:48px;font-size:17px">▶ 시작하기</button></div>
+      <div class="modes"><button class="btn primary" id="bSolo" style="min-width:170px;min-height:48px;font-size:17px">▶ 시작하기</button><button class="btn" id="bRank" style="min-height:48px;font-size:16px">🏆 랭킹</button></div>
       <p class="sub" id="stageInfo"></p>
       <div class="modes" style="flex-wrap:nowrap"><button class="btn" id="bHost" disabled style="flex:1">🤝 방 만들기</button><button class="btn" id="bJoin" disabled style="flex:1">🔑 방 참가</button></div>
     </div>
@@ -520,7 +518,7 @@ const SK={
   {k:'mshield',e:'🔮',n:'에너지 실드',s:'실드',req:9,mp:0,cd:0,el:'#7fb4ff',passive:1,d:l=>`패시브: 받는 피해의 ${Math.round(Math.min(.65,.2+.02*l)*100)}%를 마나가 대신 받음 (피해 1당 마나 ${Math.max(.5,1.6-.04*l).toFixed(2)} 소모, 마나가 없으면 효과 없음)`},
   {k:'frostnova',e:'❄️',n:'서리 고리',s:'서리',req:6,mp:10,cd:6,el:'#8fdcff',d:l=>`주변 적에게 피해 ${14+10*l}, 3초간 감속`},
   {k:'teleport',e:'🌀',n:'순간이동',s:'이동',req:6,mp:12,cd:5,el:'#b98bff',d:l=>`누른 곳으로 순간이동 (최대 거리 ${240+4*l}) · 도착 직후 0.4초 무적 (스킬 레벨과 무관)`},
-  {k:'chain',e:'⚡',n:'연쇄 번개',s:'번개',req:12,mp:9,cd:4,el:'#dfe7ff',rg:280,d:l=>`적 사이를 ${3+Math.floor(l/4)}번 튀는 번개. 기본 피해 ${22+16*l}`},
+  {k:'chain',e:'⚡',n:'연쇄 번개',s:'번개',req:12,mp:9,cd:4,el:'#dfe7ff',rg:280,d:l=>`적 사이를 ${3+Math.floor(l/4)}번 튀는 번개. ${HMN(l)}갈래 (7레벨 2갈래, 14레벨 3갈래) · 갈래당 기본 피해 ${Math.round((22+16*l)*HMF(HMN(l)))}`},
   {k:'barrier',e:'🔷',n:'마력 방벽',s:'방벽',req:18,mp:14,cd:22,el:'#8fb6ff',d:l=>`${6+Math.floor(l/3)}초간 받는 피해 ${Math.min(70,30+2*l)}% 감소`},
   {k:'meteor',e:'☄️',n:'유성',s:'유성',req:24,mp:18,cd:10,el:'#ff5a1f',rg:300,d:l=>`잠시 뒤 떨어지는 유성. 유성 ${HMN(l)}개 (7레벨 2개, 14레벨 3개, 0.3초 간격) · 개당 기본 피해 ${Math.round((80+40*l)*HMF(HMN(l)))}, 맞은 적은 ${(.5+.02*l).toFixed(1)}초 기절 후 0.9초간 화상 (우두머리는 기절 면역)`},
   {k:'armageddon',e:'🌠',n:'대재앙',s:'재앙',req:99,mp:60,cd:75,el:'#ff5a1f',rg:420,d:l=>`[궁극기] 4초간 하늘에서 유성 14개가 쏟아져요. 유성마다 범위 피해 ${150+45*l}, 맞은 적은 기절`},
@@ -1650,13 +1648,14 @@ function castSkill(o,key,real,tx,ty,lv,tgt){
     efx.push({k:'ring',x:o.x,y:o.y,r0:20,r1:160*RS(lv),t:0,life:.5,col:'#8fdcff',w:14}); efx.push({k:'shards',x:o.x,y:o.y,r:160*RS(lv),t:0,life:.6}); impact(o.x,o.y,'150,220,255',170); burst(o.x,o.y,'#dff6ff',36,420);
     if(real) for(const m of mobsIn(o.x,o.y,160*RS(lv))) hitMob(m,spellDmg(14+10*lv),3);
     break;
-  case 'chain':{
-    let pts=[{x:o.x,y:o.y}];
-    if(real){ const n=3+Math.floor(lv/4), sk=new Set(); let cur=tgt&&!tgt.dead?tgt:nearestMob(o.x,o.y,280), f=1;
-      for(let i=0;i<n&&cur;i++){ sk.add(cur); pts.push({x:cur.x,y:cur.y}); hitMob(cur,spellDmg((22+16*lv)*f)); f*=.9; cur=nearestMob(cur.x,cur.y,170,sk); }
-      if(pts.length===1)pts.push({x:tx,y:ty}); }
-    else pts.push({x:tx,y:ty});
-    efx.push({k:'bolt',pts,t:0,life:.35,col:'#dfe7ff'}); for(const q of pts.slice(1)){impact(q.x,q.y,'190,210,255',60); burst(q.x,q.y,'#e8eeff',10,220);}
+  case 'chain':{ const fn=HMN(lv), ff=HMF(fn), n=3+Math.floor(lv/4), br=[];
+    if(real){ const sk=new Set(); const first=tgt&&!tgt.dead?tgt:nearestMob(o.x,o.y,280);
+      for(let b=0;b<fn;b++){ let cur=b===0?first:nearestMob(o.x,o.y,300,sk); if(!cur)break; const pts=[{x:o.x,y:o.y}]; let f=1;
+        for(let i=0;i<n&&cur;i++){ sk.add(cur); pts.push({x:cur.x,y:cur.y}); hitMob(cur,spellDmg((22+16*lv)*f*ff)); f*=.9; cur=nearestMob(cur.x,cur.y,170,sk); }
+        br.push(pts); }
+      if(!br.length) br.push([{x:o.x,y:o.y},{x:tx,y:ty}]); }
+    else br.push([{x:o.x,y:o.y},{x:tx,y:ty}]);
+    for(const pts of br){ efx.push({k:'bolt',pts,t:0,life:.35,col:'#dfe7ff'}); for(const q of pts.slice(1)){impact(q.x,q.y,'190,210,255',60); burst(q.x,q.y,'#e8eeff',10,220);} }
     break;}
   case 'barrier':
     efx.push({k:'ring',x:o.x,y:o.y,r0:10,r1:70,t:0,life:.5,col:'#8fb6ff',w:8}); burst(o.x,o.y,'#bcd2ff',20,200); impact(o.x,o.y,'140,180,255',90);
@@ -1967,7 +1966,7 @@ function renderBag(){
   markTabs(); sheetHead();
   const eqOrder=['weapon','armor','helm','amulet','ring1','ring2'].concat(['shield']);
   let h='<div class="bagtop" style="display:flex;flex-direction:column;gap:10px;min-width:0"><div class="eq">'+eqOrder.map(k=>{const it=me.eq[k]; return `<div style="position:relative">${cellHtml(it,'slot',`data-eq="${k}"`)}<div class="sl" style="position:absolute;bottom:2px;left:0;right:0;font-size:9.5px;color:var(--mute);text-align:center;pointer-events:none">${eqLbl(k)}</div></div>`;}).join('')+'</div>';
-  h+=`<div class="meta" style="font-size:12px;color:var(--mute)">⚔️ 전투력 <b style="color:#ffd84a">${calcCP(me).toLocaleString()}</b> · 빨간 칸은 아직 착용할 수 없어요</div><div style="display:flex;flex-wrap:nowrap;gap:5px"><button class="btn sm" style="flex:1;padding:8px 2px;font-size:13px;white-space:nowrap" data-sort="rar">등급별</button><button class="btn sm" style="flex:1;padding:8px 2px;font-size:13px;white-space:nowrap" id="aBulk">일괄 판매</button><button class="btn sm" style="flex:1.25;padding:8px 2px;font-size:12.5px;white-space:nowrap;${asLv>=0?'border-color:#ffd84a;color:#ffd84a':''}" id="aAuto">🪙 자동판매 ${ASN[asLv+1]}</button></div></div>`;
+  h+=`<div class="meta" style="font-size:12px;color:var(--mute)">⚔️ 전투력 <b style="color:#ffd84a">${calcCP(me).toLocaleString()}</b> · 빨간 칸은 아직 착용할 수 없어요</div><div style="display:flex;flex-wrap:nowrap;gap:5px"><button class="btn sm" style="flex:1;padding:8px 2px;font-size:13px;white-space:nowrap" data-sort="rar">등급별</button><button class="btn sm" style="flex:1;padding:8px 2px;font-size:13px;white-space:nowrap" id="aBulk">일괄 판매</button><button class="btn sm" style="flex:1.25;padding:8px 2px;font-size:12.5px;white-space:nowrap;${asLv>=0?`border-color:${RARC[asLv]};color:${RARC[asLv]};background:${['rgba(233,226,212,.14)','rgba(90,120,255,.28)','rgba(255,214,60,.24)'][asLv]};box-shadow:0 0 8px ${['rgba(233,226,212,.3)','rgba(110,140,255,.6)','rgba(255,214,60,.55)'][asLv]};font-weight:800`:''}" id="aAuto">🪙 자동판매 ${ASN[asLv+1]}</button></div></div>`;
   h+='<div class="inv">'+me.inv.map((it,i)=>cellHtml(it,'cell',`data-inv="${i}"`)).join('')+'</div>';
   const b=$('#sheetB'); b.className='sbody bag'; b.innerHTML=h; try{ showPop(detailHtml(),curCmpHtml()); }catch(e){ console.error(e); selItem=null; showPop(''); }
   b.querySelectorAll('[data-eq]').forEach(el=>el.onclick=()=>{const k=el.dataset.eq; if(me.eq[k]){selItem={it:me.eq[k],eq:k};renderBag();}});
