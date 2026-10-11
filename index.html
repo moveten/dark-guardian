@@ -381,7 +381,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
-    <div class="ver" id="verT">v0.1.0.0055</div>
+    <div class="ver" id="verT">v0.1.0.0056</div>
     <div class="clist car" id="charList"></div>
     <button id="bNew" hidden></button>
     <div class="pp" id="playPanel" hidden>
@@ -855,6 +855,7 @@ function loadChar(id){
     for(const k in p.skills){ if(!SKBY[k]){p.skillPts+=p.skills[k]; delete p.skills[k];} } for(const s of SK[cls]) if(p.skills[s.k]===undefined)p.skills[s.k]=0;
     if(p.clear===undefined)p.clear=Math.max(0,+(lsGet('dkdef2.clear')||0));
     p.eq=p.eq||{}; if(p.eq.shield===undefined)p.eq.shield=null;
+    for(const k in p.eq){ if(p.eq[k])delete p.eq[k].isNew; } /* 장착했던 아이템의 NEW 꼬리표 정리(1회) */ if(!lsGet('dkdef2.nwf.'+id)){ (p.inv||[]).forEach(x=>{ if(x)delete x.isNew; }); lsSet('dkdef2.nwf.'+id,'1'); }
     p.inv=p.inv||Array(INVN).fill(null); while(p.inv.length<INVN)p.inv.push(null);
     const fx=it=>{ if(!it)return; if(!Array.isArray(it.aff))it.aff=[]; if(it.rar===3&&it.aff.some(a=>a&&a.t==='all'))it.aff=it.aff.filter(a=>!(a&&a.t==='sk')); it.aff=it.aff.filter(a=>a&&AFXBY[a.t]&&!(it.slot==='armor'&&a.t==='ms')&&!(a.cls&&!CLASSES[a.cls])&&!(a.t==='sk'&&!(SKBY[a.key]&&SK[a.cls]&&SK[a.cls].includes(SKBY[a.key])))); }; p.inv.forEach(fx); p.eq=p.eq||{}; for(const k in p.eq)fx(p.eq[k]);
     p.name=String(p.name||'').slice(0,8); p.gold=Number.isFinite(p.gold)?p.gold:500; p.potBuy=p.potBuy|0; p.rev=p.rev|0; return p;
@@ -1478,7 +1479,7 @@ function pickUp(g){
   sfx('pick'); if(it.rar>=2)toast(`획득: ${dn(it)}`,RARC[it.rar]);
   if(it.rar>=2){ annQ.push([++annSeq,it.name.slice(0,16),it.rar]); if(annQ.length>4)annQ.shift(); }
   const key=it.slot==='ring'?(!me.eq.ring1?'ring1':!me.eq.ring2?'ring2':null):(me.eq[it.slot]?null:it.slot);
-  if(key&&canWear(it)){ const cp0=calcCP(me); me.eq[key]=it; me.inv[i]=null; const hr=me.hp/me.D.maxHp, mr=me.mp/me.D.maxMp; me.D=derive(me); me.hp=me.D.maxHp*hr; me.mp=me.D.maxMp*mr; buildSkills(); cpMsg(cp0,calcCP(me)); toast(`자동 장착: ${it.name}`,'#9fd18b'); }
+  if(key&&canWear(it)){ const cp0=calcCP(me); delete it.isNew; me.eq[key]=it; me.inv[i]=null; const hr=me.hp/me.D.maxHp, mr=me.mp/me.D.maxMp; me.D=derive(me); me.hp=me.D.maxHp*hr; me.mp=me.D.maxMp*mr; buildSkills(); cpMsg(cp0,calcCP(me)); toast(`자동 장착: ${it.name}`,'#9fd18b'); }
   saveChar(); uiDirty=true;
   if(sheetMode==='bag')renderBag();
 }
@@ -2047,14 +2048,14 @@ function detailHtml(){
 function askRingSlot(i){ const it=me.inv[i]; const cp0=calcCP(me); modal(`<h3>💍 어느 반지를 바꿀까요?</h3><div class="col">${['ring1','ring2'].map((k,n)=>{ const cur=me.eq[k], cp=calcCP({...me,eq:{...me.eq,[k]:it}}), d=cp-cp0; return `<button class="btn" data-rk="${k}" style="text-align:left">반지 ${n+1}: <b style="color:${RARC[cur.rar]}">${esc(cur.name)}</b><br><small style="color:${d>0?'#9fd18b':d<0?'#ff8a7a':'#bbb'}">바꾸면 전투력 ${d>0?'+':''}${d}</small></button>`; }).join('')}<button class="btn" id="rkX">취소</button></div>`,m=>{ m.querySelectorAll('[data-rk]').forEach(b=>b.onclick=()=>{ closeModal(); equip(i,b.dataset.rk); }); m.querySelector('#rkX').onclick=closeModal; }); }
 function equip(i,fk){
   const cp0=calcCP(me); const it=me.inv[i]; if(!it)return; if(it.slot==='shield'&&ocOf(it)!==me.cls){ warn(`${slotLbl(it)}은(는) ${CLASSES[ocOf(it)].n}만 착용할 수 있어요`); return; } if(me.lvl<reqLv(it)){ warn(`레벨 ${reqLv(it)} 이상부터 장착할 수 있어요 (지금 ${me.lvl})`); return; } { const L=statLack(it); if(L.length){ warn(`능력치가 부족해요: ${L.map(x=>`${STN[x[0]]} ${x[1]} 필요 (현재 ${x[2]})`).join(', ')}`); return; } } if(it.slot==='ring'&&me.eq.ring1&&me.eq.ring2&&!fk){ askRingSlot(i); return; } const k=fk||eqKeyFor(it); const old=me.eq[k];
-  me.eq[k]=it; me.inv[i]=old||null; const hpR=me.hp/me.D.maxHp, mpR=me.mp/me.D.maxMp;
+  delete it.isNew; if(old)delete old.isNew; me.eq[k]=it; me.inv[i]=old||null; const hpR=me.hp/me.D.maxHp, mpR=me.mp/me.D.maxMp;
   me.D=derive(me); me.hp=me.D.maxHp*hpR; me.mp=me.D.maxMp*mpR;
   selItem=null; saveChar(); renderBag(); uiDirty=true; buildSkills(); cpMsg(cp0,calcCP(me));
 }
 function unequip(k){
   const cp0=calcCP(me);
   const i=me.inv.indexOf(null); if(i<0){toast('가방이 가득 찼어요','#e07060');return;}
-  me.inv[i]=me.eq[k]; me.eq[k]=null; me.D=derive(me); me.hp=Math.min(me.hp,me.D.maxHp); me.mp=Math.min(me.mp,me.D.maxMp);
+  if(me.eq[k])delete me.eq[k].isNew; me.inv[i]=me.eq[k]; me.eq[k]=null; me.D=derive(me); me.hp=Math.min(me.hp,me.D.maxHp); me.mp=Math.min(me.mp,me.D.maxMp);
   selItem=null; saveChar(); renderBag(); buildSkills(); cpMsg(cp0,calcCP(me));
 }
 function renderStat(){
