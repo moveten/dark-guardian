@@ -389,7 +389,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
-    <div class="ver" id="verT">v0.1.1.0009</div>
+    <div class="ver" id="verT">v0.1.1.0010</div>
     <div class="clist car" id="charList"></div>
     <button id="bNew" hidden></button>
     <div class="pp" id="playPanel" hidden>
@@ -2248,7 +2248,7 @@ function enhModal(){
   if(L>MAXENH){ warn(`최대 강화(+${MAXENH})예요`); return; }
   const need=enhNeed(L), cost=enhCost(it,L), rate=enhRate(L);
   const elig=me.inv.map((x,i)=>({x,i})).filter(o=>o.x&&o.x!==it&&o.x.rar===it.rar&&!o.x.lock&&!(o.x.enh>0)).sort((a,b)=>sellInfo(a.x).total-sellInfo(b.x).total||a.x.ilvl-b.x.ilvl);
-  const sel=new Set(elig.slice(0,need).map(o=>o.i));
+  const sel=new Set(elig.slice(0,need).map(o=>o.i)); const matObj=new Map(elig.map(o=>[o.i,o.x]));
   const k2=1+.1*L, k1=1+.1*(L-1), b0=it.b0||{mn:it.mn,mx:it.mx,df:it.df,dm:it.dm,om:it.om};
   const eff=it.slot==='amulet'?`올스탯 +${L-1} → <b style="color:#9fd18b">+${L}</b>`:it.slot==='ring'?(L>=10?`<b style="color:#9fd18b">모든 스킬 +1 달성!</b>`:`+10강 달성 시 모든 스킬 +1 (현재 +${L-1} → +${L})`):it.dm?`공격력 +${it.dm} → <b style="color:#9fd18b">+${Math.round(b0.dm*k2)}</b>`:it.om?`마나 +${it.om} → <b style="color:#9fd18b">+${Math.round(b0.om*k2)}</b>`:it.b0&&it.b0.mx||it.mx?`공격력 ${it.mn}–${it.mx} → <b style="color:#9fd18b">${Math.max(1,Math.round(b0.mn*k2))}–${Math.max(Math.max(1,Math.round(b0.mn*k2))+1,Math.round(b0.mx*k2))}</b>`:`방어력 ${it.df} → <b style="color:#9fd18b">${Math.round(b0.df*k2)}</b>`;
   const rows=elig.map(o=>`<label style="display:flex;gap:8px;align-items:center;padding:5px 6px;border:1px solid var(--line2);border-radius:7px;font-size:12.5px"><input type="checkbox" data-m="${o.i}" ${sel.has(o.i)?'checked':''}><span style="color:${RARC[o.x.rar]};flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(o.x.name)}</span><span class="meta">${slotLbl(o.x)} · Lv ${o.x.ilvl}</span></label>`).join('');
@@ -2264,7 +2264,10 @@ function enhModal(){
       const mats=[...sel].map(i=>me.inv[i]).filter(Boolean);
       modal(`<h3>⚠️ 정말 강화할까요?</h3><p style="margin:0 0 8px;font-size:14px"><b style="color:${RARC[it.rar]}">${esc(it.name)}</b> +${L-1} → +${L}<br>성공 확률 <b>${rate}%</b> · <b style="color:#ffd84a">${cost.toLocaleString()}원</b> 소모</p><div class="meta" style="margin-bottom:8px">아래 재료가 사라져요${rate<100?' (실패해도 사라져요)':''}:<br>${mats.map(x=>`<span style="color:${RARC[x.rar]}">${esc(x.name)}</span>`).join(', ')}</div><div class="row2"><button class="btn" id="en2No">취소</button><button class="btn primary" id="en2Yes">강화 확정</button></div>`,m2=>{
         m2.querySelector('#en2No').onclick=closeModal; m2.querySelector('#en2Yes').onclick=()=>doEnh(); }); };
-    const doEnh=()=>{ if(sel.size!==need||me.gold<cost)return; me.gold-=cost; for(const i of sel)me.inv[i]=null;
+    const doEnh=()=>{ if(sel.size!==need||me.gold<cost)return;
+      /* 강화창이 열린 사이 자동합성/판매로 인벤이 바뀌었으면 중단 (골드·재료 보호) */
+      const own=me.inv.includes(it)||Object.values(me.eq).includes(it); if(!own||[...sel].some(i=>!matObj.get(i)||me.inv[i]!==matObj.get(i))){ closeModal(); renderBag(); sheetToast('인벤토리가 바뀌어 강화를 취소했어요 (골드·재료 그대로)','#ffb259'); return; }
+      me.gold-=cost; for(const i of sel)me.inv[i]=null;
       const ok=Math.random()*100<rate; const hr=me.hp/me.D.maxHp, mr=me.mp/me.D.maxMp;
       if(ok){ it.enh=L; enhApply(it); sfx('lvl'); } else sfx('hurt');
       me.D=derive(me); me.hp=me.D.maxHp*hr; me.mp=me.D.maxMp*mr; saveChar(); uiDirty=true; closeModal();
