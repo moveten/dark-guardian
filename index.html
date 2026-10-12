@@ -390,7 +390,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
-    <div class="ver" id="verT">v0.1.1.0022</div>
+    <div class="ver" id="verT">v0.1.1.0024</div>
     <div class="clist car" id="charList"></div>
     <button id="bNew" hidden></button>
     <div class="pp" id="playPanel" hidden>
@@ -575,10 +575,12 @@ const SK={
   {k:'execute',e:'🎯',n:'처형 명령',s:'처형',req:18,mp:12,cd:18,el:'#ff5a5a',rg:360,d:l=>`가장 가까운 적을 8초간 표식. 소환수가 모두 그 적을 집중 공격하고(공격 속도 +30%), 표식 적이 받는 모든 피해 +${20+3*l}% (우두머리 포함)`},
   {k:'colossus',e:'🗿',n:'고대 거인',s:'거인',req:24,mp:30,cd:45,el:'#9aa6b8',d:l=>`[소환수·시한] ${(18+.5*l).toFixed(1)}초간 등장. 생명력은 내 최대 생명력의 ${300+15*l}%, 받는 피해 -50%. 1.5초마다 범위 피해 ${120+45*l}, 4초마다 도발. 시한 소환수는 동시에 하나만 나와요`},
   {k:'pact',e:'📜',n:'영혼 서약',s:'서약',req:30,mp:20,cd:25,el:'#b8a0ff',d:l=>`8초간 내가 받는 피해의 ${Math.min(80,50+2*l)}%를 소환수가 대신 받아요 (소환수가 없으면 효과 없음)`},
-  {k:'lord',e:'🐉',n:'영혼 군주 강림',s:'강림',req:99,mp:60,cd:90,el:'#7dffd8',rg:420,d:l=>`[궁극기·시한] 15초간 영혼 용령이 나와 전방에 숨결을 뿜어요. 0.5초마다 범위 피해 ${100+30*l}, 모든 소환수 피해 +40%. 고대 거인이 있으면 사라져요`}]
+  {k:'lord',e:'🐉',n:'영혼 군주 강림',s:'강림',req:99,mp:60,cd:90,el:'#7dffd8',rg:420,d:l=>`[궁극기·시한] 15초간 영혼 용령이 나와 전방에 숨결을 뿜어요. 0.5초마다 범위 피해 ${100+30*l}, 모든 소환수 피해 +40%. 고대 거인이 있으면 사라져요`},
+  {k:'fusion',e:'🌀',n:'영혼 융합',s:'융합',req:21,mp:25,cd:40,el:'#8ff0ff',d:l=>`수호 영혼과 포격 영혼이 둘 다 살아 있을 때 버튼이 나타나요. 둘이 하나로 합쳐 ${(10+.3*l).toFixed(1)}초간 [융합 영혼]이 되어 적진을 휩쓸어요 (융합 중 다시 누르면 바로 분리). 생명력은 내 최대 생명력의 ${220+10*l}%, 받는 피해 -50%. ① 주변(반경 105)에 0.5초마다 지속 피해 ${6+4*l} ② 2초마다 영혼탄 ${FZB(l)}발(발당 ${16+10*l}) ③ 4초마다 휩쓸기 범위 피해 ${50+22*l}, 4초마다 도발. 끝나면 둘로 돌아오고 남은 생명력 비율을 이어받아요 (쓰러지면 20%로 분리)`}]
 };
 const GZM=1.3, BSKM=1.3; /* 바닥 장판(용암·불길) 피해 배율 / 시전 시간이 있는 우두머리 기술 피해 배율 */
 const FNR=1.3, FND=1.3, SHOCKB=4/3, SHK=l=>4+.15*l; /* 서리 고리 범위·피해 배율 / 감전 상태에서 화·수 속성 피해 배율(+1/3) / 감전 지속시간 */
+const FZB=l=>3+Math.min(3,Math.floor(l/8)); /* 융합 영혼 영혼탄 발수 */
 const HMN=l=>l>=14?3:l>=7?2:1, HMF=n=>[1,.7,.55][n-1]||.55; /* 망치 개수/개당 피해 배율 */
 function mightBonus(l){ return {dmg:Math.round(2*l),ias:Math.round(1.5*l),ms:Math.min(15,Math.round(.6*l))}; }
 /* 전투 함성: 레벨이 오를수록 지속시간↑ 재사용 대기↓ (Lv10부터 지속시간 ≥ 재사용 대기 → 끊김 없이 유지, 대기 하한 8초) */
@@ -588,7 +590,7 @@ const SKBY={}; for(const c in SK) for(const s of SK[c]) SKBY[s.k]=s;
 const SYN={
  sorc:{fireball:['chain','meteor'],frostnova:['blizzard','fireball'],chain:['frostnova','meteor','barrier'],barrier:['fireball','chain'],meteor:['blizzard','frostnova'],blizzard:['meteor','fireball']},
  war:{bash:['whirl','leap','rend'],rend:['quake','bash','whirl'],shout:['berserk','bash'],whirl:['quake','bash'],leap:['bash','quake'],berserk:['shout','whirl'],quake:['leap','whirl']},
- necro:{soulbolt:['guardian','spiritcaster'],guardian:['soullink','soulburst'],spiritcaster:['execute','soulburst'],execute:['guardian','spiritcaster'],colossus:['guardian','pact'],pact:['guardian','colossus'],soulburst:['guardian']},
+ necro:{soulbolt:['guardian','spiritcaster'],guardian:['soullink','soulburst','fusion'],spiritcaster:['execute','soulburst','fusion'],execute:['guardian','spiritcaster'],colossus:['guardian','pact'],pact:['guardian','colossus'],soulburst:['guardian']},
  pal:{holyfire:['smite','hammer'],smite:['hammer','judgment','holyfire'],healaura:['guard','might'],hammer:['smite','judgment'],might:['healaura','zeal'],guard:['healaura','might'],zeal:['smite','hammer','judgment'],judgment:['smite','hammer']}};
 function synBonus(p,key){ let n=0; const m=SYN[p.cls]; if(!m)return 0; for(const src in m) if(m[src].includes(key)) n+=Math.floor((p.skills[src]||0)/3); return n; }
 const ATKRG={sorc:250,war:100,pal:100,necro:240};
@@ -1592,6 +1594,7 @@ function tryUse(key,hold){
     sfx(CLASSES[me.cls].melee?'swing':'cast'); doCast('atk',ATKRG[me.cls],1); me.mp=Math.min(me.D.maxMp,me.mp+1.6+me.D.maxMp*.02); return;
   }
   const s=SKBY[key]; if(!s||s.passive)return; const lv=skLv(me,key); if(!lv)return;
+  if(key==='fusion'&&me.cls==='necro'&&fusionOn()){ if(!hold)splitFusion(fusionOn(),'manual'); return; }
   if(s.aura){ if(hold)return; if((me.cds[key]||0)>0)return; me.cds[key]=.3; me.aura=me.aura===key?0:key; sfx(me.aura?'aura':'auraoff'); toast(me.aura?`${s.n} 켜짐`:`${s.n} 꺼짐`); uiDirty=true; return; }
   if((me.cds[key]||0)>0)return;
   if(me.cls==='necro'&&!necroCan(key))return;
@@ -1662,19 +1665,19 @@ function later(t,fn){timers.push({t,fn});}
    소환수는 소환한 사람 화면에서 움직이고(방장·솔로는 몹의 공격 대상도 됨), 동료 화면에는 위치만 전달해요. */
 const minions=[]; let mnSeq=0;
 const MNK={guard:{n:'수호 영혼',r:15,spd:155,perm:1,col:'#6fe0c0',sk:'guardian'},caster:{n:'포격 영혼',r:12,spd:125,perm:1,col:'#a98bff',sk:'spiritcaster'},
-  colossus:{n:'고대 거인',r:26,spd:95,col:'#9aa6b8',sk:'colossus'},dragon:{n:'영혼 용령',r:30,spd:115,col:'#7dffd8',sk:'lord'}};
-const MNIDX=['guard','caster','colossus','dragon'];
+  colossus:{n:'고대 거인',r:26,spd:95,col:'#9aa6b8',sk:'colossus'},fusion:{n:'융합 영혼',r:24,spd:150,col:'#8ff0ff',sk:'fusion'},dragon:{n:'영혼 용령',r:30,spd:115,col:'#7dffd8',sk:'lord'}};
+const MNIDX=['guard','caster','colossus','dragon','fusion'];
 const SMFX={basic:1,sm:1}; /* 소환수 타격: 반격 태세 면제, 흡혈·특수효과 제외 */
 const lordOn=()=>!!(me&&me.buffs&&me.buffs.lord&&me.buffs.lord.t>0);
 const mnMul=()=>(1+.04*skLv(me,'soullink'))*(1+(me.D.sm||0)/100)*(lordOn()?1.4:1);
 const mnAS=()=>(me.aura==='resonance'?1+Math.min(.4,.02*skLv(me,'resonance')):1)*(me.buffs.exec&&me.buffs.exec.t>0?1.3:1);
-function mnMaxHp(k,lv){ const mh=me.D.maxHp, hm=1+(me.D.smhp||0)/100; return Math.round(mh*({guard:.8+.05*lv,caster:.5+.03*lv,colossus:3+.15*lv,dragon:4+.2*lv}[k])*hm); }
-function summonMinion(k,lv,free){
-  const K=MNK[k], big=!K.perm, a=Math.random()*6.283, x=clamp(me.x+Math.cos(a)*54,16,WW-16), y=clamp(me.y+Math.sin(a)*54,16,WH-16), mh=mnMaxHp(k,lv);
+function mnMaxHp(k,lv){ const mh=me.D.maxHp, hm=1+(me.D.smhp||0)/100; return Math.round(mh*({guard:.8+.05*lv,caster:.5+.03*lv,colossus:3+.15*lv,dragon:4+.2*lv,fusion:2.2+.1*lv}[k])*hm); }
+function summonMinion(k,lv,free,px,py){
+  const K=MNK[k], big=!K.perm, a=Math.random()*6.283, x=px!==undefined?clamp(px,16,WW-16):clamp(me.x+Math.cos(a)*54,16,WW-16), y=py!==undefined?clamp(py,16,WH-16):clamp(me.y+Math.sin(a)*54,16,WH-16), mh=mnMaxHp(k,lv);
   let mn=minions.find(q=>q.k===k);
-  if(big){ for(let i=minions.length-1;i>=0;i--) if(!MNK[minions[i].k].perm){ spark(minions[i].x,minions[i].y,K.col,14); minions.splice(i,1); } mn=null; }
+  if(big&&k!=='fusion'){ for(let i=minions.length-1;i>=0;i--) if(!MNK[minions[i].k].perm&&minions[i].k!=='fusion'){ spark(minions[i].x,minions[i].y,K.col,14); minions.splice(i,1); } mn=null; } else if(big)mn=null;
   if(mn){ mn.hp=mn.mh=mh; mn.x=x; mn.y=y; mn.rez=0; mn.lv=lv; }
-  else { mn={i:10+(++mnSeq),k,x,y,hp:mh,mh,lv,face:me.face||0,cd:rand(.3,.7),atk:0,flash:0,rez:0,an:Math.random()*6,tt:2,t:big?(k==='dragon'?15:18+.5*lv):Infinity,bt:0}; minions.push(mn); }
+  else { mn={i:10+(++mnSeq),k,x,y,hp:mh,mh,lv,face:me.face||0,cd:rand(.3,.7),atk:0,flash:0,rez:0,an:Math.random()*6,tt:2,t:big?(k==='dragon'?15:k==='fusion'?10+.3*lv:18+.5*lv):Infinity,bt:0}; minions.push(mn); }
   efx.push({k:'ring',x,y,r0:6,r1:big?90:56,t:0,life:.5,col:K.col,w:big?9:6}); burst(x,y,K.col,big?36:22,big?320:220); impact(x,y,'120,230,200',big?140:80); if(!free)sfx(big?'boom':'aura'); if(big)G.shake=Math.max(G.shake,.35);
   return mn; }
 function autoSummon(){ minions.length=0; if(!me||me.cls!=='necro')return; for(const [k,sk] of [['guard','guardian'],['caster','spiritcaster']]){ const l=skLv(me,sk); if(l>0)summonMinion(k,l,true); } }
@@ -1683,21 +1686,32 @@ function minionHit(id,raw){ const mn=minions.find(q=>q.i===id); if(mn)mnTake(mn,
 function mnTake(mn,raw,direct){ if(mn.rez>0)return; const D=me.D, big=!MNK[mn.k].perm, def=D.def*1.2, red=Math.min(.8,def/(def+50+G.wave*8));
   const d=direct?raw:raw*lvPen().tk*gearPen().tk*(1-red)*(1-Math.min(.3,.015*skLv(me,'soullink')))*(big?.5:1);
   mn.hp-=d; mn.flash=.12; if(d>=1)addNum(mn.x,mn.y-mn.r-8,Math.round(d),'#8fe6ff',false); if(mn.hp<=0)mnDie(mn); }
-function mnDie(mn){ const K=MNK[mn.k]; spark(mn.x,mn.y,K.col,18); burst(mn.x,mn.y,K.col,26,240); efx.push({k:'ring',x:mn.x,y:mn.y,r0:6,r1:50,t:0,life:.4,col:K.col,w:6}); const i=minions.indexOf(mn); if(i>=0)minions.splice(i,1); if(K.perm)toast(`${K.n}이(가) 쓰러졌어요 — 다시 소환하세요`,'#8fe6d0'); }
+function mnDie(mn){ if(mn.k==='fusion'){ splitFusion(mn,'death'); return; } const K=MNK[mn.k]; spark(mn.x,mn.y,K.col,18); burst(mn.x,mn.y,K.col,26,240); efx.push({k:'ring',x:mn.x,y:mn.y,r0:6,r1:50,t:0,life:.4,col:K.col,w:6}); const i=minions.indexOf(mn); if(i>=0)minions.splice(i,1); if(K.perm)toast(`${K.n}이(가) 쓰러졌어요 — 다시 소환하세요`,'#8fe6d0'); }
 function mnHealAll(p){ for(const m of minions) if(m.rez<=0)m.hp=Math.min(m.mh,m.hp+m.mh*p); }
 function mnStrike(mn,t,base,aoeR,extra){ /* 소환수 공격 1회: 대상 t (범위 aoeR이면 mn 주변 전체) */
   const hit=m=>{ const r=spellDmg(base*mnMul()); hitMob(m,r,0,false,Object.assign({},SMFX,extra||{})); if(me.aura==='resonance'&&!me.dead){ const hl=r.v*(.03+.002*skLv(me,'resonance')); me.hp=Math.min(me.D.maxHp,me.hp+hl); } };
   if(aoeR){ for(const m of mobsIn(mn.x,mn.y,aoeR)) hit(m); } else if(t&&!t.dead) hit(t); }
 function mnTaunt(mn,R,sec){ if(G.mode==='guest')return; let n=0; for(const m of mobsIn(mn.x,mn.y,R)){ if(m.hp<=0)continue; m.taunt={i:mn.i,t:sec}; n++; } if(n){ efx.push({k:'ring',x:mn.x,y:mn.y,r0:10,r1:R,t:0,life:.45,col:'#9ff5dc',w:4}); sfx('shout'); } }
+function fusionOn(){ return minions.find(q=>q.k==='fusion'); }
+function fusionReady(){ return !!(me&&me.cls==='necro'&&!fusionOn()&&minions.some(q=>q.k==='guard'&&q.rez<=0)&&minions.some(q=>q.k==='caster'&&q.rez<=0)); }
+function fuseMinions(lv){ const g=minions.find(q=>q.k==='guard'&&q.rez<=0), c=minions.find(q=>q.k==='caster'&&q.rez<=0); if(!g||!c)return;
+  const pct=(g.hp/g.mh+c.hp/c.mh)/2, x=(g.x+c.x)/2, y=(g.y+c.y)/2;
+  for(const q of [g,c]){ spark(q.x,q.y,MNK[q.k].col,16); burst(q.x,q.y,MNK[q.k].col,16,200); minions.splice(minions.indexOf(q),1); }
+  const mn=summonMinion('fusion',lv,true,x,y); mn.hp=Math.max(1,mn.mh*pct); mn.fa=.3; mn.fv=.4; mn.fs=1.2; mn.tt=1;
+  efx.push({k:'ring',x,y,r0:10,r1:130,t:0,life:.6,col:'#8ff0ff',w:12}); burst(x,y,'#cffaff',44,380); impact(x,y,'140,240,255',170); G.shake=Math.max(G.shake,.4); sfx('boom'); announce('🌀 영혼 융합!','#8ff0ff'); }
+function splitFusion(mn,why){ const i=minions.indexOf(mn); if(i<0)return; const pct=why==='death'?.2:clamp(mn.hp/mn.mh,.05,1), x=mn.x, y=mn.y;
+  minions.splice(i,1); spark(x,y,'#8ff0ff',20); burst(x,y,'#8ff0ff',30,300); efx.push({k:'ring',x,y,r0:6,r1:90,t:0,life:.45,col:'#8ff0ff',w:8}); sfx('aura');
+  for(const [k,sk,off] of [['guard','guardian',-22],['caster','spiritcaster',22]]){ const l=skLv(me,sk); if(l<1)continue; const q=summonMinion(k,l,true,x+off,y); q.hp=Math.max(1,q.mh*pct); }
+  toast(why==='death'?'융합 영혼이 쓰러져 둘로 분리됐어요 (생명력 20%)':'융합 영혼이 둘로 분리됐어요','#8fe6d0'); }
 function updateMinions(dt){
   if(!minions.length)return;
   const as=mnAS(), mk=G.mobs.find(m=>!m.dead&&m.mark&&m.mark.t>0);
   for(let i=minions.length-1;i>=0;i--){ const mn=minions[i], K=MNK[mn.k], lv=mn.lv||1;
     if(mn.rez>0){ mn.rez-=dt; if(mn.rez<=0){ mn.rez=0; mn.hp=mn.mh*.5; mn.x=me.x+rand(-40,40); mn.y=me.y+rand(-40,40); efx.push({k:'ring',x:mn.x,y:mn.y,r0:6,r1:50,t:0,life:.4,col:K.col,w:6}); burst(mn.x,mn.y,K.col,20,200); } continue; }
     mn.flash=Math.max(0,mn.flash-dt); mn.atk=Math.max(0,mn.atk-dt); mn.an+=dt; mn.cd-=dt*as; mn.tt-=dt;
-    if(isFinite(mn.t)){ mn.t-=dt; if(mn.t<=0){ spark(mn.x,mn.y,K.col,16); burst(mn.x,mn.y,K.col,24,240); minions.splice(i,1); continue; } }
+    if(isFinite(mn.t)){ mn.t-=dt; if(mn.t<=0&&mn.k==='fusion'){ splitFusion(mn,'time'); continue; } if(mn.t<=0){ spark(mn.x,mn.y,K.col,16); burst(mn.x,mn.y,K.col,24,240); minions.splice(i,1); continue; } }
     const dm=hyp(mn.x-me.x,mn.y-me.y); if(dm>700){ mn.x=me.x+rand(-40,40); mn.y=me.y+rand(-40,40); }
-    let t=null; if(mk&&hyp(mk.x-mn.x,mk.y-mn.y)<700)t=mk; else if(dm<460)t=nearestMob(mn.x,mn.y,mn.k==='caster'?300:340);
+    let t=null; if(mk&&hyp(mk.x-mn.x,mk.y-mn.y)<700)t=mk; else if(dm<(mn.k==='fusion'?600:460))t=nearestMob(mn.x,mn.y,mn.k==='caster'?300:mn.k==='fusion'?380:340);
     let gx,gy,hold=0; /* 이동 목표 */
     if(t){ const dx=t.x-mn.x,dy=t.y-mn.y,d=hyp(dx,dy)||1; mn.face=Math.atan2(dy,dx);
       if(mn.k==='caster'){ const want=190; if(d>want+25){gx=t.x-dx/d*want;gy=t.y-dy/d*want;} else if(d<want-60){gx=mn.x-dx/d*60;gy=mn.y-dy/d*60;} else hold=1; }
@@ -1715,6 +1729,14 @@ function updateMinions(dt){
             boom:(x,y)=>{ burst(x,y,'#cdb8ff',12,200); },hit:m=>{ const r=spellDmg((18+12*lv)*ff*mnMul()); hitMob(m,r,0,false,SMFX); if(me.aura==='resonance'&&!me.dead)me.hp=Math.min(me.D.maxHp,me.hp+r.v*(.03+.002*skLv(me,'resonance'))); }}); }); } }
     else if(mn.k==='colossus'){ if(mn.tt<=0){ mn.tt=4; mnTaunt(mn,220,3); }
       if(mn.cd<=0&&d2<=t.r+mn.r+22){ mn.cd=1.5; mn.atk=.3; slamFx(mn.x,mn.y,86,'#9aa6b8'); impact(mn.x,mn.y,'160,175,200',150); G.shake=Math.max(G.shake,.25); sfx('slam'); mnStrike(mn,null,120+45*lv,86); } }
+    else if(mn.k==='fusion'){ if(mn.tt<=0){ mn.tt=4; mnTaunt(mn,200,3); }
+      mn.fa=(mn.fa||0)-dt*as; mn.fv=(mn.fv||0)-dt*as; mn.fs=(mn.fs||0)-dt*as;
+      if(mn.fa<=0){ mn.fa=.5; efx.push({k:'ring',x:mn.x,y:mn.y,r0:30,r1:105,t:0,life:.35,col:'#8ff0ff',w:5}); mnStrike(mn,null,6+4*lv,105); }
+      if(mn.fv<=0){ const near=mobsIn(mn.x,mn.y,340).sort((a,b)=>hyp(a.x-mn.x,a.y-mn.y)-hyp(b.x-mn.x,b.y-mn.y)); if(near.length){ mn.fv=2; mn.atk=.25; const fn=FZB(lv);
+        for(let b=0;b<fn;b++) later(b*.1,()=>{ const q=near[b%near.length]; if(!q||q.dead)return; const a=Math.atan2(q.y-mn.y,q.x-mn.x); sfx('bolt');
+          proj({x:mn.x+Math.cos(a)*14,y:mn.y+Math.sin(a)*14,vx:Math.cos(a)*480,vy:Math.sin(a)*480,r:8,life:.9,col:'#8ff0ff',kind:'bolt',trail:'143,240,255',real:true,
+            boom:(x,y)=>{ burst(x,y,'#cffaff',12,200); },hit:m=>{ const r=spellDmg((16+10*lv)*mnMul()); hitMob(m,r,0,false,SMFX); if(me.aura==='resonance'&&!me.dead)me.hp=Math.min(me.D.maxHp,me.hp+r.v*(.03+.002*skLv(me,'resonance'))); }}); }); } else mn.fv=.3; }
+      if(mn.fs<=0){ const nr=mobsIn(mn.x,mn.y,150); if(nr.length){ mn.fs=4; mn.atk=.3; slamFx(mn.x,mn.y,150,'#8ff0ff'); impact(mn.x,mn.y,'140,240,255',170); G.shake=Math.max(G.shake,.3); mnStrike(mn,null,50+22*lv,150); for(const q of nr)knock(q,mn.x,mn.y,12); } else mn.fs=.4; } }
     else if(mn.k==='dragon'){ if(mn.cd<=0&&d2<=300){ mn.cd=.5; mn.atk=.3; const a=Math.atan2(t.y-mn.y,t.x-mn.x); let n=0;
         for(const m of G.mobs){ if(m.dead)continue; const dx=m.x-mn.x,dy=m.y-mn.y,d=hyp(dx,dy); if(d>250+m.r)continue; let da=Math.atan2(dy,dx)-a; da=Math.atan2(Math.sin(da),Math.cos(da)); if(Math.abs(da)>.6)continue;
           const r=spellDmg((100+30*lv)*mnMul()); hitMob(m,r,0,false,SMFX); if(n++<4)efx.push({k:'bolt',pts:[{x:mn.x,y:mn.y},{x:m.x,y:m.y}],t:0,life:.2,col:'#7dffd8'}); }
@@ -1722,6 +1744,8 @@ function updateMinions(dt){
   }
 }
 function necroCan(key){ /* 폭파·표식은 대상이 있어야 함 */
+  if(key==='fusion'&&!fusionReady()){ toast('수호 영혼과 포격 영혼이 모두 있어야 해요','#e07060'); return false; }
+  if((key==='guardian'||key==='spiritcaster')&&fusionOn()){ toast('융합 중에는 부를 수 없어요 (융합 버튼으로 분리)','#e07060'); return false; }
   if(key==='soulburst'&&!minions.some(q=>MNK[q.k].perm&&q.rez<=0)){ toast('폭파시킬 영구 소환수가 없어요','#e07060'); return false; }
   if(key==='execute'&&!nearestMob(me.x,me.y,360)){ toast('표식을 찍을 적이 없어요','#e07060'); return false; }
   if(key==='pact'&&!minions.length){ toast('소환수가 없어요','#e07060'); return false; }
@@ -1729,7 +1753,8 @@ function necroCan(key){ /* 폭파·표식은 대상이 있어야 함 */
 function necroCast(o,key,real,lv,tgt){
   const K=SKBY[key], col=K.el;
   if(!real){ efx.push({k:'ring',x:o.x,y:o.y,r0:8,r1:64,t:0,life:.4,col,w:6}); burst(o.x,o.y,col,14,200); return; }
-  if(key==='guardian'){ summonMinion('guard',lv); }
+  if(key==='fusion'){ fuseMinions(lv); }
+  else if(key==='guardian'){ summonMinion('guard',lv); }
   else if(key==='spiritcaster'){ summonMinion('caster',lv); }
   else if(key==='colossus'){ summonMinion('colossus',lv); announce('🗿 고대 거인 소환!','#b8c4d8'); }
   else if(key==='lord'){ summonMinion('dragon',lv); me.buffs.lord={t:15,m:15}; announce('🐉 영혼 군주 강림!','#7dffd8'); banner('🐉 영혼 군주 강림','소환수 피해 +40% · 15초'); G.flash=.5; }
@@ -1866,7 +1891,7 @@ function castSkill(o,key,real,tx,ty,lv,tgt){
         boom:(x,y)=>{ burst(x,y,'#9ff5dc',16,220); efx.push({k:'ring',x,y,r0:6,r1:34,t:0,life:.25,col:'#6fe0c0',w:4}); },
         hit:m=>{ const r=spellDmg((14+10*lv)*ff); hitMob(m,r,0,false,{el:'soul'}); mnHealAll(.02); }}); });
     break;}
-  case 'guardian': case 'spiritcaster': case 'resonance': case 'soulburst': case 'execute': case 'colossus': case 'pact': case 'lord':
+  case 'guardian': case 'spiritcaster': case 'fusion': case 'resonance': case 'soulburst': case 'execute': case 'colossus': case 'pact': case 'lord':
     necroCast(o,key,real,lv,tgt); break;
   case 'barrier':
     efx.push({k:'ring',x:o.x,y:o.y,r0:10,r1:70,t:0,life:.5,col:'#8fb6ff',w:8}); burst(o.x,o.y,'#bcd2ff',20,200); impact(o.x,o.y,'140,180,255',90);
@@ -2066,7 +2091,7 @@ let uiDirty=true, hudT=0;
 function buildSkills(){
   const box=$('#skills'); box.innerHTML='';
   for(const s of SK[me.cls]){ if(!(me.skills[s.k]>0)||s.passive)continue;
-    const b=document.createElement('button'); b.className='sb'; b.dataset.k=s.k; b.style.setProperty('--c',s.el); b.setAttribute('aria-label',s.n);
+    const b=document.createElement('button'); b.className='sb'; b.dataset.k=s.k; b.style.setProperty('--c',s.el); b.setAttribute('aria-label',s.n); if(s.k==='fusion')b.hidden=true;
     b.innerHTML=`<span class="cdv"></span><span class="nm">${s.e}</span><span class="sn">${esc(s.s)}</span><span class="cdt"></span><span class="lvn"></span>`;
     bindHold(b,s.k); box.appendChild(b);}
 }
@@ -2094,7 +2119,7 @@ function updateHud(){
   for(const b of $('#skills').children){ const k=b.dataset.k, s=SKBY[k];
     const rem=me.cds[k]||0, cd=rem/((me.cdm&&me.cdm[k])||(k==='shout'?SHC(skLv(me,k)||1):s.cd))*(k==='shout'?1:1); b.querySelector('.cdv').style.setProperty('--p',s.aura?0:clamp(cd,0,1));
     b.classList.toggle('cd',!s.aura&&rem>0); b.querySelector('.cdt').textContent=(!s.aura&&rem>0)?(rem>=1?Math.ceil(rem):rem.toFixed(1)):'';
-    b.classList.toggle('on',me.aura===k); b.classList.toggle('nomana',me.mp<mpCost(s,skLv(me,k)));
+    if(k==='fusion'){ const fz=!!fusionOn(); b.hidden=!(fz||fusionReady()); b.classList.toggle('on',fz); } else b.classList.toggle('on',me.aura===k); b.classList.toggle('nomana',me.mp<mpCost(s,skLv(me,k)));
     b.querySelector('.lvn').textContent=skLv(me,k); }
 }
 
@@ -2255,7 +2280,7 @@ const CPSK={
  sorc:[['fireball',l=>(18+13*l)*HMN(l)*HMF(HMN(l)),1,'s'],['frostnova',l=>(14+10*l)*FND*HMN(l)*HMF(HMN(l)),6,'s'],
   ['chain',l=>(22+16*l)*HMN(l)*HMF(HMN(l))*(1-Math.pow(.9,Math.min(3,3+Math.floor(l/4))))/.1,4,'s'],
   ['meteor',l=>((80+40*l)+4*(12+8*l))*HMN(l)*HMF(HMN(l)),10,'s'],['blizzard',l=>(22+13*l)*8,17,'s'],['armageddon',l=>14*(150+45*l)*.5,75,'s']],
- necro:[['soulbolt',l=>(14+10*l)*HMN(l)*HMF(HMN(l)),.8,'s'],['guardian',l=>(14+10*l)/1.2*(1+.04*l),1,'m'],['spiritcaster',l=>(18+12*l)*HMN(l)*HMF(HMN(l))/1.8*(1+.04*l),1,'m'],['soulburst',l=>(100+40*l)*1.6,12,'s'],['execute',l=>0,18,'s'],['colossus',l=>(120+45*l)/1.5*(18+.5*l)*(1+.04*l),45,'m'],['lord',l=>(100+30*l)*2*15*(1+.04*l),90,'m']],
+ necro:[['soulbolt',l=>(14+10*l)*HMN(l)*HMF(HMN(l)),.8,'s'],['guardian',l=>(14+10*l)/1.2*(1+.04*l),1,'m'],['spiritcaster',l=>(18+12*l)*HMN(l)*HMF(HMN(l))/1.8*(1+.04*l),1,'m'],['soulburst',l=>(100+40*l)*1.6,12,'s'],['execute',l=>0,18,'s'],['colossus',l=>(120+45*l)/1.5*(18+.5*l)*(1+.04*l),45,'m'],['lord',l=>(100+30*l)*2*15*(1+.04*l),90,'m'],['fusion',l=>((6+4*l)/.5+(16+10*l)*FZB(l)/2+(50+22*l)/4)*(10+.3*l)*(1+.04*l),40,'m']],
  war:[['bash',l=>3+.5*l,2,'p'],['rend',l=>4.5+.7*l+Math.floor((1.5+.12*l)/.5)*(.5+.05*l),5,'p'],['whirl',l=>1.8+.3*l,5,'p'],['leap',l=>2.8+.45*l,8,'p'],['quake',l=>4+.65*l,13,'p'],['ragnarok',l=>(14+l)*.5,70,'p']],
  pal:[['smite',l=>2.6+.4*l,2,'p'],['hammer',l=>(16+13*l)*HMN(l)*HMF(HMN(l))*3,4.5,'s'],['judgment',l=>(110+50*l)+4*(18+10*l),15,'s']]};
 function cpSkillDps(p,D){ const list=CPSK[p.cls]; if(!list||!p.skills)return 0; const pp={...p,D}, wav=(D.wmn+D.wmx)/2;
@@ -2929,7 +2954,13 @@ function drawMinion(q,t){
   ctx.fillStyle='rgba(0,0,0,.28)'; ctx.beginPath(); ctx.ellipse(x,y+r*.8,r*.9,r*.35,0,0,6.283); ctx.fill();
   ctx.globalAlpha=q.flash>0?1:.88; const sw=(q.atk>0)?(q.atk/.25):0;
   const MSH={guard:{h:72,hv:0},caster:{h:68,hv:9},colossus:{h:112,hv:0},dragon:{h:104,hv:7}}[q.k], MIA=MSH&&sprGet('mn_'+q.k+(q.atk>0?'_atk':'')), MIS=MSH&&(MIA||sprGet('mn_'+q.k));
-  if(MIS){ const ak=q.atk>0?Math.min(1,q.atk/(q.k==='colossus'?.3:.25)):0, ph=(q.an||0)*3, hh=MSH.h, hov=MSH.hv?MSH.hv+Math.sin(ph)*3:Math.abs(Math.sin(ph))*(big?1:2);
+  if(q.k==='fusion'){ const ph=(q.an||0)*3, ak=q.atk>0?Math.min(1,q.atk/.25):0, FA=sprGet('mn_fusion'+(q.atk>0?'_atk':'')), FI=FA||sprGet('mn_fusion');
+    { ctx.globalCompositeOperation='lighter'; const pu=.5+.5*Math.sin((q.an||0)*6); const g2=ctx.createRadialGradient(x,y,10,x,y,105); g2.addColorStop(0,'rgba(143,240,255,'+(.10+.05*pu)+')'); g2.addColorStop(.85,'rgba(143,240,255,'+(.16+.08*pu)+')'); g2.addColorStop(1,'rgba(143,240,255,0)'); ctx.fillStyle=g2; ctx.beginPath(); ctx.arc(x,y,105,0,6.283); ctx.fill(); ctx.strokeStyle='rgba(180,250,255,'+(.25+.2*pu)+')'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(x,y,105-2,0,6.283); ctx.stroke(); ctx.globalCompositeOperation='source-over'; }
+    const GI=sprGet('mn_guard'+(q.atk>0?'_atk':''))||sprGet('mn_guard'), CI=sprGet('mn_caster'+(q.atk>0?'_atk':''))||sprGet('mn_caster');
+    if(FI){ sprDraw(FI,x,y+r*.85-104*.12,104,a,{rot:Math.sin(ph*.5)*.03+ak*.12,hop:Math.abs(Math.sin(ph))*2,sy:1+Math.sin(ph*2)*.015,fx:ak*r*.35}); }
+    else if(GI&&CI){ sprDraw(CI,x-(Math.cos(a)>=0?1:-1)*22,y-34-2-Math.sin(ph*.8)*4,62,a,{rot:Math.sin(ph*.5)*.05,sy:1}); sprDraw(GI,x,y+r*.85-100*.12,100,a,{rot:Math.sin(ph*.5)*.03+ak*.12,hop:Math.abs(Math.sin(ph))*2,sy:1+Math.sin(ph*2)*.015,fx:ak*r*.35}); }
+    else { const yy=y+Math.sin(ph)*2; cball(x,yy,r,'#a8f5e4',2.6); cpoly([[x-r*.7,yy-r*.6],[x-r*.2,yy-r*1.7],[x+r*.2,yy-r*.6]],'#8ff0ff',2); cpoly([[x+r*.7,yy-r*.6],[x+r*.2,yy-r*1.7],[x-r*.2,yy-r*.6]],'#8ff0ff',2); ctx.fillStyle='#0b3a33'; ctx.fillRect(x-r*.4,yy-r*.2,r*.25,r*.22); ctx.fillRect(x+r*.15,yy-r*.2,r*.25,r*.22); } }
+  else if(MIS){ const ak=q.atk>0?Math.min(1,q.atk/(q.k==='colossus'?.3:.25)):0, ph=(q.an||0)*3, hh=MSH.h, hov=MSH.hv?MSH.hv+Math.sin(ph)*3:Math.abs(Math.sin(ph))*(big?1:2);
     sprDraw(MIS,x,y+r*.85-hh*.12,hh,a,{rot:Math.sin(ph*.5)*.03+ak*.12,hop:hov,sy:1+Math.sin(ph*2)*.015,fx:ak*r*.35});
     if(q.k==='dragon'&&sw>0){ const hx=x, hy=y+bob; ctx.strokeStyle='rgba(125,255,216,'+(.35+sw*.4)+')'; ctx.lineWidth=14; ctx.lineCap='round'; ctx.beginPath(); ctx.moveTo(hx+ca*r,hy+sa*r); ctx.lineTo(hx+ca*230,hy+sa*230); ctx.stroke(); ctx.lineCap='butt'; } }
   else if(q.k==='guard'){ const yy=y+bob;
