@@ -389,7 +389,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
-    <div class="ver" id="verT">v0.1.1.0010</div>
+    <div class="ver" id="verT">v0.1.1.0011</div>
     <div class="clist car" id="charList"></div>
     <button id="bNew" hidden></button>
     <div class="pp" id="playPanel" hidden>
@@ -745,9 +745,16 @@ function eqLook(p){ const e=p.eq; return [e.weapon?e.weapon.base:'',e.helm?e.hel
 /* ================= ITEMS ================= */
 let ITEMID=Math.floor(Math.random()*1e6);
 function biased(lo,hi,q){return Math.min(hi,lo+Math.floor((hi-lo+1)*Math.pow(Math.random(),1/q)))}
+const SKG=new Set(['all','cls','sk']);
+/* 스킬 옵션(모든 스킬/직업 스킬/개별 스킬) 굴림: 유니크=올스킬 또는 스킬 하나만, 레어=둘 다 가능(낮은 확률), 매직=아주 드물게 */
+function skillPick(slot,rar,R){ const out=[], ok=t=>{ const a=AFXBY[t]; return a.sl==='*'||a.sl.split(' ').includes(slot); }, one=()=>AFXBY[ok('cls')&&R()<.4?'cls':'sk'];
+  if(rar===3){ const r=R(); if(r<.18&&ok('all'))out.push(AFXBY.all); else if(r<.5)out.push(one()); }
+  else if(rar===2){ if(R()<.05&&ok('all'))out.push(AFXBY.all); if(R()<.13)out.push(one()); }
+  else if(rar===1){ const r=R(); if(r<.012&&ok('all'))out.push(AFXBY.all); else if(r<.06)out.push(one()); }
+  return out; }
 function rollAff(a,rar,ilvl,q,rng,fc){ /* fc: 직업 전용 아이템이면 그 직업(스킬 옵션은 그 직업 것만 붙음) */
   const R=rng||Math.random;
-  if(a.t==='all'){ const v=(rar>=2&&R()<.35)?2:1; rollAff.lq=(v-1); return {t:'all',v}; }
+  if(a.t==='all'){ const v=(R()<(rar===3?.35:rar===2?.12:0))?2:1; rollAff.lq=(v-1); return {t:'all',v}; }
   if(a.t==='cls'||a.t==='sk'){
     const cap=rar<=1?3:2, r=Math.random(); let v=r<.6?1:r<.9?2:3; v=Math.min(v,cap);
     const ks=Object.keys(CLASSES), rc=ks[Math.floor(R()*ks.length)], cls=fc||rc, o={t:a.t,v,cls};
@@ -813,17 +820,17 @@ function genItem(rar,ilvl,slot,baseName){
   if(rar===3){ it.name=spk?SPFX[spk].n:nameItem(it,rar);
     const rng=mulberry(hashStr(it.name+'|'+slot+'|'+it.base)); let pool;
     if(spk&&SPFX[spk].fx) pool=SPFX[spk].fx.map(t=>AFXBY[t]).filter(Boolean);
-    else { pool=AFX.filter(a=>a.sl==='*'||a.sl.split(' ').includes(slot));
-      for(let k=pool.length-1;k>=0;k--){ if(pool[k].t==='all'&&rng()>.25)pool.splice(k,1); }
-      for(let k=pool.length-1;k>0;k--){ const j=Math.floor(rng()*(k+1)); [pool[k],pool[j]]=[pool[j],pool[k]]; } }
-    { const pk=[]; let hasAll=false,hasSk=false; for(const a of pool){ if(pk.length>=5)break; if(a.t==='all'&&hasSk)continue; if(a.t==='sk'&&hasAll)continue; if(a.t==='all')hasAll=true; if(a.t==='sk')hasSk=true; pk.push(a); } pool=pk; }
+    else { pool=AFX.filter(a=>!SKG.has(a.t)&&(a.sl==='*'||a.sl.split(' ').includes(slot)));
+      for(let k=pool.length-1;k>0;k--){ const j=Math.floor(rng()*(k+1)); [pool[k],pool[j]]=[pool[j],pool[k]]; }
+      const sa=skillPick(slot,rar,rng); pool=sa.concat(pool.slice(0,5-sa.length)); }
+    if(spk&&SPFX[spk].fx){ const pk=[]; let hasAll=false,hasSk=false; for(const a of pool){ if(pk.length>=5)break; if(a.t==='all'&&hasSk)continue; if(a.t==='sk'&&hasAll)continue; if(a.t==='all')hasAll=true; if(a.t==='sk')hasSk=true; pk.push(a); } pool=pk; }
     for(const a of pool.slice(0,5)){ const o=rollAff(a,rar,ilvl,q,rng,fc); if(o.t==='cls'&&spk&&SPFX[spk].fcls)o.cls=SPFX[spk].fcls; it.aff.push(o); qs.push(rollAff.lq); }
   } else {
     const n=rar<0?0:rar===1?1:rar+1, used=new Set(); let g=0;
+    if(rar>=1) for(const a of skillPick(slot,rar,Math.random)){ used.add(a.t); it.aff.push(rollAff(a,rar,ilvl,q,undefined,fc)); qs.push(rollAff.lq); }
     while(it.aff.length<n&&g++<80){
-      const a=pick(AFX); if(used.has(a.t))continue;
+      const a=pick(AFX); if(used.has(a.t)||SKG.has(a.t))continue;
       if(a.sl!=='*'&&!a.sl.split(' ').includes(slot))continue;
-      if(a.t==='all'&&Math.random()<.8)continue; /* 모든 스킬 옵션은 드물게 */
       used.add(a.t); it.aff.push(rollAff(a,rar,ilvl,q,undefined,fc)); qs.push(rollAff.lq);
     }
   }
@@ -2085,12 +2092,12 @@ function ownTag(it){ const c=ownCls(it); if(!c||!CLASSES[c])return ''; const ok=
 /* 인벤 아이템 선택 시: 장착 중인 아이템보다 레벨이 높은지 낮은지 크게 표시 */
 function lvCmp(it){ if(!me||!me.eq||Object.values(me.eq).includes(it))return '';
   let cur=null; if(it.slot==='ring'){ const a=me.eq.ring1,b=me.eq.ring2; cur=(!a||!b)?null:(ilvOf(a)<=ilvOf(b)?a:b); } else cur=me.eq[it.slot]||null;
-  const box=(bg,bd,col,t)=>`<div style="margin:6px 0 2px;padding:7px 10px;border-radius:9px;background:${bg};border:1.5px solid ${bd};color:${col};font-weight:800;font-size:14px;text-align:center">${t}</div>`;
-  if(!cur)return box('rgba(90,170,255,.14)','#6aa6e8','#9fd0ff','🆕 비어 있는 칸이에요');
+  const box=(bg,bd,col,t)=>`<div style="margin:4px 0 0;padding:3px 8px;border-radius:7px;background:${bg};border:1px solid ${bd};color:${col};font-weight:700;font-size:11.5px;text-align:center">${t}</div>`;
+  if(!cur)return box('rgba(90,170,255,.14)','#6aa6e8','#9fd0ff','🆕 빈 칸');
   const a=ilvOf(it), b=ilvOf(cur), d=a-b;
-  if(d>0)return box('rgba(70,190,90,.18)','#58c466','#8df09a',`▲ 장착한 것보다 레벨 +${d} 높아요 <span style="font-weight:600;font-size:12px">(Lv ${b} → ${a})</span>`);
-  if(d<0)return box('rgba(230,70,60,.18)','#e0584c','#ff9a8e',`▼ 장착한 것보다 레벨 ${-d} 낮아요 <span style="font-weight:600;font-size:12px">(Lv ${b} → ${a})</span>`);
-  return box('rgba(160,160,160,.14)','#8a8a8a','#cfcfcf',`＝ 장착한 것과 레벨이 같아요 <span style="font-weight:600;font-size:12px">(Lv ${a})</span>`); }
+  if(d>0)return box('rgba(70,190,90,.18)','#58c466','#8df09a',`▲ 장착보다 +${d} <span style="font-weight:500;font-size:10.5px">(Lv ${b}→${a})</span>`);
+  if(d<0)return box('rgba(230,70,60,.18)','#e0584c','#ff9a8e',`▼ 장착보다 -${-d} <span style="font-weight:500;font-size:10.5px">(Lv ${b}→${a})</span>`);
+  return box('rgba(160,160,160,.14)','#8a8a8a','#cfcfcf',`＝ 장착과 같음 <span style="font-weight:500;font-size:10.5px">(Lv ${a})</span>`); }
 function itemLines(it){
   let s=`<div style="display:flex;gap:10px;align-items:center"><img src="${itemIcon(it).url}" alt="" style="width:56px;height:56px;flex:none;background:#0a0807;border:1px solid ${RARC[it.rar]};border-radius:8px"><div><div class="in" style="color:${RARC[it.rar]}">${it.enh>0?'+'+it.enh+' ':''}${esc(dn(it))}</div><div class="meta" style="color:#fff">아이템 레벨 ${ilvOf(it)}${it.enh>0?` <span style="color:#ffd84a">(기본 ${it.ilvl} + 강화 ${it.enh})</span>`:''}</div>${ownTag(it)}<div class="meta">${reqHtml(it)}</div></div></div>`+lvCmp(it);
   const bt=baseText(it); if(bt)s+=`<div>${bt}</div>`;
