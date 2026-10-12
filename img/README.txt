@@ -39,4 +39,5 @@
 
 [강령술사 소환수 이미지 — 적용 완료 (없으면 기본 그림)]
   mn_guard.png / mn_guard_atk.png (수호 영혼), mn_caster(.png/_atk) (포격 영혼), mn_colossus(.png/_atk) (고대 거인), mn_dragon(.png/_atk) (영혼 용령)
+  mn_fusion.png / mn_fusion_atk.png (영혼 융합 — 수호+포격 합체 일러스트, 없으면 두 그림을 겹쳐 그림)
   프롬프트: img/minion_prompt_necro.txt (4행×2열 → 행마다 잘라 대기/공격으로 저장, 같은 행은 같은 크기·같은 발 위치)
