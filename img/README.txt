@@ -2,6 +2,7 @@
 오른쪽을 바라보는 모습, 발이 이미지 아래쪽에 닿게, 세로 420px 안팎 권장.
 
 영웅:  hero_war.png (전사)  hero_pal.png (팔라딘)  hero_sorc.png (마법사)   [적용 완료]
+       hero_necro.png (강령술사) — 프롬프트: img/hero_necro_prompt.txt (없으면 코드가 그리는 기본 그림)
 몹:    mob_imp.png (타락자)  mob_zombie.png (좀비)  mob_skeleton.png (해골 전사)  mob_bat.png (박쥐)
        mob_archer.png (궁수)  mob_bomber.png (폭탄병)  mob_healer.png (치유사)
 보스:  mob_grak.png (묘지기 그라크)  mob_malek.png (역병 사제 말렉)  mob_morg.png (썩은 군주 모르그)
