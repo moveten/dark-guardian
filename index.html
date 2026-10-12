@@ -390,7 +390,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
-    <div class="ver" id="verT">v0.1.1.0024</div>
+    <div class="ver" id="verT">v0.1.1.0025</div>
     <div class="clist car" id="charList"></div>
     <button id="bNew" hidden></button>
     <div class="pp" id="playPanel" hidden>
@@ -1666,6 +1666,7 @@ function later(t,fn){timers.push({t,fn});}
 const minions=[]; let mnSeq=0;
 const MNK={guard:{n:'수호 영혼',r:15,spd:155,perm:1,col:'#6fe0c0',sk:'guardian'},caster:{n:'포격 영혼',r:12,spd:125,perm:1,col:'#a98bff',sk:'spiritcaster'},
   colossus:{n:'고대 거인',r:26,spd:95,col:'#9aa6b8',sk:'colossus'},fusion:{n:'융합 영혼',r:24,spd:150,col:'#8ff0ff',sk:'fusion'},dragon:{n:'영혼 용령',r:30,spd:115,col:'#7dffd8',sk:'lord'}};
+const MNDET={guard:420,caster:360}, MNLEASH=560, MNCHASE=1.25; /* 영구 소환수 교전 감지 범위(소환수 기준) / 주인과의 최대 이탈 거리 / 교전 중 이동 속도 배율 */
 const MNIDX=['guard','caster','colossus','dragon','fusion'];
 const SMFX={basic:1,sm:1}; /* 소환수 타격: 반격 태세 면제, 흡혈·특수효과 제외 */
 const lordOn=()=>!!(me&&me.buffs&&me.buffs.lord&&me.buffs.lord.t>0);
@@ -1677,7 +1678,7 @@ function summonMinion(k,lv,free,px,py){
   let mn=minions.find(q=>q.k===k);
   if(big&&k!=='fusion'){ for(let i=minions.length-1;i>=0;i--) if(!MNK[minions[i].k].perm&&minions[i].k!=='fusion'){ spark(minions[i].x,minions[i].y,K.col,14); minions.splice(i,1); } mn=null; } else if(big)mn=null;
   if(mn){ mn.hp=mn.mh=mh; mn.x=x; mn.y=y; mn.rez=0; mn.lv=lv; }
-  else { mn={i:10+(++mnSeq),k,x,y,hp:mh,mh,lv,face:me.face||0,cd:rand(.3,.7),atk:0,flash:0,rez:0,an:Math.random()*6,tt:2,t:big?(k==='dragon'?15:k==='fusion'?10+.3*lv:18+.5*lv):Infinity,bt:0}; minions.push(mn); }
+  else { mn={i:10+(++mnSeq),k,r:K.r,x,y,hp:mh,mh,lv,face:me.face||0,cd:rand(.3,.7),atk:0,flash:0,rez:0,an:Math.random()*6,tt:2,t:big?(k==='dragon'?15:k==='fusion'?10+.3*lv:18+.5*lv):Infinity,bt:0}; minions.push(mn); }
   efx.push({k:'ring',x,y,r0:6,r1:big?90:56,t:0,life:.5,col:K.col,w:big?9:6}); burst(x,y,K.col,big?36:22,big?320:220); impact(x,y,'120,230,200',big?140:80); if(!free)sfx(big?'boom':'aura'); if(big)G.shake=Math.max(G.shake,.35);
   return mn; }
 function autoSummon(){ minions.length=0; if(!me||me.cls!=='necro')return; for(const [k,sk] of [['guard','guardian'],['caster','spiritcaster']]){ const l=skLv(me,sk); if(l>0)summonMinion(k,l,true); } }
@@ -1711,14 +1712,14 @@ function updateMinions(dt){
     mn.flash=Math.max(0,mn.flash-dt); mn.atk=Math.max(0,mn.atk-dt); mn.an+=dt; mn.cd-=dt*as; mn.tt-=dt;
     if(isFinite(mn.t)){ mn.t-=dt; if(mn.t<=0&&mn.k==='fusion'){ splitFusion(mn,'time'); continue; } if(mn.t<=0){ spark(mn.x,mn.y,K.col,16); burst(mn.x,mn.y,K.col,24,240); minions.splice(i,1); continue; } }
     const dm=hyp(mn.x-me.x,mn.y-me.y); if(dm>700){ mn.x=me.x+rand(-40,40); mn.y=me.y+rand(-40,40); }
-    let t=null; if(mk&&hyp(mk.x-mn.x,mk.y-mn.y)<700)t=mk; else if(dm<(mn.k==='fusion'?600:460))t=nearestMob(mn.x,mn.y,mn.k==='caster'?300:mn.k==='fusion'?380:340);
+    let t=null; if(mk&&hyp(mk.x-mn.x,mk.y-mn.y)<700)t=mk; else if(dm<(mn.k==='fusion'?600:K.perm?MNLEASH:460))t=nearestMob(mn.x,mn.y,mn.k==='fusion'?380:(MNDET[mn.k]||340));
     let gx,gy,hold=0; /* 이동 목표 */
     if(t){ const dx=t.x-mn.x,dy=t.y-mn.y,d=hyp(dx,dy)||1; mn.face=Math.atan2(dy,dx);
       if(mn.k==='caster'){ const want=190; if(d>want+25){gx=t.x-dx/d*want;gy=t.y-dy/d*want;} else if(d<want-60){gx=mn.x-dx/d*60;gy=mn.y-dy/d*60;} else hold=1; }
       else if(mn.k==='dragon'){ const want=150; if(d>want+30){gx=t.x-dx/d*want;gy=t.y-dy/d*want;} else hold=1; }
       else { const rc=t.r+mn.r+(mn.k==='colossus'?14:8); if(d>rc){gx=t.x-dx/d*(rc-4);gy=t.y-dy/d*(rc-4);} else hold=1; } }
     else { const fa=(me.face||0)+(mn.k==='guard'?-.6:mn.k==='caster'?Math.PI*.8:mn.k==='colossus'?.5:Math.PI*1.15), fd=mn.k==='caster'?58:mn.k==='guard'?52:mn.k==='colossus'?66:80; gx=me.x+Math.cos(fa)*fd; gy=me.y+Math.sin(fa)*fd; if(hyp(gx-mn.x,gy-mn.y)<10)hold=1; }
-    if(!hold){ const dx=gx-mn.x,dy=gy-mn.y,d=hyp(dx,dy)||1, sp=K.spd*(d>240?1.9:1)*dt, st=Math.min(d,sp); mn.x=clamp(mn.x+dx/d*st,16,WW-16); mn.y=clamp(mn.y+dy/d*st,16,WH-16); if(!t)mn.face=Math.atan2(dy,dx); }
+    if(!hold){ const dx=gx-mn.x,dy=gy-mn.y,d=hyp(dx,dy)||1, sp=K.spd*(d>240?1.9:1)*(t&&K.perm?MNCHASE:1)*dt, st=Math.min(d,sp); mn.x=clamp(mn.x+dx/d*st,16,WW-16); mn.y=clamp(mn.y+dy/d*st,16,WH-16); if(!t)mn.face=Math.atan2(dy,dx); }
     if(!t)continue;
     const d2=hyp(t.x-mn.x,t.y-mn.y);
     if(mn.k==='guard'){ if(mn.tt<=0){ mn.tt=4; mnTaunt(mn,170,3); }
