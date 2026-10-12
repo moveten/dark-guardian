@@ -389,7 +389,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
-    <div class="ver" id="verT">v0.1.1.0003</div>
+    <div class="ver" id="verT">v0.1.1.0004</div>
     <div class="clist car" id="charList"></div>
     <button id="bNew" hidden></button>
     <div class="pp" id="playPanel" hidden>
@@ -791,12 +791,12 @@ function statLack(it){ const r=reqStats(it), out=[]; if(!me||!me.stats)return ou
 function reqHtml(it){ const r=reqStats(it); const lv=me&&me.lvl<reqLv(it); let h=`<span style="color:${lv?'#e07060':'#9fd18b'}">필요 레벨 ${reqLv(it)}${lv?` (현재 ${me.lvl})`:''}</span>`;
   for(const s in r){ const c=curStat(s), bad=c<r[s]; h+=` · <span style="color:${bad?'#e07060':'#9fd18b'}">${STN[s]} ${r[s]}${bad?` (현재 ${c})`:''}</span>`; } return h; }
 const reqLv=it=>it.req||Math.max(1,Math.round((it.ilvl||1)*.6)+[0,0,1,2][Math.max(0,it.rar|0)]);
-function genItem(rar,ilvl,slot,baseName){
+function genItem(rar,ilvl,slot,baseName,selIlvl){ /* selIlvl: 특수 유니크 후보를 고를 때 쓰는 원래 아이템 레벨(보스 상향 드랍이 유니크 종류를 바꾸지 않게) */
   slot=slot||pick(['weapon','weapon','helm','armor','amulet','ring','ring','shield','shield']);
   const oc=slot==='shield'?((me&&me.cls)||'pal'):null;
   let spk=null;
   /* 직업 전용템(보조장비·직업 전용 유니크)은 그 직업 스킬 옵션만 */
-  if(rar===3&&!baseName&&Math.random()<SPCH){ const c=Object.keys(SPFX).filter(k=>SPFX[k].slot===slot&&ilvl>=SPFX[k].il); if(c.length){ spk=pick(c); baseName=SPFX[spk].base; } }
+  if(rar===3&&!baseName&&Math.random()<SPCH){ const c=Object.keys(SPFX).filter(k=>SPFX[k].slot===slot&&(selIlvl==null?ilvl:selIlvl)>=SPFX[k].il); if(c.length){ spk=pick(c); baseName=SPFX[spk].base; } }
   const bl=slot==='shield'?(OFFB[oc]||OFFB.pal):BASES[slot]; let b; const fc=oc||(spk&&SPFX[spk].fcls)||null;
   if(baseName) b=bl.find(x=>x.n===baseName)||SPBASE[baseName];
   if(!b){const mi=Math.min(bl.length-1,Math.floor(ilvl/3)+2); b=bl[ri(0,mi)];}
@@ -1378,7 +1378,7 @@ function onKill(x,y,xp,tier,ilvl,type,lf){
     if(tier>=2){ if(i===1&&r<1)r=1; if(i===2&&r<2)r=Math.random()<.9?2:3; }
     /* 보스: 일정 확률로 '다음 스테이지급' 아이템 레벨로 드랍 (등급 확률은 그대로) */
     let il=ilvl; if(tier>=2&&r>=0&&Math.random()<BOSSUP){ const si=STAGES.indexOf(G.stg), nx=STAGES[si+1]; il=nx?nx.icap:ilvl+6; if(il>ilvl)up++; else il=ilvl; }
-    if(r>=0) dropItem(genItem(r,il),x+rand(-24,24),y+rand(-24,24));
+    if(r>=0) dropItem(genItem(r,il,undefined,undefined,ilvl),x+rand(-24,24),y+rand(-24,24));
   }
   if(up)later(.5,()=>toast(`✨ 우두머리가 다음 스테이지급 장비를 ${up}개 떨어뜨렸어요!`,'#ffd84a'));
 }
