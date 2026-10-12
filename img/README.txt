@@ -36,3 +36,7 @@
 
 [일반 몹 이미지 — 적용 완료] mob_imp/zombie/skeleton/bat/archer/bomber/healer .png + _atk (스테이지 1), _s2 / _s3 접미사는 스테이지 2·3 (없으면 스테이지 1 이미지로 대체)
 [필드 배경 — 적용 완료] field_<스테이지>_<번호>.jpg (1000×1000, 15장). 이미지가 없으면 코드가 그리는 기본 바닥을 사용
+
+[강령술사 소환수 이미지 — 코드 적용 완료, 이미지 올리면 자동 사용 / 없으면 기본 그림]
+  mn_guard.png / mn_guard_atk.png (수호 영혼), mn_caster(.png/_atk) (포격 영혼), mn_colossus(.png/_atk) (고대 거인), mn_dragon(.png/_atk) (영혼 용령)
+  프롬프트: img/minion_prompt_necro.txt (4행×2열 → 행마다 잘라 대기/공격으로 저장, 같은 행은 같은 크기·같은 발 위치)
