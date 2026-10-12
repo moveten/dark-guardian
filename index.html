@@ -389,7 +389,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
-    <div class="ver" id="verT">v0.1.1.0011</div>
+    <div class="ver" id="verT">v0.1.1.0012</div>
     <div class="clist car" id="charList"></div>
     <button id="bNew" hidden></button>
     <div class="pp" id="playPanel" hidden>
@@ -748,13 +748,13 @@ function biased(lo,hi,q){return Math.min(hi,lo+Math.floor((hi-lo+1)*Math.pow(Mat
 const SKG=new Set(['all','cls','sk']);
 /* 스킬 옵션(모든 스킬/직업 스킬/개별 스킬) 굴림: 유니크=올스킬 또는 스킬 하나만, 레어=둘 다 가능(낮은 확률), 매직=아주 드물게 */
 function skillPick(slot,rar,R){ const out=[], ok=t=>{ const a=AFXBY[t]; return a.sl==='*'||a.sl.split(' ').includes(slot); }, one=()=>AFXBY[ok('cls')&&R()<.4?'cls':'sk'];
-  if(rar===3){ const r=R(); if(r<.18&&ok('all'))out.push(AFXBY.all); else if(r<.5)out.push(one()); }
-  else if(rar===2){ if(R()<.05&&ok('all'))out.push(AFXBY.all); if(R()<.13)out.push(one()); }
+  if(rar===3){ const r=R(); if(r<.10&&ok('all'))out.push(AFXBY.all); else if(r<.38)out.push(one()); }
+  else if(rar===2){ if(R()<.035&&ok('all'))out.push(AFXBY.all); if(R()<.12)out.push(one()); }
   else if(rar===1){ const r=R(); if(r<.012&&ok('all'))out.push(AFXBY.all); else if(r<.06)out.push(one()); }
   return out; }
 function rollAff(a,rar,ilvl,q,rng,fc){ /* fc: 직업 전용 아이템이면 그 직업(스킬 옵션은 그 직업 것만 붙음) */
   const R=rng||Math.random;
-  if(a.t==='all'){ const v=(R()<(rar===3?.35:rar===2?.12:0))?2:1; rollAff.lq=(v-1); return {t:'all',v}; }
+  if(a.t==='all'){ const v=(R()<(rar===3?.2:rar===2?.08:0))?2:1; rollAff.lq=(v-1); return {t:'all',v}; }
   if(a.t==='cls'||a.t==='sk'){
     const cap=rar<=1?3:2, r=Math.random(); let v=r<.6?1:r<.9?2:3; v=Math.min(v,cap);
     const ks=Object.keys(CLASSES), rc=ks[Math.floor(R()*ks.length)], cls=fc||rc, o={t:a.t,v,cls};
