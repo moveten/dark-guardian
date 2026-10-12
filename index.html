@@ -389,7 +389,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
-    <div class="ver" id="verT">v0.1.0.0066</div>
+    <div class="ver" id="verT">v0.1.0.0067</div>
     <div class="clist car" id="charList"></div>
     <button id="bNew" hidden></button>
     <div class="pp" id="playPanel" hidden>
@@ -561,7 +561,7 @@ const SK={
   {k:'might',e:'💪',n:'신념의 오라',s:'신념',req:15,mp:0,cd:.3,el:'#ffb86b',aura:1,d:l=>{const b=mightBonus(l);return `켜면 나와 주변 동료에게 적용. 주는 피해 +${b.dmg}%, 공격 속도 +${b.ias}%, 이동 속도 +${b.ms}%`}},
   {k:'guard',e:'🛡️',n:'수호 오라',s:'수호',req:18,mp:0,cd:.3,el:'#8fb6ff',aura:1,d:l=>`켜면 나와 주변 동료 방어력 +${30+6*l}%`},
   {k:'zeal',e:'🙏',n:'신앙 증폭',s:'증폭',req:24,mp:0,cd:0,el:'#ffd76a',passive:1,d:l=>`패시브: 내 팔라딘 스킬 피해 +${15+5*l}%, 지속시간 +${10+4*l}%`},
-  {k:'divine',e:'🩸',n:'세크리파이스',s:'희생',req:99,mp:0,cd:100,el:'#ff4a4a',rg:400,d:l=>`[궁극기] 자신의 생명력과 마나를 절반으로 희생해, 필드 위 모든 적(우두머리 포함)의 현재 생명력을 절반으로 만들어요. (내 생명력은 최소 1이 남아요)`},
+  {k:'divine',e:'🩸',n:'세크리파이스',s:'희생',req:99,mp:0,cd:100,el:'#ff4a4a',rg:400,d:l=>`[궁극기] 자신의 생명력과 마나를 절반으로 희생해, 필드 위 모든 적의 현재 생명력을 깎아요. 일반 몬스터는 ${Math.round(Math.min(.9,.5+.02*(Math.max(1,l)-1))*100)}%(레벨당 +2%, 최대 90%), 우두머리는 50% 고정. (내 생명력은 최소 1이 남아요)`},
   {k:'judgment',e:'⚖️',n:'천벌',s:'천벌',req:30,mp:20,cd:15,el:'#fff7d6',rg:380,d:l=>`적 최대 5명에게 빛기둥, 기본 피해 ${110+50*l}. 성역이 2초간 남아 0.5초마다 ${18+10*l}`}]
 };
 const HMN=l=>l>=14?3:l>=7?2:1, HMF=n=>[1,.7,.55][n-1]||.55; /* 망치 개수/개당 피해 배율 */
@@ -1036,7 +1036,7 @@ function hostNet(){
   const h=Array.isArray(pr.h)?pr.h:[];
   for(const e of h){ if(!Array.isArray(e)||e[0]<=lastHit)continue; lastHit=e[0];
     const m=G.mobs.find(x=>x.id===e[1]&&!x.dead); if(!m)continue;
-    let dm=clamp(+e[2]||0,0,99999); if(m.boss&&m.counter>0)dm*=.05;
+    let dm=clamp(+e[2]||0,0,99999);
     if(m.boss){ addThreat(m,2,dm*(TMUL[ally&&ally.cls]||1)+(e[4]?m.max*.04:0)); if(e[4])m.taunt={i:2,t:5}; }
     applyDmg(m,dm,clamp(+e[3]||0,0,5),(e[5]|0)||(e[6]|0)?{stun:clamp((+e[5]||0)/10,0,1.2),burn:clamp((+e[6]||0)/10,0,1.5),bd:clamp(+e[7]||0,0,dm*.7)}:null); }
 }
@@ -1078,7 +1078,7 @@ function guestEvent(e){
   else if(t==='bx'){ bombFx(e[2],e[3],e[4]); }
   else if(t==='ann'){ announce('🔥 총공세! 바닥에 불이 번집니다','#ff9a6a'); }
   else if(t==='hv'){ halveWarn(); }
-  else if(t==='cn'){ announce('⚔️ 반격 태세! 공격을 멈추세요!','#ffb347'); sfx('block'); }
+  else if(t==='cn'){ announce('⚔️ 반격 태세! 스킬을 멈추세요 (일반공격은 OK)','#ffb347'); sfx('block'); }
   else if(t==='ag'){ announce('👁️ 우두머리가 시선을 돌렸어요! 도발로 되찾으세요','#ff9a7a'); }
   else if(t==='f'){ spawnFire(e[2],e[3],e[4],e[5],e[6],true); }
   else if(t==='r'){ openRelic(); }
@@ -1286,7 +1286,7 @@ function bossAI(m,dt,pls,sf){
       else if(t.kind==='nova'){ for(const p of pls){ if(hyp(p.x-t.x,p.y-t.y)<t.r) mobHitPlayer(p.i,m.dmg*1.2,'slow',3); } pushEv(['s',Math.round(t.x),Math.round(t.y),t.r]); slamFx(t.x,t.y,t.r,'#8a5ad0'); }
       else if(t.kind==='stack'){ const ins=pls.filter(p=>hyp(p.x-t.x,p.y-t.y)<t.r); const tot=pls.length>1?m.dmg*3.6:m.dmg*1.9; if(ins.length){ for(const p of ins) mobHitPlayer(p.i,tot/ins.length); if(pls.length>1&&ins.length>1&&G.mode!=='guest')announce('🤝 함께 맞아서 피해를 나눴어요','#9fd0ff'); } pushEv(['s',Math.round(t.x),Math.round(t.y),t.r]); slamFx(t.x,t.y,t.r,'#5a8aff'); }
       else if(t.kind==='halve'){ for(const p of pls){ if(hyp(p.x-t.x,p.y-t.y)<t.r){ if(p.i===1)applyStatus('halve',0); else pushEv(['x',2,'halve',0]); } } pushEv(['s',Math.round(t.x),Math.round(t.y),t.r]); slamFx(t.x,t.y,t.r,'#c040e0'); G.shake=1; }
-      else if(t.kind==='counter'){ m.counter=2.6; pushEv(['cn',1]); announce('⚔️ 반격 태세! 공격을 멈추세요!','#ffb347'); sfx('block'); }
+      else if(t.kind==='counter'){ m.counter=2.6; pushEv(['cn',1]); announce('⚔️ 반격 태세! 스킬을 멈추세요 (일반공격은 OK)','#ffb347'); sfx('block'); }
       else if(t.k==='slam'){ for(const p of pls){ if(hyp(p.x-t.x,p.y-t.y)<t.r) mobHitPlayer(p.i,m.dmg*1.6,'stun',1.2); }
         pushEv(['s',Math.round(t.x),Math.round(t.y),t.r]); slamFx(t.x,t.y,t.r); }
       else { const dx=t.tx-t.x,dy=t.ty-t.y,d=hyp(dx,dy)||1; m.charge={dx:dx/d,dy:dy/d,t:Math.min(.75,450/620),hit:{}}; }
@@ -1400,13 +1400,13 @@ function zealMul(){const l=me.cls==='pal'?skLv(me,'zeal'):0; return l?{d:1+(15+5
 function buffDmg(){let v=0; const b=me.buffs; if(b.vil&&b.vil.t>0)v+=b.vil.v; if(b.shout&&b.shout.t>0)v+=b.shout.v; if(b.berserk&&b.berserk.t>0)v+=b.berserk.v; return v;}
 function critRoll(v){const c=Math.random()*100<me.D.crit; return {v:c?v*1.5:v,crit:c};}
 function physDmg(mult){const D=me.D; const w=ri(D.wmn,D.wmx)+D.dmg; return critRoll(w*(1+D.str/100+D.dmgPct/100+buffDmg())*mult*(D.sp.rage&&me.hp<D.maxHp*.5?1.3:1));}
-function spellDmg(base){const D=me.D; return critRoll(base*(1+D.ene/100+D.dmgPct/200+buffDmg())*(1+((D.wmn+D.wmx)/2)/35)*(D.sp.tome?1.2:1));}
+function spellDmg(base){const D=me.D; return critRoll(base*(1+D.ene/100+D.dmgPct/100+buffDmg())*(1+((D.wmn+D.wmx)/2)/35)*(D.sp.tome?1.2:1));}
 function guardMul(){let g=0; if(me.aura==='guard')g=Math.max(g,(30+6*skLv(me,'guard'))/100);
   if(ally&&!ally.lobby&&!ally.dead&&ally.aura==='guard'&&hyp(ally.x-me.x,ally.y-me.y)<320)g=Math.max(g,(30+6*ally.al)/100); return 1+g;}
 function applyStatus(kind,dur){ if(me.dead||me.god>0)return;
   if(kind==='stun'){ if(me.stunImm>0)return; me.stun=dur; me.stunImm=dur+2.5; addNum(me.x,me.y-40,'💫 기절!','#ffd84a',true); }
   else if(kind==='slow'){ me.slowP=Math.max(me.slowP||0,dur); addNum(me.x,me.y-40,'🐌 둔화','#8fdcff',false); }
-  else if(kind==='halve'){ const loss=Math.floor(me.hp/2); if(loss>0){ me.hp=Math.max(1,me.hp-loss); me.hurt=.3; addNum(me.x,me.y-44,'☠️ -50%','#e070ff',true); spark(me.x,me.y,'#c040e0',24); sfx('hurt'); } }
+  else if(kind==='halve'){ const loss=Math.floor(me.D.maxHp/2); /* 현재가 아니라 '최대 생명력'의 50%가 고정 피해 — 남은 체력이 50% 이하면 즉사 */ if(loss>0){ me.hp-=loss; me.hurt=.3; addNum(me.x,me.y-44,'☠️ -'+loss,'#e070ff',true); spark(me.x,me.y,'#c040e0',24); sfx('hurt'); G.shake=Math.max(G.shake,.5); if(me.hp<=0)goDown(); } }
   else if(kind==='mdrain'){ if(me.mp>0){ me.mp=Math.max(0,me.mp-me.D.maxMp*dur*Math.max(.3,1/(1+(me.D.ene||0)/120))); me.drainT=.4; if(!(me.dnT>0)){ me.dnT=.7; addNum(me.x,me.y-44,'🌀 마나 흡수','#b070ff',false); } if(!G.mdw){ G.mdw=1; announce('🌀 마나 흡수 정예! 마나가 빨려나가요. 거리를 벌리거나 처치하세요','#c090ff'); } } }
   else if(kind==='poison'){ me.poison=Math.max(me.poison||0,dur); addNum(me.x,me.y-40,'☠️ 중독','#7ad04a',false); } }
 function takeDmg(raw,fire){
@@ -1529,7 +1529,8 @@ function doCast(key,range,lv){
   castSkill(me,key,true,tx,ty,lv,t);
   fxQ.push([++fxSeq,key,Math.round(tx),Math.round(ty),lv]); if(fxQ.length>6)fxQ.shift();
 }
-function counterHit(m){ if(T-(me.cLast||-9)<.6||me.dead)return; me.cLast=T; addNum(me.x,me.y-44,'⚔️ 반격!','#ff8a3a',true); efx.push({k:'ring',x:me.x,y:me.y,r0:8,r1:50,t:0,life:.35,col:'#ff8a3a',w:7}); takeDmg(me.D.maxHp*.15); }
+/* 반격 태세: 일반공격(자동)은 그대로 들어가고, 스킬로 때리면 그 피해를 되돌려받음(최소 4% ~ 최대 15%) */
+function counterHit(m,v){ if(T-(me.cLast||-9)<.6||me.dead)return; me.cLast=T; const mh=me.D.maxHp, rf=Math.max(mh*.04,Math.min(mh*.15,v||0)); addNum(me.x,me.y-44,'⚔️ 반격!','#ff8a3a',true); efx.push({k:'ring',x:me.x,y:me.y,r0:8,r1:50,t:0,life:.35,col:'#ff8a3a',w:7}); takeDmg(rf); }
 const LVP0={ex:0,gap:0,dm:1,tk:1,miss:0};
 /* 장비 레벨 페널티: 착용 중인 7칸의 아이템 레벨 총합(강화 1단계 = +1.5, 빈 칸 = 0)을 스테이지 권장 합(칸당 icap-12)과 비교해 주는 피해·받는 피해에 똑같이 반영 */
 const GP0={wm:1,tk:1,gl:0,sum:0,need:0,slots:7};
@@ -1547,7 +1548,7 @@ function hitMob(m,r,slow,tn,fx){
   const raw=!!(fx&&fx.raw); /* 고정 비율 피해(세크리파이스)는 장비·레벨 보정과 반격 태세를 무시 */
   if(!raw){ const gp=gearPen(); if(gp.wm!==1)r={v:r.v*gp.wm,crit:r.crit}; }
   if(!raw){ const P=lvPen(); if(P.ex){ if(Math.random()<P.miss){ addNum(m.x,m.y-m.r-6,'MISS','#9aa0aa',false); return; } r={v:r.v*P.dm,crit:r.crit}; } else if(P.over){ r={v:r.v*P.dm,crit:r.crit}; } }
-  if(!raw&&m.boss&&m.counter>0){ counterHit(m); r={v:r.v*.05,crit:false}; }
+  if(!raw&&m.boss&&m.counter>0&&!(fx&&fx.basic)&&!G.inProc){ counterHit(m,r.v); r={v:0,crit:false}; } /* 스킬 피해는 보스에게 안 들어가고 나에게 반사 */
   const dmg=Math.max(1,Math.round(r.v)); const sp=me.D&&me.D.sp; if(sp&&sp.frost&&Math.random()<.2&&!G.inProc) slow=Math.max(slow||0,2);
   m.flash=.12; addNum(m.x,m.y-m.r-6,dmg,r.crit?'#ffd34d':'#f3eadb',r.crit);
   m.sq=r.crit?.14:.09; sfx(r.crit?'crit':'hit');
@@ -1567,7 +1568,7 @@ function knock(m,ox,oy,f){ if(G.mode==='guest'||m.boss)return; const dx=m.x-ox,d
 function proj(o){projs.push(Object.assign({life:1,r:6,hits:new Set(),pierce:false},o));}
 function later(t,fn){timers.push({t,fn});}
 
-const ATKM=.6;
+const ATKM=.6, BASICFX={basic:1};
 const HFR=l=>Math.min(112,46+4*l); /* 성화 오라 범위: 레벨 올려도 112까지 */
 const hfMul=l=>l<=10?.55+.045*l:1+.05*(l-10);
 function castSkill(o,key,real,tx,ty,lv,tgt){
@@ -1577,9 +1578,9 @@ function castSkill(o,key,real,tx,ty,lv,tgt){
   switch(key){
   case 'atk':
     if(C.melee){ efx.push({k:'swing',o,a:ang,t:0,life:.2,col:C.col});
-      if(real){const m=nearestMob(o.x,o.y,105); if(m){ const hf=(o===me&&me.aura==='holyfire'), hl=hf?skLv(me,'holyfire'):0, am=hf?hfMul(hl):1; hitMob(m,physDmg(am*ATKM)); if(hf){ const R=HFR(hl); efx.push({k:'ring',x:m.x,y:m.y,r0:10,r1:R,t:0,life:.25,col:'#ffb347',w:6}); for(const q of mobsIn(m.x,m.y,R).filter(q=>q!==m)) hitMob(q,physDmg(am*.6*ATKM)); } }} }
+      if(real){const m=nearestMob(o.x,o.y,105); if(m){ const hf=(o===me&&me.aura==='holyfire'), hl=hf?skLv(me,'holyfire'):0, am=hf?hfMul(hl):1; hitMob(m,physDmg(am*ATKM),0,false,BASICFX); if(hf){ const R=HFR(hl); efx.push({k:'ring',x:m.x,y:m.y,r0:10,r1:R,t:0,life:.25,col:'#ffb347',w:6}); for(const q of mobsIn(m.x,m.y,R).filter(q=>q!==m)) hitMob(q,physDmg(am*.6*ATKM),0,false,BASICFX); } }} }
     else proj({x:o.x+dx*14,y:o.y+dy*14,vx:dx*560,vy:dy*560,r:6,life:.5,col:'#c9b8ff',kind:'bolt',trail:'170,150,255',real,
-      hit:m=>hitMob(m,physDmg((1+me.D.ene/150)*ATKM))});
+      hit:m=>hitMob(m,physDmg((1+me.D.ene/150)*ATKM),0,false,BASICFX)});
     break;
   case 'bash': case 'smite':
     efx.push({k:'swing',o,a:ang,t:0,life:.25,col:s.el,big:1});
@@ -1650,8 +1651,9 @@ function castSkill(o,key,real,tx,ty,lv,tgt){
     for(let i=0;i<3;i++) later(i*.2,()=>{ efx.push({k:'ring',x:o.x,y:o.y,r0:20,r1:520,t:0,life:.8,col:i===1?'#ffb0a0':'#ff3a3a',w:12}); impact(o.x,o.y,'255,70,70',280); burst(o.x,o.y,'#ff8a8a',36,420); });
     G.shake=Math.max(G.shake,.9);
     if(real){ me.hp=Math.max(1,me.hp*.5); me.mp=me.mp*.5; addNum(me.x,me.y-44,'🩸 세크리파이스','#ff8a8a',true);
-      later(.35,()=>{ let n=0; for(const m of G.mobs){ if(m.dead)continue; const dm=Math.floor(m.hp*.5); if(dm<1)continue; n++; hitMob(m,{v:dm,crit:false},0,false,{raw:1}); burst(m.x,m.y,'#ff4a4a',12,260); efx.push({k:'ring',x:m.x,y:m.y,r0:10,r1:m.r*2.4,t:0,life:.5,col:'#ff6a6a',w:6}); }
-        if(n)toast(`세크리파이스! 적 ${n}마리의 생명력이 절반이 되었어요`,'#ff8a8a'); }); }
+      const dvF=Math.min(.9,.5+.02*(lv-1)); /* 일반 몬스터: Lv1 50% → 레벨당 +2% (최대 90%), 우두머리는 50% 고정 */
+      later(.35,()=>{ let n=0; for(const m of G.mobs){ if(m.dead)continue; const dm=Math.floor(m.hp*(m.boss?.5:dvF)); if(dm<1)continue; n++; hitMob(m,{v:dm,crit:false},0,false,{raw:1}); burst(m.x,m.y,'#ff4a4a',12,260); efx.push({k:'ring',x:m.x,y:m.y,r0:10,r1:m.r*2.4,t:0,life:.5,col:'#ff6a6a',w:6}); }
+        if(n)toast(`세크리파이스! 적 ${n}마리의 생명력이 크게 깎였어요 (일반 ${Math.round(dvF*100)}% · 우두머리 50%)`,'#ff8a8a'); }); }
     break;
   case 'armageddon':
     for(let i=0;i<14;i++) later(i*.28,()=>{
@@ -2075,7 +2077,7 @@ function renderStat(){
   const D=me.D, S=[['str','힘','물리 피해 +1% · 무거운 장비 착용'],['dex','민첩','공격 속도 +0.25% · 치명타 +0.12% · 방어력 +0.5'],['vit','체력','생명력 +4 · 받는 피해 -0.12%'],['ene','에너지','마나 +1 · 마법 피해 +1% · 쿨감 0.1%']];
   const mult=1+(D.str+D.dmgPct)/100, aMin=Math.round((D.wmn+D.dmg)*mult*(me.cls==='sorc'?1+D.ene/150:1)), aMax=Math.round((D.wmx+D.dmg)*mult*(me.cls==='sorc'?1+D.ene/150:1)), aAvg=(aMin+aMax)/2, cr=D.crit/100;
   const k1=SK[me.cls][0], l1=Math.max(1,skLv(me,k1.k)); let s1=aAvg;
-  if(k1.k==='bash')s1=aAvg*(3+.5*l1); else if(k1.k==='smite')s1=aAvg*(2.6+.4*l1)+8+7*l1; else if(k1.k==='fireball')s1=(18+13*l1)*(1+D.ene/100+D.dmgPct/200);
+  if(k1.k==='bash')s1=aAvg*(3+.5*l1); else if(k1.k==='smite')s1=aAvg*(2.6+.4*l1)+8+7*l1; else if(k1.k==='fireball')s1=(18+13*l1)*(1+D.ene/100+D.dmgPct/100);
   const dpsT=Math.round(aAvg*ATKM*(1+cr*.5)/D.atkInt);
   let h=''; if(!SKM) h+=`<div class="box"><h3>⚔️ 실제 데미지</h3><div class="row"><span class="k">기본 공격 피해</span><span><b style="color:#ffd84a;font-size:17px">${Math.round(aMin*ATKM)}–${Math.round(aMax*ATKM)}</b></span></div><div class="row"><span class="k">치명타 시 (${D.crit}%)</span><span>${Math.round(aMin*1.5*ATKM)}–${Math.round(aMax*1.5*ATKM)}</span></div><div class="row"><span class="k">${esc(k1.n)} (1번 스킬 Lv ${l1})</span><span>${Math.round(s1)}</span></div><div class="row"><span class="k">초당 피해 (기본 공격)</span><span><b style="color:#ffd84a">${dpsT}</b></span></div></div>`;
 if(!SKM){
