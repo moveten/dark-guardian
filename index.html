@@ -138,8 +138,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
 .sheet header h2{white-space:nowrap;font-family:var(--f-disp);font-weight:800;font-size:15px;margin:0;letter-spacing:.04em}
 .sheet .x{background:none;border:1px solid var(--line2);border-radius:6px;width:36px;height:36px;font-size:18px}
 .sbody{overflow:auto;touch-action:pan-y;padding:12px 14px;display:grid;gap:14px;flex:1 1 auto;min-height:0;align-content:start}
-.bag{grid-template-columns:minmax(0,230px) minmax(0,1fr)}
-@media (max-width:560px){.bag{grid-template-columns:1fr}}
+.bag{grid-template-columns:minmax(0,1fr)} /* 넓은 화면에서도 가방 전체 너비 사용 */
+.up{position:absolute;right:2px;bottom:0;font-size:11px;line-height:1;font-style:normal;font-weight:900;color:#4dff6a;text-shadow:0 0 3px #000,0 0 3px #000,0 0 5px rgba(60,255,100,.7);z-index:2;pointer-events:none}.up.hi{bottom:13px}
 .eq{display:grid;grid-template-columns:repeat(4,56px);gap:5px;align-content:start;justify-content:start}
 .eq .slot{touch-action:pan-y;width:100%}.cell{touch-action:pan-y}
 .slot,.cell{position:relative;aspect-ratio:1;max-width:100%;background:#0f0b09;border:1px solid var(--line);border-radius:6px;display:grid;place-items:center;padding:0}
@@ -150,7 +150,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
 .slot.sel,.cell.sel{outline:2px solid var(--gold);outline-offset:1px}
 .sktabs{display:flex;gap:8px}.sktabs button{flex:1;min-height:46px;border:1px solid var(--line2);border-radius:10px;background:#0f0b09;font-size:15px;font-weight:800}.sktabs button[aria-pressed="true"]{border-color:var(--gold);color:var(--gold);background:var(--panel2)}
 #dock .hb[aria-pressed="true"]{border-color:var(--gold);background:var(--panel2)}#dock .hb[aria-pressed="true"] .lb{color:var(--gold)}
-.sbody.bag .bagtop{position:sticky;top:-8px;z-index:3;background:var(--panel);padding:8px 0 6px;margin:-8px 0 0;box-shadow:0 6px 8px -4px rgba(0,0,0,.6)}.sbody.bag{padding:8px 12px;gap:8px}.sbody.bag .eq{grid-template-columns:repeat(7,1fr);gap:4px;justify-content:stretch}.sbody.bag .inv{gap:4px}.sbody.bag .eq .slot .sl{font-size:8.5px}
+.sbody.bag .bagtop{position:sticky;top:-8px;z-index:3;background:var(--panel);padding:8px 0 6px;margin:-8px 0 0;box-shadow:0 6px 8px -4px rgba(0,0,0,.6)}.sbody.bag{padding:8px 12px;gap:8px}.sbody.bag .eq{grid-template-columns:repeat(7,minmax(0,64px));gap:4px;justify-content:start}.sbody.bag .inv{gap:4px;grid-template-columns:repeat(auto-fill,minmax(44px,60px));justify-content:start}.sbody.bag .eq .slot .sl{font-size:8.5px}
 .inv{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:5px;align-content:start}
 .detail{background:#0f0b09;border:1px solid var(--line);border-radius:8px;padding:12px;font-size:13px;line-height:1.6;min-height:60px}
 .detail .in{font-family:var(--f-disp);font-weight:800;font-size:17px}
@@ -389,7 +389,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
-    <div class="ver" id="verT">v0.1.1.0013</div>
+    <div class="ver" id="verT">v0.1.1.0014</div>
     <div class="clist car" id="charList"></div>
     <button id="bNew" hidden></button>
     <div class="pp" id="playPanel" hidden>
@@ -1922,7 +1922,8 @@ function usePot(){ if(!G.inGame||me.dead)return; if(me.pot<=0&&me.potBuy<=0){toa
 $('#bRev').addEventListener('pointerdown',e=>{e.preventDefault(); useRevive();});
 function useRevive(){ if(!G.inGame)return; if(!me.dead){toast('쓰러졌을 때 사용할 수 있어요');return;} if(me.out&&revItems()<=0)return; if(revItems()<=0){toast('부활 아이템이 없어요. 상점에서 살 수 있어요','#e07060');return;}
   if(G.freeRev>0)G.freeRev--; else me.rev--; reviveMe(.6); saveChar(); toast('부활!','#ffd84a'); }
-addEventListener('keydown',e=>{ if(e.target.tagName==='INPUT')return; const k=e.key.toLowerCase(); keys[k]=true;
+addEventListener('keydown',e=>{ if(e.key==='Escape'){ /* ESC: 열린 창을 닫음 (팝업 → 시트 순) */ const md=$('#modal'); if(md&&!md.hidden){ closeModal(); e.preventDefault(); return; } const sh=$('#sheet'); if(sh&&!sh.hidden){ closeSheet(); e.preventDefault(); return; } }
+  if(e.target.tagName==='INPUT')return; const k=e.key.toLowerCase(); keys[k]=true;
   if(!G.inGame)return;
   if(k>='1'&&k<='7'&&!e.repeat){const s=SK[me.cls][+k-1]; if(s)tryUse(s.k,false);}
   if(k==='q')usePot(); if(k==='r')useRevive(); if(k==='i')openSheet('bag'); if(k==='c')openSheet('stat'); if(k==='escape')closeSheet(); });
@@ -1991,7 +1992,7 @@ const ENHBD=n=>n>=10?'#ffe27a':n>=9?'#ff7ad9':n>=7?'#b57aff':n>=5?'#5ab0ff':n>=3
 function cellHtml(it,cls,extra){
   if(!it) return `<button class="${cls}" ${extra||''}></button>`;
   const lock=!canWear(it);
-  return `<button class="${cls}${selItem&&selItem.it===it?' sel':''}${lock?' lock':''}" ${extra||''} style="border:2px solid ${lock?'#a33a30':it.enh>0?ENHBD(it.enh):RBD[it.rar]};background:${RBG[it.rar]};${it.enh>=3?`box-shadow:0 0 ${it.enh>=10?9:it.enh>=7?7:5}px ${ENHBD(it.enh)}${it.enh>=5?'':' inset'};`:''}${it.enh>=3?'':it.rar===3?'box-shadow:0 0 8px rgba(255,150,50,.5) inset;':it.rar===2?'box-shadow:0 0 6px rgba(255,226,77,.3) inset;':''}" aria-label="${esc(it.name)}"><img src="${itemIcon(it).url}" alt="" style="width:86%;height:86%;pointer-events:none;${lock?'filter:grayscale(.25) brightness(.92)':''}">${lock?`<i class="rq">${it.slot==='shield'&&me.cls!=='pal'?'🚫':me.lvl<reqLv(it)?'Lv'+reqLv(it):STN[statLack(it)[0][0]]+statLack(it)[0][1]}</i>`:''}${it.lock?'<i class="lk">🔒</i>':''}${it.isNew?'<i class="nw">NEW</i>':''}${it.enh>0?`<i class="en">+${it.enh}</i>`:''}${it.enh>=5?`<i class="gl ${it.enh>=10?'t10':it.enh>=7?'t7':'t5'}"></i>`:''}</button>`;
+  return `<button class="${cls}${selItem&&selItem.it===it?' sel':''}${lock?' lock':''}" ${extra||''} style="border:2px solid ${lock?'#a33a30':it.enh>0?ENHBD(it.enh):RBD[it.rar]};background:${RBG[it.rar]};${it.enh>=3?`box-shadow:0 0 ${it.enh>=10?9:it.enh>=7?7:5}px ${ENHBD(it.enh)}${it.enh>=5?'':' inset'};`:''}${it.enh>=3?'':it.rar===3?'box-shadow:0 0 8px rgba(255,150,50,.5) inset;':it.rar===2?'box-shadow:0 0 6px rgba(255,226,77,.3) inset;':''}" aria-label="${esc(it.name)}"><img src="${itemIcon(it).url}" alt="" style="width:86%;height:86%;pointer-events:none;${lock?'filter:grayscale(.25) brightness(.92)':''}">${lock?`<i class="rq">${it.slot==='shield'&&me.cls!=='pal'?'🚫':me.lvl<reqLv(it)?'Lv'+reqLv(it):STN[statLack(it)[0][0]]+statLack(it)[0][1]}</i>`:''}${it.lock?'<i class="lk">🔒</i>':''}${it.isNew?'<i class="nw">NEW</i>':''}${cls==='cell'&&isUpgrade(it)?`<i class="up${lock?' hi':''}">▲</i>`:''}${it.enh>0?`<i class="en">+${it.enh}</i>`:''}${it.enh>=5?`<i class="gl ${it.enh>=10?'t10':it.enh>=7?'t7':'t5'}"></i>`:''}</button>`;
 }
 let dragSup=0;
 function enableDrag(b){
@@ -2090,8 +2091,10 @@ function showPop(html,pre){ const p=$('#itemPop'); if(!selItem||!html){ p.hidden
 const ownCls=it=>it.slot==='shield'?ocOf(it):((it.sp&&SPFX[it.sp]&&SPFX[it.sp].fcls)||null);
 function ownTag(it){ const c=ownCls(it); if(!c||!CLASSES[c])return ''; const ok=me&&c===me.cls; return `<div class="meta" style="color:${ok?'#ffd84a':'#e07060'};font-weight:700">${ok?'✔ ':'✖ '}${CLASSES[c].n} 전용${it.slot==='shield'?' '+OFFN[c]:''}</div>`; }
 /* 인벤 아이템 선택 시: 장착 중인 아이템보다 레벨이 높은지 낮은지 크게 표시 */
+function cmpCur(it){ if(it.slot==='ring'){ const a=me.eq.ring1,b=me.eq.ring2; return (!a||!b)?null:(ilvOf(a)<=ilvOf(b)?a:b); } return me.eq[it.slot]||null; }
+const isUpgrade=it=>{ if(!me||!me.eq||Object.values(me.eq).includes(it))return false; const c=cmpCur(it); return !!c&&ilvOf(it)>ilvOf(c); };
 function lvCmp(it){ if(!me||!me.eq||Object.values(me.eq).includes(it))return '';
-  let cur=null; if(it.slot==='ring'){ const a=me.eq.ring1,b=me.eq.ring2; cur=(!a||!b)?null:(ilvOf(a)<=ilvOf(b)?a:b); } else cur=me.eq[it.slot]||null;
+  const cur=cmpCur(it);
   const box=(bg,bd,col,t)=>`<div style="margin:4px 0 0;padding:3px 8px;border-radius:7px;background:${bg};border:1px solid ${bd};color:${col};font-weight:700;font-size:11.5px;text-align:center">${t}</div>`;
   if(!cur)return box('rgba(90,170,255,.14)','#6aa6e8','#9fd0ff','🆕 빈 칸');
   const a=ilvOf(it), b=ilvOf(cur), d=a-b;
