@@ -41,3 +41,7 @@
   mn_guard.png / mn_guard_atk.png (수호 영혼), mn_caster(.png/_atk) (포격 영혼), mn_colossus(.png/_atk) (고대 거인), mn_dragon(.png/_atk) (영혼 용령)
   mn_fusion.png / mn_fusion_atk.png (영혼 융합 — 수호+포격 합체 일러스트, 없으면 두 그림을 겹쳐 그림)
   프롬프트: img/minion_prompt_necro.txt (4행×2열 → 행마다 잘라 대기/공격으로 저장, 같은 행은 같은 크기·같은 발 위치)
+
+[영웅 걷기 시트 — 전사 적용 완료] hero_war_walk.png = 6프레임 가로 시트 (칸 크기 동일, 발이 아래에 닿음, 오른쪽 바라봄)
+  다른 직업도 hero_<직업>_walk.png 로 올리고 index.html의 WALKS 목록에 한 줄 추가하면 같은 방식으로 적용돼요.
+  시트 제작 방법: 대기 그림을 기준으로 ChatGPT에서 3칸×2줄 6프레임을 뽑은 뒤 배경 제거·균일 정렬(시트 마젠타 배경).
