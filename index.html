@@ -399,7 +399,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
-    <div class="ver" id="verT">v0.1.1.0028</div>
+    <div class="ver" id="verT">v0.1.1.0029</div>
     <div class="clist car" id="charList"></div>
     <button id="bNew" hidden></button>
     <div class="pp" id="playPanel" hidden>
@@ -410,7 +410,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
       <div class="modes" style="flex-wrap:nowrap"><button class="btn" id="bHost" disabled style="flex:1">🤝 방 만들기</button><button class="btn" id="bJoin" disabled style="flex:1">🔑 방 참가</button></div>
     </div>
     <p class="note" id="netNote">온라인 연결 확인 중…</p>
-    <p class="note">왼쪽 화면을 끌어 이동 · 기본 공격은 자동 · 스킬 버튼은 직접 누르기 · 아이템은 가까이 가면 자동으로 주워요. 가로 화면을 추천해요.</p>
+    <p class="note">왼쪽 화면을 끌어 이동 · 기본 공격은 자동 · 스킬 버튼은 직접 누르기 · 아이템은 가까이 가면 자동으로 주워요.</p>
   </section>
 
   <section class="screen" id="sNew" hidden>
@@ -932,7 +932,7 @@ function migrateChars(){
     try{ const p=JSON.parse(raw); if(p&&p.cls===cls){ p.id=genId(); lsSet(charKey(p.id),JSON.stringify(p)); ids.push(p.id); } }catch(e){} }
   setIds(ids);
 }
-function createChar(cls,name){ const ids=charIds(); if(ids.length>=MAXCHAR||!CLASSES[cls])return null; const p=newChar(cls,name); lsSet(charKey(p.id),JSON.stringify(packChar(p))); ids.push(p.id); setIds(ids); selId=p.id; lsSet('dkdef2.sel',selId); return p; }
+function createChar(cls,name){ const ids=charIds(); if(ids.length>=MAXCHAR||!CLASSES[cls])return null; if(nameTaken(name))return null; const p=newChar(cls,name); lsSet(charKey(p.id),JSON.stringify(packChar(p))); ids.push(p.id); setIds(ids); selId=p.id; lsSet('dkdef2.sel',selId); return p; }
 function deleteChar(id){ setIds(charIds().filter(x=>x!==id)); lsDel(charKey(id)); if(selId===id){selId='';lsSet('dkdef2.sel','');} }
 function packChar(p){ const {id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear,as,sy}=p; return {id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear:clear|0,as:as===undefined?-1:as,sy:sy===undefined?-1:sy}; }
 function saveChar(){ if(!me||!me.id)return; lsSet(charKey(me.id),JSON.stringify(packChar(me))); }
@@ -1168,11 +1168,15 @@ function spawnPoint(){
   if(side===2) return {x:VX+rand(-160,160),y:WH+20};
   return {x:-20,y:VY+rand(-140,140)};
 }
+/* 스테이지별 몹 보정 (일반·정예·보스 공통). 2스테이지(id '2-x') +10%, 3스테이지 +20%. 몹에는 방어력 수치가 따로 없어 def는 '받는 피해 ÷(1+def)'로 적용 */
+const STGBUF={2:{atk:1.1,hp:1.1,def:.1},3:{atk:1.2,hp:1.2,def:.2}};
+const stgBuf=S=>{ const b=STGBUF[parseInt(String(S&&S.id||'1').split('-')[0],10)]; return b?{atk:b.atk,hp:b.hp,def:1+b.def}:null; };
 function spawnMob(type,x,y,elite){
   const S=G.stg||STAGES[0], w=Math.max(1,G.wave), hm=(1+.12*(w-1))*(G.coop?1.4:1)*(elite?8:1)*S.hpM*1.2, dm=(1+.08*(w-1))*(elite?4.6:1)*S.dmgM*1.6;
   const t=MT[type], m={id:G.mobId++,type,x,y,hp:t.hp*hm,max:t.hp*hm,dmg:t.dmg*dm,spd:t.spd*(elite?1.3:S.spdM)*(t.boss?.95:.5),r:t.r*(elite?1.5:1),xp:Math.round(t.xp*(1+.1*(w-1))*S.xpM*(elite?4:1)),elite:!!elite,boss:!!t.boss,fly:!!t.fly,cd:rand(0,1),slowT:0,tgt:0,rt:0,atk:0,fa:0,flash:0,anim:Math.random()*6,kx:0,ky:0,sq:0};
   if(m.boss){const sq=Math.sqrt(S.hpM); m.hp=m.max=Math.max(t.hp*sq*1.6,32*S.hpM*1.2*(1+.12*((G.TW||8)-1))*(28+.6*(G.stageIdx|0)))*(G.coop?1.5:1);m.dmg=t.dmg*1.6*1.25*Math.pow(S.dmgM,.8);m.xp=Math.round(t.xp*S.xpM);m.spd=t.spd*.95;m.bt=3;m.sum1=false;m.sum2=false;m.tel=null;m.charge=null;}
   if(m.elite&&type<=2)m.af=1+Math.floor(Math.random()*4);
+  { const B=stgBuf(S); if(B){ m.hp*=B.hp; m.max*=B.hp; m.dmg*=B.atk; m.dfM=B.def; } }
   G.mobs.push(m); return m;
 }
 function waveMob(xf){
@@ -1395,6 +1399,7 @@ function summon(b){ for(let i=0;i<5;i++){const a=i/5*Math.PI*2; spawnMob(i%2?2:0
 
 function applyDmg(m,dmg,slow,fx){
   if(m.dead||!(dmg>0))return;
+  if(m.dfM>1)dmg/=m.dfM;
   m.hp-=dmg; m.flash=.12; if(slow){m.slowT=Math.max(m.slowT,slow); m.slowMax=Math.max(m.slowMax||0,slow);}
   if(fx){ if(fx.stun&&!m.boss){ m.stunT=Math.max(m.stunT||0,fx.stun); if(m.et)m.et=null; if(m.ch)m.ch=null; if(m.dash)m.dash=null; } if(fx.burn){ m.burnT=Math.max(m.burnT||0,fx.burn); m.burnD=Math.max(m.burnD||0,fx.bd||0); m.bt=m.bt>0?m.bt:.3; } }
   if(m.hp<=0) killMob(m);
@@ -2660,16 +2665,19 @@ function renderClassCards(){ renderTitle(); }
 function modal(html,bind){ const m=$('#modal'); m.className='ipop mdl'; m.innerHTML=`<div class="card">${html}</div>`; m.hidden=false; m.onclick=e=>{ if(e.target===m)closeModal(); }; if(bind)bind(m); }
 function closeModal(){ const m=$('#modal'); m.hidden=true; m.innerHTML=''; }
 const cleanName=v=>String(v||'').replace(/[<>&"]/g,'').trim().slice(0,8);
+const nameKey=v=>String(v||'').replace(/\s+/g,'').toLowerCase();
+function nameTaken(v,exceptId){ const k=nameKey(v); if(!k)return false; for(const id of charIds()){ if(id===exceptId)continue; const q=loadChar(id); if(q&&nameKey(q.name)===k)return true; } return false; }
 function askCode(cb){
   modal(`<h3>🔑 방 참가</h3><p class="meta" style="margin:0 0 8px">친구가 알려준 4자리 방 코드를 입력하세요.</p><div class="col"><input type="text" id="cdIn" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="0000" autocomplete="off" style="text-align:center;font-size:26px;letter-spacing:.4em"><div class="err" id="cdErr"></div><div class="row2"><button class="btn" id="cdNo">취소</button><button class="btn primary" id="cdOk">참가</button></div></div>`,m=>{
     const inp=m.querySelector('#cdIn'); setTimeout(()=>inp.focus(),60); inp.oninput=()=>{ inp.value=inp.value.replace(/\D/g,'').slice(0,4); m.querySelector('#cdErr').textContent=''; };
     const go=()=>{ const v=inp.value.replace(/\D/g,''); if(v.length!==4){ m.querySelector('#cdErr').textContent='4자리 숫자를 입력해 주세요'; return; } closeModal(); cb(v); };
     m.querySelector('#cdOk').onclick=go; m.querySelector('#cdNo').onclick=closeModal; inp.onkeydown=e=>{ if(e.key==='Enter')go(); }; });
 }
-function askName(title,init,okTxt,cb){
+function askName(title,init,okTxt,cb,exceptId){
   modal(`<h3>${title}</h3><div class="col"><input type="text" id="nmIn" maxlength="8" placeholder="닉네임 (최대 8자)" autocomplete="off" value="${esc(init||'')}"><div class="err" id="nmErr"></div><div class="row2"><button class="btn" id="nmNo">취소</button><button class="btn primary" id="nmOk">${okTxt}</button></div></div>`,m=>{
     const inp=m.querySelector('#nmIn'); inp.focus(); inp.select(); setTimeout(()=>inp.focus(),80);
-    const go=()=>{ const v=cleanName(inp.value); if(!v){ m.querySelector('#nmErr').textContent='닉네임을 입력해 주세요'; return; } closeModal(); cb(v); };
+    const go=()=>{ const v=cleanName(inp.value); if(!v){ m.querySelector('#nmErr').textContent='닉네임을 입력해 주세요'; return; } if(nameTaken(v,exceptId)){ m.querySelector('#nmErr').textContent='이미 있는 닉네임이에요. 다른 이름을 입력해 주세요'; return; } closeModal(); cb(v); };
+    inp.addEventListener('input',()=>{ m.querySelector('#nmErr').textContent=''; });
     m.querySelector('#nmOk').onclick=go; m.querySelector('#nmNo').onclick=closeModal; inp.onkeydown=e=>{ if(e.key==='Enter')go(); }; });
 }
 function showNew(canBack){ $('#bNewBack').hidden=canBack===false; const box=$('#newCards'); box.innerHTML='';
@@ -2688,7 +2696,7 @@ function charMenu(id){
     m.querySelector('#cmGear').onclick=()=>{ closeModal(); openTitleSheet('bag'); };
     m.querySelector('#cmShop').onclick=()=>{ closeModal(); openTitleSheet('shop'); };
     m.querySelector('#cmRen').onclick=()=>{ if((p.gold|0)<RENCOST){ warn(`골드가 부족해요. 이름 변경은 ${RENCOST.toLocaleString()}원이 필요해요 (보유 ${(p.gold|0).toLocaleString()}원)`); return; }
-      askName(`✏️ 이름 변경 · ${RENCOST.toLocaleString()}원`,p.name||'','✔ 변경',v=>{ const q=loadChar(id); if(!q)return; if((q.gold|0)<RENCOST)return; q.gold-=RENCOST; q.name=v; lsSet(charKey(q.id),JSON.stringify(packChar(q))); renderTitle(); toast(`이름을 '${v}'(으)로 바꿨어요 (-${RENCOST.toLocaleString()}원)`,'#ffd84a'); }); };
+      askName(`✏️ 이름 변경 · ${RENCOST.toLocaleString()}원`,p.name||'','✔ 변경',v=>{ const q=loadChar(id); if(!q)return; if((q.gold|0)<RENCOST)return; q.gold-=RENCOST; q.name=v; lsSet(charKey(q.id),JSON.stringify(packChar(q))); renderTitle(); toast(`이름을 '${v}'(으)로 바꿨어요 (-${RENCOST.toLocaleString()}원)`,'#ffd84a'); },id); };
     m.querySelector('#cmDel').onclick=()=>modal(`<h3>🗑️ 삭제</h3><p style="margin:0 0 12px;font-size:14px">'${esc(dispName(p))}' (Lv ${p.lvl}) 캐릭터를 삭제할까요?<br>장비와 아이템도 함께 사라지며 되돌릴 수 없어요.</p><div class="row2"><button class="btn" id="dNo">취소</button><button class="btn primary" id="dYes">삭제</button></div>`,m2=>{ m2.querySelector('#dNo').onclick=closeModal; m2.querySelector('#dYes').onclick=()=>{ deleteChar(id); closeModal(); renderTitle(); }; });
     m.querySelector('#cmX').onclick=closeModal; });
 }
