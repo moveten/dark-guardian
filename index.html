@@ -399,7 +399,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
-    <div class="ver" id="verT">v0.1.1.0030</div>
+    <div class="ver" id="verT">v0.1.1.0031</div>
     <div class="clist car" id="charList"></div>
     <button id="bNew" hidden></button>
     <div class="pp" id="playPanel" hidden>
@@ -922,7 +922,7 @@ function loadChar(id){
       p.inv.forEach(mg); mg(p.eq.shield); }
     for(const k of Object.keys(p.eq)){ const it=p.eq[k]; if(it&&it.sp&&SPFX[it.sp]&&SPFX[it.sp].fcls&&SPFX[it.sp].fcls!==cls){ const e=p.inv.indexOf(null); if(e>=0){ p.inv[e]=it; p.eq[k]=null; } } } /* 다른 직업 전용 장비가 장착돼 있으면 가방으로 */
     p.name=String(p.name||'').slice(0,8); p.gold=Number.isFinite(p.gold)?p.gold:500; p.potBuy=p.potBuy|0; p.rev=p.rev|0; return p;
-  }catch(e){ return null; }
+  }catch(e){ console.error('loadChar',id,e); return null; }
 }
 const MAXCHAR=10; /* 캐릭터 슬롯 수 */
 function charIds(){ try{return JSON.parse(lsGet('dkdef2.list')||'[]')}catch(e){return []} }
@@ -2199,7 +2199,7 @@ const ENHBD=n=>n>=10?'#ffe27a':n>=9?'#ff7ad9':n>=7?'#b57aff':n>=5?'#5ab0ff':n>=3
 function cellHtml(it,cls,extra){
   if(!it) return `<button class="${cls}" ${extra||''}></button>`;
   const lock=!canWear(it);
-  return `<button class="${cls}${selItem&&selItem.it===it?' sel':''}${lock?' lock':''}" ${extra||''} style="border:2px solid ${lock?'#a33a30':it.enh>0?ENHBD(it.enh):RBD[it.rar]};background:${RBG[it.rar]};${it.enh>=3?`box-shadow:0 0 ${it.enh>=10?9:it.enh>=7?7:5}px ${ENHBD(it.enh)}${it.enh>=5?'':' inset'};`:''}${it.enh>=3?'':it.rar===3?'box-shadow:0 0 8px rgba(255,150,50,.5) inset;':it.rar===2?'box-shadow:0 0 6px rgba(255,226,77,.3) inset;':''}" aria-label="${esc(it.name)}"><img src="${itemIcon(it).url}" alt="" style="width:86%;height:86%;pointer-events:none;${lock?'filter:grayscale(.25) brightness(.92)':''}">${lock?`<i class="rq">${it.slot==='shield'&&me.cls!=='pal'?'🚫':me.lvl<reqLv(it)?'Lv'+reqLv(it):STN[statLack(it)[0][0]]+statLack(it)[0][1]}</i>`:''}${it.lock?'<i class="lk">🔒</i>':''}${it.isNew?'<i class="nw">NEW</i>':''}${cls==='cell'&&isUpgrade(it)?`<i class="up${lock?' hi':''}">▲</i>`:''}${it.enh>0?`<i class="en">+${it.enh}</i>`:''}${it.enh>=5?`<i class="gl ${it.enh>=10?'t10':it.enh>=7?'t7':'t5'}"></i>`:''}</button>`;
+  return `<button class="${cls}${selItem&&selItem.it===it?' sel':''}${lock?' lock':''}" ${extra||''} style="border:2px solid ${lock?'#a33a30':it.enh>0?ENHBD(it.enh):RBD[it.rar]};background:${RBG[it.rar]};${it.enh>=3?`box-shadow:0 0 ${it.enh>=10?9:it.enh>=7?7:5}px ${ENHBD(it.enh)}${it.enh>=5?'':' inset'};`:''}${it.enh>=3?'':it.rar===3?'box-shadow:0 0 8px rgba(255,150,50,.5) inset;':it.rar===2?'box-shadow:0 0 6px rgba(255,226,77,.3) inset;':''}" aria-label="${esc(it.name)}"><img src="${itemIcon(it).url}" alt="" style="width:86%;height:86%;pointer-events:none;${lock?'filter:grayscale(.25) brightness(.92)':''}">${lock?`<i class="rq">${!ownOk(it)?'🚫':me.lvl<reqLv(it)?'Lv'+reqLv(it):(()=>{ const L=statLack(it)[0]; return L?STN[L[0]]+L[1]:''; })()}</i>`:''}${it.lock?'<i class="lk">🔒</i>':''}${it.isNew?'<i class="nw">NEW</i>':''}${cls==='cell'&&isUpgrade(it)?`<i class="up${lock?' hi':''}">▲</i>`:''}${it.enh>0?`<i class="en">+${it.enh}</i>`:''}${it.enh>=5?`<i class="gl ${it.enh>=10?'t10':it.enh>=7?'t7':'t5'}"></i>`:''}</button>`;
 }
 let dragSup=0;
 function enableDrag(b){
