@@ -343,7 +343,10 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
 .ipop .cx{position:absolute;right:8px;top:8px;width:34px;height:34px;border:1px solid var(--line2);border-radius:6px;background:none;font-size:16px}
 @media (max-width:560px){.hb{width:43px;height:48px}.qb button{width:52px;height:52px}}
 #sEnd{justify-content:center}
-#sEnd .modes{box-sizing:border-box;width:100%;max-width:none;margin:0;position:absolute;left:0;right:0;bottom:0;padding:0 18px calc(26px + env(safe-area-inset-bottom));display:flex;justify-content:center}
+#sEnd .modes{box-sizing:border-box;width:100%;max-width:none;margin:14px 0 0;padding:0 18px;display:flex;justify-content:center}
+.endbox{box-sizing:border-box;width:calc(100% - 36px);max-width:420px;margin:14px 18px 0;padding:12px 14px;border:1px solid var(--line2,#3a3027);border-radius:12px;background:rgba(18,13,10,.7);font-size:13px;color:var(--mute);display:grid;gap:10px}
+.endbox .tp{display:flex;justify-content:space-between;align-items:baseline;gap:10px}.endbox .tp b{color:var(--ink);font-size:16px;font-variant-numeric:tabular-nums}
+.endbox .rr{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center}.endbox .rr div{padding:6px 2px;border:1px solid currentColor;border-radius:8px;font-size:11.5px}.endbox .rr b{display:block;font-size:18px;font-variant-numeric:tabular-nums}
 #sEnd .modes .btn{box-sizing:border-box;width:100%;max-width:420px;min-height:56px;font-size:18px}
 </style>
 
@@ -399,7 +402,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
-    <div class="ver" id="verT">v0.1.1.0031</div>
+    <div class="ver" id="verT">v0.1.1.0032</div>
     <div class="clist car" id="charList"></div>
     <button id="bNew" hidden></button>
     <div class="pp" id="playPanel" hidden>
@@ -439,6 +442,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
     <div class="endtitle" id="endTitle">스테이지를 정복했습니다</div>
     <p class="sub" id="endSub"></p>
     <div class="endstats" id="endStats"></div>
+    <div class="endbox" id="endBox"></div>
     <div class="modes">
       <button class="btn primary" id="bToTitle">🚪 나가기</button>
     </div>
@@ -1582,10 +1586,10 @@ function synModal(){
     m.querySelectorAll('[data-sa]').forEach(b=>b.onclick=()=>{ syLv=+b.dataset.sa; saveChar(); const warn=syLv>=0&&asLv>=0&&asLv>=syLv; autoSynth(); closeModal(); if(sheetMode==='bag')renderBag(); sheetToast&&sheetToast(syLv<0?'자동 합성을 껐어요':warn?`⚠️ 자동 판매(${RARN[asLv]} 이하)가 합성 등급을 먼저 팔아요`:`${RARN[syLv]} 이하 ${SYN_N}개가 모이면 자동 합성돼요`,warn?'#ffb259':null); }); }); }
 function pickUp(g){
   { const it0=g.it; if(asLv>=0&&it0.rar<=asLv&&!it0.lock){ const k0=it0.slot==='ring'?(!me.eq.ring1?'ring1':!me.eq.ring2?'ring2':null):(me.eq[it0.slot]?null:it0.slot);
-      if(!(k0&&canWear(it0))){ ground.splice(ground.indexOf(g),1); const v=sellInfo(it0).total; me.gold+=v; sfx('coin'); addNum(me.x,me.y-34,'+'+v+'원','#ffd84a',false); G.asold=(G.asold|0)+v; saveChar(); uiDirty=true; if(sheetMode==='bag')renderBag(); return; } } }
+      if(!(k0&&canWear(it0))){ (G.stGot||(G.stGot=[0,0,0,0]))[it0.rar|0]++; ground.splice(ground.indexOf(g),1); const v=sellInfo(it0).total; me.gold+=v; sfx('coin'); addNum(me.x,me.y-34,'+'+v+'원','#ffd84a',false); G.asold=(G.asold|0)+v; saveChar(); uiDirty=true; if(sheetMode==='bag')renderBag(); return; } } }
   const i=me.inv.indexOf(null);
   if(i<0){toast('가방이 가득 찼어요','#e07060');return;}
-  const it=g.it; it.isNew=1; me.inv[i]=it; ground.splice(ground.indexOf(g),1);
+  const it=g.it; it.isNew=1; me.inv[i]=it; ground.splice(ground.indexOf(g),1); (G.stGot||(G.stGot=[0,0,0,0]))[it.rar|0]++;
   sfx('pick'); if(it.rar>=2)toast(`획득: ${dn(it)}`,RARC[it.rar],'get');
   if(it.rar>=2){ annQ.push([++annSeq,it.name.slice(0,16),it.rar]); if(annQ.length>4)annQ.shift(); }
   const key=it.slot==='ring'?(!me.eq.ring1?'ring1':!me.eq.ring2?'ring2':null):(me.eq[it.slot]?null:it.slot);
@@ -1653,11 +1657,11 @@ function dmgReset(){ DMGR.me=0; DMGR.mn={}; if(ally)ally.dd=null; }
 function dmgTally(fx,v){ if(!(v>0))return; if(fx&&fx.mk)DMGR.mn[fx.mk]=(DMGR.mn[fx.mk]||0)+v; else DMGR.me+=v; }
 function mnSkName(k){ const K=MNK[k], sk=K&&SKBY[K.sk]; return sk?sk.n:(K?K.n:'소환수'); } /* 소환수는 스킬 이름으로 표시 (다시 소환돼도 같은 이름이면 합산) */
 function dmgNet(){ const mn=[]; for(const k in DMGR.mn){ const i=MNIDX.indexOf(k); if(i>=0&&DMGR.mn[k]>=1)mn.push([i,Math.round(DMGR.mn[k])]); } return (DMGR.me>=1||mn.length)?[Math.round(DMGR.me),mn]:undefined; }
-function dmgRows(){ const map=new Map(); const add=(key,n,v)=>{ if(!(v>0))return; const e=map.get(key); if(e)e.v+=v; else map.set(key,{n,v}); };
+function dmgRows(full){ const map=new Map(); const add=(key,n,v)=>{ if(!(v>0))return; const e=map.get(key); if(e)e.v+=v; else map.set(key,{n,v}); };
   if(me)add('p:me',dispName(me),DMGR.me);
   for(const k in DMGR.mn)add('m:'+mnSkName(k),mnSkName(k),DMGR.mn[k]);
   if(ally&&!ally.lobby&&Array.isArray(ally.dd)){ add('p:ally',ally.name||'동료',+ally.dd[0]||0); for(const a of (Array.isArray(ally.dd[1])?ally.dd[1]:[])){ const k=MNIDX[a[0]|0]; if(k)add('m:'+mnSkName(k),mnSkName(k),+a[1]||0); } }
-  return [...map.values()].sort((a,b)=>b.v-a.v).slice(0,8); }
+  const all=[...map.values()].sort((a,b)=>b.v-a.v); return full?all:all.slice(0,8); }
 let dmgRkHtml='';
 function renderDmgRank(){ const el=$('#dmgRank'); if(!el)return; const rows=(hudOn('rank')&&G.inGame)?dmgRows():[]; const h=rows.map((r,i)=>`<div><span>${i+1}. ${esc(r.n)}</span><b>${Math.round(r.v).toLocaleString('en-US')}</b></div>`).join(''); if(h===dmgRkHtml)return; dmgRkHtml=h; el.innerHTML=h; el.hidden=!rows.length; }
 /* ===== 화면 표시(HUD) 켜기/끄기 — 설정 메뉴의 체크박스 ===== */
@@ -2132,13 +2136,16 @@ function useRevive(){ if(!G.inGame)return; if(!me.dead){toast('쓰러졌을 때 
 addEventListener('keydown',e=>{ if(e.key==='Escape'){ /* ESC: 열린 창을 닫음 (팝업 → 시트 순) */ const md=$('#modal'); if(md&&!md.hidden){ closeModal(); e.preventDefault(); return; } const sh=$('#sheet'); if(sh&&!sh.hidden){ closeSheet(); e.preventDefault(); return; } }
   if(e.target.tagName==='INPUT')return; const k=e.key.toLowerCase(); keys[k]=true;
   if(!G.inGame)return;
-  if(k>='1'&&k<='7'&&!e.repeat){const s=SK[me.cls][+k-1]; if(s)tryUse(s.k,false);}
+  if(k>='1'&&k<='9'&&k.length===1&&!e.repeat){ const sk=skillAtKey(+k); if(sk)tryUse(sk,false); }
   if(k==='q')usePot(); if(k==='r')useRevive(); if(k==='i')openSheet('bag'); if(k==='c')openSheet('stat'); if(k==='escape')closeSheet(); });
 addEventListener('keyup',e=>{ keys[e.key.toLowerCase()]=false; });
 addEventListener('blur',()=>{for(const k in keys)keys[k]=false; for(const k in held)held[k]=false;});
 
 /* ================= HUD ================= */
 let uiDirty=true, hudT=0;
+/* 단축키 1~9 = 화면에 보이는 스킬 버튼의 위치 (스킬 종류와 무관). 위에서부터 7 8 9 / 4 5 6 / 1 2 3 (숫자패드 배치)
+   #skills 는 direction:rtl 그리드라서 DOM 순서 0,1,2 가 윗줄의 오른쪽→왼쪽 */
+function skillAtKey(n){ const vis=[...$('#skills').children].filter(b=>!b.hidden); const row=2-Math.floor((n-1)/3), col=(n-1)%3, idx=row*3+(2-col); const b=vis[idx]; return b?b.dataset.k:null; }
 function buildSkills(){
   const box=$('#skills'); box.innerHTML='';
   for(const s of SK[me.cls]){ if(!(me.skills[s.k]>0)||s.passive)continue;
@@ -2721,7 +2728,7 @@ function prepMe(){ me=loadChar(selId); me.D=derive(me); spawnMe(); }
 function resetWorld(){
   G.aim=null;
   projs.length=zones.length=timers.length=parts.length=nums.length=ground.length=efx.length=0;
-  G.mobs=[]; G.mobMap=new Map(); G.stKills=0; G.stDrops=0; G.endShown=false; G.paused=false; G.bt=null; G.shake=0;
+  G.mobs=[]; G.mobMap=new Map(); G.stKills=0; G.stDrops=0; G.stGot=[0,0,0,0]; G.endShown=false; G.paused=false; G.bt=null; G.shake=0;
   hitQ=[]; fxQ=[]; lastAllyFx=-1; lastEv=-1; lastHit=0; G.guestDmg=0; G.fires=[]; G.freeRev=1; G.fireT=3; if(me){ me.rvGiven=0; me.seenRg=0; me.out=false; me.rvT=0; }
   spawnMe(); buildSkills(); show(null); G.inGame=true; closeSheet();
 }
@@ -2770,6 +2777,8 @@ function showEnd(msg){
   $('#endTitle').style.color=win&&!msg?'#e9d9b4':'#e07060';
   $('#endSub').textContent=msg||(win?`${G.stg.bn||MT[G.stg.boss].n}이(가) 쓰러졌습니다. 스테이지 ${G.stg.id} 클리어.`:`습격 ${G.wave}에서 쓰러졌습니다.`);
   $('#endStats').innerHTML=`<div><b>${G.stKills||0}</b>처치</div><div><b>${me.lvl}</b>현재 레벨</div><div><b>${G.stDrops||0}</b>떨어진 아이템</div>`;
+  { const rows=dmgRows(true), tot=rows.reduce((a,r)=>a+r.v,0), top=rows[0], got=G.stGot||[0,0,0,0], f=n=>Math.round(n).toLocaleString('en-US');
+    $('#endBox').innerHTML=`<div class="tp"><span>🏆 데미지 1위</span><b>${top?esc(top.n)+' · '+f(top.v)+(tot>0?` (${Math.round(top.v/tot*100)}%)`:''):'-'}</b></div><div class="tp"><span>⚔️ 총 데미지</span><b>${f(tot)}</b></div><div><div style="margin-bottom:6px">📦 획득한 아이템 <b style="display:inline;font-size:14px;color:var(--ink)">${got.reduce((a,b)=>a+b,0)}</b>개</div><div class="rr">${[0,1,2,3].map(r=>`<div style="color:${RARC[r]}">${RARN[r]}<b>${got[r]|0}</b></div>`).join('')}</div></div>`; }
   show('#sEnd');
 }
 function confirmExit(cb){ modal(`<h3>🚪 나갈까요?</h3><p style="margin:0 0 12px;font-size:14px">타이틀 화면으로 돌아갑니다.</p><div class="row2"><button class="btn" id="exN">취소</button><button class="btn primary" id="exY">나가기</button></div>`,m=>{ m.querySelector('#exN').onclick=closeModal; m.querySelector('#exY').onclick=()=>{ closeModal(); cb(); }; }); }
