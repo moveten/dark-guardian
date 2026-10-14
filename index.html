@@ -422,7 +422,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.1.1.0044</div>
+    <div class="ver" id="verT">v0.1.1.0045</div>
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -613,7 +613,7 @@ const SK={
   {k:'guardian',e:'🛡️',n:'수호 영혼',s:'수호',req:6,mp:12,cd:8,el:'#6fe0c0',d:l=>`[소환수·영구] 근접 탱커. 생명력은 내 최대 생명력의 ${80+5*l}%, 1.2초마다 기본 피해 ${14+10*l}. 4초마다 주변 적을 3초간 도발해요. 스테이지 시작 시 무료 소환 · 살아 있을 때 다시 쓰면 내 곁으로 불러와 생명력을 채워요`},
   {k:'spiritcaster',e:'🔮',n:'포격 영혼',s:'포격',req:9,mp:14,cd:8,el:'#a98bff',d:l=>`[소환수·영구] 원거리 딜러. 생명력은 내 최대 생명력의 ${50+3*l}%, 1.8초마다 마법탄 ${HMN(l)}발 (7·14레벨에 +1발) · 발당 기본 피해 ${Math.round((18+12*l)*HMF(HMN(l)))}. 스테이지 시작 시 무료 소환`},
   {k:'resonance',e:'💠',n:'영혼 공명',s:'공명',req:12,mp:0,cd:0,el:'#7dffd8',passive:1,d:l=>`패시브(항상 발동): 소환수 공격 속도 +${Math.min(40,2*l)}%, 소환수가 준 피해의 ${(3+.2*l).toFixed(1)}%만큼 내 생명력 회복`},
-  {k:'soulburst',e:'💥',n:'영혼 폭발',s:'폭발',req:30,mp:16,cd:12,el:'#ff9a6a',rg:NRG(300),d:l=>`영구 소환수 하나를 폭파해 범위 피해 ${100+40*l} + 소환수 현재 생명력의 50%, 1초 기절 (우두머리는 기절 면역). 소환수는 3초 뒤 생명력 50%로 돌아와요`},
+  {k:'soulburst',e:'💥',n:'수호 폭발',s:'폭발',req:30,mp:16,cd:12,el:'#ff9a6a',rg:NRG(300),d:l=>`수호 영혼을 폭파해 범위 피해 ${100+40*l} + 수호 영혼 현재 생명력의 50%, 1초 기절 (우두머리는 기절 면역). 폭발한 수호 영혼은 돌아오지 않아요 — 필요하면 직접 다시 소환하세요`},
   {k:'execute',e:'🎯',n:'처형 명령',s:'처형',req:18,mp:12,cd:18,el:'#ff5a5a',rg:NRG(360),d:l=>`가장 가까운 적을 8초간 표식. 소환수가 모두 그 적을 집중 공격하고(공격 속도 +30%), 표식 적이 받는 모든 피해 +${20+3*l}% (우두머리 포함)`},
   {k:'colossus',e:'🗿',n:'고대 거인',s:'거인',req:24,mp:30,cd:45,el:'#9aa6b8',d:l=>`[소환수·시한] ${(18+.5*l).toFixed(1)}초간 등장. 생명력은 내 최대 생명력의 ${300+15*l}%, 받는 피해 -50%. 1.5초마다 범위 피해 ${120+45*l}, 4초마다 도발. 시한 소환수는 동시에 하나만 나와요`},
   {k:'lord',e:'🐉',n:'영혼 군주 강림',s:'강림',req:99,mp:60,cd:90,el:'#7dffd8',rg:NRG(420),d:l=>`[궁극기·시한] 15초간 영혼 용령이 나와 전방에 숨결을 뿜어요. 0.5초마다 범위 피해 ${100+30*l}, 모든 소환수 피해 +40%. 고대 거인이 있으면 사라져요`},
@@ -1834,10 +1834,10 @@ function updateMinions(dt){
         for(let k=0;k<6;k++){ const aa=a+rand(-.5,.5), dd=rand(60,240); parts.push({x:mn.x+Math.cos(aa)*dd,y:mn.y+Math.sin(aa)*dd,vx:Math.cos(aa)*60,vy:Math.sin(aa)*60,t:0,life:rand(.3,.5),col:'#7dffd8',r:rand(3,6),glow:1,dm:.9}); } } }
   }
 }
-function necroCan(key){ /* 폭파·표식은 대상이 있어야 함 */
+function necroCan(key){ /* 폭파는 수호 영혼이, 표식은 적이 있어야 함 */
   if(key==='fusion'&&!fusionReady()){ toast('수호 영혼과 포격 영혼이 모두 있어야 해요','#e07060'); return false; }
   if((key==='guardian'||key==='spiritcaster')&&fusionOn()){ toast('융합 중에는 부를 수 없어요 (융합 버튼으로 분리)','#e07060'); return false; }
-  if(key==='soulburst'&&!minions.some(q=>MNK[q.k].perm&&q.rez<=0)){ toast('폭파시킬 영구 소환수가 없어요','#e07060'); return false; }
+  if(key==='soulburst'&&!minions.some(q=>q.k==='guard'&&q.rez<=0)){ toast('폭파시킬 수호 영혼이 없어요','#e07060'); return false; }
   if(key==='execute'&&!nearestMob(me.x,me.y,SKBY.execute.rg)){ toast('표식을 찍을 적이 없어요','#e07060'); return false; }
   return true; }
 function necroCast(o,key,real,lv,tgt){
@@ -1849,8 +1849,8 @@ function necroCast(o,key,real,lv,tgt){
   else if(key==='colossus'){ summonMinion('colossus',lv); announce('🗿 고대 거인 소환!','#b8c4d8'); }
   else if(key==='lord'){ summonMinion('dragon',lv); me.buffs.lord={t:15,m:15}; announce('🐉 영혼 군주 강림!','#7dffd8'); banner('🐉 영혼 군주 강림','소환수 피해 +40% · 15초'); G.flash=.5; }
   else if(key==='execute'){ const t=tgt&&!tgt.dead?tgt:nearestMob(me.x,me.y,SKBY.execute.rg); if(!t)return; t.mark={t:8,v:(20+3*lv)/100}; me.buffs.exec={t:8,m:8}; efx.push({k:'ring',x:t.x,y:t.y,r0:60,r1:14,t:0,life:.4,col:'#ff5a5a',w:6}); burst(t.x,t.y,'#ff7a7a',18,240); addNum(t.x,t.y-t.r-22,'🎯 표식!','#ff7a7a',true); }
-  else if(key==='soulburst'){ let best=null,bd=1e9; const ref=nearestMob(me.x,me.y,NRG(500))||me; for(const q of minions){ if(!MNK[q.k].perm||q.rez>0)continue; const d=hyp(q.x-ref.x,q.y-ref.y); if(d<bd){bd=d;best=q;} }
-    if(!best)return; const R=110*RS0(lv)*(me.D.rng>0?1+me.D.rng/100:1), cx=best.x, cy=best.y; const dmg=100+40*lv+best.hp*.5; best.rez=3; best.hp=Math.max(1,best.hp);
+  else if(key==='soulburst'){ let best=null,bd=1e9; const ref=nearestMob(me.x,me.y,NRG(500))||me; for(const q of minions){ if(q.k!=='guard'||q.rez>0)continue; const d=hyp(q.x-ref.x,q.y-ref.y); if(d<bd){bd=d;best=q;} }
+    if(!best)return; const R=110*RS0(lv)*(me.D.rng>0?1+me.D.rng/100:1), cx=best.x, cy=best.y; const dmg=100+40*lv+best.hp*.5; { const bi=minions.indexOf(best); if(bi>=0)minions.splice(bi,1); toast('수호 영혼이 폭발했어요 — 필요하면 다시 소환하세요','#8fe6d0'); } /* 폭발한 수호 영혼은 사라지고 자동으로 돌아오지 않음 */
     slamFx(cx,cy,R,'#ff9a6a'); impact(cx,cy,'255,150,100',200); efx.push({k:'ring',x:cx,y:cy,r0:20,r1:R,t:0,life:.5,col:'#ffb48a',w:12}); burst(cx,cy,'#ffb48a',40,420); burst(cx,cy,K.el,20,300); G.shake=Math.max(G.shake,.45); sfx('boom');
     for(const m of mobsIn(cx,cy,R)){ const r=spellDmg(dmg*(1+(me.D.sm||0)/100)); hitMob(m,r,0,false,{stun:1,el:'soul'}); } }
 }
@@ -2569,9 +2569,8 @@ function renderMenu(){
 /* ================= SCREENS / FLOW ================= */
 function show(id){ for(const s of ['#sTitle','#sNew','#sLobby','#sEnd']) $(s).hidden=s!==id; $('#hud').hidden=id!==null; $('#dock').hidden=id!==null; resize(); }
 /* ===== DPS 기록: 스테이지를 혼자 하다가 우두머리가 나오면 자동 측정 — 우두머리 등장~처치까지 (내 + 소환수)가 보스에게 준 피해 ÷ 시간 · 캐릭터당 최고 1건 (dd_rank.dps) ===== */
-const DPS_MINCT=8;
 try{ for(const id of charIds())for(const k of ['dkdef2.dps.'+id,'dkdef2.rk.dps.'+id])if(lsGet(k)!==null)lsDel(k); }catch(e){} /* 예전(스테이지별 DPS) 기록 정리 */
-function bossDpsDone(){ G.bsRes=null; if(G.mode!=='solo'||!me)return; const ct=G.bsT||0, tot=G.bsD||0; if(!(ct>=DPS_MINCT&&tot>0))return;
+function bossDpsDone(){ G.bsRes=null; if(G.mode!=='solo'||!me)return; const ct=G.bsT||0, tot=G.bsD||0; if(!(ct>0&&tot>0))return;
   const dps=Math.min(100000000,Math.round(tot/ct)), prev=Math.floor(me.dps)||0, best=dps>prev; G.bsRes={dps,ct,prev,best};
   if(best){ me.dps=dps; me.dpsS=G.stageIdx|0; me.dpsT=Math.round(ct); saveChar(); lsDel('dkdef2.rkc.dps'); rkSubmit([me],true); } }
 /* ===== 랭킹 (Supabase REST: dd_rank) ===== */
