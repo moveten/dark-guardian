@@ -51,4 +51,5 @@
 [보스 걷기 시트 — 적용 완료] mob_malek_walk.png
 [보스 걷기 시트 — 적용 완료] mob_morg_walk.png
 [보스 준비 자세 — 적용 완료] mob_morg_wu.png (대기 그림과 같은 배율·발 위치로 정렬된 한 장. 새 보스는 index.html 의 BWU 에 이름 추가)
+[보스 걷기 시트·준비 자세 — 적용 완료] mob_kargon_walk.png / mob_kargon_wu.png
 
