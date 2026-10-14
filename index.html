@@ -353,7 +353,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
 @keyframes efShake{0%,100%{transform:translate(0)}12%{transform:translate(-10px,4px)}25%{transform:translate(9px,-5px)}38%{transform:translate(-8px,3px)}52%{transform:translate(6px,-3px)}66%{transform:translate(-4px,2px)}80%{transform:translate(3px,0)}}
 .ipop.top{align-items:flex-start;padding-top:56px}.ipop.top .card{width:min(420px,100%)}.rl3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.rlb{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px;min-height:118px;text-align:center;line-height:1.3}.rlb i{font-style:normal;font-size:26px}.rlb b{font-size:12.5px}.rlb small{font-size:11px;color:#9fd18b}.rlb:disabled{opacity:.45}
 .ipop.two{flex-direction:row;align-items:center;justify-content:center;gap:6px;padding:8px;overflow:auto}
-.ipop.two .card{flex:1 1 0;min-width:0;width:auto;max-height:none;padding:9px;font-size:11.5px;box-sizing:border-box}
+.ipop.two .card{flex:1 1 0;min-width:0;max-width:410px;width:auto;max-height:none;padding:9px;font-size:11.5px;box-sizing:border-box}
 .ipop.two .card img{width:40px!important;height:40px!important}
 .ipop.two .in{font-size:14px}
 .ipop.two .acts .btn{padding:6px 9px;min-height:34px;font-size:12px}
@@ -422,7 +422,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.1.1.0038</div>
+    <div class="ver" id="verT">v0.1.1.0039</div>
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -1292,7 +1292,7 @@ function updateWaves(dt){
     const alive=G.mobs.filter(m=>!m.dead).length;
     if(G.spawnQ>0&&G.spawnT<=0&&alive<45){waveMob();G.spawnQ--;G.spawnT=Math.max(.25,.75-G.wave*.05);}
     if(G.allQ&&G.allQ.length&&G.spawnT<=0&&alive<30){ const wv=G.wave; G.wave=G.allQ.shift(); waveMob(); G.wave=wv; G.spawnT=.35; }
-    if(G.spawnQ<=0&&!(G.allQ&&G.allQ.length)&&alive===0){G.phase='prep';G.skipUsed=false;G.timer=G.wave>=G.TW?4:1.2; if(G.wave%3===0&&G.wave<G.TW){ pushEv(['r']); setTimeout(()=>openRelic(),500); } G.nextSides=sidesFor(G.wave+1); G.laneShow=G.nextSides; if(G.wave>=G.TW)banner('최후의 습격이 끝났습니다','우두머리가 깨어납니다…');}
+    if(G.spawnQ<=0&&!(G.allQ&&G.allQ.length)&&alive===0){G.phase='prep';G.skipUsed=false;G.timer=G.wave>=G.TW?4:1.2; if(G.wave%3===0&&G.wave<G.TW){ pushEv(['r']); setTimeout(()=>openRelic(),500); } G.nextSides=sidesFor(G.wave+1); G.laneShow=G.nextSides; if(G.wave>=G.TW)banner('주변의 어둠이 더 짙어지고 있습니다');}
   }
   if(G.allMode&&(G.phase!=='wave'&&G.phase!=='prep'||(G.phase==='prep'&&G.wave>=G.TW)))G.allMode=false;
   if(G.phase==='clear'){ G.clearT-=dt; if(G.clearT<=0)endClear(); }
@@ -2553,7 +2553,7 @@ function enhModal(){
     m.querySelector('#enNo').onclick=closeModal; draw();
     m.querySelector('#enGo').onclick=()=>{ if(sel.size!==need||me.gold<cost)return;
       const mats=[...sel].map(i=>me.inv[i]).filter(Boolean);
-      modal(`<h3>⚠️ 정말 강화할까요?</h3><p style="margin:0 0 8px;font-size:14px"><b style="color:${RARC[it.rar]}">${esc(it.name)}</b> +${L-1} → +${L}<br>성공 확률 <b>${rate}%</b> · <b style="color:#ffd84a">${cost.toLocaleString()}원</b> 소모</p><div class="meta" style="margin-bottom:8px">아래 재료가 사라져요${rate<100?' (실패해도 사라져요)':''}:<br>${mats.map(x=>`<span style="color:${RARC[x.rar]}">${esc(x.name)}</span>`).join(', ')}</div><div class="row2"><button class="btn" id="en2No">취소</button><button class="btn primary" id="en2Yes">강화 확정</button></div>`,m2=>{
+      modal(`<h3>⚠️ 정말 강화할까요?</h3><p style="margin:0 0 8px;font-size:14px"><b style="color:${RARC[it.rar]}">${esc(it.name)}</b> +${L-1} → +${L}<br>성공 확률 <b>${rate}%</b> · <b style="color:#ffd84a">${cost.toLocaleString()}원</b> 소모</p><div class="meta" style="margin-bottom:8px">아래 재료가 사라져요${rate<100?' (실패해도 사라져요)':''}:<br>${mats.map(x=>`<span style="color:${RARC[x.rar]}">${esc(x.name)}</span>`).join(', ')}</div><div class="row2"><button class="btn" id="en2No">취소</button><button class="btn primary" id="en2Yes">강화 시도</button></div>`,m2=>{
         m2.querySelector('#en2No').onclick=closeModal; m2.querySelector('#en2Yes').onclick=()=>doEnh(); }); };
     const doEnh=()=>{ if(sel.size!==need||me.gold<cost)return;
       /* 강화창이 열린 사이 자동합성/판매로 인벤이 바뀌었으면 중단 (골드·재료 보호) */
@@ -2714,7 +2714,7 @@ function buildCarousel(chars){
   const box=$('#charList'); box.innerHTML='';
   for(const c of chars){ const el=document.createElement('div'); el.className='cc'; el.dataset.id=c.id; el.setAttribute('role','button');
     el.innerHTML=`<div class="cpic ${c.cls}"><span class="cem">${CLSE[c.cls]}</span><img src="img/hero_${c.cls}.png" alt="" onload="this.previousElementSibling.style.display='none'" onerror="this.remove()"></div><b>${esc(dispName(c))}</b><span class="cl">${CLASSES[c.cls].n} · <em>Lv ${c.lvl}</em></span><span class="cl">💰 ${(c.gold|0).toLocaleString()}</span><span class="cpt">${c.statPts+c.skillPts?`포인트 ${c.statPts+c.skillPts}`:'&nbsp;'}</span>`;
-    el.onclick=()=>{ if(el.getAttribute('aria-current')==='true'&&c.id===selId) charMenu(c.id); else carCenter(box,true); };
+    el.onclick=()=>{ if(el.getAttribute('aria-current')==='true'&&c.id===selId) charMenu(c.id); else carCenter2(box,el); };
     box.appendChild(el); }
   if(chars.length<MAXCHAR){ const el=document.createElement('div'); el.className='cc add'; el.dataset.id=''; el.setAttribute('role','button'); el.innerHTML='<span class="plus2">＋</span><b>새 캐릭터</b><small>'+chars.length+' / '+MAXCHAR+'</small>'; el.onclick=()=>{ if(el.getAttribute('aria-current')==='true') showNew(true); else carCenter2(box,el); }; box.appendChild(el); }
   carLock=Date.now()+400;
