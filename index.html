@@ -351,7 +351,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
 @keyframes efDrop{0%{transform:translateY(-40px) scale(1.15);opacity:0}55%{transform:translateY(0) scale(1)}70%{transform:translateY(0) scale(1.06)}100%{transform:translateY(0) scale(1)}}
 @keyframes efCrack{from{opacity:0;transform:scale(1.2)}to{opacity:1;transform:scale(1)}}
 @keyframes efShake{0%,100%{transform:translate(0)}12%{transform:translate(-10px,4px)}25%{transform:translate(9px,-5px)}38%{transform:translate(-8px,3px)}52%{transform:translate(6px,-3px)}66%{transform:translate(-4px,2px)}80%{transform:translate(3px,0)}}
-.ipop.top{align-items:flex-start;padding-top:56px}.ipop.top .card{width:min(420px,100%)}.rl3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.rlb{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px;min-height:118px;text-align:center;line-height:1.3}.rlb i{font-style:normal;font-size:26px}.rlb b{font-size:12.5px}.rlb small{font-size:11px;color:#9fd18b}.rlb:disabled{opacity:.45}
+.ipop.top{align-items:flex-start;padding-top:56px}.ipop.top .card{width:min(420px,100%)}
 .ipop.two{flex-direction:row;align-items:center;justify-content:center;gap:6px;padding:8px;overflow:auto}
 .ipop.two .card{flex:1 1 0;min-width:0;max-width:410px;width:auto;max-height:none;padding:9px;font-size:11.5px;box-sizing:border-box}
 .ipop.two .card img{width:40px!important;height:40px!important}
@@ -422,7 +422,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.1.1.0039</div>
+    <div class="ver" id="verT">v0.1.1.0040</div>
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -980,23 +980,6 @@ const SELLBASE=[100,200,400,800], ADVAFX=['ls','crit','ias','ms','mf','pr','mr']
 function sellInfo(it){ let base=SELLBASE[it.rar]||100, ex=0; for(const a of it.aff){ if(a.t==='all')ex+=200+150*a.v; else if(a.t==='cls'||a.t==='sk')ex+=100+100*a.v; else if(ADVAFX.includes(a.t))ex+=200; } return {base,ex,total:base+ex}; }
 const need=l=>l<=30?Math.floor(24*Math.pow(l,1.95)):Math.floor(24*Math.pow(30,1.95)*Math.pow(l/30,2.6));
 
-const RELICS=[
- {id:'dmg',e:'🗡️',n:'학살자의 인장',d:'피해 +20%',ap:d=>{d.dmgPct+=20;}},
- {id:'crit',e:'🎯',n:'매의 눈',d:'치명타 확률 +12%',ap:d=>{d.crit+=12;}},
- {id:'ias',e:'⚡',n:'질풍의 장갑',d:'공격 속도 +20%',ap:d=>{d.ias+=20;}},
- {id:'ms',e:'👟',n:'바람 신발',d:'이동 속도 +12%',ap:d=>{d.ms+=12;}},
- {id:'hp',e:'❤️',n:'거인의 심장',d:'최대 생명력 +30%',ap:d=>{d._hpr=(d._hpr||1)*1.3;}},
- {id:'mp',e:'💧',n:'마나의 샘',d:'마나 회복 +60%, 마나 +20',ap:d=>{d.mr+=60;d.mana+=20;}},
- {id:'ls',e:'🩸',n:'흡혈귀의 송곳니',d:'생명력 흡수 +4%',ap:d=>{d.ls+=4;}},
- {id:'mf',e:'🍀',n:'약탈자의 주머니',d:'아이템 드롭률 +35%',ap:d=>{d.mf+=35;}},
- {id:'def',e:'🛡️',n:'강철 피부',d:'방어력 +25',ap:d=>{d.def+=25;}},
- {id:'sk',e:'✨',n:'비전의 각성',d:'모든 스킬 +2',ap:d=>{d.cls+=2;}},
- {id:'pr',e:'🧲',n:'자석 부적',d:'아이템 획득 범위 +30',ap:d=>{d.pr+=30;}}];
-const RELBY={}; RELICS.forEach(r=>RELBY[r.id]=r);
-function openRelic(){ if(!G.inGame||!me||me.dead&&false)return; const pool=RELICS.slice().sort(()=>Math.random()-.5).slice(0,3); const wasP=G.paused; if(G.mode==='solo')G.paused=true; sfx('lvl');
-  modal(`<h3 style="margin-bottom:4px">🏺 유물을 고르세요</h3><p style="margin:0 0 8px;font-size:12px;color:var(--mute)">이번 스테이지 동안만 유지돼요.</p><div class="rl3">${pool.map(r=>`<button class="btn rlb" data-rl="${r.id}" disabled><i>${r.e}</i><b>${r.n}</b><small>${r.d}</small></button>`).join('')}</div>`,m=>{
-    m.onclick=null; m.classList.add('top'); setTimeout(()=>m.querySelectorAll('[data-rl]').forEach(b=>b.disabled=false),700); /* 전투 중 실수로 누르지 않도록 잠깐 잠금 */
-    m.querySelectorAll('[data-rl]').forEach(b=>b.onclick=()=>{ closeModal(); G.paused=wasP; (me.relics=me.relics||[]).push(b.dataset.rl); const hr=me.hp/me.D.maxHp; me.D=derive(me); me.hp=me.D.maxHp*hr; announce(`유물 획득: ${RELBY[b.dataset.rl].n}`,'#ffd36a'); uiDirty=true; }); }); }
 function derive(p){
   const d={rng:0,blk:0,mf:0,pr:0,mr:0,str:p.stats.str,dex:p.stats.dex,vit:p.stats.vit,ene:p.stats.ene,dmg:0,dmgPct:0,def:0,life:0,mana:0,ias:0,ms:0,ls:0,crit:5,cls:0,sk:{},wmn:1,wmx:3,dr:0,regen:0,cdr:0,sm:0,smhp:0,sp:{}};
   for(const k in p.eq){const it=p.eq[k]; if(!it)continue; if(it.sp&&SPFX[it.sp]&&SPFX[it.sp].fcls&&SPFX[it.sp].fcls!==p.cls)continue; /* 전용 장비는 다른 직업이 끼고 있어도 효과 없음 */
@@ -1013,7 +996,6 @@ function derive(p){
   if(p.mb){ d.dmgPct+=p.mb.dmg||0; d.ias+=p.mb.ias||0; d.ms+=p.mb.ms||0; }
   const C=CLASSES[p.cls];
   { const pl=k=>{const b=(p.skills&&p.skills[k])||0; return b>0?b+d.cls+(d.sk[k]||0):0;}; const a1=pl('ironbody'),a2=pl('bulwark'),a3=pl('arcane'),a4=pl('swift'); if(a4)d.ms+=10+2*a4; d.dr+=a1*.012; d.regen+=a1*.0015; d.mr+=a3*3; d.cdr+=a3*.01; d.blk+=a2; }
-  if(p.relics)for(const id of p.relics){ const r=RELBY[id]; if(r)r.ap(d); }
   d.blk=Math.min(BLKMAX,d.blk); d.pr=Math.min(PRMAX,d.pr); d.rng=Math.min(RNGMAX,d.rng||0);
   d.maxHp=Math.round((C.hp+d.vit*4+(p.lvl-1)*5+d.life)*(d._hpm||1)*(d._hpr||1)*(1+.04*vupLv('hp')));
   d.maxMp=Math.round(C.mp+d.ene*1+(p.lvl-1)*1+d.mana);
@@ -1178,7 +1160,6 @@ function guestEvent(e){
   else if(t==='cn'){ announce('⚔️ 반격 태세! 스킬을 멈추세요 (일반공격은 OK)','#ffb347'); sfx('block'); }
   else if(t==='ag'){ announce('👁️ 우두머리가 시선을 돌렸어요! 도발로 되찾으세요','#ff9a7a'); }
   else if(t==='f'){ spawnFire(e[2],e[3],e[4],e[5],e[6],true); }
-  else if(t==='r'){ openRelic(); }
   else if(t==='w'){ banner(`습격 ${e[2]} / ${G.TW}`,'언데드가 몰려옵니다'); me.pot=3; }
   else if(t==='b'){ const bt=MT[e[2]]?e[2]:3; banner(G.stg.bn||MT[bt].n,bt===3?'거대한 그림자가 다가옵니다':'우두머리가 모습을 드러냈습니다'); me.pot=3; }
   else if(t==='a'){ arrowFx(e[2],e[3],e[4],e[5],e[6]|0); }
@@ -1292,7 +1273,7 @@ function updateWaves(dt){
     const alive=G.mobs.filter(m=>!m.dead).length;
     if(G.spawnQ>0&&G.spawnT<=0&&alive<45){waveMob();G.spawnQ--;G.spawnT=Math.max(.25,.75-G.wave*.05);}
     if(G.allQ&&G.allQ.length&&G.spawnT<=0&&alive<30){ const wv=G.wave; G.wave=G.allQ.shift(); waveMob(); G.wave=wv; G.spawnT=.35; }
-    if(G.spawnQ<=0&&!(G.allQ&&G.allQ.length)&&alive===0){G.phase='prep';G.skipUsed=false;G.timer=G.wave>=G.TW?4:1.2; if(G.wave%3===0&&G.wave<G.TW){ pushEv(['r']); setTimeout(()=>openRelic(),500); } G.nextSides=sidesFor(G.wave+1); G.laneShow=G.nextSides; if(G.wave>=G.TW)banner('주변의 어둠이 더 짙어지고 있습니다');}
+    if(G.spawnQ<=0&&!(G.allQ&&G.allQ.length)&&alive===0){G.phase='prep';G.skipUsed=false;G.timer=G.wave>=G.TW?4:1.2; G.nextSides=sidesFor(G.wave+1); G.laneShow=G.nextSides; if(G.wave>=G.TW)banner('주변의 어둠이 더 짙어지고 있습니다');}
   }
   if(G.allMode&&(G.phase!=='wave'&&G.phase!=='prep'||(G.phase==='prep'&&G.wave>=G.TW)))G.allMode=false;
   if(G.phase==='clear'){ G.clearT-=dt; if(G.clearT<=0)endClear(); }
@@ -1351,7 +1332,7 @@ function updateMobs(dt){
     if(m.elite){
       m.sk=(m.sk==null?rand(2,4):m.sk)-dt; if(m.sk<=0&&d<reach+70){ m.sk=rand(5,7); m.et={t:0,dur:.9,x:m.x,y:m.y,r:Math.round(m.r*2.2)}; addETel(m.et.x,m.et.y,m.et.r,m.et.dur); pushEv(['e',Math.round(m.et.x),Math.round(m.et.y),m.et.r,90]); continue; }
       if(m.af===1){ m.cdc=(m.cdc==null?rand(2,4):m.cdc)-dt; if(m.cdc<=0&&d>130&&d<400){ m.ch={t:0,dur:.9,tx:tx,ty:ty}; addETel(tx,ty,46,.9); pushEv(['e',Math.round(tx),Math.round(ty),46,90]); continue; } }
-      else if(m.af===4){ if(d<DRNR){ m.drn=(m.drn==null?.5:m.drn)-dt; if(m.drn<=0){ m.drn=.5; let got=0; for(const p of pls){ if(hyp(p.x-m.x,p.y-m.y)<DRNR){ drainPlayer(p.i,.1); got=1; } } if(got)m.hp=Math.min(m.max,m.hp+m.max*.002); } } }
+      else if(m.af===4){ if(d<DRNR){ m.drn=(m.drn==null?.5:m.drn)-dt; if(m.drn<=0){ m.drn=.5; let got=0; for(const p of pls){ if(hyp(p.x-m.x,p.y-m.y)<DRNR){ drainPlayer(p.i,.13); got=1; } } if(got)m.hp=Math.min(m.max,m.hp+m.max*.002); } } }
       else if(m.af===2){ m.smn=(m.smn==null?rand(3,5):m.smn)-dt; if(m.smn<=0&&G.mobs.length<70){ m.smn=7.5; for(let k=0;k<2;k++)spawnMob(0,m.x+rand(-34,34),m.y+rand(-34,34),false); efx.push({k:'ring',x:m.x,y:m.y,r0:8,r1:64,t:0,life:.4,col:'#a070d0',w:6}); spark(m.x,m.y,'#a070d0',10); } }
     }
     if(m.type===9){ const rg=235; if(d>rg){ mobMove(m,dx,dy,d,m.spd*sf,dt); } else if(d<rg*.6){ mobMove(m,-dx,-dy,d,m.spd*.6*sf,dt); }
