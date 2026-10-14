@@ -422,7 +422,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.1.1.0054</div>
+    <div class="ver" id="verT">v0.1.1.0055</div>
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -1413,8 +1413,9 @@ function bossAI(m,dt,pls,sf){
     else if(bd<220) m.tel={k:'slam',kind:'slam',x:m.x,y:m.y,r:Math.round(150*m.r/46),t:0,dur:1.1*du};
     else m.tel={k:'charge',kind:'charge',x:m.x,y:m.y,tx:best.x,ty:best.y,r:0,t:0,dur:.85*du};
     return; }
-  if(d>reach){const tm=tau?1.35:1; m.dvx=dx/d*m.spd*sf*tm;m.dvy=dy/d*m.spd*sf*tm;}
-  else if(m.cd<=0){m.cd=tau?.95:1.4;m.atk=.3; mobHitPlayer(best.i,m.dmg);}
+  m._mv=m._mv?d>reach-5:d>reach;   /* 사거리 경계에서 이동·정지가 번갈아 떨리지 않게: 걷기 시작은 사거리 밖, 멈춤은 5px 안쪽 */
+  if(m._mv){const tm=tau?1.35:1; m.dvx=dx/d*m.spd*sf*tm;m.dvy=dy/d*m.spd*sf*tm;}
+  if(d<=reach&&m.cd<=0){m.cd=tau?.95:1.4;m.atk=.3; mobHitPlayer(best.i,m.dmg);}
 }
 /* ===== 불 장판 ===== */
 function spawnFire(x,y,r,life,warn,quiet){ if(!G.fires)G.fires=[]; if(G.fires.length>26)G.fires.shift(); G.fires.push({x,y,r,t:0,life,warn,ph:Math.random()*6}); if(!quiet&&G.mode!=='guest')pushEv(['f',Math.round(x),Math.round(y),r,life,warn]); }
@@ -3005,7 +3006,7 @@ function mobGait(m,t){
 }
 function drawMob(m,t){
   const x=m.x,y=m.y,r=m.r;
-  ctx.save(); if(m.sq>0){ctx.translate(x,y);ctx.scale(1+m.sq*2.2,1-m.sq*1.4);ctx.translate(-x,-y);}
+  ctx.save(); if(m.sq>0){ const sk=m.boss?.3:1; ctx.translate(x,y);ctx.scale(1+m.sq*2.2*sk,1-m.sq*1.4*sk);ctx.translate(-x,-y);}  /* 보스는 몸집이 커서 눌림을 30%만 */
   ctx.fillStyle='rgba(0,0,0,.35)';ctx.beginPath();ctx.ellipse(x+2,y+r*.62,r*1.0,r*.5,0,0,6.283);ctx.fill();
   if(m.elite){ctx.strokeStyle='rgba(125,150,255,.85)';ctx.lineWidth=3;ctx.beginPath();ctx.arc(x,y,r+7+Math.sin(t*6)*1.5,0,6.283);ctx.stroke();}
   const GT=mobGait(m,t), fa=m.fa||0, ca=Math.cos(fa), sa=Math.sin(fa), bob=Math.sin(m.anim*8)*1.2*GT.wa, lunge=GT.ak*5;
@@ -3014,7 +3015,11 @@ function drawMob(m,t){
   const bk=(m.boss&&G.stg.bs)?(sprGet(G.stg.bs)?G.stg.bs:null):m.boss?'mob_'+SPRN[m.type]:mobKey(m.type), bps=!m.boss?(m.atk>0?'_atk':''):(m.tel&&m.tel.kind!=='counter')||m.charge?'_sk':m.atk>0?'_atk':'';  /* 보스: 스킬 준비·돌진 중엔 스킬 포즈, 평타 중엔 공격 포즈 */
   const SI=bk&&((bps&&sprGet(bk+bps))||sprGet(bk));
   if(SI){ const ph=m.type===6?0:GT.wp, wa=GT.wa, fl=m.type===6?Math.sin(m.anim*22):0, ak=GT.ak;  /* 걸음 위상은 실제 이동 거리 기준 (서 있으면 통통 튀지 않고 숨쉬기만) */
-    sprDraw(SI,X,Y+r*.5,r*(m.boss?3.2:3.4),fa,{flip:GT.flip,rot:Math.sin(ph)*(m.boss?.04:.1)*wa+ak*.25+GT.tk*.08,hop:(m.type===6?(Math.sin(m.anim*5)*r*.25+r*.4):Math.abs(Math.sin(ph))*r*(m.boss?.06:.16)*wa),sx:(1-fl*.05)*(1-.12*GT.tk),sy:(1+fl*.12)*(1+.04*GT.tk)+Math.sin(ph*2)*.03*wa+(m.type===6?0:Math.sin(t*2.2+(m.id||0))*.014*(1-wa)),fx:ak*r*.4}); }
+    const SO={flip:GT.flip,rot:Math.sin(ph)*(m.boss?.04:.1)*wa+ak*.25+GT.tk*.08,hop:(m.type===6?(Math.sin(m.anim*5)*r*.25+r*.4):Math.abs(Math.sin(ph))*r*(m.boss?.06:.16)*wa),sx:(1-fl*.05)*(1-.12*GT.tk),sy:(1+fl*.12)*(1+.04*GT.tk)+Math.sin(ph*2)*.03*wa+(m.type===6?0:Math.sin(t*2.2+(m.id||0))*.014*(1-wa)),fx:ak*r*.4};
+    let PV=null,pq=1; if(m.boss){ if(m._pi!==SI){ if(m._pi){m._pv=m._pi;m._pt=t;} m._pi=SI; } if(m._pv){ pq=clamp((t-m._pt)/.1,0,1); if(pq<1)PV=m._pv; } }   /* 보스 포즈 교체: 0.1초 크로스페이드 */
+    if(PV)sprDraw(PV,X,Y+r*.5,r*3.2,fa,SO);
+    if(pq<1){ const ga=ctx.globalAlpha; ctx.globalAlpha=ga*pq; sprDraw(SI,X,Y+r*.5,r*3.2,fa,SO); ctx.globalAlpha=ga; }
+    else sprDraw(SI,X,Y+r*.5,r*(m.boss?3.2:3.4),fa,SO); }
   else if(m.type===0){ // 타락자: 빨간 꼬마 악마
     for(const s of [-1,1]){ const a=fa+s*.8; cpoly([[X+Math.cos(a-.28)*r*.8,Y+Math.sin(a-.28)*r*.8],[X+Math.cos(a)*(r+r*.55),Y+Math.sin(a)*(r+r*.55)],[X+Math.cos(a+.28)*r*.8,Y+Math.sin(a+.28)*r*.8]],'#f2e6c8',2.2); }
     for(const s of [-1,1]) cball(X+Math.cos(fa+s*1.45)*r*.95,Y+Math.sin(fa+s*1.45)*r*.95,r*.3,'#b53a26',2);
