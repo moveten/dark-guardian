@@ -422,7 +422,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.1.1.0050</div>
+    <div class="ver" id="verT">v0.1.1.0051</div>
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -640,12 +640,12 @@ const MT0=[
  {n:'타락자',hp:14,dmg:2,spd:70,r:12,xp:5},
  {n:'좀비',hp:32,dmg:4,spd:34,r:16,xp:7},
  {n:'해골 전사',hp:22,dmg:3.5,spd:52,r:13,xp:8},
- {n:'썩은 군주 모르그',hp:950,dmg:12,spd:52,r:46,xp:320,boss:1,bc:['#2b1426','#4a2441','#3b1c35','#5e2f53']},
- {n:'묘지기 그라크',hp:380,dmg:7,spd:50,r:32,xp:140,boss:1,bc:['#1b2616','#3f5a36','#2e4228','#5f8553']},
- {n:'역병 사제 말렉',hp:640,dmg:9,spd:54,r:38,xp:230,boss:1,bc:['#1a1830','#3a3566','#292548','#5a52a0']},
+ {n:'썩은 군주 모르그',hp:950,dmg:12,spd:52,r:46,xp:640,boss:1,bc:['#2b1426','#4a2441','#3b1c35','#5e2f53']},
+ {n:'묘지기 그라크',hp:380,dmg:7,spd:50,r:32,xp:280,boss:1,bc:['#1b2616','#3f5a36','#2e4228','#5f8553']},
+ {n:'역병 사제 말렉',hp:640,dmg:9,spd:54,r:38,xp:460,boss:1,bc:['#1a1830','#3a3566','#292548','#5a52a0']},
  {n:'박쥐',hp:9,dmg:2,spd:118,r:10,xp:6,fly:1},
- {n:'뼈의 군주 카르곤',hp:1300,dmg:14,spd:56,r:50,xp:420,boss:1,bc:['#1d1d22','#55555f','#3a3a44','#9a9aaa']},
- {n:'심연의 마녀 이즈라',hp:1900,dmg:17,spd:58,r:52,xp:600,boss:1,bc:['#2a0f2e','#7a2a82','#521c5a','#b050c0']},
+ {n:'뼈의 군주 카르곤',hp:1300,dmg:14,spd:56,r:50,xp:840,boss:1,bc:['#1d1d22','#55555f','#3a3a44','#9a9aaa']},
+ {n:'심연의 마녀 이즈라',hp:1900,dmg:17,spd:58,r:52,xp:1200,boss:1,bc:['#2a0f2e','#7a2a82','#521c5a','#b050c0']},
  {n:'해골 궁수',hp:16,dmg:3.2,spd:48,r:12,xp:9},
  {n:'자폭병',hp:12,dmg:5,spd:100,r:12,xp:8},
  {n:'역병 사제',hp:30,dmg:2,spd:42,r:14,xp:12}
@@ -979,7 +979,7 @@ function saveChar(){ if(!me||!me.id)return; lsSet(charKey(me.id),JSON.stringify(
 const dispName=p=>(p&&p.name)||CLASSES[p.cls].n;
 const SELLBASE=[100,200,400,800], ADVAFX=['ls','crit','ias','ms','mf','pr','mr'];
 function sellInfo(it){ let base=SELLBASE[it.rar]||100, ex=0; for(const a of it.aff){ if(a.t==='all')ex+=200+150*a.v; else if(a.t==='cls'||a.t==='sk')ex+=100+100*a.v; else if(ADVAFX.includes(a.t))ex+=200; } return {base,ex,total:base+ex}; }
-const need=l=>l<=30?Math.floor(24*Math.pow(l,1.95)):Math.floor(24*Math.pow(30,1.95)*Math.pow(l/30,2.6));
+const need=l=>l<=58?Math.floor(23*Math.pow(l,1.92)):Math.floor(23*Math.pow(58,1.92)*Math.pow(l/58,9.5)); /* 레벨업 경험치: 계수 23 · 지수 1.92 · 전환 레벨 58 · 전환 후 지수 9.5 */
 
 function derive(p){
   const d={rng:0,blk:0,mf:0,pr:0,mr:0,str:p.stats.str,dex:p.stats.dex,vit:p.stats.vit,ene:p.stats.ene,dmg:0,dmgPct:0,def:0,life:0,mana:0,ias:0,ms:0,ls:0,crit:5,cls:0,sk:{},wmn:1,wmx:3,dr:0,regen:0,cdr:0,sm:0,smhp:0,sp:{}};
@@ -1200,7 +1200,7 @@ const STGBUF={2:{atk:1.1,hp:1.1,def:.1},3:{atk:1.2,hp:1.2,def:.2}};
 const stgBuf=S=>{ const b=STGBUF[parseInt(String(S&&S.id||'1').split('-')[0],10)]; return b?{atk:b.atk,hp:b.hp,def:1+b.def}:null; };
 function spawnMob(type,x,y,elite){
   const S=G.stg||STAGES[0], w=Math.max(1,G.wave), hm=(1+.12*(w-1))*(G.coop?1.4:1)*(elite?8:1)*S.hpM*1.2, dm=(1+.08*(w-1))*(elite?4.6:1)*S.dmgM*1.6;
-  const t=MT[type], m={id:G.mobId++,type,x,y,hp:t.hp*hm,max:t.hp*hm,dmg:t.dmg*dm,spd:t.spd*(elite?1.3:S.spdM)*(t.boss?.95:.5),r:t.r*(elite?1.5:1),xp:Math.round(t.xp*(1+.1*(w-1))*S.xpM*(elite?4:1)),elite:!!elite,boss:!!t.boss,fly:!!t.fly,cd:rand(0,1),slowT:0,tgt:0,rt:0,atk:0,fa:0,flash:0,anim:Math.random()*6,kx:0,ky:0,sq:0};
+  const t=MT[type], m={id:G.mobId++,type,x,y,hp:t.hp*hm,max:t.hp*hm,dmg:t.dmg*dm,spd:t.spd*(elite?1.3:S.spdM)*(t.boss?.95:.5),r:t.r*(elite?1.5:1),xp:Math.round(t.xp*(1+.1*(w-1))*S.xpM*(elite?5:1)),elite:!!elite,boss:!!t.boss,fly:!!t.fly,cd:rand(0,1),slowT:0,tgt:0,rt:0,atk:0,fa:0,flash:0,anim:Math.random()*6,kx:0,ky:0,sq:0};
   if(m.boss){const sq=Math.sqrt(S.hpM); m.hp=m.max=Math.max(t.hp*sq*1.6,32*S.hpM*1.2*(1+.12*((G.TW||8)-1))*(28+.6*(G.stageIdx|0)))*(G.coop?1.5:1);m.dmg=t.dmg*1.6*1.25*Math.pow(S.dmgM,.8);m.xp=Math.round(t.xp*S.xpM);m.spd=t.spd*.95;m.bt=3;m.sum1=false;m.sum2=false;m.tel=null;m.charge=null;}
   if(m.elite&&type<=2)m.af=1+Math.floor(Math.random()*4);
   { const B=stgBuf(S); if(B){ m.hp*=B.hp; m.max*=B.hp; m.dmg*=B.atk; m.dfM=B.def; } }
@@ -1241,7 +1241,7 @@ function startStage(){
   G.waveSides=[0,1,3]; G.nextSides=sidesFor(1); G.laneShow=G.nextSides;
 }
 const CLEAR_T=15; /* 보스 처치 후 전리품 줍기 시간(초) */
-const WAVE_CAP=24, ALL_CAP=60; /* 습격 1회 최대 몹 수(모든 스테이지 공통), 총공세 최대 몹 수 */
+const WAVE_CAP=39, ALL_CAP=60; /* 습격 1회 최대 몹 수(모든 스테이지 공통), 총공세 최대 몹 수 */
 const waveN=w=>Math.min(WAVE_CAP,G.stg.waves[w-1]|0), waveXf=w=>(G.stg.waves[w-1]|0)/Math.max(1,waveN(w));
 function sidesFor(w){ if(w>G.TW) return [pick([0,1,3])]; const s=[0,1,3].sort(()=>Math.random()-.5); return s.slice(0,w<3?1:w<6?2:3); }
 function nextWave(){
@@ -1452,7 +1452,7 @@ function killMob(m){
 }
 
 /* ================= KILL / LOOT / XP ================= */
-function comboMul(){ return 1+Math.min(.5,((G.combo&&G.combo.n)||0)*.01); }
+function comboMul(){ return 1+Math.min(.3,((G.combo&&G.combo.n)||0)*.01); }
 function bumpCombo(){ const c=G.combo||(G.combo={n:0,t:0}); c.n++; c.t=3.2; const el=$('#combo'); el.hidden=false; el.firstElementChild.textContent=c.n; el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop');
   if([10,25,50,100,200].includes(c.n)){ G.shake=Math.max(G.shake,.4); sfx('lvl'); } }
 function explodeMob(m){ const depth=m.xd||0; const R2=80, dm=Math.max(10,((me.D.wmn+me.D.wmx)/2+me.D.dmg)*1.4*(1+(me.D.str+me.D.dmgPct)/100)); bombFx(m.x,m.y,R2); pushEv(['bx',Math.round(m.x),Math.round(m.y),R2]);
