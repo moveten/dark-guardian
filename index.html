@@ -249,7 +249,6 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
 #sTitle h1{margin:0}
 #sTitle .pp{gap:10px}
 #sTitle .pp .modes{flex-wrap:nowrap}
-.rkcls{display:flex;gap:6px;margin:-4px 0 10px;flex-wrap:wrap}.rkcls select{flex:1 0 100%;min-height:38px;border-radius:8px;border:1px solid var(--line2);background:#120e0b;color:#fff;font:600 14px 'Noto Sans KR',sans-serif;padding:0 8px}.rkcls button{flex:1 1 auto;min-height:34px;border-radius:8px;border:1px solid var(--line);background:#14100d;color:#cbbfae;font:600 12.5px 'Noto Sans KR',sans-serif;padding:0 8px}.rkcls button[aria-pressed=true]{background:#3a2a14;border-color:var(--gold);color:#ffe0a0}
 #bSolo{flex:1;min-height:66px;font-size:22px;border-radius:14px;box-shadow:0 6px 22px rgba(163,48,42,.35)}
 #stageInfo{padding:9px 12px;text-align:center;cursor:pointer;line-height:1.45}
 #stageInfo .sd{display:block;font-size:12px;color:var(--mute);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -423,7 +422,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.1.1.0042</div>
+    <div class="ver" id="verT">v0.1.1.0043</div>
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -973,8 +972,8 @@ function migrateChars(){
   setIds(ids);
 }
 function createChar(cls,name){ const ids=charIds(); if(ids.length>=MAXCHAR||!CLASSES[cls])return null; if(nameTaken(name))return null; const p=newChar(cls,name); lsSet(charKey(p.id),JSON.stringify(packChar(p))); ids.push(p.id); setIds(ids); selId=p.id; lsSet('dkdef2.sel',selId); return p; }
-function deleteChar(id){ setIds(charIds().filter(x=>x!==id)); lsDel(charKey(id)); lsDel('dkdef2.rk.'+id); lsDel(dpKey(id)); lsDel('dkdef2.rk.dps.'+id); if(selId===id){selId='';lsSet('dkdef2.sel','');} rkQueueDel(id); }
-function packChar(p){ const {id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear,as,sy,ct,cat}=p; return {id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear:clear|0,ct:ct>0?ct|0:0,cat:cat>0?cat|0:0,as:as===undefined?-1:as,sy:sy===undefined?-1:sy}; }
+function deleteChar(id){ setIds(charIds().filter(x=>x!==id)); lsDel(charKey(id)); lsDel('dkdef2.rk.'+id); if(selId===id){selId='';lsSet('dkdef2.sel','');} rkQueueDel(id); }
+function packChar(p){ const {id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear,as,sy,ct,cat,dps,dpsS,dpsT}=p; return {id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear:clear|0,ct:ct>0?ct|0:0,cat:cat>0?cat|0:0,dps:dps>0?Math.floor(dps):0,dpsS:dpsS>0?dpsS|0:0,dpsT:dpsT>0?dpsT|0:0,as:as===undefined?-1:as,sy:sy===undefined?-1:sy}; }
 function saveChar(){ if(!me||!me.id)return; lsSet(charKey(me.id),JSON.stringify(packChar(me))); }
 const dispName=p=>(p&&p.name)||CLASSES[p.cls].n;
 const SELLBASE=[100,200,400,800], ADVAFX=['ls','crit','ias','ms','mf','pr','mr'];
@@ -1447,7 +1446,7 @@ function killMob(m){
   const tier=m.boss?2:m.elite?1:0, S=G.stg||STAGES[0], ilvl=m.boss?S.icap:Math.min(S.icap,Math.max(1,G.wave)+S.ilo);
   pushEv(['k',m.id,Math.round(m.x),Math.round(m.y),m.xp,tier,ilvl,m.type,m.lf||1]);
   onKill(Math.round(m.x),Math.round(m.y),m.xp,tier,ilvl,m.type,m.lf||1);
-  if(m.boss){ G.phase='clear'; G.clearT=CLEAR_T; for(const o of G.mobs) if(o!==m)o.dead=true; banner('우두머리 처치!',`${CLEAR_T}초 안에 전리품을 주워 보세요`); }
+  if(m.boss){ bossDpsDone(); G.phase='clear'; G.clearT=CLEAR_T; for(const o of G.mobs) if(o!==m)o.dead=true; banner('우두머리 처치!',`${CLEAR_T}초 안에 전리품을 주워 보세요`); }
 }
 
 /* ================= KILL / LOOT / XP ================= */
@@ -1709,7 +1708,7 @@ function hitMob(m,r,slow,tn,fx){
   if(!raw&&m.mark&&m.mark.t>0){ r={v:r.v*(1+m.mark.v),crit:r.crit}; } /* 처형 명령 표식: 받는 모든 피해 증가 */
   let shk=false; if(!raw&&fx&&(fx.el==='fire'||fx.el==='ice')&&m.shockT>0){ r={v:r.v*SHOCKB,crit:r.crit}; shk=true; } /* 감전된 적에게 화염/냉기 피해 +33% */
   if(!raw&&m.boss&&m.counter>0&&!(fx&&fx.basic)&&!G.inProc){ counterHit(m,r.v); r={v:0,crit:false}; } /* 스킬 피해는 보스에게 안 들어가고 나에게 반사 */
-  const dmg=Math.max(1,Math.round(r.v)); if(r.v>0)dmgTally(fx,m.hp>0?Math.min(dmg,m.hp):dmg); const sp=me.D&&me.D.sp; if(sp&&sp.frost&&Math.random()<.2&&!G.inProc) slow=Math.max(slow||0,2);
+  const dmg=Math.max(1,Math.round(r.v)); if(r.v>0){ const dd=m.hp>0?Math.min(dmg,m.hp):dmg; dmgTally(fx,dd); if(m.boss)G.bsD=(G.bsD||0)+dd; } const sp=me.D&&me.D.sp; if(sp&&sp.frost&&Math.random()<.2&&!G.inProc) slow=Math.max(slow||0,2);
   if(fx&&fx.shock){ m.shockT=Math.max(m.shockT||0,fx.shock); burst(m.x,m.y,'#cfe0ff',6,200); }
   if(shk&&T-(m.shkN||-9)>.5){ m.shkN=T; addNum(m.x+14,m.y-m.r-18,'⚡+33%','#9fd0ff',false); }
   m.flash=.12; addNum(m.x,m.y-m.r-6,dmg,r.crit?'#ffd34d':'#f3eadb',r.crit);
@@ -2569,25 +2568,12 @@ function renderMenu(){
 
 /* ================= SCREENS / FLOW ================= */
 function show(id){ for(const s of ['#sTitle','#sNew','#sLobby','#sEnd']) $(s).hidden=s!==id; $('#hud').hidden=id!==null; $('#dock').hidden=id!==null; resize(); }
-/* ===== DPS 기록: 스테이지를 혼자 클리어한 한 판의 (내 + 소환수) 총딜량 ÷ 전투 시간 · 스테이지별 최고 ===== */
-const DPS_URL=SB_URL+'/rest/v1/dd_dps', DPS_MINCT=15, DPSCLS=[['','전체'],['war','전사'],['pal','팔라딘'],['sorc','마법사'],['necro','강령술사']];
-const dpKey=id=>'dkdef2.dps.'+id;
-function dpsMap(id){ try{ const o=JSON.parse(lsGet(dpKey(id))||'{}'); return o&&typeof o==='object'&&!Array.isArray(o)?o:{}; }catch(e){ return {}; } }
-const dpsOf=(id,st)=>Math.max(0,Math.floor(+dpsMap(id)['s'+st]||0));
-function dpsSave(c,stage,dps,ct){ const m=dpsMap(c.id), prev=Math.floor(+m['s'+stage]||0), best=dps>prev; if(best){ m['s'+stage]=dps; m['c'+stage]=Math.round(ct); lsSet(dpKey(c.id),JSON.stringify(m)); for(const k of ['','war','pal','sorc','necro'])lsDel('dkdef2.rkc.dps:'+stage+':'+k); } return {best,prev}; }
-let dpsFailT=0;
-async function dpsSubmit(list,force){
-  if(!force&&Date.now()<dpsFailT)return;
-  try{
-    const rows=[], sigs=[]; for(const c of list){ if(!c||!c.id||!CLASSES[c.cls])continue; const m=dpsMap(c.id); let sg={}; try{ sg=JSON.parse(lsGet('dkdef2.rk.dps.'+c.id)||'{}')||{}; }catch(e){}
-      for(const k in m){ if(!/^s\d+$/.test(k))continue; const st=+k.slice(1), dps=Math.floor(+m[k]||0); if(!(dps>0)||st>=STAGES.length)continue; const sig=[dps,c.lvl|0,dispName(c)].join('|'); if(!force&&sg[k]===sig)continue;
-        rows.push({id:String(c.id).slice(0,40),stage:st,name:dispName(c).slice(0,8),cls:c.cls,lvl:Math.max(1,c.lvl|0),cp:Math.max(0,Math.min(999999999,calcCP(c)|0)),dps:Math.min(100000000,dps),ct:Math.max(0,m['c'+st]|0),updated_at:new Date().toISOString()}); sigs.push([c.id,k,sig]); } }
-    if(!rows.length)return;
-    const r=await fetch(DPS_URL+'?on_conflict=id,stage',{method:'POST',headers:rkHead({Prefer:'resolution=merge-duplicates,return=minimal'}),body:JSON.stringify(rows)});
-    if(r.ok){ const by={}; for(const [id,k,sig] of sigs)(by[id]=by[id]||{})[k]=sig; for(const id in by){ let sg={}; try{ sg=JSON.parse(lsGet('dkdef2.rk.dps.'+id)||'{}')||{}; }catch(e){} Object.assign(sg,by[id]); lsSet('dkdef2.rk.dps.'+id,JSON.stringify(sg)); } } else dpsFailT=Date.now()+60000;
-  }catch(e){ dpsFailT=Date.now()+60000; }
-}
-async function dpsFetch(stage,cls){ const r=await fetch(DPS_URL+'?select=id,name,cls,lvl,cp,dps,ct&stage=eq.'+(stage|0)+'&dps=gt.0'+(CLASSES[cls]?'&cls=eq.'+cls:'')+'&order=dps.desc,lvl.asc&limit=30',{headers:rkHead()}); if(!r.ok)throw new Error('dps '+r.status); return r.json(); }
+/* ===== DPS 기록: 스테이지를 혼자 하다가 우두머리가 나오면 자동 측정 — 우두머리 등장~처치까지 (내 + 소환수)가 보스에게 준 피해 ÷ 시간 · 캐릭터당 최고 1건 (dd_rank.dps) ===== */
+const DPS_MINCT=8;
+try{ for(const id of charIds())for(const k of ['dkdef2.dps.'+id,'dkdef2.rk.dps.'+id])if(lsGet(k)!==null)lsDel(k); }catch(e){} /* 예전(스테이지별 DPS) 기록 정리 */
+function bossDpsDone(){ G.bsRes=null; if(G.mode!=='solo'||!me)return; const ct=G.bsT||0, tot=G.bsD||0; if(!(ct>=DPS_MINCT&&tot>0))return;
+  const dps=Math.min(100000000,Math.round(tot/ct)), prev=Math.floor(me.dps)||0, best=dps>prev; G.bsRes={dps,ct,prev,best};
+  if(best){ me.dps=dps; me.dpsS=G.stageIdx|0; me.dpsT=Math.round(ct); saveChar(); lsDel('dkdef2.rkc.dps'); rkSubmit([me],true); } }
 /* ===== 랭킹 (Supabase REST: dd_rank) ===== */
 const RK_URL=SB_URL+'/rest/v1/dd_rank';
 const RKSL=['weapon','helm','armor','shield','amulet','ring1','ring2'], RKSN={weapon:'무기',helm:'투구',armor:'갑옷',shield:'방패',amulet:'목걸이',ring1:'반지',ring2:'반지'};
@@ -2597,17 +2583,17 @@ function rkSnap(c){ const D=derive(c), eq={}; for(const k of RKSL){ const x=rkIt
   const rows=[['생명력',D.maxHp],['마나',D.maxMp],['무기 공격력',`${D.wmn+D.dmg}–${D.wmx+D.dmg}`],['피해 보너스',`+${Math.round(D.str+D.dmgPct)}%`],['방어력',Math.round(D.def)]];
   if(c.cls==='pal'||D.blk>0) rows.push(['막기 확률',D.blk>=BLKMAX?`${BLKMAX}% (MAX)`:`${D.blk}%`]);
   rows.push(['공격 속도',`+${Math.round(D.ias+D.dex*.25)}%`],['치명타',`${Math.round(D.crit*10)/10}%`],['받는 피해 감소',`${Math.round((D.dr||0)*100)}%`],['스킬 쿨감',`${Math.round((D.cdr||0)*100)}%`],['이동 속도',`+${Math.round(D.ms)}%`],['생명력 흡수',`${Math.round(D.ls)}%`]);
-  return {eq,st:[Math.floor(D.str),Math.floor(D.dex),Math.floor(D.vit),Math.floor(D.ene)],rows:rows.map(r=>[r[0],String(r[1])]),v:1,...(c.ct>0?{ct:c.ct|0}:{}),...(c.clear>0?{cat:c.cat>0?c.cat|0:legacyCat(c.id)}:{})}; }
-function rkRow(c){ const sn=rkSnap(c), cp=calcCP(c); return {id:String(c.id).slice(0,40),name:dispName(c).slice(0,8),cls:c.cls,lvl:Math.max(1,c.lvl|0),kills:Math.max(0,c.kills|0),clear:Math.max(0,Math.min(STAGES.length,c.clear|0)),cp:Math.max(0,Math.min(999999999,cp|0)),data:sn,updated_at:new Date().toISOString()}; }
+  return {eq,st:[Math.floor(D.str),Math.floor(D.dex),Math.floor(D.vit),Math.floor(D.ene)],rows:rows.map(r=>[r[0],String(r[1])]),v:1,...(c.ct>0?{ct:c.ct|0}:{}),...(c.dps>0?{ds:c.dpsS|0,dt:c.dpsT|0}:{}),...(c.clear>0?{cat:c.cat>0?c.cat|0:legacyCat(c.id)}:{})}; }
+function rkRow(c){ const sn=rkSnap(c), cp=calcCP(c); return {id:String(c.id).slice(0,40),name:dispName(c).slice(0,8),cls:c.cls,lvl:Math.max(1,c.lvl|0),kills:Math.max(0,c.kills|0),clear:Math.max(0,Math.min(STAGES.length,c.clear|0)),cp:Math.max(0,Math.min(999999999,cp|0)),dps:Math.max(0,Math.min(100000000,Math.floor(c.dps)||0)),data:sn,updated_at:new Date().toISOString()}; }
 let rkFailT=0;
 async function rkSubmit(list,force){
   if(!force&&Date.now()<rkFailT)return;
   try{
-    const rows=[]; for(const c of list){ if(!c||!c.id||!CLASSES[c.cls]||(c.kills|0)<=0)continue; const r=rkRow(c); const sig=[r.lvl,r.kills,r.clear,r.name,r.cp,hashStr(JSON.stringify(r.data))].join('|'); if(!force&&lsGet('dkdef2.rk.'+c.id)===sig)continue; rows.push({r,sig}); }
+    const rows=[]; for(const c of list){ if(!c||!c.id||!CLASSES[c.cls]||(c.kills|0)<=0)continue; const r=rkRow(c); const sig=[r.lvl,r.kills,r.clear,r.name,r.cp,r.dps,hashStr(JSON.stringify(r.data))].join('|'); if(!force&&lsGet('dkdef2.rk.'+c.id)===sig)continue; rows.push({r,sig}); }
     if(!rows.length)return;
     const send=async body=>fetch(RK_URL+'?on_conflict=id',{method:'POST',headers:rkHead({Prefer:'resolution=merge-duplicates,return=minimal'}),body:JSON.stringify(body)});
     let r=await send(rows.map(x=>x.r));
-    if(r.status===400||r.status===404){ const r2=await send(rows.map(x=>{const {cp,data,...o}=x.r; return o;})); if(r2.ok){ rkFailT=Date.now()+60000; return; } }
+    if(r.status===400||r.status===404){ const r2=await send(rows.map(x=>{const {cp,data,dps,...o}=x.r; return o;})); if(r2.ok){ rkFailT=Date.now()+60000; return; } }
     if(r.ok) for(const x of rows) lsSet('dkdef2.rk.'+x.r.id,x.sig); else rkFailT=Date.now()+60000;
   }catch(e){ rkFailT=Date.now()+60000; }
 }
@@ -2617,20 +2603,19 @@ function rkQueueDel(id){ if(!id)return; const a=rkDelList(); if(!a.includes(id))
 let rkDelBusy=false;
 async function rkFlushDel(){ if(rkDelBusy)return; const a=rkDelList(); if(!a.length)return; rkDelBusy=true;
   try{ const left=[]; for(const id of a){ if(charIds().includes(id))continue; /* 다시 살아난(복원된) 캐릭터는 건드리지 않음 */
-      try{ const r=await fetch(RK_URL+'?id=eq.'+encodeURIComponent(id),{method:'DELETE',headers:rkHead({Prefer:'return=minimal'})}); if(!r.ok)left.push(id); else fetch(DPS_URL+'?id=eq.'+encodeURIComponent(id),{method:'DELETE',headers:rkHead({Prefer:'return=minimal'})}).catch(()=>{}); }catch(e){ left.push(id); } }
+      try{ const r=await fetch(RK_URL+'?id=eq.'+encodeURIComponent(id),{method:'DELETE',headers:rkHead({Prefer:'return=minimal'})}); if(!r.ok)left.push(id); }catch(e){ left.push(id); } }
     lsSet('dkdef2.rkdel',JSON.stringify(left)); }finally{ rkDelBusy=false; } }
-function rkSubmitAll(force){ rkFlushDel(); const chars=charIds().map(loadChar).filter(Boolean); if(me&&me.id){ const i=chars.findIndex(c=>c.id===me.id); if(i>=0)chars[i]=me; } dpsSubmit(chars,force); return rkSubmit(chars,force); }
-const RKMODES={stage:{o:'clear.desc,lvl.desc,kills.desc',f:'&kills=gt.0&clear=gt.0'},lvl:{o:'lvl.desc,kills.desc',f:'&kills=gt.0'},cp:{o:'cp.desc,lvl.desc',f:'&kills=gt.0'}};
+function rkSubmitAll(force){ rkFlushDel(); const chars=charIds().map(loadChar).filter(Boolean); if(me&&me.id){ const i=chars.findIndex(c=>c.id===me.id); if(i>=0)chars[i]=me; } return rkSubmit(chars,force); }
+const RKMODES={stage:{o:'clear.desc,lvl.desc,kills.desc',f:'&kills=gt.0&clear=gt.0'},lvl:{o:'lvl.desc,kills.desc',f:'&kills=gt.0'},cp:{o:'cp.desc,lvl.desc',f:'&kills=gt.0'},dps:{o:'dps.desc,lvl.asc',f:'&dps=gt.0'}};
 const rkCt=r=>+(r&&r.data&&r.data.ct)||0;   /* 클리어 시간(초) — 표시용 */
 /* 클리어 시각(초): 그 클리어 수에 처음 도달한 때. 기록이 없는 예전 캐릭터는 id로 정한 '2026-10-13 10~22시(KST)' 사이의 고정 시각 */
 const legacyCat=id=>1791853200+hashStr(String(id))%43200;
 const rkCat=r=>+(r&&r.data&&r.data.cat)||legacyCat(r&&r.id);
 const rkStageCmp=(a,b)=>(b.clear-a.clear)||(rkCat(a)-rkCat(b))||(b.lvl-a.lvl)||(b.kills-a.kills); /* 클리어 수 → 먼저 클리어한 사람 → 레벨 → 처치 */
 async function rkFetch(mode){
-  if(String(mode).indexOf('dps:')===0){ const q=String(mode).split(':'); return dpsFetch(+q[1],q[2]||''); }
   const M=RKMODES[mode]; let r=null;
-  if(mode==='stage'){ try{ r=await fetch(RK_URL+'?select=id,name,cls,lvl,kills,clear,cp,data&order=clear.desc,data->cat.asc.nullslast,lvl.desc,kills.desc'+M.f+'&limit=30',{headers:rkHead()}); }catch(e){ r=null; } }
-  if(!r||!r.ok) r=await fetch(RK_URL+'?select=id,name,cls,lvl,kills,clear,cp,data&order='+M.o+M.f+'&limit=30',{headers:rkHead()});
+  if(mode==='stage'){ try{ r=await fetch(RK_URL+'?select=id,name,cls,lvl,kills,clear,cp,dps,data&order=clear.desc,data->cat.asc.nullslast,lvl.desc,kills.desc'+M.f+'&limit=30',{headers:rkHead()}); }catch(e){ r=null; } }
+  if(!r||!r.ok) r=await fetch(RK_URL+'?select=id,name,cls,lvl,kills,clear,cp,dps,data&order='+M.o+M.f+'&limit=30',{headers:rkHead()});
   if(!r.ok) throw new Error('rank '+r.status);
   const rows=await r.json(); if(mode==='stage'&&Array.isArray(rows))rows.sort(rkStageCmp); return rows;
 }
@@ -2645,9 +2630,9 @@ function rkCacheSet(mode,rows){ try{ lsSet('dkdef2.rkc.'+mode,JSON.stringify({t:
 async function rkLoad(mode,force){ const c=rkCacheGet(mode); if(!force&&c&&Date.now()-c.t<RK_TTL)return {rows:c.rows,t:c.t,cached:true};
   const rows=await rkFetch(mode); rkCacheSet(mode,rows); return {rows,t:Date.now(),cached:false}; }
 function rkPrefetch(){ const c=rkCacheGet('lvl'); if(c&&Date.now()-c.t<RK_TTL)return; rkLoad('lvl',true).catch(()=>{}); }
-function rkVal(mode,r){ if(mode.indexOf('dps:')===0)return r.dps>0?'⚡ '+rkFmt(r.dps):'-'; return mode==='stage'?(r.clear>0?STAGES[Math.min(STAGES.length,r.clear)-1].id+' 클리어':'-'):mode==='lvl'?'Lv '+(r.lvl|0):(r.cp>0?'⚔️ '+rkFmt(r.cp):'집계 전'); }
+function rkVal(mode,r){ if(mode==='dps')return r.dps>0?'⚡ '+rkFmt(r.dps):'-'; return mode==='stage'?(r.clear>0?STAGES[Math.min(STAGES.length,r.clear)-1].id+' 클리어':'-'):mode==='lvl'?'Lv '+(r.lvl|0):(r.cp>0?'⚔️ '+rkFmt(r.cp):'집계 전'); }
 const rkDate=t=>{ const d=new Date(t*1000); return (d.getMonth()+1)+'/'+d.getDate()+' '+d.getHours()+':'+String(d.getMinutes()).padStart(2,'0'); };
-function rkSub(mode,r){ if(mode.indexOf('dps:')===0)return `Lv ${r.lvl|0} · ⚔️ ${r.cp>0?rkFmt(r.cp):'-'}`+(r.ct>0?` · ⏱ ${fmtCt(r.ct)}`:''); return mode==='lvl'?`처치 ${rkFmt(r.kills)}마리`:`Lv ${r.lvl|0} · 처치 ${rkFmt(r.kills)}`+(mode==='stage'&&r.clear>0?` · ${rkDate(rkCat(r))}`:''); }
+function rkSub(mode,r){ if(mode==='dps'){ const d=r.data||{}, st=STAGES[d.ds|0]; return `Lv ${r.lvl|0} · ⚔️ ${r.cp>0?rkFmt(r.cp):'-'}`+(d.dt>0&&st?` · ${st.id} · ⏱ ${fmtCt(d.dt)}`:''); } return mode==='lvl'?`처치 ${rkFmt(r.kills)}마리`:`Lv ${r.lvl|0} · 처치 ${rkFmt(r.kills)}`+(mode==='stage'&&r.clear>0?` · ${rkDate(rkCat(r))}`:''); }
 function rkBuildItem(k,x){ const rar=Math.max(0,Math.min(3,x.r|0)); const it={id:0,slot:k.replace(/\d/,''),rar,ilvl:x.l|0,base:String(x.b||''),name:String(x.n||'?'),mn:x.mn|0,mx:x.mx|0,df:x.df|0,blk:x.bk|0,dm:x.dm|0,om:x.om|0,enh:x.e|0,req:x.rq|0,aff:[]}; if(it.slot==='shield')it.oc=OFFN[x.oc]?x.oc:'pal';
   if(!it.mx){delete it.mn;delete it.mx;} if(!it.df)delete it.df; if(!it.blk)delete it.blk; if(!it.dm)delete it.dm; if(!it.om)delete it.om; if(x.sp&&SPFX[x.sp])it.sp=x.sp;
   for(const a of (x.a||[])){ if(a&&AFXBY[a.t]) it.aff.push({t:a.t,v:a.v|0,cls:a.c,key:a.k}); } return it; }
@@ -2683,10 +2668,9 @@ function rkItemDetail(row,k,back){
     m.onclick=e=>{ if(e.target===m)openRank(back); }; m.querySelector('#rkBack').onclick=()=>rkProfile(row,back); m.querySelector('#rkNo').onclick=()=>openRank(back); });
 }
 function openRank(mode0){
-  let mode=(RKMODES[mode0]||/^dps:\d+:/.test(String(mode0||'')))?mode0:'lvl'; const mine=new Set(charIds()); const bm=()=>mode.split(':')[0];
-  let dpsSt=Math.max(0,Math.min(STAGES.length-1,bm()==='dps'?+mode.split(':')[1]:selStage|0)), dpsCl=bm()==='dps'?(mode.split(':')[2]||''):''; const dpsM=()=>'dps:'+dpsSt+':'+dpsCl;
+  let mode=RKMODES[mode0]?mode0:'lvl'; const mine=new Set(charIds());
   const TABS=[['lvl','⭐ 레벨'],['cp','💪 전투력'],['stage','🗺️ 진행'],['dps','⚡ DPS']];
-  modal(`<h3>🏆 랭킹</h3><div class="rktabs">${TABS.map(([k,l])=>`<button data-m="${k}" aria-pressed="${k===bm()}">${l}</button>`).join('')}</div><div class="rkcls" id="rkCls" hidden></div><div class="rklist" id="rkBox"><p class="meta">불러오는 중…</p></div><div class="row2"><button class="btn" id="rkRe">🔄 새로고침</button><button class="btn" id="rkNo">닫기</button></div><p class="meta" style="margin:8px 0 0;font-size:11.5px">이름을 누르면 장비와 능력치를 한눈에 볼 수 있어요 · 내 캐릭터는 금색 · 전투 기록 없는 캐릭터 제외 · 🔄는 바로 갱신</p>`,m=>{
+  modal(`<h3>🏆 랭킹</h3><div class="rktabs">${TABS.map(([k,l])=>`<button data-m="${k}" aria-pressed="${k===mode}">${l}</button>`).join('')}</div><div class="rklist" id="rkBox"><p class="meta">불러오는 중…</p></div><div class="row2"><button class="btn" id="rkRe">🔄 새로고침</button><button class="btn" id="rkNo">닫기</button></div><p class="meta" style="margin:8px 0 0;font-size:11.5px">이름을 누르면 장비와 능력치를 한눈에 볼 수 있어요 · 내 캐릭터는 금색 · 전투 기록 없는 캐릭터 제외 · 🔄는 바로 갱신</p>`,m=>{
     const box=m.querySelector('#rkBox'); let seq=0;
     const rowHtml=(r,i,own)=>{ const c=CLASSES[r.cls]?r.cls:'war'; return `<button class="rkrow${own?' own':''}${i<3?' top':''}" data-i="${i}"><span class="rkn">${i<3?['🥇','🥈','🥉'][i]:i+1}</span><span class="rke">${CLSE[c]}</span><span class="rkm"><b>${esc(String(r.name||CLASSES[c].n).slice(0,8))}</b><small>${rkSub(mode,r)}</small></span><span class="rkv">${esc(rkVal(mode,r))}</span><span class="rkc">›</span></button>`; };
     const load=async(force)=>{ const my=++seq; rkSubmitAll(false);
@@ -2694,23 +2678,18 @@ function openRank(mode0){
       let rows,local=false,t=Date.now();
       try{ const r=await rkLoad(mode,true); if(my!==seq)return; rows=r.rows; t=r.t; }
       catch(e){ if(my!==seq)return; if(c0&&!force)return; local=true;
-        rows=charIds().map(loadChar).filter(c=>c&&(bm()==='dps'?dpsOf(c.id,dpsSt)>0&&(!dpsCl||c.cls===dpsCl):(c.kills|0)>0)).map(c=>({id:c.id,name:dispName(c),cls:c.cls,lvl:c.lvl,kills:c.kills|0,clear:c.clear|0,cp:calcCP(c),dps:dpsOf(c.id,dpsSt),ct:+dpsMap(c.id)['c'+dpsSt]||0,data:rkSnap(c)})).sort((a,b)=>bm()==='dps'?b.dps-a.dps:mode==='stage'?rkStageCmp(a,b):mode==='lvl'?(b.lvl-a.lvl||b.kills-a.kills):b.cp-a.cp); }
+        rows=charIds().map(loadChar).filter(c=>c&&(mode==='dps'?c.dps>0:(c.kills|0)>0)).map(c=>({id:c.id,name:dispName(c),cls:c.cls,lvl:c.lvl,kills:c.kills|0,clear:c.clear|0,cp:calcCP(c),dps:c.dps|0,data:rkSnap(c)})).sort((a,b)=>mode==='dps'?(b.dps-a.dps||a.lvl-b.lvl):mode==='stage'?rkStageCmp(a,b):mode==='lvl'?(b.lvl-a.lvl||b.kills-a.kills):b.cp-a.cp); }
       show(rows,local,t); };
     const show=(rows,local,t)=>{
-      if(!rows.length){ box.innerHTML=bm()==='dps'?'<p class="meta">이 스테이지에는 아직 DPS 기록이 없어요. 혼자서 스테이지를 클리어하면 기록이 남아요!</p>':'<p class="meta">아직 등록된 기록이 없어요. 먼저 사냥해 보세요!</p>'; return; }
+      if(!rows.length){ box.innerHTML=mode==='dps'?'<p class="meta">아직 DPS 기록이 없어요. 혼자서 스테이지를 하다가 우두머리를 쓰러뜨리면 자동으로 기록돼요!</p>':'<p class="meta">아직 등록된 기록이 없어요. 먼저 사냥해 보세요!</p>'; return; }
       const hm=new Date(t||Date.now()), stamp=`${String(hm.getHours()).padStart(2,'0')}:${String(hm.getMinutes()).padStart(2,'0')}`;
       box.innerHTML=(local?'<p class="meta" style="color:#e0a070">랭킹 서버에 연결하지 못했어요. (준비 중이거나 오프라인) 내 캐릭터만 보여요.</p>':'')+rows.map((r,i)=>rowHtml(r,i,mine.has(r.id))).join('')+(local?'':`<p class="meta" style="font-size:11px;text-align:center;margin:8px 0 0">10분마다 갱신 · 마지막 갱신 ${stamp}</p>`);
       box.querySelectorAll('.rkrow').forEach(b=>{ b.onclick=()=>{ const r=rows[+b.dataset.i]; if(!r)return;
-        if(bm()==='dps'&&!mine.has(r.id)){ const base=Object.assign({kills:0,clear:0,data:null},r); rkFetchOne(r.id).then(x=>rkProfile(Object.assign({},x||base,{dps:r.dps}),mode)).catch(()=>rkProfile(base,mode)); return; }
-        if(mine.has(r.id)){ const c=loadChar(r.id); if(c){ rkProfile({id:c.id,name:dispName(c),cls:c.cls,lvl:c.lvl,kills:c.kills|0,clear:c.clear|0,cp:calcCP(c),dps:bm()==='dps'?r.dps:0,data:rkSnap(c)},mode); return; } }
+        if(mine.has(r.id)){ const c=loadChar(r.id); if(c){ rkProfile({id:c.id,name:dispName(c),cls:c.cls,lvl:c.lvl,kills:c.kills|0,clear:c.clear|0,cp:calcCP(c),dps:mode==='dps'?r.dps:0,data:rkSnap(c)},mode); return; } }
         rkProfile(r,mode); }; });
     };
-    const ctl=()=>{ const el=m.querySelector('#rkCls'); el.hidden=bm()!=='dps'; if(el.hidden)return;
-      el.innerHTML=`<select id="rkStg" aria-label="스테이지">${STAGES.map((s,i)=>`<option value="${i}"${i===dpsSt?' selected':''}>${esc(s.id)} · ${esc(s.n)}</option>`).join('')}</select>`+DPSCLS.map(([k,l])=>`<button data-c="${k}" aria-pressed="${k===dpsCl}">${l}</button>`).join('');
-      el.querySelector('#rkStg').onchange=e=>{ dpsSt=+e.target.value; mode=dpsM(); load(); };
-      el.querySelectorAll('button').forEach(b=>b.onclick=()=>{ dpsCl=b.dataset.c; mode=dpsM(); ctl(); load(); }); };
-    const setTab=k=>{ mode=k==='dps'?dpsM():k; m.querySelectorAll('.rktabs button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===k)); ctl(); load(); };
-    m.querySelectorAll('.rktabs button').forEach(b=>b.onclick=()=>setTab(b.dataset.m)); m.querySelector('#rkRe').onclick=()=>load(true); m.querySelector('#rkNo').onclick=closeModal; ctl(); load(); });
+    const setTab=k=>{ mode=k; m.querySelectorAll('.rktabs button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===k)); load(); };
+    m.querySelectorAll('.rktabs button').forEach(b=>b.onclick=()=>setTab(b.dataset.m)); m.querySelector('#rkRe').onclick=()=>load(true); m.querySelector('#rkNo').onclick=closeModal; load(); });
 }
 $('#bRank').onclick=()=>openRank();
 let carTm=null, carLock=0;
@@ -2808,7 +2787,7 @@ function prepMe(){ me=loadChar(selId); me.D=derive(me); spawnMe(); }
 function resetWorld(){
   G.aim=null;
   projs.length=zones.length=timers.length=parts.length=nums.length=ground.length=efx.length=0;
-  G.mobs=[]; G.mobMap=new Map(); G.stKills=0; G.stDrops=0; G.stCap=0; G.runT=0; G.cbT=0; G.stGot=[0,0,0,0]; G.endShown=false; G.paused=false; G.bt=null; G.shake=0;
+  G.mobs=[]; G.mobMap=new Map(); G.stKills=0; G.stDrops=0; G.stCap=0; G.runT=0; G.bsT=0; G.bsD=0; G.bsRes=null; G.stGot=[0,0,0,0]; G.endShown=false; G.paused=false; G.bt=null; G.shake=0;
   hitQ=[]; fxQ=[]; lastAllyFx=-1; lastEv=-1; lastHit=0; G.guestDmg=0; G.fires=[]; G.freeRev=1; G.fireT=3; if(me){ me.rvGiven=0; me.seenRg=0; me.out=false; me.rvT=0; }
   spawnMe(); buildSkills(); show(null); G.inGame=true; closeSheet();
 }
@@ -2875,7 +2854,7 @@ function showEnd(msg){
     const top3=rows.slice(0,3).map((r,i)=>`<div class="dr"><span role="img" aria-label="${TRN[i]}트로피">${trophy(TRC[i])}</span><span class="nm">${esc(r.n)}</span><b>${f(r.v)}${tot>0?` <small>${Math.round(r.v/tot*100)}%</small>`:''}</b></div>`).join('')||'<div class="dr"><span class="nm">-</span></div>';
     const miss=Math.max(0,(G.stDrops|0)-gs), left=Math.min(miss,ground.length), lost=Math.min(miss-left,G.stCap|0), oth=miss-left-lost;
     const missLn=miss>0?`<div class="meta" style="margin-top:6px">못 주운 아이템 ${miss}개 — ${[left?`바닥에 남음 ${left}`:'',lost?`바닥에 90개가 넘어 사라짐 ${lost}`:'',oth?`기타 ${oth}`:''].filter(Boolean).join(' · ')}</div>`:'';
-    let dpsHtml=''; { const ct=G.cbT||0; if(win&&!msg&&G.mode==='solo'&&ct>=DPS_MINCT&&tot>0){ const dps=Math.round(tot/ct), r=dpsSave(me,G.stageIdx|0,dps,ct); if(r.best)dpsSubmit([me],true); dpsHtml=`<div class="tp"><span>⚡ DPS <small style="font-weight:400;color:var(--mute)">(전투 ${fmtCt(ct)})</small></span><b>${f(dps)}</b></div><div class="meta" style="margin:-4px 0 8px;font-size:12px;color:${r.best?'#9fd18b':'var(--mute)'}">${r.best?'🎉 이 스테이지 내 최고 DPS 기록! 랭킹에 반영돼요':'이 스테이지 내 최고 DPS '+f(r.prev)}</div>`; } else if(win&&!msg&&G.mode!=='solo')dpsHtml='<div class="meta" style="margin-bottom:8px">DPS 기록은 혼자 클리어할 때만 남아요</div>'; }
+    let dpsHtml=''; { const R=G.bsRes; if(win&&!msg&&G.mode==='solo'&&R){ dpsHtml=`<div class="tp"><span>⚡ 우두머리 DPS <small style="font-weight:400;color:var(--mute)">(전투 ${fmtCt(R.ct)})</small></span><b>${f(R.dps)}</b></div><div class="meta" style="margin:-4px 0 8px;font-size:12px;color:${R.best?'#9fd18b':'var(--mute)'}">${R.best?'🎉 최고 DPS 기록! 랭킹에 반영돼요':'내 최고 DPS '+f(R.prev)}</div>`; } else if(win&&!msg&&G.mode!=='solo')dpsHtml='<div class="meta" style="margin-bottom:8px">DPS 기록은 혼자 플레이할 때만 남아요</div>'; }
     $('#endBox').innerHTML=`<div><div style="margin-bottom:6px">데미지 순위</div>${top3}</div><div class="tp"><span>⚔️ 총 데미지</span><b>${f(tot)}</b></div>${dpsHtml}<div><div style="margin-bottom:6px">📦 획득한 아이템 <b style="display:inline;font-size:14px;color:var(--ink)">${gs}</b>개</div><div class="rr">${[0,1,2,3].map(r=>`<div style="color:${RARC[r]}">${RARN[r]}<b>${got[r]|0}</b></div>`).join('')}</div>${missLn}</div>`; }
   show('#sEnd');
 }
@@ -3485,7 +3464,7 @@ function step(now){
   if(!me||!G.inGame){ if(me&&G.phase!=='title'&&G.phase!=='lobby')render(T); else {ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle='#070605';ctx.fillRect(0,0,cv.width,cv.height);} return; }
   if(G.hs>0&&G.mode==='solo'){G.hs-=dt; render(T); return;}
   if(!G.paused){
-    G.runT=(G.runT||0)+dt; if(G.phase==='wave'||G.phase==='boss')G.cbT=(G.cbT||0)+dt; /* 전투 시간(습격·우두머리 구간만) — DPS 계산용 */
+    G.runT=(G.runT||0)+dt; if(G.phase==='boss')G.bsT=(G.bsT||0)+dt; /* 우두머리 전투 시간(등장~처치) — DPS 계산용 */
     if(G.mode!=='guest'){ updateWaves(dt); updateMobs(dt); }
     else { const nw=performance.now(), k=1-Math.exp(-dt*14);   /* 마지막으로 받은 위치 + 추정 속도로 살짝 앞을 보고 따라감 → 끊김·지연 감소 */
       for(const m of G.mobs){ const el=Math.min(.08,(nw-(m._tu||nw))/1000), ex=m.tx+(m.ux||0)*el, ey=m.ty+(m.uy||0)*el;
