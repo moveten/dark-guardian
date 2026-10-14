@@ -45,3 +45,5 @@
 [영웅 걷기 시트 — 전사·팔라딘·마법사·강령술사 적용 완료] hero_war_walk.png / hero_pal_walk.png / hero_sorc_walk.png / hero_necro_walk.png = 6프레임 가로 시트 (칸 크기 동일, 발이 아래에 닿음, 오른쪽 바라봄)
   다른 직업도 hero_<직업>_walk.png 로 올리고 index.html의 WALKS 목록에 한 줄 추가하면 같은 방식으로 적용돼요.
   시트 제작 방법: 대기 그림을 기준으로 ChatGPT에서 3칸×2줄 6프레임을 뽑은 뒤 배경 제거·균일 정렬(시트 마젠타 배경).
+
+[보스 걷기·준비 동작 프롬프트] img/boss_walk_prompt.txt (스테이지 1 보스 5종: 걷기 6프레임 + 준비 자세 _wu, 참고 이미지 첨부해서 요청)
