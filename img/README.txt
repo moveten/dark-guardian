@@ -48,4 +48,5 @@
 
 [보스 걷기·준비 동작 프롬프트] img/boss_walk_prompt.txt (스테이지 1 보스 5종: 걷기 6프레임 + 준비 자세 _wu, 참고 이미지 첨부해서 요청)
 [보스 걷기 시트 — 적용 완료] mob_grak_walk.png (6프레임 가로 시트, 저장 배율 .75). 새 보스는 index.html 의 BWALKS 에 이름 추가.
+[보스 걷기 시트 — 적용 완료] mob_malek_walk.png
 
