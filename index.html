@@ -422,7 +422,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.1.1.0056</div>
+    <div class="ver" id="verT">v0.1.1.0057</div>
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -2954,6 +2954,8 @@ const SPRN=['imp','zombie','skeleton','morg','grak','malek','bat','kargon','izra
 const SPR={};
 function sprGet(k){ let e=SPR[k]; if(!e){ e=SPR[k]={ok:false,im:new Image()}; e.im.onload=()=>{e.ok=true;}; e.im.onerror=()=>{e.ok=false;e.bad=true;}; e.im.src='img/'+k+'.png'; } return e.ok?e.im:null; }
 /* 걷기 시트: hero_<직업>_walk.png = n프레임 가로 시트 (k = 저장 배율, cyc = 한 사이클을 걷는 데 필요한 이동 거리) */
+/* 보스 걷기 시트: <보스 그림 이름>_walk.png (n프레임 가로 시트, k=저장 배율, cyc=한 사이클(두 걸음)에 필요한 이동 거리 = 몸집 r의 배수) */
+const BWALKS={mob_grak:{n:6,k:.75,cyc:2.6}};
 const WALKS={war:{n:6,k:.75,cyc:70},pal:{n:6,k:.75,cyc:70},sorc:{n:6,k:.75,cyc:70},necro:{n:6,k:.75,cyc:70}};
 function sprDraw(im,x,y,h,face,o){ o=o||0; const fr=o.fr, w=fr?h*fr[1]/fr[2]:h*im.width/im.height; ctx.save(); ctx.translate(x,y-(o.hop||0)); if(o.flip!==undefined)ctx.scale(o.flip,1); else if(Math.cos(face||0)<0)ctx.scale(-1,1); if(o.fx)ctx.translate(o.fx,0); if(o.rot)ctx.rotate(o.rot); if(o.sx||o.sy)ctx.scale(o.sx||1,o.sy||1); if(fr)ctx.drawImage(im,fr[0],0,fr[1],fr[2],-w/2,-h+h*.12,w,h); else ctx.drawImage(im,-w/2,-h+h*.12,w,h); ctx.restore(); }
 /* ===== 마법사 스킬 이펙트 시트: img/fx_sorc.png (8열×10줄, 칸 140px, 검은 배경은 투명) · 가산 합성으로 그림 ===== */
@@ -2992,7 +2994,7 @@ function heroAnim(o,t,melee,wk){ wk=wk===undefined?1:wk;  /* wk: 걷기 시트�
 }
 const mobSfx=()=>{ const id=G.stg&&G.stg.id; return id?({'2':'_s2','3':'_s3'}[id[0]]||''):''; };  /* 스테이지별 일반 몹 이미지: mob_<이름>_s2 / _s3 (없으면 스테이지 1 이미지) */
 const mobKey=t=>{ const sf=mobSfx(), k='mob_'+SPRN[t]; return (sf&&sprGet(k+sf))?k+sf:k; };
-const preBoss=()=>{ try{ const bt=G.stg&&G.stg.boss; if(bt!=null){ const bk=G.stg.bs||'mob_'+SPRN[bt]; sprGet(bk); sprGet(bk+'_atk'); sprGet(bk+'_sk'); }
+const preBoss=()=>{ try{ const bt=G.stg&&G.stg.boss; if(bt!=null){ const bk=G.stg.bs||'mob_'+SPRN[bt]; sprGet(bk); sprGet(bk+'_atk'); sprGet(bk+'_sk'); if(BWALKS[bk])sprGet(bk+'_walk'); }
   const sf=mobSfx(); for(const t of [0,1,2,6,9,10,11]){ const k='mob_'+SPRN[t]; sprGet(k+sf); sprGet(k+sf+'_atk'); if(sf){ sprGet(k); sprGet(k+'_atk'); } } }catch(e){} };
 /* 몹 걸음·방향 상태: 실제로 움직인 거리만큼만 걸음 진행 · 좌우 반전은 부드럽게 돌아서기 · 공격 자세도 서서히 */
 function mobGait(m,t){
@@ -3014,12 +3016,16 @@ function drawMob(m,t){
   const E=(s,f,e,rr,iris,pup)=>ceye(X+ca*r*f+px*r*e*s,Y+sa*r*f+py*r*e*s,rr,fa,iris,pup);
   const bk=(m.boss&&G.stg.bs)?(sprGet(G.stg.bs)?G.stg.bs:null):m.boss?'mob_'+SPRN[m.type]:mobKey(m.type), bps=!m.boss?(m.atk>0?'_atk':''):(m.tel&&m.tel.kind!=='counter')||m.charge?'_sk':m.atk>0?'_atk':'';  /* 보스: 스킬 준비·돌진 중엔 스킬 포즈, 평타 중엔 공격 포즈 */
   const SI=bk&&((bps&&sprGet(bk+bps))||sprGet(bk));
-  if(SI){ const ph=m.type===6?0:GT.wp, wa=GT.wa, fl=m.type===6?Math.sin(m.anim*22):0, ak=GT.ak;  /* 걸음 위상은 실제 이동 거리 기준 (서 있으면 통통 튀지 않고 숨쉬기만) */
+  if(SI){ const BW=m.boss&&BWALKS[bk], WK=(BW&&!bps)?sprGet(bk+'_walk'):null;   /* 보스 걷기 시트 (움직일 때만, 스킬·공격 포즈가 아닐 때) */
+    if(WK){ if(GT.wa>.35)m._wkOn=true; else if(GT.wa<.15)m._wkOn=false; } const useWK=!!(WK&&m._wkOn);
+    const ph=m.type===6?0:GT.wp, wa=GT.wa*(useWK?.4:1), fl=m.type===6?Math.sin(m.anim*22):0, ak=GT.ak;  /* 걸음 위상은 실제 이동 거리 기준 (서 있으면 통통 튀지 않고 숨쉬기만) */
     const SO={flip:GT.flip,rot:Math.sin(ph)*(m.boss?.04:.1)*wa+ak*.25+GT.tk*.08,hop:(m.type===6?(Math.sin(m.anim*5)*r*.25+r*.4):Math.abs(Math.sin(ph))*r*(m.boss?.06:.16)*wa),sx:(1-fl*.05)*(1-.12*GT.tk),sy:(1+fl*.12)*(1+.04*GT.tk)+Math.sin(ph*2)*.03*wa+(m.type===6?0:Math.sin(t*2.2+(m.id||0))*.014*(1-wa)),fx:ak*r*.4};
-    let PV=null,pq=1; if(m.boss){ if(m._pi!==SI){ if(m._pi){m._pv=m._pi;m._pt=t;} m._pi=SI; } if(m._pv){ pq=clamp((t-m._pt)/.1,0,1); if(pq<1)PV=m._pv; } }   /* 보스 포즈 교체: 0.1초 크로스페이드 */
-    if(PV)sprDraw(PV,X,Y+r*.5,r*3.2,fa,SO);
-    if(pq<1){ const ga=ctx.globalAlpha; ctx.globalAlpha=ga*pq; sprDraw(SI,X,Y+r*.5,r*3.2,fa,SO); ctx.globalAlpha=ga; }
-    else sprDraw(SI,X,Y+r*.5,r*(m.boss?3.2:3.4),fa,SO); }
+    let cur={im:SI,h:r*(m.boss?3.2:3.4)};
+    if(useWK){ const cw=WK.width/BW.n, fi=Math.floor((((GT.wp*1.8/(Math.PI*BW.cyc))%1)+1)%1*BW.n); cur={im:WK,fr:[fi*cw,cw,WK.height],h:r*3.2*(WK.height/BW.k)/sprGet(bk).height}; }
+    let PV=null,pq=1; if(m.boss){ if(m._pc&&m._pc.im!==cur.im){ m._pv=m._pc; m._pt=t; } m._pc=cur; if(m._pv){ pq=clamp((t-m._pt)/.1,0,1); if(pq<1)PV=m._pv; } }   /* 보스 포즈 교체: 0.1초 크로스페이드 */
+    const dr=(c,al)=>{ const ga=ctx.globalAlpha; if(al<1)ctx.globalAlpha=ga*al; sprDraw(c.im,X,Y+r*.5,c.h,fa,c.fr?{...SO,fr:c.fr}:SO); ctx.globalAlpha=ga; };
+    if(PV)dr(PV,1);
+    dr(cur,pq); }
   else if(m.type===0){ // 타락자: 빨간 꼬마 악마
     for(const s of [-1,1]){ const a=fa+s*.8; cpoly([[X+Math.cos(a-.28)*r*.8,Y+Math.sin(a-.28)*r*.8],[X+Math.cos(a)*(r+r*.55),Y+Math.sin(a)*(r+r*.55)],[X+Math.cos(a+.28)*r*.8,Y+Math.sin(a+.28)*r*.8]],'#f2e6c8',2.2); }
     for(const s of [-1,1]) cball(X+Math.cos(fa+s*1.45)*r*.95,Y+Math.sin(fa+s*1.45)*r*.95,r*.3,'#b53a26',2);
