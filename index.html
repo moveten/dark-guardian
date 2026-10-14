@@ -422,7 +422,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.1.1.0046</div>
+    <div class="ver" id="verT">v0.1.1.0047</div>
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -1157,7 +1157,7 @@ function guestEvent(e){
   else if(t==='bx'){ bombFx(e[2],e[3],e[4]); }
   else if(t==='ann'){ announce('🔥 총공세! 바닥에 불이 번집니다','#ff9a6a'); }
   else if(t==='hv'){ halveWarn(); }
-  else if(t==='cn'){ announce('⚔️ 반격 태세! 스킬을 멈추세요 (일반공격은 OK)','#ffb347'); sfx('block'); }
+  else if(t==='cn'){ announce('⚔️ 반격 태세! 스킬을 쓰면 크게 다쳐요 (일반공격은 OK)','#ffb347'); sfx('block'); }
   else if(t==='ag'){ announce('👁️ 우두머리가 시선을 돌렸어요! 도발로 되찾으세요','#ff9a7a'); }
   else if(t==='f'){ spawnFire(e[2],e[3],e[4],e[5],e[6],true); }
   else if(t==='w'){ banner(`습격 ${e[2]} / ${G.TW}`,'언데드가 몰려옵니다'); me.pot=3; }
@@ -1388,7 +1388,7 @@ function bossAI(m,dt,pls,sf){
       else if(t.kind==='nova'){ for(const p of pls){ if(hyp(p.x-t.x,p.y-t.y)<t.r) mobHitPlayer(p.i,m.dmg*1.2*BSKM,'slow',3); } pushEv(['s',Math.round(t.x),Math.round(t.y),t.r]); slamFx(t.x,t.y,t.r,'#8a5ad0'); }
       else if(t.kind==='stack'){ for(const p of pls.filter(p=>p.i>=10&&hyp(p.x-t.x,p.y-t.y)<t.r)) mobHitPlayer(p.i,m.dmg*1.9*BSKM); const ins=pl1.filter(p=>hyp(p.x-t.x,p.y-t.y)<t.r); const tot=(pl1.length>1?m.dmg*3.6:m.dmg*1.9)*BSKM; if(ins.length){ for(const p of ins) mobHitPlayer(p.i,tot/ins.length); if(pl1.length>1&&ins.length>1&&G.mode!=='guest')announce('🤝 함께 맞아서 피해를 나눴어요','#9fd0ff'); } pushEv(['s',Math.round(t.x),Math.round(t.y),t.r]); slamFx(t.x,t.y,t.r,'#5a8aff'); }
       else if(t.kind==='halve'){ for(const p of pl1){ if(hyp(p.x-t.x,p.y-t.y)<t.r){ if(p.i===1)applyStatus('halve',0); else pushEv(['x',2,'halve',0]); } } pushEv(['s',Math.round(t.x),Math.round(t.y),t.r]); slamFx(t.x,t.y,t.r,'#c040e0'); G.shake=1; }
-      else if(t.kind==='counter'){ m.counter=2.6; pushEv(['cn',1]); announce('⚔️ 반격 태세! 스킬을 멈추세요 (일반공격은 OK)','#ffb347'); sfx('block'); }
+      else if(t.kind==='counter'){ m.counter=2.6; pushEv(['cn',1]); announce('⚔️ 반격 태세! 스킬을 쓰면 크게 다쳐요 (일반공격은 OK)','#ffb347'); sfx('block'); }
       else if(t.k==='slam'){ for(const p of pls){ if(hyp(p.x-t.x,p.y-t.y)<t.r) mobHitPlayer(p.i,m.dmg*1.6*BSKM,'stun',1.2); }
         pushEv(['s',Math.round(t.x),Math.round(t.y),t.r]); slamFx(t.x,t.y,t.r); }
       else { const dx=t.tx-t.x,dy=t.ty-t.y,d=hyp(dx,dy)||1; m.charge={dx:dx/d,dy:dy/d,t:Math.min(.75,450/620),hit:{}}; }
@@ -1666,8 +1666,10 @@ function doCast(key,range,lv){
   castSkill(me,key,true,tx,ty,lv,t);
   fxQ.push([++fxSeq,key,Math.round(tx),Math.round(ty),lv]); if(fxQ.length>6)fxQ.shift();
 }
-/* 반격 태세: 일반공격(자동)은 그대로 들어가고, 스킬로 때리면 그 피해를 되돌려받음(최소 4% ~ 최대 15%) */
-function counterHit(m,v){ if(T-(me.cLast||-9)<.6||me.dead)return; me.cLast=T; const mh=me.D.maxHp, rf=Math.max(mh*.04,Math.min(mh*.15,v||0)); addNum(me.x,me.y-44,'⚔️ 반격!','#ff8a3a',true); efx.push({k:'ring',x:me.x,y:me.y,r0:8,r1:50,t:0,life:.35,col:'#ff8a3a',w:7}); takeDmg(rf); }
+/* 반격 태세: 일반공격(자동)·소환수 공격은 그대로 들어가고, 태세 중에 내가 스킬을 쓰면 우두머리에게 피해가 안 들어가고 내 최대 생명력의 CNT_PCT 만큼 방어력·막기 무시로 되돌려받음 */
+const CNT_PCT=.35, CNT_WIN=2; /* 반사 피해(최대 생명력 비율) / 태세 중 시전한 스킬만 반사 대상으로 인정하는 시간(초) — 태세 전에 깔아 둔 장판·지연 피해는 반사 없이 0 피해만 */
+function counterHit(m,v){ if(T-(me.cLast||-9)<.6||me.dead||T-(me.cnCast||-9)>CNT_WIN)return; me.cLast=T; addNum(me.x,me.y-44,'⚔️ 반격!','#ff8a3a',true); efx.push({k:'ring',x:me.x,y:me.y,r0:8,r1:50,t:0,life:.35,col:'#ff8a3a',w:7});
+  if(me.god>0||G.phase==='win'||G.phase==='clear')return; const d=Math.round(me.D.maxHp*CNT_PCT); me.hp-=d; me.hurt=.15; sfx('hurt'); G.shake=Math.max(G.shake,.4); addNum(me.x,me.y-24,d,'#ff5a4a',false); if(me.hp<=0)goDown(); }
 const LVP0={ex:0,gap:0,dm:1,tk:1,miss:0};
 /* 장비 레벨 페널티: 착용 중인 7칸의 아이템 레벨 총합(강화 1단계 = +1, 빈 칸 = 0)을 스테이지 권장 합(칸당 icap-12)과 비교해 주는 피해·받는 피해에 똑같이 반영 */
 const GP0={wm:1,tk:1,gl:0,sum:0,need:0,slots:7};
@@ -1859,6 +1861,7 @@ const ATKM=.6, BASICFX={basic:1};
 const HFR=l=>Math.min(112,46+4*l); /* 성화 오라 범위: 레벨 올려도 112까지 */
 const hfMul=l=>l<=10?.55+.045*l:1+.05*(l-10);
 function castSkill(o,key,real,tx,ty,lv,tgt){
+  if(o===me&&real&&G.mobs.some(b=>b.boss&&!b.dead&&b.counter>0))me.cnCast=T; /* 반격 태세 중에 스킬을 썼음 */
   const ang=Math.atan2(ty-o.y,tx-o.x), dx=Math.cos(ang), dy=Math.sin(ang);
   o.face=ang; o.swing=.22; if(o===me)me.faceT=.9;
   const C=CLASSES[o.cls]; const s=SKBY[key]; const rbm=(o===me&&me.D&&me.D.rng>0)?1+me.D.rng/100:1, RS=l=>RS0(l)*rbm;
