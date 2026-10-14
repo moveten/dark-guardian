@@ -422,7 +422,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.1.1.0047</div>
+    <div class="ver" id="verT">v0.1.1.0048</div>
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -1368,7 +1368,8 @@ function bossTarget(m,pls){
   const thr=m.thr||(m.thr={1:0,2:0}); let best=null,bv=-1,bd=1e9;
   for(const p of pls){ let v=thr[p.i]||0; if(m.tg===p.i)v*=1.2; const d=hyp(p.x-m.x,p.y-m.y); if(v>bv+.001||(Math.abs(v-bv)<=.001&&d<bd)){bv=v;best=p;bd=d;} }
   return best; }
-function halveWarn(){ announce('☠️ 생명 붕괴! 보라색 영역 밖으로 벗어나세요!','#e070ff'); banner('☠️ 생명 붕괴','영역 안에 있으면 체력이 절반으로!'); sfx('boss'); G.shake=Math.max(G.shake,.6); }
+const HALVE_PCT=.7; /* 생명 붕괴: 최대 생명력 대비 고정 피해 비율 */
+function halveWarn(){ announce('☠️ 생명 붕괴! 보라색 영역 밖으로 벗어나세요!','#e070ff'); banner('☠️ 생명 붕괴','영역 안에 있으면 최대 체력의 70%가 깎여요!'); sfx('boss'); G.shake=Math.max(G.shake,.6); }
 function bossAI(m,dt,pls,sf){
   const pl1=pls.filter(p=>p.i<10); /* 소환수를 뺀 플레이어 */
   if(m.lock)m.lock.t-=dt; const tau=!!(m.taunt&&m.taunt.t>0); /* 도발에 걸리면 도발한 사람에게 달라붙어 근접 공격만 함 */
@@ -1509,7 +1510,7 @@ function guardMul(){let g=0; if(me.aura==='guard')g=Math.max(g,(30+6*skLv(me,'gu
 function applyStatus(kind,dur){ if(me.dead||me.god>0)return;
   if(kind==='stun'){ if(me.stunImm>0)return; me.stun=dur; me.stunImm=dur+2.5; addNum(me.x,me.y-40,'💫 기절!','#ffd84a',true); }
   else if(kind==='slow'){ me.slowP=Math.max(me.slowP||0,dur); addNum(me.x,me.y-40,'🐌 둔화','#8fdcff',false); }
-  else if(kind==='halve'){ const loss=Math.floor(me.D.maxHp/2); /* 현재가 아니라 '최대 생명력'의 50%가 고정 피해 — 남은 체력이 50% 이하면 즉사 */ if(loss>0){ me.hp-=loss; me.hurt=.3; addNum(me.x,me.y-44,'☠️ -'+loss,'#e070ff',true); spark(me.x,me.y,'#c040e0',24); sfx('hurt'); G.shake=Math.max(G.shake,.5); if(me.hp<=0)goDown(); } }
+  else if(kind==='halve'){ const loss=Math.floor(me.D.maxHp*HALVE_PCT); /* 현재가 아니라 '최대 생명력'의 70%가 고정 피해 — 남은 체력이 70% 이하면 즉사 */ if(loss>0){ me.hp-=loss; me.hurt=.3; addNum(me.x,me.y-44,'☠️ -'+loss,'#e070ff',true); spark(me.x,me.y,'#c040e0',24); sfx('hurt'); G.shake=Math.max(G.shake,.5); if(me.hp<=0)goDown(); } }
   else if(kind==='mdrain'){ if(me.mp>0){ me.mp=Math.max(0,me.mp-me.D.maxMp*dur*Math.max(.3,1/(1+(me.D.ene||0)/120))); me.drainT=.4; if(!(me.dnT>0)){ me.dnT=.7; addNum(me.x,me.y-44,'🌀 마나 흡수','#b070ff',false); } if(!G.mdw){ G.mdw=1; announce('🌀 마나 흡수 정예! 마나가 빨려나가요. 거리를 벌리거나 처치하세요','#c090ff'); } } }
   else if(kind==='poison'){ me.poison=Math.max(me.poison||0,dur); addNum(me.x,me.y-40,'☠️ 중독','#7ad04a',false); } }
 function takeDmg(raw,fire){
