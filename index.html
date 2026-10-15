@@ -423,7 +423,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.2.0.0066</div>
+    <div class="ver" id="verT">v0.2.0.0067</div>
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -3107,6 +3107,7 @@ function sprGet(k){ let e=SPR[k]; if(!e){ e=SPR[k]={ok:false,im:new Image()}; e.
 const BWALKS={mob_grak:{n:6,k:.75,cyc:2.6},mob_malek:{n:6,k:.75,cyc:2.6},mob_morg:{n:6,k:.75,cyc:2.6},mob_kargon:{n:6,k:.75,cyc:2.6}};
 /* 보스 준비 자세: <보스 그림 이름>_wu.png (스킬 예고 앞 70% 동안 몸을 낮추고 힘을 모은 자세, 뒤 30%와 돌진 중엔 _sk). 그림이 있는 보스만 등록 */
 const BWU={mob_morg:1,mob_kargon:1};
+const HATK={druid_wolf:{n:4,k:.75,t:[.12,.45,.75]},druid_bear:{n:4,k:.75,t:[.12,.45,.75]}}; /* 영웅 공격 시트 hero_<키>_atk.png (가로 n칸: 준비→타격→follow→복귀). t=칸 넘어가는 진행도(0~1, 공격 0.36초). 파일이 없으면 기존 동작 */
 const WALKS={war:{n:6,k:.75,cyc:70},pal:{n:6,k:.75,cyc:70},sorc:{n:6,k:.75,cyc:70},necro:{n:6,k:.75,cyc:70},druid:{n:6,k:.75,cyc:70},druid_bear:{n:6,k:.75,cyc:70},druid_wolf:{n:6,k:.75,cyc:70}}; /* 드루이드는 hero_druid / hero_druid_bear / hero_druid_wolf (+ _walk) 그림이 있으면 그걸 쓰고, 없으면 도형으로 그려요 */
 function sprDraw(im,x,y,h,face,o){ o=o||0; const fr=o.fr, w=fr?h*fr[1]/fr[2]:h*im.width/im.height; ctx.save(); ctx.translate(x,y-(o.hop||0)); if(o.flip!==undefined)ctx.scale(o.flip,1); else if(Math.cos(face||0)<0)ctx.scale(-1,1); if(o.fx)ctx.translate(o.fx,0); if(o.rot)ctx.rotate(o.rot); if(o.sx||o.sy)ctx.scale(o.sx||1,o.sy||1); if(fr)ctx.drawImage(im,fr[0],0,fr[1],fr[2],-w/2,-h+h*.12,w,h); else ctx.drawImage(im,-w/2,-h+h*.12,w,h); ctx.restore(); }
 /* ===== 마법사 스킬 이펙트 시트: img/fx_sorc.png (8열×10줄, 칸 140px, 검은 배경은 투명) · 가산 합성으로 그림 ===== */
@@ -3141,7 +3142,7 @@ function heroAnim(o,t,melee,wk){ wk=wk===undefined?1:wk;  /* wk: 걷기 시트�
   if(melee){ rot+=c*.3; fx=c>0?c*13:c*4; sy*=1+Math.max(0,c)*.05; sx*=1-Math.max(0,c)*.03; if(c>0)hop+=c*3; }
   else { rot-=c*.1; fx=c<0?c*3:-c*2; const pu=1+Math.max(0,c)*.08; sx*=pu; sy*=pu; hop+=Math.max(0,c)*4; }
   sx*=1-.12*tk; sy*=1+.04*tk; rot+=.08*tk;
-  return {rot,hop,sx,sy,fx,flip,wa};
+  return {rot,hop,sx,sy,fx,flip,wa,ap};
 }
 const mobSfx=()=>{ const id=G.stg&&G.stg.id; return id?({'2':'_s2','3':'_s3'}[id[0]]||''):''; };  /* 스테이지별 일반 몹 이미지: mob_<이름>_s2 / _s3 (없으면 스테이지 1 이미지) */
 const mobKey=t=>{ const sf=mobSfx(), k='mob_'+SPRN[t]; return (sf&&sprGet(k+sf))?k+sf:k; };
@@ -3341,7 +3342,9 @@ function drawPlayer(o,isMe,t){
   const HS=sprGet('hero_'+hk), WC=WALKS[hk], WK=(WC&&HS)?sprGet('hero_'+hk+'_walk'):null;
   if(HS){ const A=heroAnim(o,t,meleeOf(o),WK?.4:1);
     if(WK){ if(A.wa>.35)o._wkOn=true; else if(A.wa<.15)o._wkOn=false; }   /* 걷기 시트 ↔ 대기 그림 전환 (깜빡임 방지용 히스테리시스) */
-    if(WK&&o._wkOn){ const cw=WK.width/WC.n, fi=Math.floor((((o._wp||0)/.2/WC.cyc)%1+1)%1*WC.n); sprDraw(WK,x,y+16,hh*(WK.height/WC.k)/HS.height,o.face,{...A,fr:[fi*cw,cw,WK.height]}); }
+    const HA=HATK[hk], AK=(HA&&HS)?sprGet('hero_'+hk+'_atk'):null;
+    if(AK&&A.ap<1){ const cw=AK.width/HA.n; let fi=0; while(fi<HA.t.length&&A.ap>=HA.t[fi])fi++; sprDraw(AK,x,y+16,hh*(AK.height/HA.k)/HS.height,o.face,{flip:A.flip,fr:[fi*cw,cw,AK.height]}); }   /* 공격 시트: 그림 자체에 동작이 있어서 코드 흔들림은 끔 */
+    else if(WK&&o._wkOn){ const cw=WK.width/WC.n, fi=Math.floor((((o._wp||0)/.2/WC.cyc)%1+1)%1*WC.n); sprDraw(WK,x,y+16,hh*(WK.height/WC.k)/HS.height,o.face,{...A,fr:[fi*cw,cw,WK.height]}); }
     else sprDraw(HS,x,y+16,hh,o.face,A);
     if(isMe&&me.hurt>0){ctx.fillStyle=`rgba(255,40,30,${me.hurt*2.5})`;ctx.beginPath();ctx.arc(x,y,15,0,6.283);ctx.fill();} }
   else if(fm){ /* 변신 그림이 없을 때: 곰·늑대 도형 */
