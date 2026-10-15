@@ -3,7 +3,7 @@
 
 영웅:  hero_war.png (전사)  hero_pal.png (팔라딘)  hero_sorc.png (마법사)   [적용 완료]
        hero_necro.png (강령술사)   [적용 완료] 프롬프트: img/hero_necro_prompt.txt
-       hero_druid.png / hero_druid_bear.png / hero_druid_wolf.png (드루이드 인간·곰·늑대, 각각 _walk.png 6프레임 시트도 가능) [인간 대기 hero_druid.png + 걷기 hero_druid_walk.png 적용 완료 · 곰·늑대·걷기 시트는 그림 대기 — 없으면 도형으로 그려요]
+       hero_druid.png / hero_druid_bear.png / hero_druid_wolf.png (드루이드 인간·곰·늑대, 각각 _walk.png 6프레임 시트도 가능) [인간 대기·걷기(hero_druid, _walk) + 늑대인간 대기(hero_druid_wolf.png) 적용 완료 · 곰·늑대·걷기 시트는 그림 대기 — 없으면 도형으로 그려요]
 몹:    mob_imp.png (타락자)  mob_zombie.png (좀비)  mob_skeleton.png (해골 전사)  mob_bat.png (박쥐)
        mob_archer.png (궁수)  mob_bomber.png (폭탄병)  mob_healer.png (치유사)
 보스:  mob_grak.png (묘지기 그라크)  mob_malek.png (역병 사제 말렉)  mob_morg.png (썩은 군주 모르그)
