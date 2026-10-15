@@ -3,6 +3,7 @@
 
 영웅:  hero_war.png (전사)  hero_pal.png (팔라딘)  hero_sorc.png (마법사)   [적용 완료]
        hero_necro.png (강령술사)   [적용 완료] 프롬프트: img/hero_necro_prompt.txt
+       hero_druid.png / hero_druid_bear.png / hero_druid_wolf.png (드루이드 인간·곰·늑대, 각각 _walk.png 6프레임 시트도 가능) [그림 대기 — 없으면 도형으로 그려요]
 몹:    mob_imp.png (타락자)  mob_zombie.png (좀비)  mob_skeleton.png (해골 전사)  mob_bat.png (박쥐)
        mob_archer.png (궁수)  mob_bomber.png (폭탄병)  mob_healer.png (치유사)
 보스:  mob_grak.png (묘지기 그라크)  mob_malek.png (역병 사제 말렉)  mob_morg.png (썩은 군주 모르그)
@@ -39,6 +40,7 @@
 
 [강령술사 소환수 이미지 — 적용 완료 (없으면 기본 그림)]
   mn_guard.png / mn_guard_atk.png (수호 영혼), mn_caster(.png/_atk) (포격 영혼), mn_colossus(.png/_atk) (고대 거인), mn_dragon(.png/_atk) (영혼 용령)
+  mn_raven.png / mn_raven_atk.png (드루이드 까마귀 — 3마리 공용, 대기/공격) [그림 대기]
   mn_fusion.png / mn_fusion_atk.png (영혼 융합 — 수호+포격 합체 일러스트, 없으면 두 그림을 겹쳐 그림)
   프롬프트: img/minion_prompt_necro.txt (4행×2열 → 행마다 잘라 대기/공격으로 저장, 같은 행은 같은 크기·같은 발 위치)
 
