@@ -423,7 +423,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.2.0.0080</div>
+    <div class="ver" id="verT">v0.2.0.0081</div>
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -633,8 +633,8 @@ const SK={
  druid:[
   {k:'raven',e:'🐦',n:'까마귀 소환',s:'까마귀',req:1,mp:8,cd:6,el:'#9a86c8',d:l=>`[소환수·영구] 까마귀를 ${RVN(l)}마리 불러요 (7레벨 2마리, 14레벨 3마리). 적에게 날아들어 1.1초마다 기본 피해 ${Math.round((12+9*l)*RVF(RVN(l)))}(마리당) · 생명력은 마리당 내 최대 생명력의 ${Math.round(RVHP(l)*100)}%. 스테이지 시작 시 무료 소환 · 다시 쓰면 쓰러진 까마귀를 다시 부르고 생명력을 채워요 · 변신해도 사라지지 않아요`},
   {k:'wildblood',e:'🩸',n:'야생의 혈통',s:'혈통',req:3,mp:0,cd:0,el:'#d0705a',passive:1,d:l=>`패시브(모든 형태): 최대 생명력 +${2*l}%, 초당 생명력 회복 +${(.1*l).toFixed(1)}%, 변신한 동안 받는 피해 -${(.5*l).toFixed(1)}%`},
-  {k:'wolfform',e:'🐺',n:'늑대 변신',s:'늑대',req:6,mp:6,cd:2,el:'#b4bed4',form:'wolf',d:l=>`[변신·토글] 늑대로 변신해요 (다시 누르면 인간으로, 곰 변신으로는 바로 전환). 이동 속도 +${WFM(l)}%, 공격 속도 +${WFA(l)}%, 치명타 +5%. 기본 공격이 근접 연타(피해 80%)로 바뀌고 출혈을 입혀요. 생명력 비율은 그대로 유지돼요`},
-  {k:'bearform',e:'🐻',n:'곰 변신',s:'곰',req:9,mp:6,cd:2,el:'#c28a5a',form:'bear',d:l=>`[변신·토글] 곰으로 변신해요 (다시 누르면 인간으로, 늑대 변신으로는 바로 전환). 최대 생명력 +${Math.round(BRH(l))}%, 방어력 +${Math.round(BRD(l))}%, 받는 피해 -${BRR(l).toFixed(1)}% · 대신 이동 속도 -8%, 공격 속도 -10%. 기본 공격이 범위 공격(주 대상 피해 120%, 주변 적 70%)으로 바뀌어요`},
+  {k:'wolfform',e:'🐺',n:'늑대 변신',s:'늑대',req:6,mp:6,cd:2,el:'#b4bed4',form:'wolf',d:l=>`[변신·토글] 늑대로 변신해요 (다시 누르면 인간으로, 곰 변신으로는 바로 전환). 이동 속도 +${WFM(l)}%, 공격 속도 +${WFA(l)}%, 치명타 +5%. 기본 공격이 근접 연타(무기 피해 ${Math.round(WFB(l)*100)}%, 레벨당 +3%)로 바뀌고 출혈을 입혀요. 생명력 비율은 그대로 유지돼요`},
+  {k:'bearform',e:'🐻',n:'곰 변신',s:'곰',req:9,mp:6,cd:2,el:'#c28a5a',form:'bear',d:l=>`[변신·토글] 곰으로 변신해요 (다시 누르면 인간으로, 늑대 변신으로는 바로 전환). 최대 생명력 +${Math.round(BRH(l))}%, 방어력 +${Math.round(BRD(l))}%, 받는 피해 -${BRR(l).toFixed(1)}% · 대신 이동 속도 -8%, 공격 속도 -10%. 기본 공격이 범위 공격(주 대상 무기 피해 ${Math.round(BRB(l)*100)}%, 주변 적은 주 대상의 70%인 ${Math.round(BRB(l)*BRS*100)}% · 레벨당 +4%)으로 바뀌어요`},
   {k:'communion',e:'🌿',n:'자연의 교감',s:'교감',req:12,mp:0,cd:0,el:'#8fe08a',passive:1,d:l=>`패시브: 까마귀 피해 +${4*l}%, 까마귀 생명력 +${2*l}%, 영혼 정령 지속시간 +${2*l}%`},
   {k:'bite',e:'🦷',n:'물어뜯기',s:'물기',req:15,mp:10,cd:5,el:'#ff6a5a',rg:260,freq:1,d:l=>`[변신 필요] 🐺 늑대: 가까운 적(사거리 260)에게 도약해 무기 피해 ${350+55*l}% (주변 적 70%) + 4초 출혈(초당 타격 피해의 45%) / 🐻 곰: 제자리에서 전방 부채꼴의 모든 적에게 무기 피해 ${300+45*l}% + 0.8초 기절 (우두머리는 기절 면역)`},
   {k:'roar',e:'📢',n:'포효',s:'포효',req:18,mp:12,cd:18,el:'#e0a050',freq:1,d:l=>`[변신 필요] 🐻 곰: 주변 적 ${3+Math.floor(l/3)}명을 도발하고, ${6+Math.floor(l/4)}초간 나와 주변 동료(파티원 포함)가 받는 피해 -${Math.min(45,Math.round(20+1.5*l))}% / 🐺 늑대: 8초간 나와 주변 동료의 주는 피해 +${Math.round(15+2.5*l)}%, 주변 적을 6초간 약화(공격력 -${Math.min(45,Math.round(25+l))}%, 우두머리는 절반)`},
@@ -644,6 +644,7 @@ const SK={
 };
 /* 드루이드 형태 수치 (derive와 설명이 같이 씀) */
 const WFM=l=>Math.round(12+.6*l), WFA=l=>Math.round(18+.8*l); /* 늑대: 이동 속도 / 공격 속도 */
+const WFB=l=>.8+.03*(l-1), BRB=l=>1.2+.04*(l-1), BRS=.7; /* 변신 평타 피해 배율(무기 피해 대비): 늑대 = 늑대 변신 레벨당 +3% · 곰 주 대상 = 곰 변신 레벨당 +4% · 곰 주변 적 = 주 대상의 70% */
 const BRH=l=>25+1.2*l, BRD=l=>30+2*l, BRR=l=>8+.4*l;           /* 곰: 최대 생명력 / 방어력 / 받는 피해 감소 (%) */
 const SBHP=l=>Math.min(2,.4+.08*l); /* 수호 폭발: 수호 영혼 현재 생명력 반영 비율 (1레벨 48% → 20레벨 200%) */
 const GZM=1.3, BSKM=1.3; /* 바닥 장판(용암·불길) 피해 배율 / 시전 시간이 있는 우두머리 기술 피해 배율 */
@@ -693,7 +694,7 @@ const BASES={
  armor:[{n:'누비 갑옷',df:8},{n:'가죽 갑옷',df:12},{n:'사슬 갑옷',df:18}],
  amulet:[{n:'목걸이'}],ring:[{n:'반지'}],
  shield:[{n:'나무 방패',df:5},{n:'철 방패',df:9},{n:'성스러운 방패',df:14}]};
-const OFFB={pal:BASES.shield,war:[{n:'손도끼',dm:3},{n:'쌍날 단검',dm:5},{n:'전쟁의 뿔',dm:8}],sorc:[{n:'수정구',om:12},{n:'마력의 오브',om:20},{n:'별빛 오브',om:30}],necro:[{n:'혼등',om:12},{n:'영혼 등불',om:20},{n:'망령의 등불',om:30}],druid:[{n:'나무 토템',om:12},{n:'뿔 토템',om:20},{n:'정령 토템',om:30}]};
+const OFFB={pal:BASES.shield,war:[{n:'손도끼',dm:3},{n:'쌍날 단검',dm:5},{n:'전쟁의 뿔',dm:8}],sorc:[{n:'수정구',om:12},{n:'마력의 오브',om:20},{n:'별빛 오브',om:30}],necro:[{n:'혼등',om:12},{n:'영혼 등불',om:20},{n:'망령의 등불',om:30}],druid:[{n:'나무 토템',dm:3,om:12},{n:'뿔 토템',dm:5,om:20},{n:'정령 토템',dm:8,om:30}]}; /* 드루이드 토템: 공격력(전사 보조무기와 같은 값) + 마나 */
 const AFX=[
  {t:'dmg',n:'공격력 +{v}',sl:'weapon ring amulet',r:i=>[1,3+i]},
  {t:'dmgPct',n:'피해 +{v}%',sl:'weapon amulet ring',r:i=>[5,12+2*i]},
@@ -961,6 +962,7 @@ function affText(a){
 }
 function baseText(it){
   if(it.mx) return `공격력 ${it.mn}–${it.mx}`;
+  if(it.dm&&it.om) return `<b style="color:#ffb070">공격력 +${it.dm}</b> · <b style="color:#9fd0ff">마나 +${it.om}</b>`;
   if(it.dm) return `<b style="color:#ffb070">공격력 +${it.dm}</b>`;
   if(it.om) return `<b style="color:#9fd0ff">마나 +${it.om}</b>`;
   if(it.df) return `방어력 ${it.df}`+(it.blk?` · <b style="color:#9fd0ff">막기 ${it.blk}%</b> <span style="color:#8d806d">(최종 최대 ${BLKMAX}%)</span>`:'');
@@ -993,6 +995,9 @@ function loadChar(id){
         it.oc=cls; it.base=b.n; delete it.df; delete it.blk; delete it.dm; delete it.om; if(b.dm)it.dm=Math.round(b.dm*k); if(b.om)it.om=Math.round(b.om*k);
         if(typeof it.name==='string'&&it.name)it.name=it.name.replace(/\S+$/,b.n.split(' ').pop()); };
       p.inv.forEach(mg); mg(p.eq.shield); }
+    /* 토템에 공격력이 생기기 전에 얻은 드루이드 토템에도 같은 방식으로 공격력을 채워 줌(등급·아이템 레벨·강화 반영, 마나 등 나머지는 그대로) */
+    if(cls==='druid'){ const tm=it=>{ if(!it||it.slot!=='shield'||it.oc!=='druid'||it.dm)return; const b=OFFB.druid.find(x=>x.n===it.base); if(!b||!b.dm)return; const d0=Math.round(b.dm*(it.rar===3?1.3:1)*(1+(it.ilvl||1)*.1)); if(it.b0)it.b0.dm=d0; it.dm=Math.round(d0*(1+.1*(it.enh|0))); };
+      p.inv.forEach(tm); for(const k in p.eq)tm(p.eq[k]); }
     for(const k of Object.keys(p.eq)){ const it=p.eq[k]; if(it&&it.sp&&SPFX[it.sp]&&SPFX[it.sp].fcls&&SPFX[it.sp].fcls!==cls){ const e=p.inv.indexOf(null); if(e>=0){ p.inv[e]=it; p.eq[k]=null; } } } /* 다른 직업 전용 장비가 장착돼 있으면 가방으로 */
     p.name=String(p.name||'').slice(0,8); p.gold=Number.isFinite(p.gold)?p.gold:500; p.potBuy=p.potBuy|0; p.rev=p.rev|0; return p;
   }catch(e){ console.error('loadChar',id,e); return null; }
@@ -1957,14 +1962,14 @@ function necroCast(o,key,real,lv,tgt){
 }
 
 /* ================= 드루이드: 기본 공격 · 스킬 =================
-   기본 공격: 인간=가시 투사체 / 곰=범위 근접(주 대상 120%, 주변 84%) / 늑대=근접 연타(80%) + 출혈
+   기본 공격: 인간=가시 투사체 / 곰=범위 근접(주 대상 BRB(곰 변신 Lv), 주변은 그 70%) / 늑대=근접 연타(WFB(늑대 변신 Lv)) + 출혈
    스킬은 모두 castSkill → druidCast. 변신 필요 스킬은 형태(formOf)에 따라 효과가 달라요. 동료 화면에서는 real=false라 연출만 나와요. */
 function druidAtk(o,real,ang,dx,dy){ const f=formOf(o), col=f==='wolf'?'#cfd6e6':f==='bear'?'#d9a46a':'#9bd06a';
   if(!f){ proj({x:o.x+dx*14,y:o.y+dy*14,vx:dx*540,vy:dy*540,r:6,life:.42,col,kind:'leaf',trail:'150,220,110',real,hit:m=>hitMob(m,physDmg((1+me.D.ene/150)*ATKM),0,false,BASICFX)}); return; }
   efx.push({k:'swing',o,a:ang,t:0,life:.2,col}); if(!real)return;
   const m=nearestMob(o.x,o.y,f==='bear'?112:100); if(!m)return;
-  if(f==='bear'){ hitMob(m,physDmg(1.2*ATKM),0,false,BASICFX); const R=75; efx.push({k:'ring',x:m.x,y:m.y,r0:10,r1:R,t:0,life:.25,col,w:6}); for(const q of mobsIn(m.x,m.y,R)) if(q!==m) hitMob(q,physDmg(.84*ATKM),0,false,BASICFX); }
-  else { const r=physDmg(.8*ATKM); hitMob(m,r,0,false,{basic:1,burn:2.5,bd:r.v*BLEED,bl:1}); } }
+  if(f==='bear'){ const bm=BRB(Math.max(1,skLv(me,'bearform'))); hitMob(m,physDmg(bm*ATKM),0,false,BASICFX); const R=75; efx.push({k:'ring',x:m.x,y:m.y,r0:10,r1:R,t:0,life:.25,col,w:6}); for(const q of mobsIn(m.x,m.y,R)) if(q!==m) hitMob(q,physDmg(bm*BRS*ATKM),0,false,BASICFX); }
+  else { const r=physDmg(WFB(Math.max(1,skLv(me,'wolfform')))*ATKM); hitMob(m,r,0,false,{basic:1,burn:2.5,bd:r.v*BLEED,bl:1}); } }
 function weakenMob(q,v,sec){ if(q.dead)return; if(q.weak){ q.weak.t=Math.max(q.weak.t,sec); } else { q.weak={t:sec,d0:q.dmg}; q.dmg=q.dmg*(1-v); } burst(q.x,q.y,'#c8b0ff',6,140); }
 function druidCast(o,key,real,lv,tgt,tx,ty,ang){
   const s=SKBY[key], col=s.el, f=formOf(o), dx=Math.cos(ang), dy=Math.sin(ang), rbm=(o===me&&me.D&&me.D.rng>0)?1+me.D.rng/100:1, RS=RS0(lv)*rbm;
@@ -2602,8 +2607,10 @@ function renderStat(){
   const mult=1+(D.str+D.dmgPct)/100, aMin=Math.round((D.wmn+D.dmg)*mult*(me.cls==='sorc'||me.cls==='necro'?1+D.ene/150:1)), aMax=Math.round((D.wmx+D.dmg)*mult*(me.cls==='sorc'||me.cls==='necro'?1+D.ene/150:1)), aAvg=(aMin+aMax)/2, cr=D.crit/100;
   const k1=SK[me.cls][0], l1=Math.max(1,skLv(me,k1.k)); let s1=aAvg;
   if(k1.k==='bash')s1=aAvg*(3+.5*l1); else if(k1.k==='smite')s1=aAvg*(2.6+.4*l1)+8+7*l1; else if(k1.k==='fireball')s1=(18+13*l1)*(1+D.ene/100+D.dmgPct/100);
-  const dpsT=Math.round(aAvg*ATKM*(1+cr*.5)/D.atkInt);
-  let h=''; if(!SKM) h+=`<div class="box"><h3>⚔️ 실제 데미지</h3><div class="row"><span class="k">기본 공격 피해</span><span><b style="color:#ffd84a;font-size:17px">${Math.round(aMin*ATKM)}–${Math.round(aMax*ATKM)}</b></span></div><div class="row"><span class="k">치명타 시 (${D.crit}%)</span><span>${Math.round(aMin*1.5*ATKM)}–${Math.round(aMax*1.5*ATKM)}</span></div><div class="row"><span class="k">${esc(k1.n)} (1번 스킬 Lv ${l1})</span><span>${Math.round(s1)}</span></div><div class="row"><span class="k">초당 피해 (기본 공격)</span><span><b style="color:#ffd84a">${dpsT}</b></span></div></div>`;
+  /* 드루이드 기본 공격은 형태마다 달라요: 인간=에너지 보정(1+에너지/150) · 늑대=늑대 변신 Lv 배율 · 곰=곰 변신 Lv 배율(+주변 적은 70%) */
+  const dru=me.cls==='druid', dF=dru?(me.form||''):'', dK=!dru?1:dF==='wolf'?WFB(Math.max(1,skLv(me,'wolfform'))):dF==='bear'?BRB(Math.max(1,skLv(me,'bearform'))):1+D.ene/150;
+  const dpsT=Math.round(aAvg*dK*ATKM*(1+cr*.5)/D.atkInt);
+  let h=''; if(!SKM) h+=`<div class="box"><h3>⚔️ 실제 데미지</h3><div class="row"><span class="k">기본 공격 피해${dru?` (${dF==='wolf'?'🐺 늑대':dF==='bear'?'🐻 곰':'🧑 인간'})`:''}</span><span><b style="color:#ffd84a;font-size:17px">${Math.round(aMin*dK*ATKM)}–${Math.round(aMax*dK*ATKM)}</b></span></div>${dF==='bear'?`<div class="row"><span class="k">└ 주변 적 (주 대상의 70%)</span><span>${Math.round(aMin*dK*BRS*ATKM)}–${Math.round(aMax*dK*BRS*ATKM)}</span></div>`:''}<div class="row"><span class="k">치명타 시 (${D.crit}%)</span><span>${Math.round(aMin*dK*1.5*ATKM)}–${Math.round(aMax*dK*1.5*ATKM)}</span></div><div class="row"><span class="k">${esc(k1.n)} (1번 스킬 Lv ${l1})</span><span>${Math.round(s1)}</span></div><div class="row"><span class="k">초당 피해 (기본 공격)</span><span><b style="color:#ffd84a">${dpsT}</b></span></div></div>`;
 if(!SKM){
   { const base=CLASSES[me.cls].base, tots=S.map(([k])=>Math.floor(D[k])), mx=Math.max(60,...tots)*1.06;
     const R0=S.map(([k,n,ds],i)=>{ const tot=tots[i], b0=base[k], pt=Math.max(0,me.stats[k]-b0), gr=Math.max(0,tot-me.stats[k]); return {k,n,ds,tot,b0,pt,gr}; });
