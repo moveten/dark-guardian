@@ -423,7 +423,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.2.0.0074</div>
+    <div class="ver" id="verT">v0.2.0.0075</div>
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -1333,6 +1333,11 @@ const shots=[];
 function bombFx(x,y,r){ efx.push({k:'ring',x,y,r0:r*.2,r1:r,t:0,life:.35,col:'#ff8a2a',w:12}); impact(x,y,'255,150,40',r*1.4); burst(x,y,'#ffb04a',22,300); sfx('boom'); G.shake=Math.max(G.shake,.3); }
 const AFXN=['','돌진','소환','불꽃','마나 흡수'];
 function mobMove(m,dx,dy,d,sp,dt){ m.dvx=dx/d*sp; m.dvy=dy/d*sp; }  /* 원하는 속도만 정하고, 실제 이동은 mobSteer에서 부드럽게 */
+/* 맵 가장자리(밖에서 걸어 들어오는 스폰)에서 한번 안으로 들어온 몹은 다시 맵 밖으로 나가지 못해요 (궁수 뒷걸음질·넉백 포함) */
+const MSTAY=24;
+function mobStay(m){ if(!m.inn){ if(m.x>=MSTAY&&m.x<=WW-MSTAY&&m.y>=MSTAY&&m.y<=WH-MSTAY)m.inn=true; return; }
+  if(m.x<MSTAY){m.x=MSTAY; if(m.vx<0)m.vx=0; if(m.kx<0)m.kx=0;} else if(m.x>WW-MSTAY){m.x=WW-MSTAY; if(m.vx>0)m.vx=0; if(m.kx>0)m.kx=0;}
+  if(m.y<MSTAY){m.y=MSTAY; if(m.vy<0)m.vy=0; if(m.ky<0)m.ky=0;} else if(m.y>WH-MSTAY){m.y=WH-MSTAY; if(m.vy>0)m.vy=0; if(m.ky>0)m.ky=0;} }
 /* 몹 이동: 원하는 속도(dvx,dvy)를 향해 서서히 가속·감속 (갑작스러운 출발·정지·방향 전환 방지) */
 function mobSteer(m,dt){
   if(m.dash||m.charge){ m.vx=m.vy=0; m.dvx=m.dvy=0; return; }   /* 돌진은 직접 이동 */
@@ -1377,7 +1382,7 @@ function updateMobs(dt){
       else if(m.af===4){ if(d<DRNR){ m.drn=(m.drn==null?.5:m.drn)-dt; if(m.drn<=0){ m.drn=.5; let got=0; for(const p of pls){ if(hyp(p.x-m.x,p.y-m.y)<DRNR){ drainPlayer(p.i,.13); got=1; } } if(got)m.hp=Math.min(m.max,m.hp+m.max*.002); } } }
       else if(m.af===2){ m.smn=(m.smn==null?rand(3,5):m.smn)-dt; if(m.smn<=0&&G.mobs.length<70){ m.smn=7.5; for(let k=0;k<2;k++)spawnMob(0,m.x+rand(-34,34),m.y+rand(-34,34),false); efx.push({k:'ring',x:m.x,y:m.y,r0:8,r1:64,t:0,life:.4,col:'#a070d0',w:6}); spark(m.x,m.y,'#a070d0',10); } }
     }
-    if(m.type===9){ const rg=235; if(d>rg){ mobMove(m,dx,dy,d,m.spd*sf,dt); } else if(d<rg*.6){ mobMove(m,-dx,-dy,d,m.spd*.6*sf,dt); }
+    if(m.type===9){ const rg=235; if(!m.inn){ const cx=VX-m.x,cy=VY-m.y,cd=hyp(cx,cy)||1; mobMove(m,cx,cy,cd,m.spd*sf,dt); } else if(d>rg){ mobMove(m,dx,dy,d,m.spd*sf,dt); } else if(d<rg*.6){ mobMove(m,-dx,-dy,d,m.spd*.6*sf,dt); }   /* 맵 안으로 들어오기 전엔 뒷걸음질 없이 먼저 들어와요 */
       m.shot=(m.shot==null?rand(.8,2):m.shot)-dt*sf; if(m.shot<=0&&d<rg+40){ m.shot=2.6; m.atk=.3; const sx=tx+rand(-6,6), sy=ty+rand(-6,6);
         shots.push({x:sx,y:sy,t:0,dur:.8,r:34,dmg:m.dmg*1.8}); pushEv(['e',Math.round(sx),Math.round(sy),34,80]); arrowFx(m.x,m.y,sx,sy); pushEv(['a',Math.round(m.x),Math.round(m.y),Math.round(sx),Math.round(sy)]); }
       mobKb(m,dt); continue; }
@@ -1390,7 +1395,7 @@ function updateMobs(dt){
     if(d>reach){ const tm=tau?1.25:1; let ux=dx/d*tm,uy=dy/d*tm; if(m.fly){const a=Math.atan2(dy,dx)+Math.sin(T*4+m.id)*.8; ux=Math.cos(a);uy=Math.sin(a);} m.dvx=ux*m.spd*sf;m.dvy=uy*m.spd*sf;}
     else if(m.cd<=0){m.cd=1.5;m.atk=.25; m.lastP=T; mobHitPlayer(m.tgt,m.dmg*((G.stageIdx|0)===0?.62:.85),(G.stg.zp&&m.type===1)?'poison':0,3); }
   }
-  for(const m of G.mobs){ if(!m.dead)mobSteer(m,dt); }
+  for(const m of G.mobs){ if(!m.dead){ mobSteer(m,dt); mobStay(m); } }
   // separation (겹침은 한 번에 밀어내지 않고 여러 프레임에 걸쳐 부드럽게)
   const ms=G.mobs, sk=Math.min(1,dt*22);
   for(let i=0;i<ms.length;i++){const a=ms[i]; if(a.dead)continue;
@@ -1619,8 +1624,8 @@ function updateMe(dt){
   if(me.atkCd<=0&&!(me.stun>0)&&nearestMob(me.x,me.y,atkRg(me))) tryUse('atk',true);
 }
 function autoPick(){
-  if(G.phase==='clear'){ for(const g of ground){ const d=hyp(g.x-me.x,g.y-me.y); if(d<220&&d>30){ const k=Math.min(d-28,260*.016); g.x+=(me.x-g.x)/d*k; g.y+=(me.y-g.y)/d*k; } } }
-  for(let i=ground.length-1;i>=0;i--){const g=ground[i]; if(hyp(g.x-me.x,g.y-me.y)<42+(me.D.pr||0)){
+  if(G.phase==='clear'){ for(const g of ground){ if(g.carry)continue; const d=hyp(g.x-me.x,g.y-me.y); if(d<220&&d>30){ const k=Math.min(d-28,260*.016); g.x+=(me.x-g.x)/d*k; g.y+=(me.y-g.y)/d*k; } } }
+  for(let i=ground.length-1;i>=0;i--){const g=ground[i]; if(g.carry){ if(minions.includes(g.carry)&&g.carry.fe&&g.carry.fe.g===g)continue; g.carry=null; } if(hyp(g.x-me.x,g.y-me.y)<42+(me.D.pr||0)){
     if(me.inv.indexOf(null)<0&&!autoSellOk(g.it)){ if(!g.warned){g.warned=1; toast('가방이 가득 찼어요','#e07060');} continue; } /* 가방이 가득 차도 자동 판매 대상은 줍는 즉시 팔리므로 주울 수 있음 */
     pickUp(g);} }
 }
@@ -1857,23 +1862,50 @@ function mnForm(mn){ /* 대기(대형) 위치: 수호 영혼=주인 앞, 포격 
   if(k==='guard')return [me.x+Math.cos(f)*MNCFG.guardFront, me.y+Math.sin(f)*MNCFG.guardFront];
   if(k==='caster'){ const a=f+Math.PI*MNCFG.casterBack; return [me.x+Math.cos(a)*MNCFG.casterSide, me.y+Math.sin(a)*MNCFG.casterSide]; }
   const fa=(me.face||0)+(k==='colossus'?.5:Math.PI*1.15), fd=k==='colossus'?66:80; return [me.x+Math.cos(fa)*fd, me.y+Math.sin(fa)*fd]; }
+/* ===== 까마귀 운반: 몹과 맞붙어 싸우는 중이 아니면 바닥 아이템 1개를 물어 드루이드에게 가져와요 (나르는 동안 공격 안 함) ===== */
+function rvDrop(mn){ const f=mn.fe; mn.fe=null; if(f&&f.g&&f.g.carry===mn)f.g.carry=null; }
+function rvFetch(mn,dt,t){
+  let f=mn.fe;
+  if(f){ const g=f.g; f.t+=dt;
+    if(!ground.includes(g)||me.dead||f.t>9||(g.carry&&g.carry!==mn)||me.pickT===g){ rvDrop(mn); f=null; }
+    else if(f.ph===0){
+      if(hyp(g.x-mn.x,g.y-mn.y)<20){ g.carry=mn; f.ph=1; sfx('pick'); spark(g.x,g.y,'#cdb8ff',6); }
+      else return {x:g.x,y:g.y}; }
+    if(f&&f.ph===1){
+      g.x=mn.x; g.y=mn.y+8;
+      if(hyp(me.x-mn.x,me.y-mn.y)<34){ g.carry=null; g.x=me.x; g.y=me.y; mn.fe=null; spark(me.x,me.y,'#cdb8ff',6); return null; }   /* 도착: 발밑에 내려놓으면 평소처럼 자동으로 주워져요 */
+      return {x:me.x,y:me.y-10}; } }
+  if(me.dead||!ground.length)return null;
+  if(t&&hyp(t.x-mn.x,t.y-mn.y)<t.r+mn.r+36)return null;   /* 몹과 맞붙은 중이면 계속 싸워요 */
+  const full=me.inv.indexOf(null)<0; let best=null,bd=1e9;
+  for(const g of ground){
+    if(g.carry||g.warned||me.pickT===g)continue;
+    const dm=hyp(g.x-me.x,g.y-me.y); if(dm<70||dm>420)continue;   /* 드루이드가 바로 줍는 거리 안이거나 너무 먼 아이템은 제외 */
+    if(full&&!autoSellOk(g.it))continue;
+    if(minions.some(q=>q!==mn&&q.fe&&q.fe.g===g))continue;
+    const d=hyp(g.x-mn.x,g.y-mn.y); if(d<bd){bd=d;best=g;} }
+  if(!best)return null;
+  mn.fe={g:best,ph:0,t:0}; return {x:best.x,y:best.y};
+}
 function updateMinions(dt){
   if(!minions.length)return;
   { const fwd=me.moveDir!==undefined?me.moveDir:(me.face||0); if(me._mf===undefined)me._mf=fwd; const da=Math.atan2(Math.sin(fwd-me._mf),Math.cos(fwd-me._mf)); me._mf+=da*(1-Math.exp(-dt*5)); } /* 소환수 대형 기준 방향 = 내가 가는 방향(부드럽게 따라감) */
   const as=mnAS(), mk=G.mobs.find(m=>!m.dead&&m.mark&&m.mark.t>0);
   for(let i=minions.length-1;i>=0;i--){ const mn=minions[i], K=MNK[mn.k], lv=mn.lv||1;
-    if(mn.rez>0){ mn.rez-=dt; if(mn.rez<=0){ mn.rez=0; mn.hp=mn.mh*.5; mn.x=me.x+rand(-40,40); mn.y=me.y+rand(-40,40); efx.push({k:'ring',x:mn.x,y:mn.y,r0:6,r1:50,t:0,life:.4,col:K.col,w:6}); burst(mn.x,mn.y,K.col,20,200); } continue; }
+    if(mn.rez>0){ if(mn.fe)rvDrop(mn); mn.rez-=dt; if(mn.rez<=0){ mn.rez=0; mn.hp=mn.mh*.5; mn.x=me.x+rand(-40,40); mn.y=me.y+rand(-40,40); efx.push({k:'ring',x:mn.x,y:mn.y,r0:6,r1:50,t:0,life:.4,col:K.col,w:6}); burst(mn.x,mn.y,K.col,20,200); } continue; }
     mn.flash=Math.max(0,mn.flash-dt); mn.atk=Math.max(0,mn.atk-dt); mn.an+=dt; mn.cd-=dt*as; mn.tt-=dt;
     if(isFinite(mn.t)){ mn.t-=dt; if(mn.t<=0&&mn.k==='fusion'){ splitFusion(mn,'time'); continue; } if(mn.t<=0){ spark(mn.x,mn.y,K.col,16); burst(mn.x,mn.y,K.col,24,240); minions.splice(i,1); continue; } }
     const dm=hyp(mn.x-me.x,mn.y-me.y); if(dm>700){ mn.x=me.x+rand(-40,40); mn.y=me.y+rand(-40,40); }
     let t=null; if(mk&&hyp(mk.x-mn.x,mk.y-mn.y)<700)t=mk; else if(dm<(mn.k==='fusion'?600:K.perm?(MNCFG.leash[mn.k]||560):460))t=nearestMob(mn.x,mn.y,mn.k==='fusion'?380:mn.k==='caster'?MNCFG.casterRange:(MNCFG.det[mn.k]||340));
-    let gx,gy,hold=0; /* 이동 목표 */
-    if(t){ const dx=t.x-mn.x,dy=t.y-mn.y,d=hyp(dx,dy)||1; mn.face=Math.atan2(dy,dx);
+    let gx,gy,hold=0,fe=null; /* 이동 목표 */
+    if(isRv(mn.k)){ fe=rvFetch(mn,dt,t); if(fe)t=null; }   /* 까마귀: 아이템을 물어 나르는 동안은 공격하지 않아요 */
+    if(fe){ gx=fe.x; gy=fe.y; }
+    else if(t){ const dx=t.x-mn.x,dy=t.y-mn.y,d=hyp(dx,dy)||1; mn.face=Math.atan2(dy,dx);
       if(mn.k==='caster'){ if(d<MNCFG.casterKeep-60){gx=mn.x-dx/d*60;gy=mn.y-dy/d*60;} else { [gx,gy]=mnForm(mn); if(hyp(gx-mn.x,gy-mn.y)<10)hold=1; } }
       else if(mn.k==='dragon'){ const want=150; if(d>want+30){gx=t.x-dx/d*want;gy=t.y-dy/d*want;} else hold=1; }
       else { const rc=t.r+mn.r+(mn.k==='colossus'?14:8); if(d>rc){gx=t.x-dx/d*(rc-4);gy=t.y-dy/d*(rc-4);} else hold=1; } }
     else { [gx,gy]=mnForm(mn); if(hyp(gx-mn.x,gy-mn.y)<10)hold=1; }
-    let dvx=0,dvy=0; if(!hold){ const dx=gx-mn.x,dy=gy-mn.y,d=hyp(dx,dy)||1, sp=Math.min(K.spd*(d>240?1.9:1)*(t&&K.perm?MNCFG.chase:1),d*24); dvx=dx/d*sp; dvy=dy/d*sp; if(!t)mn.face=Math.atan2(dy,dx); }
+    let dvx=0,dvy=0; if(!hold){ const dx=gx-mn.x,dy=gy-mn.y,d=hyp(dx,dy)||1, sp=Math.min(K.spd*(d>240?1.9:1)*(t&&K.perm?MNCFG.chase:1)*(fe?1.4:1),d*24); dvx=dx/d*sp; dvy=dy/d*sp; if(!t)mn.face=Math.atan2(dy,dx); }
     { const kk=1-Math.exp(-dt*((dvx||dvy)?14:22)); mn.vx=(mn.vx||0)+(dvx-(mn.vx||0))*kk; mn.vy=(mn.vy||0)+(dvy-(mn.vy||0))*kk;   /* 소환수도 출발·정지를 부드럽게 */
       if(!dvx&&!dvy&&Math.abs(mn.vx)+Math.abs(mn.vy)<2)mn.vx=mn.vy=0;
       if(mn.vx||mn.vy){ mn.x=clamp(mn.x+mn.vx*dt,16,WW-16); mn.y=clamp(mn.y+mn.vy*dt,16,WH-16); } }
