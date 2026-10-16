@@ -55,3 +55,5 @@
 [보스 준비 자세 — 적용 완료] mob_morg_wu.png (대기 그림과 같은 배율·발 위치로 정렬된 한 장. 새 보스는 index.html 의 BWU 에 이름 추가)
 [보스 걷기 시트·준비 자세 — 적용 완료] mob_kargon_walk.png / mob_kargon_wu.png
 
+
+[4스테이지 삼남매] field_4_1.jpg = field_3_5.jpg를 어둡고 보랏빛으로 만든 임시 배경. 보스 그림은 hero_war/hero_sorc(어두운 톤)·hero_necro(검은 실루엣)를 코드에서 색만 입혀 씀. 전용 그림을 만들면 교체 가능.
