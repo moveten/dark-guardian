@@ -294,11 +294,14 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
 .crow .cm span{font-size:12.5px;color:var(--mute)}
 .crow .lvb{font-weight:700;color:var(--gold);font-size:15px;white-space:nowrap}
 .pp{display:flex;flex-direction:column;align-items:center;gap:10px;width:100%;max-width:440px}
-.stagebar{width:100%;max-width:100%;box-sizing:border-box;touch-action:pan-x;overscroll-behavior:contain;position:relative;display:flex;gap:8px;overflow-x:auto;padding:4px calc(50% - 40px);-webkit-overflow-scrolling:touch;scrollbar-width:none}.stagebar::-webkit-scrollbar{display:none}.stagebar .stg{flex:0 0 auto}
+.stagebar{width:100%;max-width:100%;box-sizing:border-box;touch-action:pan-x;overscroll-behavior:contain;position:relative;display:flex;gap:8px;overflow-x:auto;padding:9px calc(50% - 40px);margin:-5px 0;-webkit-overflow-scrolling:touch;scrollbar-width:none}.stagebar::-webkit-scrollbar{display:none}.stagebar .stg{flex:0 0 auto}
 .stg{position:relative;min-width:74px;min-height:52px;padding:0 10px;border-radius:12px;border:1px solid var(--line2);background:var(--panel);font-weight:700;font-size:17px}
 .stg[aria-pressed="true"]{border-color:var(--gold);color:var(--gold);background:var(--panel2)}
 .stg:disabled{opacity:.45}
-.drg{position:absolute;left:-3px;top:-3px;width:calc(100% + 6px);height:calc(100% + 6px);pointer-events:none;background:var(--line2);-webkit-mask:url(img/dragon_frame.png) center/100% 100% no-repeat;mask:url(img/dragon_frame.png) center/100% 100% no-repeat}
+.stg.dg{border-color:transparent!important}   /* 용 카드: 원래 네모 테두리는 용이 덮음 */
+.stg.soon{opacity:.45;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:0 8px;white-space:nowrap;line-height:1.2}
+.stg.soon small{font-size:10px;font-weight:600;color:var(--mute)}
+.drg{position:absolute;left:-6px;top:-6px;width:calc(100% + 12px);height:calc(100% + 12px);pointer-events:none;background:var(--line2);-webkit-mask:url(img/dragon_frame.png) center/100% 100% no-repeat;mask:url(img/dragon_frame.png) center/100% 100% no-repeat}
 .stg[aria-pressed="true"] .drg{background:var(--gold)}
 .btn.sm{padding:8px 14px;min-height:38px;font-size:13px}
 @media (max-width:520px){.classes{grid-template-columns:1fr}}
@@ -425,7 +428,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.0.0099</div>
+    <div class="ver" id="verT">v0.4.0.0100</div>
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -3015,7 +3018,8 @@ function renderStagePanel(){
   { const cur=chars.find(c=>c.id===selId); stageClear=cur?Math.min(STAGES.length,cur.clear|0):0; }
   if(selStage>stageClear) selStage=stageClear; try{fieldGet(selStage);}catch(e){}
   const sb=$('#stageBar'); sb.innerHTML='';
-  STAGES.forEach((st,i)=>{ const b=document.createElement('button'); b.className='stg'; b.setAttribute('aria-pressed',i===selStage); b.disabled=i>stageClear; b.textContent=(i>stageClear?'🔒 ':'')+st.id; if(st.raid)b.insertAdjacentHTML('beforeend',dragonBadge()); b.onclick=()=>{ selStage=i; lsSet('dkdef2.stage',String(i)); renderStagePanel(); }; sb.appendChild(b); });
+  STAGES.forEach((st,i)=>{ const b=document.createElement('button'); b.className='stg'; b.setAttribute('aria-pressed',i===selStage); b.disabled=i>stageClear; b.textContent=(i>stageClear?'🔒 ':'')+st.id; if(st.raid){ b.classList.add('dg'); b.insertAdjacentHTML('beforeend',dragonBadge()); } b.onclick=()=>{ selStage=i; lsSet('dkdef2.stage',String(i)); renderStagePanel(); }; sb.appendChild(b); });
+  { const b=document.createElement('button'); b.className='stg soon'; b.setAttribute('aria-disabled','true'); b.innerHTML='🔒 5<small>업데이트 예정</small>'; b.onclick=()=>{ if(typeof toast==='function')toast('5스테이지는 업데이트 예정이에요'); }; sb.appendChild(b); }   /* 다음 스테이지 자리 표시 */
   { const ctr=()=>{ const cb=sb.children[selStage]; if(cb&&sb.clientWidth) sb.scrollLeft=cb.offsetLeft+cb.offsetWidth/2-sb.clientWidth/2; }; ctr(); requestAnimationFrame(ctr); setTimeout(ctr,120); }
   const S=STAGES[selStage]; $('#stageBig').innerHTML=`<small>STAGE</small>${esc(S.id)} · ${esc(S.n)}`;
   { const cur=chars.find(c=>c.id===selId), low=cur&&cur.lvl<S.rl, gp0=cur&&cur.eq?gearPenOf(cur.eq,S.icap):null, gw=!!gp0&&gp0.wm<.97; $('#stageInfo').innerHTML=`<span style="color:${gw?'#e07060':'#9fd18b'};font-weight:700">장비 Lv 합 ${Math.max(1,S.icap-12)*EQSL.length}↑${gp0?` (내 합 ${gp0.sum}${gw?' · 부족':''})`:''}</span><span class="sd">${esc(S.d)}</span>`; }
