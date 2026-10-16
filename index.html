@@ -428,7 +428,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.0.0102</div>
+    <div class="ver" id="verT">v0.4.0.0103</div>
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -1790,7 +1790,7 @@ function pickUp(g){
   const i=me.inv.indexOf(null);
   if(i<0){toast('가방이 가득 찼어요','#e07060');return;}
   const it=g.it; it.isNew=1; me.inv[i]=it; ground.splice(ground.indexOf(g),1); (G.stGot||(G.stGot=[0,0,0,0,0]))[it.rar|0]++;
-  sfx('pick'); if(it.rar>=2)toast(`획득: ${dn(it)}`,RARC[it.rar],'get');
+  sfx('pick'); if(it.rar>=((G.coop||G.mode==='guest')?3:2))toast(`획득: ${dn(it)}`,RARC[it.rar],'get');   /* 협동 중엔 유니크 이상만 알림 */
   if(it.rar>=3){ annQ.push([++annSeq,it.name.slice(0,16),it.rar]); if(annQ.length>4)annQ.shift(); }   /* 협동: 동료에게 알리는 획득은 유니크 이상만 */
   const key=it.slot==='ring'?(!me.eq.ring1?'ring1':!me.eq.ring2?'ring2':null):(me.eq[it.slot]?null:it.slot);
   if(key&&canWear(it)){ const cp0=calcCP(me); delete it.isNew; me.eq[key]=it; me.inv[i]=null; const hr=me.hp/me.D.maxHp, mr=me.mp/me.D.maxMp; me.D=derive(me); me.hp=me.D.maxHp*hr; me.mp=me.D.maxMp*mr; buildSkills(); cpMsg(cp0,calcCP(me)); toast(`자동 장착: ${it.name}`,'#9fd18b'); }
