@@ -423,7 +423,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.3.0.0091</div>
+    <div class="ver" id="verT">v0.3.0.0092</div>
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -697,7 +697,7 @@ const BASES={
 const OFFB={pal:BASES.shield,war:[{n:'손도끼',dm:3},{n:'쌍날 단검',dm:5},{n:'전쟁의 뿔',dm:8}],sorc:[{n:'수정구',om:12},{n:'마력의 오브',om:20},{n:'별빛 오브',om:30}],necro:[{n:'혼등',om:12},{n:'영혼 등불',om:20},{n:'망령의 등불',om:30}],druid:[{n:'나무 토템',dm:2,om:6},{n:'뿔 토템',dm:3,om:10},{n:'정령 토템',dm:4,om:15}]}; /* 드루이드 토템: 공격력(전사 보조무기와 같은 값) + 마나 */
 const AFX=[
  {t:'dmg',n:'공격력 +{v}',sl:'weapon ring amulet',r:i=>[1,3+i]},
- {t:'dmgPct',n:'피해 +{v}%',sl:'weapon amulet ring',r:(i,s)=>s==='weapon'?[5,12+2*i]:[5,50]}, /* 무기 외 부위는 최대 50 고정 */
+ {t:'dmgPct',n:'피해 +{v}%',sl:'weapon amulet ring',r:(i,s)=>s==='weapon'?[5,12+2*i]:[5,Math.max(5,Math.round(5+i*.5))]}, /* 무기 외 부위: 최대 = 5 + 아이템 레벨×0.5 */
  {t:'str',n:'힘 +{v}',sl:'*',r:()=>[1,10]},
  {t:'dex',n:'민첩 +{v}',sl:'*',r:()=>[1,10]},
  {t:'vit',n:'체력 +{v}',sl:'*',r:()=>[1,10]},
@@ -713,8 +713,8 @@ const AFX=[
  {t:'rng',n:'스킬 범위 +{v}%',sl:'warshield'}, /* 전사 보조무기(레어 이상) 전용 고정 옵션 */
  {t:'pr',n:'아이템 획득 범위 +{v}',sl:'ring amulet armor helm shield',r:i=>[3,6+(i/6|0)]},
  {t:'mr',n:'마나 회복 +{v}%',sl:'*',r:()=>[10,30]},
- {t:'sm',n:'소환수 피해 +{v}%',sl:'weapon amulet ring helm',r:(i,s)=>s==='weapon'?[6,14+2*i]:[6,50],only:'necro druid'}, /* 강령술사 전용 옵션 */
- {t:'smhp',n:'소환수 생명력 +{v}%',sl:'armor helm amulet shield',r:()=>[8,50],only:'necro druid'},
+ {t:'sm',n:'소환수 피해 +{v}%',sl:'weapon amulet ring helm',r:(i,s)=>s==='weapon'?[6,14+2*i]:[6,Math.max(6,Math.round(5+i*.5))],only:'necro druid'}, /* 강령술사 전용 옵션 */
+ {t:'smhp',n:'소환수 생명력 +{v}%',sl:'armor helm amulet shield',r:i=>[8,Math.max(8,Math.round(5+i*.5))],only:'necro druid'},
  {t:'cls',n:'+{v} {c} 스킬',sl:'amulet helm weapon'},
  {t:'all',n:'모든 스킬 +{v}',sl:'amulet helm weapon ring armor'},
  {t:'sk',n:'+{v} {s} ({c} 전용)',sl:'*'}];
@@ -970,7 +970,7 @@ function baseText(it){
 }
 
 /* ================= CHARACTER ================= */
-const CLSE={war:'⚔️',pal:'🛡️',sorc:'🔮',necro:'💀',druid:'🌿'};
+const CLSE={war:'🪓',pal:'🛡️',sorc:'🔮',necro:'💀',druid:'🌿'};
 const lsDel=k=>{try{localStorage.removeItem(k)}catch(e){} if(clHook&&k.indexOf('dkdef2.')===0&&!CLSKIP.test(k))clHook();};
 const genId=()=>'c'+Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36);
 const charKey=id=>'dkdef2.c.'+id;
@@ -1586,7 +1586,7 @@ function takeDmg(raw,fire){
 }
 function revItems(){ return (G.freeRev|0)+(me.rev|0); }
 function goDown(){ me.hp=0; me.dead=true; me.leap=null; me.rvT=0; if(me.form||me.spirit){ me.form=''; me.spirit=null; me.D=derive(me); me.hp=0; } spark(me.x,me.y,'#7a1010',20);
-  { const lost=Math.floor((me.gold|0)*.3); if(lost>0){ me.gold-=lost; saveChar(); uiDirty=true; later(.6,()=>toast(`💸 쓰러져서 ${lost}원을 잃었어요 (보유금의 30%)`,'#e0a070')); } }
+  { const lost=Math.floor((me.gold|0)*.3); if(lost>0){ me.gold-=lost; saveChar(); uiDirty=true; later(.6,()=>toast(`💸 쓰러져서 ${lost}G를 잃었어요 (보유금의 30%)`,'#e0a070')); } }
   const coopAlive=ally&&!ally.lobby&&!ally.dead;
   me.respawn=coopAlive?30:revItems()>0?12:1.6;
   toast(revItems()>0?'쓰러졌습니다! 부활 버튼으로 일어나세요':coopAlive?'쓰러졌습니다! 동료가 구해주길 기다려요':'쓰러졌습니다…','#e07060'); }
@@ -1664,7 +1664,7 @@ function synToggle(){ syLv=syLv>=0?-1:2; saveChar(); autoSynth(); if(sheetMode==
 function autoSellOk(it0){ if(!(asLv>=0&&it0.rar<=asLv&&!it0.lock))return false; const k0=it0.slot==='ring'?(!me.eq.ring1?'ring1':!me.eq.ring2?'ring2':null):(me.eq[it0.slot]?null:it0.slot); return !(k0&&canWear(it0)); }
 function pickUp(g){
   { const it0=g.it; if(asLv>=0&&it0.rar<=asLv&&!it0.lock){ const k0=it0.slot==='ring'?(!me.eq.ring1?'ring1':!me.eq.ring2?'ring2':null):(me.eq[it0.slot]?null:it0.slot);
-      if(!(k0&&canWear(it0))){ (G.stGot||(G.stGot=[0,0,0,0]))[it0.rar|0]++; ground.splice(ground.indexOf(g),1); const v=sellInfo(it0).total; me.gold+=v; sfx('coin'); addNum(me.x,me.y-34,'+'+v+'원','#ffd84a',false); G.asold=(G.asold|0)+v; saveChar(); uiDirty=true; if(sheetMode==='bag')renderBag(); return; } } }
+      if(!(k0&&canWear(it0))){ (G.stGot||(G.stGot=[0,0,0,0]))[it0.rar|0]++; ground.splice(ground.indexOf(g),1); const v=sellInfo(it0).total; me.gold+=v; sfx('coin'); addNum(me.x,me.y-34,'+'+v+'G','#ffd84a',false); G.asold=(G.asold|0)+v; saveChar(); uiDirty=true; if(sheetMode==='bag')renderBag(); return; } } }
   const i=me.inv.indexOf(null);
   if(i<0){toast('가방이 가득 찼어요','#e07060');return;}
   const it=g.it; it.isNew=1; me.inv[i]=it; ground.splice(ground.indexOf(g),1); (G.stGot||(G.stGot=[0,0,0,0]))[it.rar|0]++;
@@ -2378,7 +2378,7 @@ function updateHud(){
   const sb=$('#bRaid'), cs=G.mode==='guest'?G.canSkip:canSkip(); sb.hidden=!cs||!!G.allMode; sb.textContent=G.wave>=G.TW?'⏭ 우두머리 소환':'⏭ 습격 스킵';
   const al=$('#hAlly');
   if(ally&&!ally.lobby){al.hidden=false; $('#hAllyN').textContent=`${ally.name||CLASSES[ally.cls].n} ${ally.lvl}`; $('#hAllyHp').style.transform=`scaleX(${clamp((ally.hp||0)/(ally.mh||1),0,1)})`;} else al.hidden=true;
-  { const pn=me.pot+me.potBuy, rn=revItems(); $('#potN').textContent=pn; $('#revN').textContent=rn; $('#potN').parentNode.classList.toggle('z',pn<=0); $('#revN').parentNode.classList.toggle('z',rn<=0); } $('#bRev').classList.toggle('rdy',!!me.dead&&revItems()>0); $('#hGold').textContent=`💰 ${(me.gold|0).toLocaleString()}원`; { const P=lvPen(), gp=gearPen(), el=$('#lvPen'); if(el){ const L=[]; let bad=false;
+  { const pn=me.pot+me.potBuy, rn=revItems(); $('#potN').textContent=pn; $('#revN').textContent=rn; $('#potN').parentNode.classList.toggle('z',pn<=0); $('#revN').parentNode.classList.toggle('z',rn<=0); } $('#bRev').classList.toggle('rdy',!!me.dead&&revItems()>0); $('#hGold').textContent=`💰 ${(me.gold|0).toLocaleString()}G`; { const P=lvPen(), gp=gearPen(), el=$('#lvPen'); if(el){ const L=[]; let bad=false;
     if(P.over)L.push(`✨ 몹 Lv ${G.stg.rl} · 레벨 우위 ${-P.gap} — 공격력 +${Math.round((P.dm-1)*100)}% · 받는 피해 -${Math.round((1-P.tk)*100)}%`);
     else if(P.ex){ bad=true; L.push(`⚠️ 몹 Lv ${G.stg.rl} · 격차 ${P.gap} — 공격력 -${Math.round((1-P.dm)*100)}% · 빗나감 ${Math.round(P.miss*100)}% · 받는 피해 +${Math.round((P.tk-1)*100)}%`); }
     if(gp.wm<.97||gp.tk>1.03){ bad=true; L.push(`⚔️ 장비 아이템 Lv 합 ${gp.sum} / 권장 ${gp.need}↑ — 공격력 -${Math.round((1-gp.wm)*100)}% · 받는 피해 +${Math.round((gp.tk-1)*100)}%`); }
@@ -2451,14 +2451,14 @@ function dragDrop(a,b){
   if(a.t==='eq'&&b.t==='inv'){ if(me.inv[b.i]){ renderBag(); return; } unequip(a.k); return; }
   renderBag();
 }
-function sheetHead(){ $('#sheetT').innerHTML=`${CLSE[me.cls]} ${CLASSES[me.cls].n} <span style="color:var(--gold)">Lv ${me.lvl}</span> <span id="goldSend" style="color:#ffd84a;margin-left:6px;cursor:pointer;border-bottom:1px dashed #ffd84a88">💰 ${(me.gold|0).toLocaleString('ko-KR')}원</span>`; }
+function sheetHead(){ $('#sheetT').innerHTML=`${CLSE[me.cls]} ${CLASSES[me.cls].n} <span style="color:var(--gold)">Lv ${me.lvl}</span> <span id="goldSend" style="color:#ffd84a;margin-left:6px;cursor:pointer;border-bottom:1px dashed #ffd84a88">💰 ${(me.gold|0).toLocaleString('ko-KR')}G</span>`; }
 function sendGold(){
   if(G.mode!=='solo'&&!G.titleSheet&&G.inGame){ sheetToast('온라인 중에는 골드를 보낼 수 없어요','#ff8a7a'); return; }
   const others_=charIds().filter(x=>x!==me.id).map(loadChar).filter(Boolean);
   if(!others_.length){ sheetToast('보낼 다른 캐릭터가 없어요','#ff8a7a'); return; }
   const have=me.gold|0; let to=others_[0].id;
-  const rows=others_.map(c=>`<button class="btn gsT" data-to="${c.id}" style="text-align:left">${CLSE[c.cls]} ${esc(dispName(c))} · Lv ${c.lvl} <span style="color:var(--mute);font-weight:400">(${(c.gold|0).toLocaleString()}원)</span></button>`).join('');
-  modal(`<h3>💰 골드 보내기</h3><p class="meta" style="margin:0 0 8px">보유 ${have.toLocaleString()}원 · 받을 캐릭터를 고르세요</p><div class="col" style="margin-bottom:8px">${rows}</div><input id="gsAmt" type="number" inputmode="numeric" min="1" max="${have}" placeholder="보낼 금액" style="width:100%;box-sizing:border-box;padding:11px;font-size:16px;border-radius:8px;border:1px solid var(--line2);background:#0f0b09;color:#fff"><div class="row2" style="margin:8px 0"><button class="btn" data-q="1000">+1,000</button><button class="btn" data-q="10000">+10,000</button><button class="btn" data-q="all">전부</button></div><p class="meta" id="gsMsg" style="min-height:18px;margin:0 0 6px;color:#ff8a7a"></p><div class="row2"><button class="btn" id="gsNo">취소</button><button class="btn primary" id="gsGo">보내기</button></div>`,m=>{
+  const rows=others_.map(c=>`<button class="btn gsT" data-to="${c.id}" style="text-align:left">${CLSE[c.cls]} ${esc(dispName(c))} · Lv ${c.lvl} <span style="color:var(--mute);font-weight:400">(${(c.gold|0).toLocaleString()}G)</span></button>`).join('');
+  modal(`<h3>💰 골드 보내기</h3><p class="meta" style="margin:0 0 8px">보유 ${have.toLocaleString()}G · 받을 캐릭터를 고르세요</p><div class="col" style="margin-bottom:8px">${rows}</div><input id="gsAmt" type="number" inputmode="numeric" min="1" max="${have}" placeholder="보낼 금액" style="width:100%;box-sizing:border-box;padding:11px;font-size:16px;border-radius:8px;border:1px solid var(--line2);background:#0f0b09;color:#fff"><div class="row2" style="margin:8px 0"><button class="btn" data-q="1000">+1,000</button><button class="btn" data-q="10000">+10,000</button><button class="btn" data-q="all">전부</button></div><p class="meta" id="gsMsg" style="min-height:18px;margin:0 0 6px;color:#ff8a7a"></p><div class="row2"><button class="btn" id="gsNo">취소</button><button class="btn primary" id="gsGo">보내기</button></div>`,m=>{
     const mark=()=>m.querySelectorAll('.gsT').forEach(b=>{ b.style.borderColor=b.dataset.to===to?'var(--gold)':''; b.style.color=b.dataset.to===to?'var(--gold)':''; }); mark();
     m.querySelectorAll('.gsT').forEach(b=>b.onclick=()=>{ to=b.dataset.to; mark(); });
     const inp=m.querySelector('#gsAmt');
@@ -2466,7 +2466,7 @@ function sendGold(){
     m.querySelector('#gsNo').onclick=closeModal;
     m.querySelector('#gsGo').onclick=()=>{ const v=Math.floor(+inp.value||0); if(v<=0){ m.querySelector('#gsMsg').textContent='금액을 입력해 주세요'; return; } if(v>(me.gold|0)){ m.querySelector('#gsMsg').textContent='보유 골드가 부족해요'; return; }
       const t=loadChar(to); if(!t){ m.querySelector('#gsMsg').textContent='캐릭터를 찾을 수 없어요'; return; }
-      t.gold=(t.gold|0)+v; lsSet(charKey(t.id),JSON.stringify(packChar(t))); me.gold-=v; saveChar(); uiDirty=true; sfx('coin'); closeModal(); rerender(); toast(`${dispName(t)}에게 ${v.toLocaleString()}원을 보냈어요`,'#ffd84a'); }; });
+      t.gold=(t.gold|0)+v; lsSet(charKey(t.id),JSON.stringify(packChar(t))); me.gold-=v; saveChar(); uiDirty=true; sfx('coin'); closeModal(); rerender(); toast(`${dispName(t)}에게 ${v.toLocaleString()}G를 보냈어요`,'#ffd84a'); }; });
 }
 document.addEventListener('click',e=>{ if(e.target.closest&&e.target.closest('#goldSend'))sendGold(); });
 /* 인벤 한 줄 칸 수: 화면 너비에 맞춰 INV_COLS_MIN~INV_COLS_MAX 사이에서 자동 결정 (칸 크기 목표 INV_CELL px) */
@@ -2509,7 +2509,7 @@ function sendPick(){
   });
 }
 function sellBtn(btn){ const it=selItem&&selItem.it; if(!it||selItem.inv===undefined)return; if(it.lock){ sheetToast('🔒 잠긴 아이템이에요. 잠금을 먼저 풀어 주세요','#ff8a7a'); return; } sellItem(selItem.inv); }
-function sellItem(i){ const it=me.inv[i]; if(!it)return; sfx('coin'); const v=sellInfo(it).total; me.gold+=v; me.inv[i]=null; selItem=null; shopMsg=`${it.name} 판매 +${v}원`; saveChar(); uiDirty=true; rerender(); }
+function sellItem(i){ const it=me.inv[i]; if(!it)return; sfx('coin'); const v=sellInfo(it).total; me.gold+=v; me.inv[i]=null; selItem=null; shopMsg=`${it.name} 판매 +${v}G`; saveChar(); uiDirty=true; rerender(); }
 const pq=sel=>$('#itemPop').querySelector(sel);
 function showPop(html,pre){ const p=$('#itemPop'); if(!selItem||!html){ p.hidden=true; p.innerHTML=''; p.classList.remove('two'); return; }
   p.classList.toggle('two',!!pre);
@@ -2569,7 +2569,7 @@ function detailHtml(){
   if(!selItem) return '';
   const it=selItem.it; let s=itemLines(it);
   if(selItem.inv!==undefined){
-    s+=`<div class="acts"><button class="btn primary" id="aEquip"${!canWear(it)?' style="opacity:.5"':''}>장착</button><button class="btn" id="aLock">${it.lock?'🔓 잠금 해제':'🔒 잠금'}</button>${canEnh(it)?`<button class="btn" id="aEnh">⚒ 강화${it.enh>0?' +'+it.enh:''}</button>`:''}<button class="btn" id="aSell"${it.lock?' style="opacity:.45"':''}>판매 ${sellInfo(it).total}원</button>${(G.titleSheet&&charIds().length>1)?'<button class="btn" id="aSend">📤 보내기</button>':''}</div>`;
+    s+=`<div class="acts"><button class="btn primary" id="aEquip"${!canWear(it)?' style="opacity:.5"':''}>장착</button><button class="btn" id="aLock">${it.lock?'🔓 잠금 해제':'🔒 잠금'}</button>${canEnh(it)?`<button class="btn" id="aEnh">⚒ 강화${it.enh>0?' +'+it.enh:''}</button>`:''}<button class="btn" id="aSell"${it.lock?' style="opacity:.45"':''}>판매 ${sellInfo(it).total}G</button>${(G.titleSheet&&charIds().length>1)?'<button class="btn" id="aSend">📤 보내기</button>':''}</div>`;
   }else s+=`<div class="acts"><button class="btn" id="aUnequip">해제</button><button class="btn" id="aLock">${it.lock?'🔓 잠금 해제':'🔒 잠금'}</button>${canEnh(it)?`<button class="btn" id="aEnh">⚒ 강화${it.enh>0?' +'+it.enh:''}</button>`:''}${(G.titleSheet&&charIds().length>1)?'<button class="btn" id="aSend">📤 보내기</button>':''}</div>`;
   return s;
 }
@@ -2601,7 +2601,7 @@ if(!SKM){
   { const base=CLASSES[me.cls].base, tots=S.map(([k])=>Math.floor(D[k])), mx=Math.max(60,...tots)*1.06;
     const R0=S.map(([k,n,ds],i)=>{ const tot=tots[i], b0=base[k], pt=Math.max(0,me.stats[k]-b0), gr=Math.max(0,tot-me.stats[k]); return {k,n,ds,tot,b0,pt,gr}; });
     const sB=R0.reduce((x,r)=>x+r.b0,0), sP=R0.reduce((x,r)=>x+r.pt,0), sG=R0.reduce((x,r)=>x+r.gr,0);
-    h+=`<div class="box"><h3 class="bh"><span>📊 능력치 · 남은 포인트 ${me.statPts}</span><button class="rsb" id="rsStat">↺ 초기화 20,000원</button></h3>
+    h+=`<div class="box"><h3 class="bh"><span>📊 능력치 · 남은 포인트 ${me.statPts}</span><button class="rsb" id="rsStat">↺ 초기화 20,000G</button></h3>
       <div class="sum3"><div><span class="cB">직업 기본</span><b class="cB">${sB}</b></div><div class="s"><span class="cS">스탯</span><b class="cS">+${sP}</b></div><div class="g"><span class="cG">장비</span><b class="cG">+${sG}</b></div></div>
       <div class="k" style="font-size:11.5px;margin-top:8px">이름을 누르면 설명이 나와요</div>`;
     for(const r of R0){ const t=(r.b0+r.pt+r.gr)||1, seg=(v,c)=>v>0?`<i style="width:${(v/t*100).toFixed(1)}%;background:${c}"></i>`:'';
@@ -2618,7 +2618,7 @@ if(!SKM){
 }
 if(SKM){
   h+=`<div class="sktabs"><button data-pm="skill" aria-pressed="${!PAS}">✨ 액티브</button><button data-pm="passive" aria-pressed="${PAS}">🔰 패시브</button></div>`;
-  h+=`<div class="box"><h3 class="bh"><span>${PAS?'🔰 패시브':'✨ 액티브 스킬'} · 남은 포인트 ${me.skillPts}</span><button class="rsb" id="rsSk">↺ 초기화 30,000원</button></h3><div class="k" style="font-size:11.5px;margin-bottom:6px">${PAS?'항상 적용되는 능력이에요. 스킬 포인트로 올려요.':'위에서 아래로 레벨이 오르며 해금돼요. 🔗는 이 스킬을 올리면 함께 강해지는 스킬이에요.'}</div>`;
+  h+=`<div class="box"><h3 class="bh"><span>${PAS?'🔰 패시브':'✨ 액티브 스킬'} · 남은 포인트 ${me.skillPts}</span><button class="rsb" id="rsSk">↺ 초기화 30,000G</button></h3><div class="k" style="font-size:11.5px;margin-bottom:6px">${PAS?'항상 적용되는 능력이에요. 스킬 포인트로 올려요.':'위에서 아래로 레벨이 오르며 해금돼요. 🔗는 이 스킬을 올리면 함께 강해지는 스킬이에요.'}</div>`;
   { const list=SK[me.cls].filter(s=>!!s.passive===PAS), tiers=[...new Set(list.map(s=>s.req))].sort((x,y)=>x-y);
     for(const rq of tiers){ const unl=me.lvl>=rq;
       h+=`<div class="tier ${unl?'':'lock'}"><div class="thd"><span class="tdot"></span><b>레벨 ${rq}</b><span class="k"> ${unl?'해금됨':'잠김'}</span></div>`;
@@ -2638,21 +2638,21 @@ if(SKM){
   bo.querySelectorAll('[data-sk]').forEach(el=>el.onclick=()=>{ const k=el.dataset.sk, s=SKBY[k]; if(me.skillPts<=0||me.lvl<s.req||(me.skills[k]||0)>=20)return; me.skillPts--; me.skills[k]=(me.skills[k]||0)+1; saveChar(); buildSkills(); renderStat(); });
 }
 const SHOP={potion:{n:'회복 물약',d:'생명력·마나 45% 회복. 습격마다 주는 무료 물약 3개와 별도로 쌓여요.',p:200},rev:{n:'즉시 부활',d:'쓰러졌을 때 그 자리에서 바로 일어나요. (스테이지마다 무료 1회 포함)',p:1000}};
-function shopRow(k){ const o=SHOP[k], have=k==='potion'?me.potBuy:me.rev; return `<div class="shopitem"><div><b>${o.n}</b><div class="skd">${o.d}</div><div class="k" style="font-size:12px;color:var(--mute)">보유 ${have}개 · 최대 20개</div></div><button class="btn" data-buy="${k}"><span class="price">${o.p}원</span> 구매</button></div>`; }
+function shopRow(k){ const o=SHOP[k], have=k==='potion'?me.potBuy:me.rev; return `<div class="shopitem"><div><b>${o.n}</b><div class="skd">${o.d}</div><div class="k" style="font-size:12px;color:var(--mute)">보유 ${have}개 · 최대 20개</div></div><button class="btn" data-buy="${k}"><span class="price">${o.p}G</span> 구매</button></div>`; }
 function renderShop(){
   markTabs(); sheetHead();
   const norm=me.inv.reduce((a,it)=>a+(it&&it.rar===0?1:0),0), normV=me.inv.reduce((a,it)=>a+(it&&it.rar===0?sellInfo(it).total:0),0);
   let h=`<div class="box"><h3>🛍️ 구매</h3>${shopRow('potion')}${shopRow('rev')}</div>`;
-  h+=`<div class="box"><h3>🏋️ 수련 <small style="color:var(--mute);font-weight:400">모든 캐릭터에 적용</small></h3>${VUP.map(o=>{ const l=vupLv(o.k), mx=l>=VUPMAX, c=vupCost(o,l); return `<div class="shopitem"><div><b>${o.e} ${o.n} <span class="k">Lv ${l}/${VUPMAX}</span></b><div class="skd">${o.d(l)}${mx?'':` → 다음 ${o.d(l+1)}`}</div></div><button class="btn" data-vup="${o.k}" ${mx||me.gold<c?'disabled':''}>${mx?'최대':c.toLocaleString()+'원'}</button></div>`; }).join('')}</div>`;
+  h+=`<div class="box"><h3>🏋️ 수련 <small style="color:var(--mute);font-weight:400">모든 캐릭터에 적용</small></h3>${VUP.map(o=>{ const l=vupLv(o.k), mx=l>=VUPMAX, c=vupCost(o,l); return `<div class="shopitem"><div><b>${o.e} ${o.n} <span class="k">Lv ${l}/${VUPMAX}</span></b><div class="skd">${o.d(l)}${mx?'':` → 다음 ${o.d(l+1)}`}</div></div><button class="btn" data-vup="${o.k}" ${mx||me.gold<c?'disabled':''}>${mx?'최대':c.toLocaleString()+'G'}</button></div>`; }).join('')}</div>`;
   h+=`<div class="box"><h3>💰 판매 · 가방의 아이템을 눌러 고르세요</h3><div class="smsg">${esc(shopMsg)}</div><div class="inv">${me.inv.map((it,i)=>cellHtml(it,'cell',`data-inv="${i}"`)).join('')}</div>`;
   let d='';
-  if(selItem&&selItem.inv!==undefined&&me.inv[selItem.inv]){ const it=selItem.it, si=sellInfo(it); d=itemLines(it)+`<div class="cmp">기본 ${si.base}원${si.ex?` + 옵션 ${si.ex}원`:''}</div><div class="acts"><button class="btn" id="aLock">${it.lock?'🔓 잠금 해제':'🔒 잠금'}</button><button class="btn primary" id="aSell"${it.lock?' style="opacity:.45"':''}>판매 ${si.total}원</button></div>`; }
-  h+=`<div class="meta" style="font-size:12px;color:var(--mute)">판매가: 일반 100 · 매직 200 · 레어 400 · 유니크 800원. 스킬 옵션과 고급 옵션(생명력 흡수·치명타·공격/이동 속도)은 추가금이 붙어요.</div>`;
+  if(selItem&&selItem.inv!==undefined&&me.inv[selItem.inv]){ const it=selItem.it, si=sellInfo(it); d=itemLines(it)+`<div class="cmp">기본 ${si.base}G${si.ex?` + 옵션 ${si.ex}G`:''}</div><div class="acts"><button class="btn" id="aLock">${it.lock?'🔓 잠금 해제':'🔒 잠금'}</button><button class="btn primary" id="aSell"${it.lock?' style="opacity:.45"':''}>판매 ${si.total}G</button></div>`; }
+  h+=`<div class="meta" style="font-size:12px;color:var(--mute)">판매가: 일반 100 · 매직 200 · 레어 400 · 유니크 800G. 스킬 옵션과 고급 옵션(생명력 흡수·치명타·공격/이동 속도)은 추가금이 붙어요.</div>`;
   h+=`<button class="btn" id="aSellAll">🧺 일괄 판매…</button></div>`;
   const b=$('#sheetB'); b.className='sbody stats'; b.innerHTML=h;
   b.querySelectorAll('[data-vup]').forEach(el=>el.onclick=()=>{ const o=VUP.find(x=>x.k===el.dataset.vup), l=vupLv(o.k), c=vupCost(o,l); if(l>=VUPMAX||me.gold<c)return; me.gold-=c; const v=vupGet(); v[o.k]=l+1; _vup=v; lsSet('dkdef2.vup',JSON.stringify(v)); sfx('coin'); saveChar(); uiDirty=true; renderShop(); });
   b.querySelectorAll('[data-buy]').forEach(el=>el.onclick=()=>{ const k=el.dataset.buy, o=SHOP[k], key=k==='potion'?'potBuy':'rev';
-    if(me.gold<o.p){shopMsg='금화가 부족해요';} else if(me[key]>=20){shopMsg='더 이상 가질 수 없어요 (최대 20개)';} else { me.gold-=o.p; me[key]++; shopMsg=`${o.n} 구매 -${o.p}원`; sfx('coin'); saveChar(); uiDirty=true; }
+    if(me.gold<o.p){shopMsg='금화가 부족해요';} else if(me[key]>=20){shopMsg='더 이상 가질 수 없어요 (최대 20개)';} else { me.gold-=o.p; me[key]++; shopMsg=`${o.n} 구매 -${o.p}G`; sfx('coin'); saveChar(); uiDirty=true; }
     renderShop(); });
   b.querySelectorAll('[data-inv]').forEach(el=>el.onclick=()=>{const i=+el.dataset.inv; if(me.inv[i]){delete me.inv[i].isNew;selItem={it:me.inv[i],inv:i}; shopMsg=''; renderShop();}});
   showPop(d); const as=pq('#aSell'); if(as)as.onclick=()=>sellBtn(as); const alk2=pq('#aLock'); if(alk2)alk2.onclick=()=>{ const it=selItem&&selItem.it; if(!it)return; it.lock=!it.lock; saveChar(); renderShop(); };
@@ -2663,13 +2663,13 @@ function bulkSell(){
   const info=()=>{ let n=0,v=0; me.inv.forEach(it=>{ if(it&&!it.lock&&!(it.enh>0)&&sel.has(it.rar)){n++;v+=sellInfo(it).total;} }); return {n,v}; };
   const cnt=r=>me.inv.filter(it=>it&&!it.lock&&!(it.enh>0)&&it.rar===r).length, val=r=>me.inv.reduce((a,it)=>a+(it&&!it.lock&&!(it.enh>0)&&it.rar===r?sellInfo(it).total:0),0);
   const draw=m=>{ const f=info();
-    m.querySelector('#bsSum').innerHTML=f.n?`선택한 <b>${f.n}개</b> · <b style="color:#ffd84a">${f.v}원</b>`:'<span class="meta">판매할 등급을 선택하세요</span>';
+    m.querySelector('#bsSum').innerHTML=f.n?`선택한 <b>${f.n}개</b> · <b style="color:#ffd84a">${f.v}G</b>`:'<span class="meta">판매할 등급을 선택하세요</span>';
     m.querySelector('#bsGo').disabled=!f.n; uAsk=false; m.querySelector('#bsGo').textContent='일괄 판매하기'; };
-  modal(`<h3>🧺 일괄 판매</h3><p class="meta" style="margin:0 0 8px">가방의 아이템만 팔아요. 장착 중인 장비, 강화한 아이템, 🔒잠근 아이템은 제외돼요. 유니크는 직접 체크해야 팔려요.</p><div class="col">${[0,1,2,3].map(r=>`<label class="toggle" style="display:flex;gap:8px;align-items:center;font-size:14px;padding:8px;border:1px solid var(--line2);border-radius:8px"><input type="checkbox" data-r="${r}" ${r<=1&&cnt(r)?'checked':''} ${cnt(r)?'':'disabled'}> <span style="color:${RARC[r]};font-weight:700">${RARN[r]}</span> <span style="margin-left:auto;color:var(--mute)">${cnt(r)}개 · ${val(r)}원</span></label>`).join('')}<div id="bsSum" style="min-height:22px;font-size:14px"></div><div class="row2"><button class="btn" id="bsNo">취소</button><button class="btn primary" id="bsGo">일괄 판매하기</button></div></div>`,m=>{
+  modal(`<h3>🧺 일괄 판매</h3><p class="meta" style="margin:0 0 8px">가방의 아이템만 팔아요. 장착 중인 장비, 강화한 아이템, 🔒잠근 아이템은 제외돼요. 유니크는 직접 체크해야 팔려요.</p><div class="col">${[0,1,2,3].map(r=>`<label class="toggle" style="display:flex;gap:8px;align-items:center;font-size:14px;padding:8px;border:1px solid var(--line2);border-radius:8px"><input type="checkbox" data-r="${r}" ${r<=1&&cnt(r)?'checked':''} ${cnt(r)?'':'disabled'}> <span style="color:${RARC[r]};font-weight:700">${RARN[r]}</span> <span style="margin-left:auto;color:var(--mute)">${cnt(r)}개 · ${val(r)}G</span></label>`).join('')}<div id="bsSum" style="min-height:22px;font-size:14px"></div><div class="row2"><button class="btn" id="bsNo">취소</button><button class="btn primary" id="bsGo">일괄 판매하기</button></div></div>`,m=>{
     m.querySelectorAll('[data-r]').forEach(c=>c.onchange=()=>{ const r=+c.dataset.r; if(c.checked)sel.add(r); else sel.delete(r); draw(m); });
     m.querySelector('#bsNo').onclick=closeModal;
     if(!cnt(0)) sel.delete(0); if(!cnt(1)) sel.delete(1); draw(m);
-    m.querySelector('#bsGo').onclick=()=>{ const f=info(); if(!f.n)return; if(sel.has(3)&&!uAsk){ uAsk=true; m.querySelector('#bsGo').textContent='⚠️ 유니크 포함! 한 번 더 누르면 판매'; return; } let g=0,n=0; me.inv.forEach((it,i)=>{ if(it&&!it.lock&&!(it.enh>0)&&sel.has(it.rar)){g+=sellInfo(it).total;n++;me.inv[i]=null;} }); me.gold+=g; selItem=null; shopMsg=`${n}개 판매 +${g}원`; sfx('coin'); saveChar(); uiDirty=true; closeModal(); rerender(); sheetToast&&sheetToast(`${n}개 판매 +${g.toLocaleString()}원`); };
+    m.querySelector('#bsGo').onclick=()=>{ const f=info(); if(!f.n)return; if(sel.has(3)&&!uAsk){ uAsk=true; m.querySelector('#bsGo').textContent='⚠️ 유니크 포함! 한 번 더 누르면 판매'; return; } let g=0,n=0; me.inv.forEach((it,i)=>{ if(it&&!it.lock&&!(it.enh>0)&&sel.has(it.rar)){g+=sellInfo(it).total;n++;me.inv[i]=null;} }); me.gold+=g; selItem=null; shopMsg=`${n}개 판매 +${g}G`; sfx('coin'); saveChar(); uiDirty=true; closeModal(); rerender(); sheetToast&&sheetToast(`${n}개 판매 +${g.toLocaleString()}G`); };
   });
 }
 function enhFx(ok,it,L){
@@ -2706,7 +2706,7 @@ function enhModal(){
   const eff=it.slot==='amulet'?`올스탯 +${L-1} → <b style="color:#9fd18b">+${L}</b>`:it.slot==='ring'?(L>=10?`<b style="color:#9fd18b">모든 스킬 +1 달성!</b>`:`+10강 달성 시 모든 스킬 +1 (현재 +${L-1} → +${L})`):it.dm?`공격력 +${it.dm} → <b style="color:#9fd18b">+${Math.round(b0.dm*k2)}</b>`:it.om?`마나 +${it.om} → <b style="color:#9fd18b">+${Math.round(b0.om*k2)}</b>`:it.b0&&it.b0.mx||it.mx?`공격력 ${it.mn}–${it.mx} → <b style="color:#9fd18b">${Math.max(1,Math.round(b0.mn*k2))}–${Math.max(Math.max(1,Math.round(b0.mn*k2))+1,Math.round(b0.mx*k2))}</b>`:`방어력 ${it.df} → <b style="color:#9fd18b">${Math.round(b0.df*k2)}</b>`;
   const rows=elig.map(o=>`<label style="display:flex;gap:8px;align-items:center;padding:5px 6px;border:1px solid var(--line2);border-radius:7px;font-size:12.5px"><input type="checkbox" data-m="${o.i}" ${sel.has(o.i)?'checked':''}><span style="color:${RARC[o.x.rar]};flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(o.x.name)}</span><span class="meta">${slotLbl(o.x)} · Lv ${o.x.ilvl}</span></label>`).join('');
   modal(`<h3>⚒ 강화 +${L-1} → +${L}</h3><div class="meta" style="margin:0 0 6px"><span style="color:${RARC[it.rar]};font-weight:700">${esc(dn(it))}</span> · ${eff}<br>${it.slot==='amulet'?'강화 1회마다 힘·민첩·체력·에너지가 +1씩 올라요.':it.slot==='ring'?'+10강을 달성하면 모든 스킬 레벨이 +1 돼요.':'기본 능력(공격력/방어력)이 강화 1회마다 원래 값의 10%씩 오르고, 다른 옵션은 그대로예요.'}</div>
-   <div style="font-size:13px;line-height:1.7">성공 확률 <b style="color:${rate>=80?'#9fd18b':rate>=50?'#ffd84a':'#ff8a7a'}">${rate}%</b> · 필요 골드 <b id="enC" style="color:#ffd84a">${cost.toLocaleString()}원</b> <span class="meta">(보유 ${me.gold.toLocaleString()}원)</span><br>재료 : 같은 <b style="color:${RARC[it.rar]}">${RARN[it.rar]}</b> 등급 아이템 <b>${need}개</b> <span id="enSel" class="meta"></span></div>
+   <div style="font-size:13px;line-height:1.7">성공 확률 <b style="color:${rate>=80?'#9fd18b':rate>=50?'#ffd84a':'#ff8a7a'}">${rate}%</b> · 필요 골드 <b id="enC" style="color:#ffd84a">${cost.toLocaleString()}G</b> <span class="meta">(보유 ${me.gold.toLocaleString()}G)</span><br>재료 : 같은 <b style="color:${RARC[it.rar]}">${RARN[it.rar]}</b> 등급 아이템 <b>${need}개</b> <span id="enSel" class="meta"></span></div>
    <div style="display:grid;gap:4px;max-height:200px;overflow:auto;margin:8px 0;touch-action:pan-y">${rows||'<div class="meta">재료로 쓸 수 있는 아이템이 없어요 (잠금·강화한 아이템 제외)</div>'}</div>
    <div class="meta" style="margin-bottom:8px">실패하면 재료와 골드만 사라지고 강화 단계는 그대로예요.</div>
    <div class="row2"><button class="btn" id="enNo">취소</button><button class="btn primary" id="enGo">강화하기</button></div>`,m=>{
@@ -2715,7 +2715,7 @@ function enhModal(){
     m.querySelector('#enNo').onclick=closeModal; draw();
     m.querySelector('#enGo').onclick=()=>{ if(sel.size!==need||me.gold<cost)return;
       const mats=[...sel].map(i=>me.inv[i]).filter(Boolean);
-      modal(`<h3>⚠️ 정말 강화할까요?</h3><p style="margin:0 0 8px;font-size:14px"><b style="color:${RARC[it.rar]}">${esc(it.name)}</b> +${L-1} → +${L}<br>성공 확률 <b>${rate}%</b> · <b style="color:#ffd84a">${cost.toLocaleString()}원</b> 소모</p><div class="meta" style="margin-bottom:8px">아래 재료가 사라져요${rate<100?' (실패해도 사라져요)':''}:<br>${mats.map(x=>`<span style="color:${RARC[x.rar]}">${esc(x.name)}</span>`).join(', ')}</div><div class="row2"><button class="btn" id="en2No">취소</button><button class="btn primary" id="en2Yes">강화 시도</button></div>`,m2=>{
+      modal(`<h3>⚠️ 정말 강화할까요?</h3><p style="margin:0 0 8px;font-size:14px"><b style="color:${RARC[it.rar]}">${esc(it.name)}</b> +${L-1} → +${L}<br>성공 확률 <b>${rate}%</b> · <b style="color:#ffd84a">${cost.toLocaleString()}G</b> 소모</p><div class="meta" style="margin-bottom:8px">아래 재료가 사라져요${rate<100?' (실패해도 사라져요)':''}:<br>${mats.map(x=>`<span style="color:${RARC[x.rar]}">${esc(x.name)}</span>`).join(', ')}</div><div class="row2"><button class="btn" id="en2No">취소</button><button class="btn primary" id="en2Yes">강화 시도</button></div>`,m2=>{
         m2.querySelector('#en2No').onclick=closeModal; m2.querySelector('#en2Yes').onclick=()=>doEnh(); }); };
     const doEnh=()=>{ if(sel.size!==need||me.gold<cost)return;
       /* 강화창이 열린 사이 자동합성/판매로 인벤이 바뀌었으면 중단 (골드·재료 보호) */
@@ -2730,8 +2730,8 @@ function enhModal(){
 }
 function askReset(kind){
   const cost=kind==='stat'?20000:30000, name=kind==='stat'?'능력치':'스킬';
-  if(me.gold<cost){ warn(`${name} 초기화에는 ${cost.toLocaleString()}원이 필요해요 (보유 ${me.gold.toLocaleString()}원)`); return; }
-  modal(`<h3>🔄 ${name} 초기화</h3><p style="margin:0 0 12px;font-size:14px">${cost.toLocaleString()}원을 내고 ${name} 포인트를 모두 돌려받을까요?</p><div class="row2"><button class="btn" id="rNo">취소</button><button class="btn primary" id="rYes">초기화</button></div>`,m=>{
+  if(me.gold<cost){ warn(`${name} 초기화에는 ${cost.toLocaleString()}G가 필요해요 (보유 ${me.gold.toLocaleString()}G)`); return; }
+  modal(`<h3>🔄 ${name} 초기화</h3><p style="margin:0 0 12px;font-size:14px">${cost.toLocaleString()}G를 내고 ${name} 포인트를 모두 돌려받을까요?</p><div class="row2"><button class="btn" id="rNo">취소</button><button class="btn primary" id="rYes">초기화</button></div>`,m=>{
     m.querySelector('#rNo').onclick=closeModal;
     m.querySelector('#rYes').onclick=()=>{ me.gold-=cost;
       if(kind==='stat'){ const c=CLASSES[me.cls]; let sp=0; for(const k in c.base){ sp+=me.stats[k]-c.base[k]; me.stats[k]=c.base[k]; } me.statPts+=sp; }
@@ -2925,9 +2925,9 @@ function askCode(cb){
     m.querySelector('#cdOk').onclick=go; m.querySelector('#cdNo').onclick=closeModal; inp.onkeydown=e=>{ if(e.key==='Enter')go(); }; });
 }
 function askName(title,init,okTxt,cb,exceptId){
-  modal(`<h3>${title}</h3><div class="col"><input type="text" id="nmIn" maxlength="8" placeholder="닉네임 (한글만, 최대 8자)" autocomplete="off" value="${esc(init||'')}"><div class="err" id="nmErr"></div><div class="row2"><button class="btn" id="nmNo">취소</button><button class="btn primary" id="nmOk">${okTxt}</button></div></div>`,m=>{
+  modal(`<h3>${title}</h3><div class="col"><input type="text" id="nmIn" maxlength="8" placeholder="닉네임 (한글만, 2~8자)" autocomplete="off" value="${esc(init||'')}"><div class="err" id="nmErr"></div><div class="row2"><button class="btn" id="nmNo">취소</button><button class="btn primary" id="nmOk">${okTxt}</button></div></div>`,m=>{
     const inp=m.querySelector('#nmIn'); inp.focus(); inp.select(); setTimeout(()=>inp.focus(),80);
-    const go=()=>{ const v=cleanName(inp.value); if(!v){ m.querySelector('#nmErr').textContent='닉네임을 입력해 주세요'; return; } if(!HANGUL.test(v)){ m.querySelector('#nmErr').textContent='닉네임은 한글만 사용할 수 있어요. 영문·숫자·공백·특수기호는 쓸 수 없어요. 다시 입력해 주세요'; inp.focus(); return; } if(nameTaken(v,exceptId)){ m.querySelector('#nmErr').textContent='이미 있는 닉네임이에요. 다른 이름을 입력해 주세요'; return; } closeModal(); cb(v); };
+    const go=()=>{ const v=cleanName(inp.value); if(!v){ m.querySelector('#nmErr').textContent='닉네임을 입력해 주세요'; return; } if(v.length<2){ m.querySelector('#nmErr').textContent='닉네임은 최소 2글자 이상이어야 해요'; inp.focus(); return; } if(!HANGUL.test(v)){ m.querySelector('#nmErr').textContent='닉네임은 한글만 사용할 수 있어요. 영문·숫자·공백·특수기호는 쓸 수 없어요. 다시 입력해 주세요'; inp.focus(); return; } if(nameTaken(v,exceptId)){ m.querySelector('#nmErr').textContent='이미 있는 닉네임이에요. 다른 이름을 입력해 주세요'; return; } closeModal(); cb(v); };
     inp.addEventListener('input',()=>{ m.querySelector('#nmErr').textContent=''; });
     m.querySelector('#nmOk').onclick=go; m.querySelector('#nmNo').onclick=closeModal; inp.onkeydown=e=>{ if(e.key==='Enter')go(); }; });
 }
@@ -2940,14 +2940,14 @@ function showNew(canBack){ $('#bNewBack').hidden=canBack===false; const box=$('#
 $('#bNew').onclick=()=>showNew(true);
 $('#bNewBack').onclick=()=>{ show('#sTitle'); renderTitle(); };
 $('#bNewCl').onclick=()=>cloudModal();
-const RENCOST=30000;
+const RENCOST=1000000;
 function charMenu(id){
   const p=loadChar(id); if(!p)return;
-  modal(`<h3>${CLSE[p.cls]} ${esc(dispName(p))} <small style="color:var(--mute);font-weight:400">Lv ${p.lvl} · ${CLASSES[p.cls].n}</small></h3><div class="col"><button class="btn primary" id="cmGear">🎒 장비 · 능력치 정비</button><button class="btn" id="cmShop">🛒 상점</button><button class="btn" id="cmRen">✏️ 이름 변경 (${RENCOST.toLocaleString()}원)</button><button class="btn" id="cmDel">🗑️ 삭제</button><button class="btn" id="cmX">닫기</button></div>`,m=>{
+  modal(`<h3>${CLSE[p.cls]} ${esc(dispName(p))} <small style="color:var(--mute);font-weight:400">Lv ${p.lvl} · ${CLASSES[p.cls].n}</small></h3><div class="col"><button class="btn primary" id="cmGear">🎒 장비 · 능력치 정비</button><button class="btn" id="cmShop">🛒 상점</button><button class="btn" id="cmRen">✏️ 이름 변경 (${RENCOST.toLocaleString()}G)</button><button class="btn" id="cmDel">🗑️ 삭제</button><button class="btn" id="cmX">닫기</button></div>`,m=>{
     m.querySelector('#cmGear').onclick=()=>{ closeModal(); openTitleSheet('bag'); };
     m.querySelector('#cmShop').onclick=()=>{ closeModal(); openTitleSheet('shop'); };
-    m.querySelector('#cmRen').onclick=()=>{ if((p.gold|0)<RENCOST){ warn(`골드가 부족해요. 이름 변경은 ${RENCOST.toLocaleString()}원이 필요해요 (보유 ${(p.gold|0).toLocaleString()}원)`); return; }
-      askName(`✏️ 이름 변경 · ${RENCOST.toLocaleString()}원`,p.name||'','✔ 변경',v=>{ const q=loadChar(id); if(!q)return; if((q.gold|0)<RENCOST)return; q.gold-=RENCOST; q.name=v; lsSet(charKey(q.id),JSON.stringify(packChar(q))); renderTitle(); toast(`이름을 '${v}'(으)로 바꿨어요 (-${RENCOST.toLocaleString()}원)`,'#ffd84a'); },id); };
+    m.querySelector('#cmRen').onclick=()=>{ if((p.gold|0)<RENCOST){ warn(`골드가 부족해요. 이름 변경은 ${RENCOST.toLocaleString()}G가 필요해요 (보유 ${(p.gold|0).toLocaleString()}G)`); return; }
+      askName(`✏️ 이름 변경 · ${RENCOST.toLocaleString()}G`,p.name||'','✔ 변경',v=>{ const q=loadChar(id); if(!q)return; if((q.gold|0)<RENCOST)return; q.gold-=RENCOST; q.name=v; lsSet(charKey(q.id),JSON.stringify(packChar(q))); renderTitle(); toast(`이름을 '${v}'(으)로 바꿨어요 (-${RENCOST.toLocaleString()}G)`,'#ffd84a'); },id); };
     m.querySelector('#cmDel').onclick=()=>modal(`<h3>🗑️ 삭제</h3><p style="margin:0 0 12px;font-size:14px">'${esc(dispName(p))}' (Lv ${p.lvl}) 캐릭터를 삭제할까요?<br>장비와 아이템도 함께 사라지며 되돌릴 수 없어요.</p><div class="row2"><button class="btn" id="dNo">취소</button><button class="btn primary" id="dYes">삭제</button></div>`,m2=>{ m2.querySelector('#dNo').onclick=closeModal; m2.querySelector('#dYes').onclick=()=>{ deleteChar(id); closeModal(); renderTitle(); }; });
     m.querySelector('#cmX').onclick=closeModal; });
 }
