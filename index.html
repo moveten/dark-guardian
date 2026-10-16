@@ -428,7 +428,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.0.0101</div>
+    <div class="ver" id="verT">v0.4.0.0102</div>
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -1289,7 +1289,7 @@ function syncAlly(pl){
   ally.fm=pl.fm===1?'bear':pl.fm===2?'wolf':''; ally.sp=pl.sp|0;
   ally.aura=(pl.a==='healaura'||pl.a==='guard'||pl.a==='might')?pl.a:0; ally.al=pl.al|0; ally.face=(pl.f|0)/100; ally.lobby=false;
   { const em=pl.em|0; if(ally.emSeq===undefined){ ally.emSeq=em; } else if(em&&em!==ally.emSeq){ ally.emSeq=em; ally.emo={id:clamp(em%10,0,EMOS.length-1),t:3.2}; sfx('ui'); } }
-  { const ia=Array.isArray(pl.ia)?pl.ia:[]; if(lastAllyAnn<0){lastAllyAnn=ia.length?ia[ia.length-1][0]:0;} for(const a of ia){ if(a[0]<=lastAllyAnn)continue; lastAllyAnn=a[0]; toast(`${ally.name||'동료'}님이 ${RARN[clamp(a[2]|0,0,3)]} 아이템 [${String(a[1]||'').slice(0,16)}] 획득!`,RARC[clamp(a[2]|0,0,3)],'get'); } }
+  { const ia=Array.isArray(pl.ia)?pl.ia:[]; if(lastAllyAnn<0){lastAllyAnn=ia.length?ia[ia.length-1][0]:0;} for(const a of ia){ if(a[0]<=lastAllyAnn)continue; lastAllyAnn=a[0]; if((a[2]|0)<3)continue; const ar=clamp(a[2]|0,3,4); toast(`${ally.name||'동료'}님이 ${RARN[ar]} 아이템 [${String(a[1]||'').slice(0,16)}] 획득!`,RARC[ar],'get'); } }   /* 유니크 이상만 표시 (예전 버전 동료가 보낸 레어 알림도 거름) */
   const fx=Array.isArray(pl.fx)?pl.fx:[];
   if(lastAllyFx<0){lastAllyFx=fx.length?fx[fx.length-1][0]:0;}
   for(const f of fx){ if(f[0]<=lastAllyFx)continue; lastAllyFx=f[0];
@@ -1791,7 +1791,7 @@ function pickUp(g){
   if(i<0){toast('가방이 가득 찼어요','#e07060');return;}
   const it=g.it; it.isNew=1; me.inv[i]=it; ground.splice(ground.indexOf(g),1); (G.stGot||(G.stGot=[0,0,0,0,0]))[it.rar|0]++;
   sfx('pick'); if(it.rar>=2)toast(`획득: ${dn(it)}`,RARC[it.rar],'get');
-  if(it.rar>=2){ annQ.push([++annSeq,it.name.slice(0,16),it.rar]); if(annQ.length>4)annQ.shift(); }
+  if(it.rar>=3){ annQ.push([++annSeq,it.name.slice(0,16),it.rar]); if(annQ.length>4)annQ.shift(); }   /* 협동: 동료에게 알리는 획득은 유니크 이상만 */
   const key=it.slot==='ring'?(!me.eq.ring1?'ring1':!me.eq.ring2?'ring2':null):(me.eq[it.slot]?null:it.slot);
   if(key&&canWear(it)){ const cp0=calcCP(me); delete it.isNew; me.eq[key]=it; me.inv[i]=null; const hr=me.hp/me.D.maxHp, mr=me.mp/me.D.maxMp; me.D=derive(me); me.hp=me.D.maxHp*hr; me.mp=me.D.maxMp*mr; buildSkills(); cpMsg(cp0,calcCP(me)); toast(`자동 장착: ${it.name}`,'#9fd18b'); }
   autoSynth();
