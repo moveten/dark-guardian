@@ -424,7 +424,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.2.0.0082</div>
+    <div class="ver" id="verT">v0.2.0.0083</div>
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -632,7 +632,7 @@ const SK={
   {k:'lord',e:'🐉',n:'영혼 군주 강림',s:'강림',req:99,mp:60,cd:90,el:'#7dffd8',rg:NRG(420),d:l=>`[궁극기·시한] 15초간 영혼 용령이 나와 전방에 숨결을 뿜어요. 0.5초마다 범위 피해 ${100+30*l}, 모든 소환수 피해 +40%. 고대 거인이 있으면 사라져요`},
   {k:'fusion',e:'🌀',n:'영혼 융합',s:'융합',req:21,mp:25,cd:40,el:'#8ff0ff',d:l=>`수호 영혼과 포격 영혼이 둘 다 살아 있을 때 버튼이 나타나요. 둘이 하나로 합쳐 ${(10+.3*l).toFixed(1)}초간 [융합 영혼]이 되어 적진을 휩쓸어요 (융합 중 다시 누르면 바로 분리). 생명력은 내 최대 생명력의 ${220+10*l}%, 받는 피해 -50%. ① 주변(반경 105)에 0.5초마다 지속 피해 ${6+4*l} ② 2초마다 영혼탄 ${FZB(l)}발(발당 ${16+10*l}) ③ 4초마다 휩쓸기 범위 피해 ${50+22*l}, 4초마다 도발. 끝나면 둘로 돌아오고 남은 생명력 비율을 이어받아요 (쓰러지면 20%로 분리)`}],
  druid:[
-  {k:'raven',e:'🐦',n:'까마귀 소환',s:'까마귀',req:1,mp:8,cd:6,el:'#9a86c8',d:l=>`[소환수·영구] 까마귀를 ${RVN(l)}마리 불러요 (7레벨 2마리, 14레벨 3마리). 적에게 날아들어 1.1초마다 기본 피해 ${Math.round((12+9*l)*RVF(RVN(l)))}(마리당) · 생명력은 마리당 내 최대 생명력의 ${Math.round(RVHP(l)*100)}%. 스테이지 시작 시 무료 소환 · 다시 쓰면 쓰러진 까마귀를 다시 부르고 생명력을 채워요 · 변신해도 사라지지 않아요`},
+  {k:'raven',e:'🐦',n:'까마귀 소환',s:'까마귀',req:1,mp:8,cd:6,el:'#9a86c8',d:l=>`[소환수·영구] 까마귀를 ${RVN(l)}마리 불러요 (7레벨 2마리, 14레벨 3마리). 적에게 날아들어 1.1초마다 기본 피해 ${Math.round((12+9*l)*RVF(RVN(l)))}(마리당) · 생명력은 마리당 내 최대 생명력의 ${Math.round(RVHP(l)*100)}%. 스테이지 시작 때 자동으로 나오지 않으니 직접 써서 불러야 해요 · 다시 쓰면 쓰러진 까마귀를 다시 부르고 생명력을 채워요 · 변신해도 사라지지 않아요`},
   {k:'wildblood',e:'🩸',n:'야생의 혈통',s:'혈통',req:3,mp:0,cd:0,el:'#d0705a',passive:1,d:l=>`패시브(모든 형태): 최대 생명력 +${2*l}%, 초당 생명력 회복 +${(.1*l).toFixed(1)}%, 변신한 동안 받는 피해 -${(.5*l).toFixed(1)}%`},
   {k:'wolfform',e:'🐺',n:'늑대 변신',s:'늑대',req:6,mp:6,cd:2,el:'#b4bed4',form:'wolf',d:l=>`[변신·토글] 늑대로 변신해요 (다시 누르면 인간으로, 곰 변신으로는 바로 전환). 이동 속도 +${WFM(l)}%, 공격 속도 +${WFA(l)}%, 치명타 +5%. 기본 공격이 근접 연타(무기 피해 ${Math.round(WFB(l)*100)}%, 레벨당 +3%)로 바뀌고 출혈을 입혀요. 생명력 비율은 그대로 유지돼요`},
   {k:'bearform',e:'🐻',n:'곰 변신',s:'곰',req:9,mp:6,cd:2,el:'#c28a5a',form:'bear',d:l=>`[변신·토글] 곰으로 변신해요 (다시 누르면 인간으로, 늑대 변신으로는 바로 전환). 최대 생명력 +${Math.round(BRH(l))}%, 방어력 +${Math.round(BRD(l))}%, 받는 피해 -${BRR(l).toFixed(1)}% · 대신 이동 속도 -8%, 공격 속도 -10%. 기본 공격이 범위 공격(주 대상 무기 피해 ${Math.round(BRB(l)*100)}%, 주변 적은 주 대상의 70%인 ${Math.round(BRB(l)*BRS*100)}% · 레벨당 +4%)으로 바뀌어요`},
@@ -1840,7 +1840,7 @@ function summonMinion(k,lv,free,px,py){
   else { mn={i:10+(++mnSeq),k,r:K.r,x,y,hp:mh,mh,lv,face:me.face||0,cd:rand(.3,.7),atk:0,flash:0,rez:0,an:Math.random()*6,tt:2,t:big?(k==='dragon'?15:k==='fusion'?10+.3*lv:18+.5*lv):Infinity,bt:0}; minions.push(mn); }
   efx.push({k:'ring',x,y,r0:6,r1:big?90:56,t:0,life:.5,col:K.col,w:big?9:6}); burst(x,y,K.col,big?36:22,big?320:220); impact(x,y,'120,230,200',big?140:80); if(!free)sfx(big?'boom':'aura'); if(big)G.shake=Math.max(G.shake,.35);
   return mn; }
-function autoSummon(){ minions.length=0; if(me&&me.cls==='druid'){ const l=skLv(me,'raven'); for(let i=0;l>0&&i<RVN(l);i++)summonMinion('rv'+(i+1),l,true); return; } if(!me||me.cls!=='necro')return; for(const [k,sk] of [['guard','guardian'],['caster','spiritcaster']]){ const l=skLv(me,sk); if(l>0)summonMinion(k,l,true); } }
+function autoSummon(){ minions.length=0; if(me&&me.cls==='druid')return; /* 드루이드 까마귀는 스테이지 시작 때 자동 소환하지 않아요(직접 '까마귀 소환'을 써야 나옴) */ if(!me||me.cls!=='necro')return; for(const [k,sk] of [['guard','guardian'],['caster','spiritcaster']]){ const l=skLv(me,sk); if(l>0)summonMinion(k,l,true); } }
 function minionTargets(){ return G.mode==='guest'?[]:minions.filter(q=>q.rez<=0).map(q=>({x:q.x,y:q.y,i:q.i,mn:1})); }
 function minionHit(id,raw){ const mn=minions.find(q=>q.i===id); if(mn)mnTake(mn,raw); }
 function mnTake(mn,raw,direct){ if(mn.rez>0)return; const D=me.D, big=!MNK[mn.k].perm, def=D.def*1.2, red=Math.min(.8,def/(def+50+G.wave*8));
