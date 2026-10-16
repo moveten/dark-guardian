@@ -184,16 +184,9 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
 .plus{width:46px;height:46px;border-radius:10px;border:2px solid var(--gold);background:#2a2014;color:var(--gold);font-weight:700;font-size:24px;line-height:1;padding:0;flex:none}
 .plus[data-off]{opacity:.25;border-color:var(--line2);color:var(--mute)}.plus{touch-action:pan-y}
 .gl{position:absolute;inset:0;border-radius:inherit;overflow:hidden;pointer-events:none;z-index:0}
-.gl::before{content:'';position:absolute;top:-10%;bottom:-10%;width:45%;left:-60%;background:linear-gradient(105deg,transparent 0%,rgba(255,255,255,.0) 20%,rgba(255,255,255,.6) 50%,rgba(255,255,255,0) 80%,transparent 100%);transform:skewX(-18deg);animation:glSweep 3.2s ease-in-out infinite}
-.gl.t7::before{animation-duration:2.2s;background:linear-gradient(105deg,transparent 0%,rgba(255,236,160,0) 20%,rgba(255,236,160,.75) 50%,rgba(255,236,160,0) 80%,transparent 100%)}
-.gl.t7::after{content:'';position:absolute;inset:0;box-shadow:inset 0 0 9px rgba(255,205,90,.65);animation:glPulse 1.8s ease-in-out infinite;background:radial-gradient(circle at 22% 24%,rgba(255,255,255,.95) 0 1.4px,transparent 2.6px),radial-gradient(circle at 78% 70%,rgba(255,244,200,.95) 0 1.4px,transparent 2.6px);background-size:100% 100%;animation:glPulse 1.8s ease-in-out infinite,glTwinkle 1.6s steps(2,end) infinite}
-.gl.t10{box-shadow:inset 0 0 0 2px rgba(255,222,120,.95),inset 0 0 12px rgba(255,190,70,.6);animation:glBreath 2.4s ease-in-out infinite}
-.gl.t10::before{animation-duration:2.6s;background:linear-gradient(105deg,transparent 0%,rgba(255,255,255,0) 30%,rgba(255,255,255,.8) 50%,rgba(255,255,255,0) 70%,transparent 100%)}
-.gl.t10::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 120%,rgba(255,214,102,.55),transparent 65%)}
-@keyframes glSweep{0%,35%{left:-60%}75%,100%{left:130%}}
-@keyframes glPulse{0%,100%{opacity:.55}50%{opacity:1}}
-@keyframes glTwinkle{0%{background-position:0 0}100%{background-position:0 0;opacity:.7}}
-@keyframes glBreath{0%,100%{filter:brightness(1)}50%{filter:brightness(1.35)}}.en{position:absolute;right:2px;top:0;font-size:10.5px;font-style:normal;font-weight:800;color:#ffd84a;text-shadow:0 0 3px #000,0 0 3px #000;z-index:1}
+.gl::before{content:'';position:absolute;top:-10%;bottom:-10%;width:45%;left:-60%;background:linear-gradient(105deg,transparent 0%,rgba(255,255,255,.0) 20%,rgba(255,255,255,.6) 50%,rgba(255,255,255,0) 80%,transparent 100%);transform:skewX(-18deg);animation:glSweep 4s ease-in-out infinite}
+@keyframes glSweep{0%,55%{left:-60%}90%,100%{left:130%}}
+.en{position:absolute;right:2px;top:0;font-size:10.5px;font-style:normal;font-weight:800;color:#ffd84a;text-shadow:0 0 3px #000,0 0 3px #000;z-index:1}
 .skrow{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;padding:6px 0;border-top:1px solid #241c16}
 .skrow:first-of-type{border-top:0}
 .skic{width:34px;height:34px;border-radius:50%;border:2px solid var(--c);display:grid;place-items:center;font-size:11px;font-weight:700}
@@ -428,7 +421,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.0.0105</div>
+    <div class="ver" id="verT">v0.4.0.0106</div>
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -2545,11 +2538,10 @@ $('#bBag').onclick=()=>openSheet('bag'); $('#bStat').onclick=()=>openSheet('stat
 const RBG=['linear-gradient(160deg,#25201a,#0f0b09)','radial-gradient(circle at 35% 30%,#33407a,#10142a 75%)','radial-gradient(circle at 35% 30%,#5e4f12,#1c1606 75%)','radial-gradient(circle at 35% 30%,#7a4414,#24120a 75%)','radial-gradient(circle at 35% 30%,#5e1236,#14040c 75%)'];
 const RBD=['#b4aea0','#4a7bff','#ffe24d','#ff8a2a','#ff3f6e'];
 function canWear(it){ return ownOk(it)&&me.lvl>=reqLv(it)&&!statLack(it).length; }
-const ENHBD=n=>n>=10?'#ffe27a':n>=9?'#ff7ad9':n>=7?'#b57aff':n>=5?'#5ab0ff':n>=3?'#6fd08a':'#c8c8d0';
 function cellHtml(it,cls,extra){
   if(!it) return `<button class="${cls}" ${extra||''}></button>`;
   const lock=!canWear(it);
-  return `<button class="${cls}${selItem&&selItem.it===it?' sel':''}${lock?' lock':''}" ${extra||''} style="border:2px solid ${lock?'#a33a30':it.enh>0?ENHBD(it.enh):RBD[it.rar]};background:${RBG[it.rar]};${it.enh>=3?`box-shadow:0 0 ${it.enh>=10?9:it.enh>=7?7:5}px ${ENHBD(it.enh)}${it.enh>=5?'':' inset'};`:''}${it.enh>=3?'':it.rar===3?'box-shadow:0 0 8px rgba(255,150,50,.5) inset;':it.rar===2?'box-shadow:0 0 6px rgba(255,226,77,.3) inset;':''}" aria-label="${esc(it.name)}"><img src="${itemIcon(it).url}" alt="" style="width:86%;height:86%;pointer-events:none;${lock?'filter:grayscale(.25) brightness(.92)':''}">${lock?`<i class="rq">${!ownOk(it)?'🚫':me.lvl<reqLv(it)?'Lv'+reqLv(it):(()=>{ const L=statLack(it)[0]; return L?STN[L[0]]+L[1]:''; })()}</i>`:''}${it.lock?'<i class="lk">🔒</i>':''}${it.isNew?'<i class="nw">NEW</i>':''}${cls==='cell'&&isUpgrade(it)?`<i class="up${lock?' hi':''}">▲</i>`:''}${it.enh>0?`<i class="en">+${it.enh}</i>`:''}${it.enh>=5?`<i class="gl ${it.enh>=10?'t10':it.enh>=7?'t7':'t5'}"></i>`:''}</button>`;
+  return `<button class="${cls}${selItem&&selItem.it===it?' sel':''}${lock?' lock':''}" ${extra||''} style="border:2px solid ${lock?'#a33a30':RBD[it.rar]};background:${RBG[it.rar]};${it.rar===3?'box-shadow:0 0 8px rgba(255,150,50,.5) inset;':it.rar===2?'box-shadow:0 0 6px rgba(255,226,77,.3) inset;':''}" aria-label="${esc(it.name)}"><img src="${itemIcon(it).url}" alt="" style="width:86%;height:86%;pointer-events:none;${lock?'filter:grayscale(.25) brightness(.92)':''}">${lock?`<i class="rq">${!ownOk(it)?'🚫':me.lvl<reqLv(it)?'Lv'+reqLv(it):(()=>{ const L=statLack(it)[0]; return L?STN[L[0]]+L[1]:''; })()}</i>`:''}${it.lock?'<i class="lk">🔒</i>':''}${it.isNew?'<i class="nw">NEW</i>':''}${cls==='cell'&&isUpgrade(it)?`<i class="up${lock?' hi':''}">▲</i>`:''}${it.enh>0?`<i class="en">+${it.enh}</i>`:''}${it.enh>=5?`<i class="gl"></i>`:''}</button>`;
 }
 let dragSup=0;
 function enableDrag(b){
@@ -2956,7 +2948,7 @@ function rkProfile(row,back){
     for(const k of RKSL){ const x=d.eq[k]; if(!x){ body+=`<div class="rkgc empty"><div class="rkgi"></div><small>${k==='shield'?OFFN[CLASSES[row.cls]?row.cls:'war']:RKSN[k]}</small></div>`; continue; }
       let it; try{ it=rkBuildItem(k,x); }catch(e){ continue; }
       let ic=''; try{ ic=itemIcon(it).url; }catch(e){}
-      body+=`<button class="rkgc" data-k="${k}" aria-label="${esc(it.name)}"><div class="rkgi" style="border-color:${it.enh>0?ENHBD(it.enh):RBD[it.rar]};background:${RBG[it.rar]}"><img src="${ic}" alt="">${it.enh>0?`<i class="en">+${it.enh}</i>`:''}${it.enh>=5?`<i class="gl ${it.enh>=10?'t10':it.enh>=7?'t7':'t5'}"></i>`:''}</div><small>${RKSN[k]}</small></button>`; }
+      body+=`<button class="rkgc" data-k="${k}" aria-label="${esc(it.name)}"><div class="rkgi" style="border-color:${RBD[it.rar]};background:${RBG[it.rar]}"><img src="${ic}" alt="">${it.enh>0?`<i class="en">+${it.enh}</i>`:''}${it.enh>=5?`<i class="gl"></i>`:''}</div><small>${RKSN[k]}</small></button>`; }
     body+='</div><div class="meta" style="margin:4px 0 8px;text-align:center">장비를 누르면 상세 정보가 보여요</div>';
     const st=d.st||[0,0,0,0];
     body+=`<div class="rkst">${[['힘',st[0]],['민첩',st[1]],['체력',st[2]],['에너지',st[3]]].map(([a,b])=>`<div><span>${a}</span><b>${b|0}</b></div>`).join('')}${(d.rows||[]).map(([a,b])=>`<div><span>${esc(String(a))}</span><b>${esc(String(b))}</b></div>`).join('')}</div>`;
@@ -2971,7 +2963,7 @@ function rkItemDetail(row,k,back){
   let ic=''; try{ ic=itemIcon(it).url; }catch(e){}
   let bt=''; try{ bt=baseText(it); }catch(e){}
   let af=''; for(const a of it.aff){ try{ af+=`<li>${esc(affText(a))}</li>`; }catch(e){} }
-  modal(`<div class="rkit" style="border:0"><img src="${ic}" alt="" style="border-color:${it.enh>0?ENHBD(it.enh):RBD[it.rar]}"><div class="rkib"><div style="font-size:16px"><b style="color:${RARC[it.rar]}">${esc(dn(it))}</b>${it.enh>0?` <span style="color:#ffd84a;font-weight:800">+${it.enh}</span>`:''}</div><div class="meta">${RKSN[k]} · ${RARN[it.rar]} · 아이템 레벨 ${it.ilvl}</div>${it.req?`<div class="meta">필요 레벨 ${it.req}</div>`:''}</div></div>
+  modal(`<div class="rkit" style="border:0"><img src="${ic}" alt="" style="border-color:${RBD[it.rar]}"><div class="rkib"><div style="font-size:16px"><b style="color:${RARC[it.rar]}">${esc(dn(it))}</b>${it.enh>0?` <span style="color:#ffd84a;font-weight:800">+${it.enh}</span>`:''}</div><div class="meta">${RKSN[k]} · ${RARN[it.rar]} · 아이템 레벨 ${it.ilvl}</div>${it.req?`<div class="meta">필요 레벨 ${it.req}</div>`:''}</div></div>
     ${bt?`<div style="margin:6px 0">${bt}</div>`:''}${BASEFX[it.base]&&it.slot==='weapon'?`<div class="meta" style="color:#9fd0ff">▪ ${esc(BASEFX[it.base].t)}</div>`:''}${(it.enh>0&&enhFxText(it))?`<div class="meta" style="font-size:11px;font-style:italic;color:#7d725f">※ ${enhFxText(it)}</div>`:''}${af?`<ul style="margin:6px 0;padding-left:18px;line-height:1.55">${af}</ul>`:''}${it.sp&&SPFX[it.sp]?`<div style="margin:6px 0;color:#ffb14a;font-weight:700">★ 특수 효과: ${esc(SPFX[it.sp].d)}</div>`:''}
     <div class="row2" style="margin-top:10px"><button class="btn" id="rkBack">← 장비 보기</button><button class="btn primary" id="rkNo">랭킹으로</button></div>`,m=>{
     m.onclick=e=>{ if(e.target===m)openRank(back); }; m.querySelector('#rkBack').onclick=()=>rkProfile(row,back); m.querySelector('#rkNo').onclick=()=>openRank(back); });
