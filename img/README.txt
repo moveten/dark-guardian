@@ -58,3 +58,4 @@
 
 [4스테이지 삼남매] field_4_1.jpg = field_3_5.jpg를 어둡고 보랏빛으로 만든 임시 배경. 보스 그림은 hero_war/hero_sorc(어두운 톤)·hero_necro(검은 실루엣)를 코드에서 색만 입혀 씀. 전용 그림을 만들면 교체 가능.
 [4스테이지 삼남매] boss_shadow.png = 검은 그림자 전용 그림(적용 완료, 프롬프트 img/boss_shadow_prompt.txt). 걷기 시트가 생기면 boss_shadow_walk.png 로 올리고 index.html 의 BWALKS 에 boss_shadow 한 줄 추가.
+[4스테이지 삼남매] boss_shadow_walk.png = 검은 그림자 걷기 6프레임 시트(적용 완료, 칸마다 얼굴 위치는 index.html 의 SHD_MOUTH). 프롬프트 img/boss_shadow_walk_prompt.txt

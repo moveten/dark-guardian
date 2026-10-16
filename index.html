@@ -427,7 +427,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.0.0096</div>
+    <div class="ver" id="verT">v0.4.0.0097</div>
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -3265,19 +3265,20 @@ const SPR={};
 function sprGet(k){ let e=SPR[k]; if(!e){ e=SPR[k]={ok:false,im:new Image()}; e.im.onload=()=>{e.ok=true;}; e.im.onerror=()=>{e.ok=false;e.bad=true;}; e.im.src='img/'+k+'.png'; } return e.ok?e.im:null; }
 /* 걷기 시트: hero_<직업>_walk.png = n프레임 가로 시트 (k = 저장 배율, cyc = 한 사이클을 걷는 데 필요한 이동 거리) */
 /* 보스 걷기 시트: <보스 그림 이름>_walk.png (n프레임 가로 시트, k=저장 배율, cyc=한 사이클(두 걸음)에 필요한 이동 거리 = 몸집 r의 배수) */
-const BWALKS={hero_war:{n:6,k:.75,cyc:2.6},hero_sorc:{n:6,k:.75,cyc:2.6},mob_grak:{n:6,k:.75,cyc:2.6},mob_malek:{n:6,k:.75,cyc:2.6},mob_morg:{n:6,k:.75,cyc:2.6},mob_kargon:{n:6,k:.75,cyc:2.6}};
+const BWALKS={boss_shadow:{n:6,k:.75,cyc:2.6},hero_war:{n:6,k:.75,cyc:2.6},hero_sorc:{n:6,k:.75,cyc:2.6},mob_grak:{n:6,k:.75,cyc:2.6},mob_malek:{n:6,k:.75,cyc:2.6},mob_morg:{n:6,k:.75,cyc:2.6},mob_kargon:{n:6,k:.75,cyc:2.6}};
 /* 보스 준비 자세: <보스 그림 이름>_wu.png (스킬 예고 앞 70% 동안 몸을 낮추고 힘을 모은 자세, 뒤 30%와 돌진 중엔 _sk). 그림이 있는 보스만 등록 */
 const BWU={mob_morg:1,mob_kargon:1};
 const HATK={druid_wolf:{n:4,k:.75,t:[.12,.45,.75]},druid_bear:{n:4,k:.75,t:[.12,.45,.75]}}; /* 영웅 공격 시트 hero_<키>_atk.png (가로 n칸: 준비→타격→follow→복귀). t=칸 넘어가는 진행도(0~1, 공격 0.36초). 파일이 없으면 기존 동작 */
 const WALKS={war:{n:6,k:.75,cyc:70},pal:{n:6,k:.75,cyc:70},sorc:{n:6,k:.75,cyc:70},necro:{n:6,k:.75,cyc:70},druid:{n:6,k:.75,cyc:70},druid_bear:{n:6,k:.75,cyc:70},druid_wolf:{n:6,k:.75,cyc:70}}; /* 드루이드는 hero_druid / hero_druid_bear / hero_druid_wolf (+ _walk) 그림이 있으면 그걸 쓰고, 없으면 도형으로 그려요 */
 /* 레이드 보스 색 입히기: dark=어두운 톤, black=검은 그림자, red=각성한 그림자, glow=붉은 테두리 빛용 실루엣 (그림마다 한 번만 만들어 둠) */
+const SHD_MOUTH=[[0.5494,0.2754,0.1487],[0.5547,0.3177,0.1501],[0.5738,0.301,0.1514],[0.5811,0.2995,0.1527],[0.5599,0.3479,0.1487],[0.5806,0.2975,0.1527]]; /* boss_shadow_walk.png 칸별 입 위치 [x,y,너비] (칸 크기 대비 비율) */
 const RBT=new WeakMap();
 function rbTint(im,mode){ let o=RBT.get(im); if(!o){ o={}; RBT.set(im,o); } if(o[mode])return o[mode];
   const c=document.createElement('canvas'); c.width=im.width; c.height=im.height; const g=c.getContext('2d'); g.drawImage(im,0,0); g.globalCompositeOperation='source-atop';
   g.fillStyle={dark:'rgba(24,6,40,.56)',black:'rgba(5,2,10,.93)',red:'rgba(140,4,12,.84)',glow:'rgba(255,40,30,1)'}[mode]||'#000'; g.fillRect(0,0,c.width,c.height);
-  if(mode==='red'){ /* 각성한 검은 그림자: 얼굴에 크게 웃는 입 (boss_shadow.png 한 장 기준) */
-    const n=1, fw=im.width; g.globalCompositeOperation='source-over';
-    for(let i=0;i<n;i++){ const cx=fw*.70, cy=im.height*.243, w=fw*.19;   /* boss_shadow.png 얼굴 위치 */
+  if(mode==='red'){ /* 각성한 검은 그림자: 얼굴에 크게 웃는 입 (boss_shadow.png 한 장 또는 boss_shadow_walk.png 6칸 시트 — 칸마다 얼굴 위치 SHD_MOUTH) */
+    const sheet=im.width>im.height*1.6, n=sheet?6:1, fw=im.width/n, MM=sheet?SHD_MOUTH:null; g.globalCompositeOperation='source-over';
+    for(let i=0;i<n;i++){ const cx=i*fw+fw*(MM?MM[i][0]:.70), cy=im.height*(MM?MM[i][1]:.243), w=fw*(MM?MM[i][2]:.19);   /* 얼굴 위치: 정지 그림 / 걷기 시트 칸마다 */
       g.save(); g.translate(cx,cy); g.shadowColor='rgba(255,30,20,.95)'; g.shadowBlur=w*.35;
       g.beginPath(); g.moveTo(-w*.5,-w*.2); g.quadraticCurveTo(0,w*.22,w*.5,-w*.2);   /* 윗입술(얕은 곡선) */
       g.quadraticCurveTo(w*.32,w*.78,0,w*.8); g.quadraticCurveTo(-w*.32,w*.78,-w*.5,-w*.2); g.closePath();   /* 아랫입술(깊은 곡선) → 초승달 모양의 활짝 웃는 입 */
@@ -3328,7 +3329,7 @@ function heroAnim(o,t,melee,wk){ wk=wk===undefined?1:wk;  /* wk: 걷기 시트�
 }
 const mobSfx=()=>{ const id=G.stg&&G.stg.id; return id?({'2':'_s2','3':'_s3'}[id[0]]||''):''; };  /* 스테이지별 일반 몹 이미지: mob_<이름>_s2 / _s3 (없으면 스테이지 1 이미지) */
 const mobKey=t=>{ const sf=mobSfx(), k='mob_'+SPRN[t]; return (sf&&sprGet(k+sf))?k+sf:k; };
-const preBoss=()=>{ try{ if(G.stg&&G.stg.raid){ for(const k of ['hero_war','hero_sorc']){ sprGet(k); sprGet(k+'_walk'); } sprGet('boss_shadow'); } const bt=G.stg&&G.stg.boss; if(bt!=null&&!(G.stg&&G.stg.raid)){ const bk=G.stg.bs||'mob_'+SPRN[bt]; sprGet(bk); sprGet(bk+'_atk'); sprGet(bk+'_sk'); if(BWALKS[bk])sprGet(bk+'_walk'); if(BWU[bk])sprGet(bk+'_wu'); }
+const preBoss=()=>{ try{ if(G.stg&&G.stg.raid){ for(const k of ['hero_war','hero_sorc']){ sprGet(k); sprGet(k+'_walk'); } sprGet('boss_shadow'); sprGet('boss_shadow_walk'); } const bt=G.stg&&G.stg.boss; if(bt!=null&&!(G.stg&&G.stg.raid)){ const bk=G.stg.bs||'mob_'+SPRN[bt]; sprGet(bk); sprGet(bk+'_atk'); sprGet(bk+'_sk'); if(BWALKS[bk])sprGet(bk+'_walk'); if(BWU[bk])sprGet(bk+'_wu'); }
   const sf=mobSfx(); for(const t of [0,1,2,6,9,10,11]){ const k='mob_'+SPRN[t]; sprGet(k+sf); sprGet(k+sf+'_atk'); if(sf){ sprGet(k); sprGet(k+'_atk'); } } }catch(e){} };
 /* 몹 걸음·방향 상태: 실제로 움직인 거리만큼만 걸음 진행 · 좌우 반전은 부드럽게 돌아서기 · 공격 자세도 서서히 */
 function mobGait(m,t){
