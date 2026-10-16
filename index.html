@@ -428,7 +428,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.0.0100</div>
+    <div class="ver" id="verT">v0.4.0.0101</div>
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -1079,10 +1079,10 @@ function sellInfo(it){ let base=SELLBASE[it.rar]||100, ex=0; for(const a of it.a
 const need=l=>l<=58?Math.floor(23*Math.pow(l,1.92)):Math.floor(23*Math.pow(58,1.92)*Math.pow(l/58,9.5)); /* 레벨업 경험치: 계수 23 · 지수 1.92 · 전환 레벨 58 · 전환 후 지수 9.5 */
 
 function derive(p){
-  const d={rng:0,blk:0,mf:0,pr:0,mr:0,str:p.stats.str,dex:p.stats.dex,vit:p.stats.vit,ene:p.stats.ene,dmg:0,dmgPct:0,def:0,life:0,mana:0,ias:0,ms:0,ls:0,crit:5,cls:0,sk:{},wmn:1,wmx:3,dr:0,regen:0,cdr:0,sm:0,smhp:0,sp:{}};
+  const d={rng:0,blk:0,mf:0,pr:0,mr:0,str:p.stats.str,dex:p.stats.dex,vit:p.stats.vit,ene:p.stats.ene,dmg:0,dmgPct:0,def:0,life:0,mana:0,ias:0,ms:0,ls:0,crit:5,cls:0,sk:{},wmn:1,wmx:3,dr:0,regen:0,cdr:0,sm:0,smhp:0,sp:{},hc:0,rbd:0};
   for(const k in p.eq){const it=p.eq[k]; if(!it)continue; if(it.sp&&SPFX[it.sp]&&SPFX[it.sp].fcls&&SPFX[it.sp].fcls!==p.cls)continue; /* 전용 장비는 다른 직업이 끼고 있어도 효과 없음 */
     if(it.slot==='weapon'){d.wmn=it.mn;d.wmx=it.mx; const bf=BASEFX[it.base]; if(bf){ for(const q in bf) if(q!=='t')d[q]+=bf[q]; }}
-    if(it.sp&&SPFX[it.sp]){ SPFX[it.sp].ap(d); d.sp[it.sp]=1; }
+    if(it.sp&&SPFX[it.sp]){ SPFX[it.sp].ap(d); d.sp[it.sp]=1; if(SPFX[it.sp].hero&&it.rar===4)d.hc++; }   /* 그림자(영웅) 장비 개수 */
     if(it.enh>0){ if(it.slot==='amulet'){ const e=it.enh|0; d.str+=e; d.dex+=e; d.vit+=e; d.ene+=e; } else if(it.slot==='ring'&&it.enh>=10)d.cls+=1; }
     if(it.df)d.def+=it.df; if(it.blk)d.blk+=it.blk; if(it.dm)d.dmg+=it.dm; if(it.om)d.mana+=it.om;
     for(const a of it.aff){
@@ -1091,6 +1091,7 @@ function derive(p){
       else if(a.t==='sk'){if(a.cls===p.cls)d.sk[a.key]=(d.sk[a.key]||0)+a.v;}
       else d[a.t]+=a.v;
     }}
+  if(d.hc>=7){ d.rbd=30; d.cls+=3; } else if(d.hc>=3) d.rbd=15;   /* 그림자 세트: 3개 레이드 보스 피해 +15% · 7개 +30%(15% 대신) & 모든 스킬 +3 */
   if(p.mb){ d.dmgPct+=p.mb.dmg||0; d.ias+=p.mb.ias||0; d.ms+=p.mb.ms||0; }
   const C=CLASSES[p.cls];
   { const pl=k=>{const b=(p.skills&&p.skills[k])||0; return b>0?b+d.cls+(d.sk[k]||0):0;}; const a1=pl('ironbody'),a2=pl('bulwark'),a3=pl('arcane'),a4=pl('swift'); if(a4)d.ms+=10+2*a4; d.dr+=a1*.012; d.regen+=a1*.0015; d.mr+=a3*3; d.cdr+=a3*.01; d.blk+=a2; }
@@ -1888,6 +1889,7 @@ function hitMob(m,r,slow,tn,fx){
   const raw=!!(fx&&fx.raw); /* 고정 비율 피해(세크리파이스)는 장비·레벨 보정과 반격 태세를 무시 */
   if(!raw){ const gp=gearPen(); if(gp.wm!==1)r={v:r.v*gp.wm,crit:r.crit}; }
   if(!raw){ const P=lvPen(); if(P.ex){ if(Math.random()<P.miss){ addNum(m.x,m.y-m.r-6,'MISS','#9aa0aa',false); return; } r={v:r.v*P.dm,crit:r.crit}; } else if(P.over){ r={v:r.v*P.dm,crit:r.crit}; } }
+  if(!raw&&me.D&&me.D.rbd&&MT[m.type]&&MT[m.type].raid){ r={v:r.v*(1+me.D.rbd/100),crit:r.crit}; } /* 그림자 세트: 레이드 보스에게 주는 피해 */
   if(!raw&&m.mark&&m.mark.t>0){ r={v:r.v*(1+m.mark.v),crit:r.crit}; } /* 처형 명령 표식: 받는 모든 피해 증가 */
   let shk=false; if(!raw&&fx&&(fx.el==='fire'||fx.el==='ice')&&m.shockT>0){ r={v:r.v*SHOCKB,crit:r.crit}; shk=true; } /* 감전된 적에게 화염/냉기 피해 +33% */
   if(!raw&&m.boss&&m.counter>0&&!(fx&&fx.basic)&&!G.inProc){ counterHit(m,r.v); r={v:0,crit:false}; } /* 스킬 피해는 보스에게 안 들어가고 나에게 반사 */
@@ -2658,6 +2660,7 @@ function itemLines(it){
   const bt=baseText(it); if(bt)s+=`<div>${bt}</div>`;
   if(BASEFX[it.base]&&it.slot==='weapon') s+=`<div class="meta" style="color:#9fd0ff">▪ ${BASEFX[it.base].t}</div>`;
   if(it.sp&&SPFX[it.sp]) s+=`<div style="margin:4px 0;color:#ffb14a;font-weight:700">★ 특수 효과: ${SPFX[it.sp].d}</div>`;
+  if(it.rar===4&&it.sp&&SPFX[it.sp]&&SPFX[it.sp].hero){ const n=(me.D&&me.D.hc)|0, on=(c,a)=>c?'#d9c6ff':'#8a8a8a'; s+=`<div style="margin:4px 0;font-size:12px;line-height:1.55"><b style="color:#b98cff">🌑 그림자 세트 (${n}/7)</b><br><span style="color:${on(n>=3&&n<7)}">3개: 레이드 보스에게 주는 피해 +15%</span><br><span style="color:${on(n>=7)}">7개: 레이드 보스에게 주는 피해 +30% (15% 대신) · 모든 스킬 +3</span></div>`; }
   const ex=enhOptText(it);
   if(it.aff.length||ex) s+='<ul>'+it.aff.map(a=>`<li>${esc(affText(a))}${(a.cls&&a.cls!==me.cls)?' <span class="meta">(효과 없음)</span>':''}</li>`).join('')+(ex?`<li style="color:#ffe27a">${ex}</li>`:'')+'</ul>';
   return s;
