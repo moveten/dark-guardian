@@ -427,7 +427,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.0.0097</div>
+    <div class="ver" id="verT">v0.4.0.0098</div>
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -837,10 +837,11 @@ function drawOffIcon(c,base,rar){
 }
 const iconCache=new Map();
 /* 유니크 전용 그림: 이름이 정확히 같은 유니크는 img/ 의 그림을 쓰고(그림이 없거나 아직 불러오는 중이면 기존 그림) — 새 이름 그림은 여기에 한 줄만 추가 */
-const UNQIMG={'프로스티아의 반지':'item_ring_starlight','사나리아의 반지':'item_ring_blood','니아의 반지':'item_ring_oblivion','모르그의 목걸이':'item_amulet_corrupt','영겁의 눈':'item_amulet_eternity'};
+const UNQIMG={'프로스티아의 반지':'item_ring_starlight','사나리아의 반지':'item_ring_blood','니아의 반지':'item_ring_oblivion','모르그의 목걸이':'item_amulet_corrupt','영겁의 눈':'item_amulet_eternity',
+  '그림자 단검':'item_hero_dagger','그림자 투구':'item_hero_helm','그림자 갑옷':'item_hero_armor','그림자 목걸이':'item_hero_amulet','그림자 반지':'item_hero_ring','그림자 뿔':'item_hero_horn','그림자 방패':'item_hero_shield','그림자 오브':'item_hero_orb','그림자 등불':'item_hero_lantern','그림자 토템':'item_hero_totem'};   /* 영웅(rar 4) 그림자 아이템 아이콘 */
 const UIMGS={};
-function unqImg(it){ if(!it||it.rar!==3)return null; const f=UNQIMG[it.name]; if(!f)return null; let e=UIMGS[f]; if(!e){ e=UIMGS[f]={ok:false,im:new Image()}; e.im.onload=()=>{ e.ok=true; iconCache.clear(); uiDirty=true; }; e.im.onerror=()=>{ e.bad=true; }; e.im.src='img/'+f+'.png'; } return e; }
-Object.keys(UNQIMG).forEach(n=>unqImg({rar:3,name:n}));
+function unqImg(it){ if(!it||(it.rar!==3&&it.rar!==4))return null; const f=UNQIMG[it.name]; if(!f)return null; let e=UIMGS[f]; if(!e){ e=UIMGS[f]={ok:false,im:new Image()}; e.im.onload=()=>{ e.ok=true; iconCache.clear(); uiDirty=true; }; e.im.onerror=()=>{ e.bad=true; }; e.im.src='img/'+f+'.png'; } return e; }
+Object.keys(UNQIMG).forEach(n=>unqImg({rar:/^그림자 /.test(n)?4:3,name:n}));
 function itemIcon(it){
   const ue=unqImg(it), uk=ue&&ue.ok?'U|'+UNQIMG[it.name]:null;
   const key=uk||(it.slot+'|'+it.base+'|'+it.rar+(it.slot==='shield'?'|'+(it.oc||''):''));
