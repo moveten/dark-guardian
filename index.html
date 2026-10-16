@@ -298,10 +298,8 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
 .stg{position:relative;min-width:74px;min-height:52px;padding:0 10px;border-radius:12px;border:1px solid var(--line2);background:var(--panel);font-weight:700;font-size:17px}
 .stg[aria-pressed="true"]{border-color:var(--gold);color:var(--gold);background:var(--panel2)}
 .stg:disabled{opacity:.45}
-.drg{position:absolute;left:-3px;top:-3px;width:calc(100% + 6px);height:calc(100% + 6px);pointer-events:none;overflow:visible}
-.drg .b{fill:var(--line2)} .stg[aria-pressed="true"] .drg .b{fill:var(--gold)}
-.drg .d{fill:none;stroke:var(--panel);stroke-width:.5;opacity:.75} .stg[aria-pressed="true"] .drg .d{stroke:var(--panel2)}
-.drg .e{fill:var(--panel)} .stg[aria-pressed="true"] .drg .e{fill:var(--panel2)}
+.drg{position:absolute;left:-3px;top:-3px;width:calc(100% + 6px);height:calc(100% + 6px);pointer-events:none;background:var(--line2);-webkit-mask:url(img/dragon_frame.png) center/100% 100% no-repeat;mask:url(img/dragon_frame.png) center/100% 100% no-repeat}
+.stg[aria-pressed="true"] .drg{background:var(--gold)}
 .btn.sm{padding:8px 14px;min-height:38px;font-size:13px}
 @media (max-width:520px){.classes{grid-template-columns:1fr}}
 
@@ -427,7 +425,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.0.0098</div>
+    <div class="ver" id="verT">v0.4.0.0099</div>
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -3009,20 +3007,8 @@ function buildCarousel(chars){
     renderStagePanel(); },110); };
 }
 function carCenter2(box,el){ box.scrollTo({left:el.offsetLeft+el.offsetWidth/2-box.clientWidth/2,behavior:'smooth'}); }
-/* ===== 4스테이지 카드 테두리: 카드 둘레를 한 바퀴 감싼 용 (머리가 왼쪽에서 제 꼬리를 묾). 색은 카드 테두리 색을 따라가요(CSS .drg) ===== */
-let DRG_SVG=null;
-function dragonBadge(){ if(DRG_SVG)return DRG_SVG;
-  const W=80,H=58,I=4,R=11,P=[], f=v=>Math.round(v*10)/10;
-  const seg=(ax,ay,bx,by)=>{ const n=Math.max(1,Math.ceil(Math.hypot(bx-ax,by-ay)/1.2)); for(let i=0;i<n;i++)P.push([ax+(bx-ax)*i/n,ay+(by-ay)*i/n]); };
-  const arc=(cx,cy,a0,a1)=>{ const n=Math.max(2,Math.ceil(Math.abs(a1-a0)*R/1.2)); for(let i=0;i<n;i++){ const a=a0+(a1-a0)*i/n; P.push([cx+Math.cos(a)*R,cy+Math.sin(a)*R]); } };
-  seg(I,H/2,I,I+R); arc(I+R,I+R,Math.PI,Math.PI*1.5); seg(I+R,I,W-I-R,I); arc(W-I-R,I+R,-Math.PI/2,0); seg(W-I,I+R,W-I,H-I-R); arc(W-I-R,H-I-R,0,Math.PI/2); seg(W-I-R,H-I,I+R,H-I); arc(I+R,H-I-R,Math.PI/2,Math.PI); seg(I,H-I-R,I,H/2+16);
-  const N=P.length, Q=P.map((p,i)=>{ const a=P[Math.max(0,i-1)], b=P[Math.min(N-1,i+1)], tx=b[0]-a[0], ty=b[1]-a[1], d=Math.hypot(tx,ty)||1, ux=tx/d, uy=ty/d, ox=uy, oy=-ux, u=i/(N-1), w=u<.12?1+4.4*u/.12:u>.94?5.4+.8*(u-.94)/.06:5.4, wv=Math.sin(i*.17)*.5;   /* 바깥쪽 법선(ox,oy) */
-    return {x:p[0]+ox*wv,y:p[1]+oy*wv,ux,uy,ox,oy,w}; });
-  let body='M'+Q.map(q=>f(q.x+q.ox*q.w/2)+' '+f(q.y+q.oy*q.w/2)).join('L')+'L'+Q.slice().reverse().map(q=>f(q.x-q.ox*q.w/2)+' '+f(q.y-q.oy*q.w/2)).join('L')+'Z', sp='', sc='';
-  for(let i=6;i<N-8;i+=8){ const q=Q[i]; if(q.w<3)continue; const bx=q.x+q.ox*q.w/2, by=q.y+q.oy*q.w/2; sp+=`M${f(bx-q.ux*1.3)} ${f(by-q.uy*1.3)}L${f(bx+q.ox*2.4+q.ux*.4)} ${f(by+q.oy*2.4+q.uy*.4)}L${f(bx+q.ux*1.3)} ${f(by+q.uy*1.3)}Z`; }   /* 등 가시 */
-  for(let i=3;i<N-4;i+=3){ const q=Q[i]; if(q.w<3)continue; sc+=`M${f(q.x+q.ox*q.w*.4)} ${f(q.y+q.oy*q.w*.4)}L${f(q.x-q.ox*q.w*.4)} ${f(q.y-q.oy*q.w*.4)}`; }   /* 비늘 결 */
-  const hy=H/2+16, hd=`M-3.6 6L-4 -1L-2.5 -5.5L.5 -8L3 -6.5L4.6 -2L4.6 4L2 7L-2 7Z M-3 -4.5L-1 -12L1.5 -14L3 -10.5L2 -6Z M2.4 -5.2L4.8 -9.6L6.2 -10.8L5.8 -7L4.2 -3.2Z M-3 -.5L-6 -5L-3.4 -3Z M3.4 -.5L6.4 -4.4L3.8 -2.6Z`;   /* 머리통·위턱·아래턱·뿔 둘 (위쪽을 향해 입을 벌림) */
-  return DRG_SVG=`<svg class="drg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true"><path class="b" d="${body}"/><path class="b" d="${sp}"/><path class="d" d="${sc}"/><g transform="translate(${I} ${hy}) scale(1.4)"><path class="b" d="${hd}"/><circle class="e" cx=".9" cy="-3.6" r=".95"/></g></svg>`; }
+/* ===== 4스테이지 카드 테두리: 카드 둘레를 한 바퀴 감싼 용 (img/dragon_frame.png 흰색 실루엣을 마스크로 써서 카드 테두리 색으로 칠함 — CSS .drg) ===== */
+const dragonBadge=()=>'<i class="drg" aria-hidden="true"></i>';
 function renderStagePanel(){
   const chars=charIds().map(loadChar).filter(Boolean);
   $('#playPanel').hidden=!selId;

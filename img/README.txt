@@ -60,3 +60,4 @@
 [4스테이지 삼남매] boss_shadow.png = 검은 그림자 전용 그림(적용 완료, 프롬프트 img/boss_shadow_prompt.txt). 걷기 시트가 생기면 boss_shadow_walk.png 로 올리고 index.html 의 BWALKS 에 boss_shadow 한 줄 추가.
 [4스테이지 삼남매] boss_shadow_walk.png = 검은 그림자 걷기 6프레임 시트(적용 완료, 칸마다 얼굴 위치는 index.html 의 SHD_MOUTH). 프롬프트 img/boss_shadow_walk_prompt.txt
 [영웅 아이템 아이콘 — 적용 완료] item_hero_dagger/helm/armor/amulet/ring/horn/shield/orb/lantern/totem.png (192×192) — index.html 의 UNQIMG(이름 → 파일). 프롬프트 img/hero_item_prompt.txt
+[4스테이지 카드 용 테두리 — 적용 완료] dragon_frame.png = 흰색 실루엣(알파), index.html 의 .drg 마스크로 카드 테두리 색을 입힘. 프롬프트 img/dragon_frame_prompt.txt
