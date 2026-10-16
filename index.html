@@ -423,7 +423,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.2.0.0087</div>
+    <div class="ver" id="verT">v0.2.0.0088</div>
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -698,10 +698,10 @@ const OFFB={pal:BASES.shield,war:[{n:'손도끼',dm:3},{n:'쌍날 단검',dm:5},
 const AFX=[
  {t:'dmg',n:'공격력 +{v}',sl:'weapon ring amulet',r:i=>[1,3+i]},
  {t:'dmgPct',n:'피해 +{v}%',sl:'weapon amulet ring',r:i=>[5,12+2*i]},
- {t:'str',n:'힘 +{v}',sl:'*',r:i=>[1,3+(i>>1)]},
- {t:'dex',n:'민첩 +{v}',sl:'*',r:i=>[1,3+(i>>1)]},
- {t:'vit',n:'체력 +{v}',sl:'*',r:i=>[1,3+(i>>1)]},
- {t:'ene',n:'에너지 +{v}',sl:'*',r:i=>[1,3+(i>>1)]},
+ {t:'str',n:'힘 +{v}',sl:'*',r:()=>[1,10]},
+ {t:'dex',n:'민첩 +{v}',sl:'*',r:()=>[1,10]},
+ {t:'vit',n:'체력 +{v}',sl:'*',r:()=>[1,10]},
+ {t:'ene',n:'에너지 +{v}',sl:'*',r:()=>[1,10]},
  {t:'life',n:'생명력 +{v}',sl:'*',r:i=>[4,10+2*i]},
  {t:'mana',n:'마나 +{v}',sl:'*',r:i=>[4,10+2*i]},
  {t:'def',n:'방어력 +{v}',sl:'helm armor ring amulet',r:i=>[2,5+i]},
@@ -989,7 +989,7 @@ function loadChar(id){
     p.eq=p.eq||{}; if(p.eq.shield===undefined)p.eq.shield=null;
     for(const k in p.eq){ if(p.eq[k])delete p.eq[k].isNew; } /* 장착했던 아이템의 NEW 꼬리표 정리(1회) */ if(!lsGet('dkdef2.nwf.'+id)){ (p.inv||[]).forEach(x=>{ if(x)delete x.isNew; }); lsSet('dkdef2.nwf.'+id,'1'); }
     p.inv=p.inv||Array(INVN).fill(null); while(p.inv.length<INVN)p.inv.push(null);
-    const fx=it=>{ if(!it)return; if(!Array.isArray(it.aff))it.aff=[]; if(it.rar===3&&it.aff.some(a=>a&&a.t==='all'))it.aff=it.aff.filter(a=>!(a&&a.t==='sk')); it.aff=it.aff.filter(a=>a&&AFXBY[a.t]&&!(it.slot==='armor'&&a.t==='ms')&&!(a.cls&&!CLASSES[a.cls])&&!(a.t==='sk'&&!(SKBY[a.key]&&SK[a.cls]&&SK[a.cls].includes(SKBY[a.key])))); }; p.inv.forEach(fx); p.eq=p.eq||{}; for(const k in p.eq)fx(p.eq[k]);
+    const fx=it=>{ if(!it)return; if(!Array.isArray(it.aff))it.aff=[]; for(const a of it.aff)if(a&&(a.t==='str'||a.t==='dex'||a.t==='vit'||a.t==='ene')&&a.v>10)a.v=10; /* 힘·민첩·체력·에너지 옵션 상한 10(이전에 얻은 더 높은 수치도 10으로) */ if(it.rar===3&&it.aff.some(a=>a&&a.t==='all'))it.aff=it.aff.filter(a=>!(a&&a.t==='sk')); it.aff=it.aff.filter(a=>a&&AFXBY[a.t]&&!(it.slot==='armor'&&a.t==='ms')&&!(a.cls&&!CLASSES[a.cls])&&!(a.t==='sk'&&!(SKBY[a.key]&&SK[a.cls]&&SK[a.cls].includes(SKBY[a.key])))); }; p.inv.forEach(fx); p.eq=p.eq||{}; for(const k in p.eq)fx(p.eq[k]);
     /* 보조장비 개편 이전에 얻은 방패(oc 없음)는 전사·마법사가 못 쓰는 팔라딘 방패 → 내 직업의 보조무기/오브로 바꿔 줌(등급·옵션·강화·이름 유지) */
     if(cls!=='pal'&&OFFB[cls]){ const mg=it=>{ if(!it||it.slot!=='shield'||it.oc)return; const bl=OFFB[cls], b=bl[Math.min(bl.length-1,Math.floor((it.ilvl||1)/12))], k=(it.rar===3?1.3:1)*(1+(it.ilvl||1)*.1);
         it.oc=cls; it.base=b.n; delete it.df; delete it.blk; delete it.dm; delete it.om; if(b.dm)it.dm=Math.round(b.dm*k); if(b.om)it.om=Math.round(b.om*k);
