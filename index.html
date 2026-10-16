@@ -421,7 +421,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.0.0106</div>
+    <div class="ver" id="verT">v0.4.0.0107</div>
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -687,12 +687,6 @@ const MT0=[
 ];
 const MT=MT0.map(t=>({...t,r:t.r*MOBS}));
 const BOSSNAMES=MT.filter(m=>m.boss&&!m.raid).map(m=>m.n.split(' ').pop());
-const VUP=[{k:'hp',e:'❤️',n:'체력 단련',d:l=>`최대 생명력 +${4*l}%`,b:2000},{k:'dmg',e:'⚔️',n:'무기 연마',d:l=>`주는 피해 +${2*l}%`,b:2500},{k:'def',e:'🛡️',n:'강철 피부',d:l=>`받는 피해 -${l}%`,b:2200},{k:'luck',e:'🍀',n:'행운의 제단',d:l=>`아이템 드롭률 +${3*l}%`,b:3000}];
-const VUPMAX=10;
-let _vup=null;
-function vupGet(){ if(_vup)return _vup; try{_vup=JSON.parse(lsGet('dkdef2.vup')||'{}')||{}}catch(e){_vup={}} return _vup; }
-const vupLv=k=>Math.min(VUPMAX,vupGet()[k]|0);
-const vupCost=(o,l)=>Math.round(o.b*Math.pow(l+1,1.45)/100)*100;
 
 const BASES={
  weapon:[{n:'낡은 단검',mn:2,mx:4},{n:'장검',mn:3,mx:8},{n:'철퇴',mn:3,mx:9},{n:'참나무 지팡이',mn:2,mx:6},{n:'전투 도끼',mn:4,mx:11},{n:'대검',mn:5,mx:13}],
@@ -1096,9 +1090,9 @@ function derive(p){
     else if(fm==='wolf'){ const l=sl('wolfform')||1; d.ms+=WFM(l); d.ias+=WFA(l); d.crit+=5; }
     if(fm&&wb)d.dr+=.005*wb; }
   d.blk=Math.min(BLKMAX,d.blk); d.pr=Math.min(PRMAX,d.pr); d.rng=Math.min(RNGMAX,d.rng||0);
-  d.maxHp=Math.round((C.hp+d.vit*4+(p.lvl-1)*5+d.life)*(d._hpm||1)*(d._hpr||1)*(1+.04*vupLv('hp')));
+  d.maxHp=Math.round((C.hp+d.vit*4+(p.lvl-1)*5+d.life)*(d._hpm||1)*(d._hpr||1));
   d.maxMp=Math.round(C.mp+d.ene*1+(p.lvl-1)*1+d.mana);
-  d.crit+=d.dex*.12; d.dr=Math.min(.6,d.dr+Math.min(.2,d.vit*.0012)+.01*vupLv('def')); d.cdr=Math.min(.45,d.cdr+Math.min(.2,d.ene*.001)); d.dmgPct+=2*vupLv('dmg');
+  d.crit+=d.dex*.12; d.dr=Math.min(.6,d.dr+Math.min(.2,d.vit*.0012)); d.cdr=Math.min(.45,d.cdr+Math.min(.2,d.ene*.001)); 
   d.def+=Math.floor(d.dex/2)+(C.def||0); if(d._defm)d.def=Math.round(d.def*d._defm); d.dmgPct+=(C.dp||0)+Math.floor((p.lvl-1)*.3);
   d.spd=125*(1+d.ms/100);
   d.atkInt=.62/(1+(d.ias+d.dex*.25)/100);
@@ -1642,7 +1636,7 @@ function onKill(x,y,xp,tier,ilvl,type,lf){
   }
 }
 function rollRarity(tier,ilvl){
-  const m=(tier===2?20:tier===1?4:1)*(1+((me.D.mf||0)+3*vupLv('luck'))/100)*comboMul(), t=1;
+  const m=(tier===2?20:tier===1?4:1)*(1+(me.D.mf||0)/100)*comboMul(), t=1;
   const pu=Math.min(1,.0012*m*t), pr=Math.min(1-pu,.012*m*t), pm=Math.min(1-pu-pr,.055*m*t), pn=Math.min(1-pu-pr-pm,.11*m); /* 레벨과 무관한 고정 확률 */
   const r=Math.random();
   if(r<pu)return 3; if(r<pu+pr)return 2; if(r<pu+pr+pm)return 1; if(r<pu+pr+pm+pn)return 0; return -1;
@@ -2768,14 +2762,12 @@ function renderShop(){
   markTabs(); sheetHead();
   const norm=me.inv.reduce((a,it)=>a+(it&&it.rar===0?1:0),0), normV=me.inv.reduce((a,it)=>a+(it&&it.rar===0?sellInfo(it).total:0),0);
   let h=`<div class="box"><h3>🛍️ 구매</h3>${shopRow('potion')}${shopRow('rev')}</div>`;
-  h+=`<div class="box"><h3>🏋️ 수련 <small style="color:var(--mute);font-weight:400">모든 캐릭터에 적용</small></h3>${VUP.map(o=>{ const l=vupLv(o.k), mx=l>=VUPMAX, c=vupCost(o,l); return `<div class="shopitem"><div><b>${o.e} ${o.n} <span class="k">Lv ${l}/${VUPMAX}</span></b><div class="skd">${o.d(l)}${mx?'':` → 다음 ${o.d(l+1)}`}</div></div><button class="btn" data-vup="${o.k}" ${mx||me.gold<c?'disabled':''}>${mx?'최대':c.toLocaleString()+'G'}</button></div>`; }).join('')}</div>`;
   h+=`<div class="box"><h3>💰 판매 · 가방의 아이템을 눌러 고르세요</h3><div class="smsg">${esc(shopMsg)}</div><div class="inv">${me.inv.map((it,i)=>cellHtml(it,'cell',`data-inv="${i}"`)).join('')}</div>`;
   let d='';
   if(selItem&&selItem.inv!==undefined&&me.inv[selItem.inv]){ const it=selItem.it, si=sellInfo(it); d=itemLines(it)+`<div class="cmp">기본 ${si.base}G${si.ex?` + 옵션 ${si.ex}G`:''}</div><div class="acts"><button class="btn" id="aLock">${it.lock?'🔓 잠금 해제':'🔒 잠금'}</button><button class="btn primary" id="aSell"${it.lock?' style="opacity:.45"':''}>판매 ${si.total}G</button></div>`; }
   h+=`<div class="meta" style="font-size:12px;color:var(--mute)">판매가: 일반 100 · 매직 200 · 레어 400 · 유니크 800G. 스킬 옵션과 고급 옵션(생명력 흡수·치명타·공격/이동 속도)은 추가금이 붙어요.</div>`;
   h+=`<button class="btn" id="aSellAll">🧺 일괄 판매…</button></div>`;
   const b=$('#sheetB'); b.className='sbody stats'; b.innerHTML=h;
-  b.querySelectorAll('[data-vup]').forEach(el=>el.onclick=()=>{ const o=VUP.find(x=>x.k===el.dataset.vup), l=vupLv(o.k), c=vupCost(o,l); if(l>=VUPMAX||me.gold<c)return; me.gold-=c; const v=vupGet(); v[o.k]=l+1; _vup=v; lsSet('dkdef2.vup',JSON.stringify(v)); sfx('coin'); saveChar(); uiDirty=true; renderShop(); });
   b.querySelectorAll('[data-buy]').forEach(el=>el.onclick=()=>{ const k=el.dataset.buy, o=SHOP[k], key=k==='potion'?'potBuy':'rev';
     if(me.gold<o.p){shopMsg='금화가 부족해요';} else if(me[key]>=20){shopMsg='더 이상 가질 수 없어요 (최대 20개)';} else { me.gold-=o.p; me[key]++; shopMsg=`${o.n} 구매 -${o.p}G`; sfx('coin'); saveChar(); uiDirty=true; }
     renderShop(); });
