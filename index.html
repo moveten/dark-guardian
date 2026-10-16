@@ -423,7 +423,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.3.0.0089</div>
+    <div class="ver" id="verT">v0.3.0.0090</div>
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -985,7 +985,7 @@ function loadChar(id){
   try{ const p=JSON.parse(raw); if(!p||!CLASSES[p.cls])return null; const cls=p.cls; p.id=id;
     for(const k in p.skills){ if(!SKBY[k]){p.skillPts+=p.skills[k]; delete p.skills[k];} } for(const s of SK[cls]){ if(p.skills[s.k]===undefined)p.skills[s.k]=0; else if(p.skills[s.k]>0&&(p.lvl|0)<s.req){ p.skillPts+=p.skills[s.k]; p.skills[s.k]=0; } } /* 해금 레벨 미만인데 투자된 스킬(해금 레벨 상향 등)은 포인트 환급 */
     if(p.clear===undefined)p.clear=Math.max(0,+(lsGet('dkdef2.clear')||0));
-    { const lg=k=>{ const v=parseInt(lsGet(k)); return isNaN(v)?-1:clamp(v,-1,2); }; if(p.as===undefined)p.as=lg('dkdef2.asell'); if(p.sy===undefined)p.sy=lg('dkdef2.asyn'); } /* 캐릭터별 자동판매/합성: 기존 캐릭터는 예전 전역 설정을 한 번 이어받음 */
+    { const lg=k=>{ const v=parseInt(lsGet(k)); return isNaN(v)?-1:clamp(v,-1,2); }; if(p.as===undefined)p.as=lg('dkdef2.asell'); if(p.sy===undefined)p.sy=lg('dkdef2.asyn'); if(p.sy>=0)p.sy=2; } /* 캐릭터별 자동판매/합성: 기존 캐릭터는 예전 전역 설정을 한 번 이어받음 */
     p.eq=p.eq||{}; if(p.eq.shield===undefined)p.eq.shield=null;
     for(const k in p.eq){ if(p.eq[k])delete p.eq[k].isNew; } /* 장착했던 아이템의 NEW 꼬리표 정리(1회) */ if(!lsGet('dkdef2.nwf.'+id)){ (p.inv||[]).forEach(x=>{ if(x)delete x.isNew; }); lsSet('dkdef2.nwf.'+id,'1'); }
     p.inv=p.inv||Array(INVN).fill(null); while(p.inv.length<INVN)p.inv.push(null);
@@ -1564,7 +1564,8 @@ function drMul(){ const b=me.buffs; let m=1; if(b.fury&&b.fury.t>0&&b.fury.dr)m*
 function setForm(f){ const hr=me.hp/me.D.maxHp; me.form=f||''; me.D=derive(me); me.hp=Math.min(me.D.maxHp,me.D.maxHp*hr); me.mp=Math.min(me.mp,me.D.maxMp); me.formLock=.3; me.vx=me.vy=0; uiDirty=true; }
 function critRoll(v){const c=Math.random()*100<me.D.crit; return {v:c?v*1.5:v,crit:c};}
 function physDmg(mult){const D=me.D; const w=ri(D.wmn,D.wmx)+D.dmg; return critRoll(w*(1+D.str/100+D.dmgPct/100+buffDmg())*mult*(D.sp.rage&&me.hp<D.maxHp*.5?1.3:1));}
-function spellDmg(base,noPct){const D=me.D; return critRoll(base*(1+D.ene/100+(noPct?0:D.dmgPct/100)+buffDmg())*(1+((D.wmn+D.wmx)/2)/35)*(D.sp.tome?1.2:1));}
+const ENEM=.002; /* 에너지 1당 마법 피해 +0.2% */
+function spellDmg(base,noPct){const D=me.D; return critRoll(base*(1+D.ene*ENEM+(noPct?0:D.dmgPct/100)+buffDmg())*(1+((D.wmn+D.wmx)/2)/35)*(D.sp.tome?1.2:1));}
 function guardMul(){let g=0; if(me.aura==='guard')g=Math.max(g,(30+6*skLv(me,'guard'))/100);
   if(ally&&!ally.lobby&&!ally.dead&&ally.aura==='guard'&&hyp(ally.x-me.x,ally.y-me.y)<320)g=Math.max(g,(30+6*ally.al)/100); return 1+g;}
 function applyStatus(kind,dur){ if(me.dead||me.god>0)return;
@@ -1647,9 +1648,9 @@ function autoSellModal(){
     m.querySelector('#asX').onclick=closeModal;
     m.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{ asLv=+b.dataset.a; saveChar(); closeModal(); if(sheetMode==='bag')renderBag(); sheetToast&&sheetToast(asLv<0?'자동 판매를 껐어요':`${RARN[asLv]} 이하는 줍자마자 판매돼요`); }); });
 }
-/* ===== 아이템 합성: 같은 등급 5개 → 한 단계 위 등급 랜덤 아이템 1개 (결과 아이템 레벨은 장착 중 장비의 '강화 제외' 최고 레벨 이하) ===== */
+/* ===== 아이템 합성: 같은 등급 10개 → 한 단계 위 등급 랜덤 아이템 1개 (결과 아이템 레벨은 장착 중 장비의 '강화 제외' 최고 레벨 이하) ===== */
 Object.defineProperty(window,'syLv',{get(){ try{ return me&&me.sy!==undefined?me.sy:-1; }catch(e){ return -1; } },set(v){ try{ if(me)me.sy=v; }catch(e){} }});
-const SYN_N=5;
+const SYN_N=10;
 function synCap(){ let c=1; for(const k of EQSL){ const it=me.eq[k]; if(it)c=Math.max(c,it.ilvl|0); } return c; }
 function synPool(r){ const o=[]; me.inv.forEach((x,i)=>{ if(x&&(x.rar|0)===r&&!x.lock&&!(x.enh>0))o.push({x,i}); }); return o; }
 function doSynth(r,quiet){
@@ -1658,24 +1659,8 @@ function doSynth(r,quiet){
   const avg=Math.round(use.reduce((t,o)=>t+(o.x.ilvl|0),0)/SYN_N), il=Math.max(1,Math.min(cap,avg+ri(0,3)));
   const it=genItem(r+1,il); it.isNew=1; const dst=use[0].i; for(const o of use)me.inv[o.i]=null; me.inv[dst]=it;
   if(!quiet){ sfx(r+1>=3?'crit':'pick'); toast(`🔮 합성! ${RARN[r]} ${SYN_N}개 → ${dn(it)} (Lv ${il})`,RARC[r+1]); saveChar(); uiDirty=true; if(sheetMode==='bag')renderBag(); } return it; }
-/* 한번에 합성: grades=[등급…]을 낮은 등급부터 가능한 만큼 모두 합성 (새로 나온 아이템도 다음 등급 재료로 쓰임) */
-function batchSynth(grades){ const got=[0,0,0,0]; let n=0; for(const r of grades){ let g=0; while(g++<60){ const it=doSynth(r,true); if(!it)break; got[it.rar]++; n++; } }
-  if(n){ sfx('crit'); saveChar(); uiDirty=true; toast(`🔮 ${n}회 합성! `+[1,2,3].filter(r=>got[r]).map(r=>`${RARN[r]} ${got[r]}개`).join(' · ')+' 획득','#d9b8ff'); } else toast('합성할 수 있는 재료가 없어요 (같은 등급 5개 필요)','#e07060'); if(sheetMode==='bag')renderBag(); return n; }
-function synAllModal(){
-  const c=r=>synPool(r).length, tot=[0,1,2].reduce((t,r)=>t+Math.floor(c(r)/SYN_N),0);
-  modal(`<h3>🔮 한번에 합성</h3><p class="meta" style="margin:0 0 8px">고른 등급의 아이템을 ${SYN_N}개씩 묶어 가능한 만큼 한 번에 합성해요. 결과 레벨은 장착 장비의 강화 제외 최고 레벨 Lv ${synCap()} 이하예요. (잠금·강화 아이템 제외)</p><div class="col">${[0,1,2].map(r=>{ const k=Math.floor(c(r)/SYN_N); return `<button class="btn${k?' primary':''}" data-b="${r}" ${k?'':'disabled style="opacity:.45"'} style="text-align:left"><b style="color:${RARC[r]}">${RARN[r]}</b> ${c(r)}개 → <b style="color:${RARC[r+1]}">${RARN[r+1]}</b> ${k}개 합성</button>`; }).join('')}<button class="btn${tot?' primary':''}" id="sbAll" ${tot?'':'disabled style="opacity:.45"'}>일반·매직·레어 전부 합성 <span style="font-weight:400;font-size:12px;opacity:.8">(낮은 등급부터 차례로)</span></button><button class="btn" id="sbX">닫기</button></div>`,m=>{
-    m.querySelector('#sbX').onclick=closeModal;
-    m.querySelectorAll('[data-b]').forEach(b=>b.onclick=()=>{ closeModal(); batchSynth([+b.dataset.b]); });
-    m.querySelector('#sbAll').onclick=()=>{ closeModal(); batchSynth([0,1,2]); }; }); }
 function autoSynth(){ if(syLv<0)return; for(let r=0;r<=syLv;r++){ let g=0; while(g++<20&&doSynth(r,true)); } }
-function synModal(){
-  const cap=synCap(), opts=[[-1,'꺼짐','재료가 모여도 합성하지 않아요'],[0,'일반 이하','일반 5개 → 매직 (줍는 즉시)'],[1,'매직 이하','일반·매직 5개 → 한 단계 위'],[2,'레어 이하','일반·매직·레어 5개 → 한 단계 위']];
-  modal(`<h3>🔮 아이템 합성</h3><p class="meta" style="margin:0 0 8px">같은 등급 ${SYN_N}개가 모이면 줍는 즉시 한 단계 위 등급의 랜덤 아이템 1개로 합성돼요.<br>결과 레벨은 장착 장비의 <b>강화 제외 최고 레벨 Lv ${cap}</b> 이하예요. 잠금·강화 아이템은 재료로 안 써요.</p><div class="col">${opts.map(o=>`<button class="btn${syLv===o[0]?' primary':''}" data-sa="${o[0]}" style="text-align:left"><b style="${o[0]>=0?'color:'+RARC[o[0]]:''}">${syLv===o[0]?'✔ ':''}${o[1]}</b> <span style="font-weight:400;font-size:12px;opacity:.8">${o[2]}</span></button>`).join('')}</div>
-   <div class="meta" style="margin:10px 0 4px">지금 한번에 합성 (보유 수)</div><div class="row2" style="flex-wrap:nowrap">${[0,1,2].map(r=>{ const n=synPool(r).length; return `<button class="btn sm" data-sy="${r}" ${n>=SYN_N?'':'disabled style="opacity:.45"'} style="flex:1 1 0;min-width:0;padding:8px 2px;font-size:12px"><b style="color:${RARC[r]}">${RARN[r]}</b> ${n}개</button>`; }).join('')}</div>
-   <div class="col" style="margin-top:8px"><button class="btn" id="syX">닫기</button></div>`,m=>{
-    m.querySelector('#syX').onclick=closeModal;
-    m.querySelectorAll('[data-sy]').forEach(b=>b.onclick=()=>{ closeModal(); batchSynth([+b.dataset.sy]); });
-    m.querySelectorAll('[data-sa]').forEach(b=>b.onclick=()=>{ syLv=+b.dataset.sa; saveChar(); const warn=syLv>=0&&asLv>=0&&asLv>=syLv; autoSynth(); closeModal(); if(sheetMode==='bag')renderBag(); sheetToast&&sheetToast(syLv<0?'자동 합성을 껐어요':warn?`⚠️ 자동 판매(${RARN[asLv]} 이하)가 합성 등급을 먼저 팔아요`:`${RARN[syLv]} 이하 ${SYN_N}개가 모이면 자동 합성돼요`,warn?'#ffb259':null); }); }); }
+function synToggle(){ syLv=syLv>=0?-1:2; saveChar(); autoSynth(); if(sheetMode==='bag')renderBag(); const warn=syLv>=0&&asLv>=0&&asLv>=syLv; sheetToast&&sheetToast(syLv<0?'자동 합성을 껐어요':warn?`⚠️ 자동 판매(${RARN[asLv]} 이하)가 합성 등급을 먼저 팔아요`:`자동 합성 ON — 레어 이하 같은 등급 ${SYN_N}개가 모이면 합성돼요`,warn?'#ffb259':null); }
 function autoSellOk(it0){ if(!(asLv>=0&&it0.rar<=asLv&&!it0.lock))return false; const k0=it0.slot==='ring'?(!me.eq.ring1?'ring1':!me.eq.ring2?'ring2':null):(me.eq[it0.slot]?null:it0.slot); return !(k0&&canWear(it0)); }
 function pickUp(g){
   { const it0=g.it; if(asLv>=0&&it0.rar<=asLv&&!it0.lock){ const k0=it0.slot==='ring'?(!me.eq.ring1?'ring1':!me.eq.ring2?'ring2':null):(me.eq[it0.slot]?null:it0.slot);
@@ -2493,7 +2478,7 @@ function renderBag(){
   markTabs(); sheetHead();
   const eqOrder=['weapon','armor','helm','amulet','ring1','ring2'].concat(['shield']);
   let h='<div class="bagtop" style="display:flex;flex-direction:column;gap:10px;min-width:0"><div class="eq">'+eqOrder.map(k=>{const it=me.eq[k]; return `<div style="position:relative">${cellHtml(it,'slot',`data-eq="${k}"`)}<div class="sl" style="position:absolute;bottom:2px;left:0;right:0;font-size:9.5px;color:var(--mute);text-align:center;pointer-events:none">${eqLbl(k)}</div></div>`;}).join('')+'</div>';
-  h+=`<div class="meta" style="font-size:12px;color:var(--mute)">⚔️ 전투력 <b style="color:#ffd84a">${calcCP(me).toLocaleString()}</b> · 빨간 칸은 아직 착용할 수 없어요</div><div style="display:flex;flex-wrap:nowrap;gap:4px"><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap" data-sort="rar">정렬(등급순)</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap" id="aBulk">일괄 판매</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap;${asLv>=0?`border-color:${RARC[asLv]};color:${RARC[asLv]};background:${['rgba(233,226,212,.14)','rgba(90,120,255,.28)','rgba(255,214,60,.24)'][asLv]};box-shadow:0 0 8px ${['rgba(233,226,212,.3)','rgba(110,140,255,.6)','rgba(255,214,60,.55)'][asLv]};font-weight:800`:''}" id="aAuto">자동판매 ${ASN[asLv+1]}</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap;${syLv>=0?`border-color:#c9a0ff;color:#d9b8ff;background:rgba(150,90,255,.22);box-shadow:0 0 8px rgba(150,90,255,.5);font-weight:800`:''}" id="aSyn">합성 ${ASN[syLv+1]}</button></div><button class="btn sm" style="width:100%;margin-top:5px;padding:8px 2px;font-size:13px;white-space:nowrap" id="aSynAll">🔮 한번에 합성${(()=>{ const k=[0,1,2].reduce((t,r)=>t+Math.floor(synPool(r).length/SYN_N),0); return k?` · 지금 ${k}회 가능`:''; })()}</button>`;
+  h+=`<div class="meta" style="font-size:12px;color:var(--mute)">⚔️ 전투력 <b style="color:#ffd84a">${calcCP(me).toLocaleString()}</b> · 빨간 칸은 아직 착용할 수 없어요</div><div style="display:flex;flex-wrap:nowrap;gap:4px"><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap" data-sort="rar">정렬(등급순)</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap" id="aBulk">일괄 판매</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap;${asLv>=0?`border-color:${RARC[asLv]};color:${RARC[asLv]};background:${['rgba(233,226,212,.14)','rgba(90,120,255,.28)','rgba(255,214,60,.24)'][asLv]};box-shadow:0 0 8px ${['rgba(233,226,212,.3)','rgba(110,140,255,.6)','rgba(255,214,60,.55)'][asLv]};font-weight:800`:''}" id="aAuto">자동판매 ${ASN[asLv+1]}</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap;${syLv>=0?`border-color:#c9a0ff;color:#d9b8ff;background:rgba(150,90,255,.22);box-shadow:0 0 8px rgba(150,90,255,.5);font-weight:800`:''}" id="aSyn" aria-pressed="${syLv>=0}">합성 ${syLv>=0?'ON':'OFF'}</button></div>`;
   h+='<div class="inv">'+me.inv.map((it,i)=>cellHtml(it,'cell',`data-inv="${i}"`)).join('')+'</div>';
   const b=$('#sheetB'); b.className='sbody bag'; b.innerHTML=h; fitInv(); try{ showPop(detailHtml(),curCmpHtml()); }catch(e){ console.error(e); selItem=null; showPop(''); }
   b.querySelectorAll('[data-eq]').forEach(el=>el.onclick=()=>{const k=el.dataset.eq; if(me.eq[k]){selItem={it:me.eq[k],eq:k};renderBag();}});
@@ -2503,7 +2488,7 @@ function renderBag(){
   const alk=pq('#aLock'); if(alk)alk.onclick=()=>{ const it=selItem&&selItem.it; if(!it)return; it.lock=!it.lock; saveChar(); sheetToast(it.lock?'🔒 잠갔어요. 일괄 판매에서 제외돼요':'🔓 잠금을 풀었어요'); renderBag(); };
   b.querySelectorAll('[data-sort]').forEach(e=>e.onclick=()=>{ sortInv(e.dataset.sort); });
   b.querySelector('#aBulk').onclick=bulkSell;
-  b.querySelector('#aAuto').onclick=autoSellModal; b.querySelector('#aSyn').onclick=synModal; b.querySelector('#aSynAll').onclick=()=>batchSynth([0,1,2]); /* 낮은 등급부터 전부 합성 */
+  b.querySelector('#aAuto').onclick=autoSellModal; b.querySelector('#aSyn').onclick=synToggle;
   enableDrag(b);
   const asn=pq('#aSend'); if(asn)asn.onclick=()=>sendPick();
   const aen=pq('#aEnh'); if(aen)aen.onclick=()=>enhModal();
@@ -2570,9 +2555,9 @@ const CPSK={
  war:[['bash',l=>3+.5*l,2,'p'],['rend',l=>4.5+.7*l+Math.floor((1.5+.12*l)/.5)*(.5+.05*l),5,'p'],['whirl',l=>1.8+.3*l,5,'p'],['leap',l=>2.8+.45*l,8,'p'],['quake',l=>4+.65*l,13,'p'],['ragnarok',l=>(14+l)*.5,70,'p']],
  pal:[['smite',l=>2.6+.4*l,2,'p'],['hammer',l=>(16+13*l)*HMN(l)*HMF(HMN(l))*3,4.5,'s'],['judgment',l=>(110+50*l)+4*(18+10*l),15,'s']]};
 function cpSkillDps(p,D){ const list=CPSK[p.cls]; if(!list||!p.skills)return 0; const pp={...p,D}, wav=(D.wmn+D.wmx)/2;
-  const sMul=(1+D.ene/100+D.dmgPct/100)*(1+wav/35)*(D.sp&&D.sp.tome&&p.cls==='sorc'?1.2:1), pMul=(wav+D.dmg)*(1+(D.str+D.dmgPct)/100);
+  const sMul=(1+D.ene*ENEM+D.dmgPct/100)*(1+wav/35)*(D.sp&&D.sp.tome&&p.cls==='sorc'?1.2:1), pMul=(wav+D.dmg)*(1+(D.str+D.dmgPct)/100);
   const zl=p.cls==='pal'?skLv(pp,'zeal'):0, zm=zl?1+(15+5*zl)/100:1; let sum=0;
-  for(const [k,f,cd,t] of list){ const l=skLv(pp,k); if(l<1)continue; let v=f(l); if(t==='p')v=v*pMul+(p.cls==='pal'&&k==='smite'?8+7*l:0); else if(t==='m')v=v*sMul/(1+D.ene/100+D.dmgPct/100)*(1+D.ene/100)*(1+(D.sm||0)/100); else v*=sMul; sum+=v*zm/Math.max(1,cd*(1-(D.cdr||0))); }
+  for(const [k,f,cd,t] of list){ const l=skLv(pp,k); if(l<1)continue; let v=f(l); if(t==='p')v=v*pMul+(p.cls==='pal'&&k==='smite'?8+7*l:0); else if(t==='m')v=v*sMul/(1+D.ene*ENEM+D.dmgPct/100)*(1+D.ene*ENEM)*(1+(D.sm||0)/100); else v*=sMul; sum+=v*zm/Math.max(1,cd*(1-(D.cdr||0))); }
   return sum*CPSKW*(CPCW[p.cls]||1); }
 function calcCP(p){ const D=derive(p); let dps=((D.wmn+D.wmx)/2+D.dmg)*(1+(D.str+D.dmgPct)/100)/D.atkInt; if(p.cls==='sorc'||p.cls==='necro')dps*=1+D.ene/150; dps+=cpSkillDps(p,D); return Math.round(dps*8+D.maxHp*.6+D.maxMp*.2+D.def*3+D.blk*8+D.crit*5+D.ms*6+D.ls*10+(D.dr||0)*300+(D.cdr||0)*150); }
 let stT=null;
@@ -2603,11 +2588,11 @@ function unequip(k){
 }
 function renderStat(){
   const SKM=sheetMode==='skill'||sheetMode==='passive', PAS=sheetMode==='passive'; markTabs(); sheetHead();
-  const D=me.D, S=[['str','힘','물리 피해 +1% · 무거운 장비 착용'],['dex','민첩','공격 속도 +0.25% · 치명타 +0.12% · 방어력 +0.5'],['vit','체력','생명력 +4 · 받는 피해 -0.12%'],['ene','에너지','마나 +1 · 마법 피해 +1% · 쿨감 0.1%']];
+  const D=me.D, S=[['str','힘','물리 피해 +1% · 무거운 장비 착용'],['dex','민첩','공격 속도 +0.25% · 치명타 +0.12% · 방어력 +0.5'],['vit','체력','생명력 +4 · 받는 피해 -0.12%'],['ene','에너지','마나 +1 · 마법 피해 +0.2% · 쿨감 0.1%']];
   const mult=1+(D.str+D.dmgPct)/100, aMin=Math.round((D.wmn+D.dmg)*mult*(me.cls==='sorc'||me.cls==='necro'?1+D.ene/150:1)), aMax=Math.round((D.wmx+D.dmg)*mult*(me.cls==='sorc'||me.cls==='necro'?1+D.ene/150:1)), aAvg=(aMin+aMax)/2, cr=D.crit/100;
   const k1=SK[me.cls][0], l1=Math.max(1,skLv(me,k1.k)); let s1=aAvg;
-  if(k1.k==='bash')s1=aAvg*(3+.5*l1); else if(k1.k==='smite')s1=aAvg*(2.6+.4*l1)+8+7*l1; else if(k1.k==='fireball')s1=(18+13*l1)*(1+D.ene/100+D.dmgPct/100);
-  else if(k1.k==='raven')s1=(12+9*l1)*RVF(RVN(l1))*mnMul()*(1+D.ene/100)*(1+(D.wmn+D.wmx)/70)*(D.sp.tome?1.2:1); /* 까마귀: 스킬 설명의 기본 피해에 에너지·피해 보너스·무기 보정을 곱한 마리당 1타 (치명타·버프·레벨/장비 보정 제외) */
+  if(k1.k==='bash')s1=aAvg*(3+.5*l1); else if(k1.k==='smite')s1=aAvg*(2.6+.4*l1)+8+7*l1; else if(k1.k==='fireball')s1=(18+13*l1)*(1+D.ene*ENEM+D.dmgPct/100);
+  else if(k1.k==='raven')s1=(12+9*l1)*RVF(RVN(l1))*mnMul()*(1+D.ene*ENEM)*(1+(D.wmn+D.wmx)/70)*(D.sp.tome?1.2:1); /* 까마귀: 스킬 설명의 기본 피해에 에너지·피해 보너스·무기 보정을 곱한 마리당 1타 (치명타·버프·레벨/장비 보정 제외) */
   /* 드루이드 기본 공격은 형태마다 달라요: 인간=에너지 보정(1+에너지/150) · 늑대=늑대 변신 Lv 배율 · 곰=곰 변신 Lv 배율(+주변 적은 80%) */
   const dru=me.cls==='druid', dF=dru?(me.form||''):'', dK=!dru?1:dF==='wolf'?WFB(Math.max(1,skLv(me,'wolfform'))):dF==='bear'?BRB(Math.max(1,skLv(me,'bearform'))):1+D.ene/150;
   const dpsT=Math.round(aAvg*dK*ATKM*(1+cr*.5)/D.atkInt);
@@ -2674,17 +2659,17 @@ function renderShop(){
   const aa=b.querySelector('#aSellAll'); if(aa)aa.onclick=bulkSell;
 }
 function bulkSell(){
-  const sel=new Set([0,1]);
+  const sel=new Set([0,1]); let uAsk=false;
   const info=()=>{ let n=0,v=0; me.inv.forEach(it=>{ if(it&&!it.lock&&!(it.enh>0)&&sel.has(it.rar)){n++;v+=sellInfo(it).total;} }); return {n,v}; };
   const cnt=r=>me.inv.filter(it=>it&&!it.lock&&!(it.enh>0)&&it.rar===r).length, val=r=>me.inv.reduce((a,it)=>a+(it&&!it.lock&&!(it.enh>0)&&it.rar===r?sellInfo(it).total:0),0);
   const draw=m=>{ const f=info();
     m.querySelector('#bsSum').innerHTML=f.n?`선택한 <b>${f.n}개</b> · <b style="color:#ffd84a">${f.v}원</b>`:'<span class="meta">판매할 등급을 선택하세요</span>';
-    m.querySelector('#bsGo').disabled=!f.n; };
-  modal(`<h3>🧺 일괄 판매</h3><p class="meta" style="margin:0 0 8px">가방의 아이템만 팔아요. 장착 중인 장비, 유니크, 강화한 아이템, 🔒잠근 아이템은 제외돼요.</p><div class="col">${[0,1,2].map(r=>`<label class="toggle" style="display:flex;gap:8px;align-items:center;font-size:14px;padding:8px;border:1px solid var(--line2);border-radius:8px"><input type="checkbox" data-r="${r}" ${r<=1&&cnt(r)?'checked':''} ${cnt(r)?'':'disabled'}> <span style="color:${RARC[r]};font-weight:700">${RARN[r]}</span> <span style="margin-left:auto;color:var(--mute)">${cnt(r)}개 · ${val(r)}원</span></label>`).join('')}<div id="bsSum" style="min-height:22px;font-size:14px"></div><div class="row2"><button class="btn" id="bsNo">취소</button><button class="btn primary" id="bsGo">일괄 판매하기</button></div></div>`,m=>{
+    m.querySelector('#bsGo').disabled=!f.n; uAsk=false; m.querySelector('#bsGo').textContent='일괄 판매하기'; };
+  modal(`<h3>🧺 일괄 판매</h3><p class="meta" style="margin:0 0 8px">가방의 아이템만 팔아요. 장착 중인 장비, 강화한 아이템, 🔒잠근 아이템은 제외돼요. 유니크는 직접 체크해야 팔려요.</p><div class="col">${[0,1,2,3].map(r=>`<label class="toggle" style="display:flex;gap:8px;align-items:center;font-size:14px;padding:8px;border:1px solid var(--line2);border-radius:8px"><input type="checkbox" data-r="${r}" ${r<=1&&cnt(r)?'checked':''} ${cnt(r)?'':'disabled'}> <span style="color:${RARC[r]};font-weight:700">${RARN[r]}</span> <span style="margin-left:auto;color:var(--mute)">${cnt(r)}개 · ${val(r)}원</span></label>`).join('')}<div id="bsSum" style="min-height:22px;font-size:14px"></div><div class="row2"><button class="btn" id="bsNo">취소</button><button class="btn primary" id="bsGo">일괄 판매하기</button></div></div>`,m=>{
     m.querySelectorAll('[data-r]').forEach(c=>c.onchange=()=>{ const r=+c.dataset.r; if(c.checked)sel.add(r); else sel.delete(r); draw(m); });
     m.querySelector('#bsNo').onclick=closeModal;
     if(!cnt(0)) sel.delete(0); if(!cnt(1)) sel.delete(1); draw(m);
-    m.querySelector('#bsGo').onclick=()=>{ const f=info(); if(!f.n)return; let g=0,n=0; me.inv.forEach((it,i)=>{ if(it&&!it.lock&&!(it.enh>0)&&sel.has(it.rar)){g+=sellInfo(it).total;n++;me.inv[i]=null;} }); me.gold+=g; selItem=null; shopMsg=`${n}개 판매 +${g}원`; sfx('coin'); saveChar(); uiDirty=true; closeModal(); rerender(); sheetToast&&sheetToast(`${n}개 판매 +${g.toLocaleString()}원`); };
+    m.querySelector('#bsGo').onclick=()=>{ const f=info(); if(!f.n)return; if(sel.has(3)&&!uAsk){ uAsk=true; m.querySelector('#bsGo').textContent='⚠️ 유니크 포함! 한 번 더 누르면 판매'; return; } let g=0,n=0; me.inv.forEach((it,i)=>{ if(it&&!it.lock&&!(it.enh>0)&&sel.has(it.rar)){g+=sellInfo(it).total;n++;me.inv[i]=null;} }); me.gold+=g; selItem=null; shopMsg=`${n}개 판매 +${g}원`; sfx('coin'); saveChar(); uiDirty=true; closeModal(); rerender(); sheetToast&&sheetToast(`${n}개 판매 +${g.toLocaleString()}원`); };
   });
 }
 function enhFx(ok,it,L){
