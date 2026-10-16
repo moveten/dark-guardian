@@ -305,9 +305,8 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
 .hb .ic,.qb .ic{font-style:normal;font-size:20px;line-height:1}.hb .lb,.qb .lb{font-style:normal;font-size:10px;line-height:1.1;color:#cbbfa9}
 .qb button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;font-size:10px;width:56px;height:56px}
 .qb .ic{font-size:22px}
-#bRaid,#bAll{position:absolute;left:0;top:0;transform:translate(-50%,-50%);height:50px;border-radius:25px;padding:0 18px;font-size:18px;font-weight:800;white-space:nowrap;z-index:6;display:flex;align-items:center;justify-content:center}
+#bRaid{position:absolute;left:0;top:0;transform:translate(-50%,-50%);height:50px;border-radius:25px;padding:0 18px;font-size:18px;font-weight:800;white-space:nowrap;z-index:6;display:flex;align-items:center;justify-content:center}
 #bRaid{border:2px solid #efe3c4;background:rgba(30,22,16,.82);color:#fff3dc;box-shadow:0 0 12px rgba(255,235,190,.3)}
-#bAll{border:2px solid #e8b0a0;background:rgba(70,18,12,.85);color:#ffe3d8}
 #combo{position:absolute;left:50%;top:104px;transform:translateX(-50%);text-align:center;pointer-events:none;font-family:var(--f-disp);color:#ffd36a;text-shadow:0 2px 6px #000,0 0 14px rgba(255,150,40,.7)}
 #combo b{font-size:34px;font-weight:900;display:inline-block;margin-right:6px}#combo span{font-size:13px;font-weight:800;letter-spacing:.2em}
 #combo.pop b{animation:cpop .25s ease-out}@keyframes cpop{0%{transform:scale(1.7)}100%{transform:scale(1)}}
@@ -315,8 +314,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
 #emg{position:fixed;inset:0;pointer-events:none;z-index:4;box-shadow:inset 0 0 90px 10px rgba(255,30,20,.55);animation:emg 1s ease-in-out infinite}
 #emg[hidden]{display:none}
 @keyframes emg{0%,100%{opacity:.25}50%{opacity:1}}
-#bAll.on{background:#a3302a;box-shadow:0 0 14px #ff6a4a}
-#bRaid:active,#bAll:active{transform:translate(-50%,-50%) scale(.94)}
+#bRaid:active{transform:translate(-50%,-50%) scale(.94)}
 #ann{position:absolute;left:50%;top:78px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:3px;z-index:9;pointer-events:none;width:92%}
 #ann div{background:rgba(10,8,6,.82);border:1px solid var(--line2);border-radius:8px;padding:4px 10px;font-size:12.5px;font-weight:800;text-shadow:0 1px 2px #000;text-align:center;animation:tin .25s ease-out}
 #stoast{position:absolute;left:50%;top:14%;transform:translateX(-50%);z-index:60;pointer-events:none;background:rgba(12,9,8,.92);border:1px solid var(--line2);border-radius:10px;padding:8px 14px;font-size:14px;font-weight:700;opacity:0;transition:opacity .25s;white-space:nowrap;max-width:94%;overflow:hidden;text-overflow:ellipsis}
@@ -409,7 +407,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
     <div class="br">
       <div id="skills"></div>
     </div>
-    <button id="bSkip" hidden aria-label="나가기">🚪 나가기</button><div id="emg" hidden></div><button id="bAll" hidden aria-label="총공세">🔥 총공세</button>
+    <button id="bSkip" hidden aria-label="나가기">🚪 나가기</button><div id="emg" hidden></div>
     <button id="bRaid" hidden aria-label="습격 스킵">⏭ 습격 스킵</button>
     <div id="combo" hidden><b>0</b><span>COMBO</span></div>
     <div id="stoast"></div>
@@ -425,7 +423,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.2.0.0086</div>
+    <div class="ver" id="verT">v0.2.0.0087</div>
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -1015,7 +1013,7 @@ function migrateChars(){
 }
 function createChar(cls,name){ const ids=charIds(); if(ids.length>=MAXCHAR||!CLASSES[cls])return null; if(nameTaken(name))return null; const p=newChar(cls,name); lsSet(charKey(p.id),JSON.stringify(packChar(p))); ids.push(p.id); setIds(ids); selId=p.id; lsSet('dkdef2.sel',selId); return p; }
 function deleteChar(id){ setIds(charIds().filter(x=>x!==id)); lsDel(charKey(id)); lsDel('dkdef2.rk.'+id); if(selId===id){selId='';lsSet('dkdef2.sel','');} rkQueueDel(id); }
-function packChar(p){ const {id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear,as,sy,ct,cat,na}=p; return {id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear:clear|0,ct:ct>0?ct|0:0,cat:cat>0?cat|0:0,as:as===undefined?-1:as,sy:sy===undefined?-1:sy,na:na?1:0}; } /* na = 총공세 안내 팝업 "다시 보지 않기"(캐릭터별) */
+function packChar(p){ const {id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear,as,sy,ct,cat}=p; return {id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear:clear|0,ct:ct>0?ct|0:0,cat:cat>0?cat|0:0,as:as===undefined?-1:as,sy:sy===undefined?-1:sy}; }
 function saveChar(){ if(!me||!me.id)return; lsSet(charKey(me.id),JSON.stringify(packChar(me))); }
 const dispName=p=>(p&&p.name)||CLASSES[p.cls].n;
 const SELLBASE=[100,200,400,800], ADVAFX=['ls','crit','ias','ms','mf','pr','mr'];
@@ -1287,6 +1285,7 @@ function startStage(){
   G.allMode=false; G.allQ=[]; G.fires=[]; G.freeRev=1; me.rvGiven=0; me.seenRg=0; me.out=false; me.rvT=0;
   G.wave=0;G.skipUsed=false;G.phase='prep';G.timer=10;G.mobs.length=0;G.ev=[];G.spawnQ=0;G.lastSq=-1;G.endShown=false;G.coop=!!guestPeer;
   G.waveSides=[0,1,3]; G.nextSides=sidesFor(1); G.laneShow=G.nextSides;
+  if(G.mode!=='guest'&&(me.clear|0)>selStage)later(.05,()=>{ if(G.inGame&&!G.allMode&&G.phase==='prep'&&G.wave===0&&G.stageIdx===selStage)startAllOut(); }); /* 이미 깬 스테이지는 들어가자마자 총공세 */
 }
 const CLEAR_T=15; /* 보스 처치 후 전리품 줍기 시간(초) */
 const WAVE_CAP=39, ALL_CAP=60; /* 습격 1회 최대 몹 수(모든 스테이지 공통), 총공세 최대 몹 수 */
@@ -2424,10 +2423,6 @@ $('#sheetX').onclick=closeSheet;
 $('#sheet').addEventListener('pointerdown',e=>{ if(e.target.id==='sheet')closeSheet(); });
 $('#bSkip').addEventListener('click',e=>{e.preventDefault(); if(G.inGame&&G.phase==='clear'){ G.phase='win'; showEnd(); /* 시간 종료와 동일하게 요약 화면 */ } });
 function startAllOut(){ G.allMode=true; G.fireT=1.5; G.shake=Math.max(G.shake,.5); sfx('boss'); allSpawn(); announce('🔥 총공세! 바닥에 불이 번집니다','#ff9a6a'); pushEv(['ann',1]); }
-$('#bAll').addEventListener('click',e=>{ e.preventDefault(); e.stopPropagation(); if(G.allMode)return;
-  if(me.na){ startAllOut(); return; } /* "다시 보지 않기"를 체크한 캐릭터는 안내 팝업 없이 바로 시작 */
-  const wasP=G.paused; if(G.mode==='solo')G.paused=true;
-  modal(`<h3>🔥 총공세</h3><p style="margin:0 0 12px;font-size:14px;line-height:1.5">남은 습격을 쉬지 않고 연속으로 호출해요.<br>시작하면 중간에 멈출 수 없고, 모두 처치하면 우두머리가 나타나요.<br><b style="color:#ff9a6a">🔥 바닥에 불이 번져요. 밟으면 피해를 입으니 피하세요!</b><br>시작할까요?</p><div class="row2"><button class="btn" id="alNo">취소</button><button class="btn primary" id="alOk">🚨 시작</button></div><label style="display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;color:#cbbfa9;cursor:pointer;min-height:34px"><input type="checkbox" id="alNa" style="width:20px;height:20px;accent-color:#d6a43c;flex:none">다시 보지 않기</label>`,m=>{ m.querySelector('#alNo').onclick=()=>{ closeModal(); G.paused=wasP; }; m.querySelector('#alOk').onclick=()=>{ const na=m.querySelector('#alNa').checked; closeModal(); G.paused=wasP; if(na){ me.na=1; saveChar(); } /* 체크는 "시작"을 눌렀을 때만 저장(취소하면 저장 안 함) */ startAllOut(); }; }); });
 $('#bRaid').addEventListener('click',e=>{e.preventDefault(); e.stopPropagation(); if(!G.inGame)return; if(G.mode==='guest'){G.sq=(G.sq||0)+1; toast('다음 습격 요청을 보냈어요');} else skipWave('');});
 $('#bBag').onclick=()=>openSheet('bag'); $('#bStat').onclick=()=>openSheet('stat'); $('#bSkillT').onclick=()=>openSheet('skill'); $('#bMenu').onclick=()=>openSheet('menu');
 const RBG=['linear-gradient(160deg,#25201a,#0f0b09)','radial-gradient(circle at 35% 30%,#33407a,#10142a 75%)','radial-gradient(circle at 35% 30%,#5e4f12,#1c1606 75%)','radial-gradient(circle at 35% 30%,#7a4414,#24120a 75%)'];
@@ -2762,8 +2757,8 @@ function askReset(kind){
 function renderMenu(){
   markTabs(); sheetHead();
   const b=$('#sheetB'); b.className='sbody';
-  b.innerHTML=`<div class="menuL"><button class="btn primary" id="mResume">계속하기</button><button class="btn" id="mQuit">스테이지 포기하고 나가기</button><button class="btn" id="mCl">☁️ 클라우드 저장${clCode()?' · 켜짐':''}</button><button class="btn" id="mPn">📜 패치노트 (수치 변경)</button><div class="modes" id="sndM"></div><div class="hudbox"><b>🖥️ 화면 표시 (HUD)</b>${HUDK.map(([k,n])=>`<label><input type="checkbox" data-hud="${k}"${hudOn(k)?' checked':''}>${n}</label>`).join('')}</div><div class="hudbox"><b>🔔 안내 팝업 (이 캐릭터)</b><label><input type="checkbox" id="mNa"${me.na?'':' checked'}>🔥 총공세 시작 전 안내 팝업 보기</label></div><p class="note">캐릭터와 아이템은 이 기기에 자동 저장돼요. (클라우드 저장을 켜면 서버에도 보관돼요)${G.mode!=='solo'?' 온라인 플레이 중에는 일시정지되지 않아요.':''}</p></div>`;
-  $('#mResume').onclick=closeSheet; $('#mCl').onclick=cloudModal; $('#mPn').onclick=patchModal; {const r=$('#sndM'); r.innerHTML=sndBtns(); bindSnd(r);} b.querySelectorAll('[data-hud]').forEach(c=>c.onchange=()=>hudSet(c.dataset.hud,c.checked)); { const c=$('#mNa'); if(c)c.onchange=()=>{ me.na=c.checked?0:1; saveChar(); }; }
+  b.innerHTML=`<div class="menuL"><button class="btn primary" id="mResume">계속하기</button><button class="btn" id="mQuit">스테이지 포기하고 나가기</button><button class="btn" id="mCl">☁️ 클라우드 저장${clCode()?' · 켜짐':''}</button><button class="btn" id="mPn">📜 패치노트 (수치 변경)</button><div class="modes" id="sndM"></div><div class="hudbox"><b>🖥️ 화면 표시 (HUD)</b>${HUDK.map(([k,n])=>`<label><input type="checkbox" data-hud="${k}"${hudOn(k)?' checked':''}>${n}</label>`).join('')}</div><p class="note">캐릭터와 아이템은 이 기기에 자동 저장돼요. (클라우드 저장을 켜면 서버에도 보관돼요)${G.mode!=='solo'?' 온라인 플레이 중에는 일시정지되지 않아요.':''}</p></div>`;
+  $('#mResume').onclick=closeSheet; $('#mCl').onclick=cloudModal; $('#mPn').onclick=patchModal; {const r=$('#sndM'); r.innerHTML=sndBtns(); bindSnd(r);} b.querySelectorAll('[data-hud]').forEach(c=>c.onchange=()=>hudSet(c.dataset.hud,c.checked));
   $('#mQuit').onclick=()=>{closeSheet(); quitToTitle();};
 }
 
@@ -3664,10 +3659,8 @@ function render(t){
     if(!_camOk||dtc<0||dtc>.5||Math.hypot(tx-camX,ty-camY)>260){ camX=tx; camY=ty; _camOk=true; } else { const k=1-Math.exp(-dtc*14); camX+=(tx-camX)*k; camY+=(ty-camY)*k; } }
   let shx=0,shy=0; if(G.shake>0){shx=rand(-1,1)*G.shake*8;shy=rand(-1,1)*G.shake*8;}
   ctx.setTransform(DPR*ZOOM,0,0,DPR*ZOOM,(-camX*ZOOM+shx)*DPR,(-camY*ZOOM+shy)*DPR);
-  { const rb=$('#bRaid'); const sx=(VX-camX)*ZOOM, sy=(VY-camY)*ZOOM; const ab=$('#bAll'); const okAll=G.inGame&&G.mode!=='guest'&&(me.clear|0)>(G.stageIdx|0)&&(G.phase==='prep'||G.phase==='wave')&&G.wave<G.TW; ab.hidden=!okAll||!!G.allMode; ab.classList.toggle('on',!!G.allMode);
-    /* 두 버튼은 마을 중심을 기준으로 가운데 정렬해서 나란히(버튼 크기가 바뀌어도 안 겹치게 실제 너비로 계산) */
-    const rw=rb.hidden?0:rb.offsetWidth, aw=ab.hidden?0:ab.offsetWidth, gp=rw&&aw?8:0, tot=rw+aw+gp, mg=Math.max(60,tot/2+10), inV=sx>mg&&sx<VW-mg&&sy>60&&sy<VH-100;
-    rb.style.visibility=(G.inGame&&!rb.hidden&&inV)?'visible':'hidden'; ab.style.visibility=(okAll&&inV)?'visible':'hidden'; ab.style.top=(sy+66)+'px'; rb.style.top=(sy+66)+'px'; rb.style.left=(sx-tot/2+rw/2)+'px'; ab.style.left=(sx-tot/2+rw+gp+aw/2)+'px'; { const em=$('#emg'); em.hidden=!(G.inGame&&G.allMode&&(G.phase==='prep'||G.phase==='wave')); } }
+  { const rb=$('#bRaid'); const sx=(VX-camX)*ZOOM, sy=(VY-camY)*ZOOM; const rw=rb.hidden?0:rb.offsetWidth, mg=Math.max(60,rw/2+10), inV=sx>mg&&sx<VW-mg&&sy>60&&sy<VH-100;
+    rb.style.visibility=(G.inGame&&!rb.hidden&&inV)?'visible':'hidden'; rb.style.top=(sy+66)+'px'; rb.style.left=sx+'px'; { const em=$('#emg'); em.hidden=!(G.inGame&&G.allMode&&(G.phase==='prep'||G.phase==='wave')); } }
   drawWorld(t); ctx.save(); ctx.globalCompositeOperation='screen'; ctx.fillStyle='rgba(255,238,215,.13)'; ctx.fillRect(camX-10,camY-10,VW/ZOOM+20,VH/ZOOM+20); ctx.restore(); drawLanesWorld(t); drawZones(t); drawFires(t); drawAuras(t); drawBossTel(); drawItemsWorld(t);
   const actors=[...G.mobs.filter(m=>!m.dead).map(m=>({y:m.y,f:()=>drawMob(m,t)})),{y:me.y,f:()=>drawPlayer(me,true,t)}];
   if(ally&&!ally.lobby)actors.push({y:ally.y,f:()=>drawPlayer(ally,false,t)});
