@@ -381,6 +381,21 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
 .ipop .in{font-family:var(--f-disp);font-weight:800;font-size:17px}.ipop .meta{color:var(--mute);font-size:12px}
 .ipop .acts{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}.ipop .acts .btn{padding:8px 14px;min-height:40px;font-size:13px}
 .ipop .cx{position:absolute;right:8px;top:8px;width:34px;height:34px;border:1px solid var(--line2);border-radius:6px;background:none;font-size:16px}
+/* 아이템 상세 버튼: 패드·PC는 예전 모양 그대로, 폰(560px 이하)만 새 배치 */
+.ipop .lkb{display:none}
+.ipop .tlb .ph{display:none}
+@media (max-width:560px){
+  .ipop .acts.iact{display:flex;flex-wrap:wrap;gap:6px}
+  .ipop .acts.iact #aEquip,.ipop .acts.iact #aUnequip{flex:1 1 100%;min-height:44px;font-size:14px}
+  .ipop .acts.iact .lkx{display:none}
+  .ipop .acts.iact .tlb{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-height:44px;padding:4px 2px;line-height:1.15;font-size:11px}
+  .ipop .acts.iact .tlb .ti,.ipop .acts.iact .tlb .tx{display:block;text-align:center}
+  .ipop .acts.iact .tlb .ti{font-size:15px}
+  .ipop .acts.iact .tlb .tx{font-size:11px;white-space:normal;word-break:keep-all}
+  .ipop .acts.iact .tlb .ph{display:block}
+  .ipop .lkb{display:grid;place-items:center;position:absolute;right:-6px;bottom:-6px;width:26px;height:26px;padding:0;border-radius:50%;font-size:13px;line-height:1;background:#2a2118;border:1px solid var(--line2);opacity:.75}
+  .ipop .lkb.on{opacity:1;border-color:#ffd84a;background:#4a3a14}
+}
 @media (max-width:560px){.hb{width:43px;height:48px}.qb button{width:52px;height:52px}}
 #sEnd{justify-content:center}
 #sEnd .modes{box-sizing:border-box;width:100%;max-width:none;margin:14px 0 0;padding:0 18px;display:flex;justify-content:center;flex-wrap:nowrap;gap:10px}
@@ -440,7 +455,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.2.0132</div>
+    <div class="ver" id="verT">v0.4.2.0133</div>
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -2657,7 +2672,7 @@ function renderBag(){
   b.querySelectorAll('[data-inv]').forEach(el=>el.onclick=()=>{const i=+el.dataset.inv; if(me.inv[i]){delete me.inv[i].isNew;selItem={it:me.inv[i],inv:i};renderBag();}});
   const ab=pq('#aEquip'); if(ab)ab.onclick=()=>{equip(selItem.inv);};
   const asl=pq('#aSell'); if(asl)asl.onclick=()=>sellBtn(asl);
-  const alk=pq('#aLock'); if(alk)alk.onclick=()=>{ const it=selItem&&selItem.it; if(!it)return; it.lock=!it.lock; saveChar(); sheetToast(it.lock?'🔒 잠갔어요. 일괄 판매에서 제외돼요':'🔓 잠금을 풀었어요'); renderBag(); };
+  $('#itemPop').querySelectorAll('[data-lk]').forEach(alk=>alk.onclick=()=>{ const it=selItem&&selItem.it; if(!it)return; it.lock=!it.lock; saveChar(); sheetToast(it.lock?'🔒 잠갔어요. 일괄 판매에서 제외돼요':'🔓 잠금을 풀었어요'); renderBag(); });
   b.querySelectorAll('[data-sort]').forEach(e=>e.onclick=()=>{ sortInv(e.dataset.sort); });
   b.querySelector('#aBulk').onclick=bulkSell;
   b.querySelector('#aAuto').onclick=autoSellModal; b.querySelector('#aSyn').onclick=synToggle; 
@@ -2691,7 +2706,7 @@ function sendPick(){
   });
 }
 function sellBtn(btn){ const it=selItem&&selItem.it; if(!it||selItem.inv===undefined)return; if(it.lock){ sheetToast('🔒 잠긴 아이템이에요. 잠금을 먼저 풀어 주세요','#ff8a7a'); return; }
-  if(it.enh>0&&sellAskIt!==it){ sellAskIt=it; if(btn){ btn.textContent='⚠️ 판매 '+sellInfo(it).total+'G'; btn.style.background='#a62a22'; btn.style.borderColor='#ff6a5a'; btn.style.color='#fff'; btn.style.opacity='1'; } sheetToast&&sheetToast(`⚠️ +${it.enh} 강화 아이템이에요. 한 번 더 누르면 판매돼요`,'#ffb259'); return; }   /* 강화한 아이템은 두 번 눌러야 판매 */
+  if(it.enh>0&&sellAskIt!==it){ sellAskIt=it; if(btn){ const tx=btn.querySelector('.tx'); if(tx)tx.textContent='⚠️ 판매 '+sellInfo(it).total+'G'; else btn.textContent='⚠️ 판매 '+sellInfo(it).total+'G'; btn.style.background='#a62a22'; btn.style.borderColor='#ff6a5a'; btn.style.color='#fff'; btn.style.opacity='1'; } sheetToast&&sheetToast(`⚠️ +${it.enh} 강화 아이템이에요. 한 번 더 누르면 판매돼요`,'#ffb259'); return; }   /* 강화한 아이템은 두 번 눌러야 판매 */
   sellAskIt=null; sellItem(selItem.inv); }
 function sellItem(i){ const it=me.inv[i]; if(!it)return; if(isShard(it)){ sheetToast('그림자 조각은 팔 수 없어요','#ff8a7a'); return; } sfx('coin'); const v=sellInfo(it).total; me.gold+=v; me.inv[i]=null; selItem=null; shopMsg=`${it.name} 판매 +${v}G`; saveChar(); uiDirty=true; rerender(); }
 const pq=sel=>$('#itemPop').querySelector(sel);
@@ -2716,9 +2731,9 @@ function lvCmp(it){ if(!me||!me.eq||Object.values(me.eq).includes(it))return '';
   if(d>0)return box('rgba(70,190,90,.18)','#58c466','#8df09a',`▲ 장착보다 +${d} <span style="font-weight:500;font-size:10.5px">(Lv ${b}→${a})</span>`);
   if(d<0)return box('rgba(230,70,60,.18)','#e0584c','#ff9a8e',`▼ 장착보다 -${-d} <span style="font-weight:500;font-size:10.5px">(Lv ${b}→${a})</span>`);
   return box('rgba(160,160,160,.14)','#8a8a8a','#cfcfcf',`＝ 장착과 같음 <span style="font-weight:500;font-size:10.5px">(Lv ${a})</span>`); }
-function itemLines(it){
+function itemLines(it,opt){
   if(isShard(it)) return `<div style="display:flex;gap:10px;align-items:center"><div style="width:56px;height:56px;flex:none;display:grid;place-items:center;font-size:34px;background:#0a0807;border:1px solid ${RARC[4]};border-radius:8px">🌑</div><div><div class="in" style="color:${RARC[4]}">그림자 조각</div><div class="meta">수량 <b style="color:#fff">${it.n}</b> / ${SHARD_MAX} (한 칸 최대)</div></div></div><div class="meta" style="margin:6px 0">삼남매를 쓰러뜨리면 얻는 재료예요. ${SHARD_N}개로 영웅 아이템 하나를 교환할 수 있어요. 판매할 수 없어요.</div>`;
-  let s=`<div style="display:flex;gap:10px;align-items:center"><img src="${itemIcon(it).url}" alt="" style="width:56px;height:56px;flex:none;background:#0a0807;border:1px solid ${RARC[it.rar]};border-radius:8px"><div><div class="in" style="color:${RARC[it.rar]}">${it.enh>0?'+'+it.enh+' ':''}${esc(dn(it))}</div><div class="meta" style="color:#fff">아이템 레벨 ${ilvOf(it)}${it.enh>0?` <span style="color:#ffd84a">(기본 ${it.ilvl} + 강화 ${it.enh})</span>`:''}</div>${ownTag(it)}<div class="meta">${reqHtml(it)}</div></div></div>`+lvCmp(it);
+  let s=`<div style="display:flex;gap:10px;align-items:center"><span style="position:relative;flex:none;display:flex"><img src="${itemIcon(it).url}" alt="" style="width:56px;height:56px;flex:none;background:#0a0807;border:1px solid ${RARC[it.rar]};border-radius:8px">${opt&&opt.lk?`<button class="lkb${it.lock?' on':''}" data-lk="1" aria-label="${it.lock?'잠금 해제':'잠금'}">${it.lock?'🔒':'🔓'}</button>`:''}</span><div><div class="in" style="color:${RARC[it.rar]}">${it.enh>0?'+'+it.enh+' ':''}${esc(dn(it))}</div><div class="meta" style="color:#fff">아이템 레벨 ${ilvOf(it)}${it.enh>0?` <span style="color:#ffd84a">(기본 ${it.ilvl} + 강화 ${it.enh})</span>`:''}</div>${ownTag(it)}<div class="meta">${reqHtml(it)}</div></div></div>`+lvCmp(it);
   const bt=baseText(it); if(bt)s+=`<div>${bt}</div>`;
   if(BASEFX[it.base]&&it.slot==='weapon') s+=`<div class="meta" style="color:#9fd0ff">▪ ${BASEFX[it.base].t}</div>`;
   if(it.sp&&SPFX[it.sp]) s+=`<div style="margin:4px 0;color:#ffb14a;font-weight:700">★ 특수 효과: ${SPFX[it.sp].d}</div>`;
@@ -2754,11 +2769,15 @@ function curCmpHtml(){ if(!selItem||selItem.inv===undefined)return ''; const it=
 function detailHtml(){
   sellAskIt=null;
   if(!selItem) return '';
-  const it=selItem.it; let s=itemLines(it);
+  const it=selItem.it; let s=itemLines(it,isShard(it)?null:{lk:1});
   if(isShard(it)){ s+=`<div class="acts"><button class="btn primary" id="aShardEx">🌑 영웅 아이템 교환</button>${(G.titleSheet&&charIds().length>1)?'<button class="btn" id="aSend">📤 보내기</button>':''}</div>`; return s; }
+  /* 폰 화면(560px 이하)에서는 장착/해제가 한 줄 전체, 강화·판매·보내기는 아이콘 타일 한 줄, 잠금은 아이콘 모서리 배지. 패드·PC는 예전 그대로 */
+  const lk=`<button class="btn lkx" id="aLock" data-lk="1">${it.lock?'🔓 잠금 해제':'🔒 잠금'}</button>`,
+    enh=canEnh(it)?`<button class="btn tlb" id="aEnh"><span class="ti">⚒</span> <span class="tx">강화${it.enh>0?' +'+it.enh:''}</span></button>`:'',
+    send=(G.titleSheet&&charIds().length>1)?'<button class="btn tlb" id="aSend"><span class="ti">📤</span> <span class="tx">보내기</span></button>':'';
   if(selItem.inv!==undefined){
-    s+=`<div class="acts"><button class="btn primary" id="aEquip"${!canWear(it)?' style="opacity:.5"':''}>장착</button><button class="btn" id="aLock">${it.lock?'🔓 잠금 해제':'🔒 잠금'}</button>${canEnh(it)?`<button class="btn" id="aEnh">⚒ 강화${it.enh>0?' +'+it.enh:''}</button>`:''}<button class="btn" id="aSell"${it.lock?' style="opacity:.45"':''}>판매 ${sellInfo(it).total}G</button>${(G.titleSheet&&charIds().length>1)?'<button class="btn" id="aSend">📤 보내기</button>':''}</div>`;
-  }else s+=`<div class="acts"><button class="btn" id="aUnequip">해제</button><button class="btn" id="aLock">${it.lock?'🔓 잠금 해제':'🔒 잠금'}</button>${canEnh(it)?`<button class="btn" id="aEnh">⚒ 강화${it.enh>0?' +'+it.enh:''}</button>`:''}${(G.titleSheet&&charIds().length>1)?'<button class="btn" id="aSend">📤 보내기</button>':''}</div>`;
+    s+=`<div class="acts iact"><button class="btn primary" id="aEquip"${!canWear(it)?' style="opacity:.5"':''}>장착</button>${lk}${enh}<button class="btn tlb" id="aSell"${it.lock?' style="opacity:.45"':''}><span class="ti ph">💰</span><span class="tx">판매 ${sellInfo(it).total}G</span></button>${send}</div>`;
+  }else s+=`<div class="acts iact"><button class="btn" id="aUnequip">해제</button>${lk}${enh}${send}</div>`;
   return s;
 }
 function askRingSlot(i){ const it=me.inv[i]; const cp0=calcCP(me); modal(`<h3>💍 어느 반지를 바꿀까요?</h3><div class="col">${['ring1','ring2'].map((k,n)=>{ const cur=me.eq[k], cp=calcCP({...me,eq:{...me.eq,[k]:it}}), d=cp-cp0; return `<button class="btn" data-rk="${k}" style="text-align:left">반지 ${n+1}: <b style="color:${RARC[cur.rar]}">${esc(cur.name)}</b><br><small style="color:${d>0?'#9fd18b':d<0?'#ff8a7a':'#bbb'}">바꾸면 전투력 ${d>0?'+':''}${d}</small></button>`; }).join('')}<button class="btn" id="rkX">취소</button></div>`,m=>{ m.querySelectorAll('[data-rk]').forEach(b=>b.onclick=()=>{ closeModal(); equip(i,b.dataset.rk); }); m.querySelector('#rkX').onclick=closeModal; }); }
