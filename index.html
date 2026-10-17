@@ -421,7 +421,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.2.0128</div>
+    <div class="ver" id="verT">v0.4.2.0129</div>
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -608,7 +608,7 @@ const SK={
   {k:'whirl',e:'🌀',n:'회전베기',s:'회전',req:12,mp:8,cd:5.5,el:'#e8e0d0',d:l=>`주변 모든 적에게 무기 피해 ${180+30*l}% + 4초간 강력한 출혈(초당 타격 피해의 60%, 총 240%) · 출혈은 겹치지 않고 가장 센 것 하나만 적용`},
   {k:'leap',e:'🦘',n:'도약 강타',s:'도약',req:18,mp:10,cd:8,el:'#c98b4a',rg:300,d:l=>`적에게 뛰어들어 범위 피해 ${280+45*l}%`},
   {k:'berserk',e:'😡',n:'광폭화',s:'광폭',req:24,mp:14,cd:32,el:'#ff3b2f',d:l=>`8초간 공격 속도 +40%, 피해 +${30+5*l}%`},
-  {k:'ragnarok',e:'💢',n:'파멸의 일격',s:'파멸',req:99,mp:50,cd:70,el:'#ff2a1a',rg:380,d:l=>`[궁극기] 기를 모은 뒤 주변 모든 적에게 무기 피해 ${1400+100*l}%, 3.5초 기절·넉백`},
+  {k:'ragnarok',e:'💢',n:'광전사 폭주',s:'폭주',req:99,mp:80,cd:90,el:'#ff2a1a',rg:380,d:l=>`[궁극기] 기를 모은 뒤 주변 모든 적에게 무기 피해 ${Math.round((1400+100*l)*.6)}%, 2초 기절·넉백(우두머리는 1초) 후 12초간 폭주: 내 피해 +60%, 공격 속도 +50%, 이동 속도 +30%, 평타·스킬 범위 +25%, 대신 받는 피해 +20%`},
   {k:'quake',e:'🌋',n:'대지 분쇄',s:'분쇄',req:30,mp:18,cd:13,el:'#b88a5a',rg:300,d:l=>`범위 안의 적을 우두머리 > 정예 > 일반 순으로 겨냥해 앞으로 갈라지는 충격파, 무기 피해 ${400+65*l}%`}],
  pal:[
   {k:'smite',e:'✨',n:'신성 타격',s:'신성',req:1,mp:4,cd:2,el:'#f0cf75',rg:95,d:l=>`무기 피해 ${260+40*l}% + 신성 피해 ${8+7*l}`},
@@ -667,7 +667,8 @@ const SYN={
  pal:{holyfire:['smite','hammer'],smite:['hammer','judgment','holyfire'],healaura:['guard','might'],hammer:['smite','judgment'],might:['healaura','zeal'],guard:['healaura','might'],zeal:['smite','hammer','judgment'],judgment:['smite','hammer']}};
 function synBonus(p,key){ let n=0; const m=SYN[p.cls]; if(!m)return 0; for(const src in m) if(m[src].includes(key)) n+=Math.floor((p.skills[src]||0)/3); return n; }
 const ATKRG={sorc:250,war:100,pal:100,necro:NRG(240),druid:210};
-function atkRg(o){ if(o.cls==='druid'){ const f=formOf(o); return f==='bear'?112:f==='wolf'?100:210; } return ATKRG[o.cls]; } /* 드루이드는 형태에 따라 기본 공격 사거리가 달라요 */
+function atkRg(o){ if(o===me&&me.buffs&&me.buffs.rage&&me.buffs.rage.t>0)return atkRg0(o)*1.25; return atkRg0(o); }
+function atkRg0(o){ if(o.cls==='druid'){ const f=formOf(o); return f==='bear'?112:f==='wolf'?100:210; } return ATKRG[o.cls]; } /* 드루이드는 형태에 따라 기본 공격 사거리가 달라요 */
 const MT0=[
  {n:'타락자',hp:14,dmg:2,spd:70,r:12,xp:5},
  {n:'좀비',hp:32,dmg:4,spd:34,r:16,xp:7},
@@ -1672,10 +1673,10 @@ function spawnMe(){
   me.form=''; me.spirit=null; me.formLock=0; me.D=derive(me); me.hp=me.D.maxHp; me.mp=me.D.maxMp; autoSummon(); if(me.cls==='necro')for(const k of MNIDX){ sprGet('mn_'+k); sprGet('mn_'+k+'_atk'); }
 }
 function zealMul(){const l=me.cls==='pal'?skLv(me,'zeal'):0; return l?{d:1+(15+5*l)/100,t:1+(10+4*l)/100}:{d:1,t:1};}
-function buffDmg(){let v=0; const b=me.buffs; if(b.vil&&b.vil.t>0)v+=b.vil.v; if(b.shout&&b.shout.t>0)v+=b.shout.v; if(b.berserk&&b.berserk.t>0)v+=b.berserk.v; if(b.howl&&b.howl.t>0)v+=b.howl.v; if(b.fury&&b.fury.t>0)v+=b.fury.v; const sb=spiritBuff(); if(sb)v+=sb.dmg; return v;}
+function buffDmg(){let v=0; const b=me.buffs; if(b.vil&&b.vil.t>0)v+=b.vil.v; if(b.shout&&b.shout.t>0)v+=b.shout.v; if(b.berserk&&b.berserk.t>0)v+=b.berserk.v; if(b.rage&&b.rage.t>0)v+=b.rage.v; if(b.howl&&b.howl.t>0)v+=b.howl.v; if(b.fury&&b.fury.t>0)v+=b.fury.v; const sb=spiritBuff(); if(sb)v+=sb.dmg; return v;}
 /* 드루이드: 영혼 정령 버프(내 정령 또는 반경 안에 있는 동료의 정령 중 센 쪽) · 받는 피해 감소 버프 묶음 */
 function spiritBuff(){ if(!me||me.cls===undefined)return null; let l=0; if(me.spirit&&me.spirit.t>0)l=me.spirit.lv; if(ally&&!ally.lobby&&!ally.dead&&ally.sp>0&&ally.x!==undefined&&hyp(ally.x-me.x,ally.y-me.y)<260)l=Math.max(l,ally.sp|0); return l?{lv:l,dmg:(10+1.5*l)/100,ias:(8+l)/100,mr:30+3*l}:null; }
-function drMul(){ const b=me.buffs; let m=1; if(b.fury&&b.fury.t>0&&b.fury.dr)m*=1-b.fury.dr; if(b.roar&&b.roar.t>0)m*=1-b.roar.v; if(b.hunt&&b.hunt.t>0)m*=1-b.hunt.dr; return m; }
+function drMul(){ const b=me.buffs; let m=1; if(b.rage&&b.rage.t>0)m*=1+b.rage.pen; if(b.fury&&b.fury.t>0&&b.fury.dr)m*=1-b.fury.dr; if(b.roar&&b.roar.t>0)m*=1-b.roar.v; if(b.hunt&&b.hunt.t>0)m*=1-b.hunt.dr; return m; }
 /* 형태 바꾸기: 생명력 비율은 그대로, 0.3초 동안 움직임 잠금 */
 function setForm(f){ const hr=me.hp/me.D.maxHp; me.form=f||''; me.D=derive(me); me.hp=Math.min(me.D.maxHp,me.D.maxHp*hr); me.mp=Math.min(me.mp,me.D.maxMp); me.formLock=.3; me.vx=me.vy=0; uiDirty=true; }
 function critRoll(v){const c=Math.random()*100<me.D.crit; return {v:c?v*1.5*(me.D.sp&&me.D.sp.hdag?1.4:1):v,crit:c};}
@@ -1719,6 +1720,7 @@ function updateMe(dt){
   me.atkCd=Math.max(0,me.atkCd-dt); me.swing=Math.max(0,me.swing-dt); if(G.combo&&G.combo.n>0){ G.combo.t-=dt; if(G.combo.t<=0){ G.combo.n=0; $('#combo').hidden=true; } }
   me.formLock=Math.max(0,(me.formLock||0)-dt); if(me.spirit){ me.spirit.t-=dt; if(me.spirit.t<=0)me.spirit=null; }
   me.hurt=Math.max(0,(me.hurt||0)-dt); me.god=Math.max(0,(me.god||0)-dt); me.stun=Math.max(0,(me.stun||0)-dt); me.stunImm=Math.max(0,(me.stunImm||0)-dt); me.slowP=Math.max(0,(me.slowP||0)-dt);
+  if(me.buffs.rage&&me.buffs.rage.t>0&&!me.dead&&Math.random()<dt*34)parts.push({x:me.x+rand(-14,14),y:me.y+rand(-4,16),vx:rand(-12,12),vy:-rand(50,95),t:0,life:.75,col:Math.random()<.4?'#ff7a3a':'#ff2a1a',r:2.6,glow:1,dm:.95});   /* 폭주: 몸에서 붉은 기운이 피어오름 */
   if(me.poison>0&&!me.dead){ me.poison-=dt; me.hp=Math.max(1,me.hp-me.D.maxHp*.03*dt); if(Math.random()<dt*6)parts.push({x:me.x+rand(-10,10),y:me.y-8,vx:0,vy:-30,t:0,life:.6,col:'#7ad04a',r:2.5,glow:1,dm:.95}); }
   if(me.dead){ me.respawn-=dt; if(me.respawn<=0&&!me.out){ me.respawn=0; if(G.freeRev>0){ G.freeRev--; reviveMe(.6); saveChar(); toast('✨ 무료 부활 물약이 자동으로 사용됐어요','#ffd84a'); return; } me.out=true; } if(ally&&!ally.lobby&&ally.rg>(me.seenRg|0)){ me.seenRg=ally.rg; if(!me.out){ reviveMe(.45); toast('동료가 구해줬어요!','#9be38a'); } } return;}
   if(ally&&!ally.lobby){ if(ally.rg>(me.seenRg|0))me.seenRg=ally.rg;
@@ -1740,7 +1742,7 @@ function updateMe(dt){
   else if(me.pickT){ const g=me.pickT; if(!ground.includes(g)){me.pickT=null;} else { const dx=g.x-me.x,dy=g.y-me.y,d=hyp(dx,dy);
       if(d<34){pickUp(g);me.pickT=null;} else {mx=dx/d;my=dy/d;ml=1;} } }
   if(hazards.length&&!me.dead){ for(const h of hazards){ if(hyp(me.x-h.x,me.y-h.y)<h.r*.9){ if(h.k==='lava'){ me.lavaT=(me.lavaT||0)-dt; if(me.lavaT<=0){ me.lavaT=.5; takeDmg(me.D.maxHp*.05*GZM,true); me.burn=.4; addNum(me.x,me.y-30,'🔥','#ff8a3a',false); } } else me.slowP=Math.max(me.slowP||0,.3); break; } } }
-  { const sp=D.spd*(me.slowP>0?.5:1)*(me.buffs.fury&&me.buffs.fury.t>0&&me.buffs.fury.ms?1+me.buffs.fury.ms:1), kv=1-Math.exp(-dt*(ml>0.08?20:26)); me.vx=(me.vx||0)+((ml>0.08?mx*sp:0)-(me.vx||0))*kv; me.vy=(me.vy||0)+((ml>0.08?my*sp:0)-(me.vy||0))*kv; if(Math.abs(me.vx)<1)me.vx=0; if(Math.abs(me.vy)<1)me.vy=0;
+  { const sp=D.spd*(me.slowP>0?.5:1)*(me.buffs.rage&&me.buffs.rage.t>0?1+me.buffs.rage.ms:1)*(me.buffs.fury&&me.buffs.fury.t>0&&me.buffs.fury.ms?1+me.buffs.fury.ms:1), kv=1-Math.exp(-dt*(ml>0.08?20:26)); me.vx=(me.vx||0)+((ml>0.08?mx*sp:0)-(me.vx||0))*kv; me.vy=(me.vy||0)+((ml>0.08?my*sp:0)-(me.vy||0))*kv; if(Math.abs(me.vx)<1)me.vx=0; if(Math.abs(me.vy)<1)me.vy=0;
     if(me.vx||me.vy){ me.x=clamp(me.x+me.vx*dt,16,WW-16); me.y=clamp(me.y+me.vy*dt,16,WH-16); } }
   if(ml>0.08){ me.moveDir=Math.atan2(my,mx); me.faceT=Math.max(0,(me.faceT||0)-dt); if(me.swing<=0&&!(me.faceT>0))me.face=me.moveDir; me.walk=(me.walk||0)+dt*ml*10; }
   // held buttons
@@ -1830,7 +1832,7 @@ function tryUse(key,hold){
   if(me.stun>0){ if(!hold)toast('기절 중!','#ffd84a'); return; }
   if(key==='atk'){
     if(me.atkCd>0)return;
-    const sb=spiritBuff(), fb=me.buffs.fury&&me.buffs.fury.t>0&&me.buffs.fury.ias?1+me.buffs.fury.ias:1, b=(me.buffs.berserk?1.4:1)*fb*(sb?1+sb.ias:1); me.atkCd=me.D.atkInt/b;
+    const sb=spiritBuff(), fb=me.buffs.fury&&me.buffs.fury.t>0&&me.buffs.fury.ias?1+me.buffs.fury.ias:1, b=(me.buffs.berserk?1.4:1)*(me.buffs.rage&&me.buffs.rage.t>0?1+me.buffs.rage.ias:1)*fb*(sb?1+sb.ias:1); me.atkCd=me.D.atkInt/b;
     sfx(meleeOf(me)?'swing':'cast'); doCast('atk',atkRg(me),1); me.mp=Math.min(me.D.maxMp,me.mp+1.6+me.D.maxMp*.02); return;
   }
   const s=SKBY[key]; if(!s||s.passive)return; const lv=skLv(me,key); if(!lv)return;
@@ -2100,7 +2102,7 @@ function druidAtk(o,real,ang,dx,dy){ const f=formOf(o), col=f==='wolf'?'#cfd6e6'
   else { const r=physDmg(WFB(Math.max(1,skLv(me,'wolfform')))*ATKM); hitMob(m,r,0,false,{basic:1,burn:2.5,bd:r.v*BLEED,bl:1}); } }
 function weakenMob(q,v,sec){ if(q.dead)return; if(q.weak){ q.weak.t=Math.max(q.weak.t,sec); } else { q.weak={t:sec,d0:q.dmg}; q.dmg=q.dmg*(1-v); } burst(q.x,q.y,'#c8b0ff',6,140); }
 function druidCast(o,key,real,lv,tgt,tx,ty,ang){
-  const s=SKBY[key], col=s.el, f=formOf(o), dx=Math.cos(ang), dy=Math.sin(ang), rbm=(o===me&&me.D&&me.D.rng>0)?1+me.D.rng/100:1, RS=RS0(lv)*rbm;
+  const s=SKBY[key], col=s.el, f=formOf(o), dx=Math.cos(ang), dy=Math.sin(ang), rbm=((o===me&&me.D&&me.D.rng>0)?1+me.D.rng/100:1)*((o===me&&me.buffs.rage&&me.buffs.rage.t>0)?1.25:1), RS=RS0(lv)*rbm;
   switch(key){
   case 'wolfform': case 'bearform':
     efx.push({k:'ring',x:o.x,y:o.y,r0:8,r1:70,t:0,life:.4,col,w:8}); burst(o.x,o.y,col,26,260); impact(o.x,o.y,'200,190,160',90); break;
@@ -2184,7 +2186,7 @@ function castSkill(o,key,real,tx,ty,lv,tgt){
   if(o===me&&real&&G.mobs.some(b=>b.boss&&!b.dead&&b.counter>0))me.cnCast=T; /* 반격 태세 중에 스킬을 썼음 */
   const ang=Math.atan2(ty-o.y,tx-o.x), dx=Math.cos(ang), dy=Math.sin(ang);
   o.face=ang; o.swing=.22; if(o===me)me.faceT=.9;
-  const C=CLASSES[o.cls]; const s=SKBY[key]; const rbm=(o===me&&me.D&&me.D.rng>0)?1+me.D.rng/100:1, RS=l=>RS0(l)*rbm;
+  const C=CLASSES[o.cls]; const s=SKBY[key]; const rbm=((o===me&&me.D&&me.D.rng>0)?1+me.D.rng/100:1)*((o===me&&me.buffs.rage&&me.buffs.rage.t>0)?1.25:1), RS=l=>RS0(l)*rbm;
   if(o.cls==='sorc'&&key!=='atk'&&key!=='fireball'&&key!=='armageddon')fxSpr(9,0,7,o.x,o.y+16,88,.5);
   switch(key){
   case 'atk':
@@ -2257,7 +2259,8 @@ function castSkill(o,key,real,tx,ty,lv,tgt){
   case 'ragnarok':
     efx.push({k:'ring',x:o.x,y:o.y,r0:240,r1:20,t:0,life:.6,col:'#ff2a1a',w:10}); sfx('boss'); burst(o.x,o.y,'#ff5a3a',30,260);
     later(.6,()=>{ slamFx(o.x,o.y,300,'#ff2a1a'); efx.push({k:'ring',x:o.x,y:o.y,r0:20,r1:380,t:0,life:.7,col:'#ff6a3a',w:16}); efx.push({k:'ring',x:o.x,y:o.y,r0:10,r1:260,t:0,life:.5,col:'#ffd08a',w:10}); impact(o.x,o.y,'255,90,50',300); burst(o.x,o.y,'#ffb04a',70,520); G.shake=Math.max(G.shake,1);
-      if(real) for(const m of mobsIn(o.x,o.y,380)){ hitMob(m,physDmg(14+1*lv),0,false,{stun:3.5}); const dd=hyp(m.x-o.x,m.y-o.y)||1; m.kx=(m.kx||0)+(m.x-o.x)/dd*(m.boss?120:520); m.ky=(m.ky||0)+(m.y-o.y)/dd*(m.boss?120:520); } });
+      if(real){ me.buffs.rage={t:12,m:12,v:.6,ias:.5,ms:.3,pen:.2}; toast('💢 광전사 폭주!','#ff3b2f'); }   /* 폭주 12초: 피해 +60% · 공속 +50% · 이속 +30% · 범위 +25% · 받는 피해 +20% */
+      if(real) for(const m of mobsIn(o.x,o.y,380)){ hitMob(m,physDmg((14+1*lv)*.6),0,false,{stun:m.boss?1:2});   /* 우두머리 기절은 최대 1초 */ const dd=hyp(m.x-o.x,m.y-o.y)||1; m.kx=(m.kx||0)+(m.x-o.x)/dd*(m.boss?120:520); m.ky=(m.ky||0)+(m.y-o.y)/dd*(m.boss?120:520); } });
     break;
   case 'divine':
     efx.push({k:'pillar',x:o.x,y:o.y,t:0,life:1.3,col:'#ff5a5a'}); efx.push({k:'cross',x:o.x,y:o.y,t:0,life:.9}); sfx('boss');
@@ -2715,7 +2718,7 @@ const CPSK={
   ['meteor',l=>((80+40*l)+4*(12+8*l))*HMN(l)*HMF(HMN(l)),10,'s'],['blizzard',l=>(22+13*l)*8,17,'s'],['armageddon',l=>14*(150+45*l)*.5,75,'s']],
  necro:[['soulbolt',l=>(14+10*l)*HMN(l)*HMF(HMN(l)),.8,'s'],['guardian',l=>(14+10*l)/1.2*(1+.04*l),1,'m'],['spiritcaster',l=>(18+12*l)*HMN(l)*HMF(HMN(l))/1.8*(1+.04*l),1,'m'],['soulburst',l=>(100+40*l)*1.6,12,'s'],['execute',l=>0,18,'s'],['colossus',l=>(120+45*l)/1.5*(18+.5*l)*(1+.04*l),45,'m'],['lord',l=>(100+30*l)*2*15*(1+.04*l),90,'m'],['fusion',l=>((6+4*l)/.5+(16+10*l)*FZB(l)/2+(50+22*l)/4)*(10+.3*l)*(1+.04*l),40,'m']],
  druid:[['raven',l=>(12+9*l)*RVN(l)*RVF(RVN(l))/1.1,1,'m'],['bite',l=>3.5+.55*l,5,'p'],['hunt',l=>(18+3*l)*.5,80,'p']],
- war:[['bash',l=>3+.5*l,2,'p'],['rend',l=>4.5+.7*l+Math.floor((1.5+.12*l)/.5)*(.5+.05*l),5,'p'],['whirl',l=>1.8+.3*l,5,'p'],['leap',l=>2.8+.45*l,8,'p'],['quake',l=>4+.65*l,13,'p'],['ragnarok',l=>(14+l)*.5,70,'p']],
+ war:[['bash',l=>3+.5*l,2,'p'],['rend',l=>4.5+.7*l+Math.floor((1.5+.12*l)/.5)*(.5+.05*l),5,'p'],['whirl',l=>1.8+.3*l,5,'p'],['leap',l=>2.8+.45*l,8,'p'],['quake',l=>4+.65*l,13,'p'],['ragnarok',l=>(14+l)*.6+8,90,'p']],
  pal:[['smite',l=>2.6+.4*l,2,'p'],['hammer',l=>(16+13*l)*HMN(l)*HMF(HMN(l))*3,4.5,'s'],['judgment',l=>(110+50*l)+4*(18+10*l),15,'s']]};
 function cpSkillDps(p,D){ const list=CPSK[p.cls]; if(!list||!p.skills)return 0; const pp={...p,D}, wav=(D.wmn+D.wmx)/2;
   const sMul=(1+D.ene*ENEM+D.dmgPct/100)*(1+wav/35)*(D.sp&&D.sp.tome&&p.cls==='sorc'?1.2:1), pMul=(wav+D.dmg)*(1+(D.str+D.dmgPct)/100);
@@ -3559,6 +3562,7 @@ function drawPlayer(o,isMe,t){
   const lv=(isMe?me.lvl:o.lvl)||1, tier=lvTier(lv);
   ctx.fillStyle='rgba(0,0,0,.4)';ctx.beginPath();ctx.ellipse(o.x+2,o.y+12*PS*.8,17*PS*.8,8*PS*.8,0,0,6.283);ctx.fill();
   if(tier>=3){ const g=ctx.createRadialGradient(x,y,6,x,y,40); g.addColorStop(0,'rgba(255,225,130,.45)'); g.addColorStop(1,'rgba(255,225,130,0)'); ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,40+Math.sin(t*3)*2,0,6.283); ctx.fill(); }
+  if(isMe&&me.buffs.rage&&me.buffs.rage.t>0){ const pu=.5+.5*Math.sin(t*9), g=ctx.createRadialGradient(x,y+2,8,x,y+2,46+pu*5); g.addColorStop(0,'rgba(255,40,20,0)'); g.addColorStop(.6,`rgba(255,40,20,${.16+.1*pu})`); g.addColorStop(1,'rgba(255,40,20,0)'); ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y+2,50,0,6.283); ctx.fill(); }   /* 폭주 붉은 기운 */
   if(isMe&&me.buffs.barrier&&me.buffs.barrier.t>0&&fxAtlas())fxFrame(5,Math.floor(t*8)%4,x,y+2,84,84,0,Math.min(1,me.buffs.barrier.t*2)*.55);
   const fm=o.cls==='druid'?formOf(o):'', hk=fm?'druid_'+fm:o.cls, hh=fm==='bear'?104:fm==='wolf'?84:78;
   const HS=sprGet('hero_'+hk), WC=WALKS[hk], WK=(WC&&HS)?sprGet('hero_'+hk+'_walk'):null;
@@ -3625,7 +3629,7 @@ function drawPlayer(o,isMe,t){
   const nm=(isMe?me.name:(o.name||'동료'))||'', label=`Lv${lv} ${nm}`;
   ctx.font='700 11px "Noto Sans KR",sans-serif'; ctx.textAlign='center'; ctx.lineJoin='round'; ctx.lineWidth=3.5; ctx.strokeStyle='rgba(0,0,0,.9)'; ctx.strokeText(label,x,y-31); ctx.fillStyle=isMe?'#fff3dc':C.col; ctx.fillText(label,x,y-31);
   { const ic=[];
-    if(isMe){ const b=me.buffs; if(b.shout&&b.shout.t>0)ic.push(['📣',clamp(1-b.shout.t/(b.shout.m||10),0,1),Math.ceil(b.shout.t),true]); if(b.barrier&&b.barrier.t>0)ic.push(['🔷',clamp(1-b.barrier.t/10,0,1),Math.ceil(b.barrier.t),true]); if(me.stun>0)ic.push(['💫',0,Math.ceil(me.stun),true]); if(me.slowP>0)ic.push(['🐌',0,Math.ceil(me.slowP),true]); if(me.poison>0)ic.push(['☠️',0,Math.ceil(me.poison),true]); if(b.berserk&&b.berserk.t>0)ic.push(['😡',clamp(1-b.berserk.t/8,0,1),Math.ceil(b.berserk.t),true]); for(const [bk,be] of [['roar','📢'],['howl','📢'],['fury','💢'],['hunt','🌕']]){ const bb=b[bk]; if(bb&&bb.t>0)ic.push([be,clamp(1-bb.t/(bb.m||8),0,1),Math.ceil(bb.t),true]); } if(me.spirit&&me.spirit.t>0)ic.push(['👻',clamp(1-me.spirit.t/me.spirit.m,0,1),Math.ceil(me.spirit.t),true]); if(me.aura)ic.push([SKBY[me.aura].e,0,'',true]); }
+    if(isMe){ const b=me.buffs; if(b.shout&&b.shout.t>0)ic.push(['📣',clamp(1-b.shout.t/(b.shout.m||10),0,1),Math.ceil(b.shout.t),true]); if(b.barrier&&b.barrier.t>0)ic.push(['🔷',clamp(1-b.barrier.t/10,0,1),Math.ceil(b.barrier.t),true]); if(me.stun>0)ic.push(['💫',0,Math.ceil(me.stun),true]); if(me.slowP>0)ic.push(['🐌',0,Math.ceil(me.slowP),true]); if(me.poison>0)ic.push(['☠️',0,Math.ceil(me.poison),true]); if(b.berserk&&b.berserk.t>0)ic.push(['😡',clamp(1-b.berserk.t/8,0,1),Math.ceil(b.berserk.t),true]); for(const [bk,be] of [['roar','📢'],['howl','📢'],['fury','💢'],['hunt','🌕'],['rage','🔥']]){ const bb=b[bk]; if(bb&&bb.t>0)ic.push([be,clamp(1-bb.t/(bb.m||8),0,1),Math.ceil(bb.t),true]); } if(me.spirit&&me.spirit.t>0)ic.push(['👻',clamp(1-me.spirit.t/me.spirit.m,0,1),Math.ceil(me.spirit.t),true]); if(me.aura)ic.push([SKBY[me.aura].e,0,'',true]); }
     { const oth=isMe?ally:me; if(!isMe&&o.aura&&SKBY[o.aura])ic.push([SKBY[o.aura].e,0,'',true]); if(oth&&!oth.lobby&&!oth.dead&&oth.aura&&oth.aura!==o.aura&&oth.aura!=='holyfire'&&SKBY[oth.aura]&&oth.x!==undefined&&hyp(oth.x-o.x,oth.y-o.y)<320)ic.push([SKBY[oth.aura].e,0,'받음',false]); }
     ctx.textBaseline='middle'; const w=24, x0=x-(ic.length-1)*w/2, cy=y-62;
     ic.forEach((q,i)=>{ const cx=x0+i*w; ctx.fillStyle='rgba(18,14,10,.9)'; ctx.beginPath(); ctx.arc(cx,cy,10,0,6.283); ctx.fill(); ctx.lineWidth=2; ctx.strokeStyle=q[3]?'#ffd84a':'#6a5a3a'; ctx.stroke(); ctx.font='12px sans-serif'; ctx.textAlign='center'; ctx.fillStyle='#fff'; ctx.fillText(q[0],cx,cy+1);
