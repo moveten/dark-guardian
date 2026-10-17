@@ -393,7 +393,8 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   .ipop .acts.iact .tlb .ti{font-size:15px}
   .ipop .acts.iact .tlb .tx{font-size:11px;white-space:normal;word-break:keep-all}
   .ipop .acts.iact .tlb .ph{display:block}
-  .ipop .lkb{display:grid;place-items:center;position:absolute;right:-6px;bottom:-6px;width:26px;height:26px;padding:0;border-radius:50%;font-size:13px;line-height:1;background:#2a2118;border:1px solid var(--line2);opacity:.75}
+  .ipop .lkb{display:grid;place-items:center;position:absolute;right:-6px;bottom:-6px;width:26px;height:26px;padding:0;border-radius:50%;font-size:13px;line-height:1;background:#2a2118;border:1px solid var(--line2);opacity:.9}
+  .ipop .lkb svg{display:block}
   .ipop .lkb.on{opacity:1;border-color:#ffd84a;background:#4a3a14}
 }
 @media (max-width:560px){.hb{width:43px;height:48px}.qb button{width:52px;height:52px}}
@@ -455,7 +456,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.2.0133</div>
+    <div class="ver" id="verT">v0.4.2.0134</div>
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -2731,9 +2732,13 @@ function lvCmp(it){ if(!me||!me.eq||Object.values(me.eq).includes(it))return '';
   if(d>0)return box('rgba(70,190,90,.18)','#58c466','#8df09a',`▲ 장착보다 +${d} <span style="font-weight:500;font-size:10.5px">(Lv ${b}→${a})</span>`);
   if(d<0)return box('rgba(230,70,60,.18)','#e0584c','#ff9a8e',`▼ 장착보다 -${-d} <span style="font-weight:500;font-size:10.5px">(Lv ${b}→${a})</span>`);
   return box('rgba(160,160,160,.14)','#8a8a8a','#cfcfcf',`＝ 장착과 같음 <span style="font-weight:500;font-size:10.5px">(Lv ${a})</span>`); }
+/* 자물쇠 배지: 잠금=고리가 닫혀 몸통에 붙음(금색) / 해제=고리가 한쪽으로 열려 젖혀짐(회색) — 이모지보다 차이가 크게 보이게 직접 그림 */
+function lockSvg(on){ return on
+  ?'<svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="#ffe27a" stroke-width="2.4" stroke-linecap="round"/><rect x="5" y="11" width="14" height="10" rx="2.2" fill="#ffd84a" stroke="#7a5a10" stroke-width="1"/><circle cx="12" cy="15.2" r="1.6" fill="#5a3f08"/><rect x="11.2" y="15.5" width="1.6" height="3.2" rx=".8" fill="#5a3f08"/></svg>'
+  :'<svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><g transform="rotate(-42 8 11)"><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="#b9b2a4" stroke-width="2.4" stroke-linecap="round" transform="translate(0 -1.5)"/></g><rect x="5" y="11" width="14" height="10" rx="2.2" fill="#8a8478" stroke="#3a362e" stroke-width="1"/><circle cx="12" cy="15.2" r="1.6" fill="#2a2620"/><rect x="11.2" y="15.5" width="1.6" height="3.2" rx=".8" fill="#2a2620"/></svg>'; }
 function itemLines(it,opt){
   if(isShard(it)) return `<div style="display:flex;gap:10px;align-items:center"><div style="width:56px;height:56px;flex:none;display:grid;place-items:center;font-size:34px;background:#0a0807;border:1px solid ${RARC[4]};border-radius:8px">🌑</div><div><div class="in" style="color:${RARC[4]}">그림자 조각</div><div class="meta">수량 <b style="color:#fff">${it.n}</b> / ${SHARD_MAX} (한 칸 최대)</div></div></div><div class="meta" style="margin:6px 0">삼남매를 쓰러뜨리면 얻는 재료예요. ${SHARD_N}개로 영웅 아이템 하나를 교환할 수 있어요. 판매할 수 없어요.</div>`;
-  let s=`<div style="display:flex;gap:10px;align-items:center"><span style="position:relative;flex:none;display:flex"><img src="${itemIcon(it).url}" alt="" style="width:56px;height:56px;flex:none;background:#0a0807;border:1px solid ${RARC[it.rar]};border-radius:8px">${opt&&opt.lk?`<button class="lkb${it.lock?' on':''}" data-lk="1" aria-label="${it.lock?'잠금 해제':'잠금'}">${it.lock?'🔒':'🔓'}</button>`:''}</span><div><div class="in" style="color:${RARC[it.rar]}">${it.enh>0?'+'+it.enh+' ':''}${esc(dn(it))}</div><div class="meta" style="color:#fff">아이템 레벨 ${ilvOf(it)}${it.enh>0?` <span style="color:#ffd84a">(기본 ${it.ilvl} + 강화 ${it.enh})</span>`:''}</div>${ownTag(it)}<div class="meta">${reqHtml(it)}</div></div></div>`+lvCmp(it);
+  let s=`<div style="display:flex;gap:10px;align-items:center"><span style="position:relative;flex:none;display:flex"><img src="${itemIcon(it).url}" alt="" style="width:56px;height:56px;flex:none;background:#0a0807;border:1px solid ${RARC[it.rar]};border-radius:8px">${opt&&opt.lk?`<button class="lkb${it.lock?' on':''}" data-lk="1" aria-label="${it.lock?'잠금 해제':'잠금'}">${lockSvg(!!it.lock)}</button>`:''}</span><div><div class="in" style="color:${RARC[it.rar]}">${it.enh>0?'+'+it.enh+' ':''}${esc(dn(it))}</div><div class="meta" style="color:#fff">아이템 레벨 ${ilvOf(it)}${it.enh>0?` <span style="color:#ffd84a">(기본 ${it.ilvl} + 강화 ${it.enh})</span>`:''}</div>${ownTag(it)}<div class="meta">${reqHtml(it)}</div></div></div>`+lvCmp(it);
   const bt=baseText(it); if(bt)s+=`<div>${bt}</div>`;
   if(BASEFX[it.base]&&it.slot==='weapon') s+=`<div class="meta" style="color:#9fd0ff">▪ ${BASEFX[it.base].t}</div>`;
   if(it.sp&&SPFX[it.sp]) s+=`<div style="margin:4px 0;color:#ffb14a;font-weight:700">★ 특수 효과: ${SPFX[it.sp].d}</div>`;
