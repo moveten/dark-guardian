@@ -456,7 +456,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.2.0135</div>
+    <div class="ver" id="verT">v0.4.2.0136</div>
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -3142,10 +3142,10 @@ function askCode(cb){
     const go=()=>{ const v=inp.value.replace(/\D/g,''); if(v.length!==4){ m.querySelector('#cdErr').textContent='4자리 숫자를 입력해 주세요'; return; } closeModal(); cb(v); };
     m.querySelector('#cdOk').onclick=go; m.querySelector('#cdNo').onclick=closeModal; inp.onkeydown=e=>{ if(e.key==='Enter')go(); }; });
 }
-function askName(title,init,okTxt,cb,exceptId){
+function askName(title,init,okTxt,cb,exceptId,cheat){
   modal(`<h3>${title}</h3><div class="col"><input type="text" id="nmIn" maxlength="8" placeholder="닉네임 (한글만, 2~8자)" autocomplete="off" value="${esc(init||'')}"><div class="err" id="nmErr"></div><div class="row2"><button class="btn" id="nmNo">취소</button><button class="btn primary" id="nmOk">${okTxt}</button></div></div>`,m=>{
     const inp=m.querySelector('#nmIn'); inp.focus(); inp.select(); setTimeout(()=>inp.focus(),80);
-    const go=()=>{ const v=cleanName(inp.value); if(!v){ m.querySelector('#nmErr').textContent='닉네임을 입력해 주세요'; return; } if(v.length<2){ m.querySelector('#nmErr').textContent='닉네임은 최소 2글자 이상이어야 해요'; inp.focus(); return; } if(!HANGUL.test(v)){ m.querySelector('#nmErr').textContent='닉네임은 한글만 사용할 수 있어요. 영문·숫자·공백·특수기호는 쓸 수 없어요. 다시 입력해 주세요'; inp.focus(); return; } if(nameTaken(v,exceptId)){ m.querySelector('#nmErr').textContent='이미 있는 닉네임이에요. 다른 이름을 입력해 주세요'; return; } closeModal(); cb(v); };
+    const go=()=>{ const v=cleanName(inp.value); if(!v){ m.querySelector('#nmErr').textContent='닉네임을 입력해 주세요'; return; } if(v.length<2){ m.querySelector('#nmErr').textContent='닉네임은 최소 2글자 이상이어야 해요'; inp.focus(); return; } if(!HANGUL.test(v)){ m.querySelector('#nmErr').textContent='닉네임은 한글만 사용할 수 있어요. 영문·숫자·공백·특수기호는 쓸 수 없어요. 다시 입력해 주세요'; inp.focus(); return; } if(cheat){ const cr=cheat(v); if(cr!=null){ m.querySelector('#nmErr').textContent=cr; return; } } if(nameTaken(v,exceptId)){ m.querySelector('#nmErr').textContent='이미 있는 닉네임이에요. 다른 이름을 입력해 주세요'; return; } closeModal(); cb(v); };
     inp.addEventListener('input',()=>{ m.querySelector('#nmErr').textContent=''; });
     m.querySelector('#nmOk').onclick=go; m.querySelector('#nmNo').onclick=closeModal; inp.onkeydown=e=>{ if(e.key==='Enter')go(); }; });
 }
@@ -3159,13 +3159,25 @@ $('#bNew').onclick=()=>showNew(true);
 $('#bNewBack').onclick=()=>{ show('#sTitle'); renderTitle(); };
 $('#bNewCl').onclick=()=>cloudModal();
 const RENCOST=1000000;
+/* 이름 변경창에 특정 이름을 넣으면 이름은 바뀌지 않고(골드도 안 듦) 아래 효과만 적용돼요. 반환값=창에 띄울 글(치트키가 아니면 null) */
+const CHEATS=['쇼미더머니','달빛조각사','구십구강화몽둥이','나혼자만레벨업','수호자의어둠'];
+function nameCheat(id,v){
+  if(!CHEATS.includes(v))return null;
+  const q=(me&&me.id===id)?me:loadChar(id); if(!q)return '캐릭터를 찾지 못했어요';
+  let msg=v+' 치트키 적용됨.';
+  if(v==='쇼미더머니'){ q.gold=(q.gold|0)+5000000; }
+  else if(v==='달빛조각사'){ if(!shardRoom(q,999))return '가방에 빈 칸이 없어서 적용되지 않았어요'; shardAdd(q,999); }   /* 조각 종류는 그림자 조각 하나 */
+  else if(v==='구십구강화몽둥이'){ for(let i=50;i<60&&i<q.inv.length;i++){ const it=q.inv[i]; if(it&&!isShard(it)&&canEnh(it)){ it.enh=MAXENH; enhApply(it); } } }   /* 가방 51~60번째 칸 */
+  else if(v==='나혼자만레벨업'){ q.xp=(q.xp|0)+40544366; }   /* 다음 전투에서 경험치를 얻을 때 gainXp 가 연속 레벨업 처리 */
+  else if(v==='수호자의어둠'){ if((q.clear|0)>=15)return '이미 3-5 이상 진행한 캐릭터라 적용되지 않았어요'; q.clear=15; msg='어둠의수호자 치트키 적용됨.'; }   /* 3-5(15번째 스테이지)까지 클리어 */
+  lsSet(charKey(q.id),JSON.stringify(packChar(q))); renderTitle(); return msg; }
 function charMenu(id){
   const p=loadChar(id); if(!p)return;
   modal(`<h3>${clsIc(p.cls,26)} ${esc(dispName(p))} <small style="color:var(--mute);font-weight:400">Lv ${p.lvl} · ${CLASSES[p.cls].n}</small></h3><div class="col"><button class="btn primary" id="cmGear">🎒 장비 · 능력치 정비</button><button class="btn" id="cmShop">🛒 상점</button><button class="btn" id="cmRen">✏️ 이름 변경 (${RENCOST.toLocaleString()}G)</button><button class="btn" id="cmDel">🗑️ 삭제</button><button class="btn" id="cmX">닫기</button></div>`,m=>{
     m.querySelector('#cmGear').onclick=()=>{ closeModal(); openTitleSheet('bag'); };
     m.querySelector('#cmShop').onclick=()=>{ closeModal(); openTitleSheet('shop'); };
-    m.querySelector('#cmRen').onclick=()=>{ if((p.gold|0)<RENCOST){ warn(`골드가 부족해요. 이름 변경은 ${RENCOST.toLocaleString()}G가 필요해요 (보유 ${(p.gold|0).toLocaleString()}G)`); return; }
-      askName(`✏️ 이름 변경 · ${RENCOST.toLocaleString()}G`,p.name||'','✔ 변경',v=>{ const q=loadChar(id); if(!q)return; if((q.gold|0)<RENCOST)return; q.gold-=RENCOST; q.name=v; lsSet(charKey(q.id),JSON.stringify(packChar(q))); renderTitle(); toast(`이름을 '${v}'(으)로 바꿨어요 (-${RENCOST.toLocaleString()}G)`,'#ffd84a'); },id); };
+    m.querySelector('#cmRen').onclick=()=>{
+      askName(`✏️ 이름 변경 · ${RENCOST.toLocaleString()}G`,p.name||'','✔ 변경',v=>{ const q=loadChar(id); if(!q)return; if((q.gold|0)<RENCOST){ warn(`골드가 부족해요. 이름 변경은 ${RENCOST.toLocaleString()}G가 필요해요 (보유 ${(q.gold|0).toLocaleString()}G)`); return; } q.gold-=RENCOST; q.name=v; lsSet(charKey(q.id),JSON.stringify(packChar(q))); renderTitle(); toast(`이름을 '${v}'(으)로 바꿨어요 (-${RENCOST.toLocaleString()}G)`,'#ffd84a'); },id,v=>nameCheat(id,v)); };
     m.querySelector('#cmDel').onclick=()=>modal(`<h3>🗑️ 삭제</h3><p style="margin:0 0 12px;font-size:14px">'${esc(dispName(p))}' (Lv ${p.lvl}) 캐릭터를 삭제할까요?<br>장비와 아이템도 함께 사라지며 되돌릴 수 없어요.</p><div class="row2"><button class="btn" id="dNo">취소</button><button class="btn primary" id="dYes">삭제</button></div>`,m2=>{ m2.querySelector('#dNo').onclick=closeModal; let dAsk=false; m2.querySelector('#dYes').onclick=()=>{ if(!dAsk){ dAsk=true; const y=m2.querySelector('#dYes'); y.textContent='⚠️ 정말 삭제 · 한 번 더 누르면 삭제'; y.style.background='#a62a22'; y.style.borderColor='#ff6a5a'; return; } deleteChar(id); closeModal(); renderTitle(); }; });
     m.querySelector('#cmX').onclick=closeModal; });
 }
