@@ -421,7 +421,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.2.0129</div>
+    <div class="ver" id="verT">v0.4.2.0130</div>
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -3329,7 +3329,10 @@ function rbTint(im,mode){ let o=RBT.get(im); if(!o){ o={}; RBT.set(im,o); } if(o
   if(mode==='dark'){ g.globalCompositeOperation='source-atop'; g.fillStyle='rgba(120,40,190,.12)'; g.fillRect(0,0,c.width,c.height*.45); }
   o[mode]=c; return c; }
 for(const k of ['hero_war','hero_sorc','boss_shadow'])for(const q of ['_atk','_sk','_wu'])if(!SPR[k+q])SPR[k+q]={ok:false,bad:true,im:null}; /* 레이드 보스는 포즈 그림 없음 → 404 요청 생략 */
-function sprDraw(im,x,y,h,face,o){ o=o||0; const fr=o.fr, w=fr?h*fr[1]/fr[2]:h*im.width/im.height; ctx.save(); ctx.translate(x,y-(o.hop||0)); if(o.flip!==undefined)ctx.scale(o.flip,1); else if(Math.cos(face||0)<0)ctx.scale(-1,1); if(o.fx)ctx.translate(o.fx,0); if(o.rot)ctx.rotate(o.rot); if(o.sx||o.sy)ctx.scale(o.sx||1,o.sy||1); if(fr)ctx.drawImage(im,fr[0],0,fr[1],fr[2],-w/2,-h+h*.12,w,h); else ctx.drawImage(im,-w/2,-h+h*.12,w,h); ctx.restore(); }
+/* 광전사 폭주: 기존 그림에 붉은 색조를 입힌 복사본(캐시) + 눈 광채 */
+function rageTint(im){ if(!im||!im.width)return im; if(im._rt&&im._rt.width===im.width)return im._rt; const c=document.createElement('canvas'); c.width=im.width; c.height=im.height; const g=c.getContext('2d'); g.drawImage(im,0,0); g.globalCompositeOperation='source-atop'; g.fillStyle='rgba(200,8,8,.30)'; g.fillRect(0,0,c.width,c.height); im._rt=c; return c; }
+function rageEye(x,y,h){ const s=h/95, p=.75+.25*Math.sin(T*16); ctx.save(); ctx.globalCompositeOperation='lighter'; ctx.globalAlpha=p; const g=ctx.createRadialGradient(x,y,0,x,y,6.5*s); g.addColorStop(0,'rgba(255,255,255,1)'); g.addColorStop(.3,'rgba(255,70,50,.95)'); g.addColorStop(1,'rgba(255,0,0,0)'); ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,6.5*s,0,6.283); ctx.fill(); ctx.fillStyle='rgba(255,40,25,.65)'; ctx.beginPath(); ctx.moveTo(x+2*s,y-1.6*s); ctx.lineTo(x-13*s,y-3.4*s); ctx.lineTo(x-3*s,y+.2*s); ctx.closePath(); ctx.fill(); ctx.beginPath(); ctx.moveTo(x+2*s,y+1.6*s); ctx.lineTo(x-10*s,y+2.6*s); ctx.lineTo(x-3*s,y+.4*s); ctx.closePath(); ctx.fill(); ctx.restore(); }   /* 눈이 오른쪽을 보는 그림 기준(뒤쪽=왼쪽으로 빛줄기), 좌우 반전은 sprDraw가 같이 처리 */
+function sprDraw(im,x,y,h,face,o){ o=o||0; if(o.tint)im=rageTint(im); const fr=o.fr, w=fr?h*fr[1]/fr[2]:h*im.width/im.height; ctx.save(); ctx.translate(x,y-(o.hop||0)); if(o.flip!==undefined)ctx.scale(o.flip,1); else if(Math.cos(face||0)<0)ctx.scale(-1,1); if(o.fx)ctx.translate(o.fx,0); if(o.rot)ctx.rotate(o.rot); if(o.sx||o.sy)ctx.scale(o.sx||1,o.sy||1); if(fr)ctx.drawImage(im,fr[0],0,fr[1],fr[2],-w/2,-h+h*.12,w,h); else ctx.drawImage(im,-w/2,-h+h*.12,w,h); if(o.eye)rageEye(-w/2+o.eye[0]*w,-h+h*.12+o.eye[1]*h,h); ctx.restore(); }
 /* ===== 마법사 스킬 이펙트 시트: img/fx_sorc.png (8열×10줄, 칸 140px, 검은 배경은 투명) · 가산 합성으로 그림 ===== */
 const FXR={bolt:0,fire:1,frost:2,tele:3,chain:4,barrier:5,meteor:6,circle:7,blizz:8,cast:9};
 function fxAtlas(){ return sprGet('fx_sorc'); }
@@ -3566,12 +3569,14 @@ function drawPlayer(o,isMe,t){
   if(isMe&&me.buffs.barrier&&me.buffs.barrier.t>0&&fxAtlas())fxFrame(5,Math.floor(t*8)%4,x,y+2,84,84,0,Math.min(1,me.buffs.barrier.t*2)*.55);
   const fm=o.cls==='druid'?formOf(o):'', hk=fm?'druid_'+fm:o.cls, hh=fm==='bear'?104:fm==='wolf'?84:78;
   const HS=sprGet('hero_'+hk), WC=WALKS[hk], WK=(WC&&HS)?sprGet('hero_'+hk+'_walk'):null;
-  if(HS){ const A=heroAnim(o,t,meleeOf(o),WK?.4:1);
+  const RG=isMe&&me.buffs.rage&&me.buffs.rage.t>0, RGW=[[.605,.322],[.605,.356],[.623,.312],[.605,.315],[.616,.315],[.605,.300]];   /* 폭주: 눈 위치(칸별, 그림 비율) */
+  if(HS){ const A=heroAnim(o,t,meleeOf(o),WK?.4:1); if(RG){ ctx.save(); ctx.shadowColor='rgba(255,45,25,.95)'; ctx.shadowBlur=11+4*Math.sin(t*9); }   /* 폭주: 몸 테두리에 붉은 기운 */
     if(WK){ if(A.wa>.35)o._wkOn=true; else if(A.wa<.15)o._wkOn=false; }   /* 걷기 시트 ↔ 대기 그림 전환 (깜빡임 방지용 히스테리시스) */
     const HA=HATK[hk], AK=(HA&&HS)?sprGet('hero_'+hk+'_atk'):null;
-    if(AK&&A.ap<1){ const cw=AK.width/HA.n; let fi=0; while(fi<HA.t.length&&A.ap>=HA.t[fi])fi++; sprDraw(AK,x,y+16,hh*(AK.height/HA.k)/HS.height,o.face,{flip:A.flip,fr:[fi*cw,cw,AK.height]}); }   /* 공격 시트: 그림 자체에 동작이 있어서 코드 흔들림은 끔 */
-    else if(WK&&o._wkOn){ const cw=WK.width/WC.n, fi=Math.floor((((o._wp||0)/.2/WC.cyc)%1+1)%1*WC.n); sprDraw(WK,x,y+16,hh*(WK.height/WC.k)/HS.height,o.face,{...A,fr:[fi*cw,cw,WK.height]}); }
-    else sprDraw(HS,x,y+16,hh,o.face,A);
+    if(AK&&A.ap<1){ const cw=AK.width/HA.n; let fi=0; while(fi<HA.t.length&&A.ap>=HA.t[fi])fi++; sprDraw(AK,x,y+16,hh*(AK.height/HA.k)/HS.height,o.face,{flip:A.flip,tint:RG,fr:[fi*cw,cw,AK.height]}); }   /* 공격 시트: 그림 자체에 동작이 있어서 코드 흔들림은 끔 */
+    else if(WK&&o._wkOn){ const cw=WK.width/WC.n, fi=Math.floor((((o._wp||0)/.2/WC.cyc)%1+1)%1*WC.n); sprDraw(WK,x,y+16,hh*(WK.height/WC.k)/HS.height,o.face,{...A,tint:RG,eye:RG&&o.cls==='war'?RGW[fi]:null,fr:[fi*cw,cw,WK.height]}); }
+    else sprDraw(HS,x,y+16,hh,o.face,RG?{...A,tint:1,eye:o.cls==='war'?[.545,.317]:null}:A);
+    if(RG)ctx.restore();
     if(isMe&&me.hurt>0){ctx.fillStyle=`rgba(255,40,30,${me.hurt*2.5})`;ctx.beginPath();ctx.arc(x,y,15,0,6.283);ctx.fill();} }
   else if(fm){ /* 변신 그림이 없을 때: 곰·늑대 도형 */
     const a=o.face||0, ca=Math.cos(a), sa=Math.sin(a), px=-sa, py=ca, bear=fm==='bear', R=bear?19:13, sw=o.swing>0?(o.swing/.22):0, A=heroAnim(o,t,true,1), bb=A.hop*.4, lunge=sw*6;
