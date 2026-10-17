@@ -323,8 +323,6 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
 .hb .ic,.qb .ic{font-style:normal;font-size:20px;line-height:1}.hb .lb,.qb .lb{font-style:normal;font-size:10px;line-height:1.1;color:#cbbfa9}
 .qb button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;font-size:10px;width:56px;height:56px}
 .qb .ic{font-size:22px}
-#bRaid{position:absolute;left:0;top:0;transform:translate(-50%,-50%);height:50px;border-radius:25px;padding:0 18px;font-size:18px;font-weight:800;white-space:nowrap;z-index:6;display:flex;align-items:center;justify-content:center}
-#bRaid{border:2px solid #efe3c4;background:rgba(30,22,16,.82);color:#fff3dc;box-shadow:0 0 12px rgba(255,235,190,.3)}
 #combo{position:absolute;left:50%;top:104px;transform:translateX(-50%);text-align:center;pointer-events:none;font-family:var(--f-disp);color:#ffd36a;text-shadow:0 2px 6px #000,0 0 14px rgba(255,150,40,.7)}
 #combo b{font-size:34px;font-weight:900;display:inline-block;margin-right:6px}#combo span{font-size:13px;font-weight:800;letter-spacing:.2em}
 #combo.pop b{animation:cpop .25s ease-out}@keyframes cpop{0%{transform:scale(1.7)}100%{transform:scale(1)}}
@@ -332,7 +330,6 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
 #emg{position:fixed;inset:0;pointer-events:none;z-index:4;box-shadow:inset 0 0 90px 10px rgba(255,30,20,.55);animation:emg 1s ease-in-out infinite}
 #emg[hidden]{display:none}
 @keyframes emg{0%,100%{opacity:.25}50%{opacity:1}}
-#bRaid:active{transform:translate(-50%,-50%) scale(.94)}
 #ann{position:absolute;left:50%;top:78px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:3px;z-index:9;pointer-events:none;width:92%}
 #ann div{background:rgba(10,8,6,.82);border:1px solid var(--line2);border-radius:8px;padding:4px 10px;font-size:12.5px;font-weight:800;text-shadow:0 1px 2px #000;text-align:center;animation:tin .25s ease-out}
 #stoast{position:absolute;left:50%;top:14%;transform:translateX(-50%);z-index:60;pointer-events:none;background:rgba(12,9,8,.92);border:1px solid var(--line2);border-radius:10px;padding:8px 14px;font-size:14px;font-weight:700;opacity:0;transition:opacity .25s;white-space:nowrap;max-width:94%;overflow:hidden;text-overflow:ellipsis}
@@ -442,7 +439,6 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
       <div id="skills"></div>
     </div>
     <button id="bSkip" hidden aria-label="나가기">🚪 나가기</button><button id="bRevBig" hidden aria-label="즉시 부활">✨ 부활 <b id="revBigN">0</b></button><div id="emg" hidden></div>
-    <button id="bRaid" hidden aria-label="습격 스킵">⏭ 습격 스킵</button>
     <div id="rageV"></div>
     <div id="combo" hidden><b>0</b><span>COMBO</span></div>
     <div id="stoast"></div>
@@ -456,7 +452,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.2.0138</div>
+    <div class="ver" id="verT">v0.4.2.0139</div>
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -1201,9 +1197,9 @@ function netSend(){
   if(!R)return;
   let o;
   if(G.mode==='host'){
-    o={role:'host',st:G.stageIdx|0,tw:G.TW|0,ph:G.phase,w:G.wave,tm:Math.ceil(G.timer),sk:canSkip()?1:0,ls:G.laneShow||[],pl:myNet(),m:snapMobs(),ev:G.ev,bt:bossTel()};
+    o={role:'host',st:G.stageIdx|0,tw:G.TW|0,ph:G.phase,w:G.wave,tm:Math.ceil(G.timer),ls:G.laneShow||[],pl:myNet(),m:snapMobs(),ev:G.ev,bt:bossTel()};
   }else{
-    o={role:'guest',pl:myNet(),h:hitQ,vq:G.vq||0,sq:G.sq||0};
+    o={role:'guest',pl:myNet(),h:hitQ,vq:G.vq||0};
   }
   let s=JSON.stringify(o);
   while(s.length>3900&&o.ev&&o.ev.length>4){o.ev=o.ev.slice(-Math.floor(o.ev.length/2)); s=JSON.stringify(o);}
@@ -1243,7 +1239,6 @@ function hostNet(){
   lastGuestPres=pr;
   syncAlly(pr.pl);
   if(G.phase==='lobby'||G.phase==='title') return;
-  if(typeof pr.sq==='number'){ if(G.lastSq<0)G.lastSq=pr.sq; else if(pr.sq>G.lastSq){G.lastSq=pr.sq; skipWave('동료');} }
   const h=Array.isArray(pr.h)?pr.h:[];
   for(const e of h){ if(!Array.isArray(e)||e[0]<=lastHit)continue; lastHit=e[0];
     const m=G.mobs.find(x=>x.id===e[1]&&!x.dead); if(!m)continue;
@@ -1266,7 +1261,7 @@ function guestNet(){
   if(ph==='win'||ph==='lose'){ if(!G.endShown){ G.lostBoss=G.phase==='boss'; G.phase=ph; showEnd(); } return; }
   const prevWave=G.wave;
   G.phase=ph; G.wave=pr.w|0; G.timer=pr.tm|0;
-  G.bt=pr.bt||null; G.canSkip=!!pr.sk; G.laneShow=Array.isArray(pr.ls)?pr.ls.filter(v=>v===0||v===1||v===3):[];
+  G.bt=pr.bt||null; G.laneShow=Array.isArray(pr.ls)?pr.ls.filter(v=>v===0||v===1||v===3):[];
   if(G.wave!==prevWave&&G.wave>0) me.pot=3;
   // mobs mirror
   const seen=new Set();
@@ -1381,7 +1376,7 @@ function gimmick(dt){
 function startStage(){
   dmgReset(); G.stageIdx=selStage; G.stg=STAGES[selStage]; G.TW=G.stg.waves.length; preBoss(); setTheme(selStage); G.gts=[]; later(.5,()=>{ if(G.inGame)banner(`${G.stg.id} ${G.stg.n}`,`장비 Lv 합 ${Math.max(1,G.stg.icap-12)*EQSL.length}↑ · ${G.stg.tag||''}`); });
   G.allMode=false; G.allQ=[]; G.fires=[]; G.freeRev=1; me.rvGiven=0; me.seenRg=0; me.out=false; me.rvT=0;
-  G.wave=0;G.skipUsed=false;G.phase='prep';G.timer=10;G.mobs.length=0;G.ev=[];G.spawnQ=0;G.lastSq=-1;G.endShown=false;G.coop=!!guestPeer;
+  G.wave=0;G.skipUsed=false;G.phase='prep';G.timer=2;G.mobs.length=0;G.ev=[];G.spawnQ=0;G.lastSq=-1;G.endShown=false;G.coop=!!guestPeer;
   G.waveSides=[0,1,3]; G.nextSides=sidesFor(1); G.laneShow=G.nextSides;
   if(G.mode!=='guest'&&(me.clear|0)>selStage&&!STAGES[selStage].raid)later(.05,()=>{ if(G.inGame&&!G.allMode&&G.phase==='prep'&&G.wave===0&&G.stageIdx===selStage)startAllOut(); }); /* 이미 깬 스테이지는 들어가자마자 총공세 */
 }
@@ -1416,6 +1411,7 @@ function updateWaves(dt){
     G.timer-=dt;
     if(G.timer<=0) nextWave();
   }else if(G.phase==='wave'){
+    if(G.mode!=='guest'&&!G.allMode&&G.wave<G.TW&&canSkip())skipWave('',true); /* 습격 스킵 자동 적용: 이번 습격이 다 나오면 다음 습격을 바로 부름 */
     G.spawnT-=dt;
     const alive=G.mobs.filter(m=>!m.dead).length;
     if(G.spawnQ>0&&G.spawnT<=0&&alive<45){waveMob();G.spawnQ--;G.spawnT=Math.max(.25,.75-G.wave*.05);}
@@ -2569,7 +2565,6 @@ function updateHud(){
   $('#hWave').textContent= ph==='prep'?(G.wave>=G.TW?`우두머리 출현까지 ${Math.max(0,Math.ceil(G.timer))}초`:`${G.stg.id} · 습격 ${G.wave+1}/${G.TW} 까지 ${Math.max(0,Math.ceil(G.timer))}초`)
     : ph==='wave'?`${G.stg.id} · 습격 ${G.wave}/${G.TW}` : ph==='boss'?(G.stg&&G.stg.raid?'⚔️ 삼남매 레이드':'우두머리 토벌') : ph==='clear'?(G.mode==='guest'?'전리품 줍기':`전리품 줍기 ${Math.max(0,Math.ceil(G.clearT||0))}초`) : ph==='win'?'승리':'함락';
   { const dd=!!(me.dead&&G.inGame&&['prep','wave','boss'].includes(G.phase)); $('#bSkip').hidden=!(G.phase==='clear'||dd); $('#bRevBig').hidden=!dd; if(dd){ const rn=revItems(); $('#revBigN').textContent=rn; $('#bRevBig').classList.toggle('z',rn<=0); } }   /* 쓰러졌을 때: 승리 때와 같은 자리에 나가기 + 그 위에 부활 버튼 */
-  const sb=$('#bRaid'), cs=G.mode==='guest'?G.canSkip:canSkip(); sb.hidden=!cs||!!G.allMode; sb.textContent=G.wave>=G.TW?'⏭ 우두머리 소환':'⏭ 습격 스킵';
   const al=$('#hAlly');
   if(ally&&!ally.lobby){al.hidden=false; $('#hAllyN').textContent=`${ally.name||CLASSES[ally.cls].n} ${ally.lvl}`; $('#hAllyHp').style.transform=`scaleX(${clamp((ally.hp||0)/(ally.mh||1),0,1)})`;} else al.hidden=true;
   { const pn=me.pot+me.potBuy, rn=revItems(); $('#potN').textContent=pn; $('#revN').textContent=rn; $('#potN').parentNode.classList.toggle('z',pn<=0); $('#revN').parentNode.classList.toggle('z',rn<=0); } $('#bRev').classList.toggle('rdy',!!me.dead&&revItems()>0); $('#hGold').textContent=`💰 ${(me.gold|0).toLocaleString()}G`; { const P=lvPen(), gp=gearPen(), el=$('#lvPen'); if(el){ const L=[]; let bad=false;
@@ -2602,7 +2597,6 @@ $('#sheetX').onclick=closeSheet;
 $('#sheet').addEventListener('pointerdown',e=>{ if(e.target.id==='sheet')closeSheet(); });
 $('#bSkip').addEventListener('click',e=>{e.preventDefault(); if(G.inGame&&G.phase==='clear'){ G.phase='win'; showEnd(); /* 시간 종료와 동일하게 요약 화면 */ } else if(G.inGame&&me.dead){ confirmExit(()=>quitToTitle()); } });
 function startAllOut(){ G.allMode=true; G.fireT=1.5; G.shake=Math.max(G.shake,.5); sfx('boss'); allSpawn(); announce('🔥 총공세! 바닥에 불이 번집니다','#ff9a6a'); pushEv(['ann',1]); }
-$('#bRaid').addEventListener('click',e=>{e.preventDefault(); e.stopPropagation(); if(!G.inGame)return; if(G.mode==='guest'){G.sq=(G.sq||0)+1; toast('다음 습격 요청을 보냈어요');} else skipWave('');});
 $('#bBag').onclick=()=>openSheet('bag'); $('#bStat').onclick=()=>openSheet('stat'); $('#bSkillT').onclick=()=>openSheet('skill'); $('#bMenu').onclick=()=>openSheet('menu');
 const RBG=['linear-gradient(160deg,#25201a,#0f0b09)','radial-gradient(circle at 35% 30%,#33407a,#10142a 75%)','radial-gradient(circle at 35% 30%,#5e4f12,#1c1606 75%)','radial-gradient(circle at 35% 30%,#7a4414,#24120a 75%)','radial-gradient(circle at 35% 30%,#5e1236,#14040c 75%)'];
 const RBD=['#b4aea0','#4a7bff','#ffe24d','#ff8a2a','#ff3f6e'];
@@ -3929,8 +3923,7 @@ function render(t){
     if(!_camOk||dtc<0||dtc>.5||Math.hypot(tx-camX,ty-camY)>260){ camX=tx; camY=ty; _camOk=true; } else { const k=1-Math.exp(-dtc*14); camX+=(tx-camX)*k; camY+=(ty-camY)*k; } }
   let shx=0,shy=0; if(G.shake>0){shx=rand(-1,1)*G.shake*8;shy=rand(-1,1)*G.shake*8;}
   ctx.setTransform(DPR*ZOOM,0,0,DPR*ZOOM,(-camX*ZOOM+shx)*DPR,(-camY*ZOOM+shy)*DPR);
-  { const rb=$('#bRaid'); const sx=(VX-camX)*ZOOM, sy=(VY-camY)*ZOOM; const rw=rb.hidden?0:rb.offsetWidth, mg=Math.max(60,rw/2+10), inV=sx>mg&&sx<VW-mg&&sy>60&&sy<VH-100;
-    rb.style.visibility=(G.inGame&&!rb.hidden&&inV)?'visible':'hidden'; rb.style.top=(sy+66)+'px'; rb.style.left=sx+'px'; { const em=$('#emg'); em.hidden=!(G.inGame&&G.allMode&&(G.phase==='prep'||G.phase==='wave')); } }
+  { const em=$('#emg'); em.hidden=!(G.inGame&&G.allMode&&(G.phase==='prep'||G.phase==='wave')); }
   drawWorld(t); ctx.save(); ctx.globalCompositeOperation='screen'; ctx.fillStyle='rgba(255,238,215,.13)'; ctx.fillRect(camX-10,camY-10,VW/ZOOM+20,VH/ZOOM+20); ctx.restore(); drawLanesWorld(t); drawZones(t); drawFires(t); drawAuras(t); drawBossTel(); drawItemsWorld(t);
   const actors=[...G.mobs.filter(m=>!m.dead).map(m=>({y:m.y,f:()=>drawMob(m,t)})),{y:me.y,f:()=>drawPlayer(me,true,t)}];
   if(ally&&!ally.lobby)actors.push({y:ally.y,f:()=>drawPlayer(ally,false,t)});
