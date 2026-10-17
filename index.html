@@ -604,8 +604,8 @@ const SK={
   {k:'ironbody',e:'🏋️',n:'강철 육체',s:'강철',req:3,mp:0,cd:0,el:'#e08a6a',passive:1,d:l=>`패시브: 받는 피해 -${Math.min(30,(1.2*l).toFixed(1))}%, 초당 생명력 회복 +${(.15*l).toFixed(1)}%`},
   {k:'swift',e:'👟',n:'질풍',s:'질풍',req:9,mp:0,cd:0,el:'#9fe0ff',passive:1,d:l=>`패시브: 이동 속도 +${10+2*l}% (1레벨 +12%, 레벨당 +2%, 20레벨 +50%)`},
   {k:'rend',e:'🌪️',n:'폭풍 베기',s:'폭풍',req:6,mp:9,cd:5,el:'#ff8a4a',d:l=>`내 주변 넓은 범위의 모든 적에게 무기 피해 ${450+70*l}%, 이어서 ${(1.5+.12*l).toFixed(1)}초간 0.5초마다 ${50+5*l}% (레벨마다 지속시간 증가)`},
-  {k:'shout',e:'📣',n:'전투 함성',s:'함성',req:6,mp:10,cd:20,el:'#ffb259',d:l=>`${SHD(Math.max(1,l)).toFixed(1)}초간 나와 주변 동료(파티원 포함) 피해 +${24+6*l}%. 주변 적 ${3+Math.floor(l/3)}명을 도발해 5초간 나에게 달려들게 하며 피해 (3레벨마다 대상 +1). 재사용 대기 ${SHC(Math.max(1,l)).toFixed(1)}초 · 레벨이 오를수록 지속시간↑ 대기↓ (Lv10부터 지속시간 ≥ 대기)`},
-  {k:'whirl',e:'🌀',n:'회전베기',s:'회전',req:12,mp:8,cd:5.5,el:'#e8e0d0',d:l=>`주변 모든 적에게 무기 피해 ${180+30*l}%`},
+  {k:'shout',e:'📣',n:'전투 함성',s:'함성',req:6,mp:10,cd:20,el:'#ffb259',d:l=>`${SHD(Math.max(1,l)).toFixed(1)}초간 나와 주변 동료(파티원 포함) 피해 +${24+6*l}%. 주변(반경 320) 모든 적을 3초간 위압해 이동·공격 속도 -55%, 8초간 받는 피해 +10%. 재사용 대기 ${SHC(Math.max(1,l)).toFixed(1)}초 · 레벨이 오를수록 지속시간↑ 대기↓ (Lv10부터 지속시간 ≥ 대기)`},
+  {k:'whirl',e:'🌀',n:'회전베기',s:'회전',req:12,mp:8,cd:5.5,el:'#e8e0d0',d:l=>`주변 모든 적에게 무기 피해 ${180+30*l}% + 4초간 강력한 출혈(초당 타격 피해의 60%, 총 240%) · 출혈은 겹치지 않고 가장 센 것 하나만 적용`},
   {k:'leap',e:'🦘',n:'도약 강타',s:'도약',req:18,mp:10,cd:8,el:'#c98b4a',rg:300,d:l=>`적에게 뛰어들어 범위 피해 ${280+45*l}%`},
   {k:'berserk',e:'😡',n:'광폭화',s:'광폭',req:24,mp:14,cd:32,el:'#ff3b2f',d:l=>`8초간 공격 속도 +40%, 피해 +${30+5*l}%`},
   {k:'ragnarok',e:'💢',n:'파멸의 일격',s:'파멸',req:99,mp:50,cd:70,el:'#ff2a1a',rg:380,d:l=>`[궁극기] 기를 모은 뒤 주변 모든 적에게 무기 피해 ${1400+100*l}%, 3.5초 기절·넉백`},
@@ -1417,7 +1417,7 @@ function updateMobs(dt){
   for(let i=shots.length-1;i>=0;i--){ const sh=shots[i]; sh.t+=dt; if(sh.t>=sh.dur){ shots.splice(i,1); if(sh.rift){ spawnMob(0,sh.x,sh.y,true); for(let k=0;k<4;k++)spawnMob(k%2?10:0,sh.x+rand(-40,40),sh.y+rand(-40,40),false); burst(sh.x,sh.y,'#c070ff',40,320); efx.push({k:'ring',x:sh.x,y:sh.y,r0:10,r1:110,t:0,life:.5,col:'#c070ff',w:12}); sfx('slam'); G.shake=Math.max(G.shake,.4); continue; } for(const p of pls){ if(hyp(p.x-sh.x,p.y-sh.y)<sh.r+10) mobHitPlayer(p.i,sh.dmg); } pushEv(['bx',Math.round(sh.x),Math.round(sh.y),sh.r]); bombFx(sh.x,sh.y,sh.r); } }
   RAID_HIT=0;
   for(const m of G.mobs){ if(m.dead)continue; RAID_HIT=m.rk?1:0;
-    if(m.slowT>0)m.slowT-=dt; if(m.shockT>0)m.shockT-=dt; if(m.mark&&m.mark.t>0)m.mark.t-=dt;
+    if(m.slowT>0)m.slowT-=dt; if(m.shockT>0)m.shockT-=dt; if(m.mark&&m.mark.t>0)m.mark.t-=dt; if(m.vuln&&m.vuln.t>0)m.vuln.t-=dt;
     if(m.taunt)m.taunt.t-=dt;
     if(m.weak){ m.weak.t-=dt; if(m.weak.t<=0){ m.dmg=m.weak.d0; m.weak=null; } } /* 늑대 포효: 약화(공격력 감소) 해제 */
     if(m.burnT>0){ m.burnT-=dt; m.bt=(m.bt||.3)-dt; if(m.bt<=0){ m.bt=.3; if(!(m.boss&&m.counter>0)&&m.burnD>0){ addNum(m.x,m.y-m.r-4,Math.max(1,Math.round(m.burnD*.3)),m.bl?'#ff4a4a':'#ff9a3c',false); burst(m.x,m.y,m.bl?'#c01818':'#ff8a2a',4,90); applyDmg(m,m.burnD*.3,0); if(m.dead)continue; } } if(m.burnT<=0){ m.burnD=0; } }
@@ -1603,6 +1603,7 @@ function summon(b){ for(let i=0;i<5;i++){const a=i/5*Math.PI*2; spawnMob(i%2?2:0
 function applyDmg(m,dmg,slow,fx){
   if(m.dead||!(dmg>0))return;
   if(m.dfM>1)dmg/=m.dfM;
+  if(m.vuln&&m.vuln.t>0)dmg*=1+m.vuln.v;   /* 위압 함성: 받는 모든 피해 증가 (파티원 피해 포함) */
   m.hp-=dmg; m.flash=.12; if(slow){m.slowT=Math.max(m.slowT,slow); m.slowMax=Math.max(m.slowMax||0,slow);}
   if(fx){ if(fx.stun){ if(m.boss){ if(!(m.stunImm>0)){ m.stunT=Math.max(m.stunT||0,fx.stun); m.stunImm=fx.stun+2.5; addNum(m.x,m.y-m.r-22,'💫 기절!','#ffd84a',true); } } else { m.stunT=Math.max(m.stunT||0,fx.stun); if(m.et)m.et=null; if(m.ch)m.ch=null; if(m.dash)m.dash=null; } }   /* 우두머리도 기절함 (기절이 끝난 뒤 2.5초는 다시 기절하지 않아 연속 기절 방지) */ if(fx.burn){ m.burnT=Math.max(m.burnT||0,fx.burn); m.burnD=Math.max(m.burnD||0,fx.bd||0); m.bt=m.bt>0?m.bt:.3; m.bl=fx.bl?1:0; } }
   if(m.hp<=0) killMob(m);
@@ -2212,13 +2213,14 @@ function castSkill(o,key,real,tx,ty,lv,tgt){
     break;
   case 'shout':
     efx.push({k:'ring',x:o.x,y:o.y,r0:20,r1:320,t:0,life:.6,col:'#ffb259',w:7}); impact(o.x,o.y,'255,180,90',100); burst(o.x,o.y,'#ffcf7a',20,180);
-    if(real){ me.buffs.shout={v:(24+6*lv)/100,t:SHD(lv),m:SHD(lv)}; const sk=new Set(), n=3+Math.floor(lv/3); for(let i=0;i<n;i++){ const q=nearestMob(o.x,o.y,320,sk); if(!q)break; sk.add(q); hitMob(q,physDmg(1+.12*lv),0,1); knock(q,o.x,o.y,10); efx.push({k:'ring',x:q.x,y:q.y,r0:6,r1:34,t:0,life:.35,col:'#ffb259',w:5}); } }
+    if(real){ me.buffs.shout={v:(24+6*lv)/100,t:SHD(lv),m:SHD(lv)}; }
     else if(!me.dead&&hyp(me.x-o.x,me.y-o.y)<320){me.buffs.shout={v:(24+6*lv)/100,t:SHD(lv),m:SHD(lv)}; toast('동료의 전투 함성: 피해 증가','#ffb259');}
+    if(G.mode!=='guest'){ let nn=0; for(const q of mobsIn(o.x,o.y,320)){ q.slowT=Math.max(q.slowT||0,3); q.slowMax=Math.max(q.slowMax||0,3); q.vuln={t:8,v:.1}; if(nn++<12)efx.push({k:'ring',x:q.x,y:q.y,r0:6,r1:34,t:0,life:.35,col:'#ffb259',w:5}); } }   /* 위압: 호스트(혼자 하기 포함)가 몬스터에 직접 걸어 줌 — 동료(게스트)가 외쳐도 호스트에서 적용 */
     break;
   case 'whirl':
     efx.push({k:'whirl',o,t:0,life:.45,col:'#e8e0d0'});
     impact(o.x,o.y,'235,225,210',110); for(let i=0;i<24;i++){const a=i/24*6.283; parts.push({x:o.x+Math.cos(a)*70,y:o.y+Math.sin(a)*70,vx:-Math.sin(a)*260,vy:Math.cos(a)*260,t:0,life:.35,col:'#f4efe6',r:3,glow:1,dm:.9});}
-    if(real) for(const m of mobsIn(o.x,o.y,100*RS(lv))) hitMob(m,physDmg(1.8+.3*lv));
+    if(real) for(const m of mobsIn(o.x,o.y,100*RS(lv))){ const r=physDmg(1.8+.3*lv); hitMob(m,r,0,0,{burn:4,bd:r.v*.6,bl:1}); }   /* 강력한 출혈: 4초, 초당 타격 피해의 60% (늑대 평타 25%·물어뜯기 45%보다 셈) */
     break;
   case 'leap':
     if(real){me.leap={sx:me.x,sy:me.y,ex:tx,ey:ty,t:0,dur:.35};}
@@ -3448,6 +3450,7 @@ function drawMob(m,t){
     ctx.fillStyle='#c9a14a'; ctx.beginPath(); for(let i=0;i<5;i++){const a=fa+Math.PI+(i-2)*.32; ctx.moveTo(X+Math.cos(a)*r*.2,Y+Math.sin(a)*r*.2); ctx.lineTo(X+Math.cos(a)*r*.62,Y+Math.sin(a)*r*.62); ctx.lineTo(X+Math.cos(a+.12)*r*.25,Y+Math.sin(a+.12)*r*.25);} ctx.fill(); ctx.lineWidth=1.5; ctx.stroke();
   }
   if(m.slowT>0){ctx.fillStyle='rgba(140,210,255,.3)';ctx.beginPath();ctx.arc(x,y,r+2,0,6.283);ctx.fill();}
+  if(m.vuln&&m.vuln.t>0){ ctx.strokeStyle=`rgba(255,178,89,${.45+.3*Math.sin(t*8)})`; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(x,y,r+4,0,6.283); ctx.stroke(); }
   if(m.mark&&m.mark.t>0){ const pr=.6+.4*Math.sin(t*10); ctx.strokeStyle=`rgba(255,90,90,${pr})`; ctx.lineWidth=2.4; ctx.beginPath(); ctx.arc(x,y,r+7,0,6.283); ctx.stroke(); for(let k=0;k<4;k++){ const a=k*1.5708+t*1.2; ctx.beginPath(); ctx.moveTo(x+Math.cos(a)*(r+3),y+Math.sin(a)*(r+3)); ctx.lineTo(x+Math.cos(a)*(r+13),y+Math.sin(a)*(r+13)); ctx.stroke(); } }
   if(m.shockT>0){ const fl=Math.sin(t*38); ctx.strokeStyle=`rgba(190,215,255,${.55+.3*fl})`; ctx.lineWidth=2; ctx.beginPath(); for(let k=0;k<5;k++){ const a=t*9+k*1.257, rr=r+2+((k*7+(t*20|0))%4); ctx.moveTo(x+Math.cos(a)*rr,y+Math.sin(a)*rr); ctx.lineTo(x+Math.cos(a+.4)*(rr+5),y+Math.sin(a+.4)*(rr+5)); } ctx.stroke(); }
   if(m.burnT>0){ const fl=.5+.5*Math.sin(t*30); ctx.fillStyle=m.bl?`rgba(200,${20+fl*20|0},30,${.28+.12*fl})`:`rgba(255,${100+fl*50|0},30,${.28+.12*fl})`; ctx.beginPath(); ctx.arc(x,y,r+3,0,6.283); ctx.fill(); }
