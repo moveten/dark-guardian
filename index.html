@@ -417,7 +417,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.0.0123</div>
+    <div class="ver" id="verT">v0.4.0.0124</div>
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -1673,7 +1673,7 @@ function drMul(){ const b=me.buffs; let m=1; if(b.fury&&b.fury.t>0&&b.fury.dr)m*
 function setForm(f){ const hr=me.hp/me.D.maxHp; me.form=f||''; me.D=derive(me); me.hp=Math.min(me.D.maxHp,me.D.maxHp*hr); me.mp=Math.min(me.mp,me.D.maxMp); me.formLock=.3; me.vx=me.vy=0; uiDirty=true; }
 function critRoll(v){const c=Math.random()*100<me.D.crit; return {v:c?v*1.5*(me.D.sp&&me.D.sp.hdag?1.4:1):v,crit:c};}
 function physDmg(mult){const D=me.D; const w=ri(D.wmn,D.wmx)+D.dmg; return critRoll(w*(1+D.str/100+D.dmgPct/100+buffDmg())*mult*(D.sp.rage&&me.hp<D.maxHp*.5?1.3:1));}
-const ENEM=.002; /* 에너지 1당 마법 피해 +0.2% */
+const ENEM=.003; /* 에너지 1당 마법 피해 +0.3% */
 function spellDmg(base,noPct){const D=me.D; return critRoll(base*(1+D.ene*ENEM+(noPct?0:D.dmgPct/100)+buffDmg())*(1+((D.wmn+D.wmx)/2)/35)*(D.sp.tome?1.2:1));}
 function guardMul(){let g=0; if(me.aura==='guard')g=Math.max(g,(30+6*skLv(me,'guard'))/100);
   if(ally&&!ally.lobby&&!ally.dead&&ally.aura==='guard'&&hyp(ally.x-me.x,ally.y-me.y)<320)g=Math.max(g,(30+6*ally.al)/100); return 1+g;}
@@ -1694,7 +1694,7 @@ function takeDmg(raw,fire,rh){
   if(me.hp<=0){ goDown(); }
 }
 function revItems(){ return (G.freeRev|0)+(me.rev|0); }
-function goDown(){ me.hp=0; me.dead=true; me.leap=null; me.rvT=0; if(me.cls==='necro'&&minions.length){ for(const mn of minions){ const K=MNK[mn.k]; if(mn.fe&&typeof rvDrop==='function')rvDrop(mn); burst(mn.x,mn.y,(K&&K.col)||'#8fe6d0',14,200); } minions.length=0; } /* 강령술사가 쓰러지면 소환수도 함께 사라짐 */ if(me.form||me.spirit){ me.form=''; me.spirit=null; me.D=derive(me); me.hp=0; } spark(me.x,me.y,'#7a1010',20);
+function goDown(){ me.hp=0; me.dead=true; me.leap=null; me.rvT=0; if((me.cls==='necro'||me.cls==='druid')&&minions.length){ for(const mn of minions){ const K=MNK[mn.k]; if(mn.fe&&typeof rvDrop==='function')rvDrop(mn); burst(mn.x,mn.y,(K&&K.col)||'#8fe6d0',14,200); } minions.length=0; } /* 강령술사·드루이드가 쓰러지면 소환수(까마귀 포함)도 함께 사라짐 */ if(me.form||me.spirit){ me.form=''; me.spirit=null; me.D=derive(me); me.hp=0; } spark(me.x,me.y,'#7a1010',20);
   { const lost=Math.floor((me.gold|0)*.05); if(lost>0){ me.gold-=lost; saveChar(); uiDirty=true; later(.6,()=>toast(`💸 쓰러져서 ${lost}G를 잃었어요 (보유금의 5%)`,'#e0a070')); } }
   const coopAlive=ally&&!ally.lobby&&!ally.dead;
   me.respawn=coopAlive?30:revItems()>0?12:1.6;
@@ -2741,7 +2741,7 @@ function unequip(k){
 }
 function renderStat(){
   const SKM=sheetMode==='skill'||sheetMode==='passive', PAS=sheetMode==='passive'; markTabs(); sheetHead();
-  const D=me.D, S=[['str','힘','물리 피해 +1% · 무거운 장비 착용'],['dex','민첩','공격 속도 +0.25% · 치명타 +0.12% · 방어력 +0.5'],['vit','체력','생명력 +4 · 받는 피해 -0.12%'],['ene','에너지','마나 +1 · 마법 피해 +0.2% · 쿨감 0.1%']];
+  const D=me.D, S=[['str','힘','물리 피해 +1% · 무거운 장비 착용'],['dex','민첩','공격 속도 +0.25% · 치명타 +0.12% · 방어력 +0.5'],['vit','체력','생명력 +4 · 받는 피해 -0.12%'],['ene','에너지','마나 +1 · 마법 피해 +0.3% · 쿨감 0.1%']];
   const mult=1+(D.str+D.dmgPct)/100, aMin=Math.round((D.wmn+D.dmg)*mult*(me.cls==='sorc'||me.cls==='necro'?1+D.ene/150:1)), aMax=Math.round((D.wmx+D.dmg)*mult*(me.cls==='sorc'||me.cls==='necro'?1+D.ene/150:1)), aAvg=(aMin+aMax)/2, cr=D.crit/100;
   const k1=SK[me.cls][0], l1=Math.max(1,skLv(me,k1.k)); let s1=aAvg;
   if(k1.k==='bash')s1=aAvg*(3+.5*l1); else if(k1.k==='smite')s1=aAvg*(2.6+.4*l1)+8+7*l1; else if(k1.k==='fireball')s1=(18+13*l1)*(1+D.ene*ENEM+D.dmgPct/100);
