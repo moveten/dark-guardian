@@ -267,7 +267,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
 @keyframes idleB{0%,100%{transform:translateY(0) scale(1,1)}50%{transform:translateY(-3px) scale(.985,1.035)}}
 @keyframes idleF{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-7px) rotate(1.2deg)}}
 @media (prefers-reduced-motion:reduce){.cc .cpic img{animation:none!important}}
-.cc .cpic .cem{font-size:52px;line-height:1}
+.cc .cpic .cem{font-size:52px;line-height:1}.cic{vertical-align:-5px;object-fit:contain;flex:none;filter:drop-shadow(0 1px 2px rgba(0,0,0,.7))}.cem .cic{vertical-align:baseline}
 .cc b{display:block;max-width:100%;font-family:var(--f-disp);font-size:21px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cc .cl{font-size:13px;color:var(--mute)}.cc .cl em{font-style:normal;color:var(--gold);font-weight:700}
 .cc .cpt{font-size:11.5px;color:#9fd18b}
@@ -417,7 +417,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.0.0122</div>
+    <div class="ver" id="verT">v0.4.0.0123</div>
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -1013,6 +1013,7 @@ function baseText(it){
 
 /* ================= CHARACTER ================= */
 const CLSE={war:'🪓',pal:'🛡️',sorc:'🔮',necro:'💀',druid:'🌿'};
+const clsIc=(c,s)=>`<img class="cic" src="img/cls_${c}.png" alt="${CLSE[c]||''}" style="width:${s||22}px;height:${s||22}px" decoding="async">`;   /* 직업 엠블럼 (HTML 안에서 이모지 대신) */
 const lsDel=k=>{try{localStorage.removeItem(k)}catch(e){} if(clHook&&k.indexOf('dkdef2.')===0&&!CLSKIP.test(k))clHook();};
 const genId=()=>'c'+Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36);
 const charKey=id=>'dkdef2.c.'+id;
@@ -2590,13 +2591,13 @@ function dragDrop(a,b){
   if(a.t==='eq'&&b.t==='inv'){ if(me.inv[b.i]){ renderBag(); return; } unequip(a.k); return; }
   renderBag();
 }
-function sheetHead(){ $('#sheetT').innerHTML=`${CLSE[me.cls]} ${CLASSES[me.cls].n} <span style="color:var(--gold)">Lv ${me.lvl}</span> <span id="goldSend" style="color:#ffd84a;margin-left:6px;cursor:pointer;border-bottom:1px dashed #ffd84a88">💰 ${(me.gold|0).toLocaleString('ko-KR')}G</span>`; }
+function sheetHead(){ $('#sheetT').innerHTML=`${clsIc(me.cls,22)} ${CLASSES[me.cls].n} <span style="color:var(--gold)">Lv ${me.lvl}</span> <span id="goldSend" style="color:#ffd84a;margin-left:6px;cursor:pointer;border-bottom:1px dashed #ffd84a88">💰 ${(me.gold|0).toLocaleString('ko-KR')}G</span>`; }
 function sendGold(){
   if(G.mode!=='solo'&&!G.titleSheet&&G.inGame){ sheetToast('온라인 중에는 골드를 보낼 수 없어요','#ff8a7a'); return; }
   const others_=charIds().filter(x=>x!==me.id).map(loadChar).filter(Boolean);
   if(!others_.length){ sheetToast('보낼 다른 캐릭터가 없어요','#ff8a7a'); return; }
   const have=me.gold|0; let to=others_[0].id;
-  const rows=others_.map(c=>`<button class="btn gsT" data-to="${c.id}" style="text-align:left">${CLSE[c.cls]} ${esc(dispName(c))} · Lv ${c.lvl} <span style="color:var(--mute);font-weight:400">(${(c.gold|0).toLocaleString()}G)</span></button>`).join('');
+  const rows=others_.map(c=>`<button class="btn gsT" data-to="${c.id}" style="text-align:left">${clsIc(c.cls,20)} ${esc(dispName(c))} · Lv ${c.lvl} <span style="color:var(--mute);font-weight:400">(${(c.gold|0).toLocaleString()}G)</span></button>`).join('');
   modal(`<h3>💰 골드 보내기</h3><p class="meta" style="margin:0 0 8px">보유 ${have.toLocaleString()}G · 받을 캐릭터를 고르세요</p><div class="col" style="margin-bottom:8px">${rows}</div><input id="gsAmt" type="number" inputmode="numeric" min="1" max="${have}" placeholder="보낼 금액" style="width:100%;box-sizing:border-box;padding:11px;font-size:16px;border-radius:8px;border:1px solid var(--line2);background:#0f0b09;color:#fff"><div class="row2" style="margin:8px 0"><button class="btn" data-q="1000">+1,000</button><button class="btn" data-q="10000">+10,000</button><button class="btn" data-q="all">전부</button></div><p class="meta" id="gsMsg" style="min-height:18px;margin:0 0 6px;color:#ff8a7a"></p><div class="row2"><button class="btn" id="gsNo">취소</button><button class="btn primary" id="gsGo">보내기</button></div>`,m=>{
     const mark=()=>m.querySelectorAll('.gsT').forEach(b=>{ b.style.borderColor=b.dataset.to===to?'var(--gold)':''; b.style.color=b.dataset.to===to?'var(--gold)':''; }); mark();
     m.querySelectorAll('.gsT').forEach(b=>b.onclick=()=>{ to=b.dataset.to; mark(); });
@@ -2641,7 +2642,7 @@ function sortInv(mode){ shardRepack(me); const its=me.inv.filter(Boolean);
   me.inv=its.concat(Array(Math.max(0,INVN-its.length)).fill(null)); selItem=null; saveChar(); renderBag(); sheetToast(mode==='type'?'종류별로 정리했어요':'등급별로 정리했어요'); }
 function sendShard(){ const it=selItem&&selItem.it, ix=selItem&&selItem.inv; if(!isShard(it)||ix===undefined)return; const n=it.n|0;
   const others_=charIds().filter(x=>x!==me.id).map(loadChar).filter(Boolean);
-  const rows=others_.map(c=>{ const ok=shardRoom(c,n); return `<button class="btn" data-to="${c.id}" ${ok?'':'disabled'} style="text-align:left">${CLSE[c.cls]} ${esc(dispName(c))} · Lv ${c.lvl} <span style="color:var(--mute);font-weight:400">${ok?`(조각 ${shardCount(c)}개 보유)`:'(가방 자리 부족)'}</span></button>`; }).join('');
+  const rows=others_.map(c=>{ const ok=shardRoom(c,n); return `<button class="btn" data-to="${c.id}" ${ok?'':'disabled'} style="text-align:left">${clsIc(c.cls,20)} ${esc(dispName(c))} · Lv ${c.lvl} <span style="color:var(--mute);font-weight:400">${ok?`(조각 ${shardCount(c)}개 보유)`:'(가방 자리 부족)'}</span></button>`; }).join('');
   modal(`<h3>📤 그림자 조각 보내기</h3><p style="margin:0 0 10px;font-size:13px;color:${RARC[4]}">🌑 그림자 조각 ${n}개 (이 칸 전체)</p><div class="col">${rows}<button class="btn" id="sX">취소</button></div>`,m=>{
     m.querySelector('#sX').onclick=closeModal;
     m.querySelectorAll('[data-to]').forEach(b=>b.onclick=()=>{ const t=loadChar(b.dataset.to); if(!t||!shardRoom(t,n))return; shardAdd(t,n); lsSet(charKey(t.id),JSON.stringify(packChar(t))); me.inv[ix]=null; selItem=null; saveChar(); closeModal(); sfx('pick'); shopMsg=''; renderBag(); toast(`${dispName(t)}에게 조각 ${n}개를 보냈어요`,'#9fd18b'); });
@@ -2651,7 +2652,7 @@ function sendPick(){
   const it=selItem&&selItem.it; if(!it||(selItem.inv===undefined&&selItem.eq===undefined))return;
   if(isShard(it)){ sendShard(); return; }
   const others_=charIds().filter(x=>x!==me.id).map(loadChar).filter(Boolean);
-  const rows=others_.map(c=>{ const free=c.inv.filter(x=>!x).length; return `<button class="btn" data-to="${c.id}" ${free?'':'disabled'} style="text-align:left">${CLSE[c.cls]} ${esc(dispName(c))} · Lv ${c.lvl} <span style="color:var(--mute);font-weight:400">${free?`(빈 칸 ${free})`:'(가방 가득)'}</span></button>`; }).join('');
+  const rows=others_.map(c=>{ const free=c.inv.filter(x=>!x).length; return `<button class="btn" data-to="${c.id}" ${free?'':'disabled'} style="text-align:left">${clsIc(c.cls,20)} ${esc(dispName(c))} · Lv ${c.lvl} <span style="color:var(--mute);font-weight:400">${free?`(빈 칸 ${free})`:'(가방 가득)'}</span></button>`; }).join('');
   modal(`<h3>📤 아이템 보내기</h3><p style="margin:0 0 10px;font-size:13px;color:${RARC[it.rar]}">${esc(it.name)}</p><div class="col">${rows}<button class="btn" id="sX">취소</button></div>`,m=>{
     m.querySelector('#sX').onclick=closeModal;
     m.querySelectorAll('[data-to]').forEach(b=>b.onclick=()=>{ const t=loadChar(b.dataset.to); if(!t)return; const i=t.inv.indexOf(null); if(i<0)return; t.inv[i]=it; lsSet(charKey(t.id),JSON.stringify(packChar(t))); if(selItem.inv!==undefined)me.inv[selItem.inv]=null; else { me.eq[selItem.eq]=null; me.D=derive(me); me.hp=Math.min(me.hp,me.D.maxHp); me.mp=Math.min(me.mp,me.D.maxMp); } selItem=null; saveChar(); closeModal(); sfx('pick'); shopMsg=''; renderBag(); toast(`${dispName(t)}에게 보냈어요`,'#9fd18b'); });
@@ -3027,7 +3028,7 @@ function carFx(box){ const mid=box.scrollLeft+box.clientWidth/2; let best=null,b
 function buildCarousel(chars){
   const box=$('#charList'); box.innerHTML='';
   for(const c of chars){ const el=document.createElement('div'); el.className='cc'; el.dataset.id=c.id; el.setAttribute('role','button');
-    el.innerHTML=`<div class="cpic ${c.cls}"><span class="cem">${CLSE[c.cls]}</span><img src="img/hero_${c.cls}.png" alt="" onload="this.previousElementSibling.style.display='none'" onerror="this.remove()"></div><b>${esc(dispName(c))}</b><span class="cl">${CLASSES[c.cls].n} · <em>Lv ${c.lvl}</em></span><span class="cl">💰 ${(c.gold|0).toLocaleString()}</span><span class="cpt">${c.statPts+c.skillPts?`포인트 ${c.statPts+c.skillPts}`:'&nbsp;'}</span>`;
+    el.innerHTML=`<div class="cpic ${c.cls}"><span class="cem">${clsIc(c.cls,56)}</span><img src="img/hero_${c.cls}.png" alt="" onload="this.previousElementSibling.style.display='none'" onerror="this.remove()"></div><b>${esc(dispName(c))}</b><span class="cl">${CLASSES[c.cls].n} · <em>Lv ${c.lvl}</em></span><span class="cl">💰 ${(c.gold|0).toLocaleString()}</span><span class="cpt">${c.statPts+c.skillPts?`포인트 ${c.statPts+c.skillPts}`:'&nbsp;'}</span>`;
     el.onclick=()=>{ if(el.getAttribute('aria-current')==='true'&&c.id===selId) charMenu(c.id); else carCenter2(box,el); };
     box.appendChild(el); }
   if(chars.length<MAXCHAR){ const el=document.createElement('div'); el.className='cc add'; el.dataset.id=''; el.setAttribute('role','button'); el.innerHTML='<span class="plus2">＋</span><b>새 캐릭터</b><small>'+chars.length+' / '+MAXCHAR+'</small>'; el.onclick=()=>{ if(el.getAttribute('aria-current')==='true') showNew(true); else carCenter2(box,el); }; box.appendChild(el); }
@@ -3087,8 +3088,8 @@ function askName(title,init,okTxt,cb,exceptId){
 }
 function showNew(canBack){ $('#bNewBack').hidden=canBack===false; const box=$('#newCards'); box.innerHTML='';
   for(const k of ['war','pal','sorc','necro','druid']){ const c=CLASSES[k]; const b=document.createElement('button'); b.className='ccard';
-    b.innerHTML=`<div class="cn"><span style="font-size:24px">${CLSE[k]}</span>${c.n}</div><div class="cd">${c.d}</div>`;
-    b.onclick=()=>askName(`${CLSE[k]} ${c.n} · 닉네임 정하기`,'','✔ 만들기',v=>{ const p=createChar(k,v); if(p){ show('#sTitle'); renderTitle(); } });
+    b.innerHTML=`<div class="cn">${clsIc(k,34)}${c.n}</div><div class="cd">${c.d}</div>`;
+    b.onclick=()=>askName(`${clsIc(k,26)} ${c.n} · 닉네임 정하기`,'','✔ 만들기',v=>{ const p=createChar(k,v); if(p){ show('#sTitle'); renderTitle(); } });
     box.appendChild(b); }
   show('#sNew'); }
 $('#bNew').onclick=()=>showNew(true);
@@ -3097,7 +3098,7 @@ $('#bNewCl').onclick=()=>cloudModal();
 const RENCOST=1000000;
 function charMenu(id){
   const p=loadChar(id); if(!p)return;
-  modal(`<h3>${CLSE[p.cls]} ${esc(dispName(p))} <small style="color:var(--mute);font-weight:400">Lv ${p.lvl} · ${CLASSES[p.cls].n}</small></h3><div class="col"><button class="btn primary" id="cmGear">🎒 장비 · 능력치 정비</button><button class="btn" id="cmShop">🛒 상점</button><button class="btn" id="cmRen">✏️ 이름 변경 (${RENCOST.toLocaleString()}G)</button><button class="btn" id="cmDel">🗑️ 삭제</button><button class="btn" id="cmX">닫기</button></div>`,m=>{
+  modal(`<h3>${clsIc(p.cls,26)} ${esc(dispName(p))} <small style="color:var(--mute);font-weight:400">Lv ${p.lvl} · ${CLASSES[p.cls].n}</small></h3><div class="col"><button class="btn primary" id="cmGear">🎒 장비 · 능력치 정비</button><button class="btn" id="cmShop">🛒 상점</button><button class="btn" id="cmRen">✏️ 이름 변경 (${RENCOST.toLocaleString()}G)</button><button class="btn" id="cmDel">🗑️ 삭제</button><button class="btn" id="cmX">닫기</button></div>`,m=>{
     m.querySelector('#cmGear').onclick=()=>{ closeModal(); openTitleSheet('bag'); };
     m.querySelector('#cmShop').onclick=()=>{ closeModal(); openTitleSheet('shop'); };
     m.querySelector('#cmRen').onclick=()=>{ if((p.gold|0)<RENCOST){ warn(`골드가 부족해요. 이름 변경은 ${RENCOST.toLocaleString()}G가 필요해요 (보유 ${(p.gold|0).toLocaleString()}G)`); return; }
