@@ -417,7 +417,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.0.0117</div>
+    <div class="ver" id="verT">v0.4.0.0118</div>
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -1499,6 +1499,9 @@ function bossAI(m,dt,pls,sf){
       else if(t.kind==='nova'){ for(const p of pls){ if(hyp(p.x-t.x,p.y-t.y)<t.r) mobHitPlayer(p.i,m.dmg*1.2*BSKM,'slow',3); } pushEv(['s',Math.round(t.x),Math.round(t.y),t.r]); slamFx(t.x,t.y,t.r,'#8a5ad0'); }
       else if(t.kind==='stack'){ for(const p of pls.filter(p=>p.i>=10&&hyp(p.x-t.x,p.y-t.y)<t.r)) mobHitPlayer(p.i,m.dmg*1.9*BSKM); const ins=pl1.filter(p=>hyp(p.x-t.x,p.y-t.y)<t.r); const tot=(pl1.length>1?m.dmg*3.6:m.dmg*1.9)*BSKM; if(ins.length){ for(const p of ins) mobHitPlayer(p.i,tot/ins.length); if(pl1.length>1&&ins.length>1&&G.mode!=='guest')announce('🤝 함께 맞아서 피해를 나눴어요','#9fd0ff'); } pushEv(['s',Math.round(t.x),Math.round(t.y),t.r]); slamFx(t.x,t.y,t.r,'#5a8aff'); }
       else if(t.kind==='halve'){ for(const p of pl1){ if(hyp(p.x-t.x,p.y-t.y)<t.r){ if(p.i===1)applyStatus('halve',0); else pushEv(['x',2,'halve',0]); } } for(const mn of minions){ if(mn.rez>0||hyp(mn.x-t.x,mn.y-t.y)>=t.r)continue; mnTake(mn,mn.mh*(me.D.sp&&me.D.sp.hhelm?.5:HALVE_PCT),true); } /* 소환수도 영역 안이면 최대 생명력의 70% 고정 피해 */ pushEv(['s',Math.round(t.x),Math.round(t.y),t.r]); slamFx(t.x,t.y,t.r,'#c040e0'); G.shake=1; }
+      else if(t.kind==='drain'){ let n=0; for(const p of pls){ if(p.i>=10||hyp(p.x-t.x,p.y-t.y)>=t.r)continue; n++; if(p.i===1)applyStatus('mdrain',.4); else pushEv(['x',2,'mdrain',.4]); }   /* 범위 안 플레이어 마나 흡수(최대 마나의 약 40%, 에너지로 경감) → 보스는 1명당 최대 생명력의 1.5% 회복 */
+        pushEv(['s',Math.round(t.x),Math.round(t.y),t.r]); slamFx(t.x,t.y,t.r,'#b070ff'); burst(m.x,m.y,'#b070ff',24,220);
+        if(n){ const hl=m.max*.015*n; m.hp=Math.min(m.max,m.hp+hl); addNum(m.x,m.y-m.r-10,'+'+Math.round(hl),'#c090ff',false); } }
       else if(t.kind==='counter'){ m.counter=2.6; pushEv(['cn',1]); announce('⚔️ 반격 태세! 스킬을 쓰면 크게 다쳐요 (일반공격은 OK)','#ffb347'); sfx('block'); }
       else if(t.kind==='blink'){ burst(m.x,m.y,'#241044',26,260); m.x=clamp(t.x,40,WW-40); m.y=clamp(t.y,40,WH-40); m.fa=Math.atan2(best.y-m.y,best.x-m.x); burst(m.x,m.y,'#9a6bff',30,320); slamFx(m.x,m.y,t.r,'#9a6bff'); pushEv(['s',Math.round(m.x),Math.round(m.y),t.r]); G.shake=Math.max(G.shake,.3);
         for(const p of pls){ if(hyp(p.x-m.x,p.y-m.y)<t.r+12) mobHitPlayer(p.i,m.dmg*2); } m.cd=Math.max(m.cd,.6); }   /* 도착 즉시 일반 공격(2배) */
@@ -1546,7 +1549,10 @@ function raidPick(m,best,bd,pls){
   if(K==='shd'){
     if(bd>240&&Math.random()<(bd>520?1:.65)){ const a0=Math.atan2(best.y-m.y,best.x-m.x); m.tel={k:'slam',kind:'blink',x:clamp(best.x+Math.cos(a0)*30,40,WW-40),y:clamp(best.y+Math.sin(a0)*30,40,WH-40),r:56,t:0,dur:(m.awk?.65:.9),col:'#9a6bff',nm:'🌑 그림자 이동'}; return; }   /* 멀리 있으면 내 뒤로 순간이동해서 바로 일반 공격 */
     if(bd>520){ m.bt=rand(1,2); return; }
-    if(Math.random()>=.2){ m.bt=rand(2,4); return; } cnt(); return; }   /* 반격 태세 확률 20% */
+    const rs=Math.random();   /* 가까이: 반격 태세 20% · 마나 흡수 20%(범위 안일 때) · 나머지는 잠시 쉬고 평타 */
+    if(rs<.2){ cnt(); return; }
+    if(rs<.4&&bd<290){ m.tel={k:'slam',kind:'drain',x:m.x,y:m.y,r:260,t:0,dur:1.0,col:'#b070ff',nm:'🌀 마나 흡수'}; return; }
+    m.bt=rand(2,4); return; }
   if(m.hp<m.max*.3&&!m.ult){ m.ult=1; const pts=pls.filter(q=>q.i<10).map(q=>({x:q.x,y:q.y})); while(pts.length<(K==='war'?12:14))pts.push({x:rand(80,WW-80),y:rand(80,WH-80)});
     m.tel={k:'slam',kind:'multi',x:m.x,y:m.y,pts,r:K==='war'?95:100,t:0,dur:2.4,mul:2,st:K==='war'?'stun':'slow',sd:K==='war'?1.2:3,col:K==='war'?'#ff3a2a':'#ff7a2a',nm:K==='war'?'💢 파멸의 일격':'🌠 대재앙'};
     announce(K==='war'?'💢 그림자 전사의 파멸의 일격! 붉은 원을 피하세요':'🌠 그림자 법사의 대재앙! 붉은 원을 피하세요','#ff6a4a'); return; }
@@ -2609,7 +2615,7 @@ function renderBag(){
   shardAdd(me,0); markTabs(); sheetHead();
   const eqOrder=['weapon','armor','helm','amulet','ring1','ring2'].concat(['shield']);
   let h='<div class="bagtop" style="display:flex;flex-direction:column;gap:10px;min-width:0"><div class="eq">'+eqOrder.map(k=>{const it=me.eq[k]; return `<div style="position:relative">${cellHtml(it,'slot',`data-eq="${k}"`)}<div class="sl" style="position:absolute;bottom:2px;left:0;right:0;font-size:9.5px;color:var(--mute);text-align:center;pointer-events:none">${eqLbl(k)}</div></div>`;}).join('')+'</div>';
-  h+=`<div class="meta" style="font-size:12px;color:var(--mute)">⚔️ 전투력 <b style="color:#ffd84a">${calcCP(me).toLocaleString()}</b> · 빨간 칸은 아직 착용할 수 없어요</div><div style="display:flex;flex-wrap:nowrap;gap:4px"><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap" data-sort="rar">정렬(등급순)</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap" id="aBulk">일괄 판매</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap;${asLv>=0?`border-color:${RARC[asLv]};color:${RARC[asLv]};background:${['rgba(233,226,212,.14)','rgba(90,120,255,.28)','rgba(255,214,60,.24)'][asLv]};box-shadow:0 0 8px ${['rgba(233,226,212,.3)','rgba(110,140,255,.6)','rgba(255,214,60,.55)'][asLv]};font-weight:800`:''}" id="aAuto">자동판매 ${ASN[asLv+1]}</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap;${syLv>=0?`border-color:#c9a0ff;color:#d9b8ff;background:rgba(150,90,255,.22);box-shadow:0 0 8px rgba(150,90,255,.5);font-weight:800`:''}" id="aSyn" aria-pressed="${syLv>=0}">자동합성 ${syLv>=0?'ON':'OFF'}</button></div>${(shardCount(me)>0||(me.clear|0)>=15)?`<button class="btn sm" id="aShard" style="width:100%;margin-top:5px;padding:8px 2px;font-size:13px;white-space:nowrap;${shardCount(me)>=SHARD_N?'border-color:#ff4f7a;color:#ffb0c4;box-shadow:0 0 10px rgba(255,79,122,.45);font-weight:800':''}">🌑 그림자 조각 ${shardCount(me)} / ${SHARD_N}${shardCount(me)>=SHARD_N?' · 영웅 아이템 교환 가능!':''}</button>`:''}`;
+  h+=`<div class="meta" style="font-size:12px;color:var(--mute)">⚔️ 전투력 <b style="color:#ffd84a">${calcCP(me).toLocaleString()}</b> · 빨간 칸은 아직 착용할 수 없어요</div><div style="display:flex;flex-wrap:nowrap;gap:4px"><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap" data-sort="rar">정렬(등급순)</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap" id="aBulk">일괄 판매</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap;${asLv>=0?`border-color:${RARC[asLv]};color:${RARC[asLv]};background:${['rgba(233,226,212,.14)','rgba(90,120,255,.28)','rgba(255,214,60,.24)'][asLv]};box-shadow:0 0 8px ${['rgba(233,226,212,.3)','rgba(110,140,255,.6)','rgba(255,214,60,.55)'][asLv]};font-weight:800`:''}" id="aAuto">자동판매 ${ASN[asLv+1]}</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap;${syLv>=0?`border-color:#c9a0ff;color:#d9b8ff;background:rgba(150,90,255,.22);box-shadow:0 0 8px rgba(150,90,255,.5);font-weight:800`:''}" id="aSyn" aria-pressed="${syLv>=0}">자동합성 ${syLv>=0?'ON':'OFF'}</button></div>`;
   h+='<div class="inv">'+me.inv.map((it,i)=>cellHtml(it,'cell',`data-inv="${i}"`)).join('')+'</div>';
   const b=$('#sheetB'); b.className='sbody bag'; b.innerHTML=h; fitInv(); try{ showPop(detailHtml(),curCmpHtml()); }catch(e){ console.error(e); selItem=null; showPop(''); }
   b.querySelectorAll('[data-eq]').forEach(el=>el.onclick=()=>{const k=el.dataset.eq; if(me.eq[k]){selItem={it:me.eq[k],eq:k};renderBag();}});
@@ -2619,7 +2625,7 @@ function renderBag(){
   const alk=pq('#aLock'); if(alk)alk.onclick=()=>{ const it=selItem&&selItem.it; if(!it)return; it.lock=!it.lock; saveChar(); sheetToast(it.lock?'🔒 잠갔어요. 일괄 판매에서 제외돼요':'🔓 잠금을 풀었어요'); renderBag(); };
   b.querySelectorAll('[data-sort]').forEach(e=>e.onclick=()=>{ sortInv(e.dataset.sort); });
   b.querySelector('#aBulk').onclick=bulkSell;
-  b.querySelector('#aAuto').onclick=autoSellModal; b.querySelector('#aSyn').onclick=synToggle; { const sb=b.querySelector('#aShard'); if(sb)sb.onclick=shardModal; }
+  b.querySelector('#aAuto').onclick=autoSellModal; b.querySelector('#aSyn').onclick=synToggle; 
   enableDrag(b);
   const asn=pq('#aSend'); if(asn)asn.onclick=()=>sendPick();
   const ase=pq('#aShardEx'); if(ase)ase.onclick=()=>shardModal();
@@ -3700,7 +3706,7 @@ function telName(tl){ if(!tl.nm)return; ctx.font='800 15px "Noto Sans KR",sans-s
 function drawTel(tl){
   if(tl.kind==='lines'){ const C=telRGB(tl.col||'#ff4636'); for(const a of tl.as){ ctx.save(); ctx.translate(tl.x,tl.y); ctx.rotate(a); ctx.fillStyle=`rgba(${C},.16)`; ctx.fillRect(0,-tl.w/2,tl.len,tl.w); ctx.fillStyle=`rgba(${C},.32)`; ctx.fillRect(0,-tl.w/2,tl.len*tl.p,tl.w); ctx.strokeStyle=`rgba(${C},.85)`; ctx.lineWidth=2; ctx.strokeRect(0,-tl.w/2,tl.len,tl.w); ctx.restore(); } telName(tl); return; }
   if(tl.pts&&tl.kind==='multi'&&tl.col){ const C=telRGB(tl.col); for(const q of tl.pts){ circle(q.x,q.y,tl.r,`rgba(${C},.16)`); circle(q.x,q.y,tl.r*tl.p,`rgba(${C},.32)`); ctx.strokeStyle=`rgba(${C},.9)`; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(q.x,q.y,tl.r,0,6.283); ctx.stroke(); } telName({...tl,x:tl.pts[0].x,y:tl.pts[0].y}); return; }
-  if((tl.kind==='aoe'||tl.kind==='leap'||tl.kind==='blink')&&tl.col){ const C=telRGB(tl.col); circle(tl.x,tl.y,tl.r,`rgba(${C},.16)`); circle(tl.x,tl.y,tl.r*tl.p,`rgba(${C},.3)`); ctx.strokeStyle=`rgba(${C},.9)`; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(tl.x,tl.y,tl.r,0,6.283); ctx.stroke(); telName(tl); return; }
+  if((tl.kind==='aoe'||tl.kind==='leap'||tl.kind==='blink'||tl.kind==='drain')&&tl.col){ const C=telRGB(tl.col); circle(tl.x,tl.y,tl.r,`rgba(${C},.16)`); circle(tl.x,tl.y,tl.r*tl.p,`rgba(${C},.3)`); ctx.strokeStyle=`rgba(${C},.9)`; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(tl.x,tl.y,tl.r,0,6.283); ctx.stroke(); telName(tl); return; }
   if(tl.pts){ for(const q of tl.pts){ circle(q.x,q.y,tl.r,'rgba(70,160,40,.16)'); circle(q.x,q.y,tl.r*tl.p,'rgba(90,200,50,.3)'); ctx.strokeStyle='rgba(130,230,80,.85)'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(q.x,q.y,tl.r,0,6.283); ctx.stroke(); } return; }
   if(tl.kind==='halve'){ const pu=.5+.5*Math.sin(T*(8+tl.p*14)); circle(tl.x,tl.y,tl.r,`rgba(110,20,150,${.16+.1*pu})`); circle(tl.x,tl.y,tl.r*tl.p,'rgba(190,60,230,.26)');
     ctx.strokeStyle=`rgba(225,120,255,${.6+.35*pu})`; ctx.lineWidth=4; ctx.setLineDash([14,9]); ctx.beginPath(); ctx.arc(tl.x,tl.y,tl.r,0,6.283); ctx.stroke(); ctx.setLineDash([]);
