@@ -216,6 +216,9 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
 @media (min-width:601px) and (min-height:501px){.qb{left:max(14px,env(safe-area-inset-left));transform:none;bottom:calc(max(10px,env(safe-area-inset-bottom)) + 96px);flex-direction:column-reverse}}
 .qb button{font-size:25px;width:54px;height:54px;border-radius:50%;background:rgba(18,13,10,.85);font-size:11px;font-weight:700;touch-action:none;position:relative;line-height:1.2;padding:0}
 #bRev{border:2px solid #8a7440;color:#bba878}
+#bRevBig{position:absolute;left:50%;transform:translateX(-50%);bottom:228px;z-index:20;padding:11px 31px;min-height:64px;font-size:21px;border-radius:32px;border:2px solid #ffd84a;background:rgba(88,64,8,.92);color:#fff2b0;font-weight:800;box-shadow:0 0 18px rgba(255,216,74,.7);animation:rv 1s infinite alternate}
+#bRevBig b{margin-left:4px}
+#bRevBig.z{border-color:#7a6a40;color:#a89a70;box-shadow:none;animation:none;opacity:.8}
 #bRev.rdy{border-color:#ffd84a;color:#fff2b0;box-shadow:0 0 16px #ffd84a;animation:rv 1s infinite alternate}
 @keyframes rv{to{box-shadow:0 0 5px #ffd84a}}
 .shopitem{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid #241c16}
@@ -229,6 +232,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   .tc{top:calc(max(8px,env(safe-area-inset-top)) + 52px);width:150px}
   #hWave{font-size:13.5px;letter-spacing:.02em}
   #bSkip{padding:7px 20px}
+  #bRevBig{padding:7px 20px}
   #bVil{padding:5px 10px;font-size:12px}
   .br{right:max(10px,env(safe-area-inset-right));bottom:calc(max(10px,env(safe-area-inset-bottom)) + 84px)}
   #skills{grid-template-columns:repeat(3,52px);gap:7px}
@@ -403,7 +407,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
     <div class="br">
       <div id="skills"></div>
     </div>
-    <button id="bSkip" hidden aria-label="나가기">🚪 나가기</button><div id="emg" hidden></div>
+    <button id="bSkip" hidden aria-label="나가기">🚪 나가기</button><button id="bRevBig" hidden aria-label="즉시 부활">✨ 부활 <b id="revBigN">0</b></button><div id="emg" hidden></div>
     <button id="bRaid" hidden aria-label="습격 스킵">⏭ 습격 스킵</button>
     <div id="combo" hidden><b>0</b><span>COMBO</span></div>
     <div id="stoast"></div>
@@ -417,7 +421,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.1.0126</div>
+    <div class="ver" id="verT">v0.4.1.0127</div>
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -1699,10 +1703,10 @@ function revItems(){ return (G.freeRev|0)+(me.rev|0); }
 function goDown(){ me.hp=0; me.dead=true; me.leap=null; me.rvT=0; if((me.cls==='necro'||me.cls==='druid')&&minions.length){ for(const mn of minions){ const K=MNK[mn.k]; if(mn.fe&&typeof rvDrop==='function')rvDrop(mn); burst(mn.x,mn.y,(K&&K.col)||'#8fe6d0',14,200); } minions.length=0; } /* 강령술사·드루이드가 쓰러지면 소환수(까마귀 포함)도 함께 사라짐 */ if(me.form||me.spirit){ me.form=''; me.spirit=null; me.D=derive(me); me.hp=0; } spark(me.x,me.y,'#7a1010',20);
   { const lost=Math.floor((me.gold|0)*.05); if(lost>0){ me.gold-=lost; saveChar(); uiDirty=true; later(.6,()=>toast(`💸 쓰러져서 ${lost}G를 잃었어요 (보유금의 5%)`,'#e0a070')); } }
   const coopAlive=ally&&!ally.lobby&&!ally.dead;
-  me.respawn=coopAlive?30:revItems()>0?12:1.6;
+  me.respawn=revItems()>0?12:coopAlive?30:1.6;
   toast(revItems()>0?'쓰러졌습니다! 부활 버튼으로 일어나세요':coopAlive?'쓰러졌습니다! 동료가 구해주길 기다려요':'쓰러졌습니다…','#e07060'); }
-function reviveMe(pct,free){ me.vx=me.vy=0; const a=me.aura,pot=me.pot,bx=me.x,by=me.y; me.dead=false; me.out=false; me.stun=me.slowP=me.poison=0; me.respawn=0; me.leap=null; me.cds={}; me.buffs={}; me.aura=a; me.pot=pot; me.D=derive(me); me.hp=me.D.maxHp*pct; me.mp=me.D.maxMp*.5; me.god=2; me.x=bx; me.y=by;
-  efx.push({k:'ring',x:me.x,y:me.y,r0:10,r1:170,t:0,life:.8,col:'#ffd84a',w:8}); spark(me.x,me.y,'#ffd84a',30); burst(me.x,me.y,'#ffe08a',30,260); sfx('revive');
+function reviveMe(pct,free){ me.vx=me.vy=0; const a=me.aura,pot=me.pot,bx=me.x,by=me.y; me.dead=false; me.out=false; me.stun=me.slowP=me.poison=0; me.respawn=0; me.leap=null; me.cds={}; me.buffs={}; me.aura=a; me.pot=pot; me.D=derive(me); me.hp=me.D.maxHp*pct; me.mp=me.D.maxMp*.5; me.god=3; me.x=bx; me.y=by;   /* 부활 후 3초 무적 */
+  efx.push({k:'rvfx',x:me.x,y:me.y,t:0,life:1.3}); efx.push({k:'ring',x:me.x,y:me.y,r0:10,r1:190,t:0,life:.8,col:'#ffd84a',w:10}); later(.12,()=>efx.push({k:'ring',x:me.x,y:me.y,r0:10,r1:260,t:0,life:.9,col:'#fff6cc',w:7})); later(.26,()=>efx.push({k:'ring',x:me.x,y:me.y,r0:10,r1:330,t:0,life:1,col:'#ffb04a',w:5})); impact(me.x,me.y,'255,235,160',260); spark(me.x,me.y,'#ffd84a',50); burst(me.x,me.y,'#ffe08a',50,340); burst(me.x,me.y-30,'#ffffff',24,200); G.flash=.9; G.shake=Math.max(G.shake,.5); sfx('revive');
   for(const m of G.mobs){ if(m.dead||m.boss)continue; const dx=m.x-me.x,dy=m.y-me.y,d=hyp(dx,dy); if(d<170){ m.kx=(m.kx||0)+dx/(d||1)*420; m.ky=(m.ky||0)+dy/(d||1)*420; } } if(me.cls==='necro'&&!minions.length)autoSummon(); uiDirty=true; }   /* 부활하면 기본 소환수(수호 영혼·포격 영혼)는 다시 불러옴 */
 function mightLevel(){ let l=0; if(me.aura==='might')l=skLv(me,'might');
   if(ally&&!ally.lobby&&!ally.dead&&ally.aura==='might'&&hyp(ally.x-me.x,ally.y-me.y)<320) l=Math.max(l,ally.al|0); return l; }
@@ -1715,7 +1719,7 @@ function updateMe(dt){
   me.formLock=Math.max(0,(me.formLock||0)-dt); if(me.spirit){ me.spirit.t-=dt; if(me.spirit.t<=0)me.spirit=null; }
   me.hurt=Math.max(0,(me.hurt||0)-dt); me.god=Math.max(0,(me.god||0)-dt); me.stun=Math.max(0,(me.stun||0)-dt); me.stunImm=Math.max(0,(me.stunImm||0)-dt); me.slowP=Math.max(0,(me.slowP||0)-dt);
   if(me.poison>0&&!me.dead){ me.poison-=dt; me.hp=Math.max(1,me.hp-me.D.maxHp*.03*dt); if(Math.random()<dt*6)parts.push({x:me.x+rand(-10,10),y:me.y-8,vx:0,vy:-30,t:0,life:.6,col:'#7ad04a',r:2.5,glow:1,dm:.95}); }
-  if(me.dead){ me.respawn-=dt; if(me.respawn<=0&&!me.out){ me.out=true; me.respawn=0; } if(ally&&!ally.lobby&&ally.rg>(me.seenRg|0)){ me.seenRg=ally.rg; if(!me.out){ reviveMe(.45); toast('동료가 구해줬어요!','#9be38a'); } } return;}
+  if(me.dead){ me.respawn-=dt; if(me.respawn<=0&&!me.out){ me.respawn=0; if(G.freeRev>0){ G.freeRev--; reviveMe(.6); saveChar(); toast('✨ 무료 부활 물약이 자동으로 사용됐어요','#ffd84a'); return; } me.out=true; } if(ally&&!ally.lobby&&ally.rg>(me.seenRg|0)){ me.seenRg=ally.rg; if(!me.out){ reviveMe(.45); toast('동료가 구해줬어요!','#9be38a'); } } return;}
   if(ally&&!ally.lobby){ if(ally.rg>(me.seenRg|0))me.seenRg=ally.rg;
     if(ally.dead&&!ally.out&&hyp(me.x-ally.x,me.y-ally.y)<64){ me.rvT=(me.rvT||0)+dt; if(me.rvT>=3){ me.rvT=0; me.rvGiven=(me.rvGiven|0)+1; toast('동료를 일으켰어요!','#9be38a'); sfx('revive'); } } else me.rvT=0; }
   // regen
@@ -2485,6 +2489,7 @@ function bindHold(el,key){
 $('#bPot').addEventListener('pointerdown',e=>{e.preventDefault(); usePot();});
 function usePot(){ if(!G.inGame||me.dead)return; if(me.pot<=0&&me.potBuy<=0){toast('물약이 없어요. 상점에서 사거나 다음 습격을 기다리세요');return;} if(me.pot>0)me.pot--; else {me.potBuy--; saveChar();} me.hp=Math.min(me.D.maxHp,me.hp+me.D.maxHp*.45); me.mp=Math.min(me.D.maxMp,me.mp+me.D.maxMp*.45); spark(me.x,me.y,'#d0443a',10); sfx('potion'); }
 $('#bRev').addEventListener('pointerdown',e=>{e.preventDefault(); useRevive();});
+$('#bRevBig').addEventListener('pointerdown',e=>{e.preventDefault(); useRevive();});
 function useRevive(){ if(!G.inGame)return; if(!me.dead){toast('쓰러졌을 때 사용할 수 있어요');return;} if(me.out&&revItems()<=0)return; if(revItems()<=0){toast('부활 아이템이 없어요. 상점에서 살 수 있어요','#e07060');return;}
   if(G.freeRev>0)G.freeRev--; else me.rev--; reviveMe(.6); saveChar(); toast('부활!','#ffd84a'); }
 addEventListener('keydown',e=>{ if(e.key==='Escape'){ /* ESC: 열린 창을 닫음 (팝업 → 시트 순) */ const md=$('#modal'); if(md&&!md.hidden){ closeModal(); e.preventDefault(); return; } const sh=$('#sheet'); if(sh&&!sh.hidden){ closeSheet(); e.preventDefault(); return; } }
@@ -2516,7 +2521,7 @@ function updateHud(){
   const ph=G.phase;
   $('#hWave').textContent= ph==='prep'?(G.wave>=G.TW?`우두머리 출현까지 ${Math.max(0,Math.ceil(G.timer))}초`:`${G.stg.id} · 습격 ${G.wave+1}/${G.TW} 까지 ${Math.max(0,Math.ceil(G.timer))}초`)
     : ph==='wave'?`${G.stg.id} · 습격 ${G.wave}/${G.TW}` : ph==='boss'?(G.stg&&G.stg.raid?'⚔️ 삼남매 레이드':'우두머리 토벌') : ph==='clear'?(G.mode==='guest'?'전리품 줍기':`전리품 줍기 ${Math.max(0,Math.ceil(G.clearT||0))}초`) : ph==='win'?'승리':'함락';
-  $('#bSkip').hidden=!(G.phase==='clear');
+  { const dd=!!(me.dead&&G.inGame&&['prep','wave','boss'].includes(G.phase)); $('#bSkip').hidden=!(G.phase==='clear'||dd); $('#bRevBig').hidden=!dd; if(dd){ const rn=revItems(); $('#revBigN').textContent=rn; $('#bRevBig').classList.toggle('z',rn<=0); } }   /* 쓰러졌을 때: 승리 때와 같은 자리에 나가기 + 그 위에 부활 버튼 */
   const sb=$('#bRaid'), cs=G.mode==='guest'?G.canSkip:canSkip(); sb.hidden=!cs||!!G.allMode; sb.textContent=G.wave>=G.TW?'⏭ 우두머리 소환':'⏭ 습격 스킵';
   const al=$('#hAlly');
   if(ally&&!ally.lobby){al.hidden=false; $('#hAllyN').textContent=`${ally.name||CLASSES[ally.cls].n} ${ally.lvl}`; $('#hAllyHp').style.transform=`scaleX(${clamp((ally.hp||0)/(ally.mh||1),0,1)})`;} else al.hidden=true;
@@ -2548,7 +2553,7 @@ function openTitleSheet(m){ prepMe(); G.titleSheet=true; openSheet(m); }
 function closeSheet(){ for(const id of ['bBag','bStat','bSkillT','bMenu']){ const e=$('#'+id); if(e)e.setAttribute('aria-pressed','false'); } const was=G.titleSheet; sheetMode=null; $('#sheet').hidden=true; G.paused=false; if(was){ G.titleSheet=false; renderClassCards(); } }
 $('#sheetX').onclick=closeSheet;
 $('#sheet').addEventListener('pointerdown',e=>{ if(e.target.id==='sheet')closeSheet(); });
-$('#bSkip').addEventListener('click',e=>{e.preventDefault(); if(G.inGame&&G.phase==='clear'){ G.phase='win'; showEnd(); /* 시간 종료와 동일하게 요약 화면 */ } });
+$('#bSkip').addEventListener('click',e=>{e.preventDefault(); if(G.inGame&&G.phase==='clear'){ G.phase='win'; showEnd(); /* 시간 종료와 동일하게 요약 화면 */ } else if(G.inGame&&me.dead){ confirmExit(()=>quitToTitle()); } });
 function startAllOut(){ G.allMode=true; G.fireT=1.5; G.shake=Math.max(G.shake,.5); sfx('boss'); allSpawn(); announce('🔥 총공세! 바닥에 불이 번집니다','#ff9a6a'); pushEv(['ann',1]); }
 $('#bRaid').addEventListener('click',e=>{e.preventDefault(); e.stopPropagation(); if(!G.inGame)return; if(G.mode==='guest'){G.sq=(G.sq||0)+1; toast('다음 습격 요청을 보냈어요');} else skipWave('');});
 $('#bBag').onclick=()=>openSheet('bag'); $('#bStat').onclick=()=>openSheet('stat'); $('#bSkillT').onclick=()=>openSheet('skill'); $('#bMenu').onclick=()=>openSheet('menu');
@@ -3665,6 +3670,8 @@ function drawEfx(t){
     else if(e.k==='spr'){ const n=e.c1-e.c0+1, f=e.loop?e.c0+Math.floor(t*10)%n:e.c0+Math.min(n-1,Math.floor(p*n)), x=e.o&&e.o.x!==undefined?e.o.x:e.x, y=e.o&&e.o.y!==undefined?e.o.y+(e.dy||0):e.y; fxFrame(e.row,f,x,y,e.sz,e.sz,e.rot,e.fade?Math.min(1,p*6,(1-p)*4):1,e.flip); }
     else if(e.k==='mfall'){ const h=(1-p)*420, mx=e.x+h*.35, my=e.y-h; fxFrame(6,Math.floor(t*14)%3,mx,my,104,104,0,Math.min(1,p*8),true); }
     else if(e.k==='chainspr'){ for(let i=1;i<e.pts.length;i++){ const a=e.pts[i-1], b=e.pts[i], L=hyp(b.x-a.x,b.y-a.y)||1, ang=Math.atan2(b.y-a.y,b.x-a.x); fxFrame(4,(Math.floor(e.t*24)+i)%4,(a.x+b.x)/2,(a.y+b.y)/2,L*1.04,Math.min(64,Math.max(30,L*.3)),ang,Math.min(1,(1-p)*2.2)); } }
+    else if(e.k==='rvfx'){ const a=1-p, h=340*Math.min(1,p*4), w=54*(1-.55*p); ctx.save(); ctx.globalCompositeOperation='lighter'; const g=ctx.createLinearGradient(0,e.y-h,0,e.y+14); g.addColorStop(0,'rgba(255,230,140,0)'); g.addColorStop(.65,`rgba(255,222,120,${.5*a})`); g.addColorStop(1,`rgba(255,252,215,${.9*a})`); ctx.fillStyle=g; ctx.fillRect(e.x-w/2,e.y-h,w,h+14); circle(e.x,e.y+6,60*(1-.4*p),`rgba(255,240,170,${.45*a})`);
+      for(let i=0;i<10;i++){ const an=i*.628+p*4, rr=26+p*120; circle(e.x+Math.cos(an)*rr,e.y+Math.sin(an)*rr*.55-p*70,3.8*a+1,`rgba(255,240,170,${a})`); } ctx.restore(); }
     else if(e.k==='ring'){ const r=e.r0+(e.r1-e.r0)*Math.sqrt(p); ctx.strokeStyle=e.col; ctx.globalAlpha=(1-p)*.9; ctx.lineWidth=e.w*(1-p)+1; ctx.beginPath(); ctx.arc(e.x,e.y,Math.max(1,r),0,6.283); ctx.stroke(); ctx.globalAlpha=1; }
     else if(e.k==='whirl'){ const o=e.o; if(o.x===undefined)continue; ctx.strokeStyle=e.col; ctx.globalAlpha=1-p; ctx.lineWidth=5; for(let i=0;i<3;i++){ctx.beginPath(); ctx.arc(o.x,o.y,60+i*14,p*12+i*2,p*12+i*2+1.6); ctx.stroke();} ctx.globalAlpha=1; }
     else if(e.k==='boom'){ circle(e.x,e.y,e.r*(.5+p*.5),`rgba(255,140,40,${.5*(1-p)})`); circle(e.x,e.y,e.r*.4*(1-p),`rgba(255,230,160,${1-p})`); }
@@ -3869,7 +3876,7 @@ function render(t){
   if(G.flash>0){ctx.fillStyle=`rgba(255,215,140,${G.flash*.35})`;ctx.fillRect(0,0,VW,VH);}
   if(me.dead){ctx.fillStyle='rgba(60,0,0,.25)';ctx.fillRect(0,0,VW,VH);
     ctx.save(); ctx.textAlign='center'; ctx.font='800 22px "Noto Sans KR",sans-serif'; ctx.lineWidth=5; ctx.strokeStyle='#000'; ctx.strokeText('쓰러졌습니다',VW/2,VH*.38); ctx.fillStyle='#ff8a7a'; ctx.fillText('쓰러졌습니다',VW/2,VH*.38);
-    const sub=me.out?'더 이상 일어날 수 없어요':revItems()>0?`오른쪽 아래 ✨부활 버튼으로 일어나세요 (${Math.ceil(Math.max(0,me.respawn))}초)`:(ally&&!ally.lobby&&!ally.dead)?`동료가 구해줄 때까지 ${Math.ceil(Math.max(0,me.respawn))}초`:'';
+    const sub=me.out?'더 이상 일어날 수 없어요':revItems()>0?`✨ 부활 버튼으로 일어나세요 (${Math.ceil(Math.max(0,me.respawn))}초${G.freeRev>0?' · 시간이 끝나면 무료 부활물약 자동 사용':''})`:(ally&&!ally.lobby&&!ally.dead)?`동료가 구해줄 때까지 ${Math.ceil(Math.max(0,me.respawn))}초`:'';
     ctx.font='700 13px "Noto Sans KR",sans-serif'; ctx.lineWidth=4; ctx.strokeText(sub,VW/2,VH*.38+26); ctx.fillStyle='#ffe3d8'; ctx.fillText(sub,VW/2,VH*.38+26); ctx.restore(); }
   { const nw=VW<560, bx=joy.active?joy.ox:(nw?Math.max(86,VW*.27):Math.max(180,VW*.2)), by=joy.active?joy.oy:(nw?VH-200:VH-78), al=joy.active?1:.45;
     circle(bx,by,58,`rgba(10,8,7,${.35*al})`); ctx.strokeStyle=`rgba(214,170,78,${.55*al})`; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(bx,by,58,0,6.283); ctx.stroke();
