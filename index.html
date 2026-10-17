@@ -421,7 +421,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.1.0127</div>
+    <div class="ver" id="verT">v0.4.2.0128</div>
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -604,7 +604,7 @@ const SK={
   {k:'ironbody',e:'🏋️',n:'강철 육체',s:'강철',req:3,mp:0,cd:0,el:'#e08a6a',passive:1,d:l=>`패시브: 받는 피해 -${Math.min(30,(1.2*l).toFixed(1))}%, 초당 생명력 회복 +${(.15*l).toFixed(1)}%`},
   {k:'swift',e:'👟',n:'질풍',s:'질풍',req:9,mp:0,cd:0,el:'#9fe0ff',passive:1,d:l=>`패시브: 이동 속도 +${10+2*l}% (1레벨 +12%, 레벨당 +2%, 20레벨 +50%)`},
   {k:'rend',e:'🌪️',n:'폭풍 베기',s:'폭풍',req:6,mp:9,cd:5,el:'#ff8a4a',d:l=>`내 주변 넓은 범위의 모든 적에게 무기 피해 ${450+70*l}%, 이어서 ${(1.5+.12*l).toFixed(1)}초간 0.5초마다 ${50+5*l}% (레벨마다 지속시간 증가)`},
-  {k:'shout',e:'📣',n:'전투 함성',s:'함성',req:6,mp:10,cd:20,el:'#ffb259',d:l=>`${SHD(Math.max(1,l)).toFixed(1)}초간 나와 주변 동료(파티원 포함) 피해 +${20+5*l}%. 주변 적 ${3+Math.floor(l/3)}명을 도발해 5초간 나에게 달려들게 하며 피해 (3레벨마다 대상 +1). 재사용 대기 ${SHC(Math.max(1,l)).toFixed(1)}초 · 레벨이 오를수록 지속시간↑ 대기↓ (Lv10부터 지속시간 ≥ 대기)`},
+  {k:'shout',e:'📣',n:'전투 함성',s:'함성',req:6,mp:10,cd:20,el:'#ffb259',d:l=>`${SHD(Math.max(1,l)).toFixed(1)}초간 나와 주변 동료(파티원 포함) 피해 +${24+6*l}%. 주변 적 ${3+Math.floor(l/3)}명을 도발해 5초간 나에게 달려들게 하며 피해 (3레벨마다 대상 +1). 재사용 대기 ${SHC(Math.max(1,l)).toFixed(1)}초 · 레벨이 오를수록 지속시간↑ 대기↓ (Lv10부터 지속시간 ≥ 대기)`},
   {k:'whirl',e:'🌀',n:'회전베기',s:'회전',req:12,mp:8,cd:5.5,el:'#e8e0d0',d:l=>`주변 모든 적에게 무기 피해 ${180+30*l}%`},
   {k:'leap',e:'🦘',n:'도약 강타',s:'도약',req:18,mp:10,cd:8,el:'#c98b4a',rg:300,d:l=>`적에게 뛰어들어 범위 피해 ${280+45*l}%`},
   {k:'berserk',e:'😡',n:'광폭화',s:'광폭',req:24,mp:14,cd:32,el:'#ff3b2f',d:l=>`8초간 공격 속도 +40%, 피해 +${30+5*l}%`},
@@ -2212,8 +2212,8 @@ function castSkill(o,key,real,tx,ty,lv,tgt){
     break;
   case 'shout':
     efx.push({k:'ring',x:o.x,y:o.y,r0:20,r1:320,t:0,life:.6,col:'#ffb259',w:7}); impact(o.x,o.y,'255,180,90',100); burst(o.x,o.y,'#ffcf7a',20,180);
-    if(real){ me.buffs.shout={v:(20+5*lv)/100,t:SHD(lv),m:SHD(lv)}; const sk=new Set(), n=3+Math.floor(lv/3); for(let i=0;i<n;i++){ const q=nearestMob(o.x,o.y,320,sk); if(!q)break; sk.add(q); hitMob(q,physDmg(1+.12*lv),0,1); knock(q,o.x,o.y,10); efx.push({k:'ring',x:q.x,y:q.y,r0:6,r1:34,t:0,life:.35,col:'#ffb259',w:5}); } }
-    else if(!me.dead&&hyp(me.x-o.x,me.y-o.y)<320){me.buffs.shout={v:(20+5*lv)/100,t:SHD(lv),m:SHD(lv)}; toast('동료의 전투 함성: 피해 증가','#ffb259');}
+    if(real){ me.buffs.shout={v:(24+6*lv)/100,t:SHD(lv),m:SHD(lv)}; const sk=new Set(), n=3+Math.floor(lv/3); for(let i=0;i<n;i++){ const q=nearestMob(o.x,o.y,320,sk); if(!q)break; sk.add(q); hitMob(q,physDmg(1+.12*lv),0,1); knock(q,o.x,o.y,10); efx.push({k:'ring',x:q.x,y:q.y,r0:6,r1:34,t:0,life:.35,col:'#ffb259',w:5}); } }
+    else if(!me.dead&&hyp(me.x-o.x,me.y-o.y)<320){me.buffs.shout={v:(24+6*lv)/100,t:SHD(lv),m:SHD(lv)}; toast('동료의 전투 함성: 피해 증가','#ffb259');}
     break;
   case 'whirl':
     efx.push({k:'whirl',o,t:0,life:.45,col:'#e8e0d0'});
