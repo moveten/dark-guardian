@@ -211,7 +211,9 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
 #sheetTabs .pl[hidden]{display:none}
 #sheetTabs button[aria-pressed="true"]{border-color:var(--gold);color:var(--gold);background:var(--panel2)}
 .gold{font-size:12.5px;color:var(--gold);text-shadow:0 1px 3px #000;font-weight:700}
-.qb{position:absolute;left:max(14px,env(safe-area-inset-left));bottom:calc(max(10px,env(safe-area-inset-bottom)) + 96px);display:flex;flex-direction:column-reverse;gap:10px} /* 왼쪽 생명력 구슬 위에 세로로: 물약(아래) · 부활 · 감정(위) — 오른쪽 스킬과 겹치지 않게 */
+.qb{position:absolute;left:50%;transform:translateX(-50%);bottom:max(14px,env(safe-area-inset-bottom));display:flex;gap:10px}
+/* 패드(가로·세로 모두 넓은 화면)만: 왼쪽 생명력 구슬 위에 세로로 — 오른쪽 스킬과 겹치지 않게. 폰은 아래 가운데 */
+@media (min-width:601px) and (min-height:501px){.qb{left:max(14px,env(safe-area-inset-left));transform:none;bottom:calc(max(10px,env(safe-area-inset-bottom)) + 96px);flex-direction:column-reverse}}
 .qb button{font-size:25px;width:54px;height:54px;border-radius:50%;background:rgba(18,13,10,.85);font-size:11px;font-weight:700;touch-action:none;position:relative;line-height:1.2;padding:0}
 #bRev{border:2px solid #8a7440;color:#bba878}
 #bRev.rdy{border-color:#ffd84a;color:#fff2b0;box-shadow:0 0 16px #ffd84a;animation:rv 1s infinite alternate}
@@ -231,7 +233,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   .br{right:max(10px,env(safe-area-inset-right));bottom:calc(max(10px,env(safe-area-inset-bottom)) + 84px)}
   #skills{grid-template-columns:repeat(3,52px);gap:7px}
   .sb{width:52px;height:52px}.sb .nm{font-size:23px}
-  .qb{gap:8px;bottom:calc(max(10px,env(safe-area-inset-bottom)) + 92px)}.qb button{width:50px;height:50px}
+  .qb{gap:8px}.qb button{width:50px;height:50px}
 }
 
 /* 타이틀 화면 (E안): 위=캐러셀, 가운데=스테이지·시작, 아래=탭 바 */
@@ -415,7 +417,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.0.0112</div>
+    <div class="ver" id="verT">v0.4.0.0113</div>
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -1073,6 +1075,7 @@ function derive(p){
       else if(a.t==='sk'){if(a.cls===p.cls)d.sk[a.key]=(d.sk[a.key]||0)+a.v;}
       else d[a.t]+=a.v;
     }}
+  if(d.hc>=2) d.mana+=200;   /* 그림자 세트 2개: 최대 마나 +200 */
   if(d.hc>=7){ d.rbd=30; d.cls+=3; } else if(d.hc>=3) d.rbd=15;   /* 그림자 세트: 3개 레이드 보스 피해 +15% · 7개 +30%(15% 대신) & 모든 스킬 +3 */
   if(p.mb){ d.dmgPct+=p.mb.dmg||0; d.ias+=p.mb.ias||0; d.ms+=p.mb.ms||0; }
   const C=CLASSES[p.cls];
@@ -2643,7 +2646,7 @@ function itemLines(it){
   const bt=baseText(it); if(bt)s+=`<div>${bt}</div>`;
   if(BASEFX[it.base]&&it.slot==='weapon') s+=`<div class="meta" style="color:#9fd0ff">▪ ${BASEFX[it.base].t}</div>`;
   if(it.sp&&SPFX[it.sp]) s+=`<div style="margin:4px 0;color:#ffb14a;font-weight:700">★ 특수 효과: ${SPFX[it.sp].d}</div>`;
-  if(it.rar===4&&it.sp&&SPFX[it.sp]&&SPFX[it.sp].hero){ const n=(me.D&&me.D.hc)|0, on=(c,a)=>c?'#d9c6ff':'#8a8a8a'; s+=`<div style="margin:4px 0;font-size:12px;line-height:1.55"><b style="color:#b98cff">🌑 그림자 세트 (${n}/7)</b><br><span style="color:${on(n>=3&&n<7)}">3개: 레이드 보스에게 주는 피해 +15%</span><br><span style="color:${on(n>=7)}">7개: 레이드 보스에게 주는 피해 +30% (15% 대신) · 모든 스킬 +3</span></div>`; }
+  if(it.rar===4&&it.sp&&SPFX[it.sp]&&SPFX[it.sp].hero){ const n=(me.D&&me.D.hc)|0, on=(c,a)=>c?'#d9c6ff':'#8a8a8a'; s+=`<div style="margin:4px 0;font-size:12px;line-height:1.55"><b style="color:#b98cff">🌑 그림자 세트 (${n}/7)</b><br><span style="color:${on(n>=2)}">2개: 최대 마나 +200</span><br><span style="color:${on(n>=3&&n<7)}">3개: 레이드 보스에게 주는 피해 +15%</span><br><span style="color:${on(n>=7)}">7개: 레이드 보스에게 주는 피해 +30% (15% 대신) · 모든 스킬 +3</span></div>`; }
   const ex=enhOptText(it);
   if(it.aff.length||ex) s+='<ul>'+it.aff.map(a=>`<li>${esc(affText(a))}${(a.cls&&a.cls!==me.cls)?' <span class="meta">(효과 없음)</span>':''}</li>`).join('')+(ex?`<li style="color:#ffe27a">${ex}</li>`:'')+'</ul>';
   return s;
