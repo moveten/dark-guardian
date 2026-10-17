@@ -56,7 +56,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
 .rklist{max-height:52vh;overflow-y:auto;margin:0 0 10px;-webkit-overflow-scrolling:touch}.rkrow{display:flex;align-items:center;gap:8px;padding:7px 8px;border:0;border-bottom:1px solid #2a211a;font-size:14px;width:100%;min-height:48px;background:transparent;color:inherit;text-align:left;font-family:inherit}.rkc{color:#8d806d;font-size:20px}
 .rkg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px 6px;margin:2px 0}.rkgc{background:none;border:0;padding:0;color:inherit;font-family:inherit;text-align:center}.rkgc small{display:block;font-size:11px;color:#a89a86;margin-top:2px}.rkgi{position:relative;aspect-ratio:1;border:2px solid #3a2f26;border-radius:8px;display:grid;place-items:center;overflow:hidden}.rkgc.empty .rkgi{background:#0f0b09;opacity:.5}.rkgi img{width:84%;height:84%;pointer-events:none;position:relative;z-index:1}.rkgi .en{position:absolute;right:3px;top:1px;font-size:11px;font-style:normal;font-weight:800;color:#ffd84a;text-shadow:0 0 3px #000,0 0 3px #000;z-index:2}
 .rkpb{max-height:62vh;overflow-y:auto;margin:0 0 10px;-webkit-overflow-scrolling:touch}.rkit{display:flex;gap:10px;padding:7px 0;border-bottom:1px solid #2a211a}.rkit img{width:46px;height:46px;flex:none;background:#0f0b09;border:2px solid;border-radius:6px}.rkib{min-width:0;font-size:13.5px}.rkib ul{margin:3px 0 0;padding-left:16px;font-size:12.5px;color:#cbbfae}.rkit.empty{opacity:.5;align-items:center}.rkis{width:46px;text-align:center;font-size:12px}.rkpb h4{margin:12px 0 6px}.rkst{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px}.rkst div{display:flex;justify-content:space-between;font-size:13px;border-bottom:1px solid #241c16;padding:3px 0}.rkst span{color:#a89a86}
-.rktabs button{font-size:13px!important;padding:0 2px}.rkrow.own{background:rgba(255,200,80,.13);border-radius:6px}.rkrow.own b{color:#ffd870}.rkn{width:26px;text-align:center;font-weight:800;color:#a89a86}.rkrow.top .rkn{font-size:18px}.rke{font-size:20px}.rkm{flex:1;display:flex;flex-direction:column;line-height:1.2;min-width:0}.rkm small{color:#9a8d7a;font-size:11.5px}.rkv{font-weight:800;color:#e8d6b4;white-space:nowrap}
+.rktabs button{font-size:13px!important;padding:0 2px}.rkrow.own{background:rgba(255,200,80,.13);border-radius:6px}.rkrow.own b{color:#ffd870}.rkn{width:26px;text-align:center;font-weight:800;color:#a89a86}.rkrow.top .rkn{font-size:18px}.rke{font-size:20px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;flex:none}.rke img,.rkh img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 1px 2px rgba(0,0,0,.7))}.rkh{display:inline-block;width:28px;height:28px;vertical-align:-7px}.rkm{flex:1;display:flex;flex-direction:column;line-height:1.2;min-width:0}.rkm small{color:#9a8d7a;font-size:11.5px}.rkv{font-weight:800;color:#e8d6b4;white-space:nowrap}
 .modes{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;width:100%;max-width:640px}
 .btn{background:var(--panel2);border:1px solid var(--line2);border-radius:8px;padding:12px 18px;font-size:15px;font-weight:700;min-height:46px}
 .btn.primary{background:var(--blood);border-color:#c5463d;color:#fff4ea}
@@ -417,7 +417,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.0.0120</div>
+    <div class="ver" id="verT">v0.4.0.0121</div>
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -2964,7 +2964,7 @@ function rkBuildItem(k,x){ const rar=Math.max(0,Math.min(4,x.r|0)); const it={id
   if(!it.mx){delete it.mn;delete it.mx;} if(!it.df)delete it.df; if(!it.blk)delete it.blk; if(!it.dm)delete it.dm; if(!it.om)delete it.om; if(x.sp&&SPFX[x.sp])it.sp=x.sp;
   for(const a of (x.a||[])){ if(a&&AFXBY[a.t]) it.aff.push({t:a.t,v:a.v|0,cls:a.c,key:a.k}); } return it; }
 function rkHeadHtml(row){ const c=CLASSES[row.cls]?row.cls:'war';
-  return `<h3>${CLSE[c]} ${esc(String(row.name||CLASSES[c].n).slice(0,8))} <span class="meta" style="font-weight:500">Lv ${row.lvl|0}</span></h3><div class="meta" style="margin:-4px 0 8px">⚔️ 전투력 <b style="color:#ffd84a">${row.cp>0?rkFmt(row.cp):'집계 전'}</b> · 처치 ${rkFmt(row.kills)}마리 · ${row.clear>0?STAGES[Math.min(STAGES.length,row.clear)-1].id+' 클리어'+(rkCt(row)?' ('+fmtCt(rkCt(row))+')':''):'스테이지 기록 없음'}</div>`; }
+  return `<h3><span class="rkh"><img src="img/cls_${c}.png" alt="${CLSE[c]}"></span> ${esc(String(row.name||CLASSES[c].n).slice(0,8))} <span class="meta" style="font-weight:500">Lv ${row.lvl|0}</span></h3><div class="meta" style="margin:-4px 0 8px">⚔️ 전투력 <b style="color:#ffd84a">${row.cp>0?rkFmt(row.cp):'집계 전'}</b> · 처치 ${rkFmt(row.kills)}마리 · ${row.clear>0?STAGES[Math.min(STAGES.length,row.clear)-1].id+' 클리어'+(rkCt(row)?' ('+fmtCt(rkCt(row))+')':''):'스테이지 기록 없음'}</div>`; }
 function rkProfile(row,back){
   const d=row.data; let body='';
   const go=()=>openRank(back);
@@ -2999,7 +2999,7 @@ function openRank(mode0){
   const TABS=[['lvl','⭐ 레벨'],['cp','💪 전투력'],['stage','🗺️ 진행']];
   modal(`<h3>🏆 랭킹</h3><div class="rktabs">${TABS.map(([k,l])=>`<button data-m="${k}" aria-pressed="${k===mode}">${l}</button>`).join('')}</div><div class="rklist" id="rkBox"><p class="meta">불러오는 중…</p></div><div class="row2"><button class="btn" id="rkRe">🔄 새로고침</button><button class="btn" id="rkNo">닫기</button></div><p class="meta" style="margin:8px 0 0;font-size:11.5px">이름을 누르면 장비와 능력치를 한눈에 볼 수 있어요 · 내 캐릭터는 금색 · 전투 기록 없는 캐릭터 제외 · 🔄는 바로 갱신</p>`,m=>{
     const box=m.querySelector('#rkBox'); let seq=0;
-    const rowHtml=(r,i,own)=>{ const c=CLASSES[r.cls]?r.cls:'war'; return `<button class="rkrow${own?' own':''}${i<3?' top':''}" data-i="${i}"><span class="rkn">${i<3?['🥇','🥈','🥉'][i]:i+1}</span><span class="rke">${CLSE[c]}</span><span class="rkm"><b>${esc(String(r.name||CLASSES[c].n).slice(0,8))}</b><small>${rkSub(mode,r)}</small></span><span class="rkv">${esc(rkVal(mode,r))}</span><span class="rkc">›</span></button>`; };
+    const rowHtml=(r,i,own)=>{ const c=CLASSES[r.cls]?r.cls:'war'; return `<button class="rkrow${own?' own':''}${i<3?' top':''}" data-i="${i}"><span class="rkn">${i<3?['🥇','🥈','🥉'][i]:i+1}</span><span class="rke"><img src="img/cls_${c}.png" alt="${CLSE[c]}" loading="lazy" decoding="async"></span><span class="rkm"><b>${esc(String(r.name||CLASSES[c].n).slice(0,8))}</b><small>${rkSub(mode,r)}</small></span><span class="rkv">${esc(rkVal(mode,r))}</span><span class="rkc">›</span></button>`; };
     const load=async(force)=>{ const my=++seq; rkSubmitAll(false);
       const c0=rkCacheGet(mode); if(c0&&!force){ show(c0.rows,false,c0.t); if(Date.now()-c0.t<RK_TTL)return; } else box.innerHTML='<p class="meta">불러오는 중…</p>';
       let rows,local=false,t=Date.now();
