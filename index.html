@@ -221,6 +221,10 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
 #bRevBig.z{border-color:#7a6a40;color:#a89a70;box-shadow:none;animation:none;opacity:.8}
 #bRev.rdy{border-color:#ffd84a;color:#fff2b0;box-shadow:0 0 16px #ffd84a;animation:rv 1s infinite alternate}
 @keyframes rv{to{box-shadow:0 0 5px #ffd84a}}
+/* 광전사 폭주: 화면 가장자리가 붉게 두근두근 (CSS 오버레이 — 캔버스를 다시 그리지 않아 가벼움) */
+#rageV{position:fixed;inset:0;pointer-events:none;z-index:4;opacity:0;visibility:hidden;background:radial-gradient(ellipse at center,rgba(255,30,10,0) 52%,rgba(255,30,10,.26) 100%),rgba(255,20,10,.025);will-change:opacity}
+#rageV.on{visibility:visible;animation:rvbeat 1.1s ease-in-out infinite}
+@keyframes rvbeat{0%{opacity:.35}12%{opacity:1}24%{opacity:.5}38%{opacity:.9}60%,100%{opacity:.3}}   /* 쿵-쿵 두 번 뛰고 쉬는 심장박동 */
 .shopitem{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid #241c16}
 .shopitem:first-of-type{border-top:0}
 .price{color:var(--gold);font-weight:700}
@@ -409,6 +413,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
     </div>
     <button id="bSkip" hidden aria-label="나가기">🚪 나가기</button><button id="bRevBig" hidden aria-label="즉시 부활">✨ 부활 <b id="revBigN">0</b></button><div id="emg" hidden></div>
     <button id="bRaid" hidden aria-label="습격 스킵">⏭ 습격 스킵</button>
+    <div id="rageV"></div>
     <div id="combo" hidden><b>0</b><span>COMBO</span></div>
     <div id="stoast"></div>
     <div class="qb">
@@ -421,7 +426,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.2.0130</div>
+    <div class="ver" id="verT">v0.4.2.0131</div>
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -2523,6 +2528,7 @@ function updateHud(){
   $('#hHp').style.transform=`scaleY(${clamp(me.hp/D.maxHp,0,1)})`; $('#hHpT').textContent=me.dead?`쓰러짐 ${Math.ceil(Math.max(0,me.respawn))}`:`${Math.ceil(me.hp)}/${D.maxHp}`;
   $('#hMp').style.transform=`scaleY(${clamp(me.mp/D.maxMp,0,1)})`; $('#hMpT').textContent=`${Math.floor(me.mp)}/${D.maxMp}`;
   $('#hXp').style.transform=`scaleX(${me.lvl>=99?1:clamp(me.xp/need(me.lvl),0,1)})`;
+  { const rg=!!(me.buffs.rage&&me.buffs.rage.t>0&&!me.dead&&G.inGame), rv=$('#rageV'); if(rv.classList.contains('on')!==rg)rv.classList.toggle('on',rg); }
   const ph=G.phase;
   $('#hWave').textContent= ph==='prep'?(G.wave>=G.TW?`우두머리 출현까지 ${Math.max(0,Math.ceil(G.timer))}초`:`${G.stg.id} · 습격 ${G.wave+1}/${G.TW} 까지 ${Math.max(0,Math.ceil(G.timer))}초`)
     : ph==='wave'?`${G.stg.id} · 습격 ${G.wave}/${G.TW}` : ph==='boss'?(G.stg&&G.stg.raid?'⚔️ 삼남매 레이드':'우두머리 토벌') : ph==='clear'?(G.mode==='guest'?'전리품 줍기':`전리품 줍기 ${Math.max(0,Math.ceil(G.clearT||0))}초`) : ph==='win'?'승리':'함락';
