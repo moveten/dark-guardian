@@ -417,7 +417,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.0.0121</div>
+    <div class="ver" id="verT">v0.4.0.0122</div>
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -1693,14 +1693,14 @@ function takeDmg(raw,fire,rh){
   if(me.hp<=0){ goDown(); }
 }
 function revItems(){ return (G.freeRev|0)+(me.rev|0); }
-function goDown(){ me.hp=0; me.dead=true; me.leap=null; me.rvT=0; if(me.form||me.spirit){ me.form=''; me.spirit=null; me.D=derive(me); me.hp=0; } spark(me.x,me.y,'#7a1010',20);
+function goDown(){ me.hp=0; me.dead=true; me.leap=null; me.rvT=0; if(me.cls==='necro'&&minions.length){ for(const mn of minions){ const K=MNK[mn.k]; if(mn.fe&&typeof rvDrop==='function')rvDrop(mn); burst(mn.x,mn.y,(K&&K.col)||'#8fe6d0',14,200); } minions.length=0; } /* 강령술사가 쓰러지면 소환수도 함께 사라짐 */ if(me.form||me.spirit){ me.form=''; me.spirit=null; me.D=derive(me); me.hp=0; } spark(me.x,me.y,'#7a1010',20);
   { const lost=Math.floor((me.gold|0)*.05); if(lost>0){ me.gold-=lost; saveChar(); uiDirty=true; later(.6,()=>toast(`💸 쓰러져서 ${lost}G를 잃었어요 (보유금의 5%)`,'#e0a070')); } }
   const coopAlive=ally&&!ally.lobby&&!ally.dead;
   me.respawn=coopAlive?30:revItems()>0?12:1.6;
   toast(revItems()>0?'쓰러졌습니다! 부활 버튼으로 일어나세요':coopAlive?'쓰러졌습니다! 동료가 구해주길 기다려요':'쓰러졌습니다…','#e07060'); }
 function reviveMe(pct,free){ me.vx=me.vy=0; const a=me.aura,pot=me.pot,bx=me.x,by=me.y; me.dead=false; me.out=false; me.stun=me.slowP=me.poison=0; me.respawn=0; me.leap=null; me.cds={}; me.buffs={}; me.aura=a; me.pot=pot; me.D=derive(me); me.hp=me.D.maxHp*pct; me.mp=me.D.maxMp*.5; me.god=2; me.x=bx; me.y=by;
   efx.push({k:'ring',x:me.x,y:me.y,r0:10,r1:170,t:0,life:.8,col:'#ffd84a',w:8}); spark(me.x,me.y,'#ffd84a',30); burst(me.x,me.y,'#ffe08a',30,260); sfx('revive');
-  for(const m of G.mobs){ if(m.dead||m.boss)continue; const dx=m.x-me.x,dy=m.y-me.y,d=hyp(dx,dy); if(d<170){ m.kx=(m.kx||0)+dx/(d||1)*420; m.ky=(m.ky||0)+dy/(d||1)*420; } } uiDirty=true; }
+  for(const m of G.mobs){ if(m.dead||m.boss)continue; const dx=m.x-me.x,dy=m.y-me.y,d=hyp(dx,dy); if(d<170){ m.kx=(m.kx||0)+dx/(d||1)*420; m.ky=(m.ky||0)+dy/(d||1)*420; } } if(me.cls==='necro'&&!minions.length)autoSummon(); uiDirty=true; }   /* 부활하면 기본 소환수(수호 영혼·포격 영혼)는 다시 불러옴 */
 function mightLevel(){ let l=0; if(me.aura==='might')l=skLv(me,'might');
   if(ally&&!ally.lobby&&!ally.dead&&ally.aura==='might'&&hyp(ally.x-me.x,ally.y-me.y)<320) l=Math.max(l,ally.al|0); return l; }
 function updateMe(dt){
@@ -1912,8 +1912,8 @@ function hitMob(m,r,slow,tn,fx){
   spark(m.x,m.y,r.crit?'#ffd34d':'#ffb08a',r.crit?12:5);
   if(G.mode!=='guest'&&!m.boss&&!m.elite){ const kx=m.x-me.x,ky=m.y-me.y,kd=hyp(kx,ky)||1,kf=r.crit?95:55; m.kx=(m.kx||0)+kx/kd*kf; m.ky=(m.ky||0)+ky/kd*kf; }
   const smh=!!(fx&&fx.sm);
-  if(G.mode==='solo'&&!smh)G.hs=Math.max(G.hs||0,r.crit?.08:.035);
-  G.shake=Math.max(G.shake,smh?0:r.crit?.3:.08);
+  const nhs=!!(fx&&fx.nohs); if(G.mode==='solo'&&!smh&&!nhs)G.hs=Math.max(G.hs||0,r.crit?.08:.035);
+  G.shake=Math.max(G.shake,smh?0:nhs?.05:r.crit?.3:.08);
   if(me.D.ls&&!me.dead&&!smh) me.hp=Math.min(me.D.maxHp,me.hp+dmg*me.D.ls/100);
   if(G.mode==='guest'){ hitQ.push([++hitSeq,m.id,dmg,slow||0,tn?1:0,fx?Math.round((fx.stun||0)*10):0,fx?Math.round((fx.burn||0)*10):0,fx?Math.round(fx.bd||0):0]); if(hitQ.length>40)hitQ.shift(); }
   else { if(m.boss)addThreat(m,1,dmg*(TMUL[me.cls]||1)*(smh?.4:1)+(tn?m.max*.04:0)); if(tn){ m.taunt={i:1,t:5}; if(T-(me.tnAt||-9)>.3){ me.tnAt=T; addNum(me.x,me.y-44,'📣 도발!','#ffb259',true); } } applyDmg(m,dmg,slow||0,fx); }
@@ -2230,7 +2230,7 @@ function castSkill(o,key,real,tx,ty,lv,tgt){
     {const Z=real?zealMul():{d:1,t:1}, hn=HMN(lv), hf=HMF(hn);
     for(let i=0;i<hn;i++) later(i*.4,()=>{ if(o===me&&me.dead)return; const cx=o.x, cy=o.y; if(i>0)sfx('holy');
       proj({kind:'hammer',cx,cy,a:ang+i*.9,rad:12,x:cx,y:cy,vx:0,vy:0,r:11,life:4.5*Z.t,col:'#ffe08a',real,pierce:true,re:new Map(),trail:'255,224,138',
-        hit:m=>{impact(m.x,m.y,'255,230,150',40); const r=spellDmg(16+13*lv); r.v*=Z.d*hf; hitMob(m,r);}}); });}
+        hit:m=>{ if(T-(G.hmFx||-9)>.12){ G.hmFx=T; impact(m.x,m.y,'255,230,150',40); } const r=spellDmg(16+13*lv); r.v*=Z.d*hf; hitMob(m,r,0,0,{nohs:1}); }}); });}   /* 망치: 타격 정지·큰 흔들림 없음, 빛 효과는 0.12초에 한 번 */
     break;
   case 'shock':
     efx.push({k:'ring',x:o.x,y:o.y,r0:20,r1:180,t:0,life:.45,col:'#fff2b0',w:10});
@@ -3894,10 +3894,10 @@ function step(now){
     for(let i=projs.length-1;i>=0;i--){const p=projs[i]; p.life-=dt;
       if(p.kind==='hammer'){p.rad=Math.min(185,p.rad+78*dt); p.a+=3.4*dt; p.x=p.cx+Math.cos(p.a)*p.rad; p.y=p.cy+Math.sin(p.a)*p.rad;}
       else {p.x+=p.vx*dt; p.y+=p.vy*dt;}
-      if(p.trail&&Math.random()<.8) parts.push({x:p.x+rand(-3,3),y:p.y+rand(-3,3),vx:rand(-20,20),vy:rand(-20,20),t:0,life:rand(.2,.4),col:`rgb(${p.trail})`,r:rand(2,4),glow:1,dm:.85});
+      if(p.trail&&Math.random()<(p.kind==='hammer'?.3:.8)) parts.push({x:p.x+rand(-3,3),y:p.y+rand(-3,3),vx:rand(-20,20),vy:rand(-20,20),t:0,life:rand(.2,.4),col:`rgb(${p.trail})`,r:rand(2,4),glow:1,dm:.85});
       let dead=p.life<=0||p.x<0||p.y<0||p.x>WW||p.y>WH;
       if(!dead){ for(const m of G.mobs){ if(m.dead)continue; if(hyp(m.x-p.x,m.y-p.y)<m.r+p.r){
-          if(p.kind==='hammer'){ const lt=p.re.get(m.id)||-9; if(T-lt>.5){p.re.set(m.id,T); if(p.real)p.hit(m); spark(p.x,p.y,'#ffe08a',3);} continue; }
+          if(p.kind==='hammer'){ const lt=p.re.get(m.id)||-9; if(T-lt>.5){p.re.set(m.id,T); if(p.real)p.hit(m); else spark(p.x,p.y,'#ffe08a',3);} continue; }
           if(p.real&&p.hit)p.hit(m); if(p.boom)p.boom(p.x,p.y); else { spark(p.x,p.y,p.col,4); if(p.kind==='bolt')fxSpr(0,3,7,p.x,p.y,62,.35); } dead=true; break; } } }
       else if(p.boom&&p.life<=0)p.boom(p.x,p.y);
       if(dead)projs.splice(i,1);}
