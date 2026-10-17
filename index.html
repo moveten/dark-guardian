@@ -417,7 +417,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.0.0118</div>
+    <div class="ver" id="verT">v0.4.0.0119</div>
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -1786,7 +1786,7 @@ function shardCanSwap(){ const cp={inv:JSON.parse(JSON.stringify(me.inv)),shard:
 function shardModal(){ shardAdd(me,0); const n=shardCount(me), ok=n>=SHARD_N, free=shardCanSwap();
   const parts=['weapon','helm','armor','amulet','ring','shield'];
   modal(`<h3>🌑 그림자 조각 교환</h3><p class="meta" style="margin:0 0 8px">삼남매를 쓰러뜨릴 때마다 보스 하나당 조각 1~3개를 얻어요. <b style="color:#ffb0c4">${SHARD_N}개</b>로 원하는 영웅 아이템 하나를 골라 받을 수 있어요. (수치는 무작위)</p>
-    <div class="meta" style="margin:0 0 8px;font-size:14px">보유 <b style="color:${ok?'#ff4f7a':'#e9d9b4'}">${n}</b> / ${SHARD_N}${free?'':' · <span style="color:#e07060">가방이 가득 찼어요</span>'}</div>
+    <div class="meta" style="margin:0 0 8px;font-size:14px">보유 <b style="color:${ok?'#ff4f7a':'#e9d9b4'}">${n}</b> / ${SHARD_N}${!ok?` · <span style="color:#e07060">${SHARD_N-n}개 더 필요해요</span>`:free?'':' · <span style="color:#e07060">가방에 빈 칸이 없어요</span>'}</div>
     <div class="col">${parts.map(pt=>{ const k=heroKey(pt), S=SPFX[k]; return `<button class="btn${ok&&free?' primary':''}" data-hp="${pt}" ${ok&&free?'':'disabled style="opacity:.45"'} style="text-align:left"><b style="color:#ff4f7a">${S.n}</b> <span style="font-weight:400;font-size:12px;opacity:.85">${HPARTN[pt]} · ${S.d}</span></button>`; }).join('')}<button class="btn" id="shX">닫기</button></div>`,m=>{
     m.querySelector('#shX').onclick=closeModal;
     m.querySelectorAll('[data-hp]').forEach(b=>b.onclick=()=>{ if(shardCount(me)<SHARD_N)return; const snap=JSON.stringify([me.inv,me.shard|0]); shardTake(me,SHARD_N); const i=me.inv.indexOf(null); if(i<0){ [me.inv,me.shard]=JSON.parse(snap); toast('가방이 가득 찼어요','#e07060'); return; }
