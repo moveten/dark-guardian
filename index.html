@@ -456,7 +456,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.2.0136</div>
+    <div class="ver" id="verT">v0.4.2.0137</div>
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -3176,8 +3176,8 @@ function charMenu(id){
   modal(`<h3>${clsIc(p.cls,26)} ${esc(dispName(p))} <small style="color:var(--mute);font-weight:400">Lv ${p.lvl} · ${CLASSES[p.cls].n}</small></h3><div class="col"><button class="btn primary" id="cmGear">🎒 장비 · 능력치 정비</button><button class="btn" id="cmShop">🛒 상점</button><button class="btn" id="cmRen">✏️ 이름 변경 (${RENCOST.toLocaleString()}G)</button><button class="btn" id="cmDel">🗑️ 삭제</button><button class="btn" id="cmX">닫기</button></div>`,m=>{
     m.querySelector('#cmGear').onclick=()=>{ closeModal(); openTitleSheet('bag'); };
     m.querySelector('#cmShop').onclick=()=>{ closeModal(); openTitleSheet('shop'); };
-    m.querySelector('#cmRen').onclick=()=>{
-      askName(`✏️ 이름 변경 · ${RENCOST.toLocaleString()}G`,p.name||'','✔ 변경',v=>{ const q=loadChar(id); if(!q)return; if((q.gold|0)<RENCOST){ warn(`골드가 부족해요. 이름 변경은 ${RENCOST.toLocaleString()}G가 필요해요 (보유 ${(q.gold|0).toLocaleString()}G)`); return; } q.gold-=RENCOST; q.name=v; lsSet(charKey(q.id),JSON.stringify(packChar(q))); renderTitle(); toast(`이름을 '${v}'(으)로 바꿨어요 (-${RENCOST.toLocaleString()}G)`,'#ffd84a'); },id,v=>nameCheat(id,v)); };
+    m.querySelector('#cmRen').onclick=()=>{ if((p.gold|0)<RENCOST){ warn(`골드가 부족해요. 이름 변경은 ${RENCOST.toLocaleString()}G가 필요해요 (보유 ${(p.gold|0).toLocaleString()}G)`); return; }
+      askName(`✏️ 이름 변경 · ${RENCOST.toLocaleString()}G`,p.name||'','✔ 변경',v=>{ const q=loadChar(id); if(!q)return; if((q.gold|0)<RENCOST)return; q.gold-=RENCOST; q.name=v; lsSet(charKey(q.id),JSON.stringify(packChar(q))); renderTitle(); toast(`이름을 '${v}'(으)로 바꿨어요 (-${RENCOST.toLocaleString()}G)`,'#ffd84a'); },id,v=>nameCheat(id,v)); };
     m.querySelector('#cmDel').onclick=()=>modal(`<h3>🗑️ 삭제</h3><p style="margin:0 0 12px;font-size:14px">'${esc(dispName(p))}' (Lv ${p.lvl}) 캐릭터를 삭제할까요?<br>장비와 아이템도 함께 사라지며 되돌릴 수 없어요.</p><div class="row2"><button class="btn" id="dNo">취소</button><button class="btn primary" id="dYes">삭제</button></div>`,m2=>{ m2.querySelector('#dNo').onclick=closeModal; let dAsk=false; m2.querySelector('#dYes').onclick=()=>{ if(!dAsk){ dAsk=true; const y=m2.querySelector('#dYes'); y.textContent='⚠️ 정말 삭제 · 한 번 더 누르면 삭제'; y.style.background='#a62a22'; y.style.borderColor='#ff6a5a'; return; } deleteChar(id); closeModal(); renderTitle(); }; });
     m.querySelector('#cmX').onclick=closeModal; });
 }
