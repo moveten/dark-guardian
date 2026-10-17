@@ -229,6 +229,20 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
 .shopitem:first-of-type{border-top:0}
 .price{color:var(--gold);font-weight:700}
 .shopitem .btn{flex:none;white-space:nowrap;padding:10px 12px;font-size:14px}
+.sh2{padding:12px 0;border-top:1px solid #241c16}
+.sh2:first-of-type{border-top:0}
+.sh2 .top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.sh2 .nm{font-size:18px;font-weight:800}
+.sh2 .hv{display:flex;align-items:baseline;gap:5px;padding:3px 13px;border:1.5px solid #8a7440;border-radius:20px;background:rgba(255,216,74,.09);font-size:13px;color:var(--mute);white-space:nowrap}
+.sh2 .hv b{font-size:24px;line-height:1.1;color:#ffd84a;font-weight:800}
+.sh2 .hv i{font-style:normal;font-size:17px;color:#efe4cc;font-weight:800}
+.sh2 .hv.full{border-color:#c5463d;background:rgba(197,70,61,.14)}
+.sh2 .hv.full b{color:#ff6a5a}
+.sh2 .qr{display:flex;align-items:center;gap:6px}
+.sh2 .qbtn{flex:none;min-width:42px;padding:6px;font-size:18px}
+.sh2 .qn{flex:none;min-width:44px;text-align:center;font-size:21px;font-weight:800}
+.sh2 .mx{flex:none;padding:6px 10px;color:#ffd84a;border-color:#8a7440}
+.sh2 .go{flex:1;min-width:0;padding:8px 6px;min-height:42px;font-size:14px;white-space:nowrap}
 .smsg{font-size:12.5px;color:var(--gold);min-height:18px}
 @media (max-width:560px){
   .hb{width:40px;height:40px}.tr{gap:5px}
@@ -426,7 +440,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.2.0131</div>
+    <div class="ver" id="verT">v0.4.2.0132</div>
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -2812,7 +2826,9 @@ if(SKM){
   bo.querySelectorAll('[data-sk]').forEach(el=>el.onclick=()=>{ const k=el.dataset.sk, s=SKBY[k]; if(me.skillPts<=0||me.lvl<s.req||(me.skills[k]||0)>=20)return; me.skillPts--; me.skills[k]=(me.skills[k]||0)+1; saveChar(); buildSkills(); renderStat(); });
 }
 const SHOP={potion:{n:'회복 물약',d:'생명력·마나 45% 회복. 습격마다 주는 무료 물약 3개와 별도로 쌓여요.',p:200},rev:{n:'즉시 부활',d:'쓰러졌을 때 그 자리에서 바로 일어나요. (스테이지마다 무료 1회 포함)',p:1000}};
-function shopRow(k){ const o=SHOP[k], have=k==='potion'?me.potBuy:me.rev; return `<div class="shopitem"><div><b>${o.n}</b><div class="skd">${o.d}</div><div class="k" style="font-size:12px;color:var(--mute)">보유 ${have}개 · 최대 20개</div></div><button class="btn" data-buy="${k}"><span class="price">${o.p}G</span> 구매</button></div>`; }
+const SHOPMAX=20, shopQty={potion:1,rev:1};
+function shopRow(k){ const o=SHOP[k], have=k==='potion'?me.potBuy:me.rev, space=Math.max(0,SHOPMAX-have), q=space?clamp(shopQty[k]|0||1,1,space):0; shopQty[k]=q||1;
+  return `<div class="sh2"><div class="top"><span class="nm">${o.n}</span><span class="hv${space?'':' full'}">보유 <b>${have}</b> <i>/ ${SHOPMAX}</i>${space?'':' <span style="color:#ff8a7a;font-weight:800">가득</span>'}</span></div><div class="qr"><button class="btn qbtn" data-q="${k}:-1"${space?'':' disabled'}>−</button><div class="qn">${q}</div><button class="btn qbtn" data-q="${k}:1"${space?'':' disabled'}>＋</button><button class="btn mx" data-q="${k}:max"${space?'':' disabled'}>MAX</button><button class="btn primary go" data-buy="${k}"${space?'':' disabled'}>${space?`${q}개 구매 · ${(q*o.p).toLocaleString()}G`:'가득 찼어요'}</button></div></div>`; }
 function renderShop(){
   markTabs(); sheetHead(); sellAskIt=null;
   const norm=me.inv.reduce((a,it)=>a+(it&&it.rar===0?1:0),0), normV=me.inv.reduce((a,it)=>a+(it&&it.rar===0?sellInfo(it).total:0),0);
@@ -2824,8 +2840,10 @@ function renderShop(){
   h+=`<div class="meta" style="font-size:12px;color:var(--mute)">판매가: 일반 100 · 매직 200 · 레어 400 · 유니크 800G. 스킬 옵션과 고급 옵션(생명력 흡수·치명타·공격/이동 속도)은 추가금이 붙어요.</div>`;
   h+=`<button class="btn" id="aSellAll">🧺 일괄 판매…</button></div>`;
   const b=$('#sheetB'); b.className='sbody stats'; b.innerHTML=h;
-  b.querySelectorAll('[data-buy]').forEach(el=>el.onclick=()=>{ const k=el.dataset.buy, o=SHOP[k], key=k==='potion'?'potBuy':'rev';
-    shopMsg=''; if(me.gold<o.p){buyMsg='금화가 부족해요';} else if(me[key]>=20){buyMsg='더 이상 가질 수 없어요 (최대 20개)';} else { me.gold-=o.p; me[key]++; buyMsg=`${o.n} 구매 -${o.p}G`; sfx('coin'); saveChar(); uiDirty=true; }
+  b.querySelectorAll('[data-q]').forEach(el=>el.onclick=()=>{ const [k,a]=el.dataset.q.split(':'), have=k==='potion'?me.potBuy:me.rev, space=Math.max(1,SHOPMAX-have), o=SHOP[k];
+    if(a==='max')shopQty[k]=Math.max(1,Math.min(Math.floor(me.gold/o.p),space)); else shopQty[k]=clamp((shopQty[k]|0)+(+a),1,space); buyMsg=''; renderShop(); });
+  b.querySelectorAll('[data-buy]').forEach(el=>el.onclick=()=>{ const k=el.dataset.buy, o=SHOP[k], key=k==='potion'?'potBuy':'rev', n=shopQty[k]|0||1, cost=o.p*n;
+    shopMsg=''; if(me[key]>=SHOPMAX){buyMsg=`더 이상 가질 수 없어요 (최대 ${SHOPMAX}개)`;} else if(me.gold<cost){buyMsg='금화가 부족해요';} else if(me[key]+n>SHOPMAX){buyMsg=`최대 ${SHOPMAX}개까지만 가질 수 있어요`;} else { me.gold-=cost; me[key]+=n; buyMsg=`${o.n} ${n}개 구매 -${cost.toLocaleString()}G`; sfx('coin'); saveChar(); uiDirty=true; shopQty[k]=1; }
     renderShop(); });
   b.querySelectorAll('[data-inv]').forEach(el=>el.onclick=()=>{const i=+el.dataset.inv; if(me.inv[i]){delete me.inv[i].isNew;selItem={it:me.inv[i],inv:i}; shopMsg=''; buyMsg=''; renderShop();}});
   showPop(d); const as=pq('#aSell'); if(as)as.onclick=()=>sellBtn(as); const alk2=pq('#aLock'); if(alk2)alk2.onclick=()=>{ const it=selItem&&selItem.it; if(!it)return; it.lock=!it.lock; saveChar(); renderShop(); };
