@@ -417,7 +417,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.0.0115</div>
+    <div class="ver" id="verT">v0.4.0.0116</div>
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -1031,6 +1031,7 @@ function loadChar(id){
     p.eq=p.eq||{}; if(p.eq.shield===undefined)p.eq.shield=null;
     for(const k in p.eq){ if(p.eq[k])delete p.eq[k].isNew; } /* 장착했던 아이템의 NEW 꼬리표 정리(1회) */ if(!lsGet('dkdef2.nwf.'+id)){ (p.inv||[]).forEach(x=>{ if(x)delete x.isNew; }); lsSet('dkdef2.nwf.'+id,'1'); }
     p.inv=p.inv||Array(INVN).fill(null); while(p.inv.length<INVN)p.inv.push(null);
+    p.shard=p.shard|0; shardAdd(p,0); /* 예전 조각 숫자 → 가방 아이템으로 */
     const fx=it=>{ if(!it)return; if(!Array.isArray(it.aff))it.aff=[]; if(it.rar===3&&it.name==='그림자 망토')it.name='밤의 망토'; /* 영웅 '그림자' 장비와 헷갈리지 않게 개명 */ if(!p.dv4&&it.slot!=='weapon')for(const a of it.aff)if(a&&(a.t==='dmgPct'||a.t==='sm'||a.t==='smhp'))a.v=Math.min(50,Math.max(1,Math.round(a.v/4))); /* v0.3: 무기 외 피해%·소환수 피해%·소환수 생명력% 옵션은 예전 수치를 4로 나눈 값으로(캐릭터마다 1회, p.dv4) */ for(const a of it.aff)if(a&&(a.t==='str'||a.t==='dex'||a.t==='vit'||a.t==='ene')&&a.v>10)a.v=10; /* 힘·민첩·체력·에너지 옵션 상한 10(이전에 얻은 더 높은 수치도 10으로) */ if(it.rar===3&&it.aff.some(a=>a&&a.t==='all'))it.aff=it.aff.filter(a=>!(a&&a.t==='sk')); it.aff=it.aff.filter(a=>a&&AFXBY[a.t]&&!(it.slot==='armor'&&a.t==='ms')&&!(a.cls&&!CLASSES[a.cls])&&!(a.t==='sk'&&!(SKBY[a.key]&&SK[a.cls]&&SK[a.cls].includes(SKBY[a.key])))); }; p.inv.forEach(fx); p.eq=p.eq||{}; for(const k in p.eq)fx(p.eq[k]); p.dv4=1;
     /* 보조장비 개편 이전에 얻은 방패(oc 없음)는 전사·마법사가 못 쓰는 팔라딘 방패 → 내 직업의 보조무기/오브로 바꿔 줌(등급·옵션·강화·이름 유지) */
     if(cls!=='pal'&&OFFB[cls]){ const mg=it=>{ if(!it||it.slot!=='shield'||it.oc)return; const bl=OFFB[cls], b=bl[Math.min(bl.length-1,Math.floor((it.ilvl||1)/12))], k=(it.rar===3?1.3:1)*(1+(it.ilvl||1)*.1);
@@ -1076,7 +1077,7 @@ function derive(p){
       else d[a.t]+=a.v;
     }}
   if(d.hc>=2) d.mana+=200;   /* 그림자 세트 2개: 최대 마나 +200 */
-  if(d.hc>=7){ d.rbd=30; d.cls+=3; } else if(d.hc>=3) d.rbd=15;   /* 그림자 세트: 3개 레이드 보스 피해 +15% · 7개 +30%(15% 대신) & 모든 스킬 +3 */
+  if(d.hc>=3) d.rbd=15; if(d.hc>=7){ d.rbd+=15; d.cls+=3; }   /* 그림자 세트: 3개 레이드 보스 피해 +15% · 7개 추가 +15%(합계 30%) & 모든 스킬 +3 */
   if(p.mb){ d.dmgPct+=p.mb.dmg||0; d.ias+=p.mb.ias||0; d.ms+=p.mb.ms||0; }
   const C=CLASSES[p.cls];
   { const pl=k=>{const b=(p.skills&&p.skills[k])||0; return b>0?b+d.cls+(d.sk[k]||0):0;}; const a1=pl('ironbody'),a2=pl('bulwark'),a3=pl('arcane'),a4=pl('swift'); if(a4)d.ms+=10+2*a4; d.dr+=a1*.012; d.regen+=a1*.0015; d.mr+=a3*3; d.cdr+=a3*.01; d.blk+=a2; }
@@ -1617,7 +1618,7 @@ function onKill(x,y,xp,tier,ilvl,type,lf){
   me.kills=(me.kills||0)+1; G.stKills=(G.stKills||0)+1; bumpCombo();
   { const sp=me.D&&me.D.sp; if(sp&&!me.dead){ if(sp.bloodoath)me.hp=Math.min(me.D.maxHp,me.hp+me.D.maxHp*.04); if(sp.hring)me.hp=Math.min(me.D.maxHp,me.hp+me.D.maxHp*.02); if(sp.necro)me.mp=Math.min(me.D.maxMp,me.mp+6); } }
   gainXp(Math.round(xp*comboMul()));
-  { const RK=MT[type].raid; if(RK){ const n=ri(1,3); me.shard=(me.shard|0)+n; later(.4,()=>toast(`🌑 그림자 조각 +${n} (보유 ${me.shard} / ${SHARD_N})`,'#c9a0ff'));
+  { const RK=MT[type].raid; if(RK){ const n=ri(1,3); shardAdd(me,n); later(.4,()=>toast(`🌑 그림자 조각 +${n} (보유 ${shardCount(me)})${(me.shard|0)>0?' · 가방이 가득 차서 일부는 보관 중':''}`,'#c9a0ff'));
       if(Math.random()<HERO_P){ const hit=genHero(heroKey(pick(HDROP[RK]))); if(hit)dropItem(hit,x+rand(-20,20),y+rand(-20,20)); } saveChar(); } }
   lf=lf>1?lf:1; const rolls=(tier>=2?4:tier>=1?2:1)+(tier<2?(Math.floor(lf-1)+(Math.random()<(lf-1)%1?1:0)):0);
   for(let i=0;i<rolls;i++){
@@ -1761,15 +1762,29 @@ function doSynth(r,quiet){
   const it=genItem(r+1,il); it.isNew=1; const dst=use[0].i; for(const o of use)me.inv[o.i]=null; me.inv[dst]=it;
   if(!quiet){ sfx(r+1>=3?'crit':'pick'); toast(`🔮 합성! ${RARN[r]} ${SYN_N}개 → ${dn(it)} (Lv ${il})`,RARC[r+1]); saveChar(); uiDirty=true; if(sheetMode==='bag')renderBag(); } return it; }
 function autoSynth(){ if(syLv<0)return; for(let r=0;r<=syLv;r++){ let g=0; while(g++<20&&doSynth(r,true)); } }
+/* 그림자 조각: 가방 한 칸에 최대 SHARD_N(150)개까지 쌓이는 재료 아이템 (넘치면 다음 칸). 가방이 꽉 차서 못 넣은 조각은 p.shard 에 보관했다가 자리가 나면 자동으로 들어감 */
+const isShard=it=>!!(it&&it.mat==='shard');
+function mkShard(n){ return {id:++ITEMID,slot:'mat',mat:'shard',rar:4,name:'그림자 조각',base:'',ilvl:0,n:n|0,aff:[]}; }
+function shardCount(p){ return (p.inv||[]).reduce((t,x)=>t+(isShard(x)?(x.n|0):0),0)+(p.shard|0); }
+function shardAdd(p,n){ let left=Math.max(0,n|0)+(p.shard|0); p.shard=0; if(left<=0)return 0; const put=left;
+  for(const x of p.inv){ if(left<=0)break; if(isShard(x)&&x.n<SHARD_N){ const a=Math.min(SHARD_N-x.n,left); x.n+=a; left-=a; } }
+  while(left>0){ const i=p.inv.indexOf(null); if(i<0)break; const a=Math.min(SHARD_N,left); p.inv[i]=mkShard(a); left-=a; }
+  p.shard=left; return put-left; }
+function shardRepack(p){ let n=0; for(let i=0;i<p.inv.length;i++){ if(isShard(p.inv[i])){ n+=p.inv[i].n|0; p.inv[i]=null; } } shardAdd(p,n); }
+function shardTake(p,n){ if(shardCount(p)<n)return false; let need=n; const ov=Math.min(p.shard|0,need); p.shard=(p.shard|0)-ov; need-=ov;
+  const st=p.inv.map((x,i)=>isShard(x)?i:-1).filter(i=>i>=0).sort((a,b)=>p.inv[a].n-p.inv[b].n);
+  for(const i of st){ if(need<=0)break; const a=Math.min(p.inv[i].n,need); p.inv[i].n-=a; need-=a; if(p.inv[i].n<=0)p.inv[i]=null; } return need<=0; }
+function shardRoom(p,n){ /* p 가방에 조각 n개가 더 들어갈 자리가 있나 */ let r=0; for(const x of p.inv){ if(!x)r+=SHARD_N; else if(isShard(x))r+=SHARD_N-(x.n|0); } return r>=n; }
+function shardCanSwap(){ const cp={inv:JSON.parse(JSON.stringify(me.inv)),shard:me.shard|0}; return shardTake(cp,SHARD_N)&&cp.inv.indexOf(null)>=0; }
 /* 그림자 조각 150개 → 원하는 영웅 아이템 1개 */
-function shardModal(){ const n=me.shard|0, ok=n>=SHARD_N, free=me.inv.indexOf(null)>=0;
+function shardModal(){ shardAdd(me,0); const n=shardCount(me), ok=n>=SHARD_N, free=shardCanSwap();
   const parts=['weapon','helm','armor','amulet','ring','shield'];
   modal(`<h3>🌑 그림자 조각 교환</h3><p class="meta" style="margin:0 0 8px">삼남매를 쓰러뜨릴 때마다 보스 하나당 조각 1~3개를 얻어요. <b style="color:#ffb0c4">${SHARD_N}개</b>로 원하는 영웅 아이템 하나를 골라 받을 수 있어요. (수치는 무작위)</p>
     <div class="meta" style="margin:0 0 8px;font-size:14px">보유 <b style="color:${ok?'#ff4f7a':'#e9d9b4'}">${n}</b> / ${SHARD_N}${free?'':' · <span style="color:#e07060">가방이 가득 찼어요</span>'}</div>
     <div class="col">${parts.map(pt=>{ const k=heroKey(pt), S=SPFX[k]; return `<button class="btn${ok&&free?' primary':''}" data-hp="${pt}" ${ok&&free?'':'disabled style="opacity:.45"'} style="text-align:left"><b style="color:#ff4f7a">${S.n}</b> <span style="font-weight:400;font-size:12px;opacity:.85">${HPARTN[pt]} · ${S.d}</span></button>`; }).join('')}<button class="btn" id="shX">닫기</button></div>`,m=>{
     m.querySelector('#shX').onclick=closeModal;
-    m.querySelectorAll('[data-hp]').forEach(b=>b.onclick=()=>{ if((me.shard|0)<SHARD_N)return; const i=me.inv.indexOf(null); if(i<0){ toast('가방이 가득 찼어요','#e07060'); return; }
-      const it=genHero(heroKey(b.dataset.hp)); if(!it)return; it.isNew=1; me.inv[i]=it; me.shard-=SHARD_N; saveChar(); uiDirty=true; closeModal(); sfx('rare'); toast(`🌑 교환 완료: ${dn(it)}`,RARC[4]); if(sheetMode==='bag')renderBag(); }); }); }
+    m.querySelectorAll('[data-hp]').forEach(b=>b.onclick=()=>{ if(shardCount(me)<SHARD_N)return; const snap=JSON.stringify([me.inv,me.shard|0]); shardTake(me,SHARD_N); const i=me.inv.indexOf(null); if(i<0){ [me.inv,me.shard]=JSON.parse(snap); toast('가방이 가득 찼어요','#e07060'); return; }
+      const it=genHero(heroKey(b.dataset.hp)); if(!it){ [me.inv,me.shard]=JSON.parse(snap); return; } it.isNew=1; me.inv[i]=it; selItem=null; saveChar(); uiDirty=true; closeModal(); sfx('rare'); toast(`🌑 교환 완료: ${dn(it)}`,RARC[4]); if(sheetMode==='bag')renderBag(); }); }); }
 function synToggle(){ syLv=syLv>=0?-1:2; saveChar(); autoSynth(); if(sheetMode==='bag')renderBag(); const warn=syLv>=0&&asLv>=0&&asLv>=syLv; sheetToast&&sheetToast(syLv<0?'자동 합성을 껐어요':warn?`⚠️ 자동 판매(${RARN[asLv]} 이하)가 합성 등급을 먼저 팔아요`:`자동 합성 ON — 레어 이하 같은 등급 ${SYN_N}개가 모이면 합성돼요`,warn?'#ffb259':null); }
 function autoSellOk(it0){ if(!(asLv>=0&&it0.rar<=asLv&&!it0.lock))return false; const k0=it0.slot==='ring'?(!me.eq.ring1?'ring1':!me.eq.ring2?'ring2':null):(me.eq[it0.slot]?null:it0.slot); return !(k0&&canWear(it0)); }
 function pickUp(g){
@@ -2531,6 +2546,7 @@ const RBD=['#b4aea0','#4a7bff','#ffe24d','#ff8a2a','#ff3f6e'];
 function canWear(it){ return ownOk(it)&&me.lvl>=reqLv(it)&&!statLack(it).length; }
 function cellHtml(it,cls,extra){
   if(!it) return `<button class="${cls}" ${extra||''}></button>`;
+  if(isShard(it)) return `<button class="${cls}${selItem&&selItem.it===it?' sel':''}" ${extra||''} style="border:2px solid ${RBD[4]};background:${RBG[4]}" aria-label="그림자 조각 ${it.n}개"><span style="font-size:24px;line-height:1;pointer-events:none;filter:drop-shadow(0 0 4px #c9a0ff)">🌑</span><i class="en" style="left:0;right:3px;top:auto;bottom:0;text-align:right;color:#fff;font-size:11px">${it.n}</i>${it.isNew?'<i class="nw">NEW</i>':''}</button>`;
   const lock=!canWear(it);
   return `<button class="${cls}${selItem&&selItem.it===it?' sel':''}${lock?' lock':''}" ${extra||''} style="border:2px solid ${lock?'#a33a30':RBD[it.rar]};background:${RBG[it.rar]};${it.rar===3?'box-shadow:0 0 8px rgba(255,150,50,.5) inset;':it.rar===2?'box-shadow:0 0 6px rgba(255,226,77,.3) inset;':''}" aria-label="${esc(it.name)}"><img src="${itemIcon(it).url}" alt="" style="width:86%;height:86%;pointer-events:none;${lock?'filter:grayscale(.25) brightness(.92)':''}">${lock?`<i class="rq">${!ownOk(it)?'🚫':me.lvl<reqLv(it)?'Lv'+reqLv(it):(()=>{ const L=statLack(it)[0]; return L?STN[L[0]]+L[1]:''; })()}</i>`:''}${it.lock?'<i class="lk">🔒</i>':''}${it.isNew?'<i class="nw">NEW</i>':''}${cls==='cell'&&isUpgrade(it)?`<i class="up${lock?' hi':''}">▲</i>`:''}${it.enh>0?`<i class="en">+${it.enh}</i>`:''}${it.enh>=5?`<i class="gl"></i>`:''}</button>`;
 }
@@ -2561,7 +2577,7 @@ function enableDrag(b){
 }
 function dragDrop(a,b){
   selItem=null;
-  if(a.t==='inv'&&b.t==='inv'){ if(a.i!==b.i){ const t=me.inv[a.i]; me.inv[a.i]=me.inv[b.i]; me.inv[b.i]=t; saveChar(); } renderBag(); return; }
+  if(a.t==='inv'&&b.t==='inv'){ if(a.i!==b.i&&isShard(me.inv[a.i])&&isShard(me.inv[b.i])){ const A=me.inv[a.i],B=me.inv[b.i],mv=Math.min(SHARD_N-B.n,A.n); if(mv>0){ B.n+=mv; A.n-=mv; if(A.n<=0)me.inv[a.i]=null; saveChar(); } renderBag(); return; } if(a.i!==b.i){ const t=me.inv[a.i]; me.inv[a.i]=me.inv[b.i]; me.inv[b.i]=t; saveChar(); } renderBag(); return; }
   if(a.t==='inv'&&b.t==='eq'){ const it=me.inv[a.i]; if(!it){renderBag();return;} const sl=it.slot==='ring'?(b.k.startsWith('ring')?b.k:null):it.slot; if(sl!==b.k&&!(it.slot==='ring'&&b.k.startsWith('ring'))){ toast('그 칸에는 착용할 수 없어요','#ff8a7a'); renderBag(); return; } equip(a.i,it.slot==='ring'?b.k:undefined); return; }
   if(a.t==='eq'&&b.t==='inv'){ if(me.inv[b.i]){ renderBag(); return; } unequip(a.k); return; }
   renderBag();
@@ -2590,10 +2606,10 @@ function fitInv(){ const b=$('#sheetB'); if(!b)return; const inv=b.querySelector
   const n=Math.max(INV_COLS_MIN,Math.min(INV_COLS_MAX,Math.round((w+4)/(INV_CELL+4)))); inv.style.gridTemplateColumns=`repeat(${n},minmax(0,1fr))`; }
 try{ new ResizeObserver(()=>fitInv()).observe($('#sheetB')); }catch(e){}
 function renderBag(){
-  markTabs(); sheetHead();
+  shardAdd(me,0); markTabs(); sheetHead();
   const eqOrder=['weapon','armor','helm','amulet','ring1','ring2'].concat(['shield']);
   let h='<div class="bagtop" style="display:flex;flex-direction:column;gap:10px;min-width:0"><div class="eq">'+eqOrder.map(k=>{const it=me.eq[k]; return `<div style="position:relative">${cellHtml(it,'slot',`data-eq="${k}"`)}<div class="sl" style="position:absolute;bottom:2px;left:0;right:0;font-size:9.5px;color:var(--mute);text-align:center;pointer-events:none">${eqLbl(k)}</div></div>`;}).join('')+'</div>';
-  h+=`<div class="meta" style="font-size:12px;color:var(--mute)">⚔️ 전투력 <b style="color:#ffd84a">${calcCP(me).toLocaleString()}</b> · 빨간 칸은 아직 착용할 수 없어요</div><div style="display:flex;flex-wrap:nowrap;gap:4px"><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap" data-sort="rar">정렬(등급순)</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap" id="aBulk">일괄 판매</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap;${asLv>=0?`border-color:${RARC[asLv]};color:${RARC[asLv]};background:${['rgba(233,226,212,.14)','rgba(90,120,255,.28)','rgba(255,214,60,.24)'][asLv]};box-shadow:0 0 8px ${['rgba(233,226,212,.3)','rgba(110,140,255,.6)','rgba(255,214,60,.55)'][asLv]};font-weight:800`:''}" id="aAuto">자동판매 ${ASN[asLv+1]}</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap;${syLv>=0?`border-color:#c9a0ff;color:#d9b8ff;background:rgba(150,90,255,.22);box-shadow:0 0 8px rgba(150,90,255,.5);font-weight:800`:''}" id="aSyn" aria-pressed="${syLv>=0}">자동합성 ${syLv>=0?'ON':'OFF'}</button></div>${((me.shard|0)>0||(me.clear|0)>=15)?`<button class="btn sm" id="aShard" style="width:100%;margin-top:5px;padding:8px 2px;font-size:13px;white-space:nowrap;${(me.shard|0)>=SHARD_N?'border-color:#ff4f7a;color:#ffb0c4;box-shadow:0 0 10px rgba(255,79,122,.45);font-weight:800':''}">🌑 그림자 조각 ${me.shard|0} / ${SHARD_N}${(me.shard|0)>=SHARD_N?' · 영웅 아이템 교환 가능!':''}</button>`:''}`;
+  h+=`<div class="meta" style="font-size:12px;color:var(--mute)">⚔️ 전투력 <b style="color:#ffd84a">${calcCP(me).toLocaleString()}</b> · 빨간 칸은 아직 착용할 수 없어요</div><div style="display:flex;flex-wrap:nowrap;gap:4px"><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap" data-sort="rar">정렬(등급순)</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap" id="aBulk">일괄 판매</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap;${asLv>=0?`border-color:${RARC[asLv]};color:${RARC[asLv]};background:${['rgba(233,226,212,.14)','rgba(90,120,255,.28)','rgba(255,214,60,.24)'][asLv]};box-shadow:0 0 8px ${['rgba(233,226,212,.3)','rgba(110,140,255,.6)','rgba(255,214,60,.55)'][asLv]};font-weight:800`:''}" id="aAuto">자동판매 ${ASN[asLv+1]}</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap;${syLv>=0?`border-color:#c9a0ff;color:#d9b8ff;background:rgba(150,90,255,.22);box-shadow:0 0 8px rgba(150,90,255,.5);font-weight:800`:''}" id="aSyn" aria-pressed="${syLv>=0}">자동합성 ${syLv>=0?'ON':'OFF'}</button></div>${(shardCount(me)>0||(me.clear|0)>=15)?`<button class="btn sm" id="aShard" style="width:100%;margin-top:5px;padding:8px 2px;font-size:13px;white-space:nowrap;${shardCount(me)>=SHARD_N?'border-color:#ff4f7a;color:#ffb0c4;box-shadow:0 0 10px rgba(255,79,122,.45);font-weight:800':''}">🌑 그림자 조각 ${shardCount(me)} / ${SHARD_N}${shardCount(me)>=SHARD_N?' · 영웅 아이템 교환 가능!':''}</button>`:''}`;
   h+='<div class="inv">'+me.inv.map((it,i)=>cellHtml(it,'cell',`data-inv="${i}"`)).join('')+'</div>';
   const b=$('#sheetB'); b.className='sbody bag'; b.innerHTML=h; fitInv(); try{ showPop(detailHtml(),curCmpHtml()); }catch(e){ console.error(e); selItem=null; showPop(''); }
   b.querySelectorAll('[data-eq]').forEach(el=>el.onclick=()=>{const k=el.dataset.eq; if(me.eq[k]){selItem={it:me.eq[k],eq:k};renderBag();}});
@@ -2606,16 +2622,26 @@ function renderBag(){
   b.querySelector('#aAuto').onclick=autoSellModal; b.querySelector('#aSyn').onclick=synToggle; { const sb=b.querySelector('#aShard'); if(sb)sb.onclick=shardModal; }
   enableDrag(b);
   const asn=pq('#aSend'); if(asn)asn.onclick=()=>sendPick();
+  const ase=pq('#aShardEx'); if(ase)ase.onclick=()=>shardModal();
   const aen=pq('#aEnh'); if(aen)aen.onclick=()=>enhModal();
   const au=pq('#aUnequip'); if(au)au.onclick=()=>{unequip(selItem.eq);};
 }
 const SLOTO={weapon:0,shield:1,helm:2,armor:3,amulet:4,ring:5};
 const bk=(a,b)=>(a.base||'')<(b.base||'')?-1:(a.base||'')>(b.base||'')?1:0;
-function sortInv(mode){ const its=me.inv.filter(Boolean);
+function sortInv(mode){ shardRepack(me); const its=me.inv.filter(Boolean);
   its.sort(mode==='type'?((a,b)=>(SLOTO[a.slot]|0)-(SLOTO[b.slot]|0)||(b.rar|0)-(a.rar|0)||bk(a,b)||(b.ilvl|0)-(a.ilvl|0)||String(a.name).localeCompare(String(b.name))):((a,b)=>(b.rar|0)-(a.rar|0)||(SLOTO[a.slot]|0)-(SLOTO[b.slot]|0)||bk(a,b)||(b.ilvl|0)-(a.ilvl|0)||String(a.name).localeCompare(String(b.name))));
   me.inv=its.concat(Array(Math.max(0,INVN-its.length)).fill(null)); selItem=null; saveChar(); renderBag(); sheetToast(mode==='type'?'종류별로 정리했어요':'등급별로 정리했어요'); }
+function sendShard(){ const it=selItem&&selItem.it, ix=selItem&&selItem.inv; if(!isShard(it)||ix===undefined)return; const n=it.n|0;
+  const others_=charIds().filter(x=>x!==me.id).map(loadChar).filter(Boolean);
+  const rows=others_.map(c=>{ const ok=shardRoom(c,n); return `<button class="btn" data-to="${c.id}" ${ok?'':'disabled'} style="text-align:left">${CLSE[c.cls]} ${esc(dispName(c))} · Lv ${c.lvl} <span style="color:var(--mute);font-weight:400">${ok?`(조각 ${shardCount(c)}개 보유)`:'(가방 자리 부족)'}</span></button>`; }).join('');
+  modal(`<h3>📤 그림자 조각 보내기</h3><p style="margin:0 0 10px;font-size:13px;color:${RARC[4]}">🌑 그림자 조각 ${n}개 (이 칸 전체)</p><div class="col">${rows}<button class="btn" id="sX">취소</button></div>`,m=>{
+    m.querySelector('#sX').onclick=closeModal;
+    m.querySelectorAll('[data-to]').forEach(b=>b.onclick=()=>{ const t=loadChar(b.dataset.to); if(!t||!shardRoom(t,n))return; shardAdd(t,n); lsSet(charKey(t.id),JSON.stringify(packChar(t))); me.inv[ix]=null; selItem=null; saveChar(); closeModal(); sfx('pick'); shopMsg=''; renderBag(); toast(`${dispName(t)}에게 조각 ${n}개를 보냈어요`,'#9fd18b'); });
+  });
+}
 function sendPick(){
   const it=selItem&&selItem.it; if(!it||(selItem.inv===undefined&&selItem.eq===undefined))return;
+  if(isShard(it)){ sendShard(); return; }
   const others_=charIds().filter(x=>x!==me.id).map(loadChar).filter(Boolean);
   const rows=others_.map(c=>{ const free=c.inv.filter(x=>!x).length; return `<button class="btn" data-to="${c.id}" ${free?'':'disabled'} style="text-align:left">${CLSE[c.cls]} ${esc(dispName(c))} · Lv ${c.lvl} <span style="color:var(--mute);font-weight:400">${free?`(빈 칸 ${free})`:'(가방 가득)'}</span></button>`; }).join('');
   modal(`<h3>📤 아이템 보내기</h3><p style="margin:0 0 10px;font-size:13px;color:${RARC[it.rar]}">${esc(it.name)}</p><div class="col">${rows}<button class="btn" id="sX">취소</button></div>`,m=>{
@@ -2624,7 +2650,7 @@ function sendPick(){
   });
 }
 function sellBtn(btn){ const it=selItem&&selItem.it; if(!it||selItem.inv===undefined)return; if(it.lock){ sheetToast('🔒 잠긴 아이템이에요. 잠금을 먼저 풀어 주세요','#ff8a7a'); return; } sellItem(selItem.inv); }
-function sellItem(i){ const it=me.inv[i]; if(!it)return; sfx('coin'); const v=sellInfo(it).total; me.gold+=v; me.inv[i]=null; selItem=null; shopMsg=`${it.name} 판매 +${v}G`; saveChar(); uiDirty=true; rerender(); }
+function sellItem(i){ const it=me.inv[i]; if(!it)return; if(isShard(it)){ sheetToast('그림자 조각은 팔 수 없어요','#ff8a7a'); return; } sfx('coin'); const v=sellInfo(it).total; me.gold+=v; me.inv[i]=null; selItem=null; shopMsg=`${it.name} 판매 +${v}G`; saveChar(); uiDirty=true; rerender(); }
 const pq=sel=>$('#itemPop').querySelector(sel);
 function showPop(html,pre){ const p=$('#itemPop'); if(!selItem||!html){ p.hidden=true; p.innerHTML=''; p.classList.remove('two'); return; }
   p.classList.toggle('two',!!pre);
@@ -2648,11 +2674,12 @@ function lvCmp(it){ if(!me||!me.eq||Object.values(me.eq).includes(it))return '';
   if(d<0)return box('rgba(230,70,60,.18)','#e0584c','#ff9a8e',`▼ 장착보다 -${-d} <span style="font-weight:500;font-size:10.5px">(Lv ${b}→${a})</span>`);
   return box('rgba(160,160,160,.14)','#8a8a8a','#cfcfcf',`＝ 장착과 같음 <span style="font-weight:500;font-size:10.5px">(Lv ${a})</span>`); }
 function itemLines(it){
+  if(isShard(it)) return `<div style="display:flex;gap:10px;align-items:center"><div style="width:56px;height:56px;flex:none;display:grid;place-items:center;font-size:34px;background:#0a0807;border:1px solid ${RARC[4]};border-radius:8px">🌑</div><div><div class="in" style="color:${RARC[4]}">그림자 조각</div><div class="meta">수량 <b style="color:#fff">${it.n}</b> / ${SHARD_N} (한 칸 최대)</div></div></div><div class="meta" style="margin:6px 0">삼남매를 쓰러뜨리면 얻는 재료예요. ${SHARD_N}개로 영웅 아이템 하나를 교환할 수 있어요. 판매할 수 없어요.</div>`;
   let s=`<div style="display:flex;gap:10px;align-items:center"><img src="${itemIcon(it).url}" alt="" style="width:56px;height:56px;flex:none;background:#0a0807;border:1px solid ${RARC[it.rar]};border-radius:8px"><div><div class="in" style="color:${RARC[it.rar]}">${it.enh>0?'+'+it.enh+' ':''}${esc(dn(it))}</div><div class="meta" style="color:#fff">아이템 레벨 ${ilvOf(it)}${it.enh>0?` <span style="color:#ffd84a">(기본 ${it.ilvl} + 강화 ${it.enh})</span>`:''}</div>${ownTag(it)}<div class="meta">${reqHtml(it)}</div></div></div>`+lvCmp(it);
   const bt=baseText(it); if(bt)s+=`<div>${bt}</div>`;
   if(BASEFX[it.base]&&it.slot==='weapon') s+=`<div class="meta" style="color:#9fd0ff">▪ ${BASEFX[it.base].t}</div>`;
   if(it.sp&&SPFX[it.sp]) s+=`<div style="margin:4px 0;color:#ffb14a;font-weight:700">★ 특수 효과: ${SPFX[it.sp].d}</div>`;
-  if(it.rar===4&&it.sp&&SPFX[it.sp]&&SPFX[it.sp].hero){ const n=(me.D&&me.D.hc)|0, on=(c,a)=>c?'#d9c6ff':'#8a8a8a'; s+=`<div style="margin:4px 0;font-size:12px;line-height:1.55"><b style="color:#b98cff">🌑 그림자 세트 (${n}/7)</b><br><span style="color:${on(n>=2)}">2개: 최대 마나 +200</span><br><span style="color:${on(n>=3&&n<7)}">3개: 레이드 보스에게 주는 피해 +15%</span><br><span style="color:${on(n>=7)}">7개: 레이드 보스에게 주는 피해 +30% (15% 대신) · 모든 스킬 +3</span></div>`; }
+  if(it.rar===4&&it.sp&&SPFX[it.sp]&&SPFX[it.sp].hero){ const n=(me.D&&me.D.hc)|0, on=(c,a)=>c?'#d9c6ff':'#8a8a8a'; s+=`<div style="margin:4px 0;font-size:12px;line-height:1.55"><b style="color:#b98cff">🌑 그림자 세트 (${n}/7)</b><br><span style="color:${on(n>=2)}">2개: 최대 마나 +200</span><br><span style="color:${on(n>=3)}">3개: 레이드 보스에게 주는 피해 +15%</span><br><span style="color:${on(n>=7)}">7개: 레이드 보스에게 주는 피해 추가 +15% (합계 +30%) · 모든 스킬 +3</span></div>`; }
   const ex=enhOptText(it);
   if(it.aff.length||ex) s+='<ul>'+it.aff.map(a=>`<li>${esc(affText(a))}${(a.cls&&a.cls!==me.cls)?' <span class="meta">(효과 없음)</span>':''}</li>`).join('')+(ex?`<li style="color:#ffe27a">${ex}</li>`:'')+'</ul>';
   return s;
@@ -2684,6 +2711,7 @@ function curCmpHtml(){ if(!selItem||selItem.inv===undefined)return ''; const it=
 function detailHtml(){
   if(!selItem) return '';
   const it=selItem.it; let s=itemLines(it);
+  if(isShard(it)){ s+=`<div class="acts"><button class="btn primary" id="aShardEx">🌑 영웅 아이템 교환</button>${(G.titleSheet&&charIds().length>1)?'<button class="btn" id="aSend">📤 보내기</button>':''}</div>`; return s; }
   if(selItem.inv!==undefined){
     s+=`<div class="acts"><button class="btn primary" id="aEquip"${!canWear(it)?' style="opacity:.5"':''}>장착</button><button class="btn" id="aLock">${it.lock?'🔓 잠금 해제':'🔒 잠금'}</button>${canEnh(it)?`<button class="btn" id="aEnh">⚒ 강화${it.enh>0?' +'+it.enh:''}</button>`:''}<button class="btn" id="aSell"${it.lock?' style="opacity:.45"':''}>판매 ${sellInfo(it).total}G</button>${(G.titleSheet&&charIds().length>1)?'<button class="btn" id="aSend">📤 보내기</button>':''}</div>`;
   }else s+=`<div class="acts"><button class="btn" id="aUnequip">해제</button><button class="btn" id="aLock">${it.lock?'🔓 잠금 해제':'🔒 잠금'}</button>${canEnh(it)?`<button class="btn" id="aEnh">⚒ 강화${it.enh>0?' +'+it.enh:''}</button>`:''}${(G.titleSheet&&charIds().length>1)?'<button class="btn" id="aSend">📤 보내기</button>':''}</div>`;
@@ -2761,7 +2789,8 @@ function renderShop(){
   let h=`<div class="box"><h3>🛍️ 구매</h3>${shopRow('potion')}${shopRow('rev')}</div>`;
   h+=`<div class="box"><h3>💰 판매 · 가방의 아이템을 눌러 고르세요</h3><div class="smsg">${esc(shopMsg)}</div><div class="inv">${me.inv.map((it,i)=>cellHtml(it,'cell',`data-inv="${i}"`)).join('')}</div>`;
   let d='';
-  if(selItem&&selItem.inv!==undefined&&me.inv[selItem.inv]){ const it=selItem.it, si=sellInfo(it); d=itemLines(it)+`<div class="cmp">기본 ${si.base}G${si.ex?` + 옵션 ${si.ex}G`:''}</div><div class="acts"><button class="btn" id="aLock">${it.lock?'🔓 잠금 해제':'🔒 잠금'}</button><button class="btn primary" id="aSell"${it.lock?' style="opacity:.45"':''}>판매 ${si.total}G</button></div>`; }
+  if(selItem&&selItem.inv!==undefined&&me.inv[selItem.inv]&&isShard(selItem.it)){ d=itemLines(selItem.it); }
+  else if(selItem&&selItem.inv!==undefined&&me.inv[selItem.inv]){ const it=selItem.it, si=sellInfo(it); d=itemLines(it)+`<div class="cmp">기본 ${si.base}G${si.ex?` + 옵션 ${si.ex}G`:''}</div><div class="acts"><button class="btn" id="aLock">${it.lock?'🔓 잠금 해제':'🔒 잠금'}</button><button class="btn primary" id="aSell"${it.lock?' style="opacity:.45"':''}>판매 ${si.total}G</button></div>`; }
   h+=`<div class="meta" style="font-size:12px;color:var(--mute)">판매가: 일반 100 · 매직 200 · 레어 400 · 유니크 800G. 스킬 옵션과 고급 옵션(생명력 흡수·치명타·공격/이동 속도)은 추가금이 붙어요.</div>`;
   h+=`<button class="btn" id="aSellAll">🧺 일괄 판매…</button></div>`;
   const b=$('#sheetB'); b.className='sbody stats'; b.innerHTML=h;
@@ -2814,7 +2843,7 @@ function enhModal(){
   const it=selItem&&selItem.it; if(!it||!canEnh(it))return; const L=(it.enh|0)+1;
   if(L>MAXENH){ warn(`최대 강화(+${MAXENH})예요`); return; }
   const need=enhNeed(L), cost=enhCost(it,L), rate=enhRate(L);
-  const elig=me.inv.map((x,i)=>({x,i})).filter(o=>o.x&&o.x!==it&&o.x.rar===it.rar&&!o.x.lock&&!(o.x.enh>0)).sort((a,b)=>(a.x.ilvl|0)-(b.x.ilvl|0)||sellInfo(a.x).total-sellInfo(b.x).total||a.i-b.i); /* 레벨 오름차순 — 낮은 레벨부터 자동 선택 */
+  const elig=me.inv.map((x,i)=>({x,i})).filter(o=>o.x&&!isShard(o.x)&&o.x!==it&&o.x.rar===it.rar&&!o.x.lock&&!(o.x.enh>0)).sort((a,b)=>(a.x.ilvl|0)-(b.x.ilvl|0)||sellInfo(a.x).total-sellInfo(b.x).total||a.i-b.i); /* 레벨 오름차순 — 낮은 레벨부터 자동 선택 */
   const sel=new Set(elig.slice(0,need).map(o=>o.i)); const matObj=new Map(elig.map(o=>[o.i,o.x]));
   const k2=1+.1*L, k1=1+.1*(L-1), b0=it.b0||{mn:it.mn,mx:it.mx,df:it.df,dm:it.dm,om:it.om};
   const eff=it.slot==='amulet'?`올스탯 +${L-1} → <b style="color:#9fd18b">+${L}</b>`:it.slot==='ring'?(L>=10?`<b style="color:#9fd18b">모든 스킬 +1 달성!</b>`:`+10강 달성 시 모든 스킬 +1 (현재 +${L-1} → +${L})`):it.dm?`공격력 +${it.dm} → <b style="color:#9fd18b">+${Math.round(b0.dm*k2)}</b>`:it.om?`마나 +${it.om} → <b style="color:#9fd18b">+${Math.round(b0.om*k2)}</b>`:it.b0&&it.b0.mx||it.mx?`공격력 ${it.mn}–${it.mx} → <b style="color:#9fd18b">${Math.max(1,Math.round(b0.mn*k2))}–${Math.max(Math.max(1,Math.round(b0.mn*k2))+1,Math.round(b0.mx*k2))}</b>`:`방어력 ${it.df} → <b style="color:#9fd18b">${Math.round(b0.df*k2)}</b>`;
