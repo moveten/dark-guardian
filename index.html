@@ -455,7 +455,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.2.0148</div>
+    <div class="ver" id="verT">v0.4.2.0149</div>
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -1900,6 +1900,7 @@ function tryUse(key,hold){
   if(s.aura){ if(hold)return; if((me.cds[key]||0)>0)return; me.cds[key]=.3; me.aura=me.aura===key?0:key; sfx(me.aura?'aura':'auraoff'); toast(me.aura?`${s.n} 켜짐`:`${s.n} 꺼짐`); uiDirty=true; return; }
   if((me.cds[key]||0)>0)return;
   if(me.cls==='necro'&&!necroCan(key))return;
+  if(key==='colossus'&&minions.some(q=>q.k==='dragon')){ if(!hold)toast('🐉 영혼 군주가 강림 중이라 고대 거인을 소환할 수 없어요','#ff8a7a'); return; }   /* 영혼 군주는 그대로 두고, 마나·재사용 대기시간도 쓰지 않아요 (반대로 영혼 군주를 쓰면 거인은 사라지고 용령이 나와요) */
   if(key==='teleport'&&!hold){ if(G.aim){G.aim=null;toast('순간이동 취소');return;} if(me.mp<mpCost(s,lv)){toast('마나가 부족해요','#7d96ff');return;} G.aim={key,lv}; toast('이동할 곳을 눌러 주세요 (다시 누르면 취소)','#b98bff'); return; }
   const cost=mpCost(s,lv);
   if(me.mp<cost){ if(!hold)toast('마나가 부족해요','#7d96ff'); return; }
