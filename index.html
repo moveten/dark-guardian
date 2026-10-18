@@ -452,7 +452,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.2.0142</div>
+    <div class="ver" id="verT">v0.4.2.0143</div>
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -893,7 +893,9 @@ function biased(lo,hi,q){return Math.min(hi,lo+Math.floor((hi-lo+1)*Math.pow(Mat
 const SKG=new Set(['all','cls','sk']);
 /* 스킬 옵션(모든 스킬/직업 스킬/개별 스킬) 굴림: 유니크=올스킬 또는 스킬 하나만, 레어=둘 다 가능(낮은 확률), 매직=아주 드물게 */
 function skillPick(slot,rar,R){ const out=[], ok=t=>{ const a=AFXBY[t]; return a.sl==='*'||a.sl.split(' ').includes(slot); }, one=()=>AFXBY[ok('cls')&&R()<.4?'cls':'sk'];
-  if(rar===3){ const r=R(); if(r<.10&&ok('all'))out.push(AFXBY.all); else if(r<.38)out.push(one()); }
+  if(rar===3){ const r=R(); if(r<.10&&ok('all'))out.push(AFXBY.all);
+    else if(r<.38){ /* 유니크: 개별 스킬 옵션은 없음 — 보조장비=내 직업 스킬, 직업 스킬 롤=모든 스킬, 개별 스킬 롤=무작위 직업 스킬(+1~2) */
+      if(slot==='shield')out.push(AFXBY.cls); else if(ok('cls')&&R()<.4)out.push(AFXBY.all); else out.push(AFXBY.cls); } }
   else if(rar===2){ if(R()<.035&&ok('all'))out.push(AFXBY.all); if(R()<.12)out.push(one()); }
   else if(rar===1){ const r=R(); if(r<.012&&ok('all'))out.push(AFXBY.all); else if(r<.06)out.push(one()); }
   return out; }
@@ -902,7 +904,7 @@ function rollAff(a,rar,ilvl,q,rng,fc,slot){ /* fc: 직업 전용 아이템이면
   if(a.t==='all'){ const v=(R()<(rar===3?.2:rar===2?.08:0))?2:1; rollAff.lq=(v-1); return {t:'all',v}; }
   if(a.t==='cls'||a.t==='sk'){
     const cap=rar<=1?3:2, r=Math.random(); let v=r<.6?1:r<.9?2:3; v=Math.min(v,cap);
-    const ks=Object.keys(CLASSES), rc=ks[Math.floor(R()*ks.length)], cls=fc||rc, o={t:a.t,v,cls};
+    const ks=Object.keys(CLASSES), rc=ks[Math.floor((rar===3&&a.t==='cls'?Math.random():R())*ks.length)], cls=fc||rc, o={t:a.t,v,cls};   /* 유니크의 무작위 직업 스킬은 드롭마다 직업이 달라져요(이름으로 고정 X) */
     if(a.t==='sk'){ const l=SK[cls]; o.key=l[Math.floor(R()*l.length)].k; }
     rollAff.lq=(v-1)/2; return o;
   }
@@ -928,9 +930,16 @@ const SPFX={
  martyr:{n:'순교자의 흉갑',slot:'armor',base:'사슬 갑옷',il:18,d:'생명력 35% 이하에서 받는 피해 -40%, 초당 생명력 회복 +0.4%',ap:d=>{d.regen+=.004;}},
  skullcrown:{n:'해골 왕관',slot:'helm',base:'철 투구',il:10,d:'스킬 재사용 대기시간 -15%, 생명력 +40',ap:d=>{d.cdr+=.15;d.life+=40;}},
  frostlord:{n:'서리 군주의 투구',slot:'helm',base:'뿔 달린 투구',il:16,d:'마나 +40, 마나 회복 +25%',ap:d=>{d.mana+=40;d.mr+=25;}},
- tome:{n:'금지된 마법서',slot:'weapon',base:'마법서',il:10,fx:['ene','mana','mr','cls'],fcls:'sorc',d:'마법사 스킬 피해 +20%, 스킬 재사용 대기시간 -12%, 마나 소모 -15% (옵션 종류 고정, 수치만 변동)',ap:d=>{d.cdr+=.12;}},
+ tome:{n:'금지된 마법서',slot:'weapon',base:'마법서',il:10,fx:['ene','mana','mr','all'],fcls:'sorc',d:'마법사 스킬 피해 +20%, 스킬 재사용 대기시간 -12%, 마나 소모 -15% (옵션 종류 고정, 수치만 변동)',ap:d=>{d.cdr+=.12;}},
  rage:{n:'광전사의 훈장',slot:'amulet',base:'목걸이',il:12,fx:['str','vit','dmgPct','life'],d:'생명력 50% 이하에서 피해 +30%, 생명력 흡수 +3% (옵션 종류 고정, 수치만 변동)',ap:d=>{d.ls+=3;}},
  eye:{n:'영겁의 눈',slot:'amulet',base:'목걸이',il:10,d:'아이템 드롭률 +30%, 획득 범위 +20, 치명타 확률 +5%',ap:d=>{d.mf+=30;d.pr+=20;d.crit+=5;}},
+ /* ===== 보스 이름 유니크 (이름·옵션 종류 고정, 수치만 변동 · 개별 스킬 옵션 없음) ===== */
+ rfrost:{n:'프로스티아의 반지',slot:'ring',base:'반지',il:29,fx:['ene','mana','mr','def','vit'],d:'서리의 가호: 스킬 재사용 대기시간 -6%, 받는 피해 -3% (옵션 종류 고정, 수치만 변동)',ap:d=>{d.cdr+=.06;d.dr+=.03;}},
+ rblood:{n:'사나리아의 반지',slot:'ring',base:'반지',il:64,fx:['all','life','dmgPct','crit','vit'],d:'핏빛 갈증: 생명력 흡수 +4%, 초당 생명력 회복 +0.3% (옵션 종류 고정, 수치만 변동)',ap:d=>{d.ls+=4;d.regen+=.003;}},
+ rvoid:{n:'니아의 반지',slot:'ring',base:'반지',il:76,fx:['all','dmgPct','ias','crit','ene'],d:'공허의 허기: 적을 처치할 때마다 마나 8 회복, 마나 +40 (옵션 종류 고정, 수치만 변동)',ap:d=>{d.mana+=40;}},
+ aignis:{n:'이그니스의 목걸이',slot:'amulet',base:'목걸이',il:34,fx:['str','vit','life','dmgPct','def'],d:'용암의 심장: 생명력 +80, 받는 피해 -4% (옵션 종류 고정, 수치만 변동)',ap:d=>{d.life+=80;d.dr+=.04;}},
+ asekr:{n:'세케르의 목걸이',slot:'amulet',base:'목걸이',il:46,fx:['dex','ms','mf','life','def'],d:'모래 폭풍: 이동 속도 +8%, 아이템 획득 범위 +15 (옵션 종류 고정, 수치만 변동)',ap:d=>{d.ms+=8;d.pr+=15;}},
+ adeath:{n:'데스락의 목걸이',slot:'amulet',base:'목걸이',il:70,fx:['all','crit','dmgPct','ias','ls'],d:'죽음의 징조: 치명타 확률 +5%, 생명력 흡수 +3% (옵션 종류 고정, 수치만 변동)',ap:d=>{d.crit+=5;d.ls+=3;}},
  /* ===== 영웅 아이템 특수 효과 (4스테이지 삼남매) ===== */
  hdag:{n:'그림자 단검',slot:'weapon',base:'낡은 단검',il:999,hero:1,d:'그림자 일격: 치명타 피해 +40%',ap:()=>{}},
  hhelm:{n:'그림자 투구',slot:'helm',base:'뿔 달린 투구',il:999,hero:1,d:'생명 붕괴로 잃는 생명력 70% → 50%',ap:()=>{}},
@@ -1002,7 +1011,7 @@ function genItem(rar,ilvl,slot,baseName){
   const bl=slot==='shield'?(OFFB[oc]||OFFB.pal):BASES[slot]; let b; const fc=oc||(spk&&SPFX[spk].fcls)||null;
   if(baseName) b=bl.find(x=>x.n===baseName)||SPBASE[baseName];
   if(!b){const mi=Math.min(bl.length-1,Math.floor(ilvl/3)+2); b=bl[ri(0,mi)];}
-  const q=[1,1.15,1.3,1.6][rar], it={id:++ITEMID,slot,rar,ilvl,base:b.n,aff:[]}; if(spk)it.sp=spk; if(oc)it.oc=oc;
+  const q=[1,1.15,1.3,1.6][rar], it={id:++ITEMID,slot,rar,ilvl,base:b.n,aff:[]}; if(rar===3)it.sv=1; /* sv: 유니크 스킬 옵션 개편(v0.4.2.0143) 적용 표시 */ if(spk)it.sp=spk; if(oc)it.oc=oc;
   if(b.mx){const m=(1+ilvl*.16)*(rar===3?1.3:1); it.mn=Math.max(1,Math.round(b.mn*m)); it.mx=Math.max(it.mn+1,Math.round(b.mx*m));}
   if(b.df){it.df=Math.round(b.df*(1+ilvl*.2)*(rar===3?1.3:1));}
   if(b.dm)it.dm=Math.round(b.dm*(1+ilvl*.1)*(rar===3?1.3:1)); if(b.om)it.om=Math.round(b.om*(1+ilvl*.1)*(rar===3?1.3:1));
@@ -1076,7 +1085,10 @@ function loadChar(id){
     for(const k in p.eq){ if(p.eq[k])delete p.eq[k].isNew; } /* 장착했던 아이템의 NEW 꼬리표 정리(1회) */ if(!lsGet('dkdef2.nwf.'+id)){ (p.inv||[]).forEach(x=>{ if(x)delete x.isNew; }); lsSet('dkdef2.nwf.'+id,'1'); }
     p.inv=p.inv||Array(INVN).fill(null); while(p.inv.length<INVN)p.inv.push(null);
     p.shard=p.shard|0; shardAdd(p,0); /* 예전 조각 숫자 → 가방 아이템으로 */
-    const fx=it=>{ if(!it)return; heroFix(it); if(!Array.isArray(it.aff))it.aff=[]; if(it.rar===3&&it.name==='그림자 망토')it.name='밤의 망토'; /* 영웅 '그림자' 장비와 헷갈리지 않게 개명 */ if(!p.dv4&&it.slot!=='weapon')for(const a of it.aff)if(a&&(a.t==='dmgPct'||a.t==='sm'||a.t==='smhp'))a.v=Math.min(50,Math.max(1,Math.round(a.v/4))); /* v0.3: 무기 외 피해%·소환수 피해%·소환수 생명력% 옵션은 예전 수치를 4로 나눈 값으로(캐릭터마다 1회, p.dv4) */ for(const a of it.aff)if(a&&(a.t==='str'||a.t==='dex'||a.t==='vit'||a.t==='ene')&&a.v>10)a.v=10; /* 힘·민첩·체력·에너지 옵션 상한 10(이전에 얻은 더 높은 수치도 10으로) */ if(it.rar===3&&it.aff.some(a=>a&&a.t==='all'))it.aff=it.aff.filter(a=>!(a&&a.t==='sk')); it.aff=it.aff.filter(a=>a&&AFXBY[a.t]&&!(it.slot==='armor'&&a.t==='ms')&&!(a.cls&&!CLASSES[a.cls])&&!(a.t==='sk'&&!(SKBY[a.key]&&SK[a.cls]&&SK[a.cls].includes(SKBY[a.key])))); }; p.inv.forEach(fx); p.eq=p.eq||{}; for(const k in p.eq)fx(p.eq[k]); p.dv4=1;
+    const fx=it=>{ if(!it)return; heroFix(it); if(!Array.isArray(it.aff))it.aff=[]; if(it.rar===3&&it.name==='그림자 망토')it.name='밤의 망토'; /* 영웅 '그림자' 장비와 헷갈리지 않게 개명 */ if(!p.dv4&&it.slot!=='weapon')for(const a of it.aff)if(a&&(a.t==='dmgPct'||a.t==='sm'||a.t==='smhp'))a.v=Math.min(50,Math.max(1,Math.round(a.v/4))); /* v0.3: 무기 외 피해%·소환수 피해%·소환수 생명력% 옵션은 예전 수치를 4로 나눈 값으로(캐릭터마다 1회, p.dv4) */ for(const a of it.aff)if(a&&(a.t==='str'||a.t==='dex'||a.t==='vit'||a.t==='ene')&&a.v>10)a.v=10; /* 힘·민첩·체력·에너지 옵션 상한 10(이전에 얻은 더 높은 수치도 10으로) */ if(it.rar===3&&!it.sv){ it.sv=1; const sh=it.slot==='shield'; /* 유니크 스킬 옵션 개편: 직업 스킬→모든 스킬, 개별 스킬→그 직업 스킬, 보조장비→내(보조장비) 직업 스킬 (1회) */
+      for(const a of it.aff){ if(!a)continue; const v=Math.min(2,Math.max(1,a.v|0)); if(a.t==='cls'){ if(sh){ a.cls=it.oc||cls; a.v=v; } else { a.t='all'; a.v=v; delete a.cls; } } else if(a.t==='sk'){ a.t='cls'; a.v=v; if(sh)a.cls=it.oc||cls; delete a.key; } }
+      if(it.aff.some(a=>a&&a.t==='all'))it.aff=it.aff.filter(a=>!(a&&a.t==='cls')); }
+    if(it.rar===3&&it.aff.some(a=>a&&a.t==='all'))it.aff=it.aff.filter(a=>!(a&&a.t==='sk')); it.aff=it.aff.filter(a=>a&&AFXBY[a.t]&&!(it.slot==='armor'&&a.t==='ms')&&!(a.cls&&!CLASSES[a.cls])&&!(a.t==='sk'&&!(SKBY[a.key]&&SK[a.cls]&&SK[a.cls].includes(SKBY[a.key])))); }; p.inv.forEach(fx); p.eq=p.eq||{}; for(const k in p.eq)fx(p.eq[k]); p.dv4=1;
     /* 보조장비 개편 이전에 얻은 방패(oc 없음)는 전사·마법사가 못 쓰는 팔라딘 방패 → 내 직업의 보조무기/오브로 바꿔 줌(등급·옵션·강화·이름 유지) */
     if(cls!=='pal'&&OFFB[cls]){ const mg=it=>{ if(!it||it.slot!=='shield'||it.oc)return; const bl=OFFB[cls], b=bl[Math.min(bl.length-1,Math.floor((it.ilvl||1)/12))], k=(it.rar===3?1.3:1)*(1+(it.ilvl||1)*.1);
         it.oc=cls; it.base=b.n; delete it.df; delete it.blk; delete it.dm; delete it.om; if(b.dm)it.dm=Math.round(b.dm*k); if(b.om)it.om=Math.round(b.om*k);
@@ -1669,7 +1681,7 @@ function onKill(x,y,xp,tier,ilvl,type,lf){
   spark(x,y,col,bs?60:14); spark(x,y,'#5a0f0c',bs?40:8);
   if(bs){G.shake=1;sfx('boss');} else sfx('kill');
   me.kills=(me.kills||0)+1; G.stKills=(G.stKills||0)+1; bumpCombo();
-  { const sp=me.D&&me.D.sp; if(sp&&!me.dead){ if(sp.bloodoath)me.hp=Math.min(me.D.maxHp,me.hp+me.D.maxHp*.04); if(sp.hring)me.hp=Math.min(me.D.maxHp,me.hp+me.D.maxHp*.02); if(sp.necro)me.mp=Math.min(me.D.maxMp,me.mp+6); } }
+  { const sp=me.D&&me.D.sp; if(sp&&!me.dead){ if(sp.bloodoath)me.hp=Math.min(me.D.maxHp,me.hp+me.D.maxHp*.04); if(sp.hring)me.hp=Math.min(me.D.maxHp,me.hp+me.D.maxHp*.02); if(sp.necro)me.mp=Math.min(me.D.maxMp,me.mp+6); if(sp.rvoid)me.mp=Math.min(me.D.maxMp,me.mp+8); } }
   gainXp(Math.round(xp*comboMul()));
   { const RK=MT[type].raid; if(RK){ const n=ri(1,3); shardAdd(me,n); later(.4,()=>toast(`🌑 그림자 조각 +${n} (보유 ${shardCount(me)})${(me.shard|0)>0?' · 가방이 가득 차서 일부는 보관 중':''}`,'#c9a0ff'));
       if(Math.random()<HERO_P){ const hit=genHero(heroKey(pick(HDROP[RK]))); if(hit)dropItem(hit,x+rand(-20,20),y+rand(-20,20)); } saveChar(); } }
