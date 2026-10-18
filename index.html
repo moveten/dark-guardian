@@ -83,7 +83,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
 .bars{flex:1;display:flex;flex-direction:column;gap:3px;min-width:0}
 .bar{position:relative;height:12px;background:#0a0807;border:1px solid #3a2e24;border-radius:3px;overflow:hidden}
 .bar i{position:absolute;inset:0;transform-origin:left;background:var(--hp)}
-.bar.mp i{background:var(--mp)} .bar.xp{height:5px} .bar.xp i{background:var(--xp)}
+.bar.mp i{background:var(--mp)} .bar.xp{height:16px;border:2px solid #d9b45a;border-radius:5px;box-shadow:0 0 0 1px #000,0 1px 4px rgba(0,0,0,.6)} .bar.xp i{background:var(--xp)} .bar.xp span{font-size:10.5px;font-weight:800;line-height:12px;letter-spacing:.02em;text-shadow:0 0 3px #000,0 1px 1px #000}
 .bar span{position:absolute;inset:0;font-size:9.5px;line-height:12px;text-align:center;font-variant-numeric:tabular-nums;color:#f6e9d8;text-shadow:0 1px 1px #000}
 .ally{display:flex;gap:6px;align-items:center;font-size:11px;color:var(--mute)}
 .ally .bar{flex:1;height:8px}
@@ -419,7 +419,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
       <div class="meRow">
         <div class="lv" id="hLv">1</div>
         <div class="bars">
-          <div class="bar xp"><i id="hXp"></i></div>
+          <div class="bar xp"><i id="hXp"></i><span id="hXpT">0.0%</span></div>
         </div>
       </div>
       <div class="ally" id="hAlly" hidden><span id="hAllyN"></span><div class="bar"><i id="hAllyHp"></i></div></div>
@@ -452,7 +452,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.2.0143</div>
+    <div class="ver" id="verT">v0.4.2.0144</div>
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -2581,7 +2581,7 @@ function updateHud(){
   $('#hLv').textContent=me.lvl;
   $('#hHp').style.transform=`scaleY(${clamp(me.hp/D.maxHp,0,1)})`; $('#hHpT').textContent=me.dead?`쓰러짐 ${Math.ceil(Math.max(0,me.respawn))}`:`${Math.ceil(me.hp)}/${D.maxHp}`;
   $('#hMp').style.transform=`scaleY(${clamp(me.mp/D.maxMp,0,1)})`; $('#hMpT').textContent=`${Math.floor(me.mp)}/${D.maxMp}`;
-  $('#hXp').style.transform=`scaleX(${me.lvl>=99?1:clamp(me.xp/need(me.lvl),0,1)})`;
+  { const xr=me.lvl>=99?1:clamp(me.xp/need(me.lvl),0,1); $('#hXp').style.transform=`scaleX(${xr})`; const xt=(xr*100).toFixed(1)+'%'; const xe=$('#hXpT'); if(xe.textContent!==xt)xe.textContent=xt; }
   { const rg=!!(me.buffs.rage&&me.buffs.rage.t>0&&!me.dead&&G.inGame), rv=$('#rageV'); if(rv.classList.contains('on')!==rg)rv.classList.toggle('on',rg); }
   const ph=G.phase;
   $('#hWave').textContent= ph==='prep'?(G.wave>=G.TW?`우두머리 출현까지 ${Math.max(0,Math.ceil(G.timer))}초`:`${G.stg.id} · 습격 ${G.wave+1}/${G.TW} 까지 ${Math.max(0,Math.ceil(G.timer))}초`)
@@ -3190,7 +3190,7 @@ function nameCheat(id,v){
   if(v==='쇼미더머니'){ q.gold=(q.gold|0)+5000000; }
   else if(v==='달빛조각사'){ if(!shardRoom(q,999))return '가방에 빈 칸이 없어서 적용되지 않았어요'; shardAdd(q,999); }   /* 조각 종류는 그림자 조각 하나 */
   else if(v==='구십구강화몽둥이'){ for(let i=50;i<60&&i<q.inv.length;i++){ const it=q.inv[i]; if(it&&!isShard(it)&&canEnh(it)){ it.enh=MAXENH; enhApply(it); } } }   /* 가방 51~60번째 칸 */
-  else if(v==='나혼자만레벨업'){ q.xp=(q.xp|0)+40544366; }   /* 다음 전투에서 경험치를 얻을 때 gainXp 가 연속 레벨업 처리 */
+  else if(v==='나혼자만레벨업'){ const L=q.lvl|0, T=Math.min(99,L+20); if(L>=99)return '이미 최대 레벨이라 적용되지 않았어요'; let sum=-(q.xp|0); for(let l=L;l<T;l++)sum+=need(l); q.xp=(q.xp|0)+Math.max(0,sum); }   /* 현재 Lv+20(최대 99)이 되는 데 필요한 경험치만큼 추가 — 다음 전투에서 경험치를 얻을 때 gainXp 가 연속 레벨업 처리 */
   else if(v==='수호자의어둠'){ if((q.clear|0)>=15)return '이미 3-5 이상 진행한 캐릭터라 적용되지 않았어요'; q.clear=15; msg='어둠의수호자 치트키 적용됨.'; }   /* 3-5(15번째 스테이지)까지 클리어 */
   lsSet(charKey(q.id),JSON.stringify(packChar(q))); renderTitle(); return msg; }
 function charMenu(id){
@@ -3199,7 +3199,7 @@ function charMenu(id){
     m.querySelector('#cmGear').onclick=()=>{ closeModal(); openTitleSheet('bag'); };
     m.querySelector('#cmShop').onclick=()=>{ closeModal(); openTitleSheet('shop'); };
     m.querySelector('#cmRen').onclick=()=>{ if((p.gold|0)<RENCOST){ warn(`골드가 부족해요. 이름 변경은 ${RENCOST.toLocaleString()}G가 필요해요 (보유 ${(p.gold|0).toLocaleString()}G)`); return; }
-      askName(`✏️ 이름 변경 · ${RENCOST.toLocaleString()}G`,p.name||'','✔ 변경',v=>{ const q=loadChar(id); if(!q)return; if((q.gold|0)<RENCOST)return; q.gold-=RENCOST; q.name=v; lsSet(charKey(q.id),JSON.stringify(packChar(q))); renderTitle(); toast(`이름을 '${v}'(으)로 바꿨어요 (-${RENCOST.toLocaleString()}G)`,'#ffd84a'); },id,v=>nameCheat(id,v)); };
+      askName(`✏️ 이름 변경 · ${RENCOST.toLocaleString()}G`,'','✔ 변경',v=>{ const q=loadChar(id); if(!q)return; if((q.gold|0)<RENCOST)return; q.gold-=RENCOST; q.name=v; lsSet(charKey(q.id),JSON.stringify(packChar(q))); renderTitle(); toast(`이름을 '${v}'(으)로 바꿨어요 (-${RENCOST.toLocaleString()}G)`,'#ffd84a'); },id,v=>nameCheat(id,v)||(v===dispName(p)?'현재 이름과 같아요. 다른 이름을 입력해 주세요 (골드는 들지 않아요)':null)); };
     m.querySelector('#cmDel').onclick=()=>modal(`<h3>🗑️ 삭제</h3><p style="margin:0 0 12px;font-size:14px">'${esc(dispName(p))}' (Lv ${p.lvl}) 캐릭터를 삭제할까요?<br>장비와 아이템도 함께 사라지며 되돌릴 수 없어요.</p><div class="row2"><button class="btn" id="dNo">취소</button><button class="btn primary" id="dYes">삭제</button></div>`,m2=>{ m2.querySelector('#dNo').onclick=closeModal; let dAsk=false; m2.querySelector('#dYes').onclick=()=>{ if(!dAsk){ dAsk=true; const y=m2.querySelector('#dYes'); y.textContent='⚠️ 정말 삭제 · 한 번 더 누르면 삭제'; y.style.background='#a62a22'; y.style.borderColor='#ff6a5a'; return; } deleteChar(id); closeModal(); renderTitle(); }; });
     m.querySelector('#cmX').onclick=closeModal; });
 }
@@ -3208,7 +3208,7 @@ $('#bSet').onclick=()=>modal(`<h3>⚙️ 설정</h3><div class="col"><div class=
 $('#verT').onclick=()=>patchModal(); $('#verT').style.cursor='pointer';
 /* 패치노트: 저장소의 patchnotes.txt를 불러와서 보여줌 (원본 파일 링크 포함) */
 function patchModal(){
-  modal(`<h3>📜 패치노트</h3><pre id="pnT" style="white-space:pre-wrap;word-break:break-word;font:12px/1.55 ui-monospace,Menlo,monospace;max-height:58vh;overflow:auto;margin:0 0 8px;padding:8px;background:#0a0807;border:1px solid var(--line2);border-radius:8px;touch-action:pan-y">불러오는 중…</pre><div class="row2"><a class="btn" href="patchnotes.txt" target="_blank" rel="noopener" style="text-align:center;text-decoration:none">원본 파일 열기</a><button class="btn primary" id="pnX">닫기</button></div>`,m=>{
+  modal(`<h3>📜 패치노트</h3><pre id="pnT" style="white-space:pre-wrap;word-break:break-word;font:12px/1.55 ui-monospace,Menlo,monospace;max-height:58vh;overflow:auto;margin:0 0 8px;padding:8px;background:#0a0807;border:1px solid var(--line2);border-radius:8px;touch-action:pan-y">불러오는 중…</pre><div class="row2"><a class="btn" href="patchnotes.txt" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;text-align:center;text-decoration:none;box-sizing:border-box">원본 파일 열기</a><button class="btn primary" id="pnX">닫기</button></div>`,m=>{
     m.querySelector('#pnX').onclick=closeModal;
     fetch('patchnotes.txt?'+Date.now(),{cache:'no-store'}).then(r=>{ if(!r.ok)throw 0; return r.text(); }).then(t=>{ m.querySelector('#pnT').textContent=t; }).catch(()=>{ m.querySelector('#pnT').textContent='패치노트를 불러오지 못했어요. (오프라인이거나 서버 점검 중)'; }); }); }
 function prepMe(){ me=loadChar(selId); me.D=derive(me); spawnMe(); }
@@ -3714,16 +3714,16 @@ function drawPlayer(o,isMe,t){
   }
   // 이름 · 레벨 · 생명/마나 바
   const nm=(isMe?me.name:(o.name||'동료'))||'', label=`Lv${lv} ${nm}`;
-  ctx.font='700 11px "Noto Sans KR",sans-serif'; ctx.textAlign='center'; ctx.lineJoin='round'; ctx.lineWidth=3.5; ctx.strokeStyle='rgba(0,0,0,.9)'; ctx.strokeText(label,x,y-31); ctx.fillStyle=isMe?'#fff3dc':C.col; ctx.fillText(label,x,y-31);
+  ctx.font='700 11px "Noto Sans KR",sans-serif'; ctx.textAlign='center'; ctx.lineJoin='round'; ctx.lineWidth=3.5; ctx.strokeStyle='rgba(0,0,0,.9)'; ctx.strokeText(label,x,y-45); ctx.fillStyle=isMe?'#fff3dc':C.col; ctx.fillText(label,x,y-45);
   { const ic=[];
     if(isMe){ const b=me.buffs; if(b.shout&&b.shout.t>0)ic.push(['📣',clamp(1-b.shout.t/(b.shout.m||10),0,1),Math.ceil(b.shout.t),true]); if(b.barrier&&b.barrier.t>0)ic.push(['🔷',clamp(1-b.barrier.t/10,0,1),Math.ceil(b.barrier.t),true]); if(me.stun>0)ic.push(['💫',0,Math.ceil(me.stun),true]); if(me.slowP>0)ic.push(['🐌',0,Math.ceil(me.slowP),true]); if(me.poison>0)ic.push(['☠️',0,Math.ceil(me.poison),true]); if(b.berserk&&b.berserk.t>0)ic.push(['😡',clamp(1-b.berserk.t/8,0,1),Math.ceil(b.berserk.t),true]); for(const [bk,be] of [['roar','📢'],['howl','📢'],['fury','💢'],['hunt','🌕'],['rage','🔥']]){ const bb=b[bk]; if(bb&&bb.t>0)ic.push([be,clamp(1-bb.t/(bb.m||8),0,1),Math.ceil(bb.t),true]); } if(me.spirit&&me.spirit.t>0)ic.push(['👻',clamp(1-me.spirit.t/me.spirit.m,0,1),Math.ceil(me.spirit.t),true]); if(me.aura)ic.push([SKBY[me.aura].e,0,'',true]); }
     { const oth=isMe?ally:me; if(!isMe&&o.aura&&SKBY[o.aura])ic.push([SKBY[o.aura].e,0,'',true]); if(oth&&!oth.lobby&&!oth.dead&&oth.aura&&oth.aura!==o.aura&&oth.aura!=='holyfire'&&SKBY[oth.aura]&&oth.x!==undefined&&hyp(oth.x-o.x,oth.y-o.y)<320)ic.push([SKBY[oth.aura].e,0,'받음',false]); }
-    ctx.textBaseline='middle'; const w=24, x0=x-(ic.length-1)*w/2, cy=y-62;
+    ctx.textBaseline='middle'; const w=24, x0=x-(ic.length-1)*w/2, cy=y-76;
     ic.forEach((q,i)=>{ const cx=x0+i*w; ctx.fillStyle='rgba(18,14,10,.9)'; ctx.beginPath(); ctx.arc(cx,cy,10,0,6.283); ctx.fill(); ctx.lineWidth=2; ctx.strokeStyle=q[3]?'#ffd84a':'#6a5a3a'; ctx.stroke(); ctx.font='12px sans-serif'; ctx.textAlign='center'; ctx.fillStyle='#fff'; ctx.fillText(q[0],cx,cy+1);
       if(q[1]>0){ ctx.fillStyle='rgba(0,0,0,.6)'; ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,9,-Math.PI/2+6.283*(1-q[1]),-Math.PI/2+6.283,false); ctx.closePath(); ctx.fill(); }
       if(q[2]!==''){ ctx.font='700 9px "Noto Sans KR",sans-serif'; ctx.lineWidth=2.5; ctx.strokeStyle='#000'; ctx.strokeText(q[2],cx,cy+16); ctx.fillStyle='#fff'; ctx.fillText(q[2],cx,cy+16); } });
     ctx.textBaseline='alphabetic'; }
-  if(o.emo&&o.emo.t>0){ const E=EMOS[o.emo.id]||EMOS[0], el=3.2-o.emo.t, sc=Math.min(1,.4+el*5)+Math.sin(Math.min(el,.4)*14)*.08, by0=y-108;
+  if(o.emo&&o.emo.t>0){ const E=EMOS[o.emo.id]||EMOS[0], el=3.2-o.emo.t, sc=Math.min(1,.4+el*5)+Math.sin(Math.min(el,.4)*14)*.08, by0=y-122;
     ctx.save(); ctx.translate(x,by0); ctx.scale(sc,sc); ctx.globalAlpha=Math.min(1,o.emo.t*2.5);
     ctx.font='700 12px "Noto Sans KR",sans-serif'; const tw=ctx.measureText(E.l).width, bw2=tw+46, hh=32;
     ctx.fillStyle=o.emo.id===0?'rgba(120,20,16,.95)':'rgba(24,20,30,.95)'; ctx.strokeStyle=o.emo.id===0?'#ff6a5a':'#9fd0ff'; ctx.lineWidth=2;
