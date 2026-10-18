@@ -229,6 +229,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
 .shopitem:first-of-type{border-top:0}
 .price{color:var(--gold);font-weight:700}
 .shopitem .btn{flex:none;white-space:nowrap;padding:10px 12px;font-size:14px}
+.sorb{display:inline-block;border-radius:50%;flex:none} .sorb.hot{animation:sorbp 1.8s ease-in-out infinite}@keyframes sorbp{0%,100%{filter:brightness(1)}50%{filter:brightness(1.25)}}
 .sh2{padding:12px 0;border-top:1px solid #241c16}
 .sh2:first-of-type{border-top:0}
 .sh2 .top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
@@ -454,7 +455,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.2.0147</div>
+    <div class="ver" id="verT">v0.4.2.0148</div>
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -1832,6 +1833,9 @@ function doSynth(r,quiet){
 function autoSynth(){ if(syLv<0)return; for(let r=0;r<=syLv;r++){ let g=0; while(g++<20&&doSynth(r,true)); } }
 /* 그림자 조각: 가방 한 칸에 최대 SHARD_MAX(999)개까지 쌓이는 재료 아이템 (넘치면 다음 칸). 가방이 꽉 차서 못 넣은 조각은 p.shard 에 보관했다가 자리가 나면 자동으로 들어감 */
 const isShard=it=>!!(it&&it.mat==='shard');
+/* 그림자 조각 구슬: 평소엔 어두운 구슬, 교환 수량(SHARD_N) 이상이면 진한 보라빛으로 */
+const shardOrb=(n,sz)=>{ const hot=(n|0)>=SHARD_N, bg=hot?'radial-gradient(circle at 36% 30%,#ffb0f0 0%,#d24bff 38%,#7a18d6 72%,#3a0a78 100%)':'radial-gradient(circle at 36% 30%,#6b7aa0 0%,#2f3758 48%,#0f1328 100%)';
+  return `<span class="sorb${hot?' hot':''}" style="width:${sz}px;height:${sz}px;background:${bg};${hot?'box-shadow:0 0 '+Math.round(sz*.45)+'px #c13cff,0 0 '+Math.round(sz*.2)+'px #ff7ae6 inset;':'box-shadow:0 0 4px #c9a0ff;'}"></span>`; };
 function mkShard(n){ return {id:++ITEMID,slot:'mat',mat:'shard',rar:4,name:'그림자 조각',base:'',ilvl:0,n:n|0,aff:[]}; }
 function shardCount(p){ return (p.inv||[]).reduce((t,x)=>t+(isShard(x)?(x.n|0):0),0)+(p.shard|0); }
 function shardAdd(p,n){ let left=Math.max(0,n|0)+(p.shard|0); p.shard=0; if(left<=0)return 0; const put=left;
@@ -2629,7 +2633,7 @@ const RBD=['#b4aea0','#4a7bff','#ffe24d','#ff8a2a','#ff3f6e'];
 function canWear(it){ return ownOk(it)&&me.lvl>=reqLv(it)&&!statLack(it).length; }
 function cellHtml(it,cls,extra){
   if(!it) return `<button class="${cls}" ${extra||''}></button>`;
-  if(isShard(it)) return `<button class="${cls}${selItem&&selItem.it===it?' sel':''}" ${extra||''} style="border:2px solid ${RBD[4]};background:${RBG[4]}" aria-label="그림자 조각 ${it.n}개"><span style="font-size:24px;line-height:1;pointer-events:none;filter:drop-shadow(0 0 4px #c9a0ff)">🌑</span><i class="en" style="left:0;right:3px;top:auto;bottom:0;text-align:right;color:#fff;font-size:11px">${it.n}</i>${it.isNew?'<i class="nw">NEW</i>':''}</button>`;
+  if(isShard(it)) return `<button class="${cls}${selItem&&selItem.it===it?' sel':''}" ${extra||''} style="border:2px solid ${RBD[4]};background:${RBG[4]}" aria-label="그림자 조각 ${it.n}개"><span style="display:grid;place-items:center;pointer-events:none">${shardOrb(it.n,24)}</span><i class="en" style="left:0;right:3px;top:auto;bottom:0;text-align:right;color:#fff;font-size:11px">${it.n}</i>${it.isNew?'<i class="nw">NEW</i>':''}</button>`;
   const lock=!canWear(it);
   return `<button class="${cls}${selItem&&selItem.it===it?' sel':''}${lock?' lock':''}" ${extra||''} style="border:2px solid ${lock?'#a33a30':RBD[it.rar]};background:${RBG[it.rar]};${it.rar===3?'box-shadow:0 0 8px rgba(255,150,50,.5) inset;':it.rar===2?'box-shadow:0 0 6px rgba(255,226,77,.3) inset;':''}" aria-label="${esc(it.name)}"><img src="${itemIcon(it).url}" alt="" style="width:86%;height:86%;pointer-events:none;${lock?'filter:grayscale(.25) brightness(.92)':''}">${lock?`<i class="rq">${!ownOk(it)?'🚫':me.lvl<reqLv(it)?'Lv'+reqLv(it):(()=>{ const L=statLack(it)[0]; return L?STN[L[0]]+L[1]:''; })()}</i>`:''}${it.lock?'<i class="lk">🔒</i>':''}${it.isNew?'<i class="nw">NEW</i>':''}${cls==='cell'&&isUpgrade(it)?`<i class="up${lock?' hi':''}">▲</i>`:''}${it.enh>0?`<i class="en">+${it.enh}</i>`:''}${it.enh>=5?`<i class="gl"></i>`:''}</button>`;
 }
@@ -2763,7 +2767,7 @@ function lockSvg(on){ return on
   ?'<svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="#ffe27a" stroke-width="2.4" stroke-linecap="round"/><rect x="5" y="11" width="14" height="10" rx="2.2" fill="#ffd84a" stroke="#7a5a10" stroke-width="1"/><circle cx="12" cy="15.2" r="1.6" fill="#5a3f08"/><rect x="11.2" y="15.5" width="1.6" height="3.2" rx=".8" fill="#5a3f08"/></svg>'
   :'<svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><g transform="rotate(-42 8 11)"><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="#b9b2a4" stroke-width="2.4" stroke-linecap="round" transform="translate(0 -1.5)"/></g><rect x="5" y="11" width="14" height="10" rx="2.2" fill="#8a8478" stroke="#3a362e" stroke-width="1"/><circle cx="12" cy="15.2" r="1.6" fill="#2a2620"/><rect x="11.2" y="15.5" width="1.6" height="3.2" rx=".8" fill="#2a2620"/></svg>'; }
 function itemLines(it,opt){
-  if(isShard(it)) return `<div style="display:flex;gap:10px;align-items:center"><div style="width:56px;height:56px;flex:none;display:grid;place-items:center;font-size:34px;background:#0a0807;border:1px solid ${RARC[4]};border-radius:8px">🌑</div><div><div class="in" style="color:${RARC[4]}">그림자 조각</div><div class="meta">수량 <b style="color:#fff">${it.n}</b> / ${SHARD_MAX} (한 칸 최대)</div></div></div><div class="meta" style="margin:6px 0">삼남매를 쓰러뜨리면 얻는 재료예요. ${SHARD_N}개로 영웅 아이템 하나를 교환할 수 있어요. 판매할 수 없어요.</div>`;
+  if(isShard(it)) return `<div style="display:flex;gap:10px;align-items:center"><div style="width:56px;height:56px;flex:none;display:grid;place-items:center;background:#0a0807;border:1px solid ${RARC[4]};border-radius:8px">${shardOrb(it.n,32)}</div><div><div class="in" style="color:${RARC[4]}">그림자 조각</div><div class="meta">수량 <b style="color:#fff">${it.n}</b> / ${SHARD_MAX} (한 칸 최대)</div></div></div><div class="meta" style="margin:6px 0">삼남매를 쓰러뜨리면 얻는 재료예요. ${SHARD_N}개로 영웅 아이템 하나를 교환할 수 있어요. 판매할 수 없어요.</div>`;
   let s=`<div style="display:flex;gap:10px;align-items:center"><span style="position:relative;flex:none;display:flex"><img src="${itemIcon(it).url}" alt="" style="width:56px;height:56px;flex:none;background:#0a0807;border:1px solid ${RARC[it.rar]};border-radius:8px">${opt&&opt.lk?`<button class="lkb${it.lock?' on':''}" data-lk="1" aria-label="${it.lock?'잠금 해제':'잠금'}">${lockSvg(!!it.lock)}</button>`:''}</span><div><div class="in" style="color:${RARC[it.rar]}">${it.enh>0?'+'+it.enh+' ':''}${esc(dn(it))}</div><div class="meta" style="color:#fff">아이템 레벨 ${ilvOf(it)}${it.enh>0?` <span style="color:#ffd84a">(기본 ${it.ilvl} + 강화 ${it.enh})</span>`:''}</div>${ownTag(it)}<div class="meta">${reqHtml(it)}</div></div></div>`+lvCmp(it);
   const bt=baseText(it); if(bt)s+=`<div>${bt}</div>`;
   if(BASEFX[it.base]&&it.slot==='weapon') s+=`<div class="meta" style="color:#9fd0ff">▪ ${BASEFX[it.base].t}</div>`;
