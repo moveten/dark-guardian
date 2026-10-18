@@ -452,7 +452,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.2.0140</div>
+    <div class="ver" id="verT">v0.4.2.0141</div>
     <button class="gearT" id="bSet" aria-label="설정">⚙️</button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -639,7 +639,7 @@ const SK={
   {k:'whirl',e:'🌀',n:'회전베기',s:'회전',req:12,mp:8,cd:5.5,el:'#e8e0d0',d:l=>`주변 모든 적에게 무기 피해 ${180+30*l}% + 4초간 강력한 출혈(초당 타격 피해의 60%, 총 240%) · 출혈은 겹치지 않고 가장 센 것 하나만 적용`},
   {k:'leap',e:'🦘',n:'도약 강타',s:'도약',req:18,mp:10,cd:8,el:'#c98b4a',rg:300,d:l=>`적에게 뛰어들어 범위 피해 ${280+45*l}%`},
   {k:'berserk',e:'😡',n:'광폭화',s:'광폭',req:24,mp:14,cd:32,el:'#ff3b2f',d:l=>`8초간 공격 속도 +40%, 피해 +${30+5*l}%`},
-  {k:'ragnarok',e:'💢',n:'광전사 폭주',s:'폭주',req:99,mp:80,cd:90,el:'#ff2a1a',rg:380,d:l=>`[궁극기] 기를 모은 뒤 주변 모든 적에게 무기 피해 ${Math.round((1400+100*l)*.6)}%, 2초 기절·넉백(우두머리는 1초) 후 12초간 폭주: 내 피해 +60%, 공격 속도 +50%, 이동 속도 +30%, 평타·스킬 범위 +25%, 대신 받는 피해 +20%`},
+  {k:'ragnarok',e:'💢',n:'광전사 폭주',s:'폭주',req:99,mp:80,cd:90,el:'#ff2a1a',rg:380,d:l=>`[궁극기] 기를 모은 뒤 주변 모든 적에게 무기 피해 ${Math.round((1400+100*l)*.6)}%, 2초 기절·넉백(우두머리는 1초) 후 12초간 폭주: 내 피해 +${60+2*(Math.max(1,l)-1)}%(레벨당 +2%), 공격 속도 +50%, 이동 속도 +30%, 평타·스킬 범위 +25%, 대신 받는 피해 +20%`},
   {k:'quake',e:'🌋',n:'대지 분쇄',s:'분쇄',req:30,mp:18,cd:13,el:'#b88a5a',rg:300,d:l=>`범위 안의 적을 우두머리 > 정예 > 일반 순으로 겨냥해 앞으로 갈라지는 충격파, 무기 피해 ${400+65*l}%`}],
  pal:[
   {k:'smite',e:'✨',n:'신성 타격',s:'신성',req:1,mp:4,cd:2,el:'#f0cf75',rg:95,d:l=>`무기 피해 ${260+40*l}% + 신성 피해 ${8+7*l}`},
@@ -2305,7 +2305,7 @@ function castSkill(o,key,real,tx,ty,lv,tgt){
   case 'ragnarok':
     efx.push({k:'ring',x:o.x,y:o.y,r0:240,r1:20,t:0,life:.6,col:'#ff2a1a',w:10}); sfx('boss'); burst(o.x,o.y,'#ff5a3a',30,260);
     later(.6,()=>{ slamFx(o.x,o.y,300,'#ff2a1a'); efx.push({k:'ring',x:o.x,y:o.y,r0:20,r1:380,t:0,life:.7,col:'#ff6a3a',w:16}); efx.push({k:'ring',x:o.x,y:o.y,r0:10,r1:260,t:0,life:.5,col:'#ffd08a',w:10}); impact(o.x,o.y,'255,90,50',300); burst(o.x,o.y,'#ffb04a',70,520); G.shake=Math.max(G.shake,1);
-      if(real){ me.buffs.rage={t:12,m:12,v:.6,ias:.5,ms:.3,pen:.2}; toast('💢 광전사 폭주!','#ff3b2f'); }   /* 폭주 12초: 피해 +60% · 공속 +50% · 이속 +30% · 범위 +25% · 받는 피해 +20% */
+      if(real){ me.buffs.rage={t:12,m:12,v:.6+.02*(Math.max(1,lv)-1),ias:.5,ms:.3,pen:.2}; toast('💢 광전사 폭주!','#ff3b2f'); }   /* 폭주 12초: 피해 +60%(레벨당 +2%) · 공속 +50% · 이속 +30% · 범위 +25% · 받는 피해 +20% */
       if(real) for(const m of mobsIn(o.x,o.y,380)){ hitMob(m,physDmg((14+1*lv)*.6),0,false,{stun:m.boss?1:2});   /* 우두머리 기절은 최대 1초 */ const dd=hyp(m.x-o.x,m.y-o.y)||1; m.kx=(m.kx||0)+(m.x-o.x)/dd*(m.boss?120:520); m.ky=(m.ky||0)+(m.y-o.y)/dd*(m.boss?120:520); } });
     break;
   case 'divine':
