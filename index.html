@@ -124,13 +124,12 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
 #bPot{border:2px solid #b8322b}
 .qb .lb b{font-style:normal;font-weight:900;font-size:12.5px;color:#ffd84a;text-shadow:0 1px 2px #000;margin-left:1px}.qb .lb.z b{color:#8a8277}
 .qb #bPot,.qb #bRev{gap:0}.qb #bPot .ic,.qb #bRev .ic{margin-top:-1px}
-#lvPen{position:absolute;left:10px;bottom:calc(max(10px,env(safe-area-inset-bottom)) + 168px);max-width:min(60vw,260px);padding:3px 8px;border-radius:6px;background:rgba(80,14,10,.82);border:1px solid #c0392b;color:#ffb3a6;font-size:11.5px;font-weight:700;line-height:1.35;pointer-events:none;z-index:5}#lvPen[hidden]{display:none}
 #banner{position:absolute;left:0;right:0;top:30%;text-align:center;font-family:var(--f-disp);font-weight:800;font-size:clamp(26px,6vw,44px);color:#efdcae;text-shadow:0 2px 12px #000,0 0 30px rgba(163,48,42,.6);opacity:0;transition:opacity .4s;pointer-events:none}
 #banner small{display:block;font-family:var(--f-body);font-size:14px;font-weight:500;color:var(--mute);margin-top:6px}
 #dmgRank{margin-top:56px;width:max-content;min-width:118px;max-width:min(215px,52vw);pointer-events:none;font-size:11px;line-height:1.5;color:rgba(205,205,205,.62);text-shadow:0 1px 2px rgba(0,0,0,.95),0 0 3px rgba(0,0,0,.8);font-variant-numeric:tabular-nums;white-space:nowrap}
 #dmgRank[hidden]{display:none}
 #dmgRank div{display:flex;justify-content:space-between;gap:12px}#dmgRank b{font-weight:600}
-body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display:none!important}
+body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 .hudbox{margin-top:12px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:rgba(12,9,8,.5)}
 .hudbox>b{display:block;font-size:13px;margin-bottom:6px;color:#e9dcc3}
 .hudbox label{display:flex;align-items:center;gap:10px;min-height:38px;font-size:13px;cursor:pointer}
@@ -449,7 +448,6 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
       <div id="dmgRank" hidden></div>
       <div id="combo" hidden><b>0</b><span>COMBO</span></div>
     </div>
-    <div id="lvPen" hidden></div>
     <div class="tc">
       <div id="hWave">준비</div>
       
@@ -473,7 +471,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.3.0158</div>
+    <div class="ver" id="verT">v0.4.3.0159</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -1995,10 +1993,10 @@ function dmgRows(full){ const map=new Map(); const add=(key,n,v)=>{ if(!(v>0))re
 let dmgRkHtml='';
 function renderDmgRank(){ const el=$('#dmgRank'); if(!el)return; const rows=(hudOn('rank')&&G.inGame)?dmgRows():[]; const h=rows.map((r,i)=>`<div><span>${i+1}. ${esc(r.n)}</span><b>${Math.round(r.v).toLocaleString('en-US')}</b></div>`).join(''); if(h===dmgRkHtml)return; dmgRkHtml=h; el.innerHTML=h; el.hidden=!rows.length; }
 /* ===== 화면 표시(HUD) 켜기/끄기 — 설정 메뉴의 체크박스 ===== */
-const HUDK=[['mini','🗺️ 미니맵'],['get','📦 획득 로그 (아이템 획득 알림)'],['drop','💎 드랍 로그 (아이템 드랍·동료 알림)'],['label','🏷️ 바닥 아이템 이름표 (끄면 가까이 가면 자동 습득)'],['rank','🏆 데미지 랭크표'],['num','💥 피해 숫자'],['combo','🔥 콤보 표시'],['lvpen','⚖️ 레벨·장비 보정 안내']];
+const HUDK=[['mini','🗺️ 미니맵'],['get','📦 획득 로그 (아이템 획득 알림)'],['drop','💎 드랍 로그 (아이템 드랍·동료 알림)'],['label','🏷️ 바닥 아이템 이름표 (끄면 가까이 가면 자동 습득)'],['rank','🏆 데미지 랭크표'],['num','💥 피해 숫자'],['combo','🔥 콤보 표시'],];
 let HUDS={}; try{ HUDS=JSON.parse(lsGet('dkdef2.hud')||'{}')||{}; }catch(e){ HUDS={}; }
 const hudOn=k=>HUDS[k]!==0;
-function applyHud(){ for(const k of ['combo','lvpen','rank'])document.body.classList.toggle('hud-no'+k,!hudOn(k)); dmgRkHtml=''; try{renderDmgRank();}catch(e){} }
+function applyHud(){ for(const k of ['combo','rank'])document.body.classList.toggle('hud-no'+k,!hudOn(k)); dmgRkHtml=''; try{renderDmgRank();}catch(e){} }
 function hudSet(k,on){ HUDS[k]=on?1:0; lsSet('dkdef2.hud',JSON.stringify(HUDS)); applyHud(); }
 function hitMob(m,r,slow,tn,fx){
   const raw=!!(fx&&fx.raw); /* 고정 비율 피해(세크리파이스)는 장비·레벨 보정과 반격 태세를 무시 */
@@ -2651,12 +2649,7 @@ function updateHud(){
   { const dd=!!(me.dead&&G.inGame&&['prep','wave','boss'].includes(G.phase)); $('#bSkip').hidden=!(G.phase==='clear'||dd); $('#bRevBig').hidden=!dd; if(dd){ const rn=revItems(); $('#revBigN').textContent=rn; $('#bRevBig').classList.toggle('z',rn<=0); } }   /* 쓰러졌을 때: 승리 때와 같은 자리에 나가기 + 그 위에 부활 버튼 */
   const al=$('#hAlly');
   if(ally&&!ally.lobby){al.hidden=false; $('#hAllyN').textContent=`${ally.name||CLASSES[ally.cls].n} ${ally.lvl}`; $('#hAllyHp').style.transform=`scaleX(${clamp((ally.hp||0)/(ally.mh||1),0,1)})`;} else al.hidden=true;
-  { const pn=me.pot+me.potBuy, rn=revItems(); $('#potN').textContent=pn; $('#revN').textContent=rn; $('#potN').parentNode.classList.toggle('z',pn<=0); $('#revN').parentNode.classList.toggle('z',rn<=0); } $('#bRev').classList.toggle('rdy',!!me.dead&&revItems()>0); $('#hGold').textContent=`💰 ${(me.gold|0).toLocaleString()}G`; { const P=lvPen(), gp=gearPen(), el=$('#lvPen'); if(el){ const L=[]; let bad=false;
-    if(P.over)L.push(`✨ 몹 Lv ${G.stg.rl} · 레벨 우위 ${-P.gap} — 공격력 +${Math.round((P.dm-1)*100)}% · 받는 피해 -${Math.round((1-P.tk)*100)}%`);
-    else if(P.ex){ bad=true; L.push(`⚠️ 몹 Lv ${G.stg.rl} · 격차 ${P.gap} — 공격력 -${Math.round((1-P.dm)*100)}% · 빗나감 ${Math.round(P.miss*100)}% · 받는 피해 +${Math.round((P.tk-1)*100)}%`); }
-    if(gp.wm<.97||gp.tk>1.03){ bad=true; L.push(`⚔️ 장비 아이템 Lv 합 ${gp.sum} / 권장 ${gp.need}↑ — 공격력 -${Math.round((1-gp.wm)*100)}% · 받는 피해 +${Math.round((gp.tk-1)*100)}%`); }
-    else if(gp.wm>1.03||gp.tk<.97)L.push(`✨ 장비 아이템 Lv 합 ${gp.sum} (권장 ${gp.need}) — 공격력 +${Math.round((gp.wm-1)*100)}% · 받는 피해 -${Math.round((1-gp.tk)*100)}%`);
-    el.hidden=!L.length; el.style.background=bad?'':'rgba(14,60,30,.82)'; el.style.borderColor=bad?'':'#3fae6a'; el.style.color=bad?'':'#a6f0c0'; el.innerHTML=L.join('<br>'); } }
+  { const pn=me.pot+me.potBuy, rn=revItems(); $('#potN').textContent=pn; $('#revN').textContent=rn; $('#potN').parentNode.classList.toggle('z',pn<=0); $('#revN').parentNode.classList.toggle('z',rn<=0); } $('#bRev').classList.toggle('rdy',!!me.dead&&revItems()>0); $('#hGold').textContent=`💰 ${(me.gold|0).toLocaleString()}G`;
   { const nb=$('#bagNew'); if(nb){ const n=me.inv.reduce((t,x)=>t+(x&&x.isNew?1:0),0); nb.hidden=!n; nb.textContent=n>9?'9+':n; } }
   { const bd=$('#statBadge'), b2=$('#skillBadge'), a=me.statPts|0, k=me.skillPts|0; bd.hidden=a<=0; bd.textContent='+'+a; b2.hidden=k<=0; b2.textContent='+'+k; }
   for(const b of $('#skills').children){ const k=b.dataset.k, s=SKBY[k];
