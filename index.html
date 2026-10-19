@@ -448,8 +448,8 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
       <div class="gold" id="hGold"></div>
       <div id="dmgRank" hidden></div>
       <div id="combo" hidden><b>0</b><span>COMBO</span></div>
-      <div id="lvPen" hidden></div>
     </div>
+    <div id="lvPen" hidden></div>
     <div class="tc">
       <div id="hWave">준비</div>
       
@@ -473,7 +473,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.3.0157</div>
+    <div class="ver" id="verT">v0.4.3.0158</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -2469,7 +2469,8 @@ function alRender(){ const box=$('#toasts'); if(!box)return; const al=box.queryS
   else { const h=[...ALOG].reverse().find(a=>a.hero&&now-a.ts<4500); list=ALOG.slice(-2); if(h&&!list.includes(h)) list=[h,list[1]]; list=list.sort((a,b)=>a.ts-b.ts||ALOG.indexOf(a)-ALOG.indexOf(b)); }
   al.innerHTML=''; for(const a of list){ const d=document.createElement('div'); d.className='t'+(a.hero?' hero':'')+(now-a.ts>6000?' old':''); d.textContent=a.t; if(a.col&&!a.hero)d.style.color=a.col; al.appendChild(d); }
   box.classList.toggle('open',alOpen); box.querySelector('.tg').textContent=alOpen?'▴':'▾'; if(alOpen)al.scrollTop=al.scrollHeight; }
-function alPush(t,col,hero){ ALOG.push({t,col,hero:!!hero,ts:Date.now()}); while(ALOG.length>40)ALOG.shift(); alRender(); setTimeout(alRender,hero?4600:6100); }
+function alPush(t,col,hero){ const lst=ALOG[ALOG.length-1]; if(lst&&lst.t===t&&Date.now()-lst.ts<3000){ lst.ts=Date.now(); lst.hero=lst.hero||!!hero; alRender(); return; }   /* 같은 알림이 연달아 오면 한 줄만 */
+  ALOG.push({t,col,hero:!!hero,ts:Date.now()}); while(ALOG.length>40)ALOG.shift(); alRender(); setTimeout(alRender,hero?4600:6100); }
 function alSet(o){ alOpen=o; clearTimeout(alCl); if(o)alCl=setTimeout(()=>alSet(false),8000); alRender(); }
 function alClear(){ ALOG.length=0; alSet(false); }
 $('#toasts').addEventListener('click',e=>{ e.preventDefault(); e.stopPropagation(); alSet(!alOpen); });
