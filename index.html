@@ -127,7 +127,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
 #lvPen{position:absolute;left:10px;bottom:calc(max(10px,env(safe-area-inset-bottom)) + 168px);max-width:min(60vw,260px);padding:3px 8px;border-radius:6px;background:rgba(80,14,10,.82);border:1px solid #c0392b;color:#ffb3a6;font-size:11.5px;font-weight:700;line-height:1.35;pointer-events:none;z-index:5}#lvPen[hidden]{display:none}
 #banner{position:absolute;left:0;right:0;top:30%;text-align:center;font-family:var(--f-disp);font-weight:800;font-size:clamp(26px,6vw,44px);color:#efdcae;text-shadow:0 2px 12px #000,0 0 30px rgba(163,48,42,.6);opacity:0;transition:opacity .4s;pointer-events:none}
 #banner small{display:block;font-family:var(--f-body);font-size:14px;font-weight:500;color:var(--mute);margin-top:6px}
-#dmgRank{margin-top:4px;width:max-content;min-width:118px;max-width:min(215px,52vw);pointer-events:none;font-size:11px;line-height:1.5;color:rgba(205,205,205,.62);text-shadow:0 1px 2px rgba(0,0,0,.95),0 0 3px rgba(0,0,0,.8);font-variant-numeric:tabular-nums;white-space:nowrap}
+#dmgRank{margin-top:56px;width:max-content;min-width:118px;max-width:min(215px,52vw);pointer-events:none;font-size:11px;line-height:1.5;color:rgba(205,205,205,.62);text-shadow:0 1px 2px rgba(0,0,0,.95),0 0 3px rgba(0,0,0,.8);font-variant-numeric:tabular-nums;white-space:nowrap}
 #dmgRank[hidden]{display:none}
 #dmgRank div{display:flex;justify-content:space-between;gap:12px}#dmgRank b{font-weight:600}
 body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display:none!important}
@@ -136,6 +136,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
 .hudbox label{display:flex;align-items:center;gap:10px;min-height:38px;font-size:13px;cursor:pointer}
 .hudbox input{width:20px;height:20px;accent-color:#d6a43c;flex:none}
 #toasts{position:absolute;right:10px;top:calc(max(8px,env(safe-area-inset-top)) + 112px);display:flex;flex-direction:column;align-items:flex-end;gap:4px;pointer-events:none;width:min(230px,58vw)}
+.toast.hero{border-color:#ff4f7a;box-shadow:0 0 10px rgba(255,79,122,.45);font-weight:800}
 .toast{background:rgba(12,9,8,.88);border:1px solid var(--line);border-radius:6px;padding:4px 9px;font-size:12px;text-align:right;animation:tin .25s ease-out}
 @keyframes tin{from{opacity:0;transform:translateY(-6px)}}
 @media (prefers-reduced-motion:reduce){.toast{animation:none}#banner{transition:none}}
@@ -465,7 +466,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.3.0153</div>
+    <div class="ver" id="verT">v0.4.3.0154</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -1351,7 +1352,7 @@ function syncAlly(pl){
   ally.fm=pl.fm===1?'bear':pl.fm===2?'wolf':''; ally.sp=pl.sp|0;
   ally.aura=(pl.a==='healaura'||pl.a==='guard'||pl.a==='might')?pl.a:0; ally.al=pl.al|0; ally.face=(pl.f|0)/100; ally.lobby=false;
   { const em=pl.em|0; if(ally.emSeq===undefined){ ally.emSeq=em; } else if(em&&em!==ally.emSeq){ ally.emSeq=em; ally.emo={id:clamp(em%10,0,EMOS.length-1),t:3.2}; sfx('ui'); } }
-  { const ia=Array.isArray(pl.ia)?pl.ia:[]; if(lastAllyAnn<0){lastAllyAnn=ia.length?ia[ia.length-1][0]:0;} for(const a of ia){ if(a[0]<=lastAllyAnn)continue; lastAllyAnn=a[0]; if((a[2]|0)<3)continue; const ar=clamp(a[2]|0,3,4); toast(`${ally.name||'동료'}님이 ${RARN[ar]} 아이템 [${String(a[1]||'').slice(0,16)}] 획득!`,RARC[ar],'get'); } }   /* 유니크 이상만 표시 (예전 버전 동료가 보낸 레어 알림도 거름) */
+  { const ia=Array.isArray(pl.ia)?pl.ia:[]; if(lastAllyAnn<0){lastAllyAnn=ia.length?ia[ia.length-1][0]:0;} for(const a of ia){ if(a[0]<=lastAllyAnn)continue; lastAllyAnn=a[0]; if((a[2]|0)<3)continue; const ar=clamp(a[2]|0,3,4); toast(`${ally.name||'동료'}님이 ${RARN[ar]} 아이템 [${String(a[1]||'').slice(0,16)}] 획득!`,RARC[ar],'get',ar>=4); } }   /* 유니크 이상만 표시 (예전 버전 동료가 보낸 레어 알림도 거름) */
   const fx=Array.isArray(pl.fx)?pl.fx:[];
   if(lastAllyFx<0){lastAllyFx=fx.length?fx[fx.length-1][0]:0;}
   for(const f of fx){ if(f[0]<=lastAllyFx)continue; lastAllyFx=f[0];
@@ -1730,7 +1731,7 @@ function rollRarity(tier,ilvl){
 function dropItem(it,x,y){
   ground.push({it,x:clamp(x,20,WW-20),y:clamp(y,20,WH-20),t:0});
   G.stDrops=(G.stDrops||0)+1;
-  if(it.rar>=2){ if(it.rar>=3)toast(`${RARN[it.rar]} 아이템이 떨어졌습니다!`,RARC[it.rar],'drop'); sfx('rare'); G.flash=Math.max(G.flash||0,it.rar>=3?.5:.2); }
+  if(it.rar>=2){ if(it.rar>=3)toast(`${RARN[it.rar]} 아이템이 떨어졌습니다!`,RARC[it.rar],'drop',it.rar>=4); sfx('rare'); G.flash=Math.max(G.flash||0,it.rar>=3?.5:.2); }
   if(ground.length>90){const i=ground.findIndex(g=>g.it.rar===0); ground.splice(i>=0?i:0,1); G.stCap=(G.stCap|0)+1;}
 }
 function gainXp(xp){
@@ -1890,7 +1891,7 @@ function pickUp(g){
   const i=me.inv.indexOf(null);
   if(i<0){toast('가방이 가득 찼어요','#e07060');return;}
   const it=g.it; it.isNew=1; me.inv[i]=it; ground.splice(ground.indexOf(g),1); (G.stGot||(G.stGot=[0,0,0,0,0]))[it.rar|0]++;
-  sfx('pick'); if(it.rar>=((G.coop||G.mode==='guest')?3:2))toast(`획득: ${dn(it)}`,RARC[it.rar],'get');   /* 협동 중엔 유니크 이상만 알림 */
+  sfx('pick'); if(it.rar>=((G.coop||G.mode==='guest')?3:2))toast(`획득: ${dn(it)}`,RARC[it.rar],'get',it.rar>=4);   /* 협동 중엔 유니크 이상만 알림 */
   if(it.rar>=3){ annQ.push([++annSeq,it.name.slice(0,16),it.rar]); if(annQ.length>4)annQ.shift(); }   /* 협동: 동료에게 알리는 획득은 유니크 이상만 */
   const key=it.slot==='ring'?(!me.eq.ring1?'ring1':!me.eq.ring2?'ring2':null):(me.eq[it.slot]?null:it.slot);
   if(key&&canWear(it)){ const cp0=calcCP(me); delete it.isNew; me.eq[key]=it; me.inv[i]=null; const hr=me.hp/me.D.maxHp, mr=me.mp/me.D.maxMp; me.D=derive(me); me.hp=me.D.maxHp*hr; me.mp=me.D.maxMp*mr; buildSkills(); cpMsg(cp0,calcCP(me)); toast(`자동 장착: ${it.name}`,'#9fd18b'); }
@@ -2448,7 +2449,9 @@ function slamFx(x,y,r,col){ sfx('slam'); efx.push({k:'ring',x,y,r0:r*.3,r1:r,t:0
 /* ================= UI: banner/toast ================= */
 let bannerT=0;
 function banner(t,s){const b=$('#banner'); b.innerHTML=esc(t)+(s?`<small>${esc(s)}</small>`:''); b.style.opacity=1; bannerT=2.6;}
-function toast(t,col,kind){ if(kind&&!hudOn(kind))return; const box=$('#toasts'); const d=document.createElement('div'); d.className='toast'; d.textContent=t; if(col)d.style.color=col; box.appendChild(d); while(box.children.length>4)box.firstChild.remove(); setTimeout(()=>d.remove(),2800);}
+function toast(t,col,kind,keep){ if(kind&&!hudOn(kind))return; const box=$('#toasts'); const d=document.createElement('div'); d.className='toast'+(keep?' hero':''); d.textContent=t; if(col)d.style.color=col; if(keep)d.dataset.keep='1'; box.appendChild(d);
+  { const ns=[...box.children].filter(e=>!e.dataset.keep); while(ns.length>3)ns.shift().remove(); }   /* 알림은 최대 3줄(오래된 것부터 지움) — 영웅 등급 이상 알림(keep)은 줄 수에 안 세고 지워지지도 않음 */
+  setTimeout(()=>d.remove(),keep?4500:2800);}
 
 /* ================= AUDIO ================= */
 const AUD=(()=>{
@@ -2559,7 +2562,7 @@ document.addEventListener('pointerdown',()=>AUD.init(),{passive:true});
 /* ================= INPUT ================= */
 const cv=$('#cv'), ctx=cv.getContext('2d');
 let VW=0,VH=0,DPR=1,ZOOM=1,camX=0,camY=0,_camT=0,_camOk=false;
-function resize(){DPR=Math.min(2,window.devicePixelRatio||1); { const dk=$('#dock'), ap=$('#app'); const hh=dk.hidden?0:dk.offsetHeight; ap.style.bottom=hh+'px'; VW=innerWidth; VH=innerHeight-hh; } try{ const mw=Math.min(150,VW<560?VW*.26:VW*.2); $('#toasts').style.top=Math.round(mw*WH/WW+4+8)+'px'; }catch(e){}
+function resize(){DPR=Math.min(2,window.devicePixelRatio||1); { const dk=$('#dock'), ap=$('#app'); const hh=dk.hidden?0:dk.offsetHeight; ap.style.bottom=hh+'px'; VW=innerWidth; VH=innerHeight-hh; } try{ const mw=Math.min(150,VW<560?VW*.26:VW*.2); $('#toasts').style.top=Math.max(Math.round(mw*WH/WW+4+8),138)+'px';   /* 보스 체력바(제목 바로 아래) 밑에서 시작 */ }catch(e){}
   cv.width=Math.round(VW*DPR); cv.height=Math.round(VH*DPR); ZOOM=clamp(Math.min(VW,VH)/420,.68,1.35);}
 addEventListener('resize',resize); resize();
 const joy={active:false,id:null,ox:0,oy:0,x:0,y:0,dx:0,dy:0};
@@ -3916,7 +3919,7 @@ function drawNums(){
   ctx.globalAlpha=1;
 }
 function drawBossBar(){
-  if(G.stg&&G.stg.raid){ if(G.phase!=='boss')return; const w=Math.min(190,VW*.42), x=VW/2-w/2+34; let y=136; /* 위쪽 HUD·미니맵 아래 */
+  if(G.stg&&G.stg.raid){ if(G.phase!=='boss')return; const mw=Math.min(150,VW<560?VW*.26:VW*.2), w=Math.min(150,VW*.34), bw=w+101, lim=VW-10-mw-8, left=Math.min(VW/2-bw/2,lim-bw), x=left+68; let y=84; /* 제목('삼남매 레이드') 바로 아래, 미니맵 왼쪽에 맞춰 배치 */
     for(const k of ['war','sorc','shd']){ const ty=MT.findIndex(q=>q.raid===k), b=G.mobs.find(m=>m.type===ty&&!m.dead), p=b?(b.hpp!==undefined?b.hpp/100:b.hp/b.max):0;
       ctx.fillStyle='rgba(0,0,0,.72)'; ctx.fillRect(x-2,y-2,w+4,11); ctx.fillStyle=!b?'#3a2a2a':(b.awk?'#c01818':k==='war'?'#8a2440':k==='sorc'?'#4a3aa8':'#4a2a5a'); ctx.fillRect(x,y,w*p,7);
       if((G.sib||0)>0&&b){ ctx.strokeStyle=`rgba(255,60,40,${.5+.3*Math.sin(T*6)})`; ctx.lineWidth=1.5; ctx.strokeRect(x-2.5,y-2.5,w+5,12); }
