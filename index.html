@@ -465,7 +465,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.3.0151</div>
+    <div class="ver" id="verT">v0.4.3.0152</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -1088,6 +1088,7 @@ const MAILS={
 const MAIL0_D=new Date(2026,9,19).getTime(); /* 이미 있던 캐릭터가 처음 받는 환영 편지의 날짜(고정) */
 const mailNew=(id,d)=>({id,d:d||Date.now(),r:0});
 const mailUnread=p=>p&&Array.isArray(p.mail)?p.mail.reduce((n,x)=>n+(x&&!x.r?1:0),0):0;
+const mailUnreadAll=chars=>(chars||charIds().map(loadChar).filter(Boolean)).reduce((n,p)=>n+mailUnread(p),0);   /* 우편함은 모든 캐릭터의 편지를 한 목록으로 */
 const mailIc=open=>open
   ?'<svg class="mic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10l9-6.5 9 6.5v9.5a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 19.5V10z"/><path d="M6.5 12.5V8h11v4.5"/><path d="M9.5 11h5"/><path d="M3.5 10.5L12 16.5l8.5-6"/></svg>'
   :'<svg class="mic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 6.5L12 13l8.5-6.5"/></svg>';
@@ -2005,7 +2006,7 @@ function hitMob(m,r,slow,tn,fx){
   spark(m.x,m.y,r.crit?'#ffd34d':'#ffb08a',r.crit?12:5);
   if(G.mode!=='guest'&&!m.boss&&!m.elite){ const kx=m.x-me.x,ky=m.y-me.y,kd=hyp(kx,ky)||1,kf=r.crit?95:55; m.kx=(m.kx||0)+kx/kd*kf; m.ky=(m.ky||0)+ky/kd*kf; }
   const smh=!!(fx&&fx.sm);
-  const nhs=!!(fx&&fx.nohs); if(G.mode==='solo'&&!smh&&!nhs)G.hs=Math.max(G.hs||0,r.crit?.08:.035);
+  const nhs=!!(fx&&fx.nohs);   /* 타격 정지(화면 멈춤)는 모든 공격에서 제거 — 여러 번 맞는 스킬에서 끊김처럼 보였음 */
   G.shake=Math.max(G.shake,smh?0:nhs?.05:r.crit?.3:.08);
   if(me.D.ls&&!me.dead&&!smh) me.hp=Math.min(me.D.maxHp,me.hp+dmg*me.D.ls/100);
   if(G.mode==='guest'){ hitQ.push([++hitSeq,m.id,dmg,slow||0,tn?1:0,fx?Math.round((fx.stun||0)*10):0,fx?Math.round((fx.burn||0)*10):0,fx?Math.round(fx.bd||0):0]); if(hitQ.length>40)hitQ.shift(); }
@@ -2913,23 +2914,14 @@ function fitGo(root){ root.querySelectorAll('.sh2 .go').forEach(el=>{ const sp=e
   if(!shrink(11)&&sp.dataset.s){ sp.textContent=sp.dataset.s; shrink(9); } }); }   /* 버튼 크기는 그대로, 글자 크기만 줄이고(11px까지) 그래도 넘치면 '구매'를 뺀 짧은 문구로 */
 function renderShop(){
   markTabs(); sheetHead(); sellAskIt=null;
-  const norm=me.inv.reduce((a,it)=>a+(it&&it.rar===0?1:0),0), normV=me.inv.reduce((a,it)=>a+(it&&it.rar===0?sellInfo(it).total:0),0);
+  selItem=null;   /* 상점에는 판매창이 없음 — 판매·일괄 판매는 가방에서 */
   let h=`<div class="box"><h3>🛍️ 구매</h3>${shopRow('potion')}${shopRow('rev')}<div class="smsg">${esc(buyMsg)}</div></div>`;
-  h+=`<div class="box"><h3>💰 판매</h3><div class="smsg">${esc(shopMsg)}</div><div class="inv">${me.inv.map((it,i)=>cellHtml(it,'cell',`data-inv="${i}"`)).join('')}</div>`;
-  let d='';
-  if(selItem&&selItem.inv!==undefined&&me.inv[selItem.inv]&&isShard(selItem.it)){ d=itemLines(selItem.it); }
-  else if(selItem&&selItem.inv!==undefined&&me.inv[selItem.inv]){ const it=selItem.it, si=sellInfo(it); d=itemLines(it)+`<div class="cmp">기본 ${si.base}G${si.ex?` + 옵션 ${si.ex}G`:''}</div><div class="acts"><button class="btn" id="aLock">${it.lock?'🔓 잠금 해제':'🔒 잠금'}</button><button class="btn primary" id="aSell"${it.lock?' style="opacity:.45"':''}>판매 ${si.total}G</button></div>`; }
-  h+=`<div class="meta" style="font-size:12px;color:var(--mute)">판매가: 일반 100 · 매직 200 · 레어 400 · 유니크 800G. 스킬 옵션과 고급 옵션(생명력 흡수·치명타·공격/이동 속도)은 추가금이 붙어요.</div>`;
-  h+=`<button class="btn" id="aSellAll">🧺 일괄 판매…</button></div>`;
   const b=$('#sheetB'); b.className='sbody stats'; b.innerHTML=h; fitGo(b);
   b.querySelectorAll('[data-q]').forEach(el=>el.onclick=()=>{ const [k,a]=el.dataset.q.split(':'), have=k==='potion'?me.potBuy:me.rev, space=Math.max(1,SHOPMAX-have), o=SHOP[k];
     if(a==='max')shopQty[k]=Math.max(1,Math.min(Math.floor(me.gold/o.p),space)); else shopQty[k]=clamp((shopQty[k]|0)+(+a),1,space); buyMsg=''; renderShop(); });
   b.querySelectorAll('[data-buy]').forEach(el=>el.onclick=()=>{ const k=el.dataset.buy, o=SHOP[k], key=k==='potion'?'potBuy':'rev', n=shopQty[k]|0||1, cost=o.p*n;
     shopMsg=''; if(me[key]>=SHOPMAX){buyMsg=`더 이상 가질 수 없어요 (최대 ${SHOPMAX}개)`;} else if(me.gold<cost){buyMsg='금화가 부족해요';} else if(me[key]+n>SHOPMAX){buyMsg=`최대 ${SHOPMAX}개까지만 가질 수 있어요`;} else { me.gold-=cost; me[key]+=n; buyMsg=`${o.n} ${n}개 구매 -${cost.toLocaleString()}G`; sfx('coin'); saveChar(); uiDirty=true; shopQty[k]=1; }
     renderShop(); });
-  b.querySelectorAll('[data-inv]').forEach(el=>el.onclick=()=>{const i=+el.dataset.inv; if(me.inv[i]){delete me.inv[i].isNew;selItem={it:me.inv[i],inv:i}; shopMsg=''; buyMsg=''; renderShop();}});
-  showPop(d); const as=pq('#aSell'); if(as)as.onclick=()=>sellBtn(as); const alk2=pq('#aLock'); if(alk2)alk2.onclick=()=>{ const it=selItem&&selItem.it; if(!it)return; it.lock=!it.lock; saveChar(); renderShop(); };
-  const aa=b.querySelector('#aSellAll'); if(aa)aa.onclick=bulkSell;
 }
 function bulkSell(){
   const sel=new Set([0,1]); let uAsk=false;
@@ -3015,7 +3007,7 @@ function askReset(kind){
 function renderMenu(){
   markTabs(); sheetHead();
   const b=$('#sheetB'); b.className='sbody';
-  b.innerHTML=`<div class="menuL"><button class="btn primary" id="mResume">계속하기</button><button class="btn" id="mQuit">스테이지 포기하고 나가기</button><button class="btn" id="mCl">☁️ 클라우드 저장${clCode()?' · 켜짐':''}</button><button class="btn" id="mPn">📜 패치노트 (수치 변경)</button><div class="modes" id="sndM"></div><div class="hudbox"><b>🖥️ 화면 표시 (HUD)</b>${HUDK.map(([k,n])=>`<label><input type="checkbox" data-hud="${k}"${hudOn(k)?' checked':''}>${n}</label>`).join('')}</div><p class="note">캐릭터와 아이템은 이 기기에 자동 저장돼요. (클라우드 저장을 켜면 서버에도 보관돼요)${G.mode!=='solo'?' 온라인 플레이 중에는 일시정지되지 않아요.':''}</p></div>`;
+  b.innerHTML=`<div class="menuL"><button class="btn primary" id="mResume">계속하기</button><button class="btn" id="mQuit">스테이지 포기하고 나가기</button><button class="btn" id="mCl">☁️ 클라우드 저장${clCode()?' · 켜짐':''}</button><button class="btn" id="mPn">📜 패치노트</button><div class="modes" id="sndM"></div><div class="hudbox"><b>🖥️ 화면 표시 (HUD)</b>${HUDK.map(([k,n])=>`<label><input type="checkbox" data-hud="${k}"${hudOn(k)?' checked':''}>${n}</label>`).join('')}</div><p class="note">캐릭터와 아이템은 이 기기에 자동 저장돼요. (클라우드 저장을 켜면 서버에도 보관돼요)${G.mode!=='solo'?' 온라인 플레이 중에는 일시정지되지 않아요.':''}</p></div>`;
   $('#mResume').onclick=closeSheet; $('#mCl').onclick=cloudModal; $('#mPn').onclick=patchModal; {const r=$('#sndM'); r.innerHTML=sndBtns(); bindSnd(r);} b.querySelectorAll('[data-hud]').forEach(c=>c.onchange=()=>hudSet(c.dataset.hud,c.checked));
   $('#mQuit').onclick=()=>{closeSheet(); quitToTitle();};
 }
@@ -3176,7 +3168,7 @@ function renderStagePanel(){
   const S=STAGES[selStage]; $('#stageBig').innerHTML=`<small>STAGE</small>${esc(S.id)} · ${esc(S.n)}`;
   { const cur=chars.find(c=>c.id===selId), low=cur&&cur.lvl<S.rl, gp0=cur&&cur.eq?gearPenOf(cur.eq,S.icap):null, gw=!!gp0&&gp0.wm<.97; $('#stageInfo').innerHTML=`<span style="color:${gw?'#e07060':'#9fd18b'};font-weight:700">장비 Lv 합 ${Math.max(1,S.icap-12)*EQSL.length}↑${gp0?` (내 합 ${gp0.sum}${gw?' · 부족':''})`:''}</span><span class="sd">${esc(S.d)}</span>`; }
   { const cur=chars.find(c=>c.id===selId), nw=!!cur&&(cur.inv||[]).some(x=>x&&x.isNew), pt=cur?(cur.statPts|0)+(cur.skillPts|0):0;
-    $('#tGearB').hidden=!nw; $('#menuB').hidden=!mailUnread(cur); const pb=$('#tStatB'); pb.hidden=!pt; pb.textContent=pt; for(const id of ['tGear','tStat'])$('#'+id).disabled=!cur; }
+    $('#tGearB').hidden=!nw; $('#menuB').hidden=!mailUnreadAll(chars); const pb=$('#tStatB'); pb.hidden=!pt; pb.textContent=pt; for(const id of ['tGear','tStat'])$('#'+id).disabled=!cur; }
   $('#bSolo').disabled=!selId; if(room){ $('#bHost').disabled=!selId; $('#bJoin').disabled=!selId; }
 }
 function renderTitle(){
@@ -3241,25 +3233,28 @@ function charMenu(id){
 }
 /* 타이틀 메뉴 (예전 '설정') — 소리 · 우편함 · 클라우드 저장 · 패치노트 */
 function menuModal(){
-  const cur=selId?loadChar(selId):null, un=mailUnread(cur);
-  modal(`<h3>☰ 메뉴</h3><div class="col"><div class="row2" id="sndS"></div><button class="btn" id="setMail"${cur?'':' disabled'}>${mailIc(false)} 우편함${un?'<i class="mnew">NEW</i>':''}</button><button class="btn" id="setCl">☁️ 클라우드 저장${clCode()?' · 켜짐':''}</button><button class="btn" id="setPn">📜 패치노트 (수치 변경)</button><button class="btn" id="setX">닫기</button></div>`,m=>{
+  const un=mailUnreadAll();
+  modal(`<h3>☰ 메뉴</h3><div class="col"><div class="row2" id="sndS"></div><button class="btn" id="setMail">${mailIc(false)} 우편함${un?'<i class="mnew">NEW</i>':''}</button><button class="btn" id="setCl">☁️ 클라우드 저장${clCode()?' · 켜짐':''}</button><button class="btn" id="setPn">📜 패치노트</button><button class="btn" id="setX">닫기</button></div>`,m=>{
     const r=m.querySelector('#sndS'); r.innerHTML=sndBtns(); bindSnd(r); m.querySelector('#setX').onclick=closeModal; m.querySelector('#setMail').onclick=mailModal; m.querySelector('#setCl').onclick=cloudModal; m.querySelector('#setPn').onclick=patchModal; }); }
 $('#bSet').onclick=menuModal;
-/* 우편함: 선택한 캐릭터의 편지 목록 → 편지 읽기(읽음 처리) → 삭제 */
+/* 우편함: 모든 캐릭터의 편지를 한 목록(최근 순)으로 → 편지 읽기(읽음 처리) → 삭제 */
 function mailSave(p){ lsSet(charKey(p.id),JSON.stringify(packChar(p))); }
 function mailModal(){
-  const p=selId?loadChar(selId):null; if(!p){ closeModal(); return; }
-  const rows=p.mail.map((x,i)=>{ const M=MAILS[x.id]; return `<button class="mrow${x.r?'':' un'}" data-i="${i}">${mailIc(!!x.r)}<span class="mt"><b>${esc(M.t)}</b><small>${esc(M.f)} · ${mailDate(x.d)}</small></span>${x.r?'':'<i class="mnew">NEW</i>'}</button>`; }).join('');
-  modal(`<h3>${mailIc(false)} 우편함 <small style="color:var(--mute);font-weight:400">${p.mail.length}통</small></h3>${rows?`<div class="mlist">${rows}</div>`:'<p class="meta" style="text-align:center;margin:18px 0">받은 편지가 없어요</p>'}<div class="row2"><button class="btn primary" id="mX">닫기</button></div>`,m=>{
-    m.querySelector('#mX').onclick=closeModal; m.querySelectorAll('.mrow').forEach(b=>b.onclick=()=>mailRead(+b.dataset.i)); }); }
-function mailRead(i){
-  const p=selId?loadChar(selId):null, x=p&&p.mail[i]; if(!x){ mailModal(); return; }
+  const chars=charIds().map(loadChar).filter(Boolean), all=[];
+  chars.forEach(p=>p.mail.forEach((x,i)=>all.push({p,x,i})));
+  all.sort((a,b)=>(b.x.d|0)-(a.x.d|0));
+  const un=all.reduce((n,o)=>n+(o.x.r?0:1),0);
+  const rows=all.map(o=>{ const M=MAILS[o.x.id]; return `<button class="mrow${o.x.r?'':' un'}" data-c="${o.p.id}" data-i="${o.i}">${mailIc(!!o.x.r)}<span class="mt"><b>${esc(M.t)}</b><small>${esc(M.f)} · ${mailDate(o.x.d)} · ${esc(dispName(o.p))}</small></span>${o.x.r?'':'<i class="mnew">NEW</i>'}</button>`; }).join('');
+  modal(`<h3>${mailIc(false)} 우편함 <small style="color:var(--mute);font-weight:400">읽지 않은 편지 ${un}개</small></h3>${rows?`<div class="mlist">${rows}</div>`:'<p class="meta" style="text-align:center;margin:18px 0">받은 편지가 없어요</p>'}<div class="row2"><button class="btn primary" id="mX">닫기</button></div>`,m=>{
+    m.querySelector('#mX').onclick=closeModal; m.querySelectorAll('.mrow').forEach(b=>b.onclick=()=>mailRead(b.dataset.c,+b.dataset.i)); }); }
+function mailRead(cid,i){
+  const p=loadChar(cid), x=p&&p.mail[i]; if(!x){ mailModal(); return; }
   if(!x.r){ x.r=1; mailSave(p); renderStagePanel(); }
   const M=MAILS[x.id];
-  modal(`<h3>${mailIc(true)} ${esc(M.t)}</h3><p class="meta" style="margin:0 0 8px">${esc(M.f)} · ${mailDate(x.d)}</p><div class="mbody">${esc(M.b(p))}</div><div class="row2"><button class="btn" id="mDel">🗑️ 삭제</button><button class="btn primary" id="mBk">목록</button></div>`,m=>{
+  modal(`<h3>${mailIc(true)} ${esc(M.t)}</h3><p class="meta" style="margin:0 0 8px">${esc(M.f)} · ${mailDate(x.d)} · ${esc(dispName(p))}</p><div class="mbody">${esc(M.b(p))}</div><div class="row2"><button class="btn" id="mDel">🗑️ 삭제</button><button class="btn primary" id="mBk">목록</button></div>`,m=>{
     m.querySelector('#mBk').onclick=mailModal; let ask=false;
     m.querySelector('#mDel').onclick=e=>{ if(!ask){ ask=true; const b=e.currentTarget; b.textContent='⚠️ 한 번 더 누르면 삭제'; b.style.background='#a62a22'; b.style.borderColor='#ff6a5a'; return; }
-      const q=loadChar(p.id); if(q){ q.mail.splice(i,1); mailSave(q); renderStagePanel(); } mailModal(); }; }); }
+      const q=loadChar(cid); if(q){ q.mail.splice(i,1); mailSave(q); renderStagePanel(); } mailModal(); }; }); }
 $('#verT').onclick=()=>patchModal(); $('#verT').style.cursor='pointer';
 /* 패치노트: 저장소의 patchnotes.txt를 불러와서 보여줌 (원본 파일 링크 포함) */
 function patchModal(){
@@ -4043,7 +4038,6 @@ function step(now){
   if(bannerT>0){bannerT-=dt; if(bannerT<=0)$('#banner').style.opacity=0;}
   AUD.setMood(G.inGame?(G.phase==='boss'?'boss':G.phase==='wave'?'battle':'calm'):'calm');
   if(!me||!G.inGame){ if(me&&G.phase!=='title'&&G.phase!=='lobby')render(T); else {ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle='#070605';ctx.fillRect(0,0,cv.width,cv.height);} return; }
-  if(G.hs>0&&G.mode==='solo'){G.hs-=dt; render(T); return;}
   if(!G.paused){
     G.runT=(G.runT||0)+dt; 
     if(G.mode!=='guest'){ updateWaves(dt); updateMobs(dt); }
