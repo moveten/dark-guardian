@@ -471,7 +471,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.3.0160</div>
+    <div class="ver" id="verT">v0.4.3.0161</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -951,7 +951,7 @@ const SPFX={
  skullcrown:{n:'해골 왕관',slot:'helm',base:'철 투구',il:10,d:'스킬 재사용 대기시간 -15%, 생명력 +40',ap:d=>{d.cdr+=.15;d.life+=40;}},
  frostlord:{n:'서리 군주의 투구',slot:'helm',base:'뿔 달린 투구',il:16,d:'마나 +40, 마나 회복 +25%',ap:d=>{d.mana+=40;d.mr+=25;}},
  tome:{n:'금지된 마법서',slot:'weapon',base:'마법서',il:10,fx:['ene','mana','mr','all'],fcls:'sorc',d:'마법사 스킬 피해 +20%, 스킬 재사용 대기시간 -12%, 마나 소모 -15%',ap:d=>{d.cdr+=.12;}},
- rage:{n:'광전사의 훈장',slot:'amulet',base:'목걸이',il:12,fx:['str','vit','dmgPct','life'],d:'생명력 50% 이하에서 피해 +30%, 생명력 흡수 +3%',ap:d=>{d.ls+=3;}},
+ rage:{n:'광전사의 훈장',slot:'amulet',base:'목걸이',il:12,fx:['str','vit','dmgPct','life','crit'],d:'생명력 50% 이하에서 피해 +30%, 생명력 흡수 +3%',ap:d=>{d.ls+=3;}},
  eye:{n:'영겁의 눈',slot:'amulet',base:'목걸이',il:10,d:'아이템 드롭률 +30%, 획득 범위 +20, 치명타 확률 +5%',ap:d=>{d.mf+=30;d.pr+=20;d.crit+=5;}},
  /* ===== 보스 이름 유니크 (이름·옵션 종류 고정, 수치만 변동 · 개별 스킬 옵션 없음) ===== */
  rfrost:{n:'프로스티아의 반지',slot:'ring',base:'반지',il:29,fx:['ene','mana','mr','def','vit'],d:'서리의 가호: 스킬 재사용 대기시간 -6%, 받는 피해 -3%',ap:d=>{d.cdr+=.06;d.dr+=.03;}},
@@ -974,7 +974,7 @@ const SPFX={
 /* ===== 영웅 아이템: 아이템 레벨 100 · 착용 Lv 90 · 기본 수치 ×1.6 (유니크 ×1.3) · 옵션 종류 고정, 수치만 변동 =====
    fx: [옵션, 최소, 최대] · clsR = 무작위 직업의 '+N 직업 스킬' · clsM = 착용 직업의 '+N 직업 스킬' */
 const HERO_IL=100, HERO_REQ=90, HERO_P=.02, SHARD_N=120, SHARD_MAX=999, RAID_UQ=.6;   /* HERO_P=레이드 보스 한 마리당 영웅 아이템 추가 드랍 확률, SHARD_N=교환에 필요한 개수, SHARD_MAX=가방 한 칸에 쌓이는 최대 수량, RAID_UQ=레이드 스테이지 일반 드랍의 유니크 비율(나머지는 레어) */
-const HERO_AFC=[['life',150,210],['def',70,105],['vit',5,10],['mr',20,30]]; /* 보조무기 공통 옵션(+ 직업 스킬) */
+const HERO_AFC=[['life',150,210],['def',70,105],['vit',5,10],['mr',20,30],['dmgPct',25,50]]; /* 보조무기 공통 옵션(+ 직업 스킬) */
 const HEROI={
  hdag:{mn:6,mx:14,fx:[['dmgPct',150,212],['ias',10,15],['crit',5,10],['ls',3,5],['dex',5,10],['clsR',1,2]]},
  hhelm:{df:10,fx:[['life',150,210],['def',70,105],['all',1,1],['crit',4,6],['dmgPct',25,50],['mr',10,30]]},
@@ -992,12 +992,16 @@ const HDROP={war:['helm','armor','shield'],sorc:['amulet','ring','shield'],shd:[
 const heroKey=(part,cls)=>part==='shield'?'hoff_'+(cls||(me&&me.cls)||'war'):HERO_PART[part];
 const HERO_M=1.92; /* 영웅 장비 기본 성능(무기 공격력·방어구 방어력) 배율 — 1.6 → 1.92 (+20%) */
 /* 예전(1.6배)에 얻은 영웅 장비는 불러올 때 한 번 새 배율로 다시 계산 (강화한 아이템은 강화 수치 유지) */
+/* 예전에 얻은 아이템에도 새 옵션 1개를 붙여 줌 — 광전사의 훈장(치명타 확률) · 그림자 보조장비(피해 %) */
+function newOptFix(it){ if(!it||it.nof)return;
+  if(it.rar===3&&it.sp==='rage'&&Array.isArray(it.aff)){ if(!it.aff.some(a=>a.t==='crit'))it.aff.push(rollAff(AFXBY.crit,3,it.ilvl||1,1.3,undefined,null,'amulet')); it.nof=1; }
+  else if(it.rar===4&&it.sp&&it.sp.indexOf('hoff_')===0&&Array.isArray(it.aff)){ if(!it.aff.some(a=>a.t==='dmgPct'))it.aff.push({t:'dmgPct',v:ri(25,50)}); it.nof=1; } }
 function heroFix(it){ const H=it&&it.rar===4&&it.sp&&HEROI[it.sp]; if(!H||it.hv===2)return; const IL=it.ilvl||HERO_IL;
   if(H.mx){ const m=(1+IL*.16)*HERO_M; it.mn=Math.round(H.mn*m); it.mx=Math.round(H.mx*m); }
   if(H.df)it.df=Math.round(H.df*(1+IL*.2)*HERO_M); if(H.dm)it.dm=Math.round(H.dm*(1+IL*.1)*HERO_M); if(H.om)it.om=Math.round(H.om*(1+IL*.1)*HERO_M);
   if(it.b0)it.b0={mn:it.mn,mx:it.mx,df:it.df,dm:it.dm,om:it.om}; if((it.enh|0)>0)enhApply(it); it.hv=2; }
 function genHero(key){ const H=HEROI[key], S=SPFX[key]; if(!H||!S)return null;
-  const it={id:++ITEMID,slot:S.slot,rar:4,ilvl:HERO_IL,base:S.base,aff:[],sp:key,name:S.n,req:HERO_REQ,hv:2};
+  const it={id:++ITEMID,slot:S.slot,rar:4,ilvl:HERO_IL,base:S.base,aff:[],sp:key,name:S.n,req:HERO_REQ,hv:2,nof:1};
   if(S.fcls)it.oc=S.fcls;
   const M=HERO_M; if(H.mx){ const m=(1+HERO_IL*.16)*M; it.mn=Math.round(H.mn*m); it.mx=Math.round(H.mx*m); }
   if(H.df)it.df=Math.round(H.df*(1+HERO_IL*.2)*M); if(H.dm)it.dm=Math.round(H.dm*(1+HERO_IL*.1)*M); if(H.om)it.om=Math.round(H.om*(1+HERO_IL*.1)*M); if(H.blk)it.blk=ri(H.blk[0],H.blk[1]);
@@ -1118,7 +1122,7 @@ function loadChar(id){
     for(const k in p.eq){ if(p.eq[k])delete p.eq[k].isNew; } /* 장착했던 아이템의 NEW 꼬리표 정리(1회) */ if(!lsGet('dkdef2.nwf.'+id)){ (p.inv||[]).forEach(x=>{ if(x)delete x.isNew; }); lsSet('dkdef2.nwf.'+id,'1'); }
     p.inv=p.inv||Array(INVN).fill(null); while(p.inv.length<INVN)p.inv.push(null);
     p.shard=p.shard|0; shardAdd(p,0); /* 예전 조각 숫자 → 가방 아이템으로 */
-    const fx=it=>{ if(!it)return; heroFix(it); if(!Array.isArray(it.aff))it.aff=[]; if(it.rar===3&&it.name==='그림자 망토')it.name='밤의 망토'; /* 영웅 '그림자' 장비와 헷갈리지 않게 개명 */ if(!p.dv4&&it.slot!=='weapon')for(const a of it.aff)if(a&&(a.t==='dmgPct'||a.t==='sm'||a.t==='smhp'))a.v=Math.min(50,Math.max(1,Math.round(a.v/4))); /* v0.3: 무기 외 피해%·소환수 피해%·소환수 생명력% 옵션은 예전 수치를 4로 나눈 값으로(캐릭터마다 1회, p.dv4) */ for(const a of it.aff)if(a&&(a.t==='str'||a.t==='dex'||a.t==='vit'||a.t==='ene')&&a.v>10)a.v=10; /* 힘·민첩·체력·에너지 옵션 상한 10(이전에 얻은 더 높은 수치도 10으로) */ if(it.rar===3&&!it.sv){ it.sv=1; const sh=it.slot==='shield'; /* 유니크 스킬 옵션 개편: 직업 스킬→모든 스킬, 개별 스킬→그 직업 스킬, 보조장비→내(보조장비) 직업 스킬 (1회) */
+    const fx=it=>{ if(!it)return; heroFix(it); newOptFix(it); if(!Array.isArray(it.aff))it.aff=[]; if(it.rar===3&&it.name==='그림자 망토')it.name='밤의 망토'; /* 영웅 '그림자' 장비와 헷갈리지 않게 개명 */ if(!p.dv4&&it.slot!=='weapon')for(const a of it.aff)if(a&&(a.t==='dmgPct'||a.t==='sm'||a.t==='smhp'))a.v=Math.min(50,Math.max(1,Math.round(a.v/4))); /* v0.3: 무기 외 피해%·소환수 피해%·소환수 생명력% 옵션은 예전 수치를 4로 나눈 값으로(캐릭터마다 1회, p.dv4) */ for(const a of it.aff)if(a&&(a.t==='str'||a.t==='dex'||a.t==='vit'||a.t==='ene')&&a.v>10)a.v=10; /* 힘·민첩·체력·에너지 옵션 상한 10(이전에 얻은 더 높은 수치도 10으로) */ if(it.rar===3&&!it.sv){ it.sv=1; const sh=it.slot==='shield'; /* 유니크 스킬 옵션 개편: 직업 스킬→모든 스킬, 개별 스킬→그 직업 스킬, 보조장비→내(보조장비) 직업 스킬 (1회) */
       for(const a of it.aff){ if(!a)continue; const v=Math.min(2,Math.max(1,a.v|0)); if(a.t==='cls'){ if(sh){ a.cls=it.oc||cls; a.v=v; } else { a.t='all'; a.v=v; delete a.cls; } } else if(a.t==='sk'){ a.t='cls'; a.v=v; if(sh)a.cls=it.oc||cls; delete a.key; } }
       if(it.aff.some(a=>a&&a.t==='all'))it.aff=it.aff.filter(a=>!(a&&a.t==='cls')); }
     if(it.rar===3&&it.aff.some(a=>a&&a.t==='all'))it.aff=it.aff.filter(a=>!(a&&a.t==='sk')); it.aff=it.aff.filter(a=>a&&AFXBY[a.t]&&!(it.slot==='armor'&&a.t==='ms')&&!(a.cls&&!CLASSES[a.cls])&&!(a.t==='sk'&&!(SKBY[a.key]&&SK[a.cls]&&SK[a.cls].includes(SKBY[a.key])))); }; p.inv.forEach(fx); p.eq=p.eq||{}; for(const k in p.eq)fx(p.eq[k]); p.dv4=1;
@@ -2758,6 +2762,7 @@ function renderBag(){
   enableDrag(b);
   const asn=pq('#aSend'); if(asn)asn.onclick=()=>sendPick();
   const ase=pq('#aShardEx'); if(ase)ase.onclick=()=>shardModal();
+  const ass=pq('#aShardSell'); if(ass)ass.onclick=()=>sellShard();
   const aen=pq('#aEnh'); if(aen)aen.onclick=()=>enhModal();
   const au=pq('#aUnequip'); if(au)au.onclick=()=>{unequip(selItem.eq);};
 }
@@ -2766,12 +2771,29 @@ const bk=(a,b)=>(a.base||'')<(b.base||'')?-1:(a.base||'')>(b.base||'')?1:0;
 function sortInv(mode){ shardRepack(me); const its=me.inv.filter(Boolean);
   its.sort(mode==='type'?((a,b)=>(SLOTO[a.slot]|0)-(SLOTO[b.slot]|0)||(b.rar|0)-(a.rar|0)||bk(a,b)||(b.ilvl|0)-(a.ilvl|0)||String(a.name).localeCompare(String(b.name))):((a,b)=>(b.rar|0)-(a.rar|0)||(SLOTO[a.slot]|0)-(SLOTO[b.slot]|0)||bk(a,b)||(b.ilvl|0)-(a.ilvl|0)||String(a.name).localeCompare(String(b.name))));
   me.inv=its.concat(Array(Math.max(0,INVN-its.length)).fill(null)); selItem=null; saveChar(); renderBag(); sheetToast(mode==='type'?'종류별로 정리했어요':'등급별로 정리했어요'); }
-function sendShard(){ const it=selItem&&selItem.it, ix=selItem&&selItem.inv; if(!isShard(it)||ix===undefined)return; const n=it.n|0;
-  const others_=charIds().filter(x=>x!==me.id).map(loadChar).filter(Boolean);
-  const rows=others_.map(c=>{ const ok=shardRoom(c,n); return `<button class="btn" data-to="${c.id}" ${ok?'':'disabled'} style="text-align:left">${clsIc(c.cls,20)} ${esc(dispName(c))} · Lv ${c.lvl} <span style="color:var(--mute);font-weight:400">${ok?`(조각 ${shardCount(c)}개 보유)`:'(가방 자리 부족)'}</span></button>`; }).join('');
-  modal(`<h3>📤 그림자 조각 보내기</h3><p style="margin:0 0 10px;font-size:13px;color:${RARC[4]}">🌑 그림자 조각 ${n}개 (이 칸 전체)</p><div class="col">${rows}<button class="btn" id="sX">취소</button></div>`,m=>{
+const SHARD_SELL=1000;   /* 그림자 조각 판매가(개당 G) */
+/* 수량 고르기(−/+/직접 입력/슬라이더/전부) — 조각 보내기·판매에서 사용 */
+const qtyHtml=max=>`<div style="display:flex;align-items:center;gap:6px;margin:8px 0 4px"><button class="btn" data-qd="-1" style="min-width:46px;min-height:44px">−</button><input id="qtyN" type="number" inputmode="numeric" min="1" max="${max}" value="${max}" aria-label="수량" style="flex:1;min-width:0;box-sizing:border-box;padding:10px;font-size:17px;text-align:center;border-radius:8px;border:1px solid var(--line2);background:#0f0b09;color:#fff"><button class="btn" data-qd="1" style="min-width:46px;min-height:44px">+</button><button class="btn" data-qd="all" style="min-height:44px">전부</button></div><input id="qtyR" type="range" min="1" max="${max}" value="${max}" aria-label="수량 조절" style="width:100%;margin:4px 0 8px">`;
+function qtyBind(m,max,onch){ const n=m.querySelector('#qtyN'), r=m.querySelector('#qtyR'); const get=()=>Math.max(1,Math.min(max,Math.floor(+n.value||1)));
+  const set=v=>{ v=Math.max(1,Math.min(max,Math.floor(+v||1))); n.value=v; r.value=v; if(onch)onch(v); };
+  n.oninput=()=>{ const v=Math.floor(+n.value||0); if(v>=1){ r.value=Math.min(max,v); if(onch)onch(get()); } }; n.onchange=()=>set(n.value); r.oninput=()=>set(r.value);
+  m.querySelectorAll('[data-qd]').forEach(b=>b.onclick=()=>{ const d=b.dataset.qd; set(d==='all'?max:get()+(+d)); });
+  if(onch)onch(get()); return get; }
+function sendShard(){ const it=selItem&&selItem.it, ix=selItem&&selItem.inv; if(!isShard(it)||ix===undefined)return; const max=it.n|0; if(max<1)return;
+  const others_=charIds().filter(x=>x!==me.id).map(loadChar).filter(Boolean); let q=max;
+  const rows=others_.map(c=>`<button class="btn" data-to="${c.id}" style="text-align:left">${clsIc(c.cls,20)} ${esc(dispName(c))} · Lv ${c.lvl} <span class="st" style="color:var(--mute);font-weight:400"></span></button>`).join('');
+  modal(`<h3>📤 그림자 조각 보내기</h3><p style="margin:0;font-size:13px;color:${RARC[4]}">🌑 이 칸 보유 ${max}개 · 보낼 수량을 고르세요</p>${qtyHtml(max)}<div class="col">${rows}<button class="btn" id="sX">취소</button></div>`,m=>{
     m.querySelector('#sX').onclick=closeModal;
-    m.querySelectorAll('[data-to]').forEach(b=>b.onclick=()=>{ const t=loadChar(b.dataset.to); if(!t||!shardRoom(t,n))return; shardAdd(t,n); lsSet(charKey(t.id),JSON.stringify(packChar(t))); me.inv[ix]=null; selItem=null; saveChar(); closeModal(); sfx('pick'); shopMsg=''; renderBag(); toast(`${dispName(t)}에게 조각 ${n}개를 보냈어요`,'#9fd18b'); });
+    const refresh=v=>{ q=v; m.querySelectorAll('[data-to]').forEach(b=>{ const c=others_.find(o=>o.id===b.dataset.to), ok=c&&shardRoom(c,q); b.disabled=!ok; b.style.opacity=ok?'':'.5'; b.querySelector('.st').textContent=ok?`(조각 ${shardCount(c)}개 보유)`:'(가방 자리 부족)'; }); };
+    qtyBind(m,max,refresh);
+    m.querySelectorAll('[data-to]').forEach(b=>b.onclick=()=>{ const t=loadChar(b.dataset.to); if(!t||me.inv[ix]!==it||q>(it.n|0)||!shardRoom(t,q))return; shardAdd(t,q); lsSet(charKey(t.id),JSON.stringify(packChar(t))); it.n-=q; if(it.n<=0)me.inv[ix]=null; selItem=null; saveChar(); closeModal(); sfx('pick'); shopMsg=''; renderBag(); toast(`${dispName(t)}에게 조각 ${q}개를 보냈어요`,'#9fd18b'); });
+  });
+}
+function sellShard(){ const it=selItem&&selItem.it, ix=selItem&&selItem.inv; if(!isShard(it)||ix===undefined)return; const max=it.n|0; if(max<1)return;
+  modal(`<h3>💰 그림자 조각 판매</h3><p style="margin:0;font-size:13px;color:${RARC[4]}">🌑 이 칸 보유 ${max}개 · 개당 ${SHARD_SELL.toLocaleString()}G</p>${qtyHtml(max)}<p class="meta" id="ssTot" style="margin:0 0 10px;font-size:15px;color:#ffd84a;text-align:center"></p><div class="row2"><button class="btn" id="ssNo">취소</button><button class="btn primary" id="ssGo">판매</button></div>`,m=>{
+    m.querySelector('#ssNo').onclick=closeModal;
+    const get=qtyBind(m,max,v=>{ m.querySelector('#ssTot').textContent=`${v}개 → +${(v*SHARD_SELL).toLocaleString()}G`; });
+    m.querySelector('#ssGo').onclick=()=>{ const q=get(); if(me.inv[ix]!==it||q>(it.n|0))return; const v=q*SHARD_SELL; it.n-=q; if(it.n<=0)me.inv[ix]=null; me.gold+=v; selItem=null; shopMsg=`그림자 조각 ${q}개 판매 +${v.toLocaleString()}G`; saveChar(); uiDirty=true; sfx('coin'); closeModal(); rerender(); };
   });
 }
 function sendPick(){
@@ -2815,7 +2837,7 @@ function lockSvg(on){ return on
   ?'<svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="#ffe27a" stroke-width="2.4" stroke-linecap="round"/><rect x="5" y="11" width="14" height="10" rx="2.2" fill="#ffd84a" stroke="#7a5a10" stroke-width="1"/><circle cx="12" cy="15.2" r="1.6" fill="#5a3f08"/><rect x="11.2" y="15.5" width="1.6" height="3.2" rx=".8" fill="#5a3f08"/></svg>'
   :'<svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><g transform="rotate(-42 8 11)"><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="#b9b2a4" stroke-width="2.4" stroke-linecap="round" transform="translate(0 -1.5)"/></g><rect x="5" y="11" width="14" height="10" rx="2.2" fill="#8a8478" stroke="#3a362e" stroke-width="1"/><circle cx="12" cy="15.2" r="1.6" fill="#2a2620"/><rect x="11.2" y="15.5" width="1.6" height="3.2" rx=".8" fill="#2a2620"/></svg>'; }
 function itemLines(it,opt){
-  if(isShard(it)) return `<div style="display:flex;gap:10px;align-items:center"><div style="width:56px;height:56px;flex:none;display:grid;place-items:center;background:#0a0807;border:1px solid ${RARC[4]};border-radius:8px">${shardOrb(it.n,32)}</div><div><div class="in" style="color:${RARC[4]}">그림자 조각</div><div class="meta">수량 <b style="color:#fff">${it.n}</b> / ${SHARD_MAX} (한 칸 최대)</div></div></div><div class="meta" style="margin:6px 0">삼남매를 쓰러뜨리면 얻는 재료예요. ${SHARD_N}개로 영웅 아이템 하나를 교환할 수 있어요. 판매할 수 없어요.</div>`;
+  if(isShard(it)) return `<div style="display:flex;gap:10px;align-items:center"><div style="width:56px;height:56px;flex:none;display:grid;place-items:center;background:#0a0807;border:1px solid ${RARC[4]};border-radius:8px">${shardOrb(it.n,32)}</div><div><div class="in" style="color:${RARC[4]}">그림자 조각</div><div class="meta">수량 <b style="color:#fff">${it.n}</b> / ${SHARD_MAX} (한 칸 최대)</div></div></div><div class="meta" style="margin:6px 0">삼남매를 쓰러뜨리면 얻는 재료예요. ${SHARD_N}개로 영웅 아이템 하나를 교환할 수 있어요. 개당 ${SHARD_SELL.toLocaleString()}G에 판매할 수도 있어요.</div>`;
   let s=`<div style="display:flex;gap:10px;align-items:center"><span style="position:relative;flex:none;display:flex"><img src="${itemIcon(it).url}" alt="" style="width:56px;height:56px;flex:none;background:#0a0807;border:1px solid ${RARC[it.rar]};border-radius:8px">${opt&&opt.lk?`<button class="lkb${it.lock?' on':''}" data-lk="1" aria-label="${it.lock?'잠금 해제':'잠금'}">${lockSvg(!!it.lock)}</button>`:''}</span><div><div class="in" style="color:${RARC[it.rar]}">${it.enh>0?'+'+it.enh+' ':''}${esc(dn(it))}</div><div class="meta" style="color:#fff">아이템 레벨 ${ilvOf(it)}${it.enh>0?` <span style="color:#ffd84a">(기본 ${it.ilvl} + 강화 ${it.enh})</span>`:''}</div>${ownTag(it)}<div class="meta">${reqHtml(it)}</div></div></div>`+lvCmp(it);
   const bt=baseText(it); if(bt)s+=`<div>${bt}</div>`;
   if(BASEFX[it.base]&&it.slot==='weapon') s+=`<div class="meta" style="color:#9fd0ff">▪ ${BASEFX[it.base].t}</div>`;
@@ -2853,7 +2875,7 @@ function detailHtml(){
   sellAskIt=null;
   if(!selItem) return '';
   const it=selItem.it; let s=itemLines(it,isShard(it)?null:{lk:1});
-  if(isShard(it)){ s+=`<div class="acts"><button class="btn primary" id="aShardEx">🌑 영웅 아이템 교환</button>${(G.titleSheet&&charIds().length>1)?'<button class="btn" id="aSend">📤 보내기</button>':''}</div>`; return s; }
+  if(isShard(it)){ s+=`<div class="acts"><button class="btn primary" id="aShardEx">🌑 영웅 아이템 교환</button><button class="btn" id="aShardSell">💰 판매</button>${(G.titleSheet&&charIds().length>1)?'<button class="btn" id="aSend">📤 보내기</button>':''}</div>`; return s; }
   /* 폰 화면(560px 이하)에서는 장착/해제가 한 줄 전체, 강화·판매·보내기는 아이콘 타일 한 줄, 잠금은 아이콘 모서리 배지. 패드·PC는 예전 그대로 */
   const lk=`<button class="btn lkx" id="aLock" data-lk="1">${it.lock?'🔓 잠금 해제':'🔒 잠금'}</button>`,
     enh=canEnh(it)?`<button class="btn tlb" id="aEnh"><span class="ti">⚒</span> <span class="tx">강화${it.enh>0?' +'+it.enh:''}</span></button>`:'',
