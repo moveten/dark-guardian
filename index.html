@@ -465,7 +465,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo,body.hud-nolvpen #lvPen{display
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.3.0150</div>
+    <div class="ver" id="verT">v0.4.3.0151</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -966,7 +966,7 @@ const SPFX={
  hoff_druid:{n:'그림자 토템',slot:'shield',base:'정령 토템',il:999,hero:1,fcls:'druid',d:'변신 중 받는 피해 -10%',ap:()=>{}}};
 /* ===== 영웅 아이템: 아이템 레벨 100 · 착용 Lv 90 · 기본 수치 ×1.6 (유니크 ×1.3) · 옵션 종류 고정, 수치만 변동 =====
    fx: [옵션, 최소, 최대] · clsR = 무작위 직업의 '+N 직업 스킬' · clsM = 착용 직업의 '+N 직업 스킬' */
-const HERO_IL=100, HERO_REQ=90, HERO_P=.01, SHARD_N=150, SHARD_MAX=999;   /* SHARD_N=교환에 필요한 개수, SHARD_MAX=가방 한 칸에 쌓이는 최대 수량 */
+const HERO_IL=100, HERO_REQ=90, HERO_P=.02, SHARD_N=120, SHARD_MAX=999, RAID_UQ=.6;   /* HERO_P=레이드 보스 한 마리당 영웅 아이템 추가 드랍 확률, SHARD_N=교환에 필요한 개수, SHARD_MAX=가방 한 칸에 쌓이는 최대 수량, RAID_UQ=레이드 스테이지 일반 드랍의 유니크 비율(나머지는 레어) */
 const HERO_AFC=[['life',150,210],['def',70,105],['vit',5,10],['mr',20,30]]; /* 보조무기 공통 옵션(+ 직업 스킬) */
 const HEROI={
  hdag:{mn:6,mx:14,fx:[['dmgPct',150,212],['ias',10,15],['crit',5,10],['ls',3,5],['dex',5,10],['clsR',1,2]]},
@@ -1712,9 +1712,11 @@ function onKill(x,y,xp,tier,ilvl,type,lf){
       if(Math.random()<HERO_P){ const hit=genHero(heroKey(pick(HDROP[RK]))); if(hit)dropItem(hit,x+rand(-20,20),y+rand(-20,20)); } saveChar(); } }
   lf=lf>1?lf:1; const rolls=(tier>=2?4:tier>=1?2:1)+(tier<2?(Math.floor(lf-1)+(Math.random()<(lf-1)%1?1:0)):0);
   for(let i=0;i<rolls;i++){
-    let r=rollRarity(tier,ilvl);
-    if(tier>=1&&i===0&&r<1) r=1;
-    if(tier>=2){ if(i===1&&r<1)r=1; if(i===2&&r<2)r=Math.random()<.9?2:3; }
+    let r;
+    if(G.stg&&G.stg.raid) r=Math.random()<RAID_UQ?3:2;   /* 레이드 스테이지(삼남매): 드랍은 레어 이상만 — 유니크 60%, 나머지 레어 */
+    else { r=rollRarity(tier,ilvl);
+      if(tier>=1&&i===0&&r<1) r=1;
+      if(tier>=2){ if(i===1&&r<1)r=1; if(i===2&&r<2)r=Math.random()<.9?2:3; } }
     if(r>=0) dropItem(genItem(r,ilvl),x+rand(-24,24),y+rand(-24,24));
   }
 }
@@ -1870,7 +1872,7 @@ function shardTake(p,n){ if(shardCount(p)<n)return false; let need=n; const ov=M
   for(const i of st){ if(need<=0)break; const a=Math.min(p.inv[i].n,need); p.inv[i].n-=a; need-=a; if(p.inv[i].n<=0)p.inv[i]=null; } return need<=0; }
 function shardRoom(p,n){ /* p 가방에 조각 n개가 더 들어갈 자리가 있나 */ let r=0; for(const x of p.inv){ if(!x)r+=SHARD_MAX; else if(isShard(x))r+=SHARD_MAX-(x.n|0); } return r>=n; }
 function shardCanSwap(){ const cp={inv:JSON.parse(JSON.stringify(me.inv)),shard:me.shard|0}; return shardTake(cp,SHARD_N)&&cp.inv.indexOf(null)>=0; }
-/* 그림자 조각 150개 → 원하는 영웅 아이템 1개 */
+/* 그림자 조각 SHARD_N개 → 원하는 영웅 아이템 1개 */
 function shardModal(){ shardAdd(me,0); const n=shardCount(me), ok=n>=SHARD_N, free=shardCanSwap();
   const parts=['weapon','helm','armor','amulet','ring','shield'];
   modal(`<h3>🌑 그림자 조각 교환</h3><p class="meta" style="margin:0 0 8px">삼남매를 쓰러뜨릴 때마다 보스 하나당 조각 1~3개를 얻어요. <b style="color:#ffb0c4">${SHARD_N}개</b>로 원하는 영웅 아이템 하나를 골라 받을 수 있어요. (수치는 무작위)</p>
