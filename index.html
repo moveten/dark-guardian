@@ -474,7 +474,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.3.0164</div>
+    <div class="ver" id="verT">v0.4.3.0165</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -981,7 +981,7 @@ const HERO_AFC=[['life',150,210],['def',70,105],['vit',5,10],['mr',20,30],['dmgP
 const HEROI={
  hdag:{mn:6,mx:14,fx:[['dmgPct',150,212],['ias',10,15],['crit',5,10],['ls',3,5],['dex',5,10],['clsR',1,2]]},
  hhelm:{df:10,fx:[['life',150,210],['def',70,105],['all',1,1],['crit',4,6],['dmgPct',25,50],['mr',10,30]]},
- harmor:{df:20,fx:[['life',150,210],['def',70,105],['vit',5,10],['str',5,10],['ms',6,10],['all',1,1]]},
+ harmor:{df:20,fx:[['life',150,210],['def',70,105],['vit',5,10],['str',5,10],['dmgPct',25,50],['all',1,1]]},
  hamu:{fx:[['all',1,2],['dmgPct',40,55],['crit',3,5],['life',150,210],['ene',5,10],['mr',20,30]]},
  hring:{fx:[['ias',10,15],['crit',3,5],['ls',3,5],['dmgPct',25,50],['str',5,10],['dex',5,10]]},
  hoff_war:{dm:10,fx:[['clsM',1,2],...HERO_AFC]},
@@ -997,7 +997,9 @@ const HERO_M=1.92; /* 영웅 장비 기본 성능(무기 공격력·방어구 �
 /* 예전(1.6배)에 얻은 영웅 장비는 불러올 때 한 번 새 배율로 다시 계산 (강화한 아이템은 강화 수치 유지) */
 /* 예전에 얻은 아이템에도 새 옵션 1개를 붙여 줌 — 광전사의 훈장(치명타 확률) · 그림자 보조장비(피해 %) */
 function lanternFix(it){ if(!it||it.slot!=='shield'||it.rar>=4||it.sp||typeof it.name!=='string'||!/ 등불$/.test(it.name))return; const nn=NOUN_FULL[it.base]; if(nn&&!it.name.endsWith(nn))it.name=it.name.replace(/ 등불$/,' '+nn); }   /* 예전에 얻은 '…의 등불' 이름 정리 */
-function newOptFix(it){ if(!it||it.nof)return;
+function newOptFix(it){ if(!it)return;
+  if(it.rar===4&&it.sp==='harmor'&&!it.nfa&&Array.isArray(it.aff)){ it.aff=it.aff.filter(a=>a&&a.t!=='ms'); if(!it.aff.some(a=>a.t==='dmgPct'))it.aff.push({t:'dmgPct',v:ri(25,50)}); it.nfa=1; }   /* 그림자 갑옷: 갑옷에서 지워지던 이동속도 자리를 피해 +%로 바꿔 6개 */
+  if(it.nof)return;
   if(it.rar===3&&it.sp==='rage'&&Array.isArray(it.aff)){ if(!it.aff.some(a=>a.t==='crit'))it.aff.push(rollAff(AFXBY.crit,3,it.ilvl||1,1.3,undefined,null,'amulet')); it.nof=1; }
   else if(it.rar===4&&it.sp&&it.sp.indexOf('hoff_')===0&&Array.isArray(it.aff)){ if(!it.aff.some(a=>a.t==='dmgPct'))it.aff.push({t:'dmgPct',v:ri(25,50)}); it.nof=1; } }
 function heroFix(it){ const H=it&&it.rar===4&&it.sp&&HEROI[it.sp]; if(!H||it.hv===2)return; const IL=it.ilvl||HERO_IL;
@@ -1005,7 +1007,7 @@ function heroFix(it){ const H=it&&it.rar===4&&it.sp&&HEROI[it.sp]; if(!H||it.hv=
   if(H.df)it.df=Math.round(H.df*(1+IL*.2)*HERO_M); if(H.dm)it.dm=Math.round(H.dm*(1+IL*.1)*HERO_M); if(H.om)it.om=Math.round(H.om*(1+IL*.1)*HERO_M);
   if(it.b0)it.b0={mn:it.mn,mx:it.mx,df:it.df,dm:it.dm,om:it.om}; if((it.enh|0)>0)enhApply(it); it.hv=2; }
 function genHero(key){ const H=HEROI[key], S=SPFX[key]; if(!H||!S)return null;
-  const it={id:++ITEMID,slot:S.slot,rar:4,ilvl:HERO_IL,base:S.base,aff:[],sp:key,name:S.n,req:HERO_REQ,hv:2,nof:1};
+  const it={id:++ITEMID,slot:S.slot,rar:4,ilvl:HERO_IL,base:S.base,aff:[],sp:key,name:S.n,req:HERO_REQ,hv:2,nof:1,nfa:1};
   if(S.fcls)it.oc=S.fcls;
   const M=HERO_M; if(H.mx){ const m=(1+HERO_IL*.16)*M; it.mn=Math.round(H.mn*m); it.mx=Math.round(H.mx*m); }
   if(H.df)it.df=Math.round(H.df*(1+HERO_IL*.2)*M); if(H.dm)it.dm=Math.round(H.dm*(1+HERO_IL*.1)*M); if(H.om)it.om=Math.round(H.om*(1+HERO_IL*.1)*M); if(H.blk)it.blk=ri(H.blk[0],H.blk[1]);
@@ -1077,6 +1079,9 @@ function nameItem(it,rar){
     return ca?CLASSES[ca.cls].n+'의 '+noun:pick(RAREA)+' '+noun; }
   return MT[ri(0,2)].n+'의 '+noun;                                   /* 일반·매직: 몬스터 이름 */
 }
+/* 아이템 옵션 표시 순서 (일반 옵션만 정렬 · 강화로 붙는 노란색 줄은 맨 아래 그대로) */
+const AFORD=['all','cls','sk','dmgPct','dmg','crit','ias','ms','str','dex','vit','ene','mf','pr','def','life','ls','mana','mr','sm','smhp','rng'];
+const affSorted=it=>(it.aff||[]).map((a,i)=>[a,i]).sort((x,y)=>{ const r=a=>{ const k=AFORD.indexOf(a&&a.t); return k<0?99:k; }; return r(x[0])-r(y[0])||x[1]-y[1]; }).map(x=>x[0]);
 function affText(a){
   const d=AFXBY[a&&a.t]; if(!d)return '알 수 없는 옵션'; let s=d.n.replace('{v}',a.v);
   if(a.cls&&CLASSES[a.cls]) s=s.replace('{c}',CLASSES[a.cls].n);
@@ -2895,11 +2900,11 @@ function itemLines(it,opt){
   if(it.sp&&SPFX[it.sp]) s+=`<div style="margin:4px 0;color:#ffb14a;font-weight:700">★ 특수 효과: ${SPFX[it.sp].d}</div>`;
   if(it.rar===4&&it.sp&&SPFX[it.sp]&&SPFX[it.sp].hero){ const n=(me.D&&me.D.hc)|0, on=(c,a)=>c?'#d9c6ff':'#8a8a8a'; s+=`<div style="margin:4px 0;font-size:12px;line-height:1.55"><b style="color:#b98cff">🌑 그림자 세트 (${n}/7)</b><br><span style="color:${on(n>=2)}">2개: 최대 마나 +200</span><br><span style="color:${on(n>=3)}">3개: 레이드 보스에게 주는 피해 +15%</span><br><span style="color:${on(n>=7)}">7개: 레이드 보스에게 주는 피해 추가 +15% (합계 +30%) · 모든 스킬 +3</span></div>`; }
   const ex=enhOptText(it);
-  if(it.aff.length||ex) s+='<ul>'+it.aff.map(a=>`<li>${esc(affText(a))}${(a.cls&&a.cls!==me.cls)?' <span class="meta">(효과 없음)</span>':''}</li>`).join('')+(ex?`<li style="color:#ffe27a">${ex}</li>`:'')+'</ul>';
+  if(it.aff.length||ex) s+='<ul>'+affSorted(it).map(a=>`<li>${esc(affText(a))}${(a.cls&&a.cls!==me.cls)?' <span class="meta">(효과 없음)</span>':''}</li>`).join('')+(ex?`<li style="color:#ffe27a">${ex}</li>`:'')+'</ul>';
   return s;
 }
 function warn(msg){ if(G.titleSheet||!G.inGame) modal(`<h3>⚠️ 알림</h3><p style="margin:0 0 12px;font-size:14px">${esc(msg)}</p><div class="row2"><button class="btn primary" id="wOk">확인</button></div>`,m=>{m.querySelector('#wOk').onclick=closeModal;}); else toast(msg,'#e07060'); }
-function cmpMini(it){ let t=`<div style="color:${RARC[it.rar]};font-weight:700">${esc(it.name)}</div><div class="meta" style="color:#fff">아이템 레벨 ${ilvOf(it)}${it.enh>0?` <span style="color:#ffd84a">(기본 ${it.ilvl} + 강화 ${it.enh})</span>`:''}</div>${ownTag(it)}<div class="meta">${reqHtml(it)}</div>`; const bt=baseText(it); if(bt)t+=`<div>${bt}</div>`; { const ex=enhOptText(it); if(it.aff.length||ex)t+='<ul style="margin:4px 0">'+it.aff.map(a=>`<li>${esc(affText(a))}</li>`).join('')+(ex?`<li style="color:#ffe27a">${ex}</li>`:'')+'</ul>'; } return t; }
+function cmpMini(it){ let t=`<div style="color:${RARC[it.rar]};font-weight:700">${esc(it.name)}</div><div class="meta" style="color:#fff">아이템 레벨 ${ilvOf(it)}${it.enh>0?` <span style="color:#ffd84a">(기본 ${it.ilvl} + 강화 ${it.enh})</span>`:''}</div>${ownTag(it)}<div class="meta">${reqHtml(it)}</div>`; const bt=baseText(it); if(bt)t+=`<div>${bt}</div>`; { const ex=enhOptText(it); if(it.aff.length||ex)t+='<ul style="margin:4px 0">'+affSorted(it).map(a=>`<li>${esc(affText(a))}</li>`).join('')+(ex?`<li style="color:#ffe27a">${ex}</li>`:'')+'</ul>'; } return t; }
 /* 전투력(스킬 반영): 마법사·팔라딘은 기본 공격 + 배운 스킬들의 '초당 피해(재사용 대기시간 반영)'를 함께 봐요. 에너지·스킬 레벨·쿨감이 전투력에 들어가요.
    항목: [스킬키, 1회 시전 피해(레벨→기본치), 재사용 대기(초), 종류 s=마법(에너지 계수)/p=물리(힘 계수)] */
 const CPSKW=.5, CPCW={war:1,sorc:.75,pal:1.2,necro:.8,druid:.9}; /* 스킬을 전부 동시에 못 쓰고 마나도 한정이라서 곱하는 보정(.5) · 클래스별 균형 보정(마법사는 원거리 이점, 팔라딘은 오라 등 비공격 스킬이 많아서) */
@@ -3196,7 +3201,7 @@ function rkItemDetail(row,k,back){
   let it; try{ it=rkBuildItem(k,x); }catch(e){ rkProfile(row,back); return; }
   let ic=''; try{ ic=itemIcon(it).url; }catch(e){}
   let bt=''; try{ bt=baseText(it); }catch(e){}
-  let af=''; for(const a of it.aff){ try{ af+=`<li>${esc(affText(a))}</li>`; }catch(e){} }
+  let af=''; for(const a of affSorted(it)){ try{ af+=`<li>${esc(affText(a))}</li>`; }catch(e){} }
   modal(`<div class="rkit" style="border:0"><img src="${ic}" alt="" style="border-color:${RBD[it.rar]}"><div class="rkib"><div style="font-size:16px"><b style="color:${RARC[it.rar]}">${esc(dn(it))}</b>${it.enh>0?` <span style="color:#ffd84a;font-weight:800">+${it.enh}</span>`:''}</div><div class="meta">${RKSN[k]} · ${RARN[it.rar]} · 아이템 레벨 ${it.ilvl}</div>${it.req?`<div class="meta">필요 레벨 ${it.req}</div>`:''}</div></div>
     ${bt?`<div style="margin:6px 0">${bt}</div>`:''}${BASEFX[it.base]&&it.slot==='weapon'?`<div class="meta" style="color:#9fd0ff">▪ ${esc(BASEFX[it.base].t)}</div>`:''}${(it.enh>0&&enhFxText(it))?`<div class="meta" style="font-size:11px;font-style:italic;color:#7d725f">※ ${enhFxText(it)}</div>`:''}${af?`<ul style="margin:6px 0;padding-left:18px;line-height:1.55">${af}</ul>`:''}${it.sp&&SPFX[it.sp]?`<div style="margin:6px 0;color:#ffb14a;font-weight:700">★ 특수 효과: ${esc(SPFX[it.sp].d)}</div>`:''}
     <div class="row2" style="margin-top:10px"><button class="btn" id="rkBack">← 장비 보기</button><button class="btn primary" id="rkNo">랭킹으로</button></div>`,m=>{
