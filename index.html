@@ -474,7 +474,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.3.0166</div>
+    <div class="ver" id="verT">v0.4.3.0167</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -1024,6 +1024,8 @@ function enhFxText(it){ if(it.slot==='amulet')return it.enh>0?`강화 보너스(
 function enhOptText(it){ const e=it&&it.enh|0; if(!e)return ''; if(it.slot==='amulet')return `올스탯 +${e} <span class="meta">(강화)</span>`; if(it.slot==='ring'&&e>=10)return `모든 스킬 +1 <span class="meta">(강화)</span>`; return ''; }
 const PRMAX=60; /* 아이템 획득 범위 보너스 최대치 (기본 42 + 최대 60) */
 const BLKMAX=30; /* 막기 확률 최대치 */
+const DRMAX=60, VITDR=20, CDRMAX=45, ENECD=20; /* 받는 피해 감소 최대(%) · 그중 체력으로 얻는 몫 최대 · 스킬 쿨감 최대(%) · 그중 에너지로 얻는 몫 최대 */
+const capV=(v,max,hit)=>hit?`${max}% <b style="color:#ffd84a">MAX</b>`:`${v}% <span style="color:#8d806d">/ ${max}%</span>`;   /* 한계가 있는 수치 표기: '현재% / 최대%' · 최대에 닿으면 'MAX' */
 const SPCH=.15; /* 유니크 중 이름 고정 유니크 비율 (특수 효과 포함) */
 const STN={str:'힘',dex:'민첩',vit:'체력',ene:'에너지'};
 function reqStats(it){ const b=BREQ[it.base]; if(!b||it.rar===4)return {}; const o={}, k=it.rar===3?1.1:1, L=it.ilvl||1, e=L>30?30+(L-30)*1.25:L; /* 아이템 레벨 30 위부터는 요구 능력치가 더 가파르게 올라요 */ for(const s in b){ const v=Math.round((b[s][0]+b[s][1]*e)*k); if(v>0)o[s]=v; } return o; }
@@ -1194,7 +1196,7 @@ function derive(p){
   d.blk=Math.min(BLKMAX,d.blk); d.pr=Math.min(PRMAX,d.pr); d.rng=Math.min(RNGMAX,d.rng||0);
   d.maxHp=Math.round((C.hp+d.vit*4+(p.lvl-1)*5+d.life)*(d._hpm||1)*(d._hpr||1));
   d.maxMp=Math.round(C.mp+d.ene*1+(p.lvl-1)*1+d.mana);
-  d.crit+=d.dex*.12; d.dr=Math.min(.6,d.dr+Math.min(.2,d.vit*.0012)); d.cdr=Math.min(.45,d.cdr+Math.min(.2,d.ene*.001)); 
+  d.crit+=d.dex*.12; d.dr=Math.min(DRMAX/100,d.dr+Math.min(VITDR/100,d.vit*.0012)); d.cdr=Math.min(CDRMAX/100,d.cdr+Math.min(ENECD/100,d.ene*.001)); 
   d.def+=Math.floor(d.dex/2)+(C.def||0); if(d._defm)d.def=Math.round(d.def*d._defm); d.dmgPct+=(C.dp||0)+Math.floor((p.lvl-1)*.3);
   d.spd=125*(1+d.ms/100);
   d.atkInt=.62/(1+(d.ias+d.dex*.25)/100);
@@ -2956,7 +2958,7 @@ function unequip(k){
 }
 function renderStat(){
   const SKM=sheetMode==='skill'||sheetMode==='passive', PAS=sheetMode==='passive'; markTabs(); sheetHead();
-  const D=me.D, S=[['str','힘','물리 피해 +1% · 무거운 장비 착용'],['dex','민첩','공격 속도 +0.25% · 치명타 +0.12% · 방어력 +0.5'],['vit','체력','생명력 +4 · 받는 피해 -0.12%'],['ene','에너지','마나 +1 · 마법 피해 +0.3% · 쿨감 0.1%']];
+  const D=me.D, S=[['str','힘','물리 피해 +1% · 무거운 장비 착용'],['dex','민첩','공격 속도 +0.25% · 치명타 +0.12% · 방어력 +0.5'],['vit','체력',`생명력 +4 · 받는 피해 -0.12% (체력으로 얻는 감소는 최대 ${VITDR}%)`],['ene','에너지',`마나 +1 · 마법 피해 +0.3% · 쿨감 0.1% (에너지로 얻는 쿨감은 최대 ${ENECD}%)`]];
   const mult=1+(D.str+D.dmgPct)/100, aMin=Math.round((D.wmn+D.dmg)*mult*(me.cls==='sorc'||me.cls==='necro'?1+D.ene/150:1)), aMax=Math.round((D.wmx+D.dmg)*mult*(me.cls==='sorc'||me.cls==='necro'?1+D.ene/150:1)), aAvg=(aMin+aMax)/2, cr=D.crit/100;
   const k1=SK[me.cls][0], l1=Math.max(1,skLv(me,k1.k)); let s1=aAvg;
   if(k1.k==='bash')s1=aAvg*(3+.5*l1); else if(k1.k==='smite')s1=aAvg*(2.6+.4*l1)+8+7*l1; else if(k1.k==='fireball')s1=(18+13*l1)*(1+D.ene*ENEM+D.dmgPct/100);
@@ -2977,7 +2979,7 @@ if(!SKM){
     h+='</div>';
     /* 능력치로 바뀐 수치: 기본(직업·레벨) / 스탯(찍은 포인트) / 장비로 나눠서 표시 — 장비를 뺀 값, 스탯을 직업 기본으로 되돌린 값을 각각 계산해서 차이로 구함 */
     const Dn=derive({...me,eq:{}}), Db=derive({...me,eq:{},stats:{...base}}), r1=v=>Math.round(v*10)/10, sg=v=>(v<0?'':'+')+r1(v);
-    const RW=[['생명력',`${Math.ceil(me.hp)} / ${D.maxHp}`,d=>d.maxHp,''],['마나',`${Math.floor(me.mp)} / ${D.maxMp}`,d=>d.maxMp,''],['무기 공격력',`${D.wmn+D.dmg}–${D.wmx+D.dmg}`],['피해 보너스',`+${D.str+D.dmgPct}%`,d=>d.str+d.dmgPct,'%'],['방어력',D.def,d=>d.def,''],...(me.cls==='pal'||D.blk>0?[['막기 확률',D.blk>=BLKMAX?`${BLKMAX}% <b style="color:#ffd84a">MAX</b>`:`${D.blk}% <span style="color:#8d806d">/ ${BLKMAX}%</span>`]]:[]),['공격 속도',`+${Math.round(D.ias+D.dex*.25)}%`,d=>d.ias+d.dex*.25,'%'],['치명타',`${Math.round(D.crit*10)/10}%`,d=>d.crit,'%'],['받는 피해 감소',`${Math.round((D.dr||0)*100)}%`,d=>(d.dr||0)*100,'%'],['스킬 쿨감',`${Math.round((D.cdr||0)*100)}%`,d=>(d.cdr||0)*100,'%'],['이동 속도',`+${D.ms}%`,d=>d.ms,'%'],['생명력 흡수',`${D.ls}%`,d=>d.ls,'%'],['스킬 보너스',`+${D.cls} (전체)`],['⚔️ 총 전투력',`<b style="color:#ffd84a;font-size:16px">${calcCP(me).toLocaleString()}</b>`]];
+    const RW=[['생명력',`${Math.ceil(me.hp)} / ${D.maxHp}`,d=>d.maxHp,''],['마나',`${Math.floor(me.mp)} / ${D.maxMp}`,d=>d.maxMp,''],['무기 공격력',`${D.wmn+D.dmg}–${D.wmx+D.dmg}`],['피해 보너스',`+${D.str+D.dmgPct}%`,d=>d.str+d.dmgPct,'%'],['방어력',D.def,d=>d.def,''],...(me.cls==='pal'||D.blk>0?[['막기 확률',capV(D.blk,BLKMAX,D.blk>=BLKMAX)]]:[]),['공격 속도',`+${Math.round(D.ias+D.dex*.25)}%`,d=>d.ias+d.dex*.25,'%'],['치명타',`${Math.round(D.crit*10)/10}%`,d=>d.crit,'%'],['받는 피해 감소',capV(Math.round((D.dr||0)*100),DRMAX,(D.dr||0)>=DRMAX/100-1e-9),d=>(d.dr||0)*100,'%'],['스킬 쿨감',capV(Math.round((D.cdr||0)*100),CDRMAX,(D.cdr||0)>=CDRMAX/100-1e-9),d=>(d.cdr||0)*100,'%'],['이동 속도',`+${D.ms}%`,d=>d.ms,'%'],['생명력 흡수',`${D.ls}%`,d=>d.ls,'%'],['스킬 보너스',`+${D.cls} (전체)`],['⚔️ 총 전투력',`<b style="color:#ffd84a;font-size:16px">${calcCP(me).toLocaleString()}</b>`]];
     h+=`<div class="box"><h3 class="bh"><span>🧮 능력치로 바뀐 수치</span><span class="k" style="font-size:11.5px;font-weight:500"><span class="cB">기본</span> · <span class="cS">스탯</span> · <span class="cG">장비</span></span></h3>`;
     for(const [a,v,f,u] of RW){ let sp=''; if(f){ const t=f(D), n=f(Dn), bb=f(Db), st=n-bb, gr=t-n; if(Math.abs(st)>=.05||Math.abs(gr)>=.05) sp=`<div class="brk2"><span class="cB">기본 ${r1(bb)}${u}</span>${Math.abs(st)>=.05?`<span class="cS">스탯 ${sg(st)}${u}</span>`:''}${Math.abs(gr)>=.05?`<span class="cG">장비 ${sg(gr)}${u}</span>`:''}</div>`; }
       h+=`<div class="row dr0"><span class="k">${a}</span><span>${v}</span></div>${sp}`; }
