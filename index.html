@@ -474,7 +474,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.3.0165</div>
+    <div class="ver" id="verT">v0.4.3.0166</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -549,7 +549,7 @@ const $=s=>document.querySelector(s);
 const rand=(a,b)=>a+Math.random()*(b-a), ri=(a,b)=>Math.floor(a+Math.random()*(b-a+1)), pick=a=>a[Math.floor(Math.random()*a.length)];
 const clamp=(v,a,b)=>v<a?a:v>b?b:v, hyp=Math.hypot;
 const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
-const CLSKIP=/^dkdef2\.(cl\.|nwf\.|rk\.|rkdel|hud)/; let clHook=null;  /* 클라우드 저장 대상 키 변경 감지 */
+const CLSKIP=/^dkdef2\.(cl\.|nwf\.|rk\.|rkc\.|rkdel|hud|sel$|stage$|mus$|sfx$)/; let clHook=null;  /* 클라우드 저장 대상 키 변경 감지 — 제외: 랭킹 캐시(rkc, 기기마다 열 때마다 달라져서 서로 충돌을 만들었음)·선택 캐릭터·선택 스테이지·소리 설정 같은 기기별 값 */
 const lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){} if(clHook&&k.indexOf('dkdef2.')===0&&!CLSKIP.test(k))clHook();};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
@@ -4205,7 +4205,8 @@ function clDirty(){ if(!clCode()||clT)return; clT=setTimeout(async()=>{ clT=0; c
 clHook=clDirty;
 function clFlush(){ if(clT){ clearTimeout(clT); clT=0; clPut().then(r=>{ if(r==='conflict'&&!G.inGame)clResolve(); }); } }
 document.addEventListener('visibilitychange',()=>{ if(document.hidden)clFlush(); else if(!G.inGame&&clCode())clCheck(); });
-async function clCheck(){ const code=clCode(); if(!code||clBusy)return; try{ const v=await clRpc('dd_save_ver',{p_code:code}); if(v&&v.ver>clVer())await clResolve(v); }catch(e){} }
+let clLater=0;   /* '나중에'를 누른 서버 버전: 같은 버전으론 이번 접속 동안 다시 묻지 않음 */
+async function clCheck(){ const code=clCode(); if(!code||clBusy)return; try{ const v=await clRpc('dd_save_ver',{p_code:code}); if(v&&v.ver>clVer()&&v.ver!==clLater)await clResolve(v); }catch(e){} }
 function clApply(res,code){ clHook=null; if(clT){clearTimeout(clT);clT=0;}
   try{ const del=[]; for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k&&k.indexOf('dkdef2.')===0&&!CLSKIP.test(k))del.push(k); } del.forEach(k=>localStorage.removeItem(k));
     for(const k in res.data){ if(k.indexOf('dkdef2.')===0&&!CLSKIP.test(k)&&typeof res.data[k]==='string')localStorage.setItem(k,res.data[k]); }
@@ -4213,7 +4214,7 @@ function clApply(res,code){ clHook=null; if(clT){clearTimeout(clT);clT=0;}
   location.reload(); }
 function clConflict(v){ if(!$('#modal').hidden&&G.inGame)return;
   modal(`<h3>☁️ 다른 기기에서 저장한 데이터가 있어요</h3><p style="margin:0 0 12px;font-size:14px;line-height:1.5">서버에 더 최근 데이터가 있어요. 어느 쪽을 쓸까요?</p><div class="col"><button class="btn primary" id="cfSv">서버 데이터 불러오기</button><button class="btn" id="cfMe">이 기기 데이터로 덮어쓰기</button><button class="btn" id="cfNo">나중에</button></div><p class="note" style="margin-top:8px">'불러오기'를 하면 이 기기의 현재 캐릭터는 서버 데이터로 바뀌어요.</p>`,m=>{
-    m.querySelector('#cfNo').onclick=closeModal;
+    m.querySelector('#cfNo').onclick=()=>{ clLater=(v&&v.ver)|0; closeModal(); };
     m.querySelector('#cfSv').onclick=async()=>{ const b=m.querySelector('#cfSv'); b.disabled=true; b.textContent='불러오는 중…'; try{ const res=await clRpc('dd_save_get',{p_code:clCode()}); if(res&&res.data)clApply(res,clCode()); else { b.textContent='불러오지 못했어요'; } }catch(e){ b.textContent='연결 실패 · 다시 눌러보세요'; b.disabled=false; } };
     m.querySelector('#cfMe').onclick=async()=>{ const b=m.querySelector('#cfMe'); b.disabled=true; b.textContent='저장 중…'; try{ const v=await clRpc('dd_save_ver',{p_code:clCode()}); if(v){ clHook=null; lsSet('dkdef2.cl.ver',String(v.ver)); clHook=clDirty; } const r=await clPut(); if(r===true){ closeModal(); cloudModal(); } else { b.textContent='저장 실패 · 다시 눌러보세요'; b.disabled=false; } }catch(e){ b.textContent='연결 실패 · 다시 눌러보세요'; b.disabled=false; } }; }); }
 function clCopy(t,btn){ const done=()=>{ if(btn){ const o=btn.textContent; btn.textContent='복사됐어요 ✔'; setTimeout(()=>{btn.textContent=o;},1500); } };
