@@ -474,7 +474,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.3.0167</div>
+    <div class="ver" id="verT">v0.4.3.0168</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -629,17 +629,16 @@ const CLASSES={
  war:{n:'전사',col:'#e2694c',base:{str:30,dex:20,vit:25,ene:10},hp:84,def:14,dp:18,mp:10,melee:true,start:'장검',d:'두꺼운 체력과 강력한 근접 공격으로 앞을 막습니다.'},
  pal:{n:'팔라딘',col:'#f0cf75',base:{str:25,dex:20,vit:25,ene:15},hp:72,def:12,dp:12,mp:14,melee:true,start:'철퇴',d:'성스러운 오라로 동료를 치유하고 보호합니다.'},
  necro:{n:'강령술사',col:'#6fe0c0',base:{str:10,dex:15,vit:20,ene:30},hp:56,mp:18,melee:false,start:'참나무 지팡이',d:'영혼과 계약해 소수의 강력한 소환수를 부립니다. 소환수 뒤에서 지휘하세요.'},
- druid:{n:'드루이드',col:'#9bd06a',base:{str:18,dex:18,vit:22,ene:22},hp:62,mp:16,def:3,melee:false,start:'참나무 지팡이',d:'까마귀를 부리고, 곰과 늑대로 변신해 싸웁니다. 같은 스킬도 변신한 형태에 따라 효과가 달라요.'}
+ druid:{n:'드루이드',col:'#9bd06a',base:{str:18,dex:18,vit:22,ene:22},hp:62,mp:16,def:3,melee:false,start:'참나무 지팡이',d:'까마귀를 부리고, 곰으로 변신해 싸웁니다. 30레벨 궁극기로는 곰 가족 세 마리를 불러요.'}
 };
 /* ===== 드루이드: 형태(변신) =====
-   me.form = ''(인간) | 'bear' | 'wolf'. 형태 스킬로 켜고 끄며, 스테이지 시작·사망 시 인간으로 돌아와요.
-   변신 필요 스킬(물어뜯기·포효·광란)은 형태에 따라 효과가 달라요. 야생의 대사냥은 인간·곰·늑대 모두 쓸 수 있고 효과가 달라요. */
-const FORMN={'':'인간',bear:'곰',wolf:'늑대'};
+   me.form = ''(인간) | 'bear'. 곰 변신 스킬로 켜고 끄며, 스테이지 시작·사망 시 인간으로 돌아와요.
+   변신 필요 스킬(물어뜯기·포효·광란)은 곰으로 변신해야 써요. 궁극기 '곰세마리'는 어떤 형태에서도 쓸 수 있어요. */
+const FORMN={'':'인간',bear:'곰'};
 const formOf=o=>o===me?(me.form||''):(o&&o.fm)||'';
 const meleeOf=o=>o.cls==='druid'?!!formOf(o):CLASSES[o.cls].melee;
 const RVN=l=>l>=14?3:l>=7?2:1, RVF=n=>[1,.8,.7][n-1]||.7, RVHP=l=>.2+.02*l; /* 까마귀 수 / 마리당 피해 배율 / 생명력(내 최대 생명력 대비) */
 const isRv=k=>k.charCodeAt(0)===114&&k.charCodeAt(1)===118; /* 'rv1'~'rv3' = 까마귀 */
-const BLEED=.25; /* 늑대 기본 공격 출혈: 초당 피해 = 타격 피해 × 이 값 (2.5초) */
 const NRM=.8, NRG=v=>Math.round(v*NRM); /* 강령술사 사정거리 배율 (일반공격·스킬 사거리에 곱함) */
 const SK={
  sorc:[
@@ -689,18 +688,17 @@ const SK={
  druid:[
   {k:'raven',e:'🐦',n:'까마귀 소환',s:'까마귀',req:1,mp:8,cd:6,el:'#9a86c8',d:l=>`[소환수·영구] 까마귀를 ${RVN(l)}마리 불러요 (7레벨 2마리, 14레벨 3마리). 적에게 날아들어 1.1초마다 기본 피해 ${Math.round((12+9*l)*RVF(RVN(l)))}(마리당, 에너지·피해 보너스·무기 공격력에 따라 증가) · 생명력은 마리당 내 최대 생명력의 ${Math.round(RVHP(l)*100)}%. 다시 쓰면 쓰러진 까마귀를 다시 부르고 생명력을 채워요 · 변신해도 사라지지 않아요`},
   {k:'wildblood',e:'🩸',n:'야생의 혈통',s:'혈통',req:3,mp:0,cd:0,el:'#d0705a',passive:1,d:l=>`패시브(모든 형태): 최대 생명력 +${2*l}%, 초당 생명력 회복 +${(.1*l).toFixed(1)}%, 변신한 동안 받는 피해 -${(.5*l).toFixed(1)}%`},
-  {k:'wolfform',e:'🐺',n:'늑대 변신',s:'늑대',req:6,mp:6,cd:2,el:'#b4bed4',form:'wolf',d:l=>`[변신·토글] 늑대로 변신해요 (다시 누르면 인간으로, 곰 변신으로는 바로 전환). 이동 속도 +${WFM(l)}%, 공격 속도 +${WFA(l)}%, 치명타 +5%. 기본 공격이 근접 연타(무기 피해 ${Math.round(WFB(l)*100)}%, 레벨당 +3%)로 바뀌고 출혈을 입혀요. 생명력 비율은 그대로 유지돼요`},
-  {k:'bearform',e:'🐻',n:'곰 변신',s:'곰',req:9,mp:6,cd:2,el:'#c28a5a',form:'bear',d:l=>`[변신·토글] 곰으로 변신해요 (다시 누르면 인간으로, 늑대 변신으로는 바로 전환). 최대 생명력 +${Math.round(BRH(l))}%, 방어력 +${Math.round(BRD(l))}%, 받는 피해 -${BRR(l).toFixed(1)}% · 대신 이동 속도 -8%, 공격 속도 -10%. 기본 공격이 범위 공격(주 대상 무기 피해 ${Math.round(BRB(l)*100)}%, 주변 적은 주 대상의 80%인 ${Math.round(BRB(l)*BRS*100)}% · 레벨당 +1%)으로 바뀌어요`},
+  {k:'bearform',e:'🐻',n:'곰 변신',s:'곰',req:6,mp:6,cd:2,el:'#c28a5a',form:'bear',d:l=>`[변신·토글] 곰으로 변신해요 (다시 누르면 인간으로). 최대 생명력 +${Math.round(BRH(l))}%, 방어력 +${Math.round(BRD(l))}%, 받는 피해 -${BRR(l).toFixed(1)}% · 대신 이동 속도 -8%, 공격 속도 -10%. 기본 공격이 범위 공격(주 대상 무기 피해 ${Math.round(BRB(l)*100)}%, 주변 적은 주 대상의 80%인 ${Math.round(BRB(l)*BRS*100)}% · 레벨당 +1%)으로 바뀌어요`},
   {k:'communion',e:'🌿',n:'자연의 교감',s:'교감',req:12,mp:0,cd:0,el:'#8fe08a',passive:1,d:l=>`패시브: 까마귀 피해 +${4*l}%, 까마귀 생명력 +${2*l}%, 영혼 정령 지속시간 +${2*l}%`},
-  {k:'bite',e:'🦷',n:'물어뜯기',s:'물기',req:15,mp:10,cd:5,el:'#ff6a5a',rg:260,freq:1,d:l=>`[변신 필요] 🐺 늑대: 가까운 적(사거리 260)에게 도약해 무기 피해 ${350+55*l}% (주변 적 70%) + 4초 출혈(초당 타격 피해의 45%) / 🐻 곰: 제자리에서 전방 부채꼴의 모든 적에게 무기 피해 ${300+45*l}% + 0.8초 기절`},
-  {k:'roar',e:'📢',n:'포효',s:'포효',req:18,mp:12,cd:18,el:'#e0a050',freq:1,d:l=>`[변신 필요] 🐻 곰: 주변 적 ${3+Math.floor(l/3)}명을 도발하고, ${6+Math.floor(l/4)}초간 나와 주변 동료(파티원 포함)가 받는 피해 -${Math.min(45,Math.round(20+1.5*l))}% / 🐺 늑대: 8초간 나와 주변 동료의 주는 피해 +${Math.round(15+2.5*l)}%, 주변 적을 6초간 약화(공격력 -${Math.min(45,Math.round(25+l))}%, 우두머리는 절반)`},
-  {k:'spirit',e:'👻',n:'영혼 정령',s:'정령',req:21,mp:22,cd:40,el:'#b8f0ff',d:l=>`[소환수·시한] ${(14+.4*l).toFixed(1)}초간 내 곁에 정령이 떠올라요. 공격하지 않고, 적의 공격 대상도 아니에요. 정령 주변(반경 260)의 나와 동료: 주는 피해 +${Math.round(10+1.5*l)}%, 공격 속도 +${8+l}%, 마나 회복 +${30+3*l}% (까마귀도 함께 강해져요). 어떤 형태에서도 쓸 수 있고 변신해도 유지돼요`},
-  {k:'fury',e:'💢',n:'광란',s:'광란',req:24,mp:14,cd:30,el:'#ff5a3a',freq:1,d:l=>`[변신 필요] 8초간 🐻 곰: 받는 피해 -${Math.min(50,Math.round(25+1.2*l))}%, 주는 피해 +${10+2*l}%, 1초마다 주변에 충격파(무기 피해 ${120+15*l}%) / 🐺 늑대: 공격 속도 +50%, 주는 피해 +${20+3*l}%, 이동 속도 +20%`},
-  {k:'hunt',e:'🌕',n:'야생의 대사냥',s:'대사냥',req:90,mp:60,cd:80,el:'#ffd24a',rg:420,d:l=>`[궁극기] 형태에 따라 달라요. 🧑 인간: 4초간 까마귀 떼가 적 위치를 16번 급습해 범위 피해 ${110+36*l} / 🐻 곰: 대지를 울려 주변(반경 320)에 충격파 3연타(무기 피해 ${500+90*l}%씩), 첫 타에 2초 기절, 6초간 받는 피해 -50% / 🐺 늑대: 무적 상태로 적 사이를 7번 도약하며 무기 피해 ${300+50*l}% + 출혈`}]
+  {k:'bite',e:'🦷',n:'물어뜯기',s:'물기',req:12,mp:10,cd:5,el:'#ff6a5a',rg:260,freq:1,d:l=>`[곰 변신 필요] 제자리에서 전방 부채꼴의 모든 적에게 무기 피해 ${300+45*l}% + 0.8초 기절`},
+  {k:'roar',e:'📢',n:'포효',s:'포효',req:18,mp:12,cd:18,el:'#e0a050',freq:1,d:l=>`[곰 변신 필요] 주변 적 ${3+Math.floor(l/3)}명을 도발하고, ${6+Math.floor(l/4)}초간 나와 주변 동료(파티원 포함)가 받는 피해 -${Math.min(45,Math.round(20+1.5*l))}%`},
+  {k:'fury',e:'💢',n:'광란',s:'광란',req:22,mp:14,cd:30,el:'#ff5a3a',freq:1,d:l=>`[곰 변신 필요] 8초간 받는 피해 -${Math.min(50,Math.round(25+1.2*l))}%, 주는 피해 +${10+2*l}%, 1초마다 주변에 충격파(무기 피해 ${120+15*l}%)`},
+  {k:'spirit',e:'👻',n:'영혼 정령',s:'정령',req:24,mp:22,cd:40,el:'#b8f0ff',d:l=>`[소환수·시한] ${(14+.4*l).toFixed(1)}초간 내 곁에 정령이 떠올라요. 공격하지 않고, 적의 공격 대상도 아니에요. 정령 주변(반경 260)의 나와 동료: 주는 피해 +${Math.round(10+1.5*l)}%, 공격 속도 +${8+l}%, 마나 회복 +${30+3*l}% (까마귀도 함께 강해져요). 어떤 형태에서도 쓸 수 있고 변신해도 유지돼요`},
+  {k:'bears',e:'🐻',n:'곰세마리',s:'곰세마리',req:30,mp:60,cd:80,el:'#d9a46a',d:l=>`[궁극기·소환수] ${BEAR_T(l)}초간 곰 가족 세 마리를 불러요 (어떤 형태에서도 사용, 다시 쓰면 새로 불러요). 🐻 아빠곰: 튼튼하고 느려요. 1.6초마다 범위 공격 ${100+40*l}, 8초마다 큰 돌 던지기(범위 ${240+90*l} + 0.8초 기절), 10초마다 돌진(지나간 적에게 ${160+60*l}). 🐻 엄마곰: 빠르고 강해요. 0.55초마다 ${24+16*l} 피해, 14초마다 포효(주변 반경 280의 적 방어력을 떨어뜨려 8초간 받는 피해 +${Math.round(BRV(l)*100)}%, 우두머리는 절반). 🐻 애기곰: 약하지만 도와줘요. 1초마다 ${10+7*l} 피해, 9초마다 꿀단지 던지기(적 4초 둔화), 12초마다 재롱(나와 곰 가족 생명력 ${(4+.25*l).toFixed(1)}% 회복), 7초마다 데굴데굴(굴러서 ${70+28*l} 피해 + 밀쳐내기). 피해는 에너지·소환수 피해 보너스에 따라 늘어요`}]
 };
 /* 드루이드 형태 수치 (derive와 설명이 같이 씀) */
-const WFM=l=>Math.round(12+.6*l), WFA=l=>Math.round(18+.8*l); /* 늑대: 이동 속도 / 공격 속도 */
-const WFB=l=>.8+.03*(l-1), BRB=l=>.9+.01*(l-1), BRS=.8; /* 변신 평타 피해 배율(무기 피해 대비): 늑대 = 늑대 변신 레벨당 +3% · 곰 주 대상 = 곰 변신 레벨당 +1% · 곰 주변 적 = 주 대상의 80% */
+const BRB=l=>.9+.01*(l-1), BRS=.8; /* 곰 변신 평타 피해 배율(무기 피해 대비): 주 대상 = 곰 변신 레벨당 +1% · 주변 적 = 주 대상의 80% */
+const BEAR_T=l=>Math.round((18+.5*l)*10)/10, BRV=l=>Math.min(.4,.16+.012*l); /* 곰세마리: 곰 가족이 머무는 시간(초) / 엄마곰 포효의 '받는 피해 증가' 비율(우두머리는 절반) */
 const BRH=l=>25+1.2*l, BRD=l=>30+2*l, BRR=l=>8+.4*l;           /* 곰: 최대 생명력 / 방어력 / 받는 피해 감소 (%) */
 const SBHP=l=>Math.min(2,.4+.08*l); /* 수호 폭발: 수호 영혼 현재 생명력 반영 비율 (1레벨 48% → 20레벨 200%) */
 const RAID_RED=.7; /* 레이드 보스 공격에 대한 방어력 피해 감소 상한 (일반 .8) */
@@ -717,12 +715,12 @@ const SYN={
  sorc:{fireball:['chain','meteor'],frostnova:['blizzard','fireball'],chain:['frostnova','meteor','barrier'],barrier:['fireball','chain'],meteor:['blizzard','frostnova'],blizzard:['meteor','fireball']},
  war:{bash:['whirl','leap','rend'],rend:['quake','bash','whirl'],shout:['berserk','bash'],whirl:['quake','bash'],leap:['bash','quake'],berserk:['shout','whirl'],quake:['leap','whirl']},
  necro:{soulbolt:['guardian','spiritcaster'],guardian:['soullink','soulburst','fusion'],spiritcaster:['execute','soulburst','fusion'],execute:['guardian','spiritcaster'],colossus:['guardian'],soulburst:['guardian']},
- druid:{raven:['spirit','bite'],wolfform:['bite','fury'],bearform:['roar','fury'],bite:['wolfform','bearform'],roar:['bearform','spirit'],fury:['bite','roar'],spirit:['raven','fury']},
+ druid:{raven:['spirit','bite'],bearform:['roar','fury'],bite:['bearform'],roar:['bearform','spirit'],fury:['bite','roar'],spirit:['raven','fury']},
  pal:{holyfire:['smite','hammer'],smite:['hammer','judgment','holyfire'],healaura:['guard','might'],hammer:['smite','judgment'],might:['healaura','zeal'],guard:['healaura','might'],zeal:['smite','hammer','judgment'],judgment:['smite','hammer']}};
 function synBonus(p,key){ let n=0; const m=SYN[p.cls]; if(!m)return 0; for(const src in m) if(m[src].includes(key)) n+=Math.floor((p.skills[src]||0)/3); return n; }
 const ATKRG={sorc:250,war:100,pal:100,necro:NRG(240),druid:210};
 function atkRg(o){ if(o===me&&me.buffs&&me.buffs.rage&&me.buffs.rage.t>0)return atkRg0(o)*1.25; return atkRg0(o); }
-function atkRg0(o){ if(o.cls==='druid'){ const f=formOf(o); return f==='bear'?112:f==='wolf'?100:210; } return ATKRG[o.cls]; } /* 드루이드는 형태에 따라 기본 공격 사거리가 달라요 */
+function atkRg0(o){ if(o.cls==='druid'){ const f=formOf(o); return f==='bear'?112:210; } return ATKRG[o.cls]; } /* 드루이드는 형태에 따라 기본 공격 사거리가 달라요 */
 const MT0=[
  {n:'타락자',hp:14,dmg:2,spd:70,r:12,xp:5},
  {n:'좀비',hp:32,dmg:4,spd:34,r:16,xp:7},
@@ -1127,6 +1125,7 @@ function newChar(cls,name){
 function loadChar(id){
   const raw=lsGet(charKey(id)); if(!raw)return null;
   try{ const p=JSON.parse(raw); if(!p||!CLASSES[p.cls])return null; const cls=p.cls; p.id=id;
+    if(cls==='druid'&&p.skills&&p.skills.hunt>0){ p.skills.bears=Math.max(p.skills.bears|0,p.skills.hunt); } /* 야생의 대사냥 → 곰 세 마리: 투자한 포인트 그대로 옮김 */
     for(const k in p.skills){ if(!SKBY[k]){p.skillPts+=p.skills[k]; delete p.skills[k];} } for(const s of SK[cls]){ if(p.skills[s.k]===undefined)p.skills[s.k]=0; else if(p.skills[s.k]>0&&(p.lvl|0)<s.req){ p.skillPts+=p.skills[s.k]; p.skills[s.k]=0; } } /* 해금 레벨 미만인데 투자된 스킬(해금 레벨 상향 등)은 포인트 환급 */
     if(p.clear===undefined)p.clear=Math.max(0,+(lsGet('dkdef2.clear')||0));
     { const lg=k=>{ const v=parseInt(lsGet(k)); return isNaN(v)?-1:clamp(v,-1,2); }; if(p.as===undefined)p.as=lg('dkdef2.asell'); if(p.sy===undefined)p.sy=lg('dkdef2.asyn'); if(p.sy>=0)p.sy=2; } /* 캐릭터별 자동판매/합성: 기존 캐릭터는 예전 전역 설정을 한 번 이어받음 */
@@ -1187,11 +1186,10 @@ function derive(p){
   if(p.mb){ d.dmgPct+=p.mb.dmg||0; d.ias+=p.mb.ias||0; d.ms+=p.mb.ms||0; }
   const C=CLASSES[p.cls];
   { const pl=k=>{const b=(p.skills&&p.skills[k])||0; return b>0?b+d.cls+(d.sk[k]||0):0;}; const a1=pl('ironbody'),a2=pl('bulwark'),a3=pl('arcane'),a4=pl('swift'); if(a4)d.ms+=10+2*a4; d.dr+=a1*.012; d.regen+=a1*.0015; d.mr+=a3*3; d.cdr+=a3*.01; d.blk+=a2; }
-  if(p.cls==='druid'){ /* 드루이드: 야생의 혈통(모든 형태) + 곰/늑대 형태 보정 */
+  if(p.cls==='druid'){ /* 드루이드: 야생의 혈통(모든 형태) + 곰 형태 보정 */
     const sl=k=>{ const b=(p.skills&&p.skills[k])||0; return b>0?b+d.cls+(d.sk[k]||0)+synBonus(p,k):0; }, wb=sl('wildblood'), fm=p.form||'';
     if(wb){ d._hpm=(d._hpm||1)*(1+.02*wb); d.regen+=.001*wb; }
     if(fm==='bear'){ const l=sl('bearform')||1; d._hpm=(d._hpm||1)*(1+BRH(l)/100); d.dr+=BRR(l)/100; d.ms-=8; d.ias-=10; d._defm=1+BRD(l)/100; }
-    else if(fm==='wolf'){ const l=sl('wolfform')||1; d.ms+=WFM(l); d.ias+=WFA(l); d.crit+=5; }
     if(fm&&wb)d.dr+=.005*wb; }
   d.blk=Math.min(BLKMAX,d.blk); d.pr=Math.min(PRMAX,d.pr); d.rng=Math.min(RNGMAX,d.rng||0);
   d.maxHp=Math.round((C.hp+d.vit*4+(p.lvl-1)*5+d.life)*(d._hpm||1)*(d._hpr||1));
@@ -1269,12 +1267,12 @@ function netSend(){
   R.presence(o).catch(()=>{});
 }
 const EMOS=[{e:'🆘',l:'도와줘!'},{e:'👍',l:'최고!'},{e:'🙏',l:'감사!'},{e:'😂',l:'ㅋㅋㅋ'},{e:'😢',l:'ㅠㅠ'},{e:'🔥',l:'가자!'}];
-function myMinionsNet(){ if(!me||(me.cls!=='necro'&&me.cls!=='druid')||!minions.length)return undefined; return minions.filter(q=>q.rez<=0).slice(0,4).map(q=>[MNIDX.indexOf(q.k),Math.round(q.x),Math.round(q.y),Math.max(1,Math.round(q.hp/q.mh*100)),Math.round((q.face||0)*100)]); }
+function myMinionsNet(){ if(!me||(me.cls!=='necro'&&me.cls!=='druid')||!minions.length)return undefined; return minions.filter(q=>q.rez<=0).slice(0,6).map(q=>[MNIDX.indexOf(q.k),Math.round(q.x),Math.round(q.y),Math.max(1,Math.round(q.hp/q.mh*100)),Math.round((q.face||0)*100)]); }
 function smoothAllyMn(dt){ if(!ally||ally.lobby){ return; } const src=Array.isArray(ally.mn)?ally.mn:[]; const v=ally.mnv||(ally.mnv=[]); while(v.length>src.length)v.pop(); const k=1-Math.exp(-dt*12);
   src.forEach((a,i)=>{ let q=v[i]; if(!q||q.k!==MNIDX[a[0]]){ q=v[i]={k:MNIDX[a[0]]||'guard',x:a[1],y:a[2],hpP:a[3],face:a[4]/100,an:Math.random()*6,mn:1}; } q.x+=(a[1]-q.x)*k; q.y+=(a[2]-q.y)*k; q.hpP=a[3]; q.face=a[4]/100; q.an+=dt; }); }
 function myNet(){
   if(!me) return {c:'war',l:1};
-  return {nm:me.name||'',c:me.cls,l:me.lvl,x:Math.round(me.x||0),y:Math.round(me.y||0),hp:Math.round(me.hp||0),mh:me.D?me.D.maxHp:1,mp:Math.round(me.mp||0),mm:me.D?me.D.maxMp:1,d:me.dead?1:0,o:me.out?1:0,rg:me.rvGiven|0,a:me.aura||0,al:me.aura?skLv(me,me.aura):0,q:eqLook(me),f:Math.round((me.face||0)*100),fx:fxQ,ia:annQ,em:me.emoSeq||0,mn:myMinionsNet(),dd:dmgNet(),fm:me.form==='bear'?1:me.form==='wolf'?2:undefined,sp:(me.spirit&&me.spirit.t>0)?(me.spirit.lv|0):undefined};
+  return {nm:me.name||'',c:me.cls,l:me.lvl,x:Math.round(me.x||0),y:Math.round(me.y||0),hp:Math.round(me.hp||0),mh:me.D?me.D.maxHp:1,mp:Math.round(me.mp||0),mm:me.D?me.D.maxMp:1,d:me.dead?1:0,o:me.out?1:0,rg:me.rvGiven|0,a:me.aura||0,al:me.aura?skLv(me,me.aura):0,q:eqLook(me),f:Math.round((me.face||0)*100),fx:fxQ,ia:annQ,em:me.emoSeq||0,mn:myMinionsNet(),dd:dmgNet(),fm:me.form==='bear'?1:undefined,sp:(me.spirit&&me.spirit.t>0)?(me.spirit.lv|0):undefined};
 }
 function snapMobs(){
   const out=[];
@@ -1370,8 +1368,8 @@ function syncAlly(pl){
   ally.name=String(pl.nm||'').slice(0,8); ally.cls=CLASSES[pl.c]?pl.c:'war'; ally.lvl=pl.l|0; ally.tx=pl.x; ally.ty=pl.y; ally.hp=pl.hp; ally.mh=pl.mh||1; ally.mp=pl.mp|0; ally.mm=pl.mm||1; ally.dead=!!pl.d; ally.out=!!pl.o; ally.rg=pl.rg|0;
   if(Array.isArray(pl.q)&&(pl.q.length===6||pl.q.length===7)){const q=pl.q; ally.look=[ALLBASE.has(q[0])?q[0]:'',ALLBASE.has(q[1])?q[1]:'',ALLBASE.has(q[2])?q[2]:'',clamp(q[3]|0,0,3),clamp(q[4]|0,0,3),clamp(q[5]|0,0,3),clamp(q[6]|0,0,4)];}
   ally.dd=(Array.isArray(pl.dd)&&pl.dd.length===2)?pl.dd:null;
-  ally.mn=(Array.isArray(pl.mn)?pl.mn.filter(a=>Array.isArray(a)&&a.length>=5&&a[0]>=0&&a[0]<MNIDX.length).slice(0,4):[]);
-  ally.fm=pl.fm===1?'bear':pl.fm===2?'wolf':''; ally.sp=pl.sp|0;
+  ally.mn=(Array.isArray(pl.mn)?pl.mn.filter(a=>Array.isArray(a)&&a.length>=5&&a[0]>=0&&a[0]<MNIDX.length).slice(0,6):[]);
+  ally.fm=pl.fm===1?'bear':''; ally.sp=pl.sp|0;
   ally.aura=(pl.a==='healaura'||pl.a==='guard'||pl.a==='might')?pl.a:0; ally.al=pl.al|0; ally.face=(pl.f|0)/100; ally.lobby=false;
   { const em=pl.em|0; if(ally.emSeq===undefined){ ally.emSeq=em; } else if(em&&em!==ally.emSeq){ ally.emSeq=em; ally.emo={id:clamp(em%10,0,EMOS.length-1),t:3.2}; sfx('ui'); } }
   { const ia=Array.isArray(pl.ia)?pl.ia:[]; if(lastAllyAnn<0){lastAllyAnn=ia.length?ia[ia.length-1][0]:0;} for(const a of ia){ if(a[0]<=lastAllyAnn)continue; lastAllyAnn=a[0]; if((a[2]|0)<3)continue; const ar=clamp(a[2]|0,3,4); toast(`${ally.name||'동료'}님이 ${RARN[ar]} 아이템 [${String(a[1]||'').slice(0,16)}] 획득!`,RARC[ar],'get',ar>=4); } }   /* 유니크 이상만 표시 (예전 버전 동료가 보낸 레어 알림도 거름) */
@@ -1519,7 +1517,6 @@ function updateMobs(dt){
   for(const m of G.mobs){ if(m.dead)continue; RAID_HIT=m.rk?1:0;
     if(m.slowT>0)m.slowT-=dt; if(m.shockT>0)m.shockT-=dt; if(m.mark&&m.mark.t>0)m.mark.t-=dt; if(m.vuln&&m.vuln.t>0)m.vuln.t-=dt;
     if(m.taunt)m.taunt.t-=dt;
-    if(m.weak){ m.weak.t-=dt; if(m.weak.t<=0){ m.dmg=m.weak.d0; m.weak=null; } } /* 늑대 포효: 약화(공격력 감소) 해제 */
     if(m.burnT>0){ m.burnT-=dt; m.bt=(m.bt||.3)-dt; if(m.bt<=0){ m.bt=.3; if(m.burnD>0){ addNum(m.x,m.y-m.r-4,Math.max(1,Math.round(m.burnD*.3)),m.bl?'#ff4a4a':'#ff9a3c',false); burst(m.x,m.y,m.bl?'#c01818':'#ff8a2a',4,90); applyDmg(m,m.burnD*.3,0); if(m.dead)continue; } } if(m.burnT<=0){ m.burnD=0; } }
     const sf=m.slowT>0?.45:1;
     m.cd-=dt*sf; m.atk=Math.max(0,m.atk-dt); m.flash=Math.max(0,m.flash-dt); m.anim+=dt*sf;
@@ -1774,10 +1771,10 @@ function spawnMe(){
   me.form=''; me.spirit=null; me.formLock=0; me.D=derive(me); me.hp=me.D.maxHp; me.mp=me.D.maxMp; autoSummon(); if(me.cls==='necro')for(const k of MNIDX){ sprGet('mn_'+k); sprGet('mn_'+k+'_atk'); }
 }
 function zealMul(){const l=me.cls==='pal'?skLv(me,'zeal'):0; return l?{d:1+(15+5*l)/100,t:1+(10+4*l)/100}:{d:1,t:1};}
-function buffDmg(){let v=0; const b=me.buffs; if(b.vil&&b.vil.t>0)v+=b.vil.v; if(b.shout&&b.shout.t>0)v+=b.shout.v; if(b.berserk&&b.berserk.t>0)v+=b.berserk.v; if(b.rage&&b.rage.t>0)v+=b.rage.v; if(b.howl&&b.howl.t>0)v+=b.howl.v; if(b.fury&&b.fury.t>0)v+=b.fury.v; const sb=spiritBuff(); if(sb)v+=sb.dmg; return v;}
+function buffDmg(){let v=0; const b=me.buffs; if(b.vil&&b.vil.t>0)v+=b.vil.v; if(b.shout&&b.shout.t>0)v+=b.shout.v; if(b.berserk&&b.berserk.t>0)v+=b.berserk.v; if(b.rage&&b.rage.t>0)v+=b.rage.v; if(b.fury&&b.fury.t>0)v+=b.fury.v; const sb=spiritBuff(); if(sb)v+=sb.dmg; return v;}
 /* 드루이드: 영혼 정령 버프(내 정령 또는 반경 안에 있는 동료의 정령 중 센 쪽) · 받는 피해 감소 버프 묶음 */
 function spiritBuff(){ if(!me||me.cls===undefined)return null; let l=0; if(me.spirit&&me.spirit.t>0)l=me.spirit.lv; if(ally&&!ally.lobby&&!ally.dead&&ally.sp>0&&ally.x!==undefined&&hyp(ally.x-me.x,ally.y-me.y)<260)l=Math.max(l,ally.sp|0); return l?{lv:l,dmg:(10+1.5*l)/100,ias:(8+l)/100,mr:30+3*l}:null; }
-function drMul(){ const b=me.buffs; let m=1; if(b.rage&&b.rage.t>0)m*=1+b.rage.pen; if(b.fury&&b.fury.t>0&&b.fury.dr)m*=1-b.fury.dr; if(b.roar&&b.roar.t>0)m*=1-b.roar.v; if(b.hunt&&b.hunt.t>0)m*=1-b.hunt.dr; return m; }
+function drMul(){ const b=me.buffs; let m=1; if(b.rage&&b.rage.t>0)m*=1+b.rage.pen; if(b.fury&&b.fury.t>0&&b.fury.dr)m*=1-b.fury.dr; if(b.roar&&b.roar.t>0)m*=1-b.roar.v; return m; }
 /* 형태 바꾸기: 생명력 비율은 그대로, 0.3초 동안 움직임 잠금 */
 function setForm(f){ const hr=me.hp/me.D.maxHp; me.form=f||''; me.D=derive(me); me.hp=Math.min(me.D.maxHp,me.D.maxHp*hr); me.mp=Math.min(me.mp,me.D.maxMp); me.formLock=.3; me.vx=me.vy=0; uiDirty=true; }
 function critRoll(v){const c=Math.random()*100<me.D.crit; return {v:c?v*1.5*(me.D.sp&&me.D.sp.hdag?1.4:1):v,crit:c};}
@@ -1932,7 +1929,7 @@ function execTarget(x,y,range,lowHp){ let best=null,bk=-1,bd=1e9,bp=2; for(const
     if(k>bk||(k===bk&&(p<bp||(p===bp&&d<bd)))){ best=m; bk=k; bd=d; bp=p; } } return best; }   /* 우두머리>정예>일반, 같은 등급이면(lowHp) 남은 체력%가 가장 낮은 적, 비슷하면 가까운 적 */
 function mobsIn(x,y,r){return G.mobs.filter(m=>!m.dead&&hyp(m.x-x,m.y-y)<r+m.r);}
 function mpCost(s,lv){ return s.mp?Math.round(s.mp*(1+.15*(Math.max(1,lv)-1))*(me&&me.D&&me.D.sp&&(me.D.sp.tome||me.D.sp.hoff_sorc)?.85:1)):0; }
-const SKS={raven:'aura',wolfform:'shout',bearform:'shout',bite:'slam',roar:'shout',spirit:'holy',fury:'shout',hunt:'boss',bash:'slam',smite:'holy',rend:'swing',shout:'shout',whirl:'swing',leap:'slam',berserk:'shout',quake:'boom',hammer:'holy',judgment:'holy',fireball:'fire',frostnova:'ice',chain:'zap',barrier:'holy',meteor:'fire',blizzard:'ice',ragnarok:'boom',divine:'holy',armageddon:'fire',soulbolt:'bolt',guardian:'aura',spiritcaster:'cast',soulburst:'boom',execute:'shout',colossus:'boom',pact:'holy',lord:'boss'};
+const SKS={raven:'aura',bearform:'shout',bite:'slam',roar:'shout',spirit:'holy',fury:'shout',bears:'boss',bash:'slam',smite:'holy',rend:'swing',shout:'shout',whirl:'swing',leap:'slam',berserk:'shout',quake:'boom',hammer:'holy',judgment:'holy',fireball:'fire',frostnova:'ice',chain:'zap',barrier:'holy',meteor:'fire',blizzard:'ice',ragnarok:'boom',divine:'holy',armageddon:'fire',soulbolt:'bolt',guardian:'aura',spiritcaster:'cast',soulburst:'boom',execute:'shout',colossus:'boom',pact:'holy',lord:'boss'};
 function tryUse(key,hold){
   if(me.dead||me.leap||!G.inGame||G.paused)return;
   if(me.stun>0){ if(!hold)toast('기절 중!','#ffd84a'); return; }
@@ -1956,15 +1953,15 @@ function tryUse(key,hold){
   doCast(key,s.rg||200,lv);
 }
 /* 드루이드: 변신 버튼(토글) — 같은 형태를 다시 누르면 인간, 다른 형태를 누르면 바로 전환. 마나는 변신할 때만 들어요 */
-function formToggle(s,lv,hold){ if(hold)return; if((me.cds.wolfform||0)>0||(me.cds.bearform||0)>0)return;
+function formToggle(s,lv,hold){ if(hold)return; if((me.cds.bearform||0)>0)return;
   const want=(me.form||'')===s.form?'':s.form;
   if(want){ const cost=mpCost(s,lv); if(me.mp<cost){ toast('마나가 부족해요','#7d96ff'); return; } me.mp-=cost; }
-  me.cds.wolfform=me.cds.bearform=2*(1-(me.D.cdr||0)); (me.cdm||(me.cdm={})).wolfform=me.cdm.bearform=2;
+  me.cds.bearform=2*(1-(me.D.cdr||0)); (me.cdm||(me.cdm={})).bearform=2;
   setForm(want); sfx('shout'); toast(want?`${FORMN[want]} 형태로 변신!`:'인간 형태로 돌아왔어요',s.el); doCast(s.k,0,lv); }
 /* 변신 필요 스킬은 변신해야 쓰고, 물어뜯기는 때릴 적이 있어야 해요 */
 function druidCan(key,hold){ const s=SKBY[key];
-  if(s.freq&&!me.form){ if(!hold)toast('변신해야 쓸 수 있어요 (곰 또는 늑대 변신)','#e0a070'); return false; }
-  if(key==='bite'&&!nearestMob(me.x,me.y,me.form==='wolf'?260:130)){ if(!hold)toast('물어뜯을 적이 없어요','#e07060'); return false; }
+  if(s.freq&&!me.form){ if(!hold)toast('곰으로 변신해야 쓸 수 있어요 (곰 변신)','#e0a070'); return false; }
+  if(key==='bite'&&!nearestMob(me.x,me.y,130)){ if(!hold)toast('물어뜯을 적이 없어요','#e07060'); return false; }
   return true; }
 function doCast(key,range,lv){
   const t=key==='quake'?(execTarget(me.x,me.y,range)||nearestMob(me.x,me.y,range)):nearestMob(me.x,me.y,range);   /* 대지 분쇄: 범위 안에서 우두머리 > 정예 > 일반 순으로 겨냥 */
@@ -1998,7 +1995,7 @@ function lvPen(){ const S=G.stg, ml=(S&&S.rl)|0; if(!ml||!me)return LVP0; const 
 const DMGR={me:0,mn:{}};
 function dmgReset(){ DMGR.me=0; DMGR.mn={}; if(ally)ally.dd=null; }
 function dmgTally(fx,v){ if(!(v>0))return; if(fx&&fx.mk)DMGR.mn[fx.mk]=(DMGR.mn[fx.mk]||0)+v; else DMGR.me+=v; }
-function mnSkName(k){ const K=MNK[k], sk=K&&SKBY[K.sk]; return sk?sk.n:(K?K.n:'소환수'); } /* 소환수는 스킬 이름으로 표시 (다시 소환돼도 같은 이름이면 합산) */
+function mnSkName(k){ const K=MNK[k]; if(K&&K.bear)return K.n; const sk=K&&SKBY[K.sk]; return sk?sk.n:(K?K.n:'소환수'); } /* 소환수는 스킬 이름으로 표시 (다시 소환돼도 같은 이름이면 합산) */
 function dmgNet(){ const mn=[]; for(const k in DMGR.mn){ const i=MNIDX.indexOf(k); if(i>=0&&DMGR.mn[k]>=1)mn.push([i,Math.round(DMGR.mn[k])]); } return (DMGR.me>=1||mn.length)?[Math.round(DMGR.me),mn]:undefined; }
 function dmgRows(full){ const map=new Map(); const add=(key,n,v)=>{ if(!(v>0))return; const e=map.get(key); if(e)e.v+=v; else map.set(key,{n,v}); };
   if(me)add('p:me',dispName(me),DMGR.me);
@@ -2050,7 +2047,8 @@ function later(t,fn){timers.push({t,fn});}
 const minions=[]; let mnSeq=0;
 const MNK={guard:{n:'수호 영혼',r:15,spd:155,perm:1,col:'#6fe0c0',sk:'guardian'},caster:{n:'포격 영혼',r:12,spd:125,perm:1,col:'#a98bff',sk:'spiritcaster'},
   colossus:{n:'고대 거인',r:26,spd:95,col:'#9aa6b8',sk:'colossus'},fusion:{n:'융합 영혼',r:24,spd:150,col:'#8ff0ff',sk:'fusion'},dragon:{n:'영혼 용령',r:30,spd:115,col:'#7dffd8',sk:'lord'},
-  rv1:{n:'까마귀',r:11,spd:200,perm:1,col:'#9a86c8',sk:'raven'},rv2:{n:'까마귀',r:11,spd:200,perm:1,col:'#9a86c8',sk:'raven'},rv3:{n:'까마귀',r:11,spd:200,perm:1,col:'#9a86c8',sk:'raven'}}; /* 드루이드 까마귀 (영구 소환수, 최대 3마리) */
+  rv1:{n:'까마귀',r:11,spd:200,perm:1,col:'#9a86c8',sk:'raven'},rv2:{n:'까마귀',r:11,spd:200,perm:1,col:'#9a86c8',sk:'raven'},rv3:{n:'까마귀',r:11,spd:200,perm:1,col:'#9a86c8',sk:'raven'},
+  papa:{n:'아빠곰',r:26,spd:135,col:'#a2703f',sk:'bears',bear:1},mama:{n:'엄마곰',r:20,spd:195,col:'#e0a46a',sk:'bears',bear:1},baby:{n:'애기곰',r:13,spd:170,col:'#f3cf98',sk:'bears',bear:1}}; /* 드루이드 까마귀 (영구 소환수, 최대 3마리) · 곰세마리(시한 소환수 3마리) */
 /* 영구 소환수 행동 설정 — 숫자는 여기서만 바꾸면 돼요 (바꾸면 patchnotes.txt에 이전 → 이후 기록) */
 const MNCFG={
   det:{guard:220},      /* 수호 영혼 교전 감지 범위 (소환수 기준) */
@@ -2061,21 +2059,34 @@ const MNCFG={
   leash:{guard:280,caster:560}, /* 주인과의 최대 이탈 거리 (넘으면 교전 중단하고 복귀) */
   chase:1.25            /* 교전 중 이동 속도 배율 */
 };
-const MNIDX=['guard','caster','colossus','dragon','fusion','rv1','rv2','rv3'];
+const MNIDX=['guard','caster','colossus','dragon','fusion','rv1','rv2','rv3','papa','mama','baby']; /* 순서를 바꾸면 접속 동기화가 어긋나요 — 새 소환수는 맨 뒤에 */
 const SMF={}; for(const k of MNIDX)SMF[k]={basic:1,sm:1,mk:k}; /* mk = 어떤 소환수가 때렸는지 (데미지 랭크 집계용) */
 const SMFX={basic:1,sm:1}; /* 소환수 타격: 반격 태세 면제, 흡혈·특수효과 제외 */
 const lordOn=()=>!!(me&&me.buffs&&me.buffs.lord&&me.buffs.lord.t>0);
 const mnMul=()=>(1+.04*skLv(me,'soullink'))*(1+.04*skLv(me,'communion'))*(1+(me.D.sm||0)/100)*(lordOn()?1.4:1);
 const mnAS=()=>(skLv(me,'resonance')>0?1+Math.min(.4,.02*skLv(me,'resonance')):1)*(me.buffs.exec&&me.buffs.exec.t>0?1.3:1)*(()=>{ const sb=spiritBuff(); return sb?1+sb.ias:1; })();
-function mnMaxHp(k,lv){ const mh=me.D.maxHp, hm=1+((me.D.smhp||0)+2*skLv(me,'communion'))/100, rv=RVHP(lv); return Math.round(mh*({guard:.8+.05*lv,caster:.5+.03*lv,colossus:3+.15*lv,dragon:4+.2*lv,fusion:2.2+.1*lv,rv1:rv,rv2:rv,rv3:rv}[k])*hm); }
-function summonMinion(k,lv,free,px,py){
+function mnMaxHp(k,lv){ const mh=me.D.maxHp, hm=1+((me.D.smhp||0)+2*skLv(me,'communion'))/100, rv=RVHP(lv); return Math.round(mh*({guard:.8+.05*lv,caster:.5+.03*lv,colossus:3+.15*lv,dragon:4+.2*lv,fusion:2.2+.1*lv,rv1:rv,rv2:rv,rv3:rv,papa:2.2+.1*lv,mama:1.3+.06*lv,baby:.9+.04*lv}[k])*hm); }
+function summonMinion(k,lv,free,px,py,grp){
   const K=MNK[k], big=!K.perm, a=Math.random()*6.283, x=px!==undefined?clamp(px,16,WW-16):clamp(me.x+Math.cos(a)*54,16,WW-16), y=py!==undefined?clamp(py,16,WH-16):clamp(me.y+Math.sin(a)*54,16,WH-16), mh=mnMaxHp(k,lv);
   let mn=minions.find(q=>q.k===k);
-  if(big&&k!=='fusion'){ for(let i=minions.length-1;i>=0;i--) if(!MNK[minions[i].k].perm&&minions[i].k!=='fusion'){ spark(minions[i].x,minions[i].y,K.col,14); minions.splice(i,1); } mn=null; } else if(big)mn=null;
+  if(big&&k!=='fusion'){ if(!grp){ for(let i=minions.length-1;i>=0;i--) if(!MNK[minions[i].k].perm&&minions[i].k!=='fusion'){ spark(minions[i].x,minions[i].y,K.col,14); minions.splice(i,1); } } mn=null; } else if(big)mn=null;   /* grp: 곰세마리처럼 여러 마리를 한꺼번에 부를 때는 서로 지우지 않아요 */
   if(mn){ if(mn.fe)rvDrop(mn); /* 아이템을 물고 있었다면 그 자리 바닥에 내려놓고 새로 불러요(함께 순간이동하지 않음) */ mn.hp=mn.mh=mh; mn.x=x; mn.y=y; mn.rez=0; mn.lv=lv; }
   else { mn={i:10+(++mnSeq),k,r:K.r,x,y,hp:mh,mh,lv,face:me.face||0,cd:rand(.3,.7),atk:0,flash:0,rez:0,an:Math.random()*6,tt:2,t:big?(k==='dragon'?15:k==='fusion'?10+.3*lv:18+.5*lv):Infinity,bt:0}; minions.push(mn); }
   efx.push({k:'ring',x,y,r0:6,r1:big?90:56,t:0,life:.5,col:K.col,w:big?9:6}); burst(x,y,K.col,big?36:22,big?320:220); impact(x,y,'120,230,200',big?140:80); if(!free)sfx(big?'boom':'aura'); if(big)G.shake=Math.max(G.shake,.35);
   return mn; }
+/* ===== 곰세마리 (드루이드 궁극기): 아빠곰·엄마곰·애기곰 ===== */
+function summonBears(lv){
+  for(let i=minions.length-1;i>=0;i--){ const q=minions[i]; if(!MNK[q.k].perm){ spark(q.x,q.y,MNK[q.k].col,14); minions.splice(i,1); } }   /* 먼저 불러둔 곰 가족·다른 시한 소환수는 사라져요 */
+  const f=me.face||0, P=[['papa',f+.7,66],['mama',f-.7,66],['baby',f+Math.PI,48]];
+  P.forEach(([k,a,d],i)=>{ const mn=summonMinion(k,lv,i>0,clamp(me.x+Math.cos(a)*d,16,WW-16),clamp(me.y+Math.sin(a)*d,16,WH-16),true);
+    mn.s1=k==='papa'?4:k==='mama'?2:3; mn.s2=k==='baby'?6:k==='papa'?6:0; if(k==='baby')mn.s3=4; mn.ch=null; }); }
+function mnHit(mn,m,base,extra,slow){ hitMob(m,spellDmg(base*mnMul(),true),slow||0,false,Object.assign({},SMF[mn.k]||SMFX,extra||{})); }
+function mnBlast(mn,x,y,R,base,extra,slow){ for(const m of mobsIn(x,y,R)) mnHit(mn,m,base,extra,slow); }   /* 소환수가 (x,y) 한 점에 내리는 범위 피해 */
+function pickFar(mn,lo,hi){ let b=null,bd=0; for(const m of mobsIn(mn.x,mn.y,hi)){ const d=hyp(m.x-mn.x,m.y-mn.y); if(d>lo&&d>bd){ bd=d; b=m; } } return b; }   /* lo~hi 사이에서 가장 먼 적 */
+function bestCluster(x,y,range,R){ let best=null,bn=0; const L=G.mobs.filter(m=>!m.dead&&hyp(m.x-x,m.y-y)<range).slice(0,30);
+  for(const m of L){ let n=m.boss?2:0; for(const q of L) if(hyp(q.x-m.x,q.y-m.y)<R)n++; if(n>bn){bn=n;best=m;} } return best; }   /* 적이 가장 많이 몰린 곳(우두머리는 가산점) */
+function throwRock(mn,tx,ty,o){ const sx=mn.x, sy=mn.y, d=hyp(tx-sx,ty-sy)||1, sp=o.sp||420; mn.face=Math.atan2(ty-sy,tx-sx);
+  proj({x:sx,y:sy,vx:(tx-sx)/d*sp,vy:(ty-sy)/d*sp,r:o.r||14,life:d/sp,col:o.col,kind:'rock',trail:o.trail,real:true,hit:()=>{},boom:(x,y)=>o.boom(x,y)}); sfx('swing'); }
 function autoSummon(){ minions.length=0; if(me&&me.cls==='druid')return; /* 드루이드 까마귀는 스테이지 시작 때 자동 소환하지 않아요(직접 '까마귀 소환'을 써야 나옴) */ if(!me||me.cls!=='necro')return; for(const [k,sk] of [['guard','guardian'],['caster','spiritcaster']]){ const l=skLv(me,sk); if(l>0)summonMinion(k,l,true); } }
 function minionTargets(){ return G.mode==='guest'?[]:minions.filter(q=>q.rez<=0).map(q=>({x:q.x,y:q.y,i:q.i,mn:1})); }
 function minionHit(id,raw){ const mn=minions.find(q=>q.i===id); if(mn)mnTake(mn,raw); }
@@ -2104,6 +2115,7 @@ function mnForm(mn){ /* 대기(대형) 위치: 수호 영혼=주인 앞, 포격 
   if(isRv(k)){ const n=RVN(mn.lv||1), i=(+k.charAt(2))-1, a=T*1.5+i*6.283/n; return [me.x+Math.cos(a)*56, me.y+Math.sin(a)*40-16]; } /* 까마귀는 주인 둘레를 돌아요 */
   if(k==='guard')return [me.x+Math.cos(f)*MNCFG.guardFront, me.y+Math.sin(f)*MNCFG.guardFront];
   if(k==='caster'){ const a=f+Math.PI*MNCFG.casterBack; return [me.x+Math.cos(a)*MNCFG.casterSide, me.y+Math.sin(a)*MNCFG.casterSide]; }
+  if(k==='papa'||k==='mama'){ const a=f+(k==='papa'?.7:-.7); return [me.x+Math.cos(a)*72, me.y+Math.sin(a)*72]; } if(k==='baby'){ const a=f+Math.PI; return [me.x+Math.cos(a)*56, me.y+Math.sin(a)*56]; }   /* 곰 가족: 아빠곰은 앞 오른쪽, 엄마곰은 앞 왼쪽, 애기곰은 뒤 */
   const fa=(me.face||0)+(k==='colossus'?.5:Math.PI*1.15), fd=k==='colossus'?66:80; return [me.x+Math.cos(fa)*fd, me.y+Math.sin(fa)*fd]; }
 /* ===== 까마귀 운반: 몹과 맞붙어 싸우는 중이 아니면 바닥 아이템 1개를 물어 드루이드에게 가져와요 (나르는 동안 공격 안 함) ===== */
 function rvDrop(mn){ const f=mn.fe; mn.fe=null; if(f&&f.g&&f.g.carry===mn)f.g.carry=null; }
@@ -2139,6 +2151,16 @@ function updateMinions(dt){
     mn.flash=Math.max(0,mn.flash-dt); mn.atk=Math.max(0,mn.atk-dt); mn.an+=dt; mn.cd-=dt*as; mn.tt-=dt;
     if(isFinite(mn.t)){ mn.t-=dt; if(mn.t<=0&&mn.k==='fusion'){ splitFusion(mn,'time'); continue; } if(mn.t<=0){ spark(mn.x,mn.y,K.col,16); burst(mn.x,mn.y,K.col,24,240); minions.splice(i,1); continue; } }
     const dm=hyp(mn.x-me.x,mn.y-me.y); if(dm>700){ mn.x=me.x+rand(-40,40); mn.y=me.y+rand(-40,40); }
+    if(K.bear){ mn.s1-=dt*as; mn.s2-=dt*as; if(mn.s3!==undefined)mn.s3-=dt*as;   /* 곰 가족 스킬 대기시간 (전투 중이 아니어도 흘러요) */
+      if(mn.k==='baby'&&mn.s2<=0){ const hurt=(!me.dead&&me.hp<me.D.maxHp*.92)||minions.some(q=>q.rez<=0&&q.hp<q.mh*.92);   /* 재롱: 다친 사람이 있을 때만 */
+        if(hurt){ mn.s2=12; mn.atk=.3; const pc=(4+.25*lv)/100, hv=Math.round(me.D.maxHp*pc); if(!me.dead){ me.hp=Math.min(me.D.maxHp,me.hp+hv); addNum(me.x,me.y-52,'+'+hv,'#8aff9a',false); } mnHealAll(pc);
+          efx.push({k:'ring',x:mn.x,y:mn.y,r0:8,r1:90,t:0,life:.5,col:'#ff9ab8',w:6}); burst(mn.x,mn.y,'#ff9ab8',16,150); for(const q of minions) if(q.rez<=0)burst(q.x,q.y,'#ffc0d4',6,120); if(!me.dead)burst(me.x,me.y,'#ffc0d4',10,140); sfx('potion'); }
+        else mn.s2=1.5; }
+      if(mn.ch){ const c=mn.ch, ca2=Math.cos(c.a), sa2=Math.sin(c.a); c.t-=dt; mn.x=clamp(mn.x+ca2*c.sp*dt,16,WW-16); mn.y=clamp(mn.y+sa2*c.sp*dt,16,WH-16); mn.face=c.a; mn.atk=Math.max(mn.atk,.1); mn.vx=mn.vy=0;   /* 돌진·데굴데굴: 지나가는 길의 적을 한 번씩 때려요 */
+        if(Math.random()<.8)parts.push({x:mn.x-ca2*mn.r+rand(-4,4),y:mn.y+mn.r*.6+rand(-3,3),vx:rand(-30,30),vy:rand(-30,10),t:0,life:rand(.25,.45),col:c.dust,r:rand(3,6),glow:0,dm:.9});
+        for(const m of mobsIn(mn.x,mn.y,mn.r+6)){ if(c.hit.has(m.id))continue; c.hit.add(m.id); mnHit(mn,m,c.base,{stun:c.stun}); knock(m,mn.x-ca2*30,mn.y-sa2*30,c.kb); spark(m.x,m.y,K.col,8); impact(m.x,m.y,c.rgb,70); G.shake=Math.max(G.shake,.12); }
+        if(c.t<=0){ mn.ch=null; efx.push({k:'ring',x:mn.x,y:mn.y,r0:6,r1:mn.r*2.6,t:0,life:.3,col:K.col,w:6}); }
+        continue; } }
     let t=null; if(mk&&hyp(mk.x-mn.x,mk.y-mn.y)<700)t=mk; else if(dm<(mn.k==='fusion'?600:K.perm?(MNCFG.leash[mn.k]||560):460))t=nearestMob(mn.x,mn.y,mn.k==='fusion'?380:mn.k==='caster'?MNCFG.casterRange:(MNCFG.det[mn.k]||340));
     let gx,gy,hold=0,fe=null; /* 이동 목표 */
     if(isRv(mn.k)){ fe=rvFetch(mn,dt,t); if(fe)t=null; }   /* 까마귀: 아이템을 물어 나르는 동안은 공격하지 않아요 */
@@ -2170,6 +2192,24 @@ function updateMinions(dt){
           proj({x:mn.x+Math.cos(a)*14,y:mn.y+Math.sin(a)*14,vx:Math.cos(a)*480,vy:Math.sin(a)*480,r:8,life:.9,col:'#8ff0ff',kind:'bolt',trail:'143,240,255',real:true,
             boom:(x,y)=>{ burst(x,y,'#cffaff',12,200); },hit:m=>{ const r=spellDmg((16+10*lv)*mnMul(),true); hitMob(m,r,0,false,SMF.fusion); if(skLv(me,'resonance')>0&&!me.dead)me.hp=Math.min(me.D.maxHp,me.hp+r.v*(.03+.002*skLv(me,'resonance'))); }}); }); } else mn.fv=.3; }
       if(mn.fs<=0){ const nr=mobsIn(mn.x,mn.y,150); if(nr.length){ mn.fs=4; mn.atk=.3; slamFx(mn.x,mn.y,150,'#8ff0ff'); impact(mn.x,mn.y,'140,240,255',170); G.shake=Math.max(G.shake,.3); mnStrike(mn,null,50+22*lv,150); for(const q of nr)knock(q,mn.x,mn.y,12); } else mn.fs=.4; } }
+    else if(mn.k==='papa'){   /* 아빠곰: 강력한 범위 공격 + 큰 돌 던지기 + 돌진 */
+      const farT=(mn.s2<=0)?pickFar(mn,120,400):null;   /* 돌진: 120~400 떨어진 적 중 가장 먼 쪽으로(근접전 중에도 쓸 수 있게) */
+      if(farT){ mn.s2=10; const a=Math.atan2(farT.y-mn.y,farT.x-mn.x), dist=Math.min(hyp(farT.x-mn.x,farT.y-mn.y)+90,480); mn.ch={a,t:dist/540,sp:540,hit:new Set(),base:160+60*lv,stun:.3,kb:26,rgb:'200,150,100',dust:'#c9a27a'}; mn.face=a; efx.push({k:'ring',x:mn.x,y:mn.y,r0:6,r1:60,t:0,life:.3,col:'#e0b080',w:8}); sfx('boss'); }
+      else if(mn.s1<=0&&d2<430){ const c=bestCluster(mn.x,mn.y,430,115)||t; mn.s1=8; mn.atk=.35;
+        throwRock(mn,c.x,c.y,{col:'#8f6a45',r:15,sp:400,trail:'160,120,80',boom:(x,y)=>{ slamFx(x,y,115,'#9a7a54'); efx.push({k:'ring',x,y,r0:10,r1:115,t:0,life:.4,col:'#e0b080',w:10}); impact(x,y,'200,160,110',150); burst(x,y,'#b08a5a',26,320); G.shake=Math.max(G.shake,.35);
+          for(const m of mobsIn(x,y,115)){ mnHit(mn,m,240+90*lv,{stun:.8}); knock(m,x,y,22); } }}); }
+      else if(mn.cd<=0&&d2<=t.r+mn.r+22){ mn.cd=1.6; mn.atk=.3; slamFx(mn.x,mn.y,100,'#a2703f'); impact(mn.x,mn.y,'200,150,100',140); G.shake=Math.max(G.shake,.25); mnStrike(mn,null,100+40*lv,100); } }
+    else if(mn.k==='mama'){   /* 엄마곰: 빠르고 강한 공격 + 포효(적 방어력 감소 = 받는 피해 증가) */
+      if(mn.s1<=0&&mobsIn(mn.x,mn.y,280).length){ mn.s1=14; mn.atk=.35; efx.push({k:'ring',x:mn.x,y:mn.y,r0:20,r1:280,t:0,life:.6,col:'#e0a46a',w:10}); efx.push({k:'ring',x:mn.x,y:mn.y,r0:10,r1:200,t:0,life:.45,col:'#fff0c8',w:5}); impact(mn.x,mn.y,'255,190,110',140); burst(mn.x,mn.y,'#ffcf8a',22,260); sfx('shout'); G.shake=Math.max(G.shake,.2);
+        if(G.mode!=='guest'){ let nn=0; const v0=BRV(lv); for(const q of mobsIn(mn.x,mn.y,280)){ const v=v0*(q.boss?.5:1); q.vuln={t:8,v:Math.max(v,(q.vuln&&q.vuln.t>0)?q.vuln.v:0)}; if(nn++<12)efx.push({k:'ring',x:q.x,y:q.y,r0:6,r1:34,t:0,life:.35,col:'#e0a46a',w:5}); } } }
+      else if(mn.cd<=0&&d2<=t.r+mn.r+14){ mn.cd=.55; mn.atk=.2; efx.push({k:'swing',o:{x:mn.x,y:mn.y},a:mn.face,t:0,life:.16,col:K.col,big:1}); sfx('hit'); mnStrike(mn,t,24+16*lv); } }
+    else if(mn.k==='baby'){   /* 애기곰: 꿀단지 던지기(둔화) · 재롱(회복, 위에서 처리) · 데굴데굴 */
+      const farB=(mn.s3<=0)?pickFar(mn,90,260):null;   /* 데굴데굴: 90~260 떨어진 적 쪽으로 */
+      if(farB){ mn.s3=7; const a=Math.atan2(farB.y-mn.y,farB.x-mn.x); mn.ch={a,t:Math.min(hyp(farB.x-mn.x,farB.y-mn.y)+30,300)/400,sp:400,hit:new Set(),base:70+28*lv,stun:.5,kb:20,rgb:'255,220,160',dust:'#f0d8a8'}; mn.face=a; sfx('swing'); }
+      else if(mn.s1<=0&&d2<330){ const c=bestCluster(mn.x,mn.y,330,120)||t; mn.s1=9; mn.atk=.25;
+        throwRock(mn,c.x,c.y,{col:'#e0a830',r:9,sp:380,trail:'255,200,80',boom:(x,y)=>{ efx.push({k:'ring',x,y,r0:8,r1:120,t:0,life:.45,col:'#f0c040',w:9}); impact(x,y,'255,200,80',130); burst(x,y,'#f0c040',22,240); burst(x,y,'#fff0a0',10,160); sfx('slam');
+          mnBlast(mn,x,y,120,40+15*lv,null,4); }}); }
+      else if(mn.cd<=0&&d2<=t.r+mn.r+12){ mn.cd=1; mn.atk=.2; efx.push({k:'swing',o:{x:mn.x,y:mn.y},a:mn.face,t:0,life:.14,col:K.col}); sfx('hit'); mnStrike(mn,t,10+7*lv); } }
     else if(isRv(mn.k)){ if(mn.cd<=0&&d2<=t.r+mn.r+16){ mn.cd=1.1; mn.atk=.25; efx.push({k:'swing',o:{x:mn.x,y:mn.y},a:mn.face,t:0,life:.18,col:K.col}); sfx('hit'); mnStrike(mn,t,(12+9*lv)*RVF(RVN(lv))); } }
     else if(mn.k==='dragon'){ if(mn.cd<=0&&d2<=300){ mn.cd=.5; mn.atk=.3; const a=Math.atan2(t.y-mn.y,t.x-mn.x); let n=0;
         for(const m of G.mobs){ if(m.dead)continue; const dx=m.x-mn.x,dy=m.y-mn.y,d=hyp(dx,dy); if(d>250+m.r)continue; let da=Math.atan2(dy,dx)-a; da=Math.atan2(Math.sin(da),Math.cos(da)); if(Math.abs(da)>.6)continue;
@@ -2199,19 +2239,17 @@ function necroCast(o,key,real,lv,tgt){
 }
 
 /* ================= 드루이드: 기본 공격 · 스킬 =================
-   기본 공격: 인간=가시 투사체 / 곰=범위 근접(주 대상 BRB(곰 변신 Lv), 주변은 그 80%) / 늑대=근접 연타(WFB(늑대 변신 Lv)) + 출혈
+   기본 공격: 인간=가시 투사체 / 곰=범위 근접(주 대상 BRB(곰 변신 Lv), 주변은 그 80%)
    스킬은 모두 castSkill → druidCast. 변신 필요 스킬은 형태(formOf)에 따라 효과가 달라요. 동료 화면에서는 real=false라 연출만 나와요. */
-function druidAtk(o,real,ang,dx,dy){ const f=formOf(o), col=f==='wolf'?'#cfd6e6':f==='bear'?'#d9a46a':'#9bd06a';
+function druidAtk(o,real,ang,dx,dy){ const f=formOf(o), col=f==='bear'?'#d9a46a':'#9bd06a';
   if(!f){ proj({x:o.x+dx*14,y:o.y+dy*14,vx:dx*540,vy:dy*540,r:6,life:.42,col,kind:'leaf',trail:'150,220,110',real,hit:m=>hitMob(m,physDmg((1+me.D.ene/150)*ATKM),0,false,BASICFX)}); return; }
   efx.push({k:'swing',o,a:ang,t:0,life:.2,col}); if(!real)return;
-  const m=nearestMob(o.x,o.y,f==='bear'?112:100); if(!m)return;
-  if(f==='bear'){ const bm=BRB(Math.max(1,skLv(me,'bearform'))); hitMob(m,physDmg(bm*ATKM),0,false,BASICFX); const R=75; efx.push({k:'ring',x:m.x,y:m.y,r0:10,r1:R,t:0,life:.25,col,w:6}); for(const q of mobsIn(m.x,m.y,R)) if(q!==m) hitMob(q,physDmg(bm*BRS*ATKM),0,false,BASICFX); }
-  else { const r=physDmg(WFB(Math.max(1,skLv(me,'wolfform')))*ATKM); hitMob(m,r,0,false,{basic:1,burn:2.5,bd:r.v*BLEED,bl:1}); } }
-function weakenMob(q,v,sec){ if(q.dead)return; if(q.weak){ q.weak.t=Math.max(q.weak.t,sec); } else { q.weak={t:sec,d0:q.dmg}; q.dmg=q.dmg*(1-v); } burst(q.x,q.y,'#c8b0ff',6,140); }
+  const m=nearestMob(o.x,o.y,112); if(!m)return;
+  { const bm=BRB(Math.max(1,skLv(me,'bearform'))); hitMob(m,physDmg(bm*ATKM),0,false,BASICFX); const R=75; efx.push({k:'ring',x:m.x,y:m.y,r0:10,r1:R,t:0,life:.25,col,w:6}); for(const q of mobsIn(m.x,m.y,R)) if(q!==m) hitMob(q,physDmg(bm*BRS*ATKM),0,false,BASICFX); } }
 function druidCast(o,key,real,lv,tgt,tx,ty,ang){
   const s=SKBY[key], col=s.el, f=formOf(o), dx=Math.cos(ang), dy=Math.sin(ang), rbm=((o===me&&me.D&&me.D.rng>0)?1+me.D.rng/100:1)*((o===me&&me.buffs.rage&&me.buffs.rage.t>0)?1.25:1), RS=RS0(lv)*rbm;
   switch(key){
-  case 'wolfform': case 'bearform':
+  case 'bearform':
     efx.push({k:'ring',x:o.x,y:o.y,r0:8,r1:70,t:0,life:.4,col,w:8}); burst(o.x,o.y,col,26,260); impact(o.x,o.y,'200,190,160',90); break;
   case 'raven':
     efx.push({k:'ring',x:o.x,y:o.y,r0:8,r1:80,t:0,life:.45,col,w:8}); burst(o.x,o.y,'#b9a6e8',22,240);
@@ -2222,15 +2260,7 @@ function druidCast(o,key,real,lv,tgt,tx,ty,ang){
     if(real){ const dur=(14+.4*lv)*(1+.02*skLv(me,'communion')); me.spirit={t:dur,m:dur,lv}; announce('👻 영혼 정령 소환!','#b8f0ff'); }
     break;
   case 'bite':
-    if(f==='wolf'){
-      const t=real?(tgt&&!tgt.dead?tgt:nearestMob(o.x,o.y,260)):null;
-      if(real&&!t)return;
-      const a2=real?Math.atan2(t.y-o.y,t.x-o.x):ang, ex=real?clamp(t.x-Math.cos(a2)*(t.r+14),20,WW-20):tx, ey=real?clamp(t.y-Math.sin(a2)*(t.r+14),20,WH-20):ty;
-      if(real)me.leap={sx:me.x,sy:me.y,ex,ey,t:0,dur:.25};
-      efx.push({k:'swing',o,a:a2,t:0,life:.25,col,big:1});
-      later(real?.25:.1,()=>{ const cx=real&&t&&!t.dead?t.x:tx, cy=real&&t&&!t.dead?t.y:ty; efx.push({k:'swing',o:{x:cx-dx*20,y:cy-dy*20},a:a2,t:0,life:.25,col,big:1}); efx.push({k:'ring',x:cx,y:cy,r0:10,r1:80,t:0,life:.3,col,w:7}); impact(cx,cy,'255,120,100',100); burst(cx,cy,'#ff7a6a',22,260); G.shake=Math.max(G.shake,.3);
-        if(real){ for(const q of mobsIn(cx,cy,80)){ const r=physDmg(3.5+.55*lv); r.v*=(q===t?1:.7); hitMob(q,r,0,false,{burn:4,bd:r.v*.45,bl:1}); } } });
-    } else {
+    {
       efx.push({k:'swing',o,a:ang,t:0,life:.25,col,big:1}); efx.push({k:'ring',x:o.x+dx*60,y:o.y+dy*60,r0:20,r1:105*RS,t:0,life:.3,col,w:8}); impact(o.x+dx*50,o.y+dy*50,'255,150,100',100); burst(o.x+dx*60,o.y+dy*60,'#ffb08a',20,260); G.shake=Math.max(G.shake,.25);
       if(real){ const R=105*RS; for(const m of G.mobs){ if(m.dead)continue; const ddx=m.x-o.x,ddy=m.y-o.y,d=hyp(ddx,ddy); if(d>R+m.r)continue; let da=Math.atan2(ddy,ddx)-ang; da=Math.atan2(Math.sin(da),Math.cos(da)); if(d>40&&Math.abs(da)>1)continue;
           hitMob(m,physDmg(3+.45*lv),0,false,{stun:.8}); knock(m,o.x,o.y,14); spark(m.x,m.y,col,6); } }
@@ -2238,45 +2268,20 @@ function druidCast(o,key,real,lv,tgt,tx,ty,ang){
     break;
   case 'roar':
     efx.push({k:'ring',x:o.x,y:o.y,r0:20,r1:320,t:0,life:.6,col,w:8}); impact(o.x,o.y,'255,190,100',110); burst(o.x,o.y,'#ffcf8a',20,200);
-    if(f==='bear'){
-      if(real){ me.buffs.roar={v:Math.min(.45,(20+1.5*lv)/100),t:6+Math.floor(lv/4),m:6+Math.floor(lv/4)}; const sk=new Set(), n=3+Math.floor(lv/3); for(let i=0;i<n;i++){ const q=nearestMob(o.x,o.y,320,sk); if(!q)break; sk.add(q); hitMob(q,physDmg(.6+.08*lv),0,1); knock(q,o.x,o.y,8); efx.push({k:'ring',x:q.x,y:q.y,r0:6,r1:34,t:0,life:.35,col,w:5}); } }
-      else if(!me.dead&&hyp(me.x-o.x,me.y-o.y)<320){ me.buffs.roar={v:Math.min(.45,(20+1.5*lv)/100),t:6+Math.floor(lv/4),m:6+Math.floor(lv/4)}; toast('동료의 곰 포효: 받는 피해 감소','#e0a050'); }
-    } else {
-      if(real){ me.buffs.howl={v:(15+2.5*lv)/100,t:8,m:8}; const wv=Math.min(.45,(25+lv)/100); for(const q of mobsIn(o.x,o.y,320)) weakenMob(q,wv*(q.boss?.5:1),6); }
-      else if(!me.dead&&hyp(me.x-o.x,me.y-o.y)<320){ me.buffs.howl={v:(15+2.5*lv)/100,t:8,m:8}; toast('동료의 늑대 포효: 피해 증가','#e0a050'); }
-    }
+    if(real){ me.buffs.roar={v:Math.min(.45,(20+1.5*lv)/100),t:6+Math.floor(lv/4),m:6+Math.floor(lv/4)}; const sk=new Set(), n=3+Math.floor(lv/3); for(let i=0;i<n;i++){ const q=nearestMob(o.x,o.y,320,sk); if(!q)break; sk.add(q); hitMob(q,physDmg(.6+.08*lv),0,1); knock(q,o.x,o.y,8); efx.push({k:'ring',x:q.x,y:q.y,r0:6,r1:34,t:0,life:.35,col,w:5}); } }
+    else if(!me.dead&&hyp(me.x-o.x,me.y-o.y)<320){ me.buffs.roar={v:Math.min(.45,(20+1.5*lv)/100),t:6+Math.floor(lv/4),m:6+Math.floor(lv/4)}; toast('동료의 곰 포효: 받는 피해 감소','#e0a050'); }
     break;
   case 'fury':
     efx.push({k:'ring',x:o.x,y:o.y,r0:10,r1:100,t:0,life:.5,col,w:9}); impact(o.x,o.y,'255,90,60',100); burst(o.x,o.y,'#ff7a4a',26,240);
     if(real){
-      if(f==='bear'){ me.buffs.fury={t:8,m:8,v:(10+2*lv)/100,dr:Math.min(.5,(25+1.2*lv)/100)};
-        for(let i=1;i<=8;i++) later(i,()=>{ if(me.dead||!(me.buffs.fury&&me.buffs.fury.t>0))return; const R=110*RS; efx.push({k:'ring',x:me.x,y:me.y,r0:20,r1:R,t:0,life:.35,col,w:8}); slamFx(me.x,me.y,R,col); sfx('slam'); G.shake=Math.max(G.shake,.2); for(const q of mobsIn(me.x,me.y,R)) hitMob(q,physDmg(1.2+.15*lv)); }); }
-      else me.buffs.fury={t:8,m:8,v:(20+3*lv)/100,ias:.5,ms:.2};
+      me.buffs.fury={t:8,m:8,v:(10+2*lv)/100,dr:Math.min(.5,(25+1.2*lv)/100)};
+      for(let i=1;i<=8;i++) later(i,()=>{ if(me.dead||!(me.buffs.fury&&me.buffs.fury.t>0))return; const R=110*RS; efx.push({k:'ring',x:me.x,y:me.y,r0:20,r1:R,t:0,life:.35,col,w:8}); slamFx(me.x,me.y,R,col); sfx('slam'); G.shake=Math.max(G.shake,.2); for(const q of mobsIn(me.x,me.y,R)) hitMob(q,physDmg(1.2+.15*lv)); });
       me.buffs.fury.form=f;
     }
     break;
-  case 'hunt':
-    sfx('boss'); G.shake=Math.max(G.shake,.4);
-    if(!f){ /* 인간: 까마귀 떼 급습 */
-      efx.push({k:'ring',x:o.x,y:o.y,r0:300,r1:20,t:0,life:.5,col:'#7a62b8',w:8});
-      for(let i=0;i<16;i++) later(i*.25,()=>{ if(o===me&&me.dead)return; let px,py;
-        if(real){ const c=G.mobs.filter(q=>!q.dead&&hyp(q.x-o.x,q.y-o.y)<430); const q=c.length?c[Math.floor(Math.random()*c.length)]:null; if(q){ px=q.x+rand(-24,24); py=q.y+rand(-24,24); } }
-        if(px===undefined){ const a=rand(0,6.283), d=rand(40,320); px=clamp(o.x+Math.cos(a)*d,20,WW-20); py=clamp(o.y+Math.sin(a)*d,20,WH-20); }
-        efx.push({k:'bolt',pts:[{x:px+rand(-30,30),y:py-240},{x:px,y:py}],t:0,life:.2,col:'#3a2e55'}); efx.push({k:'ring',x:px,y:py,r0:10,r1:80,t:0,life:.3,col:'#9a86c8',w:6}); burst(px,py,'#2a2038',14,260); burst(px,py,'#b9a6e8',8,200); impact(px,py,'120,100,180',90);
-        if(real) for(const m of mobsIn(px,py,75)) hitMob(m,spellDmg(110+36*lv),0,false,{el:'nature'}); });
-    } else if(f==='bear'){ /* 곰: 대지의 분노 */
-      efx.push({k:'ring',x:o.x,y:o.y,r0:300,r1:20,t:0,life:.5,col:'#c28a5a',w:10});
-      if(real)me.buffs.hunt={t:6,m:6,dr:.5};
-      for(let i=0;i<3;i++) later(.5+i*.45,()=>{ const cx=o===me?me.x:o.x, cy=o===me?me.y:o.y; slamFx(cx,cy,320,'#c28a5a'); efx.push({k:'ring',x:cx,y:cy,r0:20,r1:320,t:0,life:.5,col:'#e0b080',w:14}); impact(cx,cy,'220,170,110',240); burst(cx,cy,'#c9a27a',40,420); G.shake=Math.max(G.shake,.6); sfx('slam');
-        if(real) for(const m of mobsIn(me.x,me.y,320)){ hitMob(m,physDmg(5+.9*lv),0,false,i===0?{stun:2}:undefined); knock(m,me.x,me.y,i===0?30:14); } });
-    } else { /* 늑대: 무리의 사냥 — 무적 상태로 연속 도약 */
-      efx.push({k:'ring',x:o.x,y:o.y,r0:10,r1:160,t:0,life:.5,col:'#cfd6e6',w:9}); burst(o.x,o.y,'#cfd6e6',30,320);
-      if(real){ me.god=Math.max(me.god||0,2.8); const used=new Set();
-        for(let i=0;i<7;i++) later(.15+i*.33,()=>{ if(me.dead)return; let q=nearestMob(me.x,me.y,460,used); if(!q){ used.clear(); q=nearestMob(me.x,me.y,460,used); } if(!q)return; used.add(q);
-          const a2=Math.atan2(q.y-me.y,q.x-me.x); me.leap={sx:me.x,sy:me.y,ex:clamp(q.x-Math.cos(a2)*(q.r+10),20,WW-20),ey:clamp(q.y-Math.sin(a2)*(q.r+10),20,WH-20),t:0,dur:.14}; me.face=a2;
-          later(.14,()=>{ if(me.dead)return; const cx=q.dead?me.x:q.x, cy=q.dead?me.y:q.y; efx.push({k:'swing',o:{x:cx-Math.cos(a2)*22,y:cy-Math.sin(a2)*22},a:a2,t:0,life:.22,col:'#cfd6e6',big:1}); efx.push({k:'ring',x:cx,y:cy,r0:10,r1:95,t:0,life:.3,col:'#ff7a6a',w:7}); impact(cx,cy,'255,150,130',110); burst(cx,cy,'#ff7a6a',18,260); sfx('slam'); G.shake=Math.max(G.shake,.3);
-            for(const m of mobsIn(cx,cy,95)){ const r=physDmg(3+.5*lv); hitMob(m,r,0,false,{burn:3,bd:r.v*.4,bl:1}); } }); }); }
-    }
+  case 'bears':   /* 곰세마리: 아빠곰·엄마곰·애기곰을 한꺼번에 불러요 (시한 소환수, 이전에 불러둔 곰 가족/큰 소환수는 사라져요) */
+    efx.push({k:'ring',x:o.x,y:o.y,r0:20,r1:150,t:0,life:.5,col,w:12}); efx.push({k:'ring',x:o.x,y:o.y,r0:10,r1:90,t:0,life:.4,col:'#fff0c8',w:6}); impact(o.x,o.y,'220,170,110',170); burst(o.x,o.y,'#e0b080',34,340); G.shake=Math.max(G.shake,.4);
+    if(real){ summonBears(lv); announce('🐻🐻🐻 곰세마리 소환!','#e0b080'); }
     break;
   }
 }
@@ -2337,7 +2342,7 @@ function castSkill(o,key,real,tx,ty,lv,tgt){
   case 'whirl':
     efx.push({k:'whirl',o,t:0,life:.45,col:'#e8e0d0'});
     impact(o.x,o.y,'235,225,210',110); for(let i=0;i<24;i++){const a=i/24*6.283; parts.push({x:o.x+Math.cos(a)*70,y:o.y+Math.sin(a)*70,vx:-Math.sin(a)*260,vy:Math.cos(a)*260,t:0,life:.35,col:'#f4efe6',r:3,glow:1,dm:.9});}
-    if(real) for(const m of mobsIn(o.x,o.y,100*RS(lv))){ const r=physDmg(1.8+.3*lv); hitMob(m,r,0,0,{burn:4,bd:r.v*.6,bl:1}); }   /* 강력한 출혈: 4초, 초당 타격 피해의 60% (늑대 평타 25%·물어뜯기 45%보다 셈) */
+    if(real) for(const m of mobsIn(o.x,o.y,100*RS(lv))){ const r=physDmg(1.8+.3*lv); hitMob(m,r,0,0,{burn:4,bd:r.v*.6,bl:1}); }   /* 강력한 출혈: 4초, 초당 타격 피해의 60% */
     break;
   case 'leap':
     if(real){me.leap={sx:me.x,sy:me.y,ex:tx,ey:ty,t:0,dur:.35};}
@@ -2426,7 +2431,7 @@ function castSkill(o,key,real,tx,ty,lv,tgt){
     break;}
   case 'guardian': case 'spiritcaster': case 'fusion': case 'resonance': case 'soulburst': case 'execute': case 'colossus': case 'lord':
     necroCast(o,key,real,lv,tgt); break;
-  case 'raven': case 'wolfform': case 'bearform': case 'bite': case 'roar': case 'fury': case 'spirit': case 'hunt':
+  case 'raven': case 'bearform': case 'bite': case 'roar': case 'fury': case 'spirit': case 'bears':
     druidCast(o,key,real,lv,tgt,tx,ty,ang); break;
   case 'barrier':
     efx.push({k:'ring',x:o.x,y:o.y,r0:10,r1:70,t:0,life:.5,col:'#8fb6ff',w:8}); burst(o.x,o.y,'#bcd2ff',20,200); impact(o.x,o.y,'140,180,255',90);
@@ -2915,7 +2920,7 @@ const CPSK={
   ['chain',l=>(22+16*l)*HMN(l)*HMF(HMN(l))*(1-Math.pow(.9,Math.min(3,3+Math.floor(l/4))))/.1,4,'s'],
   ['meteor',l=>((80+40*l)+4*(12+8*l))*HMN(l)*HMF(HMN(l)),10,'s'],['blizzard',l=>(22+13*l)*8,17,'s'],['armageddon',l=>14*(150+45*l)*.5,75,'s']],
  necro:[['soulbolt',l=>(14+10*l)*HMN(l)*HMF(HMN(l)),.8,'s'],['guardian',l=>(14+10*l)/1.2*(1+.04*l),1,'m'],['spiritcaster',l=>(18+12*l)*HMN(l)*HMF(HMN(l))/1.8*(1+.04*l),1,'m'],['soulburst',l=>(100+40*l)*1.6,12,'s'],['execute',l=>0,18,'s'],['colossus',l=>(120+45*l)/1.5*(18+.5*l)*(1+.04*l),45,'m'],['lord',l=>(100+30*l)*2*15*(1+.04*l),90,'m'],['fusion',l=>((6+4*l)/.5+(16+10*l)*FZB(l)/2+(50+22*l)/4)*(10+.3*l)*(1+.04*l),40,'m']],
- druid:[['raven',l=>(12+9*l)*RVN(l)*RVF(RVN(l))/1.1,1,'m'],['bite',l=>3.5+.55*l,5,'p'],['hunt',l=>(18+3*l)*.5,80,'p']],
+ druid:[['raven',l=>(12+9*l)*RVN(l)*RVF(RVN(l))/1.1,1,'m'],['bite',l=>3.5+.55*l,5,'p'],['bears',l=>(110+55*l)*BEAR_T(l)/3,80,'m']],
  war:[['bash',l=>3+.5*l,2,'p'],['rend',l=>4.5+.7*l+Math.floor((1.5+.12*l)/.5)*(.5+.05*l),5,'p'],['whirl',l=>1.8+.3*l,5,'p'],['leap',l=>2.8+.45*l,8,'p'],['quake',l=>4+.65*l,13,'p'],['ragnarok',l=>(14+l)*.6+8,90,'p']],
  pal:[['smite',l=>2.6+.4*l,2,'p'],['hammer',l=>(16+13*l)*HMN(l)*HMF(HMN(l))*3,4.5,'s'],['judgment',l=>(110+50*l)+4*(18+10*l),15,'s']]};
 function cpSkillDps(p,D){ const list=CPSK[p.cls]; if(!list||!p.skills)return 0; const pp={...p,D}, wav=(D.wmn+D.wmx)/2;
@@ -2963,10 +2968,10 @@ function renderStat(){
   const k1=SK[me.cls][0], l1=Math.max(1,skLv(me,k1.k)); let s1=aAvg;
   if(k1.k==='bash')s1=aAvg*(3+.5*l1); else if(k1.k==='smite')s1=aAvg*(2.6+.4*l1)+8+7*l1; else if(k1.k==='fireball')s1=(18+13*l1)*(1+D.ene*ENEM+D.dmgPct/100);
   else if(k1.k==='raven')s1=(12+9*l1)*RVF(RVN(l1))*mnMul()*(1+D.ene*ENEM)*(1+(D.wmn+D.wmx)/70)*(D.sp.tome?1.2:1); /* 까마귀: 스킬 설명의 기본 피해에 에너지·피해 보너스·무기 보정을 곱한 마리당 1타 (치명타·버프·레벨/장비 보정 제외) */
-  /* 드루이드 기본 공격은 형태마다 달라요: 인간=에너지 보정(1+에너지/150) · 늑대=늑대 변신 Lv 배율 · 곰=곰 변신 Lv 배율(+주변 적은 80%) */
-  const dru=me.cls==='druid', dF=dru?(me.form||''):'', dK=!dru?1:dF==='wolf'?WFB(Math.max(1,skLv(me,'wolfform'))):dF==='bear'?BRB(Math.max(1,skLv(me,'bearform'))):1+D.ene/150;
+  /* 드루이드 기본 공격은 형태마다 달라요: 인간=에너지 보정(1+에너지/150) · 곰=곰 변신 Lv 배율(+주변 적은 80%) */
+  const dru=me.cls==='druid', dF=dru?(me.form||''):'', dK=!dru?1:dF==='bear'?BRB(Math.max(1,skLv(me,'bearform'))):1+D.ene/150;
   const dpsT=Math.round(aAvg*dK*ATKM*(1+cr*.5)/D.atkInt);
-  let h=''; if(!SKM) h+=`<div class="box"><h3>⚔️ 실제 데미지</h3><div class="row"><span class="k">기본 공격 피해${dru?` (${dF==='wolf'?'🐺 늑대':dF==='bear'?'🐻 곰':'🧑 인간'})`:''}</span><span><b style="color:#ffd84a;font-size:17px">${Math.round(aMin*dK*ATKM)}–${Math.round(aMax*dK*ATKM)}</b></span></div>${dF==='bear'?`<div class="row"><span class="k">└ 주변 적 (주 대상의 80%)</span><span>${Math.round(aMin*dK*BRS*ATKM)}–${Math.round(aMax*dK*BRS*ATKM)}</span></div>`:''}<div class="row"><span class="k">치명타 시 (${D.crit}%)</span><span>${Math.round(aMin*dK*1.5*ATKM)}–${Math.round(aMax*dK*1.5*ATKM)}</span></div><div class="row"><span class="k">${esc(k1.n)} (1번 스킬 Lv ${l1})</span><span>${Math.round(s1)}${k1.k==='raven'?` <small style="color:#9aa0aa">마리당 · ${RVN(l1)}마리</small>`:''}</span></div><div class="row"><span class="k">초당 피해 (기본 공격)</span><span><b style="color:#ffd84a">${dpsT}</b></span></div></div>`;
+  let h=''; if(!SKM) h+=`<div class="box"><h3>⚔️ 실제 데미지</h3><div class="row"><span class="k">기본 공격 피해${dru?` (${dF==='bear'?'🐻 곰':'🧑 인간'})`:''}</span><span><b style="color:#ffd84a;font-size:17px">${Math.round(aMin*dK*ATKM)}–${Math.round(aMax*dK*ATKM)}</b></span></div>${dF==='bear'?`<div class="row"><span class="k">└ 주변 적 (주 대상의 80%)</span><span>${Math.round(aMin*dK*BRS*ATKM)}–${Math.round(aMax*dK*BRS*ATKM)}</span></div>`:''}<div class="row"><span class="k">치명타 시 (${D.crit}%)</span><span>${Math.round(aMin*dK*1.5*ATKM)}–${Math.round(aMax*dK*1.5*ATKM)}</span></div><div class="row"><span class="k">${esc(k1.n)} (1번 스킬 Lv ${l1})</span><span>${Math.round(s1)}${k1.k==='raven'?` <small style="color:#9aa0aa">마리당 · ${RVN(l1)}마리</small>`:''}</span></div><div class="row"><span class="k">초당 피해 (기본 공격)</span><span><b style="color:#ffd84a">${dpsT}</b></span></div></div>`;
 if(!SKM){
   { const base=CLASSES[me.cls].base, tots=S.map(([k])=>Math.floor(D[k])), mx=Math.max(60,...tots)*1.06;
     const R0=S.map(([k,n,ds],i)=>{ const tot=tots[i], b0=base[k], pt=Math.max(0,me.stats[k]-b0), gr=Math.max(0,tot-me.stats[k]); return {k,n,ds,tot,b0,pt,gr}; });
@@ -3540,8 +3545,8 @@ function sprGet(k){ let e=SPR[k]; if(!e){ e=SPR[k]={ok:false,im:new Image()}; e.
 const BWALKS={boss_shadow:{n:6,k:.75,cyc:2.6},hero_war:{n:6,k:.75,cyc:2.6},hero_sorc:{n:6,k:.75,cyc:2.6},mob_grak:{n:6,k:.75,cyc:2.6},mob_malek:{n:6,k:.75,cyc:2.6},mob_morg:{n:6,k:.75,cyc:2.6},mob_kargon:{n:6,k:.75,cyc:2.6}};
 /* 보스 준비 자세: <보스 그림 이름>_wu.png (스킬 예고 앞 70% 동안 몸을 낮추고 힘을 모은 자세, 뒤 30%와 돌진 중엔 _sk). 그림이 있는 보스만 등록 */
 const BWU={mob_morg:1,mob_kargon:1};
-const HATK={druid_wolf:{n:4,k:.75,t:[.12,.45,.75]},druid_bear:{n:4,k:.75,t:[.12,.45,.75]}}; /* 영웅 공격 시트 hero_<키>_atk.png (가로 n칸: 준비→타격→follow→복귀). t=칸 넘어가는 진행도(0~1, 공격 0.36초). 파일이 없으면 기존 동작 */
-const WALKS={war:{n:6,k:.75,cyc:70},pal:{n:6,k:.75,cyc:70},sorc:{n:6,k:.75,cyc:70},necro:{n:6,k:.75,cyc:70},druid:{n:6,k:.75,cyc:70},druid_bear:{n:6,k:.75,cyc:70},druid_wolf:{n:6,k:.75,cyc:70}}; /* 드루이드는 hero_druid / hero_druid_bear / hero_druid_wolf (+ _walk) 그림이 있으면 그걸 쓰고, 없으면 도형으로 그려요 */
+const HATK={druid_bear:{n:4,k:.75,t:[.12,.45,.75]}}; /* 영웅 공격 시트 hero_<키>_atk.png (가로 n칸: 준비→타격→follow→복귀). t=칸 넘어가는 진행도(0~1, 공격 0.36초). 파일이 없으면 기존 동작 */
+const WALKS={war:{n:6,k:.75,cyc:70},pal:{n:6,k:.75,cyc:70},sorc:{n:6,k:.75,cyc:70},necro:{n:6,k:.75,cyc:70},druid:{n:6,k:.75,cyc:70},druid_bear:{n:6,k:.75,cyc:70}}; /* 드루이드는 hero_druid / hero_druid_bear (+ _walk) 그림이 있으면 그걸 쓰고, 없으면 도형으로 그려요 */
 /* 레이드 보스 색 입히기: dark=어두운 톤, black=검은 그림자, red=각성한 그림자, glow=붉은 테두리 빛용 실루엣 (그림마다 한 번만 만들어 둠) */
 const SHD_MOUTH=[[0.5494,0.2754,0.1487],[0.5547,0.3177,0.1501],[0.5738,0.301,0.1514],[0.5811,0.2995,0.1527],[0.5599,0.3479,0.1487],[0.5806,0.2975,0.1527]]; /* boss_shadow_walk.png 칸별 입 위치 [x,y,너비] (칸 크기 대비 비율) */
 const RBT=new WeakMap();
@@ -3737,6 +3742,20 @@ function drawAuras(t){
 }
 
 /* 소환수 그리기 (이미지 없이 도형으로: 반투명 영혼 느낌) */
+/* 곰 가족 도형: 아빠곰(크고 짙은 갈색·흉터) · 엄마곰(분홍 리본) · 애기곰(작고 큰 머리·볼터치) */
+function drawBear(q,x,y,r,a,sw){ const ca=Math.cos(a), sa=Math.sin(a), isP=q.k==='papa', isM=q.k==='mama', isB=q.k==='baby';
+  const base=isP?'#7d4f2b':isM?'#b9794a':'#d9a873', belly=isP?'#b3814f':isM?'#e8bd8c':'#f6dcae', ph=(q.an||0)*(isB?7:5), mv=Math.abs(q.vx||0)+Math.abs(q.vy||0)>10, hop=mv?Math.abs(Math.sin(ph))*(isB?3.5:2):Math.sin(ph*.4)*.6, yy=y-hop;
+  for(const s2 of [-1,1]) cball(x+s2*r*.5,yy+r*.8+(mv?Math.sin(ph+s2)*2:0),r*.3,base,2.2);   /* 뒷발 */
+  cball(x,yy+r*.12,r*(isB?.82:.96),base,2.6); cball(x,yy+r*.26,r*(isB?.5:.58),belly,0);   /* 몸통·배 */
+  for(const s2 of [-1,1]) cball(x+s2*r*.95,yy+r*.1-sw*r*(s2>0?.9:.5),r*.3,base,2.2);   /* 앞발: 공격할 때 번쩍 */
+  const hy=yy-r*(isB?.72:.82), hr=r*(isB?.8:.7);
+  for(const s2 of [-1,1]) { cball(x+s2*hr*.78,hy-hr*.72,hr*.34,base,2.2); cball(x+s2*hr*.78,hy-hr*.72,hr*.16,belly,0); }   /* 귀 */
+  cball(x,hy,hr,base,2.6);   /* 머리 */
+  cball(x+ca*hr*.12,hy+hr*.34,hr*.4,belly,2); cball(x+ca*hr*.12,hy+hr*.26,hr*.13,'#2a1a10',0);   /* 주둥이·코 */
+  ctx.fillStyle='#1c110c'; for(const s2 of [-1,1]){ ctx.beginPath(); ctx.arc(x+s2*hr*.4+ca*hr*.08,hy-hr*.28,Math.max(2,hr*.13),0,6.283); ctx.fill(); }   /* 눈 */
+  if(isP){ ctx.strokeStyle='#e8d0b0'; ctx.lineWidth=1.6; ctx.beginPath(); ctx.moveTo(x+hr*.2,hy-hr*.55); ctx.lineTo(x+hr*.45,hy-hr*.15); ctx.stroke(); ctx.strokeStyle='#1c110c'; ctx.lineWidth=2.4; for(const s2 of [-1,1]){ ctx.beginPath(); ctx.moveTo(x+s2*hr*.55,hy-hr*.32); ctx.lineTo(x+s2*hr*.2,hy-hr*.2); ctx.stroke(); } }   /* 흉터·굵은 눈썹 */
+  if(isM){ const bx=x-hr*.62, by=hy-hr*.78; cpoly([[bx,by],[bx-hr*.42,by-hr*.3],[bx-hr*.42,by+hr*.3]],'#ff7aa8',1.8); cpoly([[bx,by],[bx+hr*.42,by-hr*.3],[bx+hr*.42,by+hr*.3]],'#ff7aa8',1.8); cball(bx,by,hr*.14,'#ffc0d6',1.4); }   /* 분홍 리본 */
+  if(isB){ ctx.fillStyle='rgba(255,120,140,.55)'; for(const s2 of [-1,1]){ ctx.beginPath(); ctx.arc(x+s2*hr*.62,hy+hr*.18,hr*.15,0,6.283); ctx.fill(); } cball(x,hy-hr*1.02,hr*.14,base,1.6); } }   /* 볼터치·머리 한 가닥 */
 function drawMinion(q,t){
   const K=MNK[q.k]||MNK.guard, big=!K.perm, x=q.x, y=q.y, r=K.r, a=q.face||0, ca=Math.cos(a), sa=Math.sin(a), bob=Math.sin((q.an||0)*3)*(q.k==='caster'?4:q.k==='dragon'?3:1.5);
   const hpP=q.hpP!==undefined?q.hpP/100:clamp(q.hp/q.mh,0,1);
@@ -3754,6 +3773,7 @@ function drawMinion(q,t){
   else if(MIS){ const ak=q.atk>0?Math.min(1,q.atk/(q.k==='colossus'?.3:.25)):0, ph=(q.an||0)*3, hh=MSH.h, hov=MSH.hv?MSH.hv+Math.sin(ph)*3:Math.abs(Math.sin(ph))*(big?1:2);
     sprDraw(MIS,x,y+r*.85-hh*.12,hh,a,{rot:Math.sin(ph*.5)*.03+ak*.12,hop:hov,sy:1+Math.sin(ph*2)*.015,fx:ak*r*.35});
     if(q.k==='dragon'&&sw>0){ const hx=x, hy=y+bob; ctx.strokeStyle='rgba(125,255,216,'+(.35+sw*.4)+')'; ctx.lineWidth=14; ctx.lineCap='round'; ctx.beginPath(); ctx.moveTo(hx+ca*r,hy+sa*r); ctx.lineTo(hx+ca*230,hy+sa*230); ctx.stroke(); ctx.lineCap='butt'; } }
+  else if(K.bear){ drawBear(q,x,y,r,a,sw); }
   else if(q.k==='guard'){ const yy=y+bob;
     cpoly([[x-r*.9,yy+r*.9],[x-r*.55,yy-r*.2],[x+r*.55,yy-r*.2],[x+r*.9,yy+r*.9],[x+r*.3,yy+r*.55],[x,yy+r*1.05],[x-r*.3,yy+r*.55]],'#7fe8d0',2.2);
     cball(x,yy-r*.55,r*.62,'#a8f5e4',2.4); cpoly([[x-r*.6,yy-r*.75],[x,yy-r*1.5],[x+r*.6,yy-r*.75]],'#5fd6bc',2);
@@ -3802,7 +3822,7 @@ function drawPlayer(o,isMe,t){
   if(tier>=3){ const g=ctx.createRadialGradient(x,y,6,x,y,40); g.addColorStop(0,'rgba(255,225,130,.45)'); g.addColorStop(1,'rgba(255,225,130,0)'); ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,40+Math.sin(t*3)*2,0,6.283); ctx.fill(); }
   if(isMe&&me.buffs.rage&&me.buffs.rage.t>0){ const pu=.5+.5*Math.sin(t*9), g=ctx.createRadialGradient(x,y+2,8,x,y+2,46+pu*5); g.addColorStop(0,'rgba(255,40,20,0)'); g.addColorStop(.6,`rgba(255,40,20,${.16+.1*pu})`); g.addColorStop(1,'rgba(255,40,20,0)'); ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y+2,50,0,6.283); ctx.fill(); }   /* 폭주 붉은 기운 */
   if(isMe&&me.buffs.barrier&&me.buffs.barrier.t>0&&fxAtlas())fxFrame(5,Math.floor(t*8)%4,x,y+2,84,84,0,Math.min(1,me.buffs.barrier.t*2)*.55);
-  const fm=o.cls==='druid'?formOf(o):'', hk=fm?'druid_'+fm:o.cls, hh=fm==='bear'?104:fm==='wolf'?84:78;
+  const fm=o.cls==='druid'?formOf(o):'', hk=fm?'druid_'+fm:o.cls, hh=fm==='bear'?104:78;
   const HS=sprGet('hero_'+hk), WC=WALKS[hk], WK=(WC&&HS)?sprGet('hero_'+hk+'_walk'):null;
   const RG=isMe&&me.buffs.rage&&me.buffs.rage.t>0, RGW=[[.605,.322],[.605,.356],[.623,.312],[.605,.315],[.616,.315],[.605,.300]];   /* 폭주: 눈 위치(칸별, 그림 비율) */
   if(HS){ const A=heroAnim(o,t,meleeOf(o),WK?.4:1); if(RG){ ctx.save(); ctx.shadowColor='rgba(255,45,25,.95)'; ctx.shadowBlur=11+4*Math.sin(t*9); }   /* 폭주: 몸 테두리에 붉은 기운 */
@@ -3813,7 +3833,7 @@ function drawPlayer(o,isMe,t){
     else sprDraw(HS,x,y+16,hh,o.face,RG?{...A,tint:1,eye:o.cls==='war'?[.545,.317]:null}:A);
     if(RG)ctx.restore();
     if(isMe&&me.hurt>0){ctx.fillStyle=`rgba(255,40,30,${me.hurt*2.5})`;ctx.beginPath();ctx.arc(x,y,15,0,6.283);ctx.fill();} }
-  else if(fm){ /* 변신 그림이 없을 때: 곰·늑대 도형 */
+  else if(fm){ /* 변신 그림이 없을 때: 곰 도형 */
     const a=o.face||0, ca=Math.cos(a), sa=Math.sin(a), px=-sa, py=ca, bear=fm==='bear', R=bear?19:13, sw=o.swing>0?(o.swing/.22):0, A=heroAnim(o,t,true,1), bb=A.hop*.4, lunge=sw*6;
     const body=bear?'#8a5e34':'#8f98ac', dark=bear?'#5c3a1f':'#5d6578', yy=y-bb;
     if(!bear) cpoly([[x-ca*R*.6+px*3,yy-sa*R*.6+py*3],[x-ca*(R+14)+px*6,yy-sa*(R+14)+py*6+Math.sin(t*9)*2],[x-ca*R*.6-px*3,yy-sa*R*.6-py*3]],dark,1.8); /* 꼬리 */
@@ -3869,7 +3889,7 @@ function drawPlayer(o,isMe,t){
   const nm=(isMe?me.name:(o.name||'동료'))||'', label=`Lv${lv} ${nm}`;
   ctx.font='700 11px "Noto Sans KR",sans-serif'; ctx.textAlign='center'; ctx.lineJoin='round'; ctx.lineWidth=3.5; ctx.strokeStyle='rgba(0,0,0,.9)'; ctx.strokeText(label,x,y-45); ctx.fillStyle=isMe?'#fff3dc':C.col; ctx.fillText(label,x,y-45);
   { const ic=[];
-    if(isMe){ const b=me.buffs; if(b.shout&&b.shout.t>0)ic.push(['📣',clamp(1-b.shout.t/(b.shout.m||10),0,1),Math.ceil(b.shout.t),true]); if(b.barrier&&b.barrier.t>0)ic.push(['🔷',clamp(1-b.barrier.t/10,0,1),Math.ceil(b.barrier.t),true]); if(me.stun>0)ic.push(['💫',0,Math.ceil(me.stun),true]); if(me.slowP>0)ic.push(['🐌',0,Math.ceil(me.slowP),true]); if(me.poison>0)ic.push(['☠️',0,Math.ceil(me.poison),true]); if(b.berserk&&b.berserk.t>0)ic.push(['😡',clamp(1-b.berserk.t/8,0,1),Math.ceil(b.berserk.t),true]); for(const [bk,be] of [['roar','📢'],['howl','📢'],['fury','💢'],['hunt','🌕'],['rage','🔥']]){ const bb=b[bk]; if(bb&&bb.t>0)ic.push([be,clamp(1-bb.t/(bb.m||8),0,1),Math.ceil(bb.t),true]); } if(me.spirit&&me.spirit.t>0)ic.push(['👻',clamp(1-me.spirit.t/me.spirit.m,0,1),Math.ceil(me.spirit.t),true]); if(me.aura)ic.push([SKBY[me.aura].e,0,'',true]); }
+    if(isMe){ const b=me.buffs; if(b.shout&&b.shout.t>0)ic.push(['📣',clamp(1-b.shout.t/(b.shout.m||10),0,1),Math.ceil(b.shout.t),true]); if(b.barrier&&b.barrier.t>0)ic.push(['🔷',clamp(1-b.barrier.t/10,0,1),Math.ceil(b.barrier.t),true]); if(me.stun>0)ic.push(['💫',0,Math.ceil(me.stun),true]); if(me.slowP>0)ic.push(['🐌',0,Math.ceil(me.slowP),true]); if(me.poison>0)ic.push(['☠️',0,Math.ceil(me.poison),true]); if(b.berserk&&b.berserk.t>0)ic.push(['😡',clamp(1-b.berserk.t/8,0,1),Math.ceil(b.berserk.t),true]); for(const [bk,be] of [['roar','📢'],['fury','💢'],['rage','🔥']]){ const bb=b[bk]; if(bb&&bb.t>0)ic.push([be,clamp(1-bb.t/(bb.m||8),0,1),Math.ceil(bb.t),true]); } if(me.spirit&&me.spirit.t>0)ic.push(['👻',clamp(1-me.spirit.t/me.spirit.m,0,1),Math.ceil(me.spirit.t),true]); if(me.aura)ic.push([SKBY[me.aura].e,0,'',true]); }
     { const oth=isMe?ally:me; if(!isMe&&o.aura&&SKBY[o.aura])ic.push([SKBY[o.aura].e,0,'',true]); if(oth&&!oth.lobby&&!oth.dead&&oth.aura&&oth.aura!==o.aura&&oth.aura!=='holyfire'&&SKBY[oth.aura]&&oth.x!==undefined&&hyp(oth.x-o.x,oth.y-o.y)<320)ic.push([SKBY[oth.aura].e,0,'받음',false]); }
     ctx.textBaseline='middle'; const w=24, x0=x-(ic.length-1)*w/2, cy=y-76;
     ic.forEach((q,i)=>{ const cx=x0+i*w; ctx.fillStyle='rgba(18,14,10,.9)'; ctx.beginPath(); ctx.arc(cx,cy,10,0,6.283); ctx.fill(); ctx.lineWidth=2; ctx.strokeStyle=q[3]?'#ffd84a':'#6a5a3a'; ctx.stroke(); ctx.font='12px sans-serif'; ctx.textAlign='center'; ctx.fillStyle='#fff'; ctx.fillText(q[0],cx,cy+1);
@@ -3896,6 +3916,7 @@ function drawProjs(){
     if((p.kind==='fire'||p.kind==='bolt')&&fxAtlas()){ const ag=Math.atan2(p.vy,p.vx); if(p.kind==='fire')fxFrame(1,Math.floor(T*14)%3,p.x,p.y,88,88,ag); else fxFrame(0,Math.floor(T*14)%3,p.x,p.y,66,66,ag); }
     else if(p.kind==='fire'){ctx.globalCompositeOperation='lighter'; circle(p.x,p.y,20,'rgba(255,110,30,.25)'); circle(p.x,p.y,12,'rgba(255,140,40,.6)'); ctx.globalCompositeOperation='source-over'; circle(p.x,p.y,8,'#ff8a3e');circle(p.x,p.y,4.5,'#fff0c0');}
     else if(p.kind==='bolt'){circle(p.x,p.y,8,'rgba(170,150,255,.25)');circle(p.x,p.y,4,'#d9ccff');}
+    else if(p.kind==='rock'){ ctx.fillStyle='rgba(0,0,0,.25)'; ctx.beginPath(); ctx.ellipse(p.x,p.y+p.r*.9,p.r*.9,p.r*.35,0,0,6.283); ctx.fill(); ctx.save(); ctx.translate(p.x,p.y-p.r*.5); ctx.rotate(T*9); cball(0,0,p.r,p.col,2.2); cball(-p.r*.3,-p.r*.3,p.r*.28,'rgba(255,255,255,.28)',0); ctx.restore(); }
     else if(p.kind==='leaf'){ const ag=Math.atan2(p.vy,p.vx); circle(p.x,p.y,10,'rgba(150,220,110,.22)'); ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(ag); ctx.beginPath(); ctx.moveTo(-8,0); ctx.quadraticCurveTo(0,-6,9,0); ctx.quadraticCurveTo(0,6,-8,0); ctx.fillStyle='#b8e87a'; ctx.fill(); ctx.lineWidth=1.4; ctx.strokeStyle='#3f6a2a'; ctx.stroke(); ctx.restore(); }
     else if(p.kind==='hammer'){ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.a*3);ctx.fillStyle='rgba(255,224,138,.3)';ctx.fillRect(-11,-11,22,22);ctx.fillStyle='#ffe08a';ctx.fillRect(-7,-5,14,10);ctx.fillStyle='#8a6a3a';ctx.fillRect(-2,5,4,8);ctx.restore();}
   }
