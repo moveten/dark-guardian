@@ -427,6 +427,43 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 #sEnd #bBack{box-sizing:border-box;width:calc(100% - 36px);max-width:420px;min-height:56px;font-size:18px;margin:14px 18px 0}
 #sEnd #bBack{background:linear-gradient(#2f6a3f,#245232);border-color:#6fd08a;color:#e8ffe9}
 #sEnd #bBack[hidden]{display:none}
+
+/* ===== 폰 가로 모드(높이 500px 이하): 화면을 덜 가리는 배치 ===== */
+@media (orientation:landscape) and (max-height:500px){
+  body.land{--R:max(10px,env(safe-area-inset-right));--B:max(10px,env(safe-area-inset-bottom));--u:46px;--g:5px;--o:58px;--mm:84px}
+  /* 하단 메뉴 바 → 오른쪽 세로 아이콘 줄 (메뉴(⚙️)는 미니맵 왼쪽 위) */
+  body.land #dock{left:auto;right:var(--R);top:calc(var(--mm) + 16px);bottom:auto;width:38px;flex-direction:column;gap:6px;padding:0;background:none;border:0;z-index:40}
+  body.land #dock .hb{flex:none;width:38px;height:38px;border-radius:10px;background:rgba(18,13,10,.72);padding:0}
+  body.land #dock .hb .lb{display:none}
+  body.land #dock .hb .ic{font-size:19px}
+  body.land #dock .badge{top:-5px;right:-5px;min-width:18px;height:18px;line-height:18px;font-size:11px}
+  body.land #dock #bMenu{position:fixed;top:8px;right:calc(var(--R) + var(--mm) + 8px)}
+  body.land.shopen .sb{visibility:hidden}   /* 창이 열려 있을 땐 스킬 버튼을 숨겨 아이콘 줄과 겹치지 않게 */
+  body.land.shopen #dock #bMenu{position:static}   /* 창이 열려 있을 땐 아이콘 줄의 네 번째로 */
+  body.land .sheetwrap{padding:max(10px,env(safe-area-inset-top)) calc(var(--R) + 46px) 10px 12px}
+  /* 구슬·물약 버튼 */
+  body.land .orb{width:var(--o);height:var(--o)}body.land .orb b{font-size:11px}body.land .orb small{font-size:8px}
+  body.land .orb.hp,body.land .orb.mp{bottom:var(--B)}body.land .orb.mp{right:var(--R)}body.land .orb.hp{left:max(10px,env(safe-area-inset-left))}
+  body.land .qb{bottom:var(--B);gap:6px}body.land .qb button{width:44px;height:44px}
+  /* 스킬: 마나 구슬 위 2칸 + 구슬 왼쪽 3×2칸 (더 많으면 왼쪽으로 늘어남) */
+  body.land .br{position:absolute;inset:0;right:0;bottom:0;pointer-events:none}
+  body.land #skills{display:contents}
+  body.land .sb{position:absolute;width:var(--u);height:var(--u);pointer-events:auto;font-size:11px}
+  body.land .sb .nm{font-size:20px}body.land .sb .lvn{font-size:8px;bottom:1px}
+  body.land .sb[data-sl]{--st:calc(var(--u) + var(--g))}
+  body.land .sb[data-sl="0"],body.land .sb[data-sl="1"]{right:calc(var(--R) + (var(--o) - var(--u))/2)}
+  body.land .sb[data-sl="0"]{bottom:calc(var(--B) + var(--o) + 6px)}
+  body.land .sb[data-sl="1"]{bottom:calc(var(--B) + var(--o) + 6px + var(--st))}
+  body.land .sb[data-sl="2"],body.land .sb[data-sl="5"]{right:calc(var(--R) + var(--o) + 8px)}
+  body.land .sb[data-sl="3"],body.land .sb[data-sl="6"]{right:calc(var(--R) + var(--o) + 8px + var(--st))}
+  body.land .sb[data-sl="4"],body.land .sb[data-sl="7"]{right:calc(var(--R) + var(--o) + 8px + 2*var(--st))}
+  body.land .sb[data-sl="8"],body.land .sb[data-sl="9"]{right:calc(var(--R) + var(--o) + 8px + 3*var(--st))}
+  body.land .sb[data-sl="10"],body.land .sb[data-sl="11"]{right:calc(var(--R) + var(--o) + 8px + 4*var(--st))}
+  body.land .sb[data-sl="2"],body.land .sb[data-sl="3"],body.land .sb[data-sl="4"],body.land .sb[data-sl="8"],body.land .sb[data-sl="10"]{bottom:var(--B)}
+  body.land .sb[data-sl="5"],body.land .sb[data-sl="6"],body.land .sb[data-sl="7"],body.land .sb[data-sl="9"],body.land .sb[data-sl="11"]{bottom:calc(var(--B) + var(--st))}
+}
+@media (orientation:landscape) and (max-height:400px){ body.land{--u:42px;--o:54px} body.land #dock .hb{width:36px;height:36px}body.land #dock{width:36px;gap:5px} }
+@media (orientation:landscape) and (max-height:360px){ body.land{--u:38px;--o:50px;--g:4px} body.land #dock .hb{width:34px;height:34px}body.land #dock{width:34px} }
 </style>
 
 <nav id="dock" hidden>
@@ -474,7 +511,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.4.0172</div>
+    <div class="ver" id="verT">v0.4.4.0173</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -2621,7 +2658,9 @@ document.addEventListener('pointerdown',()=>AUD.init(),{passive:true});
 /* ================= INPUT ================= */
 const cv=$('#cv'), ctx=cv.getContext('2d');
 let VW=0,VH=0,DPR=1,ZOOM=1,camX=0,camY=0,_camT=0,_camOk=false;
-function resize(){DPR=Math.min(2,window.devicePixelRatio||1); { const dk=$('#dock'), ap=$('#app'); const hh=dk.hidden?0:dk.offsetHeight; ap.style.bottom=hh+'px'; VW=innerWidth; VH=innerHeight-hh; } try{ const mw=Math.min(150,VW<560?VW*.26:VW*.2); $('#toasts').style.top=Math.max(Math.round(mw*WH/WW+4+8),138)+'px';   /* 보스 체력바(제목 바로 아래) 밑에서 시작 */ }catch(e){}
+let LAND=false;   /* 폰 가로 모드(높이 500px 이하): 하단 메뉴 바를 없애고 버튼을 가장자리로 옮긴 화면 */
+const mmW=()=>LAND?84:Math.min(150,VW<560?VW*.26:VW*.2);   /* 미니맵 너비 */
+function resize(){DPR=Math.min(2,window.devicePixelRatio||1); LAND=matchMedia('(orientation:landscape) and (max-height:500px)').matches; document.body.classList.toggle('land',LAND); { const dk=$('#dock'), ap=$('#app'); const hh=(dk.hidden||LAND)?0:dk.offsetHeight; ap.style.bottom=hh+'px'; VW=innerWidth; VH=innerHeight-hh; } try{ const mw=mmW(); $('#toasts').style.top=Math.max(Math.round(mw*WH/WW+4+8),138)+'px';   /* 보스 체력바(제목 바로 아래) 밑에서 시작 */ }catch(e){}
   cv.width=Math.round(VW*DPR); cv.height=Math.round(VH*DPR); ZOOM=clamp(Math.min(VW,VH)/420,.68,1.35);}
 addEventListener('resize',resize); resize();
 const joy={active:false,id:null,ox:0,oy:0,x:0,y:0,dx:0,dy:0};
@@ -2665,12 +2704,15 @@ let uiDirty=true, hudT=0;
 /* 단축키 1~9 = 화면에 보이는 스킬 버튼의 위치 (스킬 종류와 무관). 위에서부터 7 8 9 / 4 5 6 / 1 2 3 (숫자패드 배치)
    #skills 는 direction:rtl 그리드라서 DOM 순서 0,1,2 가 윗줄의 오른쪽→왼쪽 */
 function skillAtKey(n){ const vis=[...$('#skills').children].filter(b=>!b.hidden); const rows=Math.ceil(vis.length/3); /* 맨 아랫줄이 1 2 3 기준 — 줄이 덜 찬 쪽은 오른쪽(3)부터 채움: 5개=4 5 6/2 3, 1개=3 */ const rb=Math.floor((n-1)/3), col=2-(n-1)%3, idx=(rows-1-rb)*3+col; const b=(rb<rows&&idx>=0)?vis[idx]:null; return b?b.dataset.k:null; }
+let skSig='';
+function layoutSkills(){ const all=[...$('#skills').children], vis=all.filter(b=>!b.hidden), sig=vis.map(b=>b.dataset.k).join(','); if(sig===skSig)return; skSig=sig; all.forEach(b=>{ delete b.dataset.sl; }); vis.forEach((b,i)=>{ b.dataset.sl=i; }); }   /* 가로 모드: 보이는 스킬을 칸 번호(data-sl)로 배치 — 칸 위치는 CSS */
 function buildSkills(){
-  const box=$('#skills'); box.innerHTML='';
+  const box=$('#skills'); box.innerHTML=''; skSig='';
   for(const s of SK[me.cls]){ if(!(me.skills[s.k]>0)||s.passive)continue;
     const b=document.createElement('button'); b.className='sb'; b.dataset.k=s.k; b.style.setProperty('--c',s.el); b.setAttribute('aria-label',s.n); if(s.k==='fusion')b.hidden=true;
     b.innerHTML=`<span class="cdv"></span><span class="nm">${s.e}</span><span class="sn">${esc(s.s)}</span><span class="cdt"></span><span class="lvn"></span>`;
     bindHold(b,s.k); box.appendChild(b);}
+  layoutSkills();
 }
 function updateHud(){
   const D=me.D;
@@ -2693,19 +2735,20 @@ function updateHud(){
     b.classList.toggle('cd',!s.aura&&rem>0); b.querySelector('.cdt').textContent=(!s.aura&&rem>0)?(rem>=1?Math.ceil(rem):rem.toFixed(1)):'';
     if(k==='fusion'){ const fz=!!fusionOn(); b.hidden=!(fz||fusionReady()); b.classList.toggle('on',fz); } else if(s.form)b.classList.toggle('on',(me.form||'')===s.form); else if(k==='spirit')b.classList.toggle('on',!!(me.spirit&&me.spirit.t>0)); else b.classList.toggle('on',me.aura===k); b.classList.toggle('nofm',!!s.freq&&!me.form); b.classList.toggle('nomana',me.mp<mpCost(s,skLv(me,k)));
     b.querySelector('.lvn').textContent=skLv(me,k); }
+  layoutSkills();
 }
 
 /* ================= SHEETS ================= */
 let sheetMode=null, selItem=null;
 let shopMsg='', buyMsg='', sellAskIt=null;
-function openSheet(m){ if(!G.inGame&&!G.titleSheet)return; sheetMode=m; selItem=null; shopMsg=''; buyMsg=''; $('#sheet').hidden=false; if(G.inGame&&G.mode==='solo')G.paused=true; for(const k in held)held[k]=false; joy.active=false;
+function openSheet(m){ if(!G.inGame&&!G.titleSheet)return; document.body.classList.add('shopen'); sheetMode=m; selItem=null; shopMsg=''; buyMsg=''; $('#sheet').hidden=false; if(G.inGame&&G.mode==='solo')G.paused=true; for(const k in held)held[k]=false; joy.active=false;
   rerender(); $('#sheetB').scrollTop=0; }
 function rerender(){ $('#sheet').classList.toggle('isstore',sheetMode==='store'); if(sheetMode==='store')renderStore(); else if(sheetMode==='bag')renderBag(); else if(sheetMode==='stat'||sheetMode==='skill'||sheetMode==='passive')renderStat(); else if(sheetMode==='shop')renderShop(); else renderMenu(); }
 function markTabs(){ $('#itemPop').hidden=true; $('#ptsBar').hidden=true; const t=$('#sheetTabs'), cm=sheetMode==='passive'?'skill':sheetMode; t.hidden=sheetMode==='menu'||sheetMode==='store'||!!G.inGame; /* 게임 중에는 하단 독 하나만 사용 */ for(const [id,m] of [['bBag','bag'],['bStat','stat'],['bSkillT','skill'],['bMenu','menu']]){ const e=$('#'+id); if(e)e.setAttribute('aria-pressed',cm===m); } t.querySelectorAll('button').forEach(b=>{b.setAttribute('aria-pressed',b.dataset.m===cm); if(b.dataset.m==='shop')b.hidden=!!G.inGame&&sheetMode!=='shop'; const n=b.dataset.m==='bag'?me.inv.reduce((t,x)=>t+(x&&x.isNew?1:0),0):b.dataset.m==='stat'?(me.statPts|0):b.dataset.m==='skill'?(me.skillPts|0):0; let bd=b.querySelector('.pl'); if(!bd){bd=document.createElement('span');bd.className='pl';b.appendChild(bd);} bd.textContent=n>0?(b.dataset.m==='bag'?'NEW':'+'+n):''; bd.hidden=!(n>0); }); }
 $('#ptsBar').onclick=()=>{ sheetMode='stat'; selItem=null; rerender(); };
 $('#sheetTabs').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; sheetMode=b.dataset.m; selItem=null; shopMsg=''; buyMsg=''; rerender(); $('#sheetB').scrollTop=0; });
 function openTitleSheet(m){ prepMe(); G.titleSheet=true; if(m==='store')STORE=loadStore(); openSheet(m); }
-function closeSheet(){ for(const id of ['bBag','bStat','bSkillT','bMenu']){ const e=$('#'+id); if(e)e.setAttribute('aria-pressed','false'); } const was=G.titleSheet; if(me&&me.id)saveChar(); sheetMode=null; $('#sheet').hidden=true; G.paused=false; if(was){ G.titleSheet=false; renderClassCards(); } }
+function closeSheet(){ document.body.classList.remove('shopen'); for(const id of ['bBag','bStat','bSkillT','bMenu']){ const e=$('#'+id); if(e)e.setAttribute('aria-pressed','false'); } const was=G.titleSheet; if(me&&me.id)saveChar(); sheetMode=null; $('#sheet').hidden=true; G.paused=false; if(was){ G.titleSheet=false; renderClassCards(); } }
 $('#sheetX').onclick=closeSheet;
 $('#sheet').addEventListener('pointerdown',e=>{ if(e.target.id==='sheet')closeSheet(); });
 $('#bSkip').addEventListener('click',e=>{e.preventDefault(); if(G.inGame&&G.phase==='clear'){ G.phase='win'; showEnd(); /* 시간 종료와 동일하게 요약 화면 */ } else if(G.inGame&&me.dead){ confirmExit(()=>quitToTitle()); } });
@@ -4057,7 +4100,7 @@ function drawNums(){
   ctx.globalAlpha=1;
 }
 function drawBossBar(){
-  if(G.stg&&G.stg.raid){ if(G.phase!=='boss')return; const mw=Math.min(150,VW<560?VW*.26:VW*.2), w=Math.min(150,VW*.34), bw=w+101, lim=VW-10-mw-8, left=Math.min(VW/2-bw/2,lim-bw), x=left+68; let y=84; /* 제목('삼남매 레이드') 바로 아래, 미니맵 왼쪽에 맞춰 배치 */
+  if(G.stg&&G.stg.raid){ if(G.phase!=='boss')return; const mw=mmW(), w=Math.min(150,VW*.34), bw=w+101, lim=VW-10-mw-8, left=Math.min(VW/2-bw/2,lim-bw), x=left+68; let y=84; /* 제목('삼남매 레이드') 바로 아래, 미니맵 왼쪽에 맞춰 배치 */
     for(const k of ['war','sorc','shd']){ const ty=MT.findIndex(q=>q.raid===k), b=G.mobs.find(m=>m.type===ty&&!m.dead), p=b?(b.hpp!==undefined?b.hpp/100:b.hp/b.max):0;
       ctx.fillStyle='rgba(0,0,0,.72)'; ctx.fillRect(x-2,y-2,w+4,11); ctx.fillStyle=!b?'#3a2a2a':(b.awk?'#c01818':k==='war'?'#8a2440':k==='sorc'?'#4a3aa8':'#4a2a5a'); ctx.fillRect(x,y,w*p,7);
       if((G.sib||0)>0&&b){ ctx.strokeStyle=`rgba(255,60,40,${.5+.3*Math.sin(T*6)})`; ctx.lineWidth=1.5; ctx.strokeRect(x-2.5,y-2.5,w+5,12); }
@@ -4116,8 +4159,9 @@ function drawLanesEdge(t){
     ctx.fillText(lb,lx+1,ly+1); ctx.fillStyle='#ffb0a0'; ctx.fillText(lb,lx,ly);
   }
 }
-function drawMinimap(){ if(!hudOn('mini'))return;
-  const w=Math.min(150,VW<560?VW*.26:VW*.2), h=w*WH/WW, x=VW-w-10, y=Math.max(10,0)+4;
+function drawMinimap(){ if(!hudOn('mini'))return; if(LAND){ ctx.save(); ctx.globalAlpha=.55; drawMinimap0(); ctx.restore(); } else drawMinimap0(); }
+function drawMinimap0(){
+  const w=mmW(), h=w*WH/WW, x=VW-w-(LAND?8:10), y=LAND?8:Math.max(10,0)+4;
   ctx.fillStyle='rgba(10,8,7,.75)'; ctx.fillRect(x,y,w,h); ctx.strokeStyle='#6b5432'; ctx.lineWidth=1.5; ctx.strokeRect(x+.5,y+.5,w,h); ctx.fillStyle='#2c241c'; ctx.fillRect(x+VX*(w/WW)-2,y,4,VY*(h/WH)); ctx.fillRect(x,y+VY*(h/WH)-2,w,4);
   const sx=w/WW, sy=h/WH;
   ctx.fillStyle='#8a6a3a'; ctx.beginPath(); ctx.arc(x+VX*sx,y+VY*sy,VR*sx,0,6.283); ctx.fill();
