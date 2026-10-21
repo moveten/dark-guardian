@@ -63,3 +63,5 @@
 [4스테이지 카드 용 테두리 — 적용 완료] dragon_frame.png = 흰색 실루엣(알파), index.html 의 .drg 마스크로 카드 테두리 색을 입힘. 프롬프트 img/dragon_frame_prompt.txt
 
 [랭킹 직업 아이콘 — 적용 완료] cls_war/sorc/pal/necro/druid.png (160×160, 투명 배경) — 랭킹 목록(.rke)·랭킹 프로필 제목(.rkh)에서 사용. 원본 시트에서 잘라 배경 제거.
+
+[드루이드 궁극기 곰세마리 소환수 이미지 — 적용 완료] mn_papa / mn_mama / mn_baby .png + _atk.png (대기/공격, 각 쌍은 같은 크기·같은 발 위치). 크기는 index.html 의 MSH(papa/mama/baby h)에서 조절. 없으면 코드가 그리는 기본 곰 그림.
