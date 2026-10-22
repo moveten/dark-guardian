@@ -590,6 +590,8 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 #sty .stx{margin:0;font-size:15px;line-height:1.6;word-break:keep-all}
 #sty #stB{color:transparent}
 #sty.nar .stx{font-style:italic;color:#cdbfa6;text-align:center}
+#sty.rt .snm{justify-content:flex-end}
+#sty.rt .stx{text-align:right}
 #sty .sft{display:flex;align-items:center;gap:10px;margin-top:5px}
 #sty .spg{font-size:11.5px;color:var(--mute);flex:1}
 #sty .sgo{color:var(--gold);font-size:13px;animation:stBl 1s steps(2) infinite}
@@ -704,7 +706,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.5.0199</div>
+    <div class="ver" id="verT">v0.4.5.0200</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -3299,7 +3301,7 @@ function storyRun(kind){ const id=G.stg&&G.stg.id, ls=id&&STORY[id]&&STORY[id][k
   storyShow(0); return true; }
 function storyShow(i){ const S=stS; if(!S)return; S.i=i; const ln=S.ls[i], sp=ln[0], el=$('#sty'), nar=sp==='nar';
   if(sp==='nar'){ S.foe=ln[2]==='-'?null:(ln[2]||S.foe); } else if(sp!=='me')S.foe=sp;
-  el.classList.toggle('nar',nar);
+  el.classList.toggle('nar',nar); el.classList.toggle('rt',!nar&&sp!=='me');   /* 주인공 대사는 왼쪽 · 보스·삼남매 대사는 오른쪽 정렬 */
   const me0=sp==='me', info=me0?{n:dispName(me),t:CLASSES[me.cls].n,c:'#f0d9a0'}:STSP[sp];
   $('#stN').textContent=nar?'':info.n; $('#stN').style.color=nar?'':info.c; $('#stT').textContent=nar?'':(info.t||'');
   const L=el.querySelector('.sp.l'), R=el.querySelector('.sp.r'), li=L.firstElementChild, ri=R.firstElementChild, ms='img/hero_'+me.cls+'.png';
@@ -3311,7 +3313,7 @@ function storyBox(){ const b=$('#sty .sbox'); if(b)$('#sty').style.setProperty('
 function storyTick(){ const S=stS; if(!S){ clearInterval(stTm); return; } S.n=Math.min(S.full.length,S.n+1); $('#stA').textContent=S.full.slice(0,S.n); $('#stB').textContent=S.full.slice(S.n); if(S.n>=S.full.length){ clearInterval(stTm); $('#stGo').classList.remove('hid'); } }
 function storyNext(){ const S=stS; if(!S)return; if(S.n<S.full.length){ S.n=S.full.length; storyTick(); return; } sfx('ui'); if(S.i+1>=S.ls.length)storyEnd(); else storyShow(S.i+1); }
 function storySkip(){ if(stS){ sfx('ui'); storyEnd(); } }
-function storyClose(){ const S=stS; clearInterval(stTm); stS=null; const el=$('#sty'); if(el){ el.hidden=true; el.classList.remove('nar','nb'); } if(S&&S.pz)G.paused=G.mode==='solo'&&!$('#sheet').hidden; return S; }
+function storyClose(){ const S=stS; clearInterval(stTm); stS=null; const el=$('#sty'); if(el){ el.hidden=true; el.classList.remove('nar','nb','rt'); } if(S&&S.pz)G.paused=G.mode==='solo'&&!$('#sheet').hidden; return S; }
 function storyStop(){ storyClose(); storyWait=false; }
 function storyEnd(){ const S=storyClose(); if(S&&S.kind==='pre'){ storyWait=false;
   if(G.mode!=='guest'&&(me.clear|0)>selStage&&!STAGES[selStage].raid&&G.inGame&&!G.allMode&&G.phase==='prep'&&G.wave===0&&G.stageIdx===selStage)startAllOut(); } }   /* 이미 깬 스테이지는 대화 뒤 바로 총공세 */
