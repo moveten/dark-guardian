@@ -707,7 +707,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.5.0203</div>
+    <div class="ver" id="verT">v0.4.5.0204</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -3783,17 +3783,17 @@ function renderShop(){
     renderShop(); });
 }
 function bulkSell(P){ P=P||me;
-  const sel=new Set([0,1]); let uAsk=false;
-  const info=()=>{ let n=0,v=0; P.inv.forEach(it=>{ if(it&&!it.lock&&!(it.enh>0)&&sel.has(it.rar)){n++;v+=sellInfo(it).total;} }); return {n,v}; };
-  const cnt=r=>P.inv.filter(it=>it&&!it.lock&&!(it.enh>0)&&it.rar===r).length, val=r=>P.inv.reduce((a,it)=>a+(it&&!it.lock&&!(it.enh>0)&&it.rar===r?sellInfo(it).total:0),0);
+  const sel=new Set([0,1]); let uAsk=false, eAsk=false;
+  const info=()=>{ let n=0,v=0,e=0; P.inv.forEach(it=>{ if(it&&!it.lock&&sel.has(it.rar)){n++;v+=sellInfo(it).total;if(it.enh>0)e++;} }); return {n,v,e}; };   /* 잠그지 않은 강화 아이템도 일괄판매 대상 */
+  const cnt=r=>P.inv.filter(it=>it&&!it.lock&&it.rar===r).length, val=r=>P.inv.reduce((a,it)=>a+(it&&!it.lock&&it.rar===r?sellInfo(it).total:0),0), ecnt=r=>P.inv.filter(it=>it&&!it.lock&&it.enh>0&&it.rar===r).length;
   const draw=m=>{ const f=info();
-    m.querySelector('#bsSum').innerHTML=f.n?`선택한 <b>${f.n}개</b> · <b style="color:#ffd84a">${f.v}G</b>`:'<span class="meta">판매할 등급을 선택하세요</span>';
-    m.querySelector('#bsGo').disabled=!f.n; uAsk=false; m.querySelector('#bsGo').textContent='일괄 판매하기'; };
-  modal(`<h3>🧺 일괄 판매</h3><p class="meta" style="margin:0 0 8px">${P===me?'가방':'공유보관함'}의 아이템만 팔아요. ${P===me?'장착 중인 장비, ':''}강화한 아이템, 🔒잠근 아이템은 제외돼요. 유니크는 직접 체크해야 팔려요.</p><div class="col">${[0,1,2,3].map(r=>`<label class="toggle" style="display:flex;gap:8px;align-items:center;font-size:14px;padding:8px;border:1px solid var(--line2);border-radius:8px"><input type="checkbox" data-r="${r}" ${r<=1&&cnt(r)?'checked':''} ${cnt(r)?'':'disabled'}> <span style="color:${RARC[r]};font-weight:700">${RARN[r]}</span> <span style="margin-left:auto;color:var(--mute)">${cnt(r)}개 · ${val(r)}G</span></label>`).join('')}<div id="bsSum" style="min-height:22px;font-size:14px"></div><div class="row2"><button class="btn" id="bsNo">취소</button><button class="btn primary" id="bsGo">일괄 판매하기</button></div></div>`,m=>{
+    m.querySelector('#bsSum').innerHTML=f.n?`선택한 <b>${f.n}개</b> · <b style="color:#ffd84a">${f.v}G</b>${f.e?` <span style="color:#ffb259">(강화 아이템 ${f.e}개 포함)</span>`:''}`:'<span class="meta">판매할 등급을 선택하세요</span>';
+    m.querySelector('#bsGo').disabled=!f.n; uAsk=false; eAsk=false; m.querySelector('#bsGo').textContent='일괄 판매하기'; };
+  modal(`<h3>🧺 일괄 판매</h3><p class="meta" style="margin:0 0 8px">${P===me?'가방':'공유보관함'}의 아이템만 팔아요. ${P===me?'장착 중인 장비와 ':''}🔒잠근 아이템은 제외돼요. 강화한 아이템도 잠그지 않았으면 함께 팔려요. 유니크는 직접 체크해야 팔려요.</p><div class="col">${[0,1,2,3].map(r=>`<label class="toggle" style="display:flex;gap:8px;align-items:center;font-size:14px;padding:8px;border:1px solid var(--line2);border-radius:8px"><input type="checkbox" data-r="${r}" ${r<=1&&cnt(r)?'checked':''} ${cnt(r)?'':'disabled'}> <span style="color:${RARC[r]};font-weight:700">${RARN[r]}</span> <span style="margin-left:auto;color:var(--mute)">${cnt(r)}개${ecnt(r)?` <span style="color:#ffb259">(강화 ${ecnt(r)})</span>`:''} · ${val(r)}G</span></label>`).join('')}<div id="bsSum" style="min-height:22px;font-size:14px"></div><div class="row2"><button class="btn" id="bsNo">취소</button><button class="btn primary" id="bsGo">일괄 판매하기</button></div></div>`,m=>{
     m.querySelectorAll('[data-r]').forEach(c=>c.onchange=()=>{ const r=+c.dataset.r; if(c.checked)sel.add(r); else sel.delete(r); draw(m); });
     m.querySelector('#bsNo').onclick=closeModal;
     if(!cnt(0)) sel.delete(0); if(!cnt(1)) sel.delete(1); draw(m);
-    m.querySelector('#bsGo').onclick=()=>{ const f=info(); if(!f.n)return; if(sel.has(3)&&!uAsk){ uAsk=true; m.querySelector('#bsGo').textContent='⚠️ 유니크 포함! 한 번 더 누르면 판매'; return; } let g=0,n=0; P.inv.forEach((it,i)=>{ if(it&&!it.lock&&!(it.enh>0)&&sel.has(it.rar)){g+=sellInfo(it).total;n++;P.inv[i]=null;} }); P.gold=(P.gold|0)+g; selItem=null; shopMsg=`${n}개 판매 +${g}G`; sfx('coin'); saveSrc(P); uiDirty=true; closeModal(); rerender(); sheetToast&&sheetToast(`${n}개 판매 +${g.toLocaleString()}G`); };
+    m.querySelector('#bsGo').onclick=()=>{ const f=info(); if(!f.n)return; if(sel.has(3)&&!uAsk){ uAsk=true; m.querySelector('#bsGo').textContent='⚠️ 유니크 포함! 한 번 더 누르면 판매'; return; } if(f.e&&!eAsk){ eAsk=true; uAsk=true; m.querySelector('#bsGo').textContent=`⚠️ 강화 아이템 ${f.e}개 포함! 한 번 더 누르면 판매`; return; } let g=0,n=0; P.inv.forEach((it,i)=>{ if(it&&!it.lock&&sel.has(it.rar)){g+=sellInfo(it).total;n++;P.inv[i]=null;} }); P.gold=(P.gold|0)+g; selItem=null; shopMsg=`${n}개 판매 +${g}G`; sfx('coin'); saveSrc(P); uiDirty=true; closeModal(); rerender(); sheetToast&&sheetToast(`${n}개 판매 +${g.toLocaleString()}G`); };
   });
 }
 function enhFx(ok,it,L){
@@ -3825,14 +3825,14 @@ function enhModal(){
   if(L>MAXENH){ warn(`최대 강화(+${MAXENH})예요`); return; }
   tutEv('enh');
   const need=enhNeed(L), cost=enhCost(it,L), rate=enhRate(L);
-  const elig=me.inv.map((x,i)=>({x,i})).filter(o=>o.x&&!isShard(o.x)&&o.x!==it&&o.x.rar===it.rar&&!o.x.lock&&!(o.x.enh>0)).sort((a,b)=>(a.x.ilvl|0)-(b.x.ilvl|0)||sellInfo(a.x).total-sellInfo(b.x).total||a.i-b.i); /* 레벨 오름차순 — 낮은 레벨부터 자동 선택 */
-  const sel=new Set(elig.slice(0,need).map(o=>o.i)); const matObj=new Map(elig.map(o=>[o.i,o.x]));
+  const elig=me.inv.map((x,i)=>({x,i})).filter(o=>o.x&&!isShard(o.x)&&o.x!==it&&o.x.rar===it.rar&&!o.x.lock).sort((a,b)=>(a.x.enh|0)-(b.x.enh|0)||(a.x.ilvl|0)-(b.x.ilvl|0)||sellInfo(a.x).total-sellInfo(b.x).total||a.i-b.i); /* 강화 안 한 것 → 낮은 레벨 순. 강화한 아이템은 목록 아래쪽, 자동 선택 안 함(직접 체크) */
+  const sel=new Set(elig.filter(o=>!(o.x.enh>0)).slice(0,need).map(o=>o.i)); const matObj=new Map(elig.map(o=>[o.i,o.x]));
   const k2=1+.1*L, k1=1+.1*(L-1), b0=it.b0||{mn:it.mn,mx:it.mx,df:it.df,dm:it.dm,om:it.om};
   const eff=it.slot==='amulet'?`올스탯 +${L-1} → <b style="color:#9fd18b">+${L}</b>`:it.slot==='ring'?(L>=10?`<b style="color:#9fd18b">모든 스킬 +1 달성!</b>`:`+10강 달성 시 모든 스킬 +1 (현재 +${L-1} → +${L})`):it.dm?`공격력 +${it.dm} → <b style="color:#9fd18b">+${Math.round(b0.dm*k2)}</b>`:it.om?`마나 +${it.om} → <b style="color:#9fd18b">+${Math.round(b0.om*k2)}</b>`:it.b0&&it.b0.mx||it.mx?`공격력 ${it.mn}–${it.mx} → <b style="color:#9fd18b">${Math.max(1,Math.round(b0.mn*k2))}–${Math.max(Math.max(1,Math.round(b0.mn*k2))+1,Math.round(b0.mx*k2))}</b>`:`방어력 ${it.df} → <b style="color:#9fd18b">${Math.round(b0.df*k2)}</b>`;
-  const rows=elig.map(o=>`<label style="display:flex;gap:8px;align-items:center;padding:0 6px;height:36px;box-sizing:border-box;flex:none;border:1px solid var(--line2);border-radius:7px;font-size:12.5px"><input type="checkbox" data-m="${o.i}" ${sel.has(o.i)?'checked':''}><span style="color:${RARC[o.x.rar]};flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(o.x.name)}</span><span class="meta">${slotLbl(o.x)} · Lv ${o.x.ilvl}</span></label>`).join('');
+  const rows=elig.map(o=>`<label style="display:flex;gap:8px;align-items:center;padding:0 6px;height:36px;box-sizing:border-box;flex:none;border:1px solid var(--line2);border-radius:7px;font-size:12.5px"><input type="checkbox" data-m="${o.i}" ${sel.has(o.i)?'checked':''}><span style="color:${RARC[o.x.rar]};flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${o.x.enh>0?`<b style="color:#ffb259">+${o.x.enh}</b> `:''}${esc(o.x.name)}</span><span class="meta">${slotLbl(o.x)} · Lv ${o.x.ilvl}</span></label>`).join('');
   modal(`<h3>⚒ 강화 +${L-1} → +${L}</h3><div class="meta" style="margin:0 0 6px"><span style="color:${RARC[it.rar]};font-weight:700">${esc(dn(it))}</span> · ${eff}<br>${it.slot==='amulet'?'강화 1회마다 힘·민첩·체력·에너지가 +1씩 올라요.':it.slot==='ring'?'+10강을 달성하면 모든 스킬 레벨이 +1 돼요.':'기본 능력(공격력/방어력)이 강화 1회마다 원래 값의 10%씩 오르고, 다른 옵션은 그대로예요.'}</div>
    <div style="font-size:13px;line-height:1.7">성공 확률 <b style="color:${rate>=80?'#9fd18b':rate>=50?'#ffd84a':'#ff8a7a'}">${rate}%</b> · 필요 골드 <b id="enC" style="color:#ffd84a">${cost.toLocaleString()}G</b> <span class="meta">(보유 ${me.gold.toLocaleString()}G)</span><br>재료 : 같은 <b style="color:${RARC[it.rar]}">${RARN[it.rar]}</b> 등급 아이템 <b>${need}개</b> <span id="enSel" class="meta"></span></div>
-   <div class="enlist" style="display:grid;grid-auto-rows:36px;align-content:start;gap:4px;max-height:200px;overflow:auto;margin:8px 0;touch-action:pan-y">${rows||'<div class="meta">재료로 쓸 수 있는 아이템이 없어요 (잠금·강화한 아이템 제외)</div>'}</div>
+   <div class="enlist" style="display:grid;grid-auto-rows:36px;align-content:start;gap:4px;max-height:200px;overflow:auto;margin:8px 0;touch-action:pan-y">${rows||'<div class="meta">재료로 쓸 수 있는 아이템이 없어요 (🔒잠근 아이템 제외)</div>'}</div>
    <div class="meta enn" style="margin-bottom:8px">실패하면 재료와 골드만 사라지고 강화 단계는 그대로예요.</div>
    <div class="row2"><button class="btn" id="enNo">취소</button><button class="btn primary" id="enGo">강화하기</button></div>`,m=>{
     m.querySelector('.card').classList.add('enc');   /* 가로 모드: 목록만 스크롤, 버튼은 항상 보임 */
@@ -3841,7 +3841,7 @@ function enhModal(){
     m.querySelector('#enNo').onclick=closeModal; draw();
     m.querySelector('#enGo').onclick=()=>{ if(sel.size!==need||me.gold<cost)return;
       const mats=[...sel].map(i=>me.inv[i]).filter(Boolean);
-      modal(`<h3>⚠️ 정말 강화할까요?</h3><p style="margin:0 0 8px;font-size:14px"><b style="color:${RARC[it.rar]}">${esc(it.name)}</b> +${L-1} → +${L}<br>성공 확률 <b>${rate}%</b> · <b style="color:#ffd84a">${cost.toLocaleString()}G</b> 소모</p><div class="meta enlist" style="margin-bottom:8px;max-height:30vh;overflow:auto;touch-action:pan-y">아래 재료가 사라져요${rate<100?' (실패해도 사라져요)':''}:<br>${mats.map(x=>`<span style="color:${RARC[x.rar]}">${esc(x.name)}</span>`).join(', ')}</div><div class="row2"><button class="btn" id="en2No">취소</button><button class="btn primary" id="en2Yes">강화 시도</button></div>`,m2=>{
+      modal(`<h3>⚠️ 정말 강화할까요?</h3><p style="margin:0 0 8px;font-size:14px"><b style="color:${RARC[it.rar]}">${esc(it.name)}</b> +${L-1} → +${L}<br>성공 확률 <b>${rate}%</b> · <b style="color:#ffd84a">${cost.toLocaleString()}G</b> 소모</p><div class="meta enlist" style="margin-bottom:8px;max-height:30vh;overflow:auto;touch-action:pan-y">아래 재료가 사라져요${rate<100?' (실패해도 사라져요)':''}:<br>${mats.map(x=>`<span style="color:${RARC[x.rar]}">${x.enh>0?`<b style="color:#ffb259">+${x.enh}</b> `:''}${esc(x.name)}</span>`).join(', ')}${mats.some(x=>x.enh>0)?'<br><span style="color:#ffb259">⚠️ 강화한 아이템이 재료에 포함돼 있어요</span>':''}</div><div class="row2"><button class="btn" id="en2No">취소</button><button class="btn primary" id="en2Yes">강화 시도</button></div>`,m2=>{
         m2.querySelector('.card').classList.add('enc'); m2.querySelector('#en2No').onclick=closeModal; m2.querySelector('#en2Yes').onclick=()=>doEnh(); }); };
     const doEnh=()=>{ if(sel.size!==need||me.gold<cost)return;
       /* 강화창이 열린 사이 자동합성/판매로 인벤이 바뀌었으면 중단 (골드·재료 보호) */
