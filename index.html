@@ -649,7 +649,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.5.0181</div>
+    <div class="ver" id="verT">v0.4.5.0182</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -2195,7 +2195,7 @@ function doCast(key,range,lv){
 /* 반격 태세: 우두머리는 무적이 아니라서 일반공격·소환수·스킬 피해가 모두 그대로 들어가고, 태세 중에 내가 스킬을 쓰면 추가로 내 최대 생명력의 CNT_PCT 만큼 방어력·막기 무시로 되돌려받음 */
 const CNT_PCT=.35, CNT_WIN=2; /* 반사 피해(최대 생명력 비율) / 태세 중 시전한 스킬만 반사 대상으로 인정하는 시간(초) — 태세 전에 깔아 둔 장판·지연 피해는 반사 없이 보스에게만 들어감 */
 function counterHit(m,v){ if(T-(me.cLast||-9)<.6||me.dead||T-(me.cnCast||-9)>CNT_WIN)return; me.cLast=T; addNum(me.x,me.y-44,'⚔️ 반격!','#ff8a3a',true); efx.push({k:'ring',x:me.x,y:me.y,r0:8,r1:50,t:0,life:.35,col:'#ff8a3a',w:7});
-  if(me.god>0||G.phase==='win'||G.phase==='clear')return; const d=Math.round(me.D.maxHp*CNT_PCT*(me.D.sp&&me.D.sp.hamu?.5:1)); me.hp-=d; me.hurt=.15; sfx('hurt'); G.shake=Math.max(G.shake,.4); addNum(me.x,me.y-24,d,'#ff5a4a',false); if(me.hp<=0)goDown(); }
+  if(me.god>0||G.phase==='win'||G.phase==='clear')return; const d=Math.round(me.D.maxHp*CNT_PCT*(me.D.sp&&me.D.sp.hamu?.5:1)); me.hp-=d; me.hurt=.15; sfx('hurt'); G.shake=Math.max(G.shake,.4); addNum(me.x,me.y-24,d,'#ff5a4a',false); if(me.hp<=0){ goDown(); counterTip(); } }
 const LVP0={ex:0,gap:0,dm:1,tk:1,miss:0};
 /* 장비 레벨 페널티: 착용 중인 7칸의 아이템 레벨 총합(강화 1단계 = +1, 빈 칸 = 0)을 스테이지 권장 합(칸당 icap-12)과 비교해 주는 피해·받는 피해에 똑같이 반영 */
 const GP0={wm:1,tk:1,gl:0,sum:0,need:0,slots:7};
@@ -2947,8 +2947,8 @@ function autoSkills(dt){
    - 단계 정의(TUTS): t 제목 · b 내용 · tg 강조할 요소 · hud 게임 화면 요소라 창이 열려 있으면 먼저 닫게 함 · ck 행동 완료 조건(주기적으로 확인) · ok 읽기만 하는 단계(확인 버튼, 혼자일 땐 게임 일시정지)
      can 못 하는 상황이면 b2 로 바꿔 읽기 단계로 · pre/post 단계 시작/끝에 할 일 */
 const TUT_TOPIC=['이동 · 공격 · 스킬 · 전리품 · 물약','스킬 포인트 · 능력치 · AUTO 자동 사냥','가방 · 장비 착용 · 판매 · 자동 정리','장비 강화 · 상점','아이템 보내기 · 우편함 · 공유보관함'];
-function tutDef(){ return {on:0,d:[0,0,0,0,0],rw:[0,0,0,0,0],g:[0,0,0,0,0],fin:0}; }
-function tutFix(p){ const t=p.tut&&typeof p.tut==='object'?p.tut:tutDef(); for(const k of ['d','rw','g']){ t[k]=Array.isArray(t[k])?t[k].slice(0,5).map(v=>v|0):[]; while(t[k].length<5)t[k].push(0); } t.on=t.on?1:0; t.fin=t.fin?1:0; p.tut=t; }
+function tutDef(){ return {on:0,d:[0,0,0,0,0],rw:[0,0,0,0,0],g:[0,0,0,0,0],fin:0,cn:0}; }
+function tutFix(p){ const t=p.tut&&typeof p.tut==='object'?p.tut:tutDef(); for(const k of ['d','rw','g']){ t[k]=Array.isArray(t[k])?t[k].slice(0,5).map(v=>v|0):[]; while(t[k].length<5)t[k].push(0); } t.on=t.on?1:0; t.fin=t.fin?1:0; t.cn=t.cn?1:0; p.tut=t; }
 let tutS=null, tutIv=0, tutWait=false;
 const tutQ=s=>document.querySelector(s), tutShut=()=>document.body.classList.contains('shopen');
 const tutVis=e=>{ if(!e)return null; const r=e.getBoundingClientRect(); return r.width>2&&r.height>2?e:null; };
@@ -2990,6 +2990,9 @@ const TUTS=[
   {t:'우편함',b:'스테이지 클리어·이벤트 보상은 타이틀 메뉴의 ✉️ 우편함으로 와요. 편지 아래의 선물 아이콘을 눌러야 가방에 들어와요. 이 튜토리얼의 보상도 우편함으로 보내 드려요!',ok:1}
  ]
 ];
+/* 보스 반격 태세로 처음 쓰러졌을 때(캐릭터마다 딱 한 번) 알려 주는 안내 — 수동·AUTO 모두 해당. 튜토리얼이 진행 중이면 다음 기회로 미룸 */
+function counterTip(){ const t=me&&me.tut; if(!t||t.cn||tutS)return; t.cn=1; saveChar(); const au=autoMode===2;
+  later(.7,()=>{ if(!G.inGame)return; modal(`<h3>⚔️ 보스의 반격 태세!</h3><div class="mbody" style="line-height:1.7"><p style="margin:0 0 8px">보스 머리 위에 <b style="color:#ffb347">⚔️ 반격 태세</b>가 뜨는 동안(약 3초)에는 <b>스킬을 쓰면 안 돼요.</b> 쓰는 순간 내 최대 생명력의 <b style="color:#ff8a7a">35%</b>가 피해로 되돌아와요.</p><p style="margin:0 0 8px">일반공격과 소환수 공격은 괜찮아요. 태세가 풀리면 다시 스킬을 쓰세요.</p>${au?'<p style="margin:0;color:#ffb259"><b>AUTO(+스킬)</b>도 태세를 구분하지 못해요. 보스가 태세에 들어가면 AUTO를 1단계(이동)로 낮추거나 직접 조작하세요.</p>':'<p style="margin:0;color:var(--mute)">AUTO(+스킬)를 쓸 때도 태세를 구분하지 못하니 조심하세요.</p>'}</div><div class="row2"><button class="btn primary" id="cnOk" style="grid-column:1/-1">알겠어요</button></div>`,m=>{ m.querySelector('#cnOk').onclick=closeModal; }); }); }
 function tutBegin(){ const k=selStage; if(tutS||!me||!me.tut||!me.tut.on||G.mode!=='solo'||G.coop||k>=TUTS.length||me.tut.d[k]!==0)return false;
   later(1.4,()=>{ if(G.inGame&&G.stageIdx===k&&!tutS&&G.mode==='solo'&&!G.coop)tutRun(k); }); return true; }
 function tutRun(k){ tutS={k,i:-1,fl:{},S:{},ok:false,pz:false,conf:0,key:''}; $('#tq').hidden=false; clearInterval(tutIv); tutIv=setInterval(tutTick,120); tutGo(0); }
