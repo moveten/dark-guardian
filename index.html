@@ -706,7 +706,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.5.0208</div>
+    <div class="ver" id="verT">v0.5.0.0209</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -979,12 +979,12 @@ const MT=MT0.map(t=>({...t,r:t.r*MOBS}));
 const BOSSNAMES=MT.filter(m=>m.boss&&!m.raid).map(m=>m.n.split(' ').pop());
 
 const BASES={
- weapon:[{n:'낡은 단검',mn:2,mx:4},{n:'장검',mn:3,mx:8},{n:'철퇴',mn:3,mx:9},{n:'참나무 지팡이',mn:2,mx:6},{n:'전투 도끼',mn:4,mx:11},{n:'대검',mn:5,mx:13}],
+ weapon:[{n:'낡은 단검',mn:2,mx:6},{n:'장검',mn:3,mx:9},{n:'철퇴',mn:1,mx:11},{n:'참나무 지팡이',mn:4,mx:8},{n:'전투 도끼',mn:6,mx:12},{n:'대검',mn:5,mx:13}],
  helm:[{n:'가죽 투구',df:3},{n:'철 투구',df:6},{n:'뿔 달린 투구',df:9}],
  armor:[{n:'누비 갑옷',df:8},{n:'가죽 갑옷',df:12},{n:'사슬 갑옷',df:18}],
  amulet:[{n:'목걸이'}],ring:[{n:'반지'}],
- shield:[{n:'나무 방패',df:5},{n:'철 방패',df:9},{n:'성스러운 방패',df:14}]};
-const OFFB={pal:BASES.shield,war:[{n:'손도끼',dm:3},{n:'쌍날 단검',dm:5},{n:'전쟁의 뿔',dm:8}],sorc:[{n:'수정구',om:12},{n:'마력의 오브',om:20},{n:'별빛 오브',om:30}],necro:[{n:'혼등',om:12},{n:'영혼 등불',om:20},{n:'망령의 등불',om:30}],druid:[{n:'나무 토템',dm:2,om:6},{n:'뿔 토템',dm:3,om:10},{n:'정령 토템',dm:4,om:15}]}; /* 드루이드 토템: 공격력(전사 보조무기와 같은 값) + 마나 */
+ shield:[{n:'나무 방패',df:9},{n:'철 방패',df:12},{n:'성스러운 방패',df:12,om:5}]};
+const OFFB={pal:BASES.shield,war:[{n:'손도끼',dm:6},{n:'쌍날 단검',dm:7},{n:'전쟁의 뿔',dm:7,om:5}],sorc:[{n:'수정구',om:24},{n:'마력의 오브',om:28},{n:'별빛 오브',om:32}],necro:[{n:'혼등',om:12},{n:'영혼 등불',om:14},{n:'망령의 등불',om:16}],druid:[{n:'나무 토템',dm:3,om:10},{n:'뿔 토템',dm:5,om:8},{n:'정령 토템',dm:4,om:24}]}; /* 드루이드 토템: 공격력 + 마나 (v0.5.0 무기·보조장비 개편 수치) */
 const AFX=[
  {t:'dmg',n:'공격력 +{v}',sl:'weapon ring amulet',r:i=>[1,3+i]},
  {t:'dmgPct',n:'피해 +{v}%',sl:'weapon amulet ring',r:(i,s)=>s==='weapon'?[5,12+2*i]:[5,Math.max(5,Math.round(5+i*.5))]}, /* 무기 외 부위: 최대 = 5 + 아이템 레벨×0.5 */
@@ -1168,11 +1168,11 @@ function rollAff(a,rar,ilvl,q,rng,fc,slot){ /* fc: 직업 전용 아이템이면
   const [lo,hi]=a.r(ilvl,slot,rar), v=biased(lo,hi,q); rollAff.lq=(v-lo)/Math.max(1,hi-lo); return {t:a.t,v};
 }
 function hashStr(t){ let h=2166136261; for(let i=0;i<t.length;i++){ h^=t.charCodeAt(i); h=Math.imul(h,16777619); } return h>>>0; }
-const BREQ={'낡은 단검':{dex:[6,.55],str:[0,.2]},'장검':{str:[10,.7],dex:[0,.25]},'철퇴':{str:[10,.7],vit:[0,.2]},'참나무 지팡이':{ene:[8,.5],vit:[0,.15]},'마법서':{ene:[12,.55],vit:[0,.15]},'전투 도끼':{str:[16,.8],vit:[0,.2]},'대검':{str:[20,.9],vit:[0,.25]},
+const BREQ={'낡은 단검':{dex:[6,.55],str:[0,.4]},'장검':{vit:[10,.7],dex:[0,.25]},'철퇴':{str:[10,.75],vit:[0,.2]},'참나무 지팡이':{ene:[8,.8],vit:[0,.15]},'마법서':{ene:[12,.75]},'전투 도끼':{str:[11,.8],vit:[0,.5]},'대검':{str:[20,.9],vit:[0,.3]},
  '가죽 투구':{vit:[0,.25]},'철 투구':{str:[10,.45],vit:[0,.2]},'뿔 달린 투구':{str:[14,.55],vit:[0,.25]},'누비 갑옷':{vit:[8,.5]},'가죽 갑옷':{dex:[12,.5],vit:[0,.2]},'사슬 갑옷':{str:[16,.65],vit:[0,.3]},
- '나무 방패':{str:[8,.4]},'철 방패':{str:[14,.55],vit:[0,.2]},'성스러운 방패':{str:[18,.6],vit:[10,.35]},
- '손도끼':{str:[8,.4]},'쌍날 단검':{dex:[10,.5]},'전쟁의 뿔':{str:[14,.55],vit:[8,.3]},'수정구':{ene:[8,.35]},'혼등':{ene:[8,.35]},'영혼 등불':{ene:[14,.5]},'망령의 등불':{ene:[18,.55],vit:[8,.2]},'나무 토템':{ene:[8,.35]},'뿔 토템':{ene:[14,.5]},'정령 토템':{ene:[18,.55],vit:[8,.2]},'마력의 오브':{ene:[14,.5]},'별빛 오브':{ene:[18,.55],vit:[8,.2]}};
-const SPBASE={'마법서':{n:'마법서',mn:3,mx:7}};
+ '나무 방패':{str:[10,.5],vit:[5,.2]},'철 방패':{str:[14,.55],vit:[10,.35]},'성스러운 방패':{str:[18,.6],ene:[10,.35]},
+ '손도끼':{str:[10,.5],vit:[5,.2]},'쌍날 단검':{dex:[15,.6],str:[5,.3]},'전쟁의 뿔':{str:[15,.7],vit:[10,.3]},'수정구':{ene:[8,.55]},'혼등':{ene:[8,.55]},'영혼 등불':{ene:[14,.6]},'망령의 등불':{ene:[20,.65],vit:[15,.3]},'나무 토템':{ene:[8,.55]},'뿔 토템':{ene:[10,.5],vit:[8,.3]},'정령 토템':{ene:[18,.55],vit:[8,.4]},'마력의 오브':{ene:[14,.6]},'별빛 오브':{ene:[20,.65],vit:[15,.3]}};
+const SPBASE={'마법서':{n:'마법서',mn:2,mx:9}};
 const BASEFX={'마법서':{mana:25,mr:20,t:'마도서: 마나 +25, 마나 회복 +20%'},'낡은 단검':{ias:12,crit:4,t:'날렵함: 공격 속도 +12%, 치명타 +4%'},'장검':{dmgPct:6,def:4,t:'균형: 피해 +6%, 방어력 +4'},'철퇴':{dmgPct:10,ias:-6,t:'묵직함: 피해 +10%, 공격 속도 -6%'},
  '참나무 지팡이':{mana:18,mr:15,t:'마력 증폭: 마나 +18, 마나 회복 +15%'},'전투 도끼':{dmgPct:12,ias:-4,t:'쪼개기: 피해 +12%, 공격 속도 -4%'},'대검':{dmgPct:20,ias:-10,t:'파괴력: 피해 +20%, 공격 속도 -10%'}};
 const SPFX={
@@ -1262,6 +1262,16 @@ function genHero(key){ const H=HEROI[key], S=SPFX[key]; if(!H||!S)return null;
     else it.aff.push({t,v}); }
   return it; }
 const MAXENH=10, ENHBASE=[5000,7000,10000,15000];
+/* 무기·보조장비 기본 수치 개편(v0.5.0) 보정: 이미 가진 아이템의 기본 공격력/방어력/마나를 새 표로 다시 계산 (아이템 레벨·등급·강화 단계 그대로).
+   아이템 생성 식(genItem)과 같은 식이라 몇 번을 해도 결과가 같아요. 영웅 아이템은 heroFix 가 따로 맞춰요. 바뀌었으면 true */
+function baseFix(it){ if(!it||!(it.rar>=0&&it.rar<=3)||it.mat)return false; const il=it.ilvl||1, u=it.rar===3?1.3:1, R=Math.round; let b;
+  if(it.slot==='weapon')b=BASES.weapon.find(x=>x.n===it.base)||SPBASE[it.base]; else if(it.slot==='shield')b=(OFFB[it.oc]||OFFB.pal).find(x=>x.n===it.base);
+  if(!b)return false;
+  const n={}; if(b.mx){ const m=(1+il*.16)*u; n.mn=Math.max(1,R(b.mn*m)); n.mx=Math.max(n.mn+1,R(b.mx*m)); } if(b.df)n.df=R(b.df*(1+il*.2)*u); if(b.dm)n.dm=R(b.dm*(1+il*.1)*u); if(b.om)n.om=R(b.om*(1+il*.1)*u);
+  const before=JSON.stringify([it.mn,it.mx,it.df,it.dm,it.om,it.b0]);
+  for(const k of ['mn','mx','df','dm','om']){ if(n[k]!==undefined)it[k]=n[k]; else delete it[k]; }
+  if(it.b0||(it.enh|0)>0){ it.b0={mn:n.mn,mx:n.mx,df:n.df,dm:n.dm,om:n.om}; enhApply(it); }
+  return JSON.stringify([it.mn,it.mx,it.df,it.dm,it.om,it.b0])!==before; }
 const enhRate=L=>Math.max(5,100-8*(L-1)), enhNeed=L=>L, enhCost=(it,L)=>Math.round((1000+1000*L)*1.5), canEnh=it=>!!(it&&(it.mx||it.df||it.dm||it.om||it.slot==='ring'||it.slot==='amulet'));
 function enhApply(it){ if(it.slot==='ring'||it.slot==='amulet')return; if(!it.b0)it.b0={mn:it.mn,mx:it.mx,df:it.df,dm:it.dm,om:it.om}; const k=1+.1*(it.enh|0);
   if(it.b0.mx){ it.mn=Math.max(1,Math.round(it.b0.mn*k)); it.mx=Math.max(it.mn+1,Math.round(it.b0.mx*k)); } if(it.b0.df)it.df=Math.round(it.b0.df*k); if(it.b0.dm)it.dm=Math.round(it.b0.dm*k); if(it.b0.om)it.om=Math.round(it.b0.om*k); }
@@ -1340,6 +1350,7 @@ function baseText(it){
   if(it.mx) return `공격력 ${it.mn}–${it.mx}`;
   if(it.dm&&it.om) return `<b style="color:#ffb070">공격력 +${it.dm}</b> · <b style="color:#9fd0ff">마나 +${it.om}</b>`;
   if(it.dm) return `<b style="color:#ffb070">공격력 +${it.dm}</b>`;
+  if(it.om&&it.df) return `방어력 ${it.df} · <b style="color:#9fd0ff">마나 +${it.om}</b>`+(it.blk?` · <b style="color:#9fd0ff">막기 ${it.blk}%</b> <span style="color:#8d806d">(최종 최대 ${BLKMAX}%)</span>`:'');
   if(it.om) return `<b style="color:#9fd0ff">마나 +${it.om}</b>`;
   if(it.df) return `방어력 ${it.df}`+(it.blk?` · <b style="color:#9fd0ff">막기 ${it.blk}%</b> <span style="color:#8d806d">(최종 최대 ${BLKMAX}%)</span>`:'');
   return '';
@@ -1422,6 +1433,7 @@ function loadChar(id){
     if(cls==='druid'){ const tm=it=>{ if(!it||it.slot!=='shield'||it.oc!=='druid'||it.rar===4)return; const b=OFFB.druid.find(x=>x.n===it.base); if(!b)return; const k=(it.rar===3?1.3:1)*(1+(it.ilvl||1)*.1), e=1+.1*(it.enh|0), d0=Math.round(b.dm*k), o0=Math.round(b.om*k); if(it.b0){ it.b0.dm=d0; it.b0.om=o0; } it.dm=Math.round(d0*e); it.om=Math.round(o0*e); }; /* 토템 수치 조정(공격력 3/5/8→2/3/4, 마나 12/20/30→6/10/15)을 이미 가진 토템에도 같은 식으로 다시 적용(등급·아이템 레벨·강화 반영) */
       p.inv.forEach(tm); for(const k in p.eq)tm(p.eq[k]); }
     for(const k of Object.keys(p.eq)){ const it=p.eq[k]; if(it&&it.sp&&SPFX[it.sp]&&SPFX[it.sp].fcls&&SPFX[it.sp].fcls!==cls){ const e=p.inv.indexOf(null); if(e>=0){ p.inv[e]=it; p.eq[k]=null; } } } /* 다른 직업 전용 장비가 장착돼 있으면 가방으로 */
+    p.inv.forEach(baseFix); for(const k in p.eq)baseFix(p.eq[k]);   /* 무기·보조장비 기본 수치 개편 보정 */
     p.mail=Array.isArray(p.mail)?p.mail.filter(x=>x&&MAILS[x.id]):[mailNew('welcome',MAIL0_D)]; /* 우편함 도입 전 캐릭터는 환영 편지를 한 번 받음(지우면 다시 안 옴) */ p.name=String(p.name||'').slice(0,8); p.gold=Number.isFinite(p.gold)?p.gold:500; p.potBuy=p.potBuy|0; p.rev=p.rev|0; tutFix(p); smMigrate(p); return p;
   }catch(e){ console.error('loadChar',id,e); return null; }
 }
@@ -3496,7 +3508,7 @@ const STORE_N=100, STORE_KEY='dkdef2.store', STORE_IC=`<svg viewBox="0 0 24 24" 
 let STORE=null, satSeq=0;
 function loadStore(){ let o=null; try{ o=JSON.parse(lsGet(STORE_KEY)||'null'); }catch(e){} if(!o||typeof o!=='object')o={};
   const inv=Array.isArray(o.inv)?o.inv.slice(0,STORE_N):[]; while(inv.length<STORE_N)inv.push(null);
-  let ch=false; for(const it of inv){ if(it){ if(!Array.isArray(it.aff))it.aff=[]; try{ heroFix(it); newOptFix(it); lanternFix(it); if(sumFix(it))ch=true; }catch(e){} } }
+  let ch=false; for(const it of inv){ if(it){ if(!Array.isArray(it.aff))it.aff=[]; try{ heroFix(it); newOptFix(it); lanternFix(it); if(sumFix(it))ch=true; if(baseFix(it))ch=true; }catch(e){} } }
   if(ch){ try{ lsSet(STORE_KEY,JSON.stringify({inv,gold:Math.max(0,o.gold|0)})); }catch(e){} }
   return {inv,gold:Math.max(0,o.gold|0),shard:0}; }
 function getStore(){ if(!STORE)STORE=loadStore(); return STORE; }
@@ -3829,7 +3841,7 @@ function enhModal(){
   const elig=me.inv.map((x,i)=>({x,i})).filter(o=>o.x&&!isShard(o.x)&&o.x!==it&&o.x.rar===it.rar&&!o.x.lock).sort((a,b)=>(a.x.ilvl|0)-(b.x.ilvl|0)||sellInfo(a.x).total-sellInfo(b.x).total||a.i-b.i); /* 레벨 오름차순 — 낮은 레벨부터 자동 선택 (잠그지 않은 강화 아이템도 똑같이 재료) */
   const sel=new Set(elig.slice(0,need).map(o=>o.i)); const matObj=new Map(elig.map(o=>[o.i,o.x]));
   const k2=1+.1*L, k1=1+.1*(L-1), b0=it.b0||{mn:it.mn,mx:it.mx,df:it.df,dm:it.dm,om:it.om};
-  const eff=it.slot==='amulet'?`올스탯 +${L-1} → <b style="color:#9fd18b">+${L}</b>`:it.slot==='ring'?(L>=10?`<b style="color:#9fd18b">모든 스킬 +1 달성!</b>`:`+10강 달성 시 모든 스킬 +1 (현재 +${L-1} → +${L})`):it.dm?`공격력 +${it.dm} → <b style="color:#9fd18b">+${Math.round(b0.dm*k2)}</b>`:it.om?`마나 +${it.om} → <b style="color:#9fd18b">+${Math.round(b0.om*k2)}</b>`:it.b0&&it.b0.mx||it.mx?`공격력 ${it.mn}–${it.mx} → <b style="color:#9fd18b">${Math.max(1,Math.round(b0.mn*k2))}–${Math.max(Math.max(1,Math.round(b0.mn*k2))+1,Math.round(b0.mx*k2))}</b>`:`방어력 ${it.df} → <b style="color:#9fd18b">${Math.round(b0.df*k2)}</b>`;
+  const eff=it.slot==='amulet'?`올스탯 +${L-1} → <b style="color:#9fd18b">+${L}</b>`:it.slot==='ring'?(L>=10?`<b style="color:#9fd18b">모든 스킬 +1 달성!</b>`:`+10강 달성 시 모든 스킬 +1 (현재 +${L-1} → +${L})`):it.dm?`공격력 +${it.dm} → <b style="color:#9fd18b">+${Math.round(b0.dm*k2)}</b>`:(it.om&&it.df)?`방어력 ${it.df} → <b style="color:#9fd18b">${Math.round(b0.df*k2)}</b> · 마나 +${it.om} → <b style="color:#9fd18b">+${Math.round(b0.om*k2)}</b>`:it.om?`마나 +${it.om} → <b style="color:#9fd18b">+${Math.round(b0.om*k2)}</b>`:it.b0&&it.b0.mx||it.mx?`공격력 ${it.mn}–${it.mx} → <b style="color:#9fd18b">${Math.max(1,Math.round(b0.mn*k2))}–${Math.max(Math.max(1,Math.round(b0.mn*k2))+1,Math.round(b0.mx*k2))}</b>`:`방어력 ${it.df} → <b style="color:#9fd18b">${Math.round(b0.df*k2)}</b>`;
   const rows=elig.map(o=>`<label style="display:flex;gap:8px;align-items:center;padding:0 6px;height:36px;box-sizing:border-box;flex:none;border:1px solid var(--line2);border-radius:7px;font-size:12.5px"><input type="checkbox" data-m="${o.i}" ${sel.has(o.i)?'checked':''}><span style="color:${RARC[o.x.rar]};flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${o.x.enh>0?`<b style="color:#ffb259">+${o.x.enh}</b> `:''}${esc(o.x.name)}</span><span class="meta">${slotLbl(o.x)} · Lv ${o.x.ilvl}</span></label>`).join('');
   modal(`<h3>⚒ 강화 +${L-1} → +${L}</h3><div class="meta" style="margin:0 0 6px"><span style="color:${RARC[it.rar]};font-weight:700">${esc(dn(it))}</span> · ${eff}<br>${it.slot==='amulet'?'강화 1회마다 힘·민첩·체력·에너지가 +1씩 올라요.':it.slot==='ring'?'+10강을 달성하면 모든 스킬 레벨이 +1 돼요.':'기본 능력(공격력/방어력)이 강화 1회마다 원래 값의 10%씩 오르고, 다른 옵션은 그대로예요.'}</div>
    <div style="font-size:13px;line-height:1.7">성공 확률 <b style="color:${rate>=80?'#9fd18b':rate>=50?'#ffd84a':'#ff8a7a'}">${rate}%</b> · 필요 골드 <b id="enC" style="color:#ffd84a">${cost.toLocaleString()}G</b> <span class="meta">(보유 ${me.gold.toLocaleString()}G)</span><br>재료 : 같은 <b style="color:${RARC[it.rar]}">${RARN[it.rar]}</b> 등급 아이템 <b>${need}개</b> <span id="enSel" class="meta"></span></div>
