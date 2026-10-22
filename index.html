@@ -119,6 +119,21 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
 .sb.on{background:rgba(70,60,20,.85);box-shadow:0 0 12px var(--c)}
 .sb.nomana{opacity:.45}
 .sb.nofm{opacity:.4;filter:grayscale(.8)}
+/* AUTO 버튼 (0 끔 · 1 이동+일반공격 · 2 +스킬 자동) */
+#bAuto{position:relative;flex:none;align-self:flex-end;width:45px;height:45px;border-radius:50%;padding:3px;border:0;box-sizing:border-box;pointer-events:auto;touch-action:none;font-family:inherit;transition:transform .1s}
+#bAuto:active{transform:scale(.92)}
+#bAuto .in{width:100%;height:100%;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:900;line-height:1;pointer-events:none}
+#bAuto b{font-size:11.5px;letter-spacing:.01em}#bAuto small{font-size:8.5px;font-weight:800;margin-top:2px}
+#bAuto.s0{background:#6b604f}#bAuto.s0 .in{background:radial-gradient(circle at 35% 28%,#4a4034,#1a1510 75%);color:#b9ac96}#bAuto.s0 small{color:#8c806b}
+#bAuto.s1{background:conic-gradient(#7be08f 0 180deg,#2c5a3a 180deg 360deg);box-shadow:0 0 12px rgba(111,208,138,.5)}#bAuto.s1 .in{background:radial-gradient(circle at 35% 28%,#3a8450,#143a26 75%);color:#eaffee}#bAuto.s1 small{color:#a9f2bb}
+#bAuto.s2{background:conic-gradient(#ffd24a,#ff9a2e,#ffd24a);animation:autoGlow 1.6s ease-in-out infinite}#bAuto.s2 .in{background:radial-gradient(circle at 35% 28%,#a8641c,#47240a 75%);color:#fff3d2}#bAuto.s2 small{color:#ffe08a}
+@keyframes autoGlow{0%,100%{box-shadow:0 0 10px rgba(255,190,70,.55)}50%{box-shadow:0 0 20px rgba(255,190,70,.95)}}
+.br{flex-direction:column;align-items:flex-end;gap:8px}   /* 세로: AUTO는 스킬 묶음 바로 위, 오른쪽 정렬 */
+#autoT{font-weight:800;font-size:11.5px;padding:3px 11px;border-radius:999px;white-space:nowrap;pointer-events:none;text-shadow:0 1px 2px #000;opacity:0;transition:opacity .25s}
+#autoT.show{opacity:1}
+#autoT.s0{border:2px solid #7d705a;background:rgba(40,34,26,.9);color:#cfc3ad}
+#autoT.s1{border:2px solid #6fd08a;background:rgba(18,50,32,.9);color:#c9ffd6}
+#autoT.s2{border:2px solid #ffc04a;background:rgba(70,38,10,.9);color:#ffe7b0}
 .atkcol{display:flex;flex-direction:column;align-items:center;gap:8px}
 #bAtk{width:78px;height:78px;border-radius:50%;border:2px solid var(--blood);background:rgba(60,18,14,.85);font-family:var(--f-disp);font-weight:800;font-size:16px;touch-action:none}
 #bPot{border:2px solid #b8322b}
@@ -507,7 +522,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   body.land #dock .hb .ic{font-size:19px}
   body.land #dock .badge{top:-5px;right:-5px;min-width:18px;height:18px;line-height:18px;font-size:11px}
   body.land #dock #bMenu{position:fixed;top:8px;right:calc(var(--R) + var(--mm) + 8px)}
-  body.land.shopen .sb{visibility:hidden}   /* 창이 열려 있을 땐 스킬 버튼을 숨겨 아이콘 줄과 겹치지 않게 */
+  body.land.shopen .sb,body.land.shopen #bAuto{visibility:hidden}   /* 창이 열려 있을 땐 스킬 버튼을 숨겨 아이콘 줄과 겹치지 않게 */
   body.land.shopen #dock #bMenu{position:static}   /* 창이 열려 있을 땐 아이콘 줄의 네 번째로 */
   body.land .sheetwrap{padding:max(10px,env(safe-area-inset-top)) calc(var(--R) + 46px) 10px 12px}
   /* 구슬·물약 버튼 */
@@ -520,6 +535,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   body.land .sb{position:absolute;width:var(--u);height:var(--u);pointer-events:auto;font-size:11px}
   body.land .sb .nm{font-size:20px}body.land .sb .lvn{font-size:8px;bottom:1px}
   body.land .sb[data-sl]{--st:calc(var(--u) + var(--g))}
+  body.land #bAuto{position:absolute;width:calc(var(--u) + 4px);height:calc(var(--u) + 4px);bottom:var(--B);right:calc(var(--R) + var(--o) + 8px + var(--sc,0)*(var(--u) + var(--g)) - var(--g) + 22px);align-self:auto}   /* 가로: 스킬 묶음 왼쪽(간격 22px) */
   body.land .sb[data-sl="0"],body.land .sb[data-sl="1"]{right:calc(var(--R) + (var(--o) - var(--u))/2)}
   body.land .sb[data-sl="0"]{bottom:calc(var(--B) + var(--o) + 6px)}
   body.land .sb[data-sl="1"]{bottom:calc(var(--B) + var(--o) + 6px + var(--st))}
@@ -559,13 +575,14 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     </div>
     <div class="tc">
       <div id="hWave">준비</div>
-      
+      <div id="autoT" class="s0"></div>
     </div>
     <div class="orbs">
       <div class="orb hp"><i id="hHp"></i><span><b id="hHpT"></b><small>❤️ 생명력</small></span></div>
       <div class="orb mp"><i id="hMp"></i><span><b id="hMpT"></b><small>💧 마나</small></span></div>
     </div>
     <div class="br">
+      <button id="bAuto" class="s0" aria-label="자동 사냥: 꺼짐"><span class="in"><b>AUTO</b><small>OFF</small></span></button>
       <div id="skills"></div>
     </div>
     <button id="bSkip" hidden aria-label="나가기">🚪 나가기</button><button id="bRevBig" hidden aria-label="즉시 부활">✨ 부활 <b id="revBigN">0</b></button><div id="emg" hidden></div>
@@ -580,7 +597,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.5.0178</div>
+    <div class="ver" id="verT">v0.4.5.0179</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -1970,12 +1987,13 @@ function updateMe(dt){
   if(ml>0.08){ me.pickT=null; if(ml>1){mx/=ml;my/=ml;ml=1;} }
   else if(me.pickT){ const g=me.pickT; if(!ground.includes(g)){me.pickT=null;} else { const dx=g.x-me.x,dy=g.y-me.y,d=hyp(dx,dy);
       if(d<34){pickUp(g);me.pickT=null;} else {mx=dx/d;my=dy/d;ml=1;} } }
+  else if(autoMode>0&&!autoBlocked()&&!(me.stun>0||me.formLock>0)){ const a=autoDir(); if(a){mx=a[0];my=a[1];ml=1;} }   /* AUTO: 조이스틱·키보드·전리품 터치가 없을 때만 자동 이동 */
   if(hazards.length&&!me.dead){ for(const h of hazards){ if(hyp(me.x-h.x,me.y-h.y)<h.r*.9){ if(h.k==='lava'){ me.lavaT=(me.lavaT||0)-dt; if(me.lavaT<=0){ me.lavaT=.5; takeDmg(me.D.maxHp*.05*GZM,true); me.burn=.4; addNum(me.x,me.y-30,'🔥','#ff8a3a',false); } } else me.slowP=Math.max(me.slowP||0,.3); break; } } }
   { const sp=D.spd*(me.slowP>0?.5:1)*(me.buffs.rage&&me.buffs.rage.t>0?1+me.buffs.rage.ms:1)*(me.buffs.fury&&me.buffs.fury.t>0&&me.buffs.fury.ms?1+me.buffs.fury.ms:1), kv=1-Math.exp(-dt*(ml>0.08?20:26)); me.vx=(me.vx||0)+((ml>0.08?mx*sp:0)-(me.vx||0))*kv; me.vy=(me.vy||0)+((ml>0.08?my*sp:0)-(me.vy||0))*kv; if(Math.abs(me.vx)<1)me.vx=0; if(Math.abs(me.vy)<1)me.vy=0;
     if(me.vx||me.vy){ me.x=clamp(me.x+me.vx*dt,16,WW-16); me.y=clamp(me.y+me.vy*dt,16,WH-16); } }
   if(ml>0.08){ me.moveDir=Math.atan2(my,mx); me.faceT=Math.max(0,(me.faceT||0)-dt); if(me.swing<=0&&!(me.faceT>0))me.face=me.moveDir; me.walk=(me.walk||0)+dt*ml*10; }
   // held buttons
-  autoPick();
+  autoPick(); autoSkills(dt);
   if(me.atkCd<=0&&!(me.stun>0)&&nearestMob(me.x,me.y,atkRg(me))) tryUse('atk',true);
 }
 function autoPick(){
@@ -2793,13 +2811,72 @@ addEventListener('keydown',e=>{ if(e.key==='Escape'){ /* ESC: 열린 창을 닫�
 addEventListener('keyup',e=>{ keys[e.key.toLowerCase()]=false; });
 addEventListener('blur',()=>{for(const k in keys)keys[k]=false; for(const k in held)held[k]=false;});
 
+/* ================= 자동 사냥 (AUTO 버튼) =================
+   한 번 누르면 1단계(자동 이동 + 일반공격, 스킬은 수동) · 두 번 누르면 2단계(+스킬 자동 사용) · 세 번 누르면 끔.
+   이동: 조이스틱·키보드를 잡으면 그 입력이 우선이에요. 스킬: 클래스별 우선순위 규칙(AUTO_RULES)을 0.25초마다 위에서부터 훑어 첫 번째로 쓸 수 있는 하나만 써요.
+   물약은 자동으로 쓰지 않아요. 순간이동·세크리파이스(희생)·수호 폭발(수호 영혼 소멸)은 자동에서 제외. */
+let autoMode=0, autoGap=0, autoRet=false, autoBo={}, autoHintT=0;
+const AUTO_LB=[['AUTO','OFF'],['AUTO','이동'],['AUTO','+스킬']], AUTO_TX=['자동 사냥 꺼짐','⚔ 자동 이동 · 일반공격','⚔ 자동 이동 · 스킬까지 자동'];
+function setAuto(n){ autoMode=n; autoRet=false; autoGap=0; autoBo={}; const b=$('#bAuto'); if(!b)return; b.className='s'+n; b.querySelector('b').textContent=AUTO_LB[n][0]; b.querySelector('small').textContent=AUTO_LB[n][1]; b.setAttribute('aria-label','자동 사냥: '+AUTO_TX[n].replace('⚔ ',''));
+  const t=$('#autoT'); t.className='s'+n+' show'; t.textContent=AUTO_TX[n]; clearTimeout(autoHintT); autoHintT=setTimeout(()=>t.classList.remove('show'),2600); }
+function cycleAuto(){ if(!G.inGame)return; setAuto((autoMode+1)%3); sfx(autoMode?'aura':'auraoff'); }
+$('#bAuto').addEventListener('pointerdown',e=>{ e.preventDefault(); cycleAuto(); });
+const autoBlocked=()=>!G.inGame||G.paused||me.dead||document.body.classList.contains('shopen');
+/* 자동 이동 방향(단위 벡터) — 없으면 null: 위험지대 탈출 > 체력이 낮으면 마을(치유 구역)로 후퇴 > 가까운 전리품 > 마을 근처의 적 추격(근접은 붙고, 원거리는 거리를 유지) > 마을로 복귀 */
+function autoDir(){
+  const ph=G.phase; if(ph==='win'||ph==='lose'||ph==='title'||ph==='lobby')return null;
+  const toward=(x,y)=>{ const dx=x-me.x,dy=y-me.y,d=hyp(dx,dy); return d>1?[dx/d,dy/d]:null; };
+  for(const h of hazards){ const dx=me.x-h.x,dy=me.y-h.y,d=hyp(dx,dy); if(d<h.r*.95+6)return d>1?[dx/d,dy/d]:[1,0]; }
+  const hr=me.hp/me.D.maxHp, vd=hyp(me.x-VX,me.y-VY);
+  if(hr<.28)autoRet=true; else if(hr>=.7)autoRet=false;
+  if(autoRet)return vd<VR*.55?null:toward(VX,VY);
+  const rg=atkRg(me), melee=meleeOf(me); let near=null,nd=1e9;
+  for(const m of G.mobs){ if(m.dead||hyp(m.x-VX,m.y-VY)>480)continue; const d=hyp(m.x-me.x,m.y-me.y)-m.r; if(d<nd){nd=d;near=m;} }
+  const full=me.inv.indexOf(null)<0; let loot=null,ld=650;
+  for(const g of ground){ if(g.carry||(full&&!autoSellOk(g.it)))continue; const d=hyp(g.x-me.x,g.y-me.y); if(d<ld){ld=d;loot=g;} }
+  const engaged=near&&nd<=rg+140;
+  if(loot&&(!engaged||ld<80)&&ld>24)return toward(loot.x,loot.y);
+  if(near){ const want=melee?Math.max(18,rg*.55):rg*.82;
+    if(!melee&&nd<rg*.3){ const dx=me.x-near.x,dy=me.y-near.y,d=hyp(dx,dy); if(d>1)return [dx/d,dy/d]; }
+    if(nd>want)return toward(near.x,near.y); return null; }
+  return vd>90?toward(VX,VY):null;
+}
+/* 자동 스킬 규칙: [스킬, 시전 뒤 남겨 둘 마나 비율, 조건(c)] — 위에서부터 첫 번째로 쓸 수 있는 하나만. 유지(소환·오라) > 약화/표식 > 광역·단일 딜 > 궁극기 > 필러 순 */
+function autoCtx(){ const x=me.x,y=me.y, ms=G.mobs.filter(m=>!m.dead), ed=m=>hyp(m.x-x,m.y-y)-m.r;
+  return {hr:me.hp/me.D.maxHp, ms,
+    n:r=>{let k=0; for(const m of ms) if(ed(m)<r)k++; return k;},
+    big:r=>ms.some(m=>(m.boss||m.elite)&&ed(m)<r), boss:r=>ms.some(m=>m.boss&&ed(m)<r), any:(f,r)=>ms.some(m=>ed(m)<r&&f(m))}; }
+const A_ULT=c=>c.boss(480)||c.n(420)>=9||(c.big(420)&&c.n(420)>=5);
+const rvLive=()=>minions.some(q=>isRv(q.k)&&q.rez<=0);
+const palAura=c=>{ const has=k=>skLv(me,k)>0; if(has('healaura')&&(c.hr<.5||(me.aura==='healaura'&&c.hr<.8)))return 'healaura'; return ['might','holyfire','guard','healaura'].find(has)||''; };
+const palSw=(k,c)=>{ const w=palAura(c); return w===k&&me.aura!==k&&(!me.aura||k==='healaura'||me.aura==='healaura'); };   /* 직접 켠 오라는 두고, 비어 있거나 위급(치유)·복귀 때만 바꿔요 */
+const AUTO_RULES={
+ sorc:[['barrier',0,c=>c.hr<.6&&c.n(260)>=1],['armageddon',0,A_ULT],['chain',.1,c=>c.any(m=>!(m.shockT>0),280)],['frostnova',.1,c=>c.n(160)>=2],['meteor',.1,c=>c.n(300)>=3||c.big(320)],['blizzard',.1,c=>c.n(300)>=4],['fireball',.22,c=>c.n(300)>=1]],
+ war:[['shout',.05,c=>c.n(320)>=3||c.big(320)],['ragnarok',0,A_ULT],['berserk',.1,c=>c.n(200)>=3||c.big(250)],['quake',.1,c=>c.n(300)>=2||c.big(300)],['rend',.1,c=>c.n(140)>=2],['whirl',.1,c=>c.n(120)>=1],['leap',.15,c=>c.hr>.5&&c.n(120)===0&&c.n(300)>=1],['bash',.2,c=>c.n(100)>=1]],
+ pal:[['might',0,c=>palSw('might',c)],['holyfire',0,c=>palSw('holyfire',c)],['guard',0,c=>palSw('guard',c)],['healaura',0,c=>palSw('healaura',c)],['judgment',.1,c=>c.n(380)>=2||c.big(380)],['hammer',.15,c=>c.n(220)>=1],['smite',.2,c=>c.n(100)>=1]],
+ necro:[['guardian',0,c=>!fusionOn()&&!minions.some(q=>q.k==='guard'&&q.rez<=0)],['spiritcaster',0,c=>!fusionOn()&&!minions.some(q=>q.k==='caster'&&q.rez<=0)],['execute',.1,c=>(c.n(360)>=2||c.big(360))&&!G.mobs.some(m=>!m.dead&&m.mark&&m.mark.t>0)],['lord',0,A_ULT],['colossus',.1,c=>!minions.some(q=>q.k==='dragon'||q.k==='colossus')&&(c.big(300)||c.n(260)>=5)],['fusion',.1,c=>fusionReady()&&(c.big(320)||c.n(260)>=6)],['soulbolt',.22,c=>c.n(SKBY.soulbolt.rg)>=1]],
+ druid:[['raven',0,c=>!rvLive()],['bearform',.05,c=>!me.form&&c.n(240)>=1&&['bite','roar','fury'].some(k=>skLv(me,k)>0)],['fury',.05,c=>!!me.form&&((c.hr<.7&&c.n(160)>=3)||c.big(200))],['roar',.05,c=>!!me.form&&c.n(200)>=3],['spirit',.1,c=>!(me.spirit&&me.spirit.t>0)&&(c.n(260)>=3||c.big(300))],['bears',0,A_ULT],['hunt',.1,c=>c.n(420)>=3||c.big(420)],['bite',.2,c=>!!me.form&&c.n(130)>=1]]
+};
+function aReady(k,res){ const s=SKBY[k], lv=skLv(me,k); if(!s||s.passive||!lv||(me.cds[k]||0)>0)return false; return s.aura||me.mp>=mpCost(s,lv)+me.D.maxMp*res; }
+function autoSkills(dt){
+  if(autoMode!==2||autoBlocked()||me.stun>0||me.leap||G.aim)return;
+  autoGap-=dt; if(autoGap>0)return;
+  const ph=G.phase; if(ph!=='wave'&&ph!=='boss'&&ph!=='prep')return;
+  const rules=AUTO_RULES[me.cls]; if(!rules)return; const c=autoCtx();
+  for(const [k,res,cond] of rules){ if((autoBo[k]||0)>T||!aReady(k,res)||!cond(c))continue;
+    const mp0=me.mp, cd0=me.cds[k]||0, sk=SKBY[k]; tryUse(k,!(sk.aura||sk.form));   /* 오라·변신 토글은 hold=true 이면 무시되므로 눌러서 쓰는 것처럼 호출 */
+    if(me.mp>=mp0&&!((me.cds[k]||0)>cd0))autoBo[k]=T+1.5;   /* 안 나갔으면 잠깐 쉬었다가 다시 */
+    autoGap=.25; return; }
+  autoGap=.1;
+}
+
 /* ================= HUD ================= */
 let uiDirty=true, hudT=0;
 /* 단축키 1~9 = 화면에 보이는 스킬 버튼의 위치 (스킬 종류와 무관). 위에서부터 7 8 9 / 4 5 6 / 1 2 3 (숫자패드 배치)
    #skills 는 direction:rtl 그리드라서 DOM 순서 0,1,2 가 윗줄의 오른쪽→왼쪽 */
 function skillAtKey(n){ const vis=[...$('#skills').children].filter(b=>!b.hidden); const rows=Math.ceil(vis.length/3); /* 맨 아랫줄이 1 2 3 기준 — 줄이 덜 찬 쪽은 오른쪽(3)부터 채움: 5개=4 5 6/2 3, 1개=3 */ const rb=Math.floor((n-1)/3), col=2-(n-1)%3, idx=(rows-1-rb)*3+col; const b=(rb<rows&&idx>=0)?vis[idx]:null; return b?b.dataset.k:null; }
 let skSig='';
-function layoutSkills(){ const all=[...$('#skills').children], vis=all.filter(b=>!b.hidden), sig=vis.map(b=>b.dataset.k).join(','); if(sig===skSig)return; skSig=sig; all.forEach(b=>{ delete b.dataset.sl; }); vis.forEach((b,i)=>{ b.dataset.sl=i; }); }   /* 가로 모드: 보이는 스킬을 칸 번호(data-sl)로 배치 — 칸 위치는 CSS */
+function layoutSkills(){ const all=[...$('#skills').children], vis=all.filter(b=>!b.hidden), sig=vis.map(b=>b.dataset.k).join(','); if(sig===skSig)return; skSig=sig; { const CL=[0,0,0,1,2,0,1,2,3,3,4,4]; let sc=0; for(let i=2;i<vis.length&&i<12;i++)sc=Math.max(sc,CL[i]+1); document.body.style.setProperty('--sc',sc); }   /* 가로 모드: AUTO 버튼이 스킬 묶음 왼쪽에 붙도록 스킬 열 수 */ all.forEach(b=>{ delete b.dataset.sl; }); vis.forEach((b,i)=>{ b.dataset.sl=i; }); }   /* 가로 모드: 보이는 스킬을 칸 번호(data-sl)로 배치 — 칸 위치는 CSS */
 function buildSkills(){
   const box=$('#skills'); box.innerHTML=''; skSig='';
   for(const s of SK[me.cls]){ if(!(me.skills[s.k]>0)||s.passive)continue;
@@ -3577,7 +3654,7 @@ $('#bStart').onclick=()=>{ if(G.mode!=='host')return; ally=null; const gp=others
 $('#bLeave').onclick=()=>quitToTitle();
 function startGuestGame(pr){ dmgReset(); resetWorld(); G.phase=pr.ph; toast('게임이 시작됐어요'); }
 async function quitToTitle(){
-  G.inGame=false; G.phase='title'; G.aim=null; saveChar(); ally=null; if(me){ selStage=Math.max(0,Math.min(STAGES.length-1,(me.clear|0)-1)); }
+  if(autoMode)setAuto(0); G.inGame=false; G.phase='title'; G.aim=null; saveChar(); ally=null; if(me){ selStage=Math.max(0,Math.min(STAGES.length-1,(me.clear|0)-1)); }
   if(R){try{R.presence({role:null,pl:null,m:null,ev:null,h:null,bt:null}).catch(()=>{}); await R.leave();}catch(e){} R=null;}
   show('#sTitle'); renderClassCards(); rkSubmitAll();
 }
