@@ -358,6 +358,14 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 .mrow{display:flex;align-items:center;gap:10px;width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid var(--line2);border-radius:10px;background:#0f0b09;color:inherit;font:inherit;text-align:left}.mrow.un{border-color:var(--gold)}
 .mrow .mic{width:26px;height:26px;color:var(--mute)}.mrow.un .mic{color:var(--gold)}
 .mrow .mt{flex:1;min-width:0}.mrow .mt b{display:block;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mrow .mt small{color:var(--mute);font-size:11px}
+.mgift{font-style:normal;font-size:18px;flex:none}
+.matt{display:flex;justify-content:center;gap:34px;margin:0 0 6px}
+.mat{display:flex;flex-direction:column;align-items:center;gap:6px;background:none;border:0;color:var(--ink);padding:0;font:inherit;cursor:pointer}.mat:disabled{cursor:default}
+.mat b{font-size:15px;font-variant-numeric:tabular-nums}
+.mbox{position:relative;width:70px;height:70px;border-radius:12px;border:2px solid var(--gold);background:linear-gradient(160deg,#2a2016,#120d0a);display:grid;place-items:center;box-shadow:0 0 14px rgba(214,170,78,.3)}.mat:active .mbox{transform:scale(.96)}
+.mat.got .mbox{opacity:.35;border-color:var(--line2);box-shadow:none}.mat.got b{color:var(--mute);text-decoration:line-through}
+.mck{position:absolute;right:-6px;bottom:-6px;width:24px;height:24px;border-radius:50%;background:#3f7a36;color:#d8ffd0;font-style:normal;font-size:14px;display:grid;place-items:center;border:2px solid #0f0b09}
+@media (orientation:landscape) and (max-height:500px){.mdl .card{padding:12px 16px}.mdl .row2 .btn{min-height:40px;padding-block:6px}.mdl .mbody{max-height:calc(100vh - 272px);min-height:56px;margin-bottom:8px;padding:8px 10px;font-size:13px;line-height:1.5}.mdl .mbox{width:48px;height:48px}.mdl .mbox svg{width:32px;height:32px}.mdl .mbox .sorb{width:28px!important;height:28px!important}.mdl .matt{gap:26px;margin-bottom:2px}.mdl .mat b{font-size:13px}.mdl h3{margin-bottom:4px}.mdl .mdl-meta{margin-bottom:4px}}
 .mbody{white-space:pre-wrap;word-break:break-word;font-size:14px;line-height:1.65;max-height:48vh;overflow:auto;margin:0 0 12px;padding:12px;background:#0a0807;border:1px solid var(--line2);border-radius:8px;touch-action:pan-y}
 .gearT{position:absolute;right:max(14px,env(safe-area-inset-right));top:max(14px,env(safe-area-inset-top));width:46px;height:46px;border-radius:12px;border:1px solid var(--line2);background:var(--panel);font-size:22px}
 .mdl .card{padding:18px}.mdl h3{margin:0 0 10px;font-family:var(--f-disp);font-size:18px;color:#e9d9b4}.mdl .col{display:flex;flex-direction:column;gap:8px}.mdl input[type=text]{width:100%;box-sizing:border-box;background:#0f0b09;border:1px solid var(--line2);border-radius:8px;color:var(--ink);font-size:16px;padding:0 12px;min-height:46px}.mdl .err{color:#e07060;font-size:12px;min-height:16px}.mdl .row2{display:flex;gap:8px}.mdl .row2 .btn{flex:1}
@@ -561,7 +569,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.5.0176</div>
+    <div class="ver" id="verT">v0.4.5.0177</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -1088,6 +1096,17 @@ function newOptFix(it){ if(!it)return;
   if(it.nof)return;
   if(it.rar===3&&it.sp==='rage'&&Array.isArray(it.aff)){ if(!it.aff.some(a=>a.t==='crit'))it.aff.push(rollAff(AFXBY.crit,3,it.ilvl||1,1.3,undefined,null,'amulet')); it.nof=1; }
   else if(it.rar===4&&it.sp&&it.sp.indexOf('hoff_')===0&&Array.isArray(it.aff)){ if(!it.aff.some(a=>a.t==='dmgPct'))it.aff.push({t:'dmgPct',v:ri(25,50)}); it.nof=1; } }
+/* ===== v0.4.5 소환수 옵션 개편 보정: 예전에 얻은 유니크 무기·갑옷·투구·목걸이·반지의 '소환수 피해/생명력' 옵션을 그 아이템에 없는 새 옵션으로 다시 굴림.
+   같은 이름 유니크는 항상 같은 새 옵션(이름·부위로 정한 순서에서 이미 없는 첫 옵션), 수치만 새로 굴림. 보조장비(방패 칸)·그림자(영웅)·특수 유니크는 제외. 가방·장착·공유보관함 공통(it.sf=1 로 한 번만) ===== */
+const SM_SL=new Set(['weapon','armor','helm','amulet','ring']);
+function smOrder(it){ const rng=mulberry(hashStr(it.name+'|'+it.slot)); const pool=AFX.filter(a=>!SKG.has(a.t)&&!a.only&&a.r&&(a.sl==='*'||a.sl.split(' ').includes(it.slot)));
+  for(let k=pool.length-1;k>0;k--){ const j=Math.floor(rng()*(k+1)); [pool[k],pool[j]]=[pool[j],pool[k]]; } return pool; }   /* 새 유니크가 쓰는 것과 같은 섞기 순서 */
+function sumFix(it){ if(!it||it.rar!==3||it.sf||it.uv||it.sp||!SM_SL.has(it.slot)||!Array.isArray(it.aff)||typeof it.name!=='string')return false;
+  if(!it.aff.some(a=>a&&(a.t==='sm'||a.t==='smhp')))return false;
+  const ord=smOrder(it);
+  for(let i=0;i<it.aff.length;i++){ const a=it.aff[i]; if(!a||(a.t!=='sm'&&a.t!=='smhp'))continue; const have=new Set(it.aff.map(x=>x&&x.t)), n=ord.find(o=>!have.has(o.t)); if(n)it.aff[i]=rollAff(n,3,it.ilvl||1,1.3,undefined,null,it.slot); }
+  it.aff=it.aff.filter(a=>a&&a.t!=='sm'&&a.t!=='smhp'); it.sf=1; return true; }
+function smMigrate(p){ let ch=false; const f=it=>{ if(sumFix(it))ch=true; }; p.inv.forEach(f); for(const k in p.eq)f(p.eq[k]); if(mailDeliver(p))ch=true; if(ch){ try{ lsSet(charKey(p.id),JSON.stringify(packChar(p))); }catch(e){} } }   /* 바뀌었으면 바로 저장(굴린 수치가 로드 때마다 달라지지 않게) */
 function heroFix(it){ const H=it&&it.rar===4&&it.sp&&HEROI[it.sp]; if(!H||it.hv===2)return; const IL=it.ilvl||HERO_IL;
   if(H.mx){ const m=(1+IL*.16)*HERO_M; it.mn=Math.round(H.mn*m); it.mx=Math.round(H.mx*m); }
   if(H.df)it.df=Math.round(H.df*(1+IL*.2)*HERO_M); if(H.dm)it.dm=Math.round(H.dm*(1+IL*.1)*HERO_M); if(H.om)it.om=Math.round(H.om*(1+IL*.1)*HERO_M);
@@ -1193,7 +1212,20 @@ const lsDel=k=>{try{localStorage.removeItem(k)}catch(e){} if(clHook&&k.indexOf('
 /* ===== 우편함 (캐릭터별) — 편지 내용은 여기 MAILS 에 있고 캐릭터에는 {id,d(받은 시각),r(읽음)}만 저장. 편지 보내기 기능은 없음 ===== */
 const MAILS={
   welcome:{f:'수호자 길드',t:'어둠의 수호자가 된 것을 환영해요',
-    b:p=>`${dispName(p)}님, 어서 오세요.\n\n어둠이 짙어지는 땅에 새로운 수호자가 도착했다는 소식을 들었어요. 지금은 낡은 무기 하나뿐이지만 걱정하지 마세요. 몬스터를 쓰러뜨리고 장비를 모으며 한 걸음씩 강해지면 돼요.\n\n스테이지를 클리어할 때마다 더 깊은 어둠이 열려요. 친구와 함께라면 더 든든하고요.\n\n당신의 모험에 행운이 함께하길.\n- 수호자 길드 -`}
+    b:p=>`${dispName(p)}님, 어서 오세요.\n\n어둠이 짙어지는 땅에 새로운 수호자가 도착했다는 소식을 들었어요. 지금은 낡은 무기 하나뿐이지만 걱정하지 마세요. 몬스터를 쓰러뜨리고 장비를 모으며 한 걸음씩 강해지면 돼요.\n\n스테이지를 클리어할 때마다 더 깊은 어둠이 열려요. 친구와 함께라면 더 든든하고요.\n\n당신의 모험에 행운이 함께하길.\n- 수호자 길드 -`},
+  smfix:{f:'수호자 길드',t:'소환수 옵션 개편 안내 및 보상',
+    att:[{k:'gold',n:200000},{k:'shard',n:10}],   /* 첨부 보상: 아이콘을 누르면 가방으로 받음(칸마다 한 번). 종류: gold / shard / item(mk: 받을 때 만드는 아이템) — 보상이 있는 편지는 att 만 적으면 됨 */
+    b:p=>`${CLASSES[p.cls].n}${p.name?' '+p.name:''}님, 안녕하세요.\n\n최근 0.4.5 패치에서 소환수 관련 옵션에 큰 변화가 있었어요. 자세한 내용은 패치노트를 확인해주세요.\n\n그에 따라 소지하신 아이템에 부득이한 조정이 있었어요. 보상을 준비했으니 아래 선물을 받아가세요.\n\n앞으로도 어둠의 수호자를 잘 부탁드려요.\n- 수호자 길드 -`}
+};
+/* 자동 발송 편지: 조건(to)에 맞는 캐릭터가 로드될 때 한 번만 받음(p.ms 에 받은 편지 id 기록 → 지워도 다시 안 옴). 새로 만든 캐릭터는 이미 지난 편지를 받지 않음 */
+const MAILQ=[{id:'smfix',d:new Date(2026,9,22).getTime(),to:p=>p.cls==='necro'||p.cls==='druid'}];
+function mailDeliver(p){ if(!Array.isArray(p.ms))p.ms=[]; let ch=false; for(const q of MAILQ){ if(p.ms.includes(q.id)||!q.to(p))continue; p.ms.push(q.id); p.mail.push(mailNew(q.id,q.d)); ch=true; } return ch; }
+/* 편지 첨부 보상 종류: ic=아이콘, tx=수량 글자, can=받을 수 있나(가방 자리), give=지급 */
+const COIN_IC='<svg viewBox="0 0 32 32" width="44" height="44" aria-hidden="true"><circle cx="16" cy="16" r="13" fill="#e0b13a" stroke="#fff1a8" stroke-width="2"/><circle cx="16" cy="16" r="9" fill="none" stroke="#a87a14" stroke-width="1.5"/><text x="16" y="21" text-anchor="middle" font-size="13" font-weight="800" fill="#7a5410">G</text></svg>';
+const MATT={
+  gold:{ic:()=>COIN_IC,tx:a=>a.n.toLocaleString('en-US')+'G',ok:a=>`💰 골드 ${a.n.toLocaleString('en-US')}G를 받았어요`,can:()=>true,give:(p,a)=>{ p.gold=(p.gold|0)+a.n; }},
+  shard:{ic:()=>shardOrb(SHARD_N,34),tx:a=>a.n+'개',ok:a=>`🌑 그림자 조각 ${a.n}개를 가방에 넣었어요`,can:(p,a)=>shardRoom(p,a.n),give:(p,a)=>{ shardAdd(p,a.n); }},
+  item:{ic:a=>`<span style="font-size:34px;line-height:1">${a.ic||'🎁'}</span>`,tx:a=>a.tx||'아이템 1개',ok:a=>`🎁 ${a.tx||'아이템'}을 가방에 넣었어요`,can:p=>p.inv.indexOf(null)>=0,give:(p,a)=>{ const it=a.mk(); it.isNew=1; p.inv[p.inv.indexOf(null)]=it; }}
 };
 const MAIL0_D=new Date(2026,9,19).getTime(); /* 이미 있던 캐릭터가 처음 받는 환영 편지의 날짜(고정) */
 const mailNew=(id,d)=>({id,d:d||Date.now(),r:0});
@@ -1234,7 +1266,7 @@ function loadChar(id){
     if(cls==='druid'){ const tm=it=>{ if(!it||it.slot!=='shield'||it.oc!=='druid'||it.rar===4)return; const b=OFFB.druid.find(x=>x.n===it.base); if(!b)return; const k=(it.rar===3?1.3:1)*(1+(it.ilvl||1)*.1), e=1+.1*(it.enh|0), d0=Math.round(b.dm*k), o0=Math.round(b.om*k); if(it.b0){ it.b0.dm=d0; it.b0.om=o0; } it.dm=Math.round(d0*e); it.om=Math.round(o0*e); }; /* 토템 수치 조정(공격력 3/5/8→2/3/4, 마나 12/20/30→6/10/15)을 이미 가진 토템에도 같은 식으로 다시 적용(등급·아이템 레벨·강화 반영) */
       p.inv.forEach(tm); for(const k in p.eq)tm(p.eq[k]); }
     for(const k of Object.keys(p.eq)){ const it=p.eq[k]; if(it&&it.sp&&SPFX[it.sp]&&SPFX[it.sp].fcls&&SPFX[it.sp].fcls!==cls){ const e=p.inv.indexOf(null); if(e>=0){ p.inv[e]=it; p.eq[k]=null; } } } /* 다른 직업 전용 장비가 장착돼 있으면 가방으로 */
-    p.mail=Array.isArray(p.mail)?p.mail.filter(x=>x&&MAILS[x.id]):[mailNew('welcome',MAIL0_D)]; /* 우편함 도입 전 캐릭터는 환영 편지를 한 번 받음(지우면 다시 안 옴) */ p.name=String(p.name||'').slice(0,8); p.gold=Number.isFinite(p.gold)?p.gold:500; p.potBuy=p.potBuy|0; p.rev=p.rev|0; return p;
+    p.mail=Array.isArray(p.mail)?p.mail.filter(x=>x&&MAILS[x.id]):[mailNew('welcome',MAIL0_D)]; /* 우편함 도입 전 캐릭터는 환영 편지를 한 번 받음(지우면 다시 안 옴) */ p.name=String(p.name||'').slice(0,8); p.gold=Number.isFinite(p.gold)?p.gold:500; p.potBuy=p.potBuy|0; p.rev=p.rev|0; smMigrate(p); return p;
   }catch(e){ console.error('loadChar',id,e); return null; }
 }
 const MAXCHAR=10; /* 캐릭터 슬롯 수 */
@@ -1246,9 +1278,9 @@ function migrateChars(){
     try{ const p=JSON.parse(raw); if(p&&p.cls===cls){ p.id=genId(); lsSet(charKey(p.id),JSON.stringify(p)); ids.push(p.id); } }catch(e){} }
   setIds(ids);
 }
-function createChar(cls,name){ const ids=charIds(); if(ids.length>=MAXCHAR||!CLASSES[cls])return null; if(nameTaken(name))return null; const p=newChar(cls,name); lsSet(charKey(p.id),JSON.stringify(packChar(p))); ids.push(p.id); setIds(ids); selId=p.id; lsSet('dkdef2.sel',selId); return p; }
+function createChar(cls,name){ const ids=charIds(); if(ids.length>=MAXCHAR||!CLASSES[cls])return null; if(nameTaken(name))return null; const p=newChar(cls,name); p.ms=MAILQ.map(q=>q.id); lsSet(charKey(p.id),JSON.stringify(packChar(p))); ids.push(p.id); setIds(ids); selId=p.id; lsSet('dkdef2.sel',selId); return p; }
 function deleteChar(id){ setIds(charIds().filter(x=>x!==id)); lsDel(charKey(id)); lsDel('dkdef2.rk.'+id); if(selId===id){selId='';lsSet('dkdef2.sel','');} rkQueueDel(id); }
-function packChar(p){ const {id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear,as,sy,ct,cat,dv4,shard,mail}=p; return {id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear:clear|0,ct:ct>0?ct|0:0,cat:cat>0?cat|0:0,as:as===undefined?-1:as,sy:sy===undefined?-1:sy,dv4:dv4?1:0,shard:shard|0,mail:Array.isArray(mail)?mail:undefined}; }
+function packChar(p){ const {id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear,as,sy,ct,cat,dv4,shard,mail,ms}=p; return {id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear:clear|0,ct:ct>0?ct|0:0,cat:cat>0?cat|0:0,as:as===undefined?-1:as,sy:sy===undefined?-1:sy,dv4:dv4?1:0,shard:shard|0,mail:Array.isArray(mail)?mail:undefined,ms:Array.isArray(ms)?ms:undefined}; }
 function saveChar(){ if(!me||!me.id)return; lsSet(charKey(me.id),JSON.stringify(packChar(me))); }
 const dispName=p=>(p&&p.name)||CLASSES[p.cls].n;
 const SELLBASE=[100,200,400,800,3000], ADVAFX=['ls','crit','ias','ms','mf','pr','mr'];
@@ -2854,7 +2886,8 @@ const STORE_N=100, STORE_KEY='dkdef2.store', STORE_IC=`<svg viewBox="0 0 24 24" 
 let STORE=null, satSeq=0;
 function loadStore(){ let o=null; try{ o=JSON.parse(lsGet(STORE_KEY)||'null'); }catch(e){} if(!o||typeof o!=='object')o={};
   const inv=Array.isArray(o.inv)?o.inv.slice(0,STORE_N):[]; while(inv.length<STORE_N)inv.push(null);
-  for(const it of inv){ if(it){ if(!Array.isArray(it.aff))it.aff=[]; try{ heroFix(it); newOptFix(it); lanternFix(it); }catch(e){} } }
+  let ch=false; for(const it of inv){ if(it){ if(!Array.isArray(it.aff))it.aff=[]; try{ heroFix(it); newOptFix(it); lanternFix(it); if(sumFix(it))ch=true; }catch(e){} } }
+  if(ch){ try{ lsSet(STORE_KEY,JSON.stringify({inv,gold:Math.max(0,o.gold|0)})); }catch(e){} }
   return {inv,gold:Math.max(0,o.gold|0),shard:0}; }
 function getStore(){ if(!STORE)STORE=loadStore(); return STORE; }
 function saveStore(){ if(!STORE)return; lsSet(STORE_KEY,JSON.stringify({inv:STORE.inv,gold:STORE.gold|0})); }
@@ -3392,7 +3425,7 @@ function renderTitle(){
   migrateChars();
   const chars=charIds().map(loadChar).filter(Boolean);
   if(!chars.find(c=>c.id===selId)){ selId=chars[0]?chars[0].id:''; lsSet('dkdef2.sel',selId); }
-  buildCarousel(chars); renderStagePanel();
+  buildCarousel(chars); renderStagePanel(); try{ getStore(); }catch(e){}   /* 공유보관함 아이템 보정을 시작할 때 한 번 적용 */
   if(!chars.length) showNew(false);
   rkSubmit(chars,false); setTimeout(rkPrefetch,1200);
 }
@@ -3461,16 +3494,24 @@ function mailModal(){
   chars.forEach(p=>p.mail.forEach((x,i)=>all.push({p,x,i})));
   all.sort((a,b)=>(b.x.d|0)-(a.x.d|0));
   const un=all.reduce((n,o)=>n+(o.x.r?0:1),0);
-  const rows=all.map(o=>{ const M=MAILS[o.x.id]; return `<button class="mrow${o.x.r?'':' un'}" data-c="${o.p.id}" data-i="${o.i}">${mailIc(!!o.x.r)}<span class="mt"><b>${esc(M.t)}</b><small>${esc(M.f)} · ${mailDate(o.x.d)} · ${esc(dispName(o.p))}</small></span>${o.x.r?'':'<i class="mnew">NEW</i>'}</button>`; }).join('');
+  const rows=all.map(o=>{ const M=MAILS[o.x.id]; return `<button class="mrow${o.x.r?'':' un'}" data-c="${o.p.id}" data-i="${o.i}">${mailIc(!!o.x.r)}<span class="mt"><b>${esc(M.t)}</b><small>${esc(M.f)} · ${mailDate(o.x.d)} · ${esc(dispName(o.p))}</small></span>${mailLeft(o.x)?'<i class="mgift" title="받지 않은 보상이 있어요">🎁</i>':''}${o.x.r?'':'<i class="mnew">NEW</i>'}</button>`; }).join('');
   modal(`<h3>${mailIc(false)} 우편함 <small style="color:var(--mute);font-weight:400">읽지 않은 편지 ${un}개</small></h3>${rows?`<div class="mlist">${rows}</div>`:'<p class="meta" style="text-align:center;margin:18px 0">받은 편지가 없어요</p>'}<div class="row2"><button class="btn primary" id="mX">닫기</button></div>`,m=>{
     m.querySelector('#mX').onclick=closeModal; m.querySelectorAll('.mrow').forEach(b=>b.onclick=()=>mailRead(b.dataset.c,+b.dataset.i)); }); }
-function mailRead(cid,i){
+const mailLeft=x=>{ const M=x&&MAILS[x.id]; return M&&M.att?M.att.length-(Array.isArray(x.g)?x.g.filter(j=>M.att[j]).length:0):0; };   /* 아직 안 받은 첨부 수 */
+function mailClaim(cid,i,j){
+  const p=loadChar(cid), x=p&&p.mail[i], M=x&&MAILS[x.id], a=M&&M.att&&M.att[j]; if(!a){ mailRead(cid,i); return; }
+  if(!Array.isArray(x.g))x.g=[]; if(x.g.includes(j)){ mailRead(cid,i); return; }
+  const T=MATT[a.k]; if(!T||!T.can(p,a)){ mailRead(cid,i,'⚠️ 가방에 자리가 부족해요. 가방을 비우고 다시 눌러 주세요',1); return; }
+  T.give(p,a); x.g.push(j); mailSave(p); sfx('rare'); renderStagePanel(); mailRead(cid,i,T.ok(a)); }
+function mailRead(cid,i,note,bad){
   const p=loadChar(cid), x=p&&p.mail[i]; if(!x){ mailModal(); return; }
   if(!x.r){ x.r=1; mailSave(p); renderStagePanel(); }
-  const M=MAILS[x.id];
-  modal(`<h3>${mailIc(true)} ${esc(M.t)}</h3><p class="meta" style="margin:0 0 8px">${esc(M.f)} · ${mailDate(x.d)} · ${esc(dispName(p))}</p><div class="mbody">${esc(M.b(p))}</div><div class="row2"><button class="btn" id="mDel">🗑️ 삭제</button><button class="btn primary" id="mBk">목록</button></div>`,m=>{
+  const M=MAILS[x.id], g=Array.isArray(x.g)?x.g:[], left=mailLeft(x);
+  const att=M.att&&M.att.length?`<div class="matt">${M.att.map((a,j)=>{ const T=MATT[a.k], got=g.includes(j); return `<button class="mat${got?' got':''}" data-j="${j}" ${got?'disabled':''} aria-label="${esc(T.tx(a))}${got?' (받음)':''}"><span class="mbox">${T.ic(a)}${got?'<i class="mck">✔</i>':''}</span><b>${esc(T.tx(a))}</b></button>`; }).join('')}</div><p class="meta" style="text-align:center;margin:0 0 10px;${bad?'color:#ff8a7a':''}">${note?esc(note):left?'선물 아이콘을 누르면 가방으로 받아요':'보상을 모두 받았어요'}</p>`:'';
+  modal(`<h3>${mailIc(true)} ${esc(M.t)}</h3><p class="meta" style="margin:0 0 8px">${esc(M.f)} · ${mailDate(x.d)} · ${esc(dispName(p))}</p><div class="mbody">${esc(M.b(p))}</div>${att}<div class="row2"><button class="btn" id="mDel">🗑️ 삭제</button><button class="btn primary" id="mBk">목록</button></div>`,m=>{
     m.querySelector('#mBk').onclick=mailModal; let ask=false;
-    m.querySelector('#mDel').onclick=e=>{ if(!ask){ ask=true; const b=e.currentTarget; b.textContent='⚠️ 한 번 더 누르면 삭제'; b.style.background='#a62a22'; b.style.borderColor='#ff6a5a'; return; }
+    m.querySelectorAll('.mat:not(.got)').forEach(b=>b.onclick=()=>mailClaim(cid,i,+b.dataset.j));
+    m.querySelector('#mDel').onclick=e=>{ if(!ask){ ask=true; const b=e.currentTarget; b.textContent=left?'⚠️ 못 받은 보상도 사라져요':'⚠️ 한 번 더 누르면 삭제'; b.style.background='#a62a22'; b.style.borderColor='#ff6a5a'; return; }
       const q=loadChar(cid); if(q){ q.mail.splice(i,1); mailSave(q); renderStagePanel(); } mailModal(); }; }); }
 $('#verT').onclick=()=>patchModal(); $('#verT').style.cursor='pointer';
 /* 패치노트: 저장소의 patchnotes.txt를 불러와서 보여줌 (원본 파일 링크 포함) */
