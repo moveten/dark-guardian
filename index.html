@@ -601,6 +601,33 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 .tqfin{font-size:12.5px;padding:7px 9px;border:1px dashed var(--gold);border-radius:9px;margin-bottom:8px;color:#e8d9ae}.tqfin.got{border-style:solid;border-color:#4f8a43}
 .tqnote{font-size:12.5px;color:#9be38a;margin:0 0 6px}
 @media (max-height:500px){#tqB{padding:8px 11px 9px}#tqP{font-size:12.5px;line-height:1.45;margin-bottom:6px}#tqT{font-size:14.5px}.tqrow{padding:5px 8px}.tqlist{max-height:calc(100vh - 190px)}}
+/* ===== 궁극기 컷인 (A안: 가로 배너) — 전투를 멈추지 않고 화면 위에 잠깐 겹쳐 보여요 ===== */
+#ult{position:absolute;inset:0;z-index:40;pointer-events:none;overflow:hidden;--h:clamp(76px,15vh,120px)}
+#ult[hidden]{display:none}
+#ult .udim,#ult .uwrap,#ult .uflash{position:absolute}
+#ult .udim{inset:0;background:radial-gradient(ellipse at center,rgba(0,0,0,.2),rgba(0,0,0,.72));opacity:0}
+#ult .uflash{inset:0;background:#fff;opacity:0}
+#ult .uwrap{left:0;right:0;top:31%;height:var(--h)}
+#ult .uband{position:absolute;left:-30px;right:-30px;top:0;bottom:0;transform:skewY(-6deg) translateX(-110%);background:linear-gradient(90deg,transparent,var(--um) 18%,var(--ud) 60%,transparent);border-top:3px solid var(--uc);border-bottom:3px solid var(--uc);box-shadow:0 0 30px var(--uc);overflow:hidden}
+#ult .ulines{position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(255,255,255,0) 0 14px,rgba(255,255,255,.2) 14px 16px,rgba(255,255,255,0) 16px 38px);animation:ultLn .5s linear infinite}
+@keyframes ultLn{to{background-position:-76px 0}}
+#ult .ucont{position:absolute;left:0;right:0;top:0;bottom:0;max-width:600px;margin:0 auto}
+#ult .uface{position:absolute;left:-1%;bottom:calc(var(--h)*-.1);width:calc(var(--h)*1.77);height:calc(var(--h)*1.77);overflow:hidden;transform:translateX(-130%);filter:drop-shadow(0 0 14px var(--uc))}
+#ult .uface img{display:block;width:126%;margin:-4% 0 0 -13%}
+#ult .utx{position:absolute;left:calc(var(--h)*1.82);right:2%;top:50%;transform:translate(40px,-50%);opacity:0}
+#ult .utx small{display:block;font-size:calc(var(--h)*.095);letter-spacing:.35em;color:#fff;opacity:.8;font-weight:800}
+#ult .utx b{display:block;font-size:clamp(17px,5.6vw,calc(var(--h)*.27));line-height:1.1;font-style:italic;color:#fff;-webkit-text-stroke:1px var(--uc);text-shadow:0 0 14px var(--uc),3px 3px 0 var(--ud);margin:2px 0;white-space:nowrap}
+#ult .utx em{display:block;font-style:normal;font-size:max(11px,calc(var(--h)*.1));color:#fff;opacity:.88;line-height:1.35}
+#ult.go .udim{animation:ultDim 1.5s both linear}
+#ult.go .uflash{animation:ultFl 1.5s both}
+#ult.go .uband{animation:ultBand 1.5s both cubic-bezier(.2,.8,.2,1)}
+#ult.go .uface{animation:ultFace 1.5s both cubic-bezier(.2,.9,.2,1.2)}
+#ult.go .utx{animation:ultTx 1.5s both ease-out}
+@keyframes ultDim{0%{opacity:0}10%{opacity:1}78%{opacity:1}100%{opacity:0}}
+@keyframes ultFl{0%{opacity:0}9%{opacity:.6}16%{opacity:0}100%{opacity:0}}
+@keyframes ultBand{0%{transform:skewY(-6deg) translateX(-110%)}12%{transform:skewY(-6deg) translateX(0)}80%{transform:skewY(-6deg) translateX(0);opacity:1}100%{transform:skewY(-6deg) translateX(8%);opacity:0}}
+@keyframes ultFace{0%{transform:translateX(-130%)}16%{transform:translateX(0) scale(1.04)}24%{transform:scale(1)}78%{transform:translateX(0);opacity:1}100%{transform:translateX(30px);opacity:0}}
+@keyframes ultTx{0%,10%{opacity:0;transform:translate(40px,-50%)}22%{opacity:1;transform:translate(0,-50%)}78%{opacity:1}100%{opacity:0}}
 </style>
 
 <nav id="dock" hidden>
@@ -649,7 +676,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.5.0182</div>
+    <div class="ver" id="verT">v0.4.5.0183</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -715,6 +742,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="ipop" id="itemPop" hidden></div>
   </div>
   <div class="ipop" id="modal" hidden style="z-index:30"></div>
+  <div id="ult" hidden><div class="udim"></div><div class="uwrap"><div class="uband"><div class="ulines"></div></div><div class="ucont"><div class="uface"><img alt=""></div><div class="utx"><small>ULTIMATE</small><b></b><em></em></div></div></div><div class="uflash"></div></div>
   <div id="tq" hidden><div id="tqH" hidden></div><div id="tqB" role="dialog" aria-label="튜토리얼"><div class="tqhd"><span id="tqS"></span><span id="tqDots"></span></div><b id="tqT"></b><p id="tqP"></p><div class="tqft"><button id="tqSk">건너뛰기</button><button id="tqOk" hidden>확인</button></div></div></div>
 </div>
 
@@ -2168,7 +2196,7 @@ function tryUse(key,hold){
   const cost=mpCost(s,lv);
   if(me.mp<cost){ if(!hold)toast('마나가 부족해요','#7d96ff'); return; }
   me.mp-=cost; { const cdb=key==='shout'?SHC(lv):s.cd; me.cds[key]=cdb*(1-(me.D.cdr||0)); (me.cdm||(me.cdm={}))[key]=cdb; } sfx(SKS[key]||'skill');
-  doCast(key,s.rg||200,lv);
+  doCast(key,s.rg||200,lv); if(ULTK[key])ultCut(key);
 }
 /* 드루이드: 변신 버튼(토글) — 같은 형태를 다시 누르면 인간, 다른 형태를 누르면 바로 전환. 마나는 변신할 때만 들어요 */
 function formToggle(s,lv,hold){ if(hold)return;
@@ -2224,7 +2252,7 @@ function dmgRows(full){ const map=new Map(); const add=(key,n,v)=>{ if(!(v>0))re
 let dmgRkHtml='';
 function renderDmgRank(){ const el=$('#dmgRank'); if(!el)return; const rows=(hudOn('rank')&&G.inGame)?dmgRows():[]; const h=rows.map((r,i)=>`<div><span>${i+1}. ${esc(r.n)}</span><b>${Math.round(r.v).toLocaleString('en-US')}</b></div>`).join(''); if(h===dmgRkHtml)return; dmgRkHtml=h; el.innerHTML=h; el.hidden=!rows.length; }
 /* ===== 화면 표시(HUD) 켜기/끄기 — 설정 메뉴의 체크박스 ===== */
-const HUDK=[['mini','🗺️ 미니맵'],['get','📦 획득 로그 (아이템 획득 알림)'],['drop','💎 드랍 로그 (아이템 드랍·동료 알림)'],['label','🏷️ 바닥 아이템 이름표 (끄면 가까이 가면 자동 습득)'],['rank','🏆 데미지 랭크표'],['num','💥 피해 숫자'],['combo','🔥 콤보 표시'],];
+const HUDK=[['mini','🗺️ 미니맵'],['get','📦 획득 로그 (아이템 획득 알림)'],['drop','💎 드랍 로그 (아이템 드랍·동료 알림)'],['label','🏷️ 바닥 아이템 이름표 (끄면 가까이 가면 자동 습득)'],['rank','🏆 데미지 랭크표'],['num','💥 피해 숫자'],['combo','🔥 콤보 표시'],['ult','⚡ 궁극기 컷인 연출'],];
 let HUDS={}; try{ HUDS=JSON.parse(lsGet('dkdef2.hud')||'{}')||{}; }catch(e){ HUDS={}; }
 const hudOn=k=>HUDS[k]!==0;
 function applyHud(){ for(const k of ['combo','rank'])document.body.classList.toggle('hud-no'+k,!hudOn(k)); dmgRkHtml=''; try{renderDmgRank();}catch(e){} }
@@ -2990,6 +3018,14 @@ const TUTS=[
   {t:'우편함',b:'스테이지 클리어·이벤트 보상은 타이틀 메뉴의 ✉️ 우편함으로 와요. 편지 아래의 선물 아이콘을 눌러야 가방에 들어와요. 이 튜토리얼의 보상도 우편함으로 보내 드려요!',ok:1}
  ]
 ];
+/* 궁극기 컷인: 내가 궁극기를 쓰면 직업 얼굴 + 스킬 이름 띠가 1.5초간 화면을 가로질러요 (게임은 멈추지 않음 · 메뉴 '화면 표시'에서 끌 수 있음) */
+const ULTK={armageddon:'하늘에서 유성이 쏟아진다',ragnarok:'기를 모아 주변의 모든 적을 벤다',divine:'생명을 바쳐 모든 적을 심판한다',lord:'영혼 용령이 강림해 숨결을 뿜는다',bears:'곰 가족이 달려온다'};
+let ultTm=0;
+function ultCut(key){ const sk=SKBY[key]; if(!sk||!me||!hudOn('ult'))return; const u=$('#ult'); if(!u)return;
+  const h=String(sk.el||'#ff5a1f').replace('#',''), c=[0,2,4].map(i=>parseInt(h.substr(i,2),16)||0), mix=f=>`rgb(${c.map(v=>Math.round(v*f)).join(',')})`;
+  u.style.setProperty('--uc',sk.el||'#ff5a1f'); u.style.setProperty('--um',mix(.5)); u.style.setProperty('--ud',mix(.28));
+  u.querySelector('img').src='img/hero_'+me.cls+'.png'; u.querySelector('.utx b').textContent=sk.n; u.querySelector('.utx em').textContent=ULTK[key];
+  u.hidden=false; u.classList.remove('go'); void u.offsetWidth; u.classList.add('go'); clearTimeout(ultTm); ultTm=setTimeout(()=>{ u.hidden=true; u.classList.remove('go'); },1600); }
 /* 보스 반격 태세로 처음 쓰러졌을 때(캐릭터마다 딱 한 번) 알려 주는 안내 — 수동·AUTO 모두 해당. 튜토리얼이 진행 중이면 다음 기회로 미룸 */
 function counterTip(){ const t=me&&me.tut; if(!t||t.cn||tutS)return; t.cn=1; saveChar(); const au=autoMode===2;
   later(.7,()=>{ if(!G.inGame)return; modal(`<h3>⚔️ 보스의 반격 태세!</h3><div class="mbody" style="line-height:1.7"><p style="margin:0 0 8px">보스 머리 위에 <b style="color:#ffb347">⚔️ 반격 태세</b>가 뜨는 동안(약 3초)에는 <b>스킬을 쓰면 안 돼요.</b> 쓰는 순간 내 최대 생명력의 <b style="color:#ff8a7a">35%</b>가 피해로 되돌아와요.</p><p style="margin:0 0 8px">일반공격과 소환수 공격은 괜찮아요. 태세가 풀리면 다시 스킬을 쓰세요.</p>${au?'<p style="margin:0;color:#ffb259"><b>AUTO(+스킬)</b>도 태세를 구분하지 못해요. 보스가 태세에 들어가면 AUTO를 1단계(이동)로 낮추거나 직접 조작하세요.</p>':'<p style="margin:0;color:var(--mute)">AUTO(+스킬)를 쓸 때도 태세를 구분하지 못하니 조심하세요.</p>'}</div><div class="row2"><button class="btn primary" id="cnOk" style="grid-column:1/-1">알겠어요</button></div>`,m=>{ m.querySelector('#cnOk').onclick=closeModal; }); }); }
