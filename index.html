@@ -549,6 +549,25 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 }
 @media (orientation:landscape) and (max-height:400px){ body.land{--u:42px;--o:54px} body.land #dock .hb{width:36px;height:36px}body.land #dock{width:36px;gap:5px} }
 @media (orientation:landscape) and (max-height:360px){ body.land{--u:38px;--o:50px;--g:4px} body.land #dock .hb{width:34px;height:34px}body.land #dock{width:34px} }
+
+/* 폰 가로 모드 가방(정비): 왼쪽 장비·전투력·버튼 / 오른쪽 가방 칸(전체 높이 스크롤), 머리말·하단 탭은 얇게 */
+@media (orientation:landscape) and (max-height:500px){
+  .sheet{width:100%}
+  .sheet header{padding:5px 12px}.sheet .x{width:32px;height:32px}
+  #sheetTabs{padding:5px 12px;gap:6px}#sheetTabs button{min-height:34px;font-size:14px;border-radius:8px;display:flex;align-items:center;justify-content:center;gap:6px}
+  #sheetB.bag{overflow:hidden;padding:8px 10px;grid-template-rows:minmax(0,1fr);align-content:stretch}
+  #sheetB.bag .bagtop{display:grid!important;grid-template-columns:232px minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr);column-gap:12px;row-gap:6px;height:100%;margin:0;padding:0;box-shadow:none;position:static}
+  #sheetB.bag .bagtop .eq{grid-column:1;grid-row:1;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;justify-content:stretch}
+  #sheetB.bag .bagtop .meta{grid-column:1;grid-row:2}
+  #sheetB.bag .bagtop .bagbtns{grid-column:1;grid-row:3;display:grid!important;grid-template-columns:1fr 1fr;gap:4px!important;align-content:start}
+  #sheetB.bag .bagtop .bagbtns .btn{padding:8px 1px!important;min-height:34px;font-size:12px!important}
+  #sheetB.bag .bagtop .inv{grid-column:2;grid-row:1/4;overflow:auto;min-height:0;max-height:100%;align-content:start;padding-right:2px}
+}
+@media (orientation:landscape) and (max-height:340px){   /* 아주 낮은 화면: 장비를 한 줄로, 버튼을 더 납작하게 */
+  #sheetB.bag .bagtop{grid-template-columns:216px minmax(0,1fr)}
+  #sheetB.bag .bagtop .eq{grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}#sheetB.bag .bagtop .eq .sl{display:none}
+  #sheetB.bag .bagtop .bagbtns .btn{min-height:30px;padding:6px 1px!important}
+}
 </style>
 
 <nav id="dock" hidden>
@@ -597,7 +616,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.5.0179</div>
+    <div class="ver" id="verT">v0.4.5.0180</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -3038,7 +3057,7 @@ function renderBag(){
   shardAdd(me,0); markTabs(); sheetHead();
   const eqOrder=['weapon','armor','helm','amulet','ring1','ring2'].concat(['shield']);
   let h='<div class="bagtop" style="display:flex;flex-direction:column;gap:10px;min-width:0"><div class="eq">'+eqOrder.map(k=>{const it=me.eq[k]; return `<div style="position:relative">${cellHtml(it,'slot',`data-eq="${k}"`)}<div class="sl" style="position:absolute;bottom:2px;left:0;right:0;font-size:9.5px;color:var(--mute);text-align:center;pointer-events:none">${eqLbl(k)}</div></div>`;}).join('')+'</div>';
-  h+=`<div class="meta" style="font-size:12px;color:var(--mute)">⚔️ 전투력 <b style="color:#ffd84a">${calcCP(me).toLocaleString()}</b></div><div style="display:flex;flex-wrap:nowrap;gap:4px"><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap" data-sort="rar">정렬(등급순)</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap" id="aBulk">일괄 판매</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap;${asLv>=0?`border-color:${RARC[asLv]};color:${RARC[asLv]};background:${['rgba(233,226,212,.14)','rgba(90,120,255,.28)','rgba(255,214,60,.24)'][asLv]};box-shadow:0 0 8px ${['rgba(233,226,212,.3)','rgba(110,140,255,.6)','rgba(255,214,60,.55)'][asLv]};font-weight:800`:''}" id="aAuto">자동판매 ${ASN[asLv+1]}</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap;${syLv>=0?`border-color:#c9a0ff;color:#d9b8ff;background:rgba(150,90,255,.22);box-shadow:0 0 8px rgba(150,90,255,.5);font-weight:800`:''}" id="aSyn" aria-pressed="${syLv>=0}">자동합성 ${syLv>=0?'ON':'OFF'}</button></div>`;
+  h+=`<div class="meta" style="font-size:12px;color:var(--mute)">⚔️ 전투력 <b style="color:#ffd84a">${calcCP(me).toLocaleString()}</b></div><div class="bagbtns" style="display:flex;flex-wrap:nowrap;gap:4px"><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap" data-sort="rar">정렬(등급순)</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap" id="aBulk">일괄 판매</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap;${asLv>=0?`border-color:${RARC[asLv]};color:${RARC[asLv]};background:${['rgba(233,226,212,.14)','rgba(90,120,255,.28)','rgba(255,214,60,.24)'][asLv]};box-shadow:0 0 8px ${['rgba(233,226,212,.3)','rgba(110,140,255,.6)','rgba(255,214,60,.55)'][asLv]};font-weight:800`:''}" id="aAuto">자동판매 ${ASN[asLv+1]}</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap;${syLv>=0?`border-color:#c9a0ff;color:#d9b8ff;background:rgba(150,90,255,.22);box-shadow:0 0 8px rgba(150,90,255,.5);font-weight:800`:''}" id="aSyn" aria-pressed="${syLv>=0}">자동합성 ${syLv>=0?'ON':'OFF'}</button></div>`;
   h+='<div class="inv">'+me.inv.map((it,i)=>cellHtml(it,'cell',`data-inv="${i}"`)).join('')+'</div>';
   const b=$('#sheetB'); b.className='sbody bag'; b.innerHTML=h; fitInv(); try{ showPop(detailHtml(),curCmpHtml()); }catch(e){ console.error(e); selItem=null; showPop(''); }
   b.querySelectorAll('[data-eq]').forEach(el=>el.onclick=()=>{const k=el.dataset.eq; if(me.eq[k]){selItem={it:me.eq[k],eq:k};renderBag();}});
