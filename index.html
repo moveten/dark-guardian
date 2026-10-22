@@ -706,7 +706,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.5.0207</div>
+    <div class="ver" id="verT">v0.4.5.0208</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -1404,6 +1404,7 @@ function loadChar(id){
     for(const k in p.skills){ if(!SKBY[k]){p.skillPts+=p.skills[k]; delete p.skills[k];} } for(const s of SK[cls]){ if(p.skills[s.k]===undefined)p.skills[s.k]=0; else if(p.skills[s.k]>0&&(p.lvl|0)<s.req){ p.skillPts+=p.skills[s.k]; p.skills[s.k]=0; } } /* 해금 레벨 미만인데 투자된 스킬(해금 레벨 상향 등)은 포인트 환급 */
     if(p.clear===undefined)p.clear=Math.max(0,+(lsGet('dkdef2.clear')||0));
     { const lg=k=>{ const v=parseInt(lsGet(k)); return isNaN(v)?-1:clamp(v,-1,2); }; if(p.as===undefined)p.as=lg('dkdef2.asell'); if(p.sy===undefined)p.sy=lg('dkdef2.asyn'); if(p.sy>=0)p.sy=2; } /* 캐릭터별 자동판매/합성: 기존 캐릭터는 예전 전역 설정을 한 번 이어받음 */
+    p.au=Math.max(0,Math.min(2,p.au|0));   /* 캐릭터별 AUTO 설정 (0 꺼짐 · 1 이동 · 2 이동+스킬) — 스테이지를 옮겨도 유지 */
     p.eq=p.eq||{}; if(p.eq.shield===undefined)p.eq.shield=null;
     for(const k in p.eq){ if(p.eq[k])delete p.eq[k].isNew; } /* 장착했던 아이템의 NEW 꼬리표 정리(1회) */ if(!lsGet('dkdef2.nwf.'+id)){ (p.inv||[]).forEach(x=>{ if(x)delete x.isNew; }); lsSet('dkdef2.nwf.'+id,'1'); }
     p.inv=p.inv||Array(INVN).fill(null); while(p.inv.length<INVN)p.inv.push(null);
@@ -1435,7 +1436,7 @@ function migrateChars(){
 }
 function createChar(cls,name){ const ids=charIds(); if(ids.length>=MAXCHAR||!CLASSES[cls])return null; if(nameTaken(name))return null; const p=newChar(cls,name); p.ms=MAILQ.map(q=>q.id); lsSet(charKey(p.id),JSON.stringify(packChar(p))); ids.push(p.id); setIds(ids); selId=p.id; lsSet('dkdef2.sel',selId); return p; }
 function deleteChar(id){ setIds(charIds().filter(x=>x!==id)); lsDel(charKey(id)); lsDel('dkdef2.rk.'+id); if(selId===id){selId='';lsSet('dkdef2.sel','');} rkQueueDel(id); }
-function packChar(p){ const {id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear,as,sy,ct,cat,dv4,shard,mail,ms,tut}=p; return {id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear:clear|0,ct:ct>0?ct|0:0,cat:cat>0?cat|0:0,as:as===undefined?-1:as,sy:sy===undefined?-1:sy,dv4:dv4?1:0,shard:shard|0,mail:Array.isArray(mail)?mail:undefined,ms:Array.isArray(ms)?ms:undefined,tut:tut||undefined}; }
+function packChar(p){ const {id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear,as,sy,au,ct,cat,dv4,shard,mail,ms,tut}=p; return {id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear:clear|0,au:Math.max(0,Math.min(2,au|0)),ct:ct>0?ct|0:0,cat:cat>0?cat|0:0,as:as===undefined?-1:as,sy:sy===undefined?-1:sy,dv4:dv4?1:0,shard:shard|0,mail:Array.isArray(mail)?mail:undefined,ms:Array.isArray(ms)?ms:undefined,tut:tut||undefined}; }
 function saveChar(){ if(!me||!me.id)return; lsSet(charKey(me.id),JSON.stringify(packChar(me))); }
 const dispName=p=>(p&&p.name)||CLASSES[p.cls].n;
 const SELLBASE=[100,200,400,800,3000], ADVAFX=['ls','crit','ias','ms','mf','pr','mr'];
@@ -2945,8 +2946,9 @@ addEventListener('blur',()=>{for(const k in keys)keys[k]=false; for(const k in h
    물약은 자동으로 쓰지 않아요. 순간이동·세크리파이스(희생)·수호 폭발(수호 영혼 소멸)은 자동에서 제외. */
 let autoMode=0, autoGap=0, autoRet=false, autoBo={}, autoHintT=0;
 const AUTO_LB=[['AUTO','OFF'],['AUTO','이동'],['AUTO','+스킬']], AUTO_TX=['자동 사냥 꺼짐','⚔ 자동 이동 · 일반공격','⚔ 자동 이동 · 스킬까지 자동'];
-function setAuto(n){ autoMode=n; autoRet=false; autoGap=0; autoBo={}; const b=$('#bAuto'); if(!b)return; b.className='s'+n; b.querySelector('b').textContent=AUTO_LB[n][0]; b.querySelector('small').textContent=AUTO_LB[n][1]; b.setAttribute('aria-label','자동 사냥: '+AUTO_TX[n].replace('⚔ ',''));
-  const t=$('#autoT'); t.className='s'+n+' show'; t.textContent=AUTO_TX[n]; clearTimeout(autoHintT); autoHintT=setTimeout(()=>t.classList.remove('show'),2600); }
+function setAuto(n,quiet){ autoMode=n; autoRet=false; autoGap=0; autoBo={}; if(me&&!quiet&&(me.au|0)!==n){ me.au=n; saveChar(); }   /* quiet=true: 저장된 설정을 화면에만 반영(저장값은 안 바꿈) */
+  const b=$('#bAuto'); if(!b)return; b.className='s'+n; b.querySelector('b').textContent=AUTO_LB[n][0]; b.querySelector('small').textContent=AUTO_LB[n][1]; b.setAttribute('aria-label','자동 사냥: '+AUTO_TX[n].replace('⚔ ',''));
+  const t=$('#autoT'); if(quiet&&!n){ t.classList.remove('show'); return; } t.className='s'+n+' show'; t.textContent=AUTO_TX[n]; clearTimeout(autoHintT); autoHintT=setTimeout(()=>t.classList.remove('show'),2600); }
 function cycleAuto(){ if(!G.inGame)return; setAuto((autoMode+1)%3); sfx(autoMode?'aura':'auraoff'); }
 $('#bAuto').addEventListener('pointerdown',e=>{ e.preventDefault(); cycleAuto(); });
 const autoBlocked=()=>!G.inGame||G.paused||me.dead||document.body.classList.contains('shopen');
@@ -3008,7 +3010,7 @@ function autoSkills(dt){
 const TUT_TOPIC=['이동 · 공격 · 스킬 · 전리품 · 물약','스킬 포인트 · 능력치 · AUTO 자동 사냥','가방 · 장비 착용 · 판매 · 자동 정리','장비 강화 · 상점','아이템 보내기 · 우편함 · 공유보관함'];
 function tutDef(){ return {on:0,d:[0,0,0,0,0],rw:[0,0,0,0,0],g:[0,0,0,0,0],fin:0,cn:0,sg:{}}; }
 function tutFix(p){ const t=p.tut&&typeof p.tut==='object'?p.tut:tutDef(); for(const k of ['d','rw','g']){ t[k]=Array.isArray(t[k])?t[k].slice(0,5).map(v=>v|0):[]; while(t[k].length<5)t[k].push(0); } t.on=t.on?1:0; t.fin=t.fin?1:0; t.cn=t.cn?1:0; { const sg={}; if(t.sg&&typeof t.sg==='object'&&!Array.isArray(t.sg))for(const k in t.sg)if(t.sg[k]&&String(k).length<12)sg[k]=1; t.sg=sg; } p.tut=t; }
-let tutS=null, tutIv=0, tutWait=false;
+let tutS=null, tutIv=0, tutWait=false, tutAu=0;   /* tutAu: 튜토리얼 AUTO 단계 전에 쓰던 AUTO 설정 */
 const tutQ=s=>document.querySelector(s), tutShut=()=>document.body.classList.contains('shopen');
 const tutVis=e=>{ if(!e)return null; const r=e.getBoundingClientRect(); return r.width>2&&r.height>2?e:null; };
 const tutBag=fn=>{ for(const e of document.querySelectorAll('#sheetB [data-inv]')){ const it=me.inv[+e.dataset.inv]; if(it&&!isShard(it)&&fn(it))return e; } return null; };
@@ -3029,7 +3031,7 @@ const TUTS=[
   {t:'스킬 올리기',b:'스킬 옆의 ＋ 버튼을 누르면 스킬 레벨이 올라 더 강해져요. 포인트를 아끼지 말고 쓰세요. 나중에 못 쓰는 스킬은 없어요.',can:()=>(me.skillPts|0)>0,b2:'스킬 포인트가 있을 때 스킬 옆 ＋ 버튼으로 스킬 레벨을 올려요. 스킬마다 해금 레벨이 있어요.',pre:S=>{S.p=me.skillPts|0;},tg:()=>tutQ('#sheetB [data-sk]')||tutQ('#bSkillT'),ck:S=>(me.skillPts|0)<S.p},
   {t:'능력치 창 열기',b:'이번에는 📊 능력 버튼을 눌러 능력치 창을 열어 보세요.',...tutOpenTab('bStat','stat')},
   {t:'능력치 올리기',b:'힘은 피해, 민첩은 공격속도·치명타, 체력은 생명력, 에너지는 마나에 영향을 줘요. ＋ 를 눌러 원하는 곳에 포인트를 써 보세요.',can:()=>(me.statPts|0)>0,b2:'레벨이 오를 때마다 능력치 포인트를 얻어요. 힘·민첩·체력·에너지 중 원하는 곳에 ＋ 로 투자해요.',pre:S=>{S.p=me.statPts|0;},tg:()=>tutQ('#sheetB [data-st]')||tutQ('#bStat'),ck:S=>(me.statPts|0)<S.p},
-  {t:'AUTO 자동 사냥',b:'AUTO 버튼을 두 번 눌러 보세요. 한 번은 자동 이동+일반공격, 두 번은 스킬까지 자동이에요. 한 번 더 누르면 꺼져요. 조이스틱을 잡으면 내가 직접 움직여요.',tg:()=>tutQ('#bAuto'),hud:1,ck:()=>autoMode===2,post:()=>setAuto(0)}
+  {t:'AUTO 자동 사냥',b:'AUTO 버튼을 두 번 눌러 보세요. 한 번은 자동 이동+일반공격, 두 번은 스킬까지 자동이에요. 한 번 더 누르면 꺼져요. 조이스틱을 잡으면 내가 직접 움직여요.',pre:()=>{ tutAu=me.au|0; setAuto(0,true); },tg:()=>tutQ('#bAuto'),hud:1,ck:()=>autoMode===2,post:()=>{ me.au=tutAu; setAuto(tutAu,true); saveChar(); }}
  ],
  [ /* 1-3 */
   {t:'가방 열기',b:'아래 🎒 가방 버튼을 눌러 가방을 열어 보세요. 열려 있는 동안 게임은 잠시 멈춰요.',...tutOpenTab('bBag','bag')},
@@ -4159,7 +4161,7 @@ function resetWorld(){
   projs.length=zones.length=timers.length=parts.length=nums.length=ground.length=efx.length=0;
   G.mobs=[]; G.mobMap=new Map(); G.stKills=0; G.stDrops=0; G.stCap=0; G.runT=0; G.stGot=[0,0,0,0,0]; G.sib=0; G.endShown=false; G.clrDone=false; alClear(); G.stRev=0; G.stGold0=me?(me.gold|0):0; G.paused=false; G.bt=null; G.shake=0;
   hitQ=[]; fxQ=[]; lastAllyFx=-1; lastEv=-1; lastHit=0; G.guestDmg=0; G.fires=[]; G.freeRev=1; G.fireT=3; if(me){ me.rvGiven=0; me.seenRg=0; me.out=false; me.rvT=0; }
-  spawnMe(); buildSkills(); show(null); G.inGame=true; closeSheet();
+  spawnMe(); buildSkills(); show(null); G.inGame=true; closeSheet(); setAuto(me?me.au|0:0,true);   /* 이 캐릭터가 마지막으로 정한 AUTO 설정으로 시작 */
 }
 /* 타이틀 하단 탭 바 */
 $('#tGear').onclick=()=>{ if(selId)openTitleSheet('bag'); };
@@ -4199,7 +4201,7 @@ $('#bStart').onclick=()=>{ if(G.mode!=='host')return; ally=null; const gp=others
 $('#bLeave').onclick=()=>quitToTitle();
 function startGuestGame(pr){ dmgReset(); resetWorld(); G.phase=pr.ph; toast('게임이 시작됐어요'); }
 async function quitToTitle(){
-  storyStop(); if(autoMode)setAuto(0); G.inGame=false; G.phase='title'; G.aim=null; saveChar(); ally=null; if(me){ selStage=Math.max(0,Math.min(STAGES.length-1,(me.clear|0)-1)); }
+  storyStop(); if(autoMode)setAuto(0,true); G.inGame=false; G.phase='title'; G.aim=null; saveChar(); ally=null; if(me){ selStage=Math.max(0,Math.min(STAGES.length-1,(me.clear|0)-1)); }
   if(R){try{R.presence({role:null,pl:null,m:null,ev:null,h:null,bt:null}).catch(()=>{}); await R.leave();}catch(e){} R=null;}
   show('#sTitle'); renderClassCards(); rkSubmitAll();
 }
