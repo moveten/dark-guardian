@@ -678,7 +678,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.5.0189</div>
+    <div class="ver" id="verT">v0.4.5.0190</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -4304,13 +4304,13 @@ function drawPlayer(o,isMe,t){
   if(isMe&&me.buffs.barrier&&me.buffs.barrier.t>0&&fxAtlas())fxFrame(5,Math.floor(t*8)%4,x,y+2,84,84,0,Math.min(1,me.buffs.barrier.t*2)*.55);
   const fm=o.cls==='druid'?formOf(o):'', hk=fm?'druid_'+fm:o.cls, hh=fm==='bear'?104:78;
   const HS=sprGet('hero_'+hk), WC=WALKS[hk], WK=(WC&&HS)?sprGet('hero_'+hk+'_walk'):null;
-  const RG=isMe&&me.buffs.rage&&me.buffs.rage.t>0, RGW=[[.605,.322],[.605,.356],[.623,.312],[.605,.315],[.616,.315],[.605,.300]];   /* 폭주: 눈 위치(칸별, 그림 비율) */
+  const RG=isMe&&me.buffs.rage&&me.buffs.rage.t>0, RGW=[[.643,.247],[.643,.256],[.610,.245],[.643,.253],[.610,.249],[.638,.252]];   /* 폭주: 눈 위치(칸별, 그림 비율) */
   if(HS){ const A=heroAnim(o,t,meleeOf(o),WK?.4:1); if(RG){ ctx.save(); ctx.shadowColor='rgba(255,45,25,.95)'; ctx.shadowBlur=11+4*Math.sin(t*9); }   /* 폭주: 몸 테두리에 붉은 기운 */
     if(WK){ if(A.wa>.35)o._wkOn=true; else if(A.wa<.15)o._wkOn=false; }   /* 걷기 시트 ↔ 대기 그림 전환 (깜빡임 방지용 히스테리시스) */
     const HA=HATK[hk], AK=(HA&&HS)?sprGet('hero_'+hk+'_atk'):null;
     if(AK&&A.ap<1){ const cw=AK.width/HA.n; let fi=0; while(fi<HA.t.length&&A.ap>=HA.t[fi])fi++; sprDraw(AK,x,y+16,hh*(AK.height/HA.k)/HS.height,o.face,{flip:A.flip,tint:RG,fr:[fi*cw,cw,AK.height]}); }   /* 공격 시트: 그림 자체에 동작이 있어서 코드 흔들림은 끔 */
     else if(WK&&o._wkOn){ const cw=WK.width/WC.n, fi=Math.floor((((o._wp||0)/.2/WC.cyc)%1+1)%1*WC.n); sprDraw(WK,x,y+16,hh*(WK.height/WC.k)/HS.height,o.face,{...A,tint:RG,eye:RG&&o.cls==='war'?RGW[fi]:null,fr:[fi*cw,cw,WK.height]}); }
-    else sprDraw(HS,x,y+16,hh,o.face,RG?{...A,tint:1,eye:o.cls==='war'?[.545,.317]:null}:A);
+    else sprDraw(HS,x,y+16,hh,o.face,RG?{...A,tint:1,eye:o.cls==='war'?[.615,.183]:null}:A);
     if(RG)ctx.restore();
     if(isMe&&me.hurt>0){ctx.fillStyle=`rgba(255,40,30,${me.hurt*2.5})`;ctx.beginPath();ctx.arc(x,y,15,0,6.283);ctx.fill();} }
   else if(fm){ /* 변신 그림이 없을 때: 곰 도형 */
