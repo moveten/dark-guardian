@@ -706,7 +706,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.5.0200</div>
+    <div class="ver" id="verT">v0.4.5.0201</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -716,7 +716,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
       <div class="stbig" id="stageBig"></div>
       <div class="stagebar" id="stageBar"></div>
       <div id="stageInfo" role="button" tabindex="0" title="누르면 설명이 펼쳐져요"></div>
-      <div class="modes"><button class="btn primary" id="bSolo">▶ 시작하기</button></div>
+      <div class="modes"><button class="btn primary" id="bSolo">▶ 시작하기</button><button class="btn" id="bStory" hidden>📖 스토리 다시 보기</button></div>
     </div>
     <div hidden><button id="bHost" disabled></button><button id="bJoin" disabled></button><p class="note" id="netNote">온라인 연결 확인 중…</p></div>
     <nav class="ttabs" id="titleTabs" aria-label="메뉴">
@@ -3296,15 +3296,15 @@ function storyBegin(kind){ const id=G.stg&&G.stg.id; if(!id||!STORY[id]||!STORY[
   const k=G.stageIdx; later(1.2,()=>{ if(G.inGame&&G.stageIdx===k&&G.phase==='prep'&&G.wave===0&&storyRun('pre'))return; storyWait=false; }); return true; }
 function storyRun(kind){ const id=G.stg&&G.stg.id, ls=id&&STORY[id]&&STORY[id][kind]; if(!ls||stS||!me||!me.tut)return false; const key=storyKey(id,kind); if(storySeen(key))return false;
   me.tut.sg[key]=1; saveChar();
-  const solo=G.mode==='solo'&&!G.coop; stS={ls,i:-1,kind,solo,pz:false,foe:null,full:'',n:0};
+  const solo=G.mode==='solo'&&!G.coop; stS={ls,i:-1,kind,solo,pz:false,foe:null,full:'',n:0,ch:me};
   const el=$('#sty'); el.hidden=false; el.classList.toggle('nb',!solo); if(solo){ stS.pz=true; G.paused=true; } for(const k in held)held[k]=false; joy.active=false;
   storyShow(0); return true; }
 function storyShow(i){ const S=stS; if(!S)return; S.i=i; const ln=S.ls[i], sp=ln[0], el=$('#sty'), nar=sp==='nar';
   if(sp==='nar'){ S.foe=ln[2]==='-'?null:(ln[2]||S.foe); } else if(sp!=='me')S.foe=sp;
   el.classList.toggle('nar',nar); el.classList.toggle('rt',!nar&&sp!=='me');   /* 주인공 대사는 왼쪽 · 보스·삼남매 대사는 오른쪽 정렬 */
-  const me0=sp==='me', info=me0?{n:dispName(me),t:CLASSES[me.cls].n,c:'#f0d9a0'}:STSP[sp];
+  const ch=S.ch||me, me0=sp==='me', info=me0?{n:dispName(ch),t:CLASSES[ch.cls].n,c:'#f0d9a0'}:STSP[sp];
   $('#stN').textContent=nar?'':info.n; $('#stN').style.color=nar?'':info.c; $('#stT').textContent=nar?'':(info.t||'');
-  const L=el.querySelector('.sp.l'), R=el.querySelector('.sp.r'), li=L.firstElementChild, ri=R.firstElementChild, ms='img/hero_'+me.cls+'.png';
+  const L=el.querySelector('.sp.l'), R=el.querySelector('.sp.r'), li=L.firstElementChild, ri=R.firstElementChild, ms='img/hero_'+ch.cls+'.png';
   if(li.getAttribute('src')!==ms)li.src=ms; L.classList.toggle('off',!me0);
   const f=S.foe&&STSP[S.foe]; R.classList.toggle('no',!f); if(f){ if(ri.getAttribute('src')!==f.img)ri.src=f.img; ri.style.filter=f.f?f.f+' drop-shadow(0 4px 10px rgba(0,0,0,.7))':''; R.classList.toggle('off',me0||nar&&false); }
   S.full=ln[1]; S.n=0; $('#stA').textContent=''; $('#stB').textContent=S.full; $('#stGo').classList.add('hid'); $('#stPg').textContent=(i+1)+' / '+S.ls.length;
@@ -3314,9 +3314,17 @@ function storyTick(){ const S=stS; if(!S){ clearInterval(stTm); return; } S.n=Ma
 function storyNext(){ const S=stS; if(!S)return; if(S.n<S.full.length){ S.n=S.full.length; storyTick(); return; } sfx('ui'); if(S.i+1>=S.ls.length)storyEnd(); else storyShow(S.i+1); }
 function storySkip(){ if(stS){ sfx('ui'); storyEnd(); } }
 function storyClose(){ const S=stS; clearInterval(stTm); stS=null; const el=$('#sty'); if(el){ el.hidden=true; el.classList.remove('nar','nb','rt'); } if(S&&S.pz)G.paused=G.mode==='solo'&&!$('#sheet').hidden; return S; }
+function storyReplay(id,kind,ch,back){ const ls=STORY[id]&&STORY[id][kind]; if(!ls||stS||!ch)return false;   /* 시작 화면에서 본 대화 다시 보기: 기록·게임 멈춤 없이 */
+  stS={ls,i:-1,kind:'re',solo:true,pz:false,foe:null,full:'',n:0,ch,back}; const el=$('#sty'); el.hidden=false; el.classList.remove('nb'); storyShow(0); return true; }
+function storyMenu(){ const ch=selId&&loadChar(selId); if(!ch||stS)return; const S=STAGES[selStage], st=STORY[S.id]; if(!st)return; const sg=(ch.tut&&ch.tut.sg)||{};
+  const row=(k,lb)=>{ const ok=!!sg[storyKey(S.id,k)]; return `<button class="btn${ok?' primary':''}" data-k="${k}"${ok?'':' disabled'}>${lb}${ok?'':' <small style="font-weight:400">· 아직 안 봤어요</small>'}</button>`; };
+  modal(`<h3>📖 스토리 · ${esc(S.id)} ${esc(S.bn)}</h3><p class="meta" style="margin:0 0 10px">이미 본 대화를 다시 볼 수 있어요. 아직 못 본 대화는 그 스테이지에서 처음 플레이할 때 나와요.</p><div class="col">${row('pre','▶ 시작 대화')}${row('post','▶ 끝 대화')}<button class="btn" id="stmX">닫기</button></div>`,m=>{
+    m.querySelector('#stmX').onclick=closeModal;
+    m.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{ const k=b.dataset.k; closeModal(); storyReplay(S.id,k,ch,()=>storyMenu()); }); }); }
 function storyStop(){ storyClose(); storyWait=false; }
-function storyEnd(){ const S=storyClose(); if(S&&S.kind==='pre'){ storyWait=false;
+function storyEnd(){ const S=storyClose(); if(S&&S.kind==='re'){ if(S.back)S.back(); return; } if(S&&S.kind==='pre'){ storyWait=false;
   if(G.mode!=='guest'&&(me.clear|0)>selStage&&!STAGES[selStage].raid&&G.inGame&&!G.allMode&&G.phase==='prep'&&G.wave===0&&G.stageIdx===selStage)startAllOut(); } }   /* 이미 깬 스테이지는 대화 뒤 바로 총공세 */
+$('#bStory').addEventListener('click',()=>{ sfx('ui'); storyMenu(); });
 $('#sty').addEventListener('click',e=>{ if(e.target.closest('#stSk')){ storySkip(); return; } storyNext(); });
 window.addEventListener('keydown',e=>{ if(!stS||!stS.solo)return; if(e.key==='Enter'||e.key===' '){ e.preventDefault(); e.stopPropagation(); storyNext(); } else if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); storySkip(); } },true);
 /* 궁극기 컷인: 내가 궁극기를 쓰면 직업 얼굴 + 스킬 이름 띠가 1.5초간 화면을 가로질러요 (게임은 멈추지 않음 · 메뉴 '화면 표시'에서 끌 수 있음) */
@@ -4021,6 +4029,7 @@ function renderStagePanel(){
   { const cur=chars.find(c=>c.id===selId), low=cur&&cur.lvl<S.rl, gp0=cur&&cur.eq?gearPenOf(cur.eq,S.icap):null, gw=!!gp0&&gp0.wm<.97; $('#stageInfo').innerHTML=`<span style="color:${gw?'#e07060':'#9fd18b'};font-weight:700">장비 Lv 합 ${Math.max(1,S.icap-12)*EQSL.length}↑${gp0?` (내 합 ${gp0.sum}${gw?' · 부족':''})`:''}</span><span class="sd">${esc(S.d)}</span>`; }
   { const cur=chars.find(c=>c.id===selId), nw=!!cur&&(cur.inv||[]).some(x=>x&&x.isNew), pt=cur?(cur.statPts|0)+(cur.skillPts|0):0;
     $('#tGearB').hidden=!nw; $('#menuB').hidden=!mailUnreadAll(chars); const pb=$('#tGearP'); pb.hidden=!pt; pb.textContent=pt; for(const id of ['tGear','tStore'])$('#'+id).disabled=!cur; }
+  { const cur=chars.find(c=>c.id===selId), sg=(cur&&cur.tut&&cur.tut.sg)||{}; $('#bStory').hidden=!(STORY[S.id]&&(sg[storyKey(S.id,'pre')]||sg[storyKey(S.id,'post')])); }   /* 이 스테이지의 대화를 하나라도 본 캐릭터만 */
   $('#bSolo').disabled=!selId; if(room){ $('#bHost').disabled=!selId; $('#bJoin').disabled=!selId; }
 }
 function renderTitle(){
