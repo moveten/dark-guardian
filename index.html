@@ -568,6 +568,39 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   #sheetB.bag .bagtop .eq{grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}#sheetB.bag .bagtop .eq .sl{display:none}
   #sheetB.bag .bagtop .bagbtns .btn{min-height:30px;padding:6px 1px!important}
 }
+/* ===== 튜토리얼 코치마크 (📖 모험 안내) ===== */
+#tq{position:absolute;inset:0;z-index:300;pointer-events:none;overflow:hidden}
+#tq[hidden]{display:none}
+#tq.dim{background:rgba(0,0,0,.6)}
+#tq.blk{pointer-events:auto}
+#tqH{position:absolute;border-radius:12px;pointer-events:none;box-shadow:0 0 0 9999px rgba(0,0,0,.58),0 0 0 3px var(--gold),0 0 18px 4px rgba(214,170,78,.7);transition:left .18s,top .18s,width .18s,height .18s;animation:tqp 1.3s ease-in-out infinite}
+#tqH[hidden]{display:none}
+@keyframes tqp{50%{box-shadow:0 0 0 9999px rgba(0,0,0,.58),0 0 0 5px #ffe28a,0 0 28px 8px rgba(255,214,110,.85)}}
+#tqB{position:absolute;width:min(330px,calc(100% - 16px));box-sizing:border-box;background:#1c1712;border:1px solid var(--gold);border-radius:12px;padding:11px 14px 12px;box-shadow:0 8px 28px rgba(0,0,0,.7);pointer-events:auto;color:var(--ink)}
+#tqB .tqhd{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:11.5px;color:var(--gold);font-weight:700;margin-bottom:5px}
+#tqDots{display:flex;gap:4px}
+#tqDots i{width:8px;height:8px;border-radius:50%;background:#4a4136}
+#tqDots i.dn{background:#6fbf5a}
+#tqDots i.cur{background:var(--gold);box-shadow:0 0 0 2px rgba(214,170,78,.35)}
+#tqT{display:block;font-size:16px;margin-bottom:3px}
+#tqP{margin:0 0 9px;font-size:13.5px;line-height:1.55;color:#e3d9c6}
+#tqP .tqn{color:#ffb259}
+#tqB .tqft{display:flex;gap:8px;align-items:center;justify-content:space-between}
+#tqSk{background:none;border:1px solid var(--line2);border-radius:8px;color:var(--mute);font-size:12px;padding:7px 10px;min-height:34px}
+#tqSk.warn{color:#ffb259;border-color:#ffb259}
+#tqOk{background:var(--blood);border:1px solid #c5463d;border-radius:8px;color:#fff4ea;font-size:14px;font-weight:700;padding:7px 22px;min-height:36px;margin-left:auto}
+#tqOk[hidden]{display:none}
+.tqbar{height:8px;border-radius:5px;background:#2a231b;overflow:hidden}.tqbar i{display:block;height:100%;background:linear-gradient(90deg,#d6aa4e,#ffe28a)}
+.tqlist{display:flex;flex-direction:column;gap:6px;margin:6px 0 8px;max-height:min(52vh,380px);overflow:auto;touch-action:pan-y}
+.tqrow{display:flex;align-items:center;gap:9px;padding:7px 9px;border:1px solid var(--line2);border-radius:9px;background:#18130e}
+.tqrow.done{border-color:#4f8a43}.tqrow.skip{opacity:.85}
+.tqck{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:#2c241a;font-size:13px;font-weight:800;color:var(--gold)}
+.tqrow.done .tqck{background:#3d7a33;color:#fff}
+.tqtx{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}.tqtx b{font-size:14px}.tqtx small{font-size:11.5px;color:var(--mute)}.tqtx small.rw{color:#d9b866}
+.tqrow .btn.sm{flex:none;padding:6px 10px;min-height:34px;font-size:12.5px}
+.tqfin{font-size:12.5px;padding:7px 9px;border:1px dashed var(--gold);border-radius:9px;margin-bottom:8px;color:#e8d9ae}.tqfin.got{border-style:solid;border-color:#4f8a43}
+.tqnote{font-size:12.5px;color:#9be38a;margin:0 0 6px}
+@media (max-height:500px){#tqB{padding:8px 11px 9px}#tqP{font-size:12.5px;line-height:1.45;margin-bottom:6px}#tqT{font-size:14.5px}.tqrow{padding:5px 8px}.tqlist{max-height:calc(100vh - 190px)}}
 </style>
 
 <nav id="dock" hidden>
@@ -616,7 +649,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.5.0180</div>
+    <div class="ver" id="verT">v0.4.5.0181</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -682,6 +715,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="ipop" id="itemPop" hidden></div>
   </div>
   <div class="ipop" id="modal" hidden style="z-index:30"></div>
+  <div id="tq" hidden><div id="tqH" hidden></div><div id="tqB" role="dialog" aria-label="튜토리얼"><div class="tqhd"><span id="tqS"></span><span id="tqDots"></span></div><b id="tqT"></b><p id="tqP"></p><div class="tqft"><button id="tqSk">건너뛰기</button><button id="tqOk" hidden>확인</button></div></div></div>
 </div>
 
 <script>
@@ -1265,15 +1299,30 @@ const MAILS={
     b:p=>`${CLASSES[p.cls].n}${p.name?' '+p.name:''}님, 안녕하세요.\n\n최근 0.4.5 패치에서 소환수 관련 옵션에 큰 변화가 있었어요. 자세한 내용은 패치노트를 확인해주세요.\n\n그에 따라 소지하신 아이템에 부득이한 조정이 있었어요. 보상을 준비했으니 아래 선물을 받아가세요.\n\n앞으로도 어둠의 수호자를 잘 부탁드려요.\n- 수호자 길드 -`}
 };
 /* 자동 발송 편지: 조건(to)에 맞는 캐릭터가 로드될 때 한 번만 받음(p.ms 에 받은 편지 id 기록 → 지워도 다시 안 옴). 새로 만든 캐릭터는 이미 지난 편지를 받지 않음 */
-const MAILQ=[{id:'smfix',d:new Date(2026,9,22).getTime(),to:p=>p.cls==='necro'||p.cls==='druid'}];
+const MAILQ=[{id:'smfix',d:new Date(2026,9,22).getTime(),to:p=>p.cls==='necro'||p.cls==='druid'},{id:'tutinv',d:new Date(2026,9,22).getTime(),to:()=>true}];
 function mailDeliver(p){ if(!Array.isArray(p.ms))p.ms=[]; let ch=false; for(const q of MAILQ){ if(p.ms.includes(q.id)||!q.to(p))continue; p.ms.push(q.id); p.mail.push(mailNew(q.id,q.d)); ch=true; } return ch; }
 /* 편지 첨부 보상 종류: ic=아이콘, tx=수량 글자, can=받을 수 있나(가방 자리), give=지급 */
 const COIN_IC='<svg viewBox="0 0 32 32" width="44" height="44" aria-hidden="true"><circle cx="16" cy="16" r="13" fill="#e0b13a" stroke="#fff1a8" stroke-width="2"/><circle cx="16" cy="16" r="9" fill="none" stroke="#a87a14" stroke-width="1.5"/><text x="16" y="21" text-anchor="middle" font-size="13" font-weight="800" fill="#7a5410">G</text></svg>';
 const MATT={
   gold:{ic:()=>COIN_IC,tx:a=>a.n.toLocaleString('en-US')+'G',ok:a=>`💰 골드 ${a.n.toLocaleString('en-US')}G를 받았어요`,can:()=>true,give:(p,a)=>{ p.gold=(p.gold|0)+a.n; }},
   shard:{ic:()=>shardOrb(SHARD_N,34),tx:a=>a.n+'개',ok:a=>`🌑 그림자 조각 ${a.n}개를 가방에 넣었어요`,can:(p,a)=>shardRoom(p,a.n),give:(p,a)=>{ shardAdd(p,a.n); }},
-  item:{ic:a=>`<span style="font-size:34px;line-height:1">${a.ic||'🎁'}</span>`,tx:a=>a.tx||'아이템 1개',ok:a=>`🎁 ${a.tx||'아이템'}을 가방에 넣었어요`,can:p=>p.inv.indexOf(null)>=0,give:(p,a)=>{ const it=a.mk(); it.isNew=1; p.inv[p.inv.indexOf(null)]=it; }}
+  item:{ic:a=>`<span style="font-size:34px;line-height:1">${a.ic||'🎁'}</span>`,tx:a=>a.tx||'아이템 1개',ok:a=>`🎁 ${a.tx||'아이템'}을 가방에 넣었어요`,can:p=>p.inv.indexOf(null)>=0,give:(p,a)=>{ const it=a.mk(p); it.isNew=1; p.inv[p.inv.indexOf(null)]=it; }}
 };
+const TUT_GOLD=[3000,5000,8000,12000,20000];
+/* 모험 안내(튜토리얼) 보상 편지: 스테이지별 골드 + 랜덤 레어 장비, 5개 모두 이수하면 랜덤 유니크 무기·갑옷 */
+const TUT_BODY=[
+  '첫 걸음을 무사히 뗐군요. 이동과 공격, 스킬, 전리품 줍기까지 모두 익히셨어요.',
+  '스킬과 능력치에 포인트를 쓰는 법, 그리고 AUTO 자동 사냥까지 익히셨어요. 이제 훨씬 편하게 싸울 수 있어요.',
+  '가방을 열고 장비를 갈아입고, 안 쓰는 아이템을 정리하는 법까지 배우셨어요.',
+  '강화는 모험의 핵심이에요. 재료와 확률을 잘 살펴서 소중한 장비를 키워 보세요.',
+  '아이템을 다른 캐릭터에게 보내고 우편함으로 보상을 받는 법까지 모두 익히셨어요.'];
+const tutUniq=(slot,p)=>{ let it; for(let i=0;i<60;i++){ it=genItem(3,STAGES[4].icap,slot); if(ownOk(it,p&&p.cls))break; } return it; };
+TUT_GOLD.forEach((g,k)=>{ MAILS['tut'+(k+1)]={f:'수호자 길드',t:`모험 안내 ${STAGES[k].id} 완료 보상`,att:[{k:'gold',n:g},{k:'item',ic:'🎁',tx:'랜덤 레어 장비',mk:()=>genItem(2,STAGES[k].icap,pick(['weapon','helm','armor','amulet','ring']))}],
+  b:p=>`${dispName(p)}님, 수고하셨어요.\n\n${TUT_BODY[k]}\n\n약속드린 보상이에요. 아래 선물을 눌러 받아 가세요.\n- 수호자 길드 -`}; });
+MAILS.tutall={f:'수호자 길드',t:'모험 안내 전 과정 완료 — 특별 보상',att:[{k:'item',ic:'⚔️',tx:'랜덤 유니크 무기',mk:p=>tutUniq('weapon',p)},{k:'item',ic:'🛡️',tx:'랜덤 유니크 갑옷',mk:p=>tutUniq('armor',p)}],
+  b:p=>`${dispName(p)}님, 모험 안내 다섯 단계를 모두 마치셨어요!\n\n이제 어둠의 땅에서 혼자서도 충분히 해쳐 나갈 수 있을 거예요. 길드가 준비한 특별한 선물을 드릴게요. 가방 자리를 비워 두고 받아 가세요.\n\n당신의 모험에 행운이 함께하길.\n- 수호자 길드 -`};
+MAILS.tutinv={f:'수호자 길드',t:'📖 모험 안내서가 도착했어요',
+  b:p=>`${dispName(p)}님, 안녕하세요.\n\n새로 시작하는 수호자를 위한 모험 안내(튜토리얼)가 생겼어요. 이동·스킬·강화·우편 같은 조작법을 스테이지 1-1~1-5에서 차근차근 알려 드려요.\n\n이미 잘 아시더라도 끝까지 이수하시면 단계마다 골드와 랜덤 장비를, 다섯 단계를 모두 마치면 랜덤 유니크 무기와 갑옷을 드려요.\n\n▶ 타이틀 화면에서 캐릭터를 눌러 [📖 모험 안내]를 열거나, 게임 중 메뉴의 [📖 모험 안내]에서 시작하세요. (건너뛰기도 가능하지만 보상은 이수해야 받아요)\n- 수호자 길드 -`};
 const MAIL0_D=new Date(2026,9,19).getTime(); /* 이미 있던 캐릭터가 처음 받는 환영 편지의 날짜(고정) */
 const mailNew=(id,d)=>({id,d:d||Date.now(),r:0});
 const mailUnread=p=>p&&Array.isArray(p.mail)?p.mail.reduce((n,x)=>n+(x&&!x.r?1:0),0):0;
@@ -1286,7 +1335,7 @@ const genId=()=>'c'+Date.now().toString(36)+Math.floor(Math.random()*1e4).toStri
 const charKey=id=>'dkdef2.c.'+id;
 function newChar(cls,name){
   const c=CLASSES[cls], sk={}; SK[cls].forEach((s,i)=>sk[s.k]=i===0?1:0);
-  const p={id:genId(),cls,lvl:1,xp:0,stats:{...c.base},statPts:0,skillPts:0,skills:sk,inv:Array(INVN).fill(null),eq:{helm:null,armor:null,weapon:null,amulet:null,ring1:null,ring2:null,shield:null},kills:0,name:String(name||'').slice(0,8),gold:500,potBuy:0,rev:0,clear:0,as:-1,sy:-1,dv4:1,mail:[mailNew('welcome')]};   /* 새 캐릭터마다 환영 편지 1통 */
+  const p={id:genId(),cls,lvl:1,xp:0,stats:{...c.base},statPts:0,skillPts:0,skills:sk,inv:Array(INVN).fill(null),eq:{helm:null,armor:null,weapon:null,amulet:null,ring1:null,ring2:null,shield:null},kills:0,name:String(name||'').slice(0,8),gold:500,potBuy:0,rev:0,clear:0,as:-1,sy:-1,dv4:1,mail:[mailNew('welcome')],tut:Object.assign(tutDef(),{on:1})};   /* 새 캐릭터마다 환영 편지 1통 */
   p.eq.weapon=genItem(-1,1,'weapon',c.start); p.eq.weapon.name='낡은 '+c.start.replace('낡은 ','');
   return p;
 }
@@ -1313,7 +1362,7 @@ function loadChar(id){
     if(cls==='druid'){ const tm=it=>{ if(!it||it.slot!=='shield'||it.oc!=='druid'||it.rar===4)return; const b=OFFB.druid.find(x=>x.n===it.base); if(!b)return; const k=(it.rar===3?1.3:1)*(1+(it.ilvl||1)*.1), e=1+.1*(it.enh|0), d0=Math.round(b.dm*k), o0=Math.round(b.om*k); if(it.b0){ it.b0.dm=d0; it.b0.om=o0; } it.dm=Math.round(d0*e); it.om=Math.round(o0*e); }; /* 토템 수치 조정(공격력 3/5/8→2/3/4, 마나 12/20/30→6/10/15)을 이미 가진 토템에도 같은 식으로 다시 적용(등급·아이템 레벨·강화 반영) */
       p.inv.forEach(tm); for(const k in p.eq)tm(p.eq[k]); }
     for(const k of Object.keys(p.eq)){ const it=p.eq[k]; if(it&&it.sp&&SPFX[it.sp]&&SPFX[it.sp].fcls&&SPFX[it.sp].fcls!==cls){ const e=p.inv.indexOf(null); if(e>=0){ p.inv[e]=it; p.eq[k]=null; } } } /* 다른 직업 전용 장비가 장착돼 있으면 가방으로 */
-    p.mail=Array.isArray(p.mail)?p.mail.filter(x=>x&&MAILS[x.id]):[mailNew('welcome',MAIL0_D)]; /* 우편함 도입 전 캐릭터는 환영 편지를 한 번 받음(지우면 다시 안 옴) */ p.name=String(p.name||'').slice(0,8); p.gold=Number.isFinite(p.gold)?p.gold:500; p.potBuy=p.potBuy|0; p.rev=p.rev|0; smMigrate(p); return p;
+    p.mail=Array.isArray(p.mail)?p.mail.filter(x=>x&&MAILS[x.id]):[mailNew('welcome',MAIL0_D)]; /* 우편함 도입 전 캐릭터는 환영 편지를 한 번 받음(지우면 다시 안 옴) */ p.name=String(p.name||'').slice(0,8); p.gold=Number.isFinite(p.gold)?p.gold:500; p.potBuy=p.potBuy|0; p.rev=p.rev|0; tutFix(p); smMigrate(p); return p;
   }catch(e){ console.error('loadChar',id,e); return null; }
 }
 const MAXCHAR=10; /* 캐릭터 슬롯 수 */
@@ -1327,7 +1376,7 @@ function migrateChars(){
 }
 function createChar(cls,name){ const ids=charIds(); if(ids.length>=MAXCHAR||!CLASSES[cls])return null; if(nameTaken(name))return null; const p=newChar(cls,name); p.ms=MAILQ.map(q=>q.id); lsSet(charKey(p.id),JSON.stringify(packChar(p))); ids.push(p.id); setIds(ids); selId=p.id; lsSet('dkdef2.sel',selId); return p; }
 function deleteChar(id){ setIds(charIds().filter(x=>x!==id)); lsDel(charKey(id)); lsDel('dkdef2.rk.'+id); if(selId===id){selId='';lsSet('dkdef2.sel','');} rkQueueDel(id); }
-function packChar(p){ const {id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear,as,sy,ct,cat,dv4,shard,mail,ms}=p; return {id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear:clear|0,ct:ct>0?ct|0:0,cat:cat>0?cat|0:0,as:as===undefined?-1:as,sy:sy===undefined?-1:sy,dv4:dv4?1:0,shard:shard|0,mail:Array.isArray(mail)?mail:undefined,ms:Array.isArray(ms)?ms:undefined}; }
+function packChar(p){ const {id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear,as,sy,ct,cat,dv4,shard,mail,ms,tut}=p; return {id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear:clear|0,ct:ct>0?ct|0:0,cat:cat>0?cat|0:0,as:as===undefined?-1:as,sy:sy===undefined?-1:sy,dv4:dv4?1:0,shard:shard|0,mail:Array.isArray(mail)?mail:undefined,ms:Array.isArray(ms)?ms:undefined,tut:tut||undefined}; }
 function saveChar(){ if(!me||!me.id)return; lsSet(charKey(me.id),JSON.stringify(packChar(me))); }
 const dispName=p=>(p&&p.name)||CLASSES[p.cls].n;
 const SELLBASE=[100,200,400,800,3000], ADVAFX=['ls','crit','ias','ms','mf','pr','mr'];
@@ -1605,7 +1654,8 @@ function startStage(){
   G.allMode=false; G.allQ=[]; G.fires=[]; G.freeRev=1; me.rvGiven=0; me.seenRg=0; me.out=false; me.rvT=0;
   G.wave=0;G.skipUsed=false;G.phase='prep';G.timer=2;G.mobs.length=0;G.ev=[];G.spawnQ=0;G.lastSq=-1;G.endShown=false;G.coop=!!guestPeer;
   G.waveSides=[0,1,3]; G.nextSides=sidesFor(1); G.laneShow=G.nextSides;
-  if(G.mode!=='guest'&&(me.clear|0)>selStage&&!STAGES[selStage].raid)later(.05,()=>{ if(G.inGame&&!G.allMode&&G.phase==='prep'&&G.wave===0&&G.stageIdx===selStage)startAllOut(); }); /* 이미 깬 스테이지는 들어가자마자 총공세 */
+  if(G.mode!=='guest'&&(me.clear|0)>selStage&&!STAGES[selStage].raid)later(.05,()=>{ if(G.inGame&&!G.allMode&&G.phase==='prep'&&G.wave===0&&G.stageIdx===selStage&&!tutS&&!tutWait)startAllOut(); }); /* 이미 깬 스테이지는 들어가자마자 총공세 (튜토리얼이 시작되는 스테이지는 제외) */
+  tutWait=tutBegin();
 }
 const CLEAR_T=15; /* 보스 처치 후 전리품 줍기 시간(초) */
 const WAVE_CAP=39, ALL_CAP=60; /* 습격 1회 최대 몹 수(모든 스테이지 공통), 총공세 최대 몹 수 */
@@ -2889,6 +2939,109 @@ function autoSkills(dt){
   autoGap=.1;
 }
 
+/* ================= 튜토리얼 (📖 모험 안내) =================
+   스테이지 1-1~1-5 에 들어갈 때 그 스테이지의 단계별 코치마크(밝은 테두리 + 말풍선)로 조작법을 안내해요. (혼자 플레이일 때만)
+   - 새 캐릭터는 자동으로 켜짐(me.tut.on=1) · 기존 캐릭터는 우편(tutinv)으로 안내 → 📖 모험 안내에서 시작
+   - 스테이지마다 '건너뛰기' 가능(d=2, 보상 없음). 끝까지 이수(d=1)하면 그 스테이지 보상 편지(tut1~5)가 한 번 오고, 5개를 모두 이수하면 tutall(유니크 무기·갑옷)
+   - me.tut={on, d:[스테이지별 0 안 함/1 완료/2 건너뜀], rw:[보상 편지 보냈나], g:[튜토리얼 지원 포인트 지급했나], fin:최종 보상 보냈나}
+   - 단계 정의(TUTS): t 제목 · b 내용 · tg 강조할 요소 · hud 게임 화면 요소라 창이 열려 있으면 먼저 닫게 함 · ck 행동 완료 조건(주기적으로 확인) · ok 읽기만 하는 단계(확인 버튼, 혼자일 땐 게임 일시정지)
+     can 못 하는 상황이면 b2 로 바꿔 읽기 단계로 · pre/post 단계 시작/끝에 할 일 */
+const TUT_TOPIC=['이동 · 공격 · 스킬 · 전리품 · 물약','스킬 포인트 · 능력치 · AUTO 자동 사냥','가방 · 장비 착용 · 판매 · 자동 정리','장비 강화 · 상점','아이템 보내기 · 우편함 · 공유보관함'];
+function tutDef(){ return {on:0,d:[0,0,0,0,0],rw:[0,0,0,0,0],g:[0,0,0,0,0],fin:0}; }
+function tutFix(p){ const t=p.tut&&typeof p.tut==='object'?p.tut:tutDef(); for(const k of ['d','rw','g']){ t[k]=Array.isArray(t[k])?t[k].slice(0,5).map(v=>v|0):[]; while(t[k].length<5)t[k].push(0); } t.on=t.on?1:0; t.fin=t.fin?1:0; p.tut=t; }
+let tutS=null, tutIv=0, tutWait=false;
+const tutQ=s=>document.querySelector(s), tutShut=()=>document.body.classList.contains('shopen');
+const tutVis=e=>{ if(!e)return null; const r=e.getBoundingClientRect(); return r.width>2&&r.height>2?e:null; };
+const tutBag=fn=>{ for(const e of document.querySelectorAll('#sheetB [data-inv]')){ const it=me.inv[+e.dataset.inv]; if(it&&!isShard(it)&&fn(it))return e; } return null; };
+const tutEqSig=()=>Object.values(me.eq).map(x=>x?x.id:0).join();
+function tutEv(n){ if(tutS)tutS.fl[n]=1; }
+function tutGrant(k,sp,st){ const t=me.tut; if(t.g[k])return; t.g[k]=1; const m=[]; if((me.skillPts|0)<sp){ me.skillPts=sp; m.push('스킬 포인트 '+sp); } if((me.statPts|0)<st){ me.statPts=st; m.push('능력치 포인트 '+st); } if(m.length){ uiDirty=true; saveChar(); toast('🎓 튜토리얼 지원 · '+m.join(' · ')+' 지급','#9be38a'); } }
+const tutOpenTab=(id,mode)=>({tg:()=>tutQ('#'+id),hud:1,ck:()=>sheetMode===mode});
+const TUTS=[
+ [ /* 1-1 */
+  {t:'이동하기',b:'화면 아무 곳이나 손가락으로 끌면 조이스틱이 나타나요. 끄는 방향으로 영웅이 움직여요. (PC: W A S D 키)',pre:S=>{S.x=me.x;S.y=me.y;},ck:S=>hyp(me.x-S.x,me.y-S.y)>110},
+  {t:'공격은 자동이에요',b:'영웅은 가까운 적을 알아서 공격해요. 적이 몰려오면 다가가서 한 마리를 쓰러뜨려 보세요. 마을 가운데 원 안에서는 체력이 빠르게 회복돼요.',pre:S=>{S.k=G.stKills|0;},ck:S=>(G.stKills|0)>S.k},
+  {t:'스킬 쓰기',b:'오른쪽 아래의 스킬 버튼을 눌러 보세요. 마나를 쓰고, 쓴 뒤에는 쿨타임이 돌아요. 레벨이 오르면 새 스킬이 열려요.',tg:()=>tutQ('#skills .sb'),hud:1,ck:()=>Object.values(me.cds).some(v=>v>0)},
+  {t:'전리품 줍기',b:'적이 떨어뜨린 아이템과 골드 위로 지나가면 자동으로 주워요. 빛기둥이 보이면 레어 이상이에요. (노랑 레어 · 주황 유니크 · 붉은색 영웅)',ok:1},
+  {t:'물약',b:'체력이 위험하면 물약 버튼(🧪)을 눌러요. 습격이 시작될 때마다 3개가 새로 채워져요. 쓰러져도 부활 물약이 있으면 이어서 싸울 수 있어요.',tg:()=>tutQ('#bPot'),hud:1,ok:1}
+ ],
+ [ /* 1-2 */
+  {t:'스킬 창 열기',b:'레벨이 오르면 스킬 포인트를 얻어요. 아래 ✨ 스킬 버튼으로 스킬 창을 열어 보세요. (이번 한 번은 포인트를 지원해 드려요)',pre:()=>tutGrant(1,1,5),...tutOpenTab('bSkillT','skill')},
+  {t:'스킬 올리기',b:'스킬 옆의 ＋ 버튼을 누르면 스킬 레벨이 올라 더 강해져요. 포인트를 아끼지 말고 쓰세요. 나중에 못 쓰는 스킬은 없어요.',can:()=>(me.skillPts|0)>0,b2:'스킬 포인트가 있을 때 스킬 옆 ＋ 버튼으로 스킬 레벨을 올려요. 스킬마다 해금 레벨이 있어요.',pre:S=>{S.p=me.skillPts|0;},tg:()=>tutQ('#sheetB [data-sk]')||tutQ('#bSkillT'),ck:S=>(me.skillPts|0)<S.p},
+  {t:'능력치 창 열기',b:'이번에는 📊 능력 버튼을 눌러 능력치 창을 열어 보세요.',...tutOpenTab('bStat','stat')},
+  {t:'능력치 올리기',b:'힘은 피해, 민첩은 공격속도·치명타, 체력은 생명력, 에너지는 마나에 영향을 줘요. ＋ 를 눌러 원하는 곳에 포인트를 써 보세요.',can:()=>(me.statPts|0)>0,b2:'레벨이 오를 때마다 능력치 포인트를 얻어요. 힘·민첩·체력·에너지 중 원하는 곳에 ＋ 로 투자해요.',pre:S=>{S.p=me.statPts|0;},tg:()=>tutQ('#sheetB [data-st]')||tutQ('#bStat'),ck:S=>(me.statPts|0)<S.p},
+  {t:'AUTO 자동 사냥',b:'AUTO 버튼을 두 번 눌러 보세요. 한 번은 자동 이동+일반공격, 두 번은 스킬까지 자동이에요. 한 번 더 누르면 꺼져요. 조이스틱을 잡으면 내가 직접 움직여요.',tg:()=>tutQ('#bAuto'),hud:1,ck:()=>autoMode===2,post:()=>setAuto(0)}
+ ],
+ [ /* 1-3 */
+  {t:'가방 열기',b:'아래 🎒 가방 버튼을 눌러 가방을 열어 보세요. 열려 있는 동안 게임은 잠시 멈춰요.',...tutOpenTab('bBag','bag')},
+  {t:'장비 착용',b:'가방 칸의 아이템을 누르면 비교 창이 열려요. 초록 ▲가 붙은 아이템이 지금 장비보다 좋아요. [장착]을 눌러 입어 보세요.',can:()=>me.inv.some(it=>it&&!isShard(it)&&canWear(it)),b2:'가방 칸의 아이템을 누르면 비교 창이 열려요. 초록 ▲가 붙은 아이템이 지금 장비보다 좋고, [장착]으로 입어요. 레벨·능력치가 모자라면 입을 수 없어요.',pre:S=>{S.sg=tutEqSig();},tg:()=>tutQ('#aEquip')||(tutBag(it=>canWear(it)&&!!document.querySelector('#sheetB [data-inv="'+me.inv.indexOf(it)+'"] .up'))||tutBag(canWear))||tutQ('#bBag'),ck:S=>tutEqSig()!==S.sg},
+  {t:'한꺼번에 팔기',b:'필요 없는 아이템은 [일괄 판매]로 한 번에 팔 수 있어요. 잠근 🔒 아이템과 장착 중인 장비는 팔리지 않아요.',tg:()=>tutQ('#aBulk')||tutQ('#bBag'),ok:1},
+  {t:'자동 판매 · 자동 합성',b:'[자동 판매]는 고른 등급 이하를 줍는 즉시 팔고, [자동 합성]은 같은 등급 아이템을 모아 더 좋은 등급으로 합쳐 줘요. 가방이 가득 차는 걸 막아 줘요.',tg:()=>tutQ('#aAuto'),ok:1}
+ ],
+ [ /* 1-4 */
+  {t:'가방 열기',b:'강화하려면 먼저 🎒 가방을 열어요.',...tutOpenTab('bBag','bag')},
+  {t:'장비 강화',b:'강화할 장비를 누른 뒤 [강화]를 눌러 보세요. 무기·방어구·목걸이·반지를 +10까지 강화할 수 있어요.',tg:()=>tutQ('#aEnh')||(me.eq.weapon&&canEnh(me.eq.weapon)&&tutVis(tutQ('#sheetB [data-eq="weapon"]')))||tutBag(canEnh)||tutQ('#bBag'),ck:(S,F)=>!!F.enh},
+  {t:'강화 재료와 확률',b:'강화에는 골드와 같은 등급 아이템 몇 개가 재료로 들어가요. 성공 확률은 단계가 오를수록 낮아지고, 실패해도 단계는 그대로예요(재료와 골드만 사라져요). 안 쓰는 장비를 재료로 모아 두세요.',tg:()=>tutQ('#modal .card'),ok:1,post:()=>closeModal()},
+  {t:'상점',b:'물약·부활 아이템·장비는 타이틀 화면의 캐릭터 메뉴 → 🛒 상점에서 사고팔 수 있어요. 스테이지 안에서는 상점을 쓸 수 없고, 대신 마을 가운데에서 쉬어 가요.',ok:1}
+ ],
+ [ /* 1-5 */
+  {t:'아이템 보내기',b:'장비는 내 계정의 다른 캐릭터에게 보낼 수 있어요. 타이틀 화면에서 캐릭터를 눌러 [장비 · 능력치 정비]를 열고, 아이템을 선택한 뒤 [📤 보내기]를 누르세요. (캐릭터가 둘 이상일 때)',ok:1},
+  {t:'공유보관함 · 골드 보내기',b:'보낼 곳 목록에는 🗄 공유보관함도 있어요. 넣어 두면 어느 캐릭터로든 꺼낼 수 있어요. 가방 창 위쪽의 💰 골드를 누르면 골드도 다른 캐릭터에게 보낼 수 있어요.',ok:1},
+  {t:'우편함',b:'스테이지 클리어·이벤트 보상은 타이틀 메뉴의 ✉️ 우편함으로 와요. 편지 아래의 선물 아이콘을 눌러야 가방에 들어와요. 이 튜토리얼의 보상도 우편함으로 보내 드려요!',ok:1}
+ ]
+];
+function tutBegin(){ const k=selStage; if(tutS||!me||!me.tut||!me.tut.on||G.mode!=='solo'||G.coop||k>=TUTS.length||me.tut.d[k]!==0)return false;
+  later(1.4,()=>{ if(G.inGame&&G.stageIdx===k&&!tutS&&G.mode==='solo'&&!G.coop)tutRun(k); }); return true; }
+function tutRun(k){ tutS={k,i:-1,fl:{},S:{},ok:false,pz:false,conf:0,key:''}; $('#tq').hidden=false; clearInterval(tutIv); tutIv=setInterval(tutTick,120); tutGo(0); }
+function tutUnpause(){ const T=tutS; if(T&&T.pz){ T.pz=false; G.paused=G.mode==='solo'&&!$('#sheet').hidden; } }
+function tutGo(i){ const T=tutS; if(!T)return; tutUnpause(); if(i>=TUTS[T.k].length){ tutDone(); return; }
+  const st=TUTS[T.k][i]; T.i=i; T.S={}; T.fl={}; T.key=''; T.sc=null; if(st.pre)st.pre(T.S);
+  const can=st.can?st.can(T.S):true; T.ok=!!st.ok||!can; T.alt=!can;
+  if(T.ok&&!tutShut()&&G.mode==='solo'){ T.pz=true; G.paused=true; }
+  for(const id of ['tqSk','tqOk']){ const b=$('#'+id); b.hidden=false; } $('#tqOk').hidden=!T.ok; $('#tq').classList.toggle('blk',T.ok); tutSkReset(); tutPlace(); }
+function tutNext(){ const T=tutS; if(!T)return; const st=TUTS[T.k][T.i]; if(st&&st.post)st.post(T.S); sfx('pick'); tutGo(T.i+1); }
+function tutStop(){ const T=tutS; if(T){ tutUnpause(); clearTimeout(T.ct); } tutS=null; clearInterval(tutIv); tutIv=0; const q=$('#tq'); if(q){ q.hidden=true; q.classList.remove('blk'); } }
+function tutDone(){ const T=tutS, k=T.k, t=me.tut; tutStop(); t.d[k]=1; let msg='';
+  if(!t.rw[k]){ t.rw[k]=1; me.mail.push(mailNew('tut'+(k+1))); msg=`보상 편지가 우편함에 도착했어요 (${TUT_GOLD[k].toLocaleString()}G + 장비)`; }
+  let fin=false; if(!t.fin&&t.rw.every(v=>v)){ t.fin=1; fin=true; me.mail.push(mailNew('tutall')); }
+  saveChar(); if(!$('#modal').hidden)closeModal(); if(!$('#sheet').hidden)closeSheet(); sfx('rare');
+  if(fin)banner('🏆 모험 안내 모두 완료!','유니크 무기와 갑옷이 우편함에 도착했어요');
+  else banner(`🎓 ${STAGES[k].id} 튜토리얼 완료!`,msg||'다시 보기를 마쳤어요');
+  toast(fin?'🏆 유니크 무기·갑옷 보상 편지가 도착했어요':`🎓 ${STAGES[k].id} 튜토리얼 완료`+(msg?' · 우편함 확인!':''),'#9be38a'); }
+function tutSkReset(){ const T=tutS; if(!T)return; T.conf=0; clearTimeout(T.ct); const b=$('#tqSk'); b.textContent='건너뛰기'; b.classList.remove('warn'); }
+function tutSkip(){ const T=tutS; if(!T)return; const k=T.k; tutStop(); me.tut.d[k]=2; saveChar(); if(!$('#sheet').hidden)closeSheet(); toast(`${STAGES[k].id} 튜토리얼을 건너뛰었어요. 메뉴의 📖 모험 안내에서 다시 할 수 있어요`,'#ffd84a'); }
+function tutPlace(){ const T=tutS; if(!T)return; const st=TUTS[T.k][T.i]; if(!st)return; const q=$('#tq'), R=q.getBoundingClientRect(), bub=$('#tqB'), hole=$('#tqH');
+  let el=null, note=''; if(st.tg){ if(st.hud&&tutShut()){ el=tutVis($('#sheetX')); note='먼저 창을 닫아 주세요 (오른쪽 위 ✕).'; } else el=tutVis(st.tg(T.S,T.fl)); }
+  const key=T.k+'.'+T.i+'.'+(T.alt?1:0)+'.'+note;
+  if(T.key!==key){ T.key=key; const n=TUTS[T.k].length; $('#tqS').textContent=STAGES[T.k].id+' 튜토리얼'; $('#tqDots').innerHTML=TUTS[T.k].map((_,j)=>`<i class="${j<T.i?'dn':j===T.i?'cur':''}"></i>`).join(''); $('#tqT').textContent=st.t; $('#tqP').innerHTML=esc(T.alt&&st.b2?st.b2:st.b)+(note?`<br><b class="tqn">${esc(note)}</b>`:''); }
+  if(el&&T.sc!==el){ T.sc=el; try{ el.scrollIntoView({block:'nearest',inline:'nearest'}); }catch(e){} }
+  const bw=bub.offsetWidth, bh=bub.offsetHeight; let top, left;
+  if(el){ const r=el.getBoundingClientRect(), pd=6; hole.hidden=false; hole.style.left=(r.left-R.left-pd)+'px'; hole.style.top=(r.top-R.top-pd)+'px'; hole.style.width=(r.width+pd*2)+'px'; hole.style.height=(r.height+pd*2)+'px';
+    const cx=r.left-R.left+r.width/2; left=clamp(cx-bw/2,8,R.width-bw-8);
+    if(r.bottom-R.top+bh+16<R.height) top=r.bottom-R.top+14; else if(r.top-R.top-bh-16>4) top=r.top-R.top-bh-14; else { top=clamp((R.height-bh)/2,8,R.height-bh-8); left=r.left-R.left>R.width/2?8:R.width-bw-8; } }
+  else { hole.hidden=true; left=(R.width-bw)/2; top=T.ok?clamp((R.height-bh)/2,8,R.height-bh-8):Math.max(8,Math.min(R.height*.16,R.height-bh-8)); if(T.ok)q.classList.add('dim'); }
+  if(el||!T.ok)q.classList.remove('dim');
+  bub.style.left=left+'px'; bub.style.top=top+'px'; }
+function tutTick(){ const T=tutS; if(!T)return;
+  if(!G.inGame||G.stageIdx!==T.k||G.mode!=='solo'||G.coop||!me||!me.tut){ tutStop(); return; }
+  if(T.pz&&!G.paused&&$('#sheet').hidden)G.paused=true;
+  const st=TUTS[T.k][T.i]; if(!st)return;
+  if(!T.ok&&st.ck&&st.ck(T.S,T.fl)){ tutNext(); return; }
+  tutPlace(); }
+$('#tqOk').onclick=()=>tutNext();
+$('#tqSk').onclick=()=>{ const T=tutS; if(!T)return; if(!T.conf){ T.conf=1; const b=$('#tqSk'); b.textContent='정말 건너뛸까요? (보상 없음)'; b.classList.add('warn'); T.ct=setTimeout(()=>{ if(tutS===T)tutSkReset(); },3200); return; } tutSkip(); };
+/* 📖 모험 안내 창: 진행 상황 · 보상 · 시작/다시 하기 (타이틀의 캐릭터 메뉴와 게임 중 메뉴에서 열림) */
+function tutModal(id,note){
+  const live=!!(G.inGame&&me&&me.id===id), P=live?me:loadChar(id); if(!P)return; const t=P.tut, nd=t.rw.filter(Boolean).length, sv=()=>{ if(live)saveChar(); else mailSave(P); };
+  const rows=TUTS.map((_,k)=>{ const s=STAGES[k], st=t.rw[k]?'done':t.d[k]===2?'skip':'todo';
+    return `<div class="tqrow ${st}"><span class="tqck">${st==='done'?'✔':st==='skip'?'⏭':k+1}</span><div class="tqtx"><b>${s.id} ${esc(s.n)}</b><small>${TUT_TOPIC[k]}</small><small class="rw">🎁 ${TUT_GOLD[k].toLocaleString()}G + 랜덤 장비 ${t.rw[k]?'· 받음':st==='skip'?'· 건너뜀(이수하면 받아요)':''}</small></div><button class="btn sm" data-r="${k}">${st==='done'?'다시 보기':st==='skip'?'다시 하기':'시작'}</button></div>`; }).join('');
+  modal(`<h3>📖 모험 안내 <small style="color:var(--mute);font-weight:400">${esc(dispName(P))}</small></h3><div class="tqbar" aria-label="진행 ${nd}/5"><i style="width:${nd*20}%"></i></div><div class="meta" style="margin:4px 0 8px">완료 ${nd} / 5 · 스테이지 1-1~1-5에 들어가면 그 단계의 안내가 시작돼요</div>${note?`<div class="tqnote">${esc(note)}</div>`:''}<div class="tqlist">${rows}</div><div class="tqfin ${t.fin?'got':''}">🏆 5개를 모두 이수하면 <b>랜덤 유니크 무기 + 갑옷</b> ${t.fin?'· 받음':''}</div><div class="row2"><button class="btn" id="tuOn">안내 ${t.on?'끄기':'켜기'}</button><button class="btn primary" id="tuX">닫기</button></div>`,m=>{
+    m.querySelector('#tuX').onclick=closeModal;
+    m.querySelector('#tuOn').onclick=()=>{ t.on=t.on?0:1; sv(); tutModal(id,t.on?'안내를 켰어요. 아직 안 한 스테이지에 들어가면 시작돼요':'안내를 껐어요. 켜기 전까지 시작되지 않아요'); };
+    m.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{ const k=+b.dataset.r; t.on=1; t.d[k]=0; sv();
+      if(live&&G.stageIdx===k&&G.mode==='solo'&&!G.coop&&!tutS){ closeModal(); closeSheet(); tutRun(k); return; }
+      tutModal(id,`${STAGES[k].id} ${STAGES[k].n} 스테이지에 들어가면 안내가 시작돼요`); }); }); }
+
 /* ================= HUD ================= */
 let uiDirty=true, hudT=0;
 /* 단축키 1~9 = 화면에 보이는 스킬 버튼의 위치 (스킬 종류와 무관). 위에서부터 7 8 9 / 4 5 6 / 1 2 3 (숫자패드 배치)
@@ -3321,6 +3474,7 @@ function enhFx(ok,it,L){
 function enhModal(){
   const it=selItem&&selItem.it; if(!it||!canEnh(it))return; const L=(it.enh|0)+1;
   if(L>MAXENH){ warn(`최대 강화(+${MAXENH})예요`); return; }
+  tutEv('enh');
   const need=enhNeed(L), cost=enhCost(it,L), rate=enhRate(L);
   const elig=me.inv.map((x,i)=>({x,i})).filter(o=>o.x&&!isShard(o.x)&&o.x!==it&&o.x.rar===it.rar&&!o.x.lock&&!(o.x.enh>0)).sort((a,b)=>(a.x.ilvl|0)-(b.x.ilvl|0)||sellInfo(a.x).total-sellInfo(b.x).total||a.i-b.i); /* 레벨 오름차순 — 낮은 레벨부터 자동 선택 */
   const sel=new Set(elig.slice(0,need).map(o=>o.i)); const matObj=new Map(elig.map(o=>[o.i,o.x]));
@@ -3365,8 +3519,8 @@ function askReset(kind){
 function renderMenu(){
   markTabs(); sheetHead();
   const b=$('#sheetB'); b.className='sbody';
-  b.innerHTML=`<div class="menuL"><button class="btn primary" id="mResume">계속하기</button><button class="btn" id="mQuit">스테이지 포기하고 나가기</button><button class="btn" id="mCl">☁️ 클라우드 저장${clCode()?' · 켜짐':''}</button><button class="btn" id="mPn">📜 패치노트</button><div class="modes" id="sndM"></div><div class="hudbox"><b>🖥️ 화면 표시 (HUD)</b>${HUDK.map(([k,n])=>`<label><input type="checkbox" data-hud="${k}"${hudOn(k)?' checked':''}>${n}</label>`).join('')}</div><p class="note">캐릭터와 아이템은 이 기기에 자동 저장돼요. (클라우드 저장을 켜면 서버에도 보관돼요)${G.mode!=='solo'?' 온라인 플레이 중에는 일시정지되지 않아요.':''}</p></div>`;
-  $('#mResume').onclick=closeSheet; $('#mCl').onclick=cloudModal; $('#mPn').onclick=patchModal; {const r=$('#sndM'); r.innerHTML=sndBtns(); bindSnd(r);} b.querySelectorAll('[data-hud]').forEach(c=>c.onchange=()=>hudSet(c.dataset.hud,c.checked));
+  b.innerHTML=`<div class="menuL"><button class="btn primary" id="mResume">계속하기</button><button class="btn" id="mQuit">스테이지 포기하고 나가기</button><button class="btn" id="mCl">☁️ 클라우드 저장${clCode()?' · 켜짐':''}</button><button class="btn" id="mTut">📖 모험 안내</button><button class="btn" id="mPn">📜 패치노트</button><div class="modes" id="sndM"></div><div class="hudbox"><b>🖥️ 화면 표시 (HUD)</b>${HUDK.map(([k,n])=>`<label><input type="checkbox" data-hud="${k}"${hudOn(k)?' checked':''}>${n}</label>`).join('')}</div><p class="note">캐릭터와 아이템은 이 기기에 자동 저장돼요. (클라우드 저장을 켜면 서버에도 보관돼요)${G.mode!=='solo'?' 온라인 플레이 중에는 일시정지되지 않아요.':''}</p></div>`;
+  $('#mResume').onclick=closeSheet; $('#mCl').onclick=cloudModal; $('#mTut').onclick=()=>tutModal(me.id); $('#mPn').onclick=patchModal; {const r=$('#sndM'); r.innerHTML=sndBtns(); bindSnd(r);} b.querySelectorAll('[data-hud]').forEach(c=>c.onchange=()=>hudSet(c.dataset.hud,c.checked));
   $('#mQuit').onclick=()=>{closeSheet(); quitToTitle();};
 }
 
@@ -3581,9 +3735,10 @@ function nameCheat(id,v){
   lsSet(charKey(q.id),JSON.stringify(packChar(q))); renderTitle(); return msg; }
 function charMenu(id){
   const p=loadChar(id); if(!p)return;
-  modal(`<h3>${clsIc(p.cls,26)} ${esc(dispName(p))} <small style="color:var(--mute);font-weight:400">Lv ${p.lvl} · ${CLASSES[p.cls].n}</small></h3><div class="col"><button class="btn primary" id="cmGear">🎒 장비 · 능력치 정비</button><button class="btn" id="cmShop">🛒 상점</button><button class="btn" id="cmRen">✏️ 이름 변경 (${RENCOST.toLocaleString()}G)</button><button class="btn" id="cmDel">🗑️ 삭제</button><button class="btn" id="cmX">닫기</button></div>`,m=>{
+  modal(`<h3>${clsIc(p.cls,26)} ${esc(dispName(p))} <small style="color:var(--mute);font-weight:400">Lv ${p.lvl} · ${CLASSES[p.cls].n}</small></h3><div class="col"><button class="btn primary" id="cmGear">🎒 장비 · 능력치 정비</button><button class="btn" id="cmShop">🛒 상점</button><button class="btn" id="cmTut">📖 모험 안내</button><button class="btn" id="cmRen">✏️ 이름 변경 (${RENCOST.toLocaleString()}G)</button><button class="btn" id="cmDel">🗑️ 삭제</button><button class="btn" id="cmX">닫기</button></div>`,m=>{
     m.querySelector('#cmGear').onclick=()=>{ closeModal(); openTitleSheet('bag'); };
     m.querySelector('#cmShop').onclick=()=>{ closeModal(); openTitleSheet('shop'); };
+    m.querySelector('#cmTut').onclick=()=>{ closeModal(); tutModal(id); };
     m.querySelector('#cmRen').onclick=()=>{ if((p.gold|0)<RENCOST){ warn(`골드가 부족해요. 이름 변경은 ${RENCOST.toLocaleString()}G가 필요해요 (보유 ${(p.gold|0).toLocaleString()}G)`); return; }
       askName(`✏️ 이름 변경 · ${RENCOST.toLocaleString()}G`,'','✔ 변경',v=>{ const q=loadChar(id); if(!q)return; if((q.gold|0)<RENCOST)return; q.gold-=RENCOST; q.name=v; lsSet(charKey(q.id),JSON.stringify(packChar(q))); renderTitle(); toast(`이름을 '${v}'(으)로 바꿨어요 (-${RENCOST.toLocaleString()}G)`,'#ffd84a'); },id,v=>nameCheat(id,v)||(v===dispName(p)?'현재 이름과 같아요. 다른 이름을 입력해 주세요':null)); };
     m.querySelector('#cmDel').onclick=()=>modal(`<h3>🗑️ 삭제</h3><p style="margin:0 0 12px;font-size:14px">'${esc(dispName(p))}' (Lv ${p.lvl}) 캐릭터를 삭제할까요?<br>장비와 아이템도 함께 사라지며 되돌릴 수 없어요.</p><div class="row2"><button class="btn" id="dNo">취소</button><button class="btn primary" id="dYes">삭제</button></div>`,m2=>{ m2.querySelector('#dNo').onclick=closeModal; let dAsk=false; m2.querySelector('#dYes').onclick=()=>{ if(!dAsk){ dAsk=true; const y=m2.querySelector('#dYes'); y.textContent='⚠️ 정말 삭제 · 한 번 더 누르면 삭제'; y.style.background='#a62a22'; y.style.borderColor='#ff6a5a'; return; } deleteChar(id); closeModal(); renderTitle(); }; });
