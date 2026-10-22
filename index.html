@@ -677,7 +677,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.5.0184</div>
+    <div class="ver" id="verT">v0.4.5.0185</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -3809,18 +3809,19 @@ function mailClaim(cid,i,j){
   T.give(p,a); x.g.push(j); mailSave(p); sfx('rare'); renderStagePanel(); mailRead(cid,i,T.ok(a)); }
 /* 받지 않은 첨부 보상을 한꺼번에 받기 — cid·i 를 주면 그 편지 하나만, 없으면 모든 캐릭터의 모든 편지. 가방에 자리가 없는 아이템·조각은 못 받고 남겨 둠(경고 표시) */
 function mailClaimAll(cid,i){
-  const chars=cid?[loadChar(cid)].filter(Boolean):charIds().map(loadChar).filter(Boolean), got={}, skip={}; let nGot=0;
-  for(const p of chars){ let ch=false;
-    p.mail.forEach((x,ii)=>{ if(cid&&ii!==i)return; const M=MAILS[x.id]; if(!M||!M.att)return; if(!Array.isArray(x.g))x.g=[];
+  const chars=cid?[loadChar(cid)].filter(Boolean):charIds().map(loadChar).filter(Boolean), got={}, skip={}; let nGot=0, nDel=0;
+  for(const p of chars){ let ch=false; const done=new Set();   /* done: 이번에 보상을 다 받아 지울 편지 */
+    p.mail.forEach((x,ii)=>{ if(cid&&ii!==i)return; const M=MAILS[x.id]; if(!M||!M.att)return; if(!Array.isArray(x.g))x.g=[]; let n0=0;
       M.att.forEach((a,j)=>{ if(x.g.includes(j))return; const T=MATT[a.k]; if(!T)return;
         if(!T.can(p,a)){ const sk=skip[p.id]||(skip[p.id]={n:dispName(p),item:0,shard:0}); if(a.k==='shard')sk.shard+=a.n|0; else sk.item++; return; }
-        T.give(p,a); x.g.push(j); ch=true; nGot++; got[a.k]=(got[a.k]||0)+(a.k==='item'?1:(a.n|0)); }); });
+        T.give(p,a); x.g.push(j); ch=true; nGot++; n0++; got[a.k]=(got[a.k]||0)+(a.k==='item'?1:(a.n|0)); }); if(n0&&mailLeft(x)===0)done.add(x); });
+    if(done.size){ p.mail=p.mail.filter(x=>!done.has(x)); nDel+=done.size; ch=true; }   /* 보상을 모두 받은 편지는 우편함에서 삭제 */
     if(ch)mailSave(p); }
   const parts=[]; if(got.gold)parts.push(`💰 골드 ${got.gold.toLocaleString('en-US')}G`); if(got.item)parts.push(`🎁 아이템 ${got.item}개`); if(got.shard)parts.push(`🌑 그림자 조각 ${got.shard}개`);
   const sks=Object.values(skip), skTx=sks.map(k=>`${esc(k.n)}: ${[k.item?`아이템 ${k.item}개`:'',k.shard?`조각 ${k.shard}개`:''].filter(Boolean).join(' · ')}`).join('<br>');
   if(nGot)sfx('rare'); renderStagePanel();
-  if(cid){ mailRead(cid,i,sks.length?'⚠️ 가방이 가득 차서 일부를 못 받았어요. 가방을 비우고 다시 눌러 주세요':nGot?'받을 수 있는 보상을 모두 받았어요':'',!!sks.length); return; }
-  modal(`<h3>🎁 우편 보상 받기</h3>${nGot?`<p style="margin:0 0 8px;font-size:14px;line-height:1.7">받은 보상<br><b>${parts.join('<br>')}</b></p>`:'<p class="meta" style="margin:0 0 8px">받은 보상이 없어요</p>'}${sks.length?`<div class="mwarn">⚠️ 가방이 가득 차서 못 받은 보상이 있어요<br><small>${skTx}</small><br><small>가방을 비운 뒤 다시 [모두 받기]를 눌러 주세요.</small></div>`:''}<div class="row2"><button class="btn primary" id="mBk2" style="grid-column:1/-1">우편함으로</button></div>`,m=>{ m.querySelector('#mBk2').onclick=mailModal; }); }
+  if(cid&&!nDel){ mailRead(cid,i,sks.length?'⚠️ 가방이 가득 차서 일부를 못 받았어요. 가방을 비우고 다시 눌러 주세요':nGot?'받을 수 있는 보상을 모두 받았어요':'',!!sks.length); return; }
+  modal(`<h3>🎁 우편 보상 받기</h3>${nGot?`<p style="margin:0 0 8px;font-size:14px;line-height:1.7">받은 보상<br><b>${parts.join('<br>')}</b></p>`:'<p class="meta" style="margin:0 0 8px">받은 보상이 없어요</p>'}${nDel?`<p class="meta" style="margin:0 0 8px">✉️ 보상을 모두 받은 편지 ${nDel}통은 우편함에서 삭제했어요</p>`:''}${sks.length?`<div class="mwarn">⚠️ 가방이 가득 차서 못 받은 보상이 있어요<br><small>${skTx}</small><br><small>가방을 비운 뒤 다시 [모두 받기]를 눌러 주세요.</small></div>`:''}<div class="row2"><button class="btn primary" id="mBk2" style="grid-column:1/-1">우편함으로</button></div>`,m=>{ m.querySelector('#mBk2').onclick=mailModal; }); }
 function mailRead(cid,i,note,bad){
   const p=loadChar(cid), x=p&&p.mail[i]; if(!x){ mailModal(); return; }
   if(!x.r){ x.r=1; mailSave(p); renderStagePanel(); }
