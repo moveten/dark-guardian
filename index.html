@@ -568,6 +568,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   #sheetB.bag .bagtop .eq{grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}#sheetB.bag .bagtop .eq .sl{display:none}
   #sheetB.bag .bagtop .bagbtns .btn{min-height:30px;padding:6px 1px!important}
 }
+.mwarn{margin:0 0 8px;padding:8px 10px;border:1px solid #ff8a3a;border-radius:9px;background:rgba(120,50,10,.35);color:#ffb259;font-size:13px;font-weight:700;line-height:1.5}.mwarn small{font-weight:500;color:#f0c9a0;font-size:12px}
 /* ===== 튜토리얼 코치마크 (📖 모험 안내) ===== */
 #tq{position:absolute;inset:0;z-index:300;pointer-events:none;overflow:hidden}
 #tq[hidden]{display:none}
@@ -676,7 +677,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.5.0183</div>
+    <div class="ver" id="verT">v0.4.5.0184</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -3795,24 +3796,39 @@ function mailModal(){
   const chars=charIds().map(loadChar).filter(Boolean), all=[];
   chars.forEach(p=>p.mail.forEach((x,i)=>all.push({p,x,i})));
   all.sort((a,b)=>(b.x.d|0)-(a.x.d|0));
-  const un=all.reduce((n,o)=>n+(o.x.r?0:1),0);
+  const un=all.reduce((n,o)=>n+(o.x.r?0:1),0), pend=all.reduce((n,o)=>n+mailLeft(o.x),0);
+  const lack=chars.map(p=>{ let need=0; p.mail.forEach(x=>{ const M=MAILS[x.id]; if(M&&M.att)M.att.forEach((a,j)=>{ if(a.k==='item'&&!(Array.isArray(x.g)&&x.g.includes(j)))need++; }); }); const free=p.inv.filter(v=>!v).length; return need>free?`${esc(dispName(p))}: 아이템 ${need}개 · 빈 칸 ${free}칸`:''; }).filter(Boolean);   /* 아이템 보상을 받을 가방 칸이 모자란 캐릭터 */
   const rows=all.map(o=>{ const M=MAILS[o.x.id]; return `<button class="mrow${o.x.r?'':' un'}" data-c="${o.p.id}" data-i="${o.i}">${mailIc(!!o.x.r)}<span class="mt"><b>${esc(M.t)}</b><small>${esc(M.f)} · ${mailDate(o.x.d)} · ${esc(dispName(o.p))}</small></span>${mailLeft(o.x)?'<i class="mgift" title="받지 않은 보상이 있어요">🎁</i>':''}${o.x.r?'':'<i class="mnew">NEW</i>'}</button>`; }).join('');
-  modal(`<h3>${mailIc(false)} 우편함 <small style="color:var(--mute);font-weight:400">읽지 않은 편지 ${un}개</small></h3>${rows?`<div class="mlist">${rows}</div>`:'<p class="meta" style="text-align:center;margin:18px 0">받은 편지가 없어요</p>'}<div class="row2"><button class="btn primary" id="mX">닫기</button></div>`,m=>{
-    m.querySelector('#mX').onclick=closeModal; m.querySelectorAll('.mrow').forEach(b=>b.onclick=()=>mailRead(b.dataset.c,+b.dataset.i)); }); }
+  modal(`<h3>${mailIc(false)} 우편함 <small style="color:var(--mute);font-weight:400">읽지 않은 편지 ${un}개</small></h3>${lack.length?`<div class="mwarn">⚠️ 가방 칸이 모자라 다 못 받을 수 있어요<br><small>${lack.join(' · ')}</small></div>`:''}${rows?`<div class="mlist">${rows}</div>`:'<p class="meta" style="text-align:center;margin:18px 0">받은 편지가 없어요</p>'}<div class="row2">${pend?`<button class="btn primary" id="mAll">🎁 모두 받기 (${pend})</button><button class="btn" id="mX">닫기</button>`:'<button class="btn primary" id="mX" style="grid-column:1/-1">닫기</button>'}</div>`,m=>{
+    m.querySelector('#mX').onclick=closeModal; { const ab=m.querySelector('#mAll'); if(ab)ab.onclick=()=>mailClaimAll(); } m.querySelectorAll('.mrow').forEach(b=>b.onclick=()=>mailRead(b.dataset.c,+b.dataset.i)); }); }
 const mailLeft=x=>{ const M=x&&MAILS[x.id]; return M&&M.att?M.att.length-(Array.isArray(x.g)?x.g.filter(j=>M.att[j]).length:0):0; };   /* 아직 안 받은 첨부 수 */
 function mailClaim(cid,i,j){
   const p=loadChar(cid), x=p&&p.mail[i], M=x&&MAILS[x.id], a=M&&M.att&&M.att[j]; if(!a){ mailRead(cid,i); return; }
   if(!Array.isArray(x.g))x.g=[]; if(x.g.includes(j)){ mailRead(cid,i); return; }
   const T=MATT[a.k]; if(!T||!T.can(p,a)){ mailRead(cid,i,'⚠️ 가방에 자리가 부족해요. 가방을 비우고 다시 눌러 주세요',1); return; }
   T.give(p,a); x.g.push(j); mailSave(p); sfx('rare'); renderStagePanel(); mailRead(cid,i,T.ok(a)); }
+/* 받지 않은 첨부 보상을 한꺼번에 받기 — cid·i 를 주면 그 편지 하나만, 없으면 모든 캐릭터의 모든 편지. 가방에 자리가 없는 아이템·조각은 못 받고 남겨 둠(경고 표시) */
+function mailClaimAll(cid,i){
+  const chars=cid?[loadChar(cid)].filter(Boolean):charIds().map(loadChar).filter(Boolean), got={}, skip={}; let nGot=0;
+  for(const p of chars){ let ch=false;
+    p.mail.forEach((x,ii)=>{ if(cid&&ii!==i)return; const M=MAILS[x.id]; if(!M||!M.att)return; if(!Array.isArray(x.g))x.g=[];
+      M.att.forEach((a,j)=>{ if(x.g.includes(j))return; const T=MATT[a.k]; if(!T)return;
+        if(!T.can(p,a)){ const sk=skip[p.id]||(skip[p.id]={n:dispName(p),item:0,shard:0}); if(a.k==='shard')sk.shard+=a.n|0; else sk.item++; return; }
+        T.give(p,a); x.g.push(j); ch=true; nGot++; got[a.k]=(got[a.k]||0)+(a.k==='item'?1:(a.n|0)); }); });
+    if(ch)mailSave(p); }
+  const parts=[]; if(got.gold)parts.push(`💰 골드 ${got.gold.toLocaleString('en-US')}G`); if(got.item)parts.push(`🎁 아이템 ${got.item}개`); if(got.shard)parts.push(`🌑 그림자 조각 ${got.shard}개`);
+  const sks=Object.values(skip), skTx=sks.map(k=>`${esc(k.n)}: ${[k.item?`아이템 ${k.item}개`:'',k.shard?`조각 ${k.shard}개`:''].filter(Boolean).join(' · ')}`).join('<br>');
+  if(nGot)sfx('rare'); renderStagePanel();
+  if(cid){ mailRead(cid,i,sks.length?'⚠️ 가방이 가득 차서 일부를 못 받았어요. 가방을 비우고 다시 눌러 주세요':nGot?'받을 수 있는 보상을 모두 받았어요':'',!!sks.length); return; }
+  modal(`<h3>🎁 우편 보상 받기</h3>${nGot?`<p style="margin:0 0 8px;font-size:14px;line-height:1.7">받은 보상<br><b>${parts.join('<br>')}</b></p>`:'<p class="meta" style="margin:0 0 8px">받은 보상이 없어요</p>'}${sks.length?`<div class="mwarn">⚠️ 가방이 가득 차서 못 받은 보상이 있어요<br><small>${skTx}</small><br><small>가방을 비운 뒤 다시 [모두 받기]를 눌러 주세요.</small></div>`:''}<div class="row2"><button class="btn primary" id="mBk2" style="grid-column:1/-1">우편함으로</button></div>`,m=>{ m.querySelector('#mBk2').onclick=mailModal; }); }
 function mailRead(cid,i,note,bad){
   const p=loadChar(cid), x=p&&p.mail[i]; if(!x){ mailModal(); return; }
   if(!x.r){ x.r=1; mailSave(p); renderStagePanel(); }
   const M=MAILS[x.id], g=Array.isArray(x.g)?x.g:[], left=mailLeft(x);
-  const att=M.att&&M.att.length?`<div class="matt">${M.att.map((a,j)=>{ const T=MATT[a.k], got=g.includes(j); return `<button class="mat${got?' got':''}" data-j="${j}" ${got?'disabled':''} aria-label="${esc(T.tx(a))}${got?' (받음)':''}"><span class="mbox">${T.ic(a)}${got?'<i class="mck">✔</i>':''}</span><b>${esc(T.tx(a))}</b></button>`; }).join('')}</div><p class="meta" style="text-align:center;margin:0 0 10px;${bad?'color:#ff8a7a':''}">${note?esc(note):left?'선물 아이콘을 누르면 가방으로 받아요':'보상을 모두 받았어요'}</p>`:'';
+  const att=M.att&&M.att.length?`<div class="matt">${M.att.map((a,j)=>{ const T=MATT[a.k], got=g.includes(j); return `<button class="mat${got?' got':''}" data-j="${j}" ${got?'disabled':''} aria-label="${esc(T.tx(a))}${got?' (받음)':''}"><span class="mbox">${T.ic(a)}${got?'<i class="mck">✔</i>':''}</span><b>${esc(T.tx(a))}</b></button>`; }).join('')}</div><p class="meta" style="text-align:center;margin:0 0 10px;${bad?'color:#ff8a7a':''}">${note?esc(note):left?'선물 아이콘을 누르면 가방으로 받아요':'보상을 모두 받았어요'}</p>${left>1?'<button class="btn" id="mAllOne" style="width:100%;margin:0 0 8px">🎁 모두 받기</button>':''}`:'';
   modal(`<h3>${mailIc(true)} ${esc(M.t)}</h3><p class="meta" style="margin:0 0 8px">${esc(M.f)} · ${mailDate(x.d)} · ${esc(dispName(p))}</p><div class="mbody">${esc(M.b(p))}</div>${att}<div class="row2"><button class="btn" id="mDel">🗑️ 삭제</button><button class="btn primary" id="mBk">목록</button></div>`,m=>{
     m.querySelector('#mBk').onclick=mailModal; let ask=false;
-    m.querySelectorAll('.mat:not(.got)').forEach(b=>b.onclick=()=>mailClaim(cid,i,+b.dataset.j));
+    m.querySelectorAll('.mat:not(.got)').forEach(b=>b.onclick=()=>mailClaim(cid,i,+b.dataset.j)); { const a1=m.querySelector('#mAllOne'); if(a1)a1.onclick=()=>mailClaimAll(cid,i); }
     m.querySelector('#mDel').onclick=e=>{ if(!ask){ ask=true; const b=e.currentTarget; b.textContent=left?'⚠️ 못 받은 보상도 사라져요':'⚠️ 한 번 더 누르면 삭제'; b.style.background='#a62a22'; b.style.borderColor='#ff6a5a'; return; }
       const q=loadChar(cid); if(q){ q.mail.splice(i,1); mailSave(q); renderStagePanel(); } mailModal(); }; }); }
 $('#verT').onclick=()=>patchModal(); $('#verT').style.cursor='pointer';
