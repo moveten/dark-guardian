@@ -568,6 +568,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   #sheetB.bag .bagtop .eq{grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}#sheetB.bag .bagtop .eq .sl{display:none}
   #sheetB.bag .bagtop .bagbtns .btn{min-height:30px;padding:6px 1px!important}
 }
+.mhd2{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 8px}.mhd2 .btn.sm{flex:none;padding:6px 10px;min-height:34px;font-size:12.5px}
 .mwarn{margin:0 0 8px;padding:8px 10px;border:1px solid #ff8a3a;border-radius:9px;background:rgba(120,50,10,.35);color:#ffb259;font-size:13px;font-weight:700;line-height:1.5}.mwarn small{font-weight:500;color:#f0c9a0;font-size:12px}
 /* ===== 튜토리얼 코치마크 (📖 모험 안내) ===== */
 #tq{position:absolute;inset:0;z-index:300;pointer-events:none;overflow:hidden}
@@ -677,7 +678,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.5.0186</div>
+    <div class="ver" id="verT">v0.4.5.0187</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -3792,15 +3793,20 @@ function menuModal(){
 $('#bSet').onclick=menuModal;
 /* 우편함: 모든 캐릭터의 편지를 한 목록(최근 순)으로 → 편지 읽기(읽음 처리) → 삭제 */
 function mailSave(p){ lsSet(charKey(p.id),JSON.stringify(packChar(p))); }
-function mailModal(){
+function mailModal(note){
   const chars=charIds().map(loadChar).filter(Boolean), all=[];
   chars.forEach(p=>p.mail.forEach((x,i)=>all.push({p,x,i})));
   all.sort((a,b)=>(b.x.d|0)-(a.x.d|0));
   const un=all.reduce((n,o)=>n+(o.x.r?0:1),0), pend=all.reduce((n,o)=>n+mailLeft(o.x),0);
   const lack=chars.map(p=>{ let need=0; p.mail.forEach(x=>{ const M=MAILS[x.id]; if(M&&M.att)M.att.forEach((a,j)=>{ if(a.k==='item'&&!(Array.isArray(x.g)&&x.g.includes(j)))need++; }); }); const free=p.inv.filter(v=>!v).length; return need>free?`${esc(dispName(p))}: 아이템 ${need}개 · 빈 칸 ${free}칸`:''; }).filter(Boolean);   /* 아이템 보상을 받을 가방 칸이 모자란 캐릭터 */
   const rows=all.map(o=>{ const M=MAILS[o.x.id]; return `<button class="mrow${o.x.r?'':' un'}" data-c="${o.p.id}" data-i="${o.i}">${mailIc(!!o.x.r)}<span class="mt"><b>${esc(M.t)}</b><small>${esc(M.f)} · ${mailDate(o.x.d)} · ${esc(dispName(o.p))}</small></span>${mailLeft(o.x)?'<i class="mgift" title="받지 않은 보상이 있어요">🎁</i>':''}${o.x.r?'':'<i class="mnew">NEW</i>'}</button>`; }).join('');
-  modal(`<h3>${mailIc(false)} 우편함 <small style="color:var(--mute);font-weight:400">읽지 않은 편지 ${un}개</small></h3>${lack.length?`<div class="mwarn">⚠️ 가방 칸이 모자라 다 못 받을 수 있어요<br><small>${lack.join(' · ')}</small></div>`:''}${rows?`<div class="mlist">${rows}</div>`:'<p class="meta" style="text-align:center;margin:18px 0">받은 편지가 없어요</p>'}<div class="row2"><button class="btn${pend?' primary':''}" id="mAll"${pend?'':' disabled style="opacity:.45"'}>🎁 ${pend?`모두 받기 (${pend})`:'받을 보상 없음'}</button><button class="btn${pend?'':' primary'}" id="mX">닫기</button></div>`,m=>{
-    m.querySelector('#mX').onclick=closeModal; { const ab=m.querySelector('#mAll'); if(ab)ab.onclick=()=>mailClaimAll(); } m.querySelectorAll('.mrow').forEach(b=>b.onclick=()=>mailRead(b.dataset.c,+b.dataset.i)); }); }
+  const rdel=all.filter(o=>o.x.r&&!mailLeft(o.x)).length;   /* 지울 수 있는 편지: 읽었고 받지 않은 보상이 없는 것 */
+  modal(`<h3 style="margin-bottom:6px">${mailIc(false)} 우편함</h3><div class="mhd2"><span class="meta">읽지 않은 편지 ${un}개</span><button class="btn sm" id="mClr"${rdel?'':' disabled style="opacity:.45"'}>🗑️ 읽은 편지 전부 삭제</button></div>${note?`<div class="tqnote">${esc(note)}</div>`:''}${lack.length?`<div class="mwarn">⚠️ 가방 칸이 모자라 다 못 받을 수 있어요<br><small>${lack.join(' · ')}</small></div>`:''}${rows?`<div class="mlist">${rows}</div>`:'<p class="meta" style="text-align:center;margin:18px 0">받은 편지가 없어요</p>'}<div class="row2"><button class="btn${pend?' primary':''}" id="mAll"${pend?'':' disabled style="opacity:.45"'}>🎁 ${pend?`모두 받기 (${pend})`:'받을 보상 없음'}</button><button class="btn${pend?'':' primary'}" id="mX">닫기</button></div>`,m=>{
+    m.querySelector('#mX').onclick=closeModal; { const ab=m.querySelector('#mAll'); if(ab)ab.onclick=()=>mailClaimAll(); }
+    { const cb=m.querySelector('#mClr'), cs=chars; let ask=false; cb.onclick=()=>{ if(!rdel)return;
+        if(!ask){ ask=true; { const w=cb.offsetWidth, h=cb.offsetHeight; cb.style.flex='none'; cb.style.height=h+'px'; cb.style.width=w+'px'; } cb.style.whiteSpace='nowrap'; cb.style.overflow='hidden'; cb.style.paddingInline='4px'; cb.textContent=`⚠️ ${rdel}통 삭제?`; cb.style.background='#a62a22'; cb.style.borderColor='#ff6a5a'; return; }
+        let n=0; for(const p of cs){ const k=p.mail.length; p.mail=p.mail.filter(x=>!(x.r&&!mailLeft(x))); if(p.mail.length!==k){ n+=k-p.mail.length; mailSave(p); } }
+        renderStagePanel(); mailModal(`읽은 편지 ${n}통을 삭제했어요 (받지 않은 보상이 있는 편지는 남겨 둬요)`); }; } m.querySelectorAll('.mrow').forEach(b=>b.onclick=()=>mailRead(b.dataset.c,+b.dataset.i)); }); }
 const mailLeft=x=>{ const M=x&&MAILS[x.id]; return M&&M.att?M.att.length-(Array.isArray(x.g)?x.g.filter(j=>M.att[j]).length:0):0; };   /* 아직 안 받은 첨부 수 */
 function mailClaim(cid,i,j){
   const p=loadChar(cid), x=p&&p.mail[i], M=x&&MAILS[x.id], a=M&&M.att&&M.att[j]; if(!a){ mailRead(cid,i); return; }
@@ -3830,7 +3836,7 @@ function mailRead(cid,i,note,bad){
   modal(`<h3>${mailIc(true)} ${esc(M.t)}</h3><p class="meta" style="margin:0 0 8px">${esc(M.f)} · ${mailDate(x.d)} · ${esc(dispName(p))}</p><div class="mbody">${esc(M.b(p))}</div>${att}<div class="row2"><button class="btn" id="mDel">🗑️ 삭제</button><button class="btn primary" id="mBk">목록</button></div>`,m=>{
     m.querySelector('#mBk').onclick=mailModal; let ask=false;
     m.querySelectorAll('.mat:not(.got)').forEach(b=>b.onclick=()=>mailClaim(cid,i,+b.dataset.j)); { const a1=m.querySelector('#mAllOne'); if(a1)a1.onclick=()=>mailClaimAll(cid,i); }
-    m.querySelector('#mDel').onclick=e=>{ if(!ask){ ask=true; const b=e.currentTarget; b.textContent=left?'⚠️ 못 받은 보상도 사라져요':'⚠️ 한 번 더 누르면 삭제'; b.style.background='#a62a22'; b.style.borderColor='#ff6a5a'; return; }
+    m.querySelector('#mDel').onclick=e=>{ if(!ask){ ask=true; const b=e.currentTarget; { const w=b.offsetWidth, h=b.offsetHeight; b.style.flex='none'; b.style.height=h+'px'; b.style.width=w+'px'; } b.style.whiteSpace='nowrap'; b.style.overflow='hidden'; b.style.paddingInline='4px'; b.style.fontSize='14px'; b.textContent=left?'⚠️ 보상도 삭제?':'⚠️ 정말 삭제?'; b.style.background='#a62a22'; b.style.borderColor='#ff6a5a'; return; }   /* 확인 단계에서도 버튼 크기는 그대로 (높이 고정 · 한 줄) */
       const q=loadChar(cid); if(q){ q.mail.splice(i,1); mailSave(q); renderStagePanel(); } mailModal(); }; }); }
 $('#verT').onclick=()=>patchModal(); $('#verT').style.cursor='pointer';
 /* 패치노트: 저장소의 patchnotes.txt를 불러와서 보여줌 (원본 파일 링크 포함) */
