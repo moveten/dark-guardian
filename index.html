@@ -511,7 +511,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.4.0173</div>
+    <div class="ver" id="verT">v0.4.5.0174</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -805,8 +805,8 @@ const AFX=[
  {t:'rng',n:'스킬 범위 +{v}%',sl:'warshield'}, /* 전사 보조무기(레어 이상) 전용 고정 옵션 */
  {t:'pr',n:'획득범위 +{v}',sl:'ring amulet armor helm shield',r:i=>[3,6+(i/6|0)]},
  {t:'mr',n:'마나 회복 +{v}%',sl:'*',r:()=>[10,30]},
- {t:'sm',n:'소환수 피해 +{v}%',sl:'weapon amulet ring helm',r:(i,s)=>s==='weapon'?[6,14+2*i]:[6,Math.max(6,Math.round(5+i*.5))],only:'necro druid'}, /* 강령술사 전용 옵션 */
- {t:'smhp',n:'소환수 생명력 +{v}%',sl:'armor helm amulet shield',r:i=>[8,Math.max(8,Math.round(5+i*.5))],only:'necro druid'},
+ {t:'sm',n:'소환수 피해 +{v}%',sl:'weapon amulet ring helm',r:(i,s,rar)=>(s==='weapon'||(s==='shield'&&rar===3))?[6,14+2*i]:[6,Math.max(6,Math.round(5+i*.5))],only:'necro druid'}, /* 강령술사·드루이드 전용 옵션 (유니크 보조장비: 최대 14 + 아이템 레벨×2) */
+ {t:'smhp',n:'소환수 생명력 +{v}%',sl:'armor helm amulet shield',r:(i,s,rar)=>(s==='shield'&&rar===3)?[8,20+2*i]:[8,Math.max(8,Math.round(5+i*.5))],only:'necro druid'},   /* 유니크 보조장비: 최대 20 + 아이템 레벨×2 */
  {t:'cls',n:'{c} 스킬 +{v}',sl:'amulet helm weapon'},
  {t:'all',n:'모든 스킬 +{v}',sl:'amulet helm weapon ring armor'},
  {t:'sk',n:'{s} +{v} ({c} 전용)',sl:'*'}];
@@ -967,7 +967,7 @@ function rollAff(a,rar,ilvl,q,rng,fc,slot){ /* fc: 직업 전용 아이템이면
     if(a.t==='sk'){ const l=SK[cls]; o.key=l[Math.floor(R()*l.length)].k; }
     rollAff.lq=(v-1)/2; return o;
   }
-  const [lo,hi]=a.r(ilvl,slot), v=biased(lo,hi,q); rollAff.lq=(v-lo)/Math.max(1,hi-lo); return {t:a.t,v};
+  const [lo,hi]=a.r(ilvl,slot,rar), v=biased(lo,hi,q); rollAff.lq=(v-lo)/Math.max(1,hi-lo); return {t:a.t,v};
 }
 function hashStr(t){ let h=2166136261; for(let i=0;i<t.length;i++){ h^=t.charCodeAt(i); h=Math.imul(h,16777619); } return h>>>0; }
 const BREQ={'낡은 단검':{dex:[6,.55],str:[0,.2]},'장검':{str:[10,.7],dex:[0,.25]},'철퇴':{str:[10,.7],vit:[0,.2]},'참나무 지팡이':{ene:[8,.5],vit:[0,.15]},'마법서':{ene:[12,.55],vit:[0,.15]},'전투 도끼':{str:[16,.8],vit:[0,.2]},'대검':{str:[20,.9],vit:[0,.25]},
@@ -1079,7 +1079,7 @@ function genItem(rar,ilvl,slot,baseName){
   const bl=slot==='shield'?(OFFB[oc]||OFFB.pal):BASES[slot]; let b; const fc=oc||(spk&&SPFX[spk].fcls)||null;
   if(baseName) b=bl.find(x=>x.n===baseName)||SPBASE[baseName];
   if(!b){const mi=Math.min(bl.length-1,Math.floor(ilvl/3)+2); b=bl[ri(0,mi)];}
-  const q=[1,1.15,1.3,1.6][rar], it={id:++ITEMID,slot,rar,ilvl,base:b.n,aff:[]}; if(rar===3)it.sv=1; /* sv: 유니크 스킬 옵션 개편(v0.4.2.0143) 적용 표시 */ if(spk)it.sp=spk; if(oc)it.oc=oc;
+  const q=[1,1.15,1.3,1.6][rar], it={id:++ITEMID,slot,rar,ilvl,base:b.n,aff:[]}; if(rar===3){ it.sv=1; it.uv=2; } /* sv: 유니크 스킬 옵션 개편(v0.4.2.0143) 적용 표시 · uv=2: 유니크 옵션 통일·보조장비 소환수 옵션 개편(v0.4.5) 이후에 나온 아이템 */ if(spk)it.sp=spk; if(oc)it.oc=oc;
   if(b.mx){const m=(1+ilvl*.16)*(rar===3?1.3:1); it.mn=Math.max(1,Math.round(b.mn*m)); it.mx=Math.max(it.mn+1,Math.round(b.mx*m));}
   if(b.df){it.df=Math.round(b.df*(1+ilvl*.2)*(rar===3?1.3:1));}
   if(b.dm)it.dm=Math.round(b.dm*(1+ilvl*.1)*(rar===3?1.3:1)); if(b.om)it.om=Math.round(b.om*(1+ilvl*.1)*(rar===3?1.3:1));
@@ -1088,9 +1088,10 @@ function genItem(rar,ilvl,slot,baseName){
   if(rar===3){ it.name=spk?SPFX[spk].n:nameItem(it,rar);
     const rng=mulberry(hashStr(it.name+'|'+slot+'|'+it.base)); let pool;
     if(spk&&SPFX[spk].fx) pool=SPFX[spk].fx.map(t=>AFXBY[t]).filter(Boolean);
-    else { pool=AFX.filter(a=>!SKG.has(a.t)&&(!a.only||a.only.split(' ').includes(fc||(me&&me.cls)))&&(a.sl==='*'||a.sl.split(' ').includes(slot)));
+    else { pool=AFX.filter(a=>!SKG.has(a.t)&&!a.only&&(a.sl==='*'||a.sl.split(' ').includes(slot)));   /* 유니크 일반 옵션 풀은 모든 직업이 같아요(직업 전용 옵션 제외, 전사 기준) */
       for(let k=pool.length-1;k>0;k--){ const j=Math.floor(rng()*(k+1)); [pool[k],pool[j]]=[pool[j],pool[k]]; }
-      const sa=skillPick(slot,rar,rng); pool=sa.concat(pool.slice(0,5-sa.length)); }
+      const sa=skillPick(slot,rar,rng), gp=(slot==='shield'&&(fc==='necro'||fc==='druid'))?[AFXBY[rng()<.5?'sm':'smhp']]:[];   /* 강령술사·드루이드 유니크 보조장비(등불·토템): 소환수 피해 / 소환수 생명력 중 하나는 반드시 */
+      pool=sa.concat(gp,pool.slice(0,5-sa.length-gp.length)); }
     if(spk&&SPFX[spk].fx){ const pk=[]; let hasAll=false,hasSk=false; for(const a of pool){ if(pk.length>=5)break; if(a.t==='all'&&hasSk)continue; if(a.t==='sk'&&hasAll)continue; if(a.t==='all')hasAll=true; if(a.t==='sk')hasSk=true; pk.push(a); } pool=pk; }
     for(const a of pool.slice(0,5)){ const o=rollAff(a,rar,ilvl,q,rng,fc,slot); if(o.t==='cls'&&spk&&SPFX[spk].fcls)o.cls=SPFX[spk].fcls; it.aff.push(o); qs.push(rollAff.lq); }
   } else {
