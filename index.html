@@ -677,7 +677,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.4.5.0185</div>
+    <div class="ver" id="verT">v0.4.5.0186</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -3799,7 +3799,7 @@ function mailModal(){
   const un=all.reduce((n,o)=>n+(o.x.r?0:1),0), pend=all.reduce((n,o)=>n+mailLeft(o.x),0);
   const lack=chars.map(p=>{ let need=0; p.mail.forEach(x=>{ const M=MAILS[x.id]; if(M&&M.att)M.att.forEach((a,j)=>{ if(a.k==='item'&&!(Array.isArray(x.g)&&x.g.includes(j)))need++; }); }); const free=p.inv.filter(v=>!v).length; return need>free?`${esc(dispName(p))}: 아이템 ${need}개 · 빈 칸 ${free}칸`:''; }).filter(Boolean);   /* 아이템 보상을 받을 가방 칸이 모자란 캐릭터 */
   const rows=all.map(o=>{ const M=MAILS[o.x.id]; return `<button class="mrow${o.x.r?'':' un'}" data-c="${o.p.id}" data-i="${o.i}">${mailIc(!!o.x.r)}<span class="mt"><b>${esc(M.t)}</b><small>${esc(M.f)} · ${mailDate(o.x.d)} · ${esc(dispName(o.p))}</small></span>${mailLeft(o.x)?'<i class="mgift" title="받지 않은 보상이 있어요">🎁</i>':''}${o.x.r?'':'<i class="mnew">NEW</i>'}</button>`; }).join('');
-  modal(`<h3>${mailIc(false)} 우편함 <small style="color:var(--mute);font-weight:400">읽지 않은 편지 ${un}개</small></h3>${lack.length?`<div class="mwarn">⚠️ 가방 칸이 모자라 다 못 받을 수 있어요<br><small>${lack.join(' · ')}</small></div>`:''}${rows?`<div class="mlist">${rows}</div>`:'<p class="meta" style="text-align:center;margin:18px 0">받은 편지가 없어요</p>'}<div class="row2">${pend?`<button class="btn primary" id="mAll">🎁 모두 받기 (${pend})</button><button class="btn" id="mX">닫기</button>`:'<button class="btn primary" id="mX" style="grid-column:1/-1">닫기</button>'}</div>`,m=>{
+  modal(`<h3>${mailIc(false)} 우편함 <small style="color:var(--mute);font-weight:400">읽지 않은 편지 ${un}개</small></h3>${lack.length?`<div class="mwarn">⚠️ 가방 칸이 모자라 다 못 받을 수 있어요<br><small>${lack.join(' · ')}</small></div>`:''}${rows?`<div class="mlist">${rows}</div>`:'<p class="meta" style="text-align:center;margin:18px 0">받은 편지가 없어요</p>'}<div class="row2"><button class="btn${pend?' primary':''}" id="mAll"${pend?'':' disabled style="opacity:.45"'}>🎁 ${pend?`모두 받기 (${pend})`:'받을 보상 없음'}</button><button class="btn${pend?'':' primary'}" id="mX">닫기</button></div>`,m=>{
     m.querySelector('#mX').onclick=closeModal; { const ab=m.querySelector('#mAll'); if(ab)ab.onclick=()=>mailClaimAll(); } m.querySelectorAll('.mrow').forEach(b=>b.onclick=()=>mailRead(b.dataset.c,+b.dataset.i)); }); }
 const mailLeft=x=>{ const M=x&&MAILS[x.id]; return M&&M.att?M.att.length-(Array.isArray(x.g)?x.g.filter(j=>M.att[j]).length:0):0; };   /* 아직 안 받은 첨부 수 */
 function mailClaim(cid,i,j){
