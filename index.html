@@ -725,7 +725,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.5.0.0228</div>
+    <div class="ver" id="verT">v0.5.0.0229</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -1762,8 +1762,15 @@ function spawnPoint(){
   return {x:-20,y:VY+rand(-140,140)};
 }
 /* 스테이지별 몹 보정 (일반·정예·보스 공통). 2스테이지(id '2-x') +10%, 3스테이지 +20%. 몹에는 방어력 수치가 따로 없어 def는 '받는 피해 ÷(1+def)'로 적용 */
-/* 5스테이지는 아직 테스트 중 — 주소 끝에 ?t5=1 을 붙여 한 번 열면 이 기기에서만 보여요(?t5=0 으로 끄기) */
-function s5Open(){ try{ const q=location.search; if(/[?&]t5=1/.test(q))lsSet('dkdef2.t5','1'); else if(/[?&]t5=0/.test(q))lsDel('dkdef2.t5'); return lsGet('dkdef2.t5')==='1'; }catch(e){ return false; } }
+/* 5스테이지는 아직 테스트 중 — 목록에선 '🔒 5 업데이트 예정' 그대로 보이고, 누르면 비밀번호를 물어요. 맞히면 이 기기에서 계속 열림 */
+const S5PW='0928', S5I=STAGES.length-1;
+function s5Open(){ try{ return lsGet('dkdef2.t5')==='1'; }catch(e){ return false; } }
+function s5Ask(go){ modal(`<h3>🔒 5스테이지</h3><p class="meta" style="margin:0 0 10px">아직 준비 중인 스테이지예요. 비밀번호를 아는 사람만 들어갈 수 있어요.</p>
+  <input id="s5pw" type="password" inputmode="numeric" autocomplete="off" maxlength="8" placeholder="비밀번호" style="width:100%;box-sizing:border-box;padding:12px;font-size:18px;letter-spacing:6px;text-align:center;background:#0d0a08;color:#f3eadb;border:1px solid #6b5432;border-radius:10px">
+  <div id="s5msg" class="meta" style="min-height:18px;margin:6px 0;color:#e07060;text-align:center"></div>
+  <div class="row" style="display:flex;gap:8px"><button class="btn" id="s5x" style="flex:1">닫기</button><button class="btn primary" id="s5ok" style="flex:1">확인</button></div>`,m=>{
+  const inp=m.querySelector('#s5pw'), ok=()=>{ if(inp.value.trim()===S5PW){ lsSet('dkdef2.t5','1'); closeModal(); sfx('rare'); toast('🌑 5스테이지가 열렸어요','#c0a8ff'); go&&go(); } else { m.querySelector('#s5msg').textContent='비밀번호가 달라요'; inp.value=''; inp.focus(); sfx('ui'); } };
+  m.querySelector('#s5x').onclick=closeModal; m.querySelector('#s5ok').onclick=ok; inp.onkeydown=e=>{ if(e.key==='Enter')ok(); }; setTimeout(()=>{ try{inp.focus();}catch(e){} },50); }); }
 const STGBUF={2:{atk:1.1,hp:1.1,def:.1},3:{atk:1.2,hp:1.2,def:.2}};
 const stgBuf=S=>{ const b=STGBUF[parseInt(String(S&&S.id||'1').split('-')[0],10)]; return b?{atk:b.atk,hp:b.hp,def:1+b.def}:null; };
 const RAIDB=()=>MT[8].dmg*1.6*1.25*Math.pow(STAGES[14].dmgM,.8)*2; /* 레이드 보스 기본 피해 = 3-5 보스 일반 공격 × 2 (2안) */
@@ -4381,11 +4388,12 @@ function renderStagePanel(){
   const chars=charIds().map(loadChar).filter(Boolean);
   $('#playPanel').hidden=!selId;
   { const cur=chars.find(c=>c.id===selId); stageClear=cur?Math.min(STAGES.length,cur.clear|0):0; }
-  if(selStage>stageClear) selStage=stageClear; try{fieldGet(selStage);}catch(e){}
+  if(selStage>stageClear&&!(selStage===S5I&&s5Open())) selStage=stageClear; try{fieldGet(selStage);}catch(e){}   /* 5스테이지: 비밀번호를 맞힌 기기는 4스테이지를 안 깼어도 테스트 입장 가능 */
   const sb=$('#stageBar'); sb.innerHTML='';
-  const nOpen=s5Open()?STAGES.length:STAGES.length-1; if(selStage>=nOpen){ selStage=nOpen-1; }
+  const nOpen=STAGES.length-1; if(selStage>=nOpen&&!(selStage===S5I&&s5Open())){ selStage=nOpen-1; }   /* 5스테이지 버튼은 아래 '업데이트 예정' 칸이 대신함 */
   STAGES.forEach((st,i)=>{ if(i>=nOpen)return; const b=document.createElement('button'); b.className='stg'; b.setAttribute('aria-pressed',i===selStage); b.disabled=i>stageClear; b.textContent=(i>stageClear?'🔒 ':'')+st.id; if(st.raid){ b.classList.add('dg'); b.insertAdjacentHTML('beforeend',dragonBadge()); } b.onclick=()=>{ selStage=i; lsSet('dkdef2.stage',String(i)); renderStagePanel(); }; sb.appendChild(b); });
-  { const b=document.createElement('button'); b.className='stg soon'; b.setAttribute('aria-disabled','true'); const nx=nOpen+1; b.innerHTML=`🔒 ${nx}<small>업데이트 예정</small>`; b.onclick=()=>{ if(typeof toast==='function')toast(`${nx}스테이지는 업데이트 예정이에요`); }; sb.appendChild(b); }   /* 다음 스테이지 자리 표시 */
+  { const b=document.createElement('button'); b.className='stg soon'; b.setAttribute('aria-disabled','true'); b.setAttribute('aria-pressed',selStage===S5I); b.innerHTML='🔒 5<small>업데이트 예정</small>';
+    const go=()=>{ selStage=S5I; lsSet('dkdef2.stage',String(S5I)); renderStagePanel(); }; b.onclick=()=>{ if(s5Open())go(); else s5Ask(go); }; sb.appendChild(b); }   /* 다음 스테이지 자리 표시 */
   { const ctr=()=>{ const cb=sb.children[selStage]; if(cb&&sb.clientWidth) sb.scrollLeft=cb.offsetLeft+cb.offsetWidth/2-sb.clientWidth/2; }; ctr(); requestAnimationFrame(ctr); setTimeout(ctr,120); }
   const S=STAGES[selStage]; $('#stageBig').innerHTML=`<small>STAGE</small>${esc(S.id)} · ${esc(S.n)}`;
   { const cur=chars.find(c=>c.id===selId), low=cur&&cur.lvl<S.rl, gp0=cur&&cur.eq?gearPenOf(cur.eq,S.icap):null, gw=!!gp0&&gp0.wm<.97; $('#stageInfo').innerHTML=`<span style="color:${gw?'#e07060':'#9fd18b'};font-weight:700">장비 Lv 합 ${Math.max(1,S.icap-12)*EQSL.length}↑${gp0?` (내 합 ${gp0.sum}${gw?' · 부족':''})`:''}</span><span class="sd">${esc(S.d)}</span>`; }
