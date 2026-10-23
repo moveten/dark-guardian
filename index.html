@@ -155,6 +155,25 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
 .qb .lb b{font-style:normal;font-weight:900;font-size:12.5px;color:#ffd84a;text-shadow:0 1px 2px #000;margin-left:1px}.qb .lb.z b{color:#8a8277}
 .qb #bPot,.qb #bRev{gap:0}.qb #bPot .ic,.qb #bRev .ic{margin-top:-1px}
 #banner{position:absolute;left:0;right:0;top:30%;text-align:center;font-family:var(--f-disp);font-weight:800;font-size:clamp(26px,6vw,44px);color:#efdcae;text-shadow:0 2px 12px #000,0 0 30px rgba(163,48,42,.6);opacity:0;transition:opacity .4s;pointer-events:none}
+/* 각성 그림자 파괴 미션 컷인 (가로 띠) — 1.5초, 게임은 멈추지 않음 */
+#awCut{position:absolute;left:0;right:0;top:34%;height:150px;pointer-events:none;z-index:6;display:none}
+#awCut.on{display:block}
+#awCut .bd{position:absolute;left:-30px;right:-30px;top:22px;height:118px;transform:skewY(-6deg);background:linear-gradient(90deg,rgba(8,3,20,.92),rgba(30,12,70,.88) 55%,rgba(8,3,20,.92));border-top:2px solid #b89cff;border-bottom:2px solid #b89cff;box-shadow:0 0 30px rgba(140,100,255,.55);overflow:hidden}
+#awCut .bd::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(184,156,255,.06) 0 2px,transparent 2px 26px)}
+#awCut .sp{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#d8c8ff,transparent);opacity:0}
+#awCut img{position:absolute;bottom:0;height:150px;width:auto;left:min(22%,110px);transform:translateX(-50%);filter:drop-shadow(0 0 10px rgba(150,110,255,.9))}
+#awCut .tx{position:absolute;left:max(40%,190px);right:8px;top:40px}
+#awCut .k{font:700 12px var(--f-body);color:#b8a8ff;letter-spacing:3px;white-space:nowrap}
+#awCut .n{font-family:var(--f-disp);font-weight:800;font-size:clamp(28px,8.6vw,44px);line-height:1.15;color:#fff;text-shadow:0 0 14px #9a7dff,0 0 2px #000,0 3px 0 #2a1460;letter-spacing:2px;white-space:nowrap}
+#awCut .s{font:700 12px var(--f-body);line-height:1.35;color:#e6dcff;margin-top:2px;word-break:keep-all}
+#awCut.on .bd{animation:awBd 1.5s cubic-bezier(.2,.8,.2,1) both}
+#awCut.on img{animation:awIm 1.5s cubic-bezier(.2,.8,.2,1) both}
+#awCut.on .tx{animation:awTx 1.5s cubic-bezier(.2,.8,.2,1) both}
+#awCut.on .sp{animation:awSp .5s ease-out both}
+@keyframes awBd{0%{clip-path:inset(0 0 0 100%)}17%{clip-path:inset(0 0 0 0)}83%{clip-path:inset(0 0 0 0);opacity:1}100%{clip-path:inset(0 100% 0 0);opacity:.6}}
+@keyframes awIm{0%{opacity:0;margin-left:60px}20%{opacity:1;margin-left:0}83%{opacity:1;margin-left:-6px}100%{opacity:0;margin-left:-60px}}
+@keyframes awTx{0%{opacity:0;transform:translateX(70px)}22%{opacity:1;transform:translateX(0)}83%{opacity:1;transform:translateX(-4px)}100%{opacity:0;transform:translateX(-70px)}}
+@keyframes awSp{0%{opacity:0;transform:translateX(60%)}30%{opacity:1}100%{opacity:0;transform:translateX(-60%)}}
 #banner small{display:block;font-family:var(--f-body);font-size:14px;font-weight:500;color:var(--mute);margin-top:6px}
 #dmgRank{margin-top:56px;width:max-content;min-width:118px;max-width:min(215px,52vw);pointer-events:none;font-size:11px;line-height:1.5;color:rgba(205,205,205,.62);text-shadow:0 1px 2px rgba(0,0,0,.95),0 0 3px rgba(0,0,0,.8);font-variant-numeric:tabular-nums;white-space:nowrap}
 #dmgRank[hidden]{display:none}
@@ -722,10 +741,11 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     </div>
     <div id="toasts" hidden><div class="al"></div><i class="tg">▾</i></div>
     <div id="banner"></div>
+    <div id="awCut" aria-hidden="true"><div class="bd"><div class="sp" style="top:28px"></div><div class="sp" style="top:66px"></div><div class="sp" style="top:98px"></div></div><img alt=""><div class="tx"><div class="k"></div><div class="n"></div><div class="s"></div></div></div>
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.5.0.0232</div>
+    <div class="ver" id="verT">v0.5.0.0233</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -1723,7 +1743,7 @@ function guestEvent(e){
   else if(t==='awk'){ announce('🩸 검은 그림자가 깨어났어요! 공격·이동 속도 +50%','#ff4a4a'); }
   else if(t==='aph'){ const np=e[2]|0, tx=np===2?['🌑 2페이즈 · 삼남매의 잔향','형과 누나의 힘을 삼켰어요']:['🌑 3페이즈 · 각성','마지막 각성 — 모든 것을 걸고 덤벼와요']; banner(tx[0],tx[1]); announce(tx[0],'#a68bff'); G.shake=1.2; sfx('boss'); later(.3,()=>{ if(G.inGame)storyRun('p'+np); }); }
   else if(t==='acl'){ announce((e[2]|0)>1?'👥 그림자 분신술! 셋 중 하나만 진짜예요':'👥 그림자 분신술! 둘 중 하나만 진짜예요','#b89cff'); sfx('boss'); }
-  else if(t==='asl'){ const C=AWC[AWCK[e[2]|0]||'seal']; banner(C.nm,C.sub); announce(C.warn,'#c0a8ff'); sfx('boss'); }
+  else if(t==='asl'){ const k=AWCK[e[2]|0]||'seal', C=AWC[k]; awkCutin(k,e[3]|0||(awkRealDraw()||{}).ph); announce(C.warn,'#c0a8ff'); sfx('boss'); }
   else if(t==='abz'){ banner('💢 광폭화','각성 그림자의 공격이 빨라져요'); announce('💢 각성 그림자 광폭화!','#ff6a8a'); }
   else if(t==='asf'){ const k=e[2]|0; if(k===1){ banner('💜 봉인 실패','각성 그림자가 크게 회복했어요'); announce('💜 봉인 실패! 보스가 크게 회복했어요','#c090ff'); } else if(k===2){ banner('🌑 그림자 잠식','15초간 받는 피해 +50% · 이동 속도 -40%'); } else if(k===3){ banner('💔 심장 파편 흡수',`${e[3]|0}개가 보스에게 닿았어요`); } else announce('✨ 파괴 성공! 각성 그림자가 잠시 쓰러졌어요','#9fe08a'); G.shake=Math.max(G.shake,.6); }
   else if(t==='b'){ const bt=MT[e[2]]?e[2]:3; banner(G.stg.bn||MT[bt].n,bt===3?'거대한 그림자가 다가옵니다':'우두머리가 모습을 드러냈습니다'); me.pot=3; }
@@ -1820,8 +1840,13 @@ function awkSeal(m){ const kind=m.ph===2?'lantern':m.ph===3?'heart':'seal', C=AW
     const o=spawnMob(objType(),x,y,false); o.obj=1; o.ok=C.ok; o.max=o.hp=hp; o.own=m.id; o.xp=0;
     if(kind==='heart'){ o.mv=Math.max(30,(hyp(x-m.x,y-m.y)-m.r-20)/(C.dur*.97)); }   /* 시전이 끝날 즈음 보스에게 닿는 속도 */
     burst(x,y,'#8a6cff',18,240); efx.push({k:'ring',x,y,r0:6,r1:60,t:0,life:.45,col:'#b89cff',w:6}); }
-  banner(C.nm,C.sub); announce(C.warn,'#c0a8ff'); sfx('boss'); G.shake=Math.max(G.shake,.6); pushEv(['asl',C.ok]); }
+  awkCutin(kind,m.ph); announce(C.warn,'#c0a8ff'); sfx('boss'); G.shake=Math.max(G.shake,.6); pushEv(['asl',C.ok,m.ph|0]); }
 /* 모든 플레이어(나 + 동료)에게 상태이상 */
+/* 파괴 미션 컷인: 보스 시전 자세 전신(얼굴이 잘리지 않게 띠 위로 올라와도 그대로 보임) + 기술 이름 */
+function awkCutin(kind,ph){ const C=AWC[kind]; if(!C)return; const el=$('#awCut'); if(!el)return; ph=ph|0||1;
+  el.querySelector('img').src='img/boss_awake'+(ph>1?ph:'')+'_cast.png'; el.querySelector('.k').textContent=`각성 그림자 · ${ph}페이즈 궁극기`;
+  el.querySelector('.n').textContent=C.nm.replace(/^\S+\s/,''); el.querySelector('.s').textContent=C.sub;
+  el.classList.remove('on'); void el.offsetWidth; el.classList.add('on'); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('on'),1550); }
 function awkAllStatus(kind,dur){ applyStatus(kind,dur); if(ally&&!ally.lobby&&G.mode==='host')pushEv(['x',2,kind,dur]); }
 function awkSealEnd(m){ const c=m.cast||{k:'seal',abs:0}, left=G.mobs.filter(o=>!o.dead&&o.obj&&o.own===m.id); m.cast=null; m.inv=0; G.awc=null;
   for(const o of left){ o.dead=true; efx.push({k:'bolt',pts:[{x:o.x,y:o.y-10},{x:m.x,y:m.y-m.r}],t:0,life:.3,col:'#b89cff'}); }
@@ -4525,7 +4550,7 @@ function patchModal(){
     fetch('patchnotes.txt?'+Date.now(),{cache:'no-store'}).then(r=>{ if(!r.ok)throw 0; return r.text(); }).then(t=>{ m.querySelector('#pnT').textContent=t; }).catch(()=>{ m.querySelector('#pnT').textContent='패치노트를 불러오지 못했어요. (오프라인이거나 서버 점검 중)'; }); }); }
 function prepMe(){ me=loadChar(selId); me.D=derive(me); spawnMe(); }
 function resetWorld(){
-  storyStop(); G.stZ=0; G.aim=null; G.lostBoss=false; G.castle=null; G.lostCastle=false; G.awz=null; G.awc=null; if(me){ me.erode=me.hblk=me.mblk=0; me.hpLk=me.mpLk=null; }
+  storyStop(); G.stZ=0; G.aim=null; G.lostBoss=false; G.castle=null; G.lostCastle=false; G.awz=null; G.awc=null; { const ac=$('#awCut'); if(ac)ac.classList.remove('on'); } if(me){ me.erode=me.hblk=me.mblk=0; me.hpLk=me.mpLk=null; }
   projs.length=zones.length=timers.length=parts.length=nums.length=ground.length=efx.length=0;
   G.mobs=[]; G.mobMap=new Map(); G.stKills=0; G.stDrops=0; G.stCap=0; G.runT=0; G.stGot=[0,0,0,0,0]; G.sib=0; G.endShown=false; G.clrDone=false; alClear(); G.stRev=0; G.stGold0=me?(me.gold|0):0; G.paused=false; G.bt=null; G.shake=0;
   hitQ=[]; fxQ=[]; lastAllyFx=-1; lastEv=-1; lastHit=0; G.guestDmg=0; G.fires=[]; G.freeRev=1; G.fireT=3; if(me){ me.rvGiven=0; me.seenRg=0; me.out=false; me.rvT=0; }
