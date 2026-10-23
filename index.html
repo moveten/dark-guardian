@@ -233,7 +233,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 .skic{width:34px;height:34px;border-radius:50%;border:2px solid var(--c);display:grid;place-items:center;font-size:11px;font-weight:700}
 .skn{font-weight:700;font-size:13.5px}
 .skd{font-size:12px;color:var(--mute);line-height:1.45}
-.skd .sv{color:#9fd18b}
+.skd .sv,.syn .sv{color:#9fd18b}
 .lock{opacity:.45}
 .menuL{display:flex;flex-direction:column;gap:10px;padding:16px}
 
@@ -725,7 +725,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.5.0.0221</div>
+    <div class="ver" id="verT">v0.5.0.0222</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -897,61 +897,72 @@ const NRM=.8, NRG=v=>Math.round(v*NRM); /* 강령술사 사정거리 배율 (일
 /* 스킬 설명: V(x)로 감싼 숫자는 레벨에 따라 바뀌는 값이라 초록(#9fd18b)으로 표시돼요. RR(기본반경,레벨)은 스킬 범위 배율을 곱한 반경 */
 const V=x=>'\u0001'+x+'\u0002', RR=(b,l)=>V(Math.round(b*RS0(l)));
 const skdHtml=t=>esc(t).replace(/\u0001/g,'<span class="sv">').replace(/\u0002/g,'</span>');
+/* 다음 레벨 변화: 설명 문장 속 레벨 따라 변하는 숫자(V)를 현재/다음 레벨끼리 비교해서 '항목 ▶ 값'으로 보여줘요. 항목 이름은 숫자 바로 앞 낱말에서 자동으로 뽑고, 스킬의 lb:[…]로 덮어써요('' 이면 숨김) */
+const NXM=/\u0001([^\u0002]*)\u0002/g;
+function nxList(s,lv){ let a,c; try{ a=s.d(lv); c=s.d(lv+1); }catch(e){ return []; }
+  const ma=[...a.matchAll(NXM)], mc=[...c.matchAll(NXM)]; if(!ma.length||ma.length!==mc.length)return []; const out=[];
+  ma.forEach((m,i)=>{ if(m[1]===mc[i][1])return; let lb=s.lb&&s.lb[i];
+    if(lb==null){ const pre=a.slice(0,m.index).replace(/\u0001|\u0002/g,''), seg=pre.split(/[.,·\/:\]]\s*/).pop().replace(/[+\-−\s]+$/,'').replace(/^기본\s+/,''), w=seg.split(/\s+/).filter(Boolean);
+      lb=(w.length>1&&/^(무기|공격|이동|받는|주는|초당|스킬|재사용)$/.test(w[w.length-2])?w.slice(-2):w.slice(-1)).join('').replace(/은$|는$|의$/,''); }
+    if(!lb)return; const end=m.index+m[0].length, un=/^(%|초)/.exec(a.slice(end).replace(/\u0001|\u0002/g,''));
+    out.push({lb,v:mc[i][1]+(un&&c.slice(mc[i].index+mc[i][0].length,mc[i].index+mc[i][0].length+1)===un[1]?un[1]:'')}); });
+  const CN=/^(까마귀|발수|연타|유성|망치|혼불|마법탄|갈래|튕김|도발)$/; return out.filter(o=>!CN.test(o.lb)).concat(out.filter(o=>CN.test(o.lb))); }   /* 개수 항목은 맨 뒤로 */
+function nxHtml(s,b,eff){ if(!b||b>=20)return ''; const L=nxList(s,Math.max(1,eff)); if(!L.length)return ''; return '다음Lv : '+L.map(o=>`${esc(o.lb)} ▶ <span class="sv">${esc(o.v)}</span>`).join(', '); }
 const SK={
  sorc:[
-  {k:'fireball',e:'🔥',n:'화염구',s:'화염',req:1,mp:4,cd:1,el:'#ff7a2e',rg:300,d:l=>`${V(HMN(l))}발 발사, 폭발 반경 ${RR(60,l)} · 기본 피해 ${V(Math.round((18+13*l)*HMF(HMN(l))))}. 7레벨 2발, 14레벨 3발`},
-  {k:'arcane',e:'🔷',n:'비전 집중',s:'비전',req:3,mp:0,cd:0,el:'#8fb0ff',passive:1,d:l=>`패시브: 마나 회복 +${V(3*l)}%, 스킬 재사용 대기시간 -${V(Math.min(25,l))}%`},
-  {k:'mshield',e:'🔮',n:'에너지 실드',s:'실드',req:9,mp:0,cd:0,el:'#7fb4ff',passive:1,d:l=>`패시브: 받는 피해의 ${V(Math.round(Math.min(.65,.2+.02*l)*100))}%를 마나가 대신 받음 · 피해 1당 마나 ${V(Math.max(.5,1.6-.04*l).toFixed(2))} 소모`},
-  {k:'frostnova',e:'❄️',n:'서리 고리',s:'서리',req:6,mp:10,cd:6,el:'#8fdcff',d:l=>`${V(HMN(l))}연타, 반경 ${RR(160*FNR,l)} · 기본 피해 ${V(Math.round((14+10*l)*FND*HMF(HMN(l))))} · 3초간 감속, 감전된 적에게 피해 +33%. 7레벨 2연타, 14레벨 3연타`},
-  {k:'teleport',e:'🌀',n:'순간이동',s:'이동',req:6,mp:12,cd:5,el:'#b98bff',d:l=>`누른 곳으로 순간이동, 최대 거리 ${V(240+4*l)} · 도착 직후 0.4초 무적`},
-  {k:'chain',e:'⚡',n:'연쇄 번개',s:'번개',req:12,mp:9,cd:4,el:'#dfe7ff',rg:280,d:l=>`적 사이를 ${V(3+Math.floor(l/4))}번 튀는 번개 ${V(HMN(l))}갈래 · 기본 피해 ${V(Math.round((22+16*l)*HMF(HMN(l))))} · 맞은 적은 ${V(SHK(l).toFixed(1))}초간 ⚡감전, 화염·냉기 스킬 피해 +33%. 7레벨 2갈래, 14레벨 3갈래`},
-  {k:'barrier',e:'🔷',n:'마력 방벽',s:'방벽',req:18,mp:14,cd:22,el:'#8fb6ff',d:l=>`${V(6+Math.floor(l/3))}초간 받는 피해 -${V(Math.min(70,30+2*l))}%`},
-  {k:'meteor',e:'☄️',n:'유성',s:'유성',req:24,mp:18,cd:10,el:'#ff5a1f',rg:300,d:l=>`잠시 뒤 유성 ${V(HMN(l))}개 낙하, 폭발 반경 ${RR(100,l)} · 기본 피해 ${V(Math.round((80+40*l)*HMF(HMN(l))))} · ${V((.5+.02*l).toFixed(1))}초 기절 후 0.9초간 화상. 7레벨 2개, 14레벨 3개`},
-  {k:'armageddon',e:'🌠',n:'대재앙',s:'재앙',req:90,mp:60,cd:75,el:'#ff5a1f',rg:420,d:l=>`[궁극기] 4초간 하늘에서 유성 14개가 쏟아져요. 반경 95 범위 피해 ${V(150+45*l)}, 1.5초 기절`},
-  {k:'blizzard',e:'🌨️',n:'눈보라',s:'눈보',req:30,mp:24,cd:17,el:'#bfe9ff',rg:300,d:l=>`4초간 반경 ${RR(130,l)} · 0.5초마다 피해 ${V(22+13*l)}, 감속`}],
+  {k:'fireball',lb:['발수','반경','피해'],e:'🔥',n:'화염구',s:'화염',req:1,mp:4,cd:1,el:'#ff7a2e',rg:300,d:l=>`${V(HMN(l))}발 발사, 폭발 반경 ${RR(60,l)} · 기본 피해 ${V(Math.round((18+13*l)*HMF(HMN(l))))}. 7레벨 2발, 14레벨 3발`},
+  {k:'arcane',lb:['마나회복','재사용대기'],e:'🔷',n:'비전 집중',s:'비전',req:3,mp:0,cd:0,el:'#8fb0ff',passive:1,d:l=>`패시브: 마나 회복 +${V(3*l)}%, 스킬 재사용 대기시간 -${V(Math.min(25,l))}%`},
+  {k:'mshield',lb:['마나분담','피해당마나'],e:'🔮',n:'에너지 실드',s:'실드',req:9,mp:0,cd:0,el:'#7fb4ff',passive:1,d:l=>`패시브: 받는 피해의 ${V(Math.round(Math.min(.65,.2+.02*l)*100))}%를 마나가 대신 받음 · 피해 1당 마나 ${V(Math.max(.5,1.6-.04*l).toFixed(2))} 소모`},
+  {k:'frostnova',lb:['연타','반경','피해'],e:'❄️',n:'서리 고리',s:'서리',req:6,mp:10,cd:6,el:'#8fdcff',d:l=>`${V(HMN(l))}연타, 반경 ${RR(160*FNR,l)} · 기본 피해 ${V(Math.round((14+10*l)*FND*HMF(HMN(l))))} · 3초간 감속, 감전된 적에게 피해 +33%. 7레벨 2연타, 14레벨 3연타`},
+  {k:'teleport',lb:['거리'],e:'🌀',n:'순간이동',s:'이동',req:6,mp:12,cd:5,el:'#b98bff',d:l=>`누른 곳으로 순간이동, 최대 거리 ${V(240+4*l)} · 도착 직후 0.4초 무적`},
+  {k:'chain',lb:['튕김','갈래','피해','감전'],e:'⚡',n:'연쇄 번개',s:'번개',req:12,mp:9,cd:4,el:'#dfe7ff',rg:280,d:l=>`적 사이를 ${V(3+Math.floor(l/4))}번 튀는 번개 ${V(HMN(l))}갈래 · 기본 피해 ${V(Math.round((22+16*l)*HMF(HMN(l))))} · 맞은 적은 ${V(SHK(l).toFixed(1))}초간 ⚡감전, 화염·냉기 스킬 피해 +33%. 7레벨 2갈래, 14레벨 3갈래`},
+  {k:'barrier',lb:['지속시간','받는피해'],e:'🔷',n:'마력 방벽',s:'방벽',req:18,mp:14,cd:22,el:'#8fb6ff',d:l=>`${V(6+Math.floor(l/3))}초간 받는 피해 -${V(Math.min(70,30+2*l))}%`},
+  {k:'meteor',lb:['유성','반경','피해','기절'],e:'☄️',n:'유성',s:'유성',req:24,mp:18,cd:10,el:'#ff5a1f',rg:300,d:l=>`잠시 뒤 유성 ${V(HMN(l))}개 낙하, 폭발 반경 ${RR(100,l)} · 기본 피해 ${V(Math.round((80+40*l)*HMF(HMN(l))))} · ${V((.5+.02*l).toFixed(1))}초 기절 후 0.9초간 화상. 7레벨 2개, 14레벨 3개`},
+  {k:'armageddon',lb:['피해'],e:'🌠',n:'대재앙',s:'재앙',req:90,mp:60,cd:75,el:'#ff5a1f',rg:420,d:l=>`[궁극기] 4초간 하늘에서 유성 14개가 쏟아져요. 반경 95 범위 피해 ${V(150+45*l)}, 1.5초 기절`},
+  {k:'blizzard',lb:['반경','피해'],e:'🌨️',n:'눈보라',s:'눈보',req:30,mp:24,cd:17,el:'#bfe9ff',rg:300,d:l=>`4초간 반경 ${RR(130,l)} · 0.5초마다 피해 ${V(22+13*l)}, 감속`}],
  war:[
-  {k:'bash',e:'💥',n:'강타',s:'강타',req:1,mp:4,cd:2,el:'#e2694c',rg:95,d:l=>`반경 ${RR(95,l)} 무기 피해 ${V(300+50*l)}%의 일격, 적을 밀쳐냄`},
-  {k:'ironbody',e:'🏋️',n:'강철 육체',s:'강철',req:3,mp:0,cd:0,el:'#e08a6a',passive:1,d:l=>`패시브: 받는 피해 -${V(Math.min(30,(1.2*l).toFixed(1)))}%, 초당 생명력 회복 +${V((.15*l).toFixed(1))}%`},
-  {k:'swift',e:'👟',n:'질풍',s:'질풍',req:9,mp:0,cd:0,el:'#9fe0ff',passive:1,d:l=>`패시브: 이동 속도 +${V(10+2*l)}%`},
-  {k:'rend',e:'🌪️',n:'폭풍 베기',s:'폭풍',req:6,mp:9,cd:5,el:'#ff8a4a',d:l=>`반경 ${RR(165,l)} 모든 적에게 무기 피해 ${V(450+70*l)}%, 이어서 ${V((1.5+.12*l).toFixed(1))}초간 0.5초마다 무기 피해 ${V(50+5*l)}%`},
-  {k:'shout',e:'📣',n:'전투 함성',s:'함성',req:6,mp:10,cd:20,el:'#ffb259',d:l=>`${V(SHD(Math.max(1,l)).toFixed(1))}초간 반경 320 안의 나와 동료 피해 +${V(24+6*l)}%. 반경 320 안의 모든 적을 3초간 위압해 이동·공격 속도 -55%, 8초간 받는 피해 +10%. 재사용 대기 ${V(SHC(Math.max(1,l)).toFixed(1))}초`},
-  {k:'whirl',e:'🌀',n:'회전베기',s:'회전',req:12,mp:8,cd:5.5,el:'#e8e0d0',d:l=>`반경 ${RR(100,l)} 모든 적에게 무기 피해 ${V(180+30*l)}% + 4초간 출혈, 초당 타격 피해의 60%. 출혈은 가장 센 것 하나만 적용`},
-  {k:'leap',e:'🦘',n:'도약 강타',s:'도약',req:18,mp:10,cd:8,el:'#c98b4a',rg:300,d:l=>`적에게 뛰어들어 반경 ${RR(110,l)} 무기 피해 ${V(280+45*l)}%`},
-  {k:'berserk',e:'😡',n:'광폭화',s:'광폭',req:24,mp:14,cd:32,el:'#ff3b2f',d:l=>`8초간 공격 속도 +40%, 피해 +${V(30+5*l)}%`},
-  {k:'ragnarok',e:'💢',n:'광전사 폭주',s:'폭주',req:90,mp:80,cd:90,el:'#ff2a1a',rg:380,d:l=>`[궁극기] 기를 모은 뒤 반경 380 모든 적에게 무기 피해 ${V(Math.round((1400+100*l)*.6))}%, 2초 기절·넉백, 우두머리는 기절 1초. 이어 12초간 폭주: 내 피해 +${V(60+2*(Math.max(1,l)-1))}%, 공격 속도 +50%, 이동 속도 +30%, 평타·스킬 범위 +25%, 받는 피해 +20%`},
-  {k:'quake',e:'🌋',n:'대지 분쇄',s:'분쇄',req:30,mp:18,cd:13,el:'#b88a5a',rg:300,d:l=>`사거리 300 안의 적을 우두머리 > 정예 > 일반 순으로 겨냥해 앞으로 갈라지는 충격파, 반경 ${RR(75,l)} · 무기 피해 ${V(400+65*l)}%`}],
+  {k:'bash',lb:['반경','무기피해'],e:'💥',n:'강타',s:'강타',req:1,mp:4,cd:2,el:'#e2694c',rg:95,d:l=>`반경 ${RR(95,l)} 무기 피해 ${V(300+50*l)}%의 일격, 적을 밀쳐냄`},
+  {k:'ironbody',lb:['받는피해','초당회복'],e:'🏋️',n:'강철 육체',s:'강철',req:3,mp:0,cd:0,el:'#e08a6a',passive:1,d:l=>`패시브: 받는 피해 -${V(Math.min(30,(1.2*l).toFixed(1)))}%, 초당 생명력 회복 +${V((.15*l).toFixed(1))}%`},
+  {k:'swift',lb:['이동속도'],e:'👟',n:'질풍',s:'질풍',req:9,mp:0,cd:0,el:'#9fe0ff',passive:1,d:l=>`패시브: 이동 속도 +${V(10+2*l)}%`},
+  {k:'rend',lb:['반경','무기피해','지속시간','추가피해'],e:'🌪️',n:'폭풍 베기',s:'폭풍',req:6,mp:9,cd:5,el:'#ff8a4a',d:l=>`반경 ${RR(165,l)} 모든 적에게 무기 피해 ${V(450+70*l)}%, 이어서 ${V((1.5+.12*l).toFixed(1))}초간 0.5초마다 무기 피해 ${V(50+5*l)}%`},
+  {k:'shout',lb:['지속시간','피해','재사용대기'],e:'📣',n:'전투 함성',s:'함성',req:6,mp:10,cd:20,el:'#ffb259',d:l=>`${V(SHD(Math.max(1,l)).toFixed(1))}초간 반경 320 안의 나와 동료 피해 +${V(24+6*l)}%. 반경 320 안의 모든 적을 3초간 위압해 이동·공격 속도 -55%, 8초간 받는 피해 +10%. 재사용 대기 ${V(SHC(Math.max(1,l)).toFixed(1))}초`},
+  {k:'whirl',lb:['반경','무기피해'],e:'🌀',n:'회전베기',s:'회전',req:12,mp:8,cd:5.5,el:'#e8e0d0',d:l=>`반경 ${RR(100,l)} 모든 적에게 무기 피해 ${V(180+30*l)}% + 4초간 출혈, 초당 타격 피해의 60%. 출혈은 가장 센 것 하나만 적용`},
+  {k:'leap',lb:['반경','무기피해'],e:'🦘',n:'도약 강타',s:'도약',req:18,mp:10,cd:8,el:'#c98b4a',rg:300,d:l=>`적에게 뛰어들어 반경 ${RR(110,l)} 무기 피해 ${V(280+45*l)}%`},
+  {k:'berserk',lb:['피해'],e:'😡',n:'광폭화',s:'광폭',req:24,mp:14,cd:32,el:'#ff3b2f',d:l=>`8초간 공격 속도 +40%, 피해 +${V(30+5*l)}%`},
+  {k:'ragnarok',lb:['무기피해','주는피해'],e:'💢',n:'광전사 폭주',s:'폭주',req:90,mp:80,cd:90,el:'#ff2a1a',rg:380,d:l=>`[궁극기] 기를 모은 뒤 반경 380 모든 적에게 무기 피해 ${V(Math.round((1400+100*l)*.6))}%, 2초 기절·넉백, 우두머리는 기절 1초. 이어 12초간 폭주: 내 피해 +${V(60+2*(Math.max(1,l)-1))}%, 공격 속도 +50%, 이동 속도 +30%, 평타·스킬 범위 +25%, 받는 피해 +20%`},
+  {k:'quake',lb:['반경','무기피해'],e:'🌋',n:'대지 분쇄',s:'분쇄',req:30,mp:18,cd:13,el:'#b88a5a',rg:300,d:l=>`사거리 300 안의 적을 우두머리 > 정예 > 일반 순으로 겨냥해 앞으로 갈라지는 충격파, 반경 ${RR(75,l)} · 무기 피해 ${V(400+65*l)}%`}],
  pal:[
-  {k:'smite',e:'✨',n:'신성 타격',s:'신성',req:1,mp:4,cd:2,el:'#f0cf75',rg:95,d:l=>`무기 피해 ${V(260+40*l)}% + 신성 피해 ${V(8+7*l)}`},
-  {k:'bulwark',e:'🛡️',n:'방패 수호',s:'수호',req:3,mp:0,cd:0,el:'#a9c4ff',passive:1,d:l=>`패시브: 막기 확률 +${V(l)}%, 막기에 성공하면 마나 3 회복. 방패·스킬 합산 최종 막기 확률은 최대 30%`},
-  {k:'holyfire',e:'☀️',n:'성화 오라',s:'성화',req:9,mp:0,cd:.3,el:'#ffb347',aura:1,d:l=>`기본 공격이 범위 공격으로 바뀜. 반경 ${V(HFR(l))} · 최대 112, 공격 피해 ${V(Math.round(hfMul(l)*100))}%`},
-  {k:'healaura',e:'💚',n:'치유 오라',s:'치유',req:6,mp:0,cd:.3,el:'#9be38a',aura:1,d:l=>`반경 320 안의 나와 동료가 초당 ${V((1+.6*l).toFixed(1))} 회복`},
-  {k:'hammer',e:'🔨',n:'축복의 망치',s:'망치',req:12,mp:8,cd:4.5,el:'#ffe08a',d:l=>`나선형으로 도는 망치 4.5초 지속. 망치 ${V(HMN(l))}개 · 기본 피해 ${V(Math.round((16+13*l)*HMF(HMN(l))))}. 7레벨 2개, 14레벨 3개`},
-  {k:'might',e:'💪',n:'신념의 오라',s:'신념',req:15,mp:0,cd:.3,el:'#ffb86b',aura:1,d:l=>{const b=mightBonus(l);return `반경 320 안의 나와 동료 주는 피해 +${V(b.dmg)}%, 공격 속도 +${V(b.ias)}%, 이동 속도 +${V(b.ms)}%`}},
-  {k:'guard',e:'🛡️',n:'수호 오라',s:'수호',req:18,mp:0,cd:.3,el:'#8fb6ff',aura:1,d:l=>`반경 320 안의 나와 동료 방어력 +${V(30+6*l)}%`},
-  {k:'zeal',e:'🙏',n:'신앙 증폭',s:'증폭',req:24,mp:0,cd:0,el:'#ffd76a',passive:1,d:l=>`패시브: 팔라딘 스킬 피해 +${V(15+5*l)}%, 지속시간 +${V(10+4*l)}%`},
-  {k:'divine',e:'🩸',n:'세크리파이스',s:'희생',req:90,mp:0,cd:100,el:'#ff4a4a',rg:400,d:l=>`[궁극기] 생명력과 마나를 절반으로 희생해, 필드 위 모든 적의 현재 생명력을 깎아요. 일반 몬스터 ${V(Math.round(Math.min(.9,.5+.02*(Math.max(1,l)-1))*100))}% · 최대 90%, 우두머리 25~40% 랜덤. 35% 이상이면 ✨축복으로 올스탯 +30, 미만이면 올스탯 +10을 10초간 받아요. 내 생명력은 최소 1이 남아요`},
-  {k:'judgment',e:'⚖️',n:'천벌',s:'천벌',req:30,mp:20,cd:15,el:'#fff7d6',rg:380,d:l=>`적 최대 5명에게 빛기둥, 기본 피해 ${V(110+50*l)}. 반경 ${RR(60,l)} 성역이 2초간 남아 0.5초마다 ${V(18+10*l)}`}],
+  {k:'smite',lb:['무기피해','신성피해'],e:'✨',n:'신성 타격',s:'신성',req:1,mp:4,cd:2,el:'#f0cf75',rg:95,d:l=>`무기 피해 ${V(260+40*l)}% + 신성 피해 ${V(8+7*l)}`},
+  {k:'bulwark',lb:['막기확률'],e:'🛡️',n:'방패 수호',s:'수호',req:3,mp:0,cd:0,el:'#a9c4ff',passive:1,d:l=>`패시브: 막기 확률 +${V(l)}%, 막기에 성공하면 마나 3 회복. 방패·스킬 합산 최종 막기 확률은 최대 30%`},
+  {k:'holyfire',lb:['반경','공격피해'],e:'☀️',n:'성화 오라',s:'성화',req:9,mp:0,cd:.3,el:'#ffb347',aura:1,d:l=>`기본 공격이 범위 공격으로 바뀜. 반경 ${V(HFR(l))} · 최대 112, 공격 피해 ${V(Math.round(hfMul(l)*100))}%`},
+  {k:'healaura',lb:['초당회복'],e:'💚',n:'치유 오라',s:'치유',req:6,mp:0,cd:.3,el:'#9be38a',aura:1,d:l=>`반경 320 안의 나와 동료가 초당 ${V((1+.6*l).toFixed(1))} 회복`},
+  {k:'hammer',lb:['망치','피해'],e:'🔨',n:'축복의 망치',s:'망치',req:12,mp:8,cd:4.5,el:'#ffe08a',d:l=>`나선형으로 도는 망치 4.5초 지속. 망치 ${V(HMN(l))}개 · 기본 피해 ${V(Math.round((16+13*l)*HMF(HMN(l))))}. 7레벨 2개, 14레벨 3개`},
+  {k:'might',lb:['주는피해','공격속도','이동속도'],e:'💪',n:'신념의 오라',s:'신념',req:15,mp:0,cd:.3,el:'#ffb86b',aura:1,d:l=>{const b=mightBonus(l);return `반경 320 안의 나와 동료 주는 피해 +${V(b.dmg)}%, 공격 속도 +${V(b.ias)}%, 이동 속도 +${V(b.ms)}%`}},
+  {k:'guard',lb:['방어력'],e:'🛡️',n:'수호 오라',s:'수호',req:18,mp:0,cd:.3,el:'#8fb6ff',aura:1,d:l=>`반경 320 안의 나와 동료 방어력 +${V(30+6*l)}%`},
+  {k:'zeal',lb:['스킬피해','지속시간'],e:'🙏',n:'신앙 증폭',s:'증폭',req:24,mp:0,cd:0,el:'#ffd76a',passive:1,d:l=>`패시브: 팔라딘 스킬 피해 +${V(15+5*l)}%, 지속시간 +${V(10+4*l)}%`},
+  {k:'divine',lb:['일반몬스터'],e:'🩸',n:'세크리파이스',s:'희생',req:90,mp:0,cd:100,el:'#ff4a4a',rg:400,d:l=>`[궁극기] 생명력과 마나를 절반으로 희생해, 필드 위 모든 적의 현재 생명력을 깎아요. 일반 몬스터 ${V(Math.round(Math.min(.9,.5+.02*(Math.max(1,l)-1))*100))}% · 최대 90%, 우두머리 25~40% 랜덤. 35% 이상이면 ✨축복으로 올스탯 +30, 미만이면 올스탯 +10을 10초간 받아요. 내 생명력은 최소 1이 남아요`},
+  {k:'judgment',lb:['피해','반경','성역피해'],e:'⚖️',n:'천벌',s:'천벌',req:30,mp:20,cd:15,el:'#fff7d6',rg:380,d:l=>`적 최대 5명에게 빛기둥, 기본 피해 ${V(110+50*l)}. 반경 ${RR(60,l)} 성역이 2초간 남아 0.5초마다 ${V(18+10*l)}`}],
  necro:[
-  {k:'soulbolt',e:'🔵',n:'혼불',s:'혼불',req:1,mp:3,cd:.8,el:'#6fe0c0',rg:NRG(300),d:l=>`영혼의 불꽃 ${V(HMN(l))}발 · 기본 피해 ${V(Math.round((14+10*l)*HMF(HMN(l))))}, 맞히면 소환수 생명력 2% 회복. 7레벨 2발, 14레벨 3발`},
-  {k:'soullink',e:'🔗',n:'영혼 연결',s:'연결',req:3,mp:0,cd:0,el:'#8fe6d0',passive:1,d:l=>`패시브: 소환수 피해 +${V(4*l)}%, 소환수가 받는 피해 -${V(Math.min(30,(1.5*l).toFixed(1)))}%`},
-  {k:'guardian',e:'🛡️',n:'수호 영혼',s:'수호',req:6,mp:12,cd:8,el:'#6fe0c0',d:l=>`[소환수·영구] 근접 탱커. 생명력은 내 최대 생명력의 ${V(80+5*l)}%, 1.2초마다 기본 피해 ${V(14+10*l)}. 4초마다 반경 170 적을 3초간 도발. 스테이지 시작 시 무료 소환, 살아 있을 때 다시 쓰면 내 곁으로 불러와 생명력을 채워요`},
-  {k:'spiritcaster',e:'🔮',n:'포격 영혼',s:'포격',req:9,mp:14,cd:8,el:'#a98bff',d:l=>`[소환수·영구] 원거리 딜러. 생명력은 내 최대 생명력의 ${V(50+3*l)}%, 1.8초마다 마법탄 ${V(HMN(l))}발 · 기본 피해 ${V(Math.round((18+12*l)*HMF(HMN(l))))}. 7레벨 2발, 14레벨 3발. 스테이지 시작 시 무료 소환`},
-  {k:'resonance',e:'💠',n:'영혼 공명',s:'공명',req:12,mp:0,cd:0,el:'#7dffd8',passive:1,d:l=>`패시브: 소환수 공격 속도 +${V(Math.min(40,2*l))}%, 소환수가 준 피해의 ${V((3+.2*l).toFixed(1))}%만큼 내 생명력 회복`},
-  {k:'soulburst',e:'💥',n:'수호 폭발',s:'폭발',req:30,mp:16,cd:12,el:'#ff9a6a',rg:NRG(300),d:l=>`수호 영혼을 폭파해 반경 ${RR(110,l)} 범위 피해 ${V(100+40*l)} + 수호 영혼 현재 생명력의 ${V(Math.round(SBHP(l)*100))}% · 최대 200%, 1초 기절. 폭발한 수호 영혼은 다시 소환해야 해요`},
-  {k:'execute',e:'🎯',n:'처형 명령',s:'처형',req:18,mp:12,cd:18,el:'#ff5a5a',rg:NRG(360),d:l=>`반경 ${NRG(360)} 안의 적 하나를 8초간 표식. 우두머리 > 정예 > 일반 순, 같은 등급이면 남은 체력 %가 가장 낮은 적. 소환수가 모두 그 적을 집중 공격하고 공격 속도 +30%, 표식 적이 받는 모든 피해 +${V(20+3*l)}%`},
-  {k:'colossus',e:'🗿',n:'고대 거인',s:'거인',req:24,mp:30,cd:45,el:'#9aa6b8',d:l=>`[소환수·시한] ${V((18+.5*l).toFixed(1))}초간 등장. 생명력은 내 최대 생명력의 ${V(300+15*l)}%, 받는 피해 -50%. 1.5초마다 반경 86 범위 피해 ${V(120+45*l)}, 4초마다 반경 220 도발. 시한 소환수는 동시에 하나만 나와요`},
-  {k:'lord',e:'🐉',n:'영혼 군주 강림',s:'강림',req:90,mp:60,cd:90,el:'#7dffd8',rg:NRG(420),d:l=>`[궁극기·시한] 15초간 영혼 용령이 나와 전방 사거리 250에 숨결을 뿜어요. 0.5초마다 범위 피해 ${V(100+30*l)}, 모든 소환수 피해 +40%`},
-  {k:'fusion',e:'🌀',n:'영혼 융합',s:'융합',req:21,mp:25,cd:40,el:'#8ff0ff',d:l=>`수호 영혼과 포격 영혼이 둘 다 살아 있을 때 버튼이 나타나요. 둘이 하나로 합쳐 ${V((10+.3*l).toFixed(1))}초간 [융합 영혼]이 되고, 융합 중 다시 누르면 바로 분리돼요. 생명력은 내 최대 생명력의 ${V(220+10*l)}%, 받는 피해 -50%. ① 0.5초마다 반경 105 지속 피해 ${V(6+4*l)} ② 2초마다 영혼탄 ${V(FZB(l))}발 · 기본 피해 ${V(16+10*l)} ③ 4초마다 반경 150 휩쓸기 범위 피해 ${V(50+22*l)}, 4초마다 반경 200 도발. 끝나면 둘로 돌아오고 남은 생명력 비율을 이어받아요. 쓰러지면 20%로 분리돼요`}],
+  {k:'soulbolt',lb:['혼불','피해'],e:'🔵',n:'혼불',s:'혼불',req:1,mp:3,cd:.8,el:'#6fe0c0',rg:NRG(300),d:l=>`영혼의 불꽃 ${V(HMN(l))}발 · 기본 피해 ${V(Math.round((14+10*l)*HMF(HMN(l))))}, 맞히면 소환수 생명력 2% 회복. 7레벨 2발, 14레벨 3발`},
+  {k:'soullink',lb:['소환수피해','받는피해'],e:'🔗',n:'영혼 연결',s:'연결',req:3,mp:0,cd:0,el:'#8fe6d0',passive:1,d:l=>`패시브: 소환수 피해 +${V(4*l)}%, 소환수가 받는 피해 -${V(Math.min(30,(1.5*l).toFixed(1)))}%`},
+  {k:'guardian',lb:['생명력','피해'],e:'🛡️',n:'수호 영혼',s:'수호',req:6,mp:12,cd:8,el:'#6fe0c0',d:l=>`[소환수·영구] 근접 탱커. 생명력은 내 최대 생명력의 ${V(80+5*l)}%, 1.2초마다 기본 피해 ${V(14+10*l)}. 4초마다 반경 170 적을 3초간 도발. 스테이지 시작 시 무료 소환, 살아 있을 때 다시 쓰면 내 곁으로 불러와 생명력을 채워요`},
+  {k:'spiritcaster',lb:['생명력','마법탄','피해'],e:'🔮',n:'포격 영혼',s:'포격',req:9,mp:14,cd:8,el:'#a98bff',d:l=>`[소환수·영구] 원거리 딜러. 생명력은 내 최대 생명력의 ${V(50+3*l)}%, 1.8초마다 마법탄 ${V(HMN(l))}발 · 기본 피해 ${V(Math.round((18+12*l)*HMF(HMN(l))))}. 7레벨 2발, 14레벨 3발. 스테이지 시작 시 무료 소환`},
+  {k:'resonance',lb:['공격속도','생명력회복'],e:'💠',n:'영혼 공명',s:'공명',req:12,mp:0,cd:0,el:'#7dffd8',passive:1,d:l=>`패시브: 소환수 공격 속도 +${V(Math.min(40,2*l))}%, 소환수가 준 피해의 ${V((3+.2*l).toFixed(1))}%만큼 내 생명력 회복`},
+  {k:'soulburst',lb:['반경','피해','생명력비례'],e:'💥',n:'수호 폭발',s:'폭발',req:30,mp:16,cd:12,el:'#ff9a6a',rg:NRG(300),d:l=>`수호 영혼을 폭파해 반경 ${RR(110,l)} 범위 피해 ${V(100+40*l)} + 수호 영혼 현재 생명력의 ${V(Math.round(SBHP(l)*100))}% · 최대 200%, 1초 기절. 폭발한 수호 영혼은 다시 소환해야 해요`},
+  {k:'execute',lb:['받는피해증가'],e:'🎯',n:'처형 명령',s:'처형',req:18,mp:12,cd:18,el:'#ff5a5a',rg:NRG(360),d:l=>`반경 ${NRG(360)} 안의 적 하나를 8초간 표식. 우두머리 > 정예 > 일반 순, 같은 등급이면 남은 체력 %가 가장 낮은 적. 소환수가 모두 그 적을 집중 공격하고 공격 속도 +30%, 표식 적이 받는 모든 피해 +${V(20+3*l)}%`},
+  {k:'colossus',lb:['지속시간','생명력','피해'],e:'🗿',n:'고대 거인',s:'거인',req:24,mp:30,cd:45,el:'#9aa6b8',d:l=>`[소환수·시한] ${V((18+.5*l).toFixed(1))}초간 등장. 생명력은 내 최대 생명력의 ${V(300+15*l)}%, 받는 피해 -50%. 1.5초마다 반경 86 범위 피해 ${V(120+45*l)}, 4초마다 반경 220 도발. 시한 소환수는 동시에 하나만 나와요`},
+  {k:'lord',lb:['피해'],e:'🐉',n:'영혼 군주 강림',s:'강림',req:90,mp:60,cd:90,el:'#7dffd8',rg:NRG(420),d:l=>`[궁극기·시한] 15초간 영혼 용령이 나와 전방 사거리 250에 숨결을 뿜어요. 0.5초마다 범위 피해 ${V(100+30*l)}, 모든 소환수 피해 +40%`},
+  {k:'fusion',lb:['지속시간','생명력','지속피해','영혼탄','영혼탄피해','휩쓸기피해'],e:'🌀',n:'영혼 융합',s:'융합',req:21,mp:25,cd:40,el:'#8ff0ff',d:l=>`수호 영혼과 포격 영혼이 둘 다 살아 있을 때 버튼이 나타나요. 둘이 하나로 합쳐 ${V((10+.3*l).toFixed(1))}초간 [융합 영혼]이 되고, 융합 중 다시 누르면 바로 분리돼요. 생명력은 내 최대 생명력의 ${V(220+10*l)}%, 받는 피해 -50%. ① 0.5초마다 반경 105 지속 피해 ${V(6+4*l)} ② 2초마다 영혼탄 ${V(FZB(l))}발 · 기본 피해 ${V(16+10*l)} ③ 4초마다 반경 150 휩쓸기 범위 피해 ${V(50+22*l)}, 4초마다 반경 200 도발. 끝나면 둘로 돌아오고 남은 생명력 비율을 이어받아요. 쓰러지면 20%로 분리돼요`}],
  druid:[
-  {k:'raven',e:'🐦',n:'까마귀 소환',s:'까마귀',req:1,mp:8,cd:6,el:'#9a86c8',d:l=>`[소환수·영구] 까마귀 ${V(RVN(l))}마리를 불러요. 1.1초마다 피해 ${V(Math.round((12+9*l)*RVF(RVN(l))))}, 생명력은 내 최대 생명력의 ${V(Math.round(RVHP(l)*100))}%. 7레벨 2마리, 14레벨 3마리`},
-  {k:'wildblood',e:'🩸',n:'야생의 혈통',s:'혈통',req:3,mp:0,cd:0,el:'#d0705a',passive:1,d:l=>`패시브: 최대 생명력 +${V(2*l)}%, 초당 생명력 회복 +${V((.1*l).toFixed(1))}%, 변신한 동안 받는 피해 -${V((.5*l).toFixed(1))}%`},
-  {k:'bearform',e:'🐻',n:'곰 변신',s:'곰',req:6,mp:6,cd:12,el:'#c28a5a',form:'bear',d:l=>`[변신·토글] 곰으로 변신해요. 생명력 +${V(Math.round(BRH(l)))}%, 방어력 +${V(Math.round(BRD(l)))}%, 받는 피해 -${V(BRR(l).toFixed(1))}%, 이동 -8%, 공격 속도 -10%. 기본 공격이 반경 75 범위 공격으로 바뀌고 무기 피해 ${V(Math.round(BRB(l)*100))}%`},
-  {k:'communion',e:'🌿',n:'자연의 교감',s:'교감',req:12,mp:0,cd:0,el:'#8fe08a',passive:1,d:l=>`패시브: 까마귀 피해 +${V(4*l)}%, 까마귀 생명력 +${V(2*l)}%, 영혼 정령 지속시간 +${V(2*l)}%`},
-  {k:'bite',e:'🦷',n:'물어뜯기',s:'물기',req:12,mp:10,cd:3,el:'#ff6a5a',rg:260,freq:1,d:l=>`[곰 변신 필요] 전방 부채꼴 반경 ${RR(105,l)} 모든 적에게 무기 피해 ${V(300+45*l)}% + 0.8초 기절`},
-  {k:'roar',e:'📢',n:'포효',s:'포효',req:18,mp:12,cd:18,el:'#e0a050',freq:1,d:l=>`[곰 변신 필요] 반경 320 적 ${V(3+Math.floor(l/3))}명을 도발하고, ${V(6+Math.floor(l/4))}초간 반경 320 안의 나와 동료가 받는 피해 -${V(Math.min(45,Math.round(20+1.5*l)))}%`},
-  {k:'fury',e:'💢',n:'광란',s:'광란',req:22,mp:14,cd:30,el:'#ff5a3a',freq:1,d:l=>`[곰 변신 필요] 8초간 받는 피해 -${V(Math.min(50,Math.round(25+1.2*l)))}%, 주는 피해 +${V(10+2*l)}%, 1초마다 반경 ${RR(110,l)} 충격파 무기 피해 ${V(120+15*l)}%`},
-  {k:'spirit',e:'👻',n:'영혼 정령',s:'정령',req:24,mp:22,cd:36,el:'#b8f0ff',d:l=>`[소환수·시한] ${V((14+.4*l).toFixed(1))}초간 정령이 곁에 떠올라요. 반경 260 안의 나와 동료: 주는 피해 +${V(Math.round(10+1.5*l))}%, 공격 속도 +${V(8+l)}%, 마나 회복 +${V(30+3*l)}%`},
-  {k:'hunt',e:'🌕',n:'야생의 대사냥',s:'대사냥',req:30,mp:60,cd:15,el:'#ffd24a',rg:420,d:l=>`[필살기] 🧑 까마귀 떼가 적을 16번 급습, 반경 75 범위 피해 ${V(110+36*l)} / 🐻 반경 320 충격파 3연타 무기 피해 ${V(500+90*l)}% + 2초 기절, 6초간 받는 피해 -50%`},
+  {k:'raven',lb:['까마귀','피해','생명력'],e:'🐦',n:'까마귀 소환',s:'까마귀',req:1,mp:8,cd:6,el:'#9a86c8',d:l=>`[소환수·영구] 까마귀 ${V(RVN(l))}마리를 불러요. 1.1초마다 피해 ${V(Math.round((12+9*l)*RVF(RVN(l))))}, 생명력은 내 최대 생명력의 ${V(Math.round(RVHP(l)*100))}%. 7레벨 2마리, 14레벨 3마리`},
+  {k:'wildblood',lb:['최대생명력','초당회복','받는피해'],e:'🩸',n:'야생의 혈통',s:'혈통',req:3,mp:0,cd:0,el:'#d0705a',passive:1,d:l=>`패시브: 최대 생명력 +${V(2*l)}%, 초당 생명력 회복 +${V((.1*l).toFixed(1))}%, 변신한 동안 받는 피해 -${V((.5*l).toFixed(1))}%`},
+  {k:'bearform',lb:['생명력','방어력','받는피해','무기피해'],e:'🐻',n:'곰 변신',s:'곰',req:6,mp:6,cd:12,el:'#c28a5a',form:'bear',d:l=>`[변신·토글] 곰으로 변신해요. 생명력 +${V(Math.round(BRH(l)))}%, 방어력 +${V(Math.round(BRD(l)))}%, 받는 피해 -${V(BRR(l).toFixed(1))}%, 이동 -8%, 공격 속도 -10%. 기본 공격이 반경 75 범위 공격으로 바뀌고 무기 피해 ${V(Math.round(BRB(l)*100))}%`},
+  {k:'communion',lb:['까마귀피해','까마귀생명력','정령지속'],e:'🌿',n:'자연의 교감',s:'교감',req:12,mp:0,cd:0,el:'#8fe08a',passive:1,d:l=>`패시브: 까마귀 피해 +${V(4*l)}%, 까마귀 생명력 +${V(2*l)}%, 영혼 정령 지속시간 +${V(2*l)}%`},
+  {k:'bite',lb:['반경','무기피해'],e:'🦷',n:'물어뜯기',s:'물기',req:12,mp:10,cd:3,el:'#ff6a5a',rg:260,freq:1,d:l=>`[곰 변신 필요] 전방 부채꼴 반경 ${RR(105,l)} 모든 적에게 무기 피해 ${V(300+45*l)}% + 0.8초 기절`},
+  {k:'roar',lb:['도발','지속시간','받는피해'],e:'📢',n:'포효',s:'포효',req:18,mp:12,cd:18,el:'#e0a050',freq:1,d:l=>`[곰 변신 필요] 반경 320 적 ${V(3+Math.floor(l/3))}명을 도발하고, ${V(6+Math.floor(l/4))}초간 반경 320 안의 나와 동료가 받는 피해 -${V(Math.min(45,Math.round(20+1.5*l)))}%`},
+  {k:'fury',lb:['받는피해','주는피해','반경','무기피해'],e:'💢',n:'광란',s:'광란',req:22,mp:14,cd:30,el:'#ff5a3a',freq:1,d:l=>`[곰 변신 필요] 8초간 받는 피해 -${V(Math.min(50,Math.round(25+1.2*l)))}%, 주는 피해 +${V(10+2*l)}%, 1초마다 반경 ${RR(110,l)} 충격파 무기 피해 ${V(120+15*l)}%`},
+  {k:'spirit',lb:['지속시간','주는피해','공격속도','마나회복'],e:'👻',n:'영혼 정령',s:'정령',req:24,mp:22,cd:36,el:'#b8f0ff',d:l=>`[소환수·시한] ${V((14+.4*l).toFixed(1))}초간 정령이 곁에 떠올라요. 반경 260 안의 나와 동료: 주는 피해 +${V(Math.round(10+1.5*l))}%, 공격 속도 +${V(8+l)}%, 마나 회복 +${V(30+3*l)}%`},
+  {k:'hunt',lb:['까마귀피해','곰무기피해'],e:'🌕',n:'야생의 대사냥',s:'대사냥',req:30,mp:60,cd:15,el:'#ffd24a',rg:420,d:l=>`[필살기] 🧑 까마귀 떼가 적을 16번 급습, 반경 75 범위 피해 ${V(110+36*l)} / 🐻 반경 320 충격파 3연타 무기 피해 ${V(500+90*l)}% + 2초 기절, 6초간 받는 피해 -50%`},
   {k:'bears',e:'🐻',n:'곰세마리',s:'곰세마리',req:90,mp:60,cd:80,el:'#d9a46a',d:l=>`[궁극기·소환수] 강력한 곰 가족을 소환해요. 엄마곰, 아빠곰, 아기곰`}]
 };
 /* 드루이드 형태 수치 (derive와 설명이 같이 씀) */
@@ -1761,6 +1772,8 @@ function gimmick(dt){
    - 체력은 습격이 끝날 때마다 최대의 10%씩 수리. 모습은 체력 65%·30%를 기준으로 3단계(img/castle_c1~c3.png 가로 3칸) */
 const CAS_R=55, CAS_Y=8, CAS_AGGRO=150, CAS_HPK=90, CAS_FIX=.1, CAS_W=150, CAS_BASE=36;
 const CAS_T={x:VX,y:VY+CAS_Y,i:-1,cas:1}; let CASM=1;
+const CAS_HR=112, CAS_HY=VY+14;   /* 성이 있는 스테이지의 회복 구역: 성 둘레 반경 112 (성 안으로는 못 들어가니 성 둘레를 걸으면 회복돼요) */
+const hzX=()=>VX, hzY=()=>G.castle?CAS_HY:VY, hzR=()=>G.castle?CAS_HR:VR;
 const CAS_IMG=['castle_c1','castle_c2','castle_c3'];
 const castleCh=S=>Math.max(1,Math.min(3,parseInt(String(S&&S.id||'1').split('-')[0],10)||1));
 function castleMax(S){ const nw=(S.waves&&S.waves.length)||8, B=stgBuf(S); return Math.round(MT[0].dmg*1.6*S.dmgM*(B?B.atk:1)*(1+.08*(nw-1)/2)*CAS_HPK); }
@@ -1784,7 +1797,7 @@ function castleTick(dt){ const c=G.castle; if(!c)return; c.fl=Math.max(0,c.fl-dt
 /* 플레이어는 성 건물 안으로 들어갈 수 없어요 (앞마당 = 중앙 회복 구역은 건물 둘레) */
 function castlePush(o){ if(!G.castle)return; const cx=VX, cy=VY+CAS_Y+4, rx=58, ry=26, dx=(o.x-cx)/rx, dy=(o.y-cy)/ry, q=dx*dx+dy*dy; if(q>=1)return; if(q<1e-6){ o.y=cy+ry; return; } const k=1/Math.sqrt(q); o.x=cx+dx*k*rx; o.y=cy+dy*k*ry; }
 function startStage(){
-  dmgReset(); G.stageIdx=selStage; G.stg=STAGES[selStage]; G.TW=G.stg.waves.length; preBoss(); setTheme(selStage); castleInit(); if(G.castle)later(3.2,()=>{ if(G.inGame&&G.castle&&G.phase!=='lose')toast('🏰 중앙의 성을 지켜요 · 체력이 0이 되면 패배, 습격이 끝날 때마다 조금씩 수리돼요','#e0c080'); }); G.gts=[]; later(.5,()=>{ if(G.inGame)banner(`${G.stg.id} ${G.stg.n}`,`장비 Lv 합 ${Math.max(1,G.stg.icap-12)*EQSL.length}↑ · ${G.stg.tag||''}`); });
+  dmgReset(); G.stageIdx=selStage; G.stg=STAGES[selStage]; G.TW=G.stg.waves.length; preBoss(); setTheme(selStage); castleInit(); if(G.castle)later(3.2,()=>{ if(G.inGame&&G.castle&&G.phase!=='lose')toast('🏰 중앙의 성을 지켜요 · 체력이 0이 되면 패배 · 성 둘레에서는 생명력·마나가 회복돼요','#e0c080'); }); G.gts=[]; later(.5,()=>{ if(G.inGame)banner(`${G.stg.id} ${G.stg.n}`,`장비 Lv 합 ${Math.max(1,G.stg.icap-12)*EQSL.length}↑ · ${G.stg.tag||''}`); });
   G.allMode=false; G.allQ=[]; G.fires=[]; G.freeRev=1; me.rvGiven=0; me.seenRg=0; me.out=false; me.rvT=0;
   G.wave=0;G.skipUsed=false;G.phase='prep';G.timer=2;G.mobs.length=0;G.ev=[];G.spawnQ=0;G.lastSq=-1;G.endShown=false;G.coop=!!guestPeer;
   G.waveSides=[0,1,3]; G.nextSides=sidesFor(1); G.laneShow=G.nextSides;
@@ -2182,7 +2195,7 @@ function updateMe(dt){
   me.hp=Math.min(D.maxHp,me.hp+D.maxHp*(.008+(D.regen||0))*dt);
   if(me.aura==='healaura'){const l=skLv(me,'healaura'); me.hp=Math.min(D.maxHp,me.hp+(1+.6*l)*dt);}
   if(ally&&!ally.lobby&&!ally.dead&&ally.aura==='healaura'&&hyp(ally.x-me.x,ally.y-me.y)<320) me.hp=Math.min(D.maxHp,me.hp+(1+.6*ally.al)*dt);
-  if(hyp(me.x-VX,me.y-VY)<VR){ me.hp=Math.min(D.maxHp,me.hp+D.maxHp*.1*dt); me.mp=Math.min(D.maxMp,me.mp+D.maxMp*.14*dt); if((me.hp<D.maxHp||me.mp<D.maxMp)&&Math.random()<dt*9) parts.push({x:me.x+rand(-14,14),y:me.y+rand(-8,10),vx:0,vy:-30,t:0,life:.7,col:Math.random()<.5?'#8be07a':'#8fb0ff',r:rand(2,3.4),glow:1,dm:.95}); }
+  if(hyp(me.x-hzX(),me.y-hzY())<hzR()){ me.hp=Math.min(D.maxHp,me.hp+D.maxHp*.1*dt); me.mp=Math.min(D.maxMp,me.mp+D.maxMp*.14*dt); if((me.hp<D.maxHp||me.mp<D.maxMp)&&Math.random()<dt*9) parts.push({x:me.x+rand(-14,14),y:me.y+rand(-8,10),vx:0,vy:-30,t:0,life:.7,col:Math.random()<.5?'#8be07a':'#8fb0ff',r:rand(2,3.4),glow:1,dm:.95}); }
   // movement
   if(me.leap){const L=me.leap; L.t+=dt; const p=Math.min(1,L.t/L.dur); me.x=L.sx+(L.ex-L.sx)*p; me.y=L.sy+(L.ey-L.sy)*p; me.z=Math.sin(p*Math.PI)*30; if(p>=1){me.leap=null;me.z=0;} return;}
   let mx=0,my=0;
@@ -3077,9 +3090,9 @@ function autoDir(){
   const ph=G.phase; if(ph==='win'||ph==='lose'||ph==='title'||ph==='lobby')return null;
   const toward=(x,y)=>{ const dx=x-me.x,dy=y-me.y,d=hyp(dx,dy); return d>1?[dx/d,dy/d]:null; };
   for(const h of hazards){ const dx=me.x-h.x,dy=me.y-h.y,d=hyp(dx,dy); if(d<h.r*.95+6)return d>1?[dx/d,dy/d]:[1,0]; }
-  const hr=me.hp/me.D.maxHp, vd=hyp(me.x-VX,me.y-VY);
+  const hr=me.hp/me.D.maxHp, vd=hyp(me.x-hzX(),me.y-hzY()), fy=G.castle?VY+72:VY;   /* 성이 있으면 성 앞마당으로 돌아가요 */
   if(hr<.28)autoRet=true; else if(hr>=.7)autoRet=false;
-  if(autoRet)return vd<(G.castle?VR*.9:VR*.55)?null:toward(VX,VY);
+  if(autoRet)return vd<(G.castle?CAS_HR*.8:VR*.55)?null:toward(VX,fy);
   const rg=atkRg(me), melee=meleeOf(me); let near=null,nd=1e9;
   for(const m of G.mobs){ if(m.dead||(!m.boss&&hyp(m.x-VX,m.y-VY)>480))continue; const d=hyp(m.x-me.x,m.y-me.y)-m.r; if(d<nd){nd=d;near=m;} }
   const full=me.inv.indexOf(null)<0; let loot=null,ld=650;
@@ -3089,7 +3102,7 @@ function autoDir(){
   if(near){ const want=melee?Math.max(18,rg*.55):rg*.82;
     if(!melee&&nd<rg*.3){ const dx=me.x-near.x,dy=me.y-near.y,d=hyp(dx,dy); if(d>1)return [dx/d,dy/d]; }
     if(nd>want)return toward(near.x,near.y); return null; }
-  return vd>90?toward(VX,VY):null;
+  return vd>(G.castle?CAS_HR*.85:90)?toward(VX,fy):null;
 }
 /* 자동 스킬 규칙: [스킬, 시전 뒤 남겨 둘 마나 비율, 조건(c)] — 위에서부터 첫 번째로 쓸 수 있는 하나만. 유지(소환·오라) > 약화/표식 > 광역·단일 딜 > 궁극기 > 필러 순 */
 function autoCtx(){ const x=me.x,y=me.y, ms=G.mobs.filter(m=>!m.dead), ed=m=>hyp(m.x-x,m.y-y)-m.r;
@@ -3873,13 +3886,13 @@ if(!SKM){
 }
 if(SKM){
   h+=`<div class="sktabs"><button data-pm="skill" aria-pressed="${!PAS}">✨ 액티브</button><button data-pm="passive" aria-pressed="${PAS}">🔰 패시브</button></div>`;
-  h+=`<div class="box"><h3 class="bh"><span>${PAS?'🔰 패시브':'✨ 액티브 스킬'} · 남은 포인트 ${me.skillPts}</span><button class="rsb" id="rsSk">↺ 초기화 30,000G</button></h3><div class="k" style="font-size:11.5px;margin-bottom:6px">${PAS?'항상 적용되는 능력이에요. 스킬 포인트로 올려요.':'위에서 아래로 레벨이 오르며 해금돼요. 🔗는 이 스킬을 올리면 함께 강해지는 스킬이에요.'}</div>`;
+  h+=`<div class="box"><h3 class="bh"><span>${PAS?'🔰 패시브':'✨ 액티브 스킬'} · 남은 포인트 ${me.skillPts}</span><button class="rsb" id="rsSk">↺ 초기화 30,000G</button></h3><div class="k" style="font-size:11.5px;margin-bottom:6px">${PAS?'항상 적용되는 능력이에요. 스킬 포인트로 올려요.':'위에서 아래로 레벨이 오르며 해금돼요. 🔗는 이 스킬을 올리면 3레벨마다 +1씩 함께 강해지는 스킬이에요.'}</div>`;
   { const list=SK[me.cls].filter(s=>!!s.passive===PAS), tiers=[...new Set(list.map(s=>s.req))].sort((x,y)=>x-y);
     for(const rq of tiers){ const unl=me.lvl>=rq;
       h+=`<div class="tier ${unl?'':'lock'}"><div class="thd"><span class="tdot"></span><b>레벨 ${rq}</b><span class="k"> ${unl?'해금됨':'잠김'}</span></div>`;
       for(const s of list.filter(s=>s.req===rq)){
         const b=me.skills[s.k]||0, eff=skLv(me,s.k), bonus=eff-b, can=me.skillPts>0&&me.lvl>=s.req&&b<20;
-        h+=`<div class="skrow ${me.lvl<s.req?'lock':''}"><div class="skic" style="--c:${s.el};color:${s.el};font-size:19px">${s.e}</div><div><div class="skn">${esc(s.n)} <span class="k" style="font-weight:400;font-size:12px;color:var(--mute)">${b?`Lv ${b}${bonus?` (+${bonus})`:''}`:'미습득'}${s.aura?' · 오라':''}${s.cd>=1?` · 쿨 ${s.cd}초`:''}${s.mp?` · 마나 ${mpCost(s,eff||1)}`:''}</span></div><div class="skd">${skdHtml(s.d(Math.max(1,eff||1)))}</div>${(()=>{ const pn=wpPen(me); return pn&&pn.sk.includes(s.k)?`<div class="k" style="font-size:11.5px;color:#ff8a7a">⚠ 대검·전투 도끼를 끼고 있어서 효과가 없어요</div>`:''; })()}${s.k==='bulwark'?`<div class="k" style="font-size:11.5px;color:${me.D.blk>=(me.D.blkMax||BLKMAX)?'#ffd84a':'#9fd0ff'}">현재 막기 확률 ${me.D.blk}% / ${me.D.blkMax||BLKMAX}%${me.D.blk>=(me.D.blkMax||BLKMAX)?' · MAX (더 올려도 효과 없음)':''}</div>`:''}${(()=>{ if(s.passive)return ''; const tg=(SYN[me.cls][s.k]||[]).map(x=>SKBY[x].n), rc=synBonus(me,s.k); if(!tg.length&&!rc)return ''; return `<div class="k" style="font-size:11px;color:#8fb6a0">🔗 ${tg.length?tg.join('·')+' · 3레벨마다 +1':''}${tg.length&&rc?' · ':''}${rc?`받는 시너지 +${rc}`:''}</div>`; })()}</div><button class="plus" data-sk="${s.k}" ${can?'':'data-off'} aria-label="${esc(s.n)} 올리기">+</button></div>`;
+        h+=`<div class="skrow ${me.lvl<s.req?'lock':''}"><div class="skic" style="--c:${s.el};color:${s.el};font-size:19px">${s.e}</div><div><div class="skn">${esc(s.n)} <span class="k" style="font-weight:400;font-size:12px;color:var(--mute)">${b?`Lv ${b}${bonus?` (+${bonus})`:''}`:'미습득'}${s.aura?' · 오라':''}${s.cd>=1?` · 쿨 ${s.cd}초`:''}${s.mp?` · 마나 ${mpCost(s,eff||1)}`:''}</span></div><div class="skd">${skdHtml(s.d(Math.max(1,eff||1)))}</div>${(()=>{ const pn=wpPen(me); return pn&&pn.sk.includes(s.k)?`<div class="k" style="font-size:11.5px;color:#ff8a7a">⚠ 대검·전투 도끼를 끼고 있어서 효과가 없어요</div>`:''; })()}${s.k==='bulwark'?`<div class="k" style="font-size:11.5px;color:${me.D.blk>=(me.D.blkMax||BLKMAX)?'#ffd84a':'#9fd0ff'}">현재 막기 확률 ${me.D.blk}% / ${me.D.blkMax||BLKMAX}%${me.D.blk>=(me.D.blkMax||BLKMAX)?' · MAX (더 올려도 효과 없음)':''}</div>`:''}${(()=>{ const tg=s.passive?[]:(SYN[me.cls][s.k]||[]).map(x=>SKBY[x].n), rc=s.passive?0:synBonus(me,s.k), nx=nxHtml(s,b,eff); if(!tg.length&&!rc&&!nx)return ''; const l1=(tg.length?'🔗 '+esc(tg.join('·')):'')+(tg.length&&rc?' · ':'')+(rc?`${tg.length?'':'🔗 '}받는 시너지 +${rc}`:''); return `<div class="k syn" style="font-size:11px;color:#8fb6a0">${l1}${l1&&nx?' | ':''}${nx}</div>`; })()}</div><button class="plus" data-sk="${s.k}" ${can?'':'data-off'} aria-label="${esc(s.n)} 올리기">+</button></div>`;
       }
       h+='</div>'; } }
   h+='</div>';
@@ -4451,8 +4464,8 @@ function drawCastle(t){ const c=G.castle; if(!c)return; const st=castleSt(c), im
 }
 function drawVillage(t){ // 중앙 포털
   const col=TH().pc||'110,180,255';
-  if(G.castle){ ctx.globalCompositeOperation='lighter'; { const g=ctx.createRadialGradient(VX,VY,10,VX,VY,120); g.addColorStop(0,`rgba(${col},.2)`); g.addColorStop(1,`rgba(${col},0)`); ctx.fillStyle=g; ctx.beginPath(); ctx.arc(VX,VY,120,0,6.283); ctx.fill(); } ctx.globalCompositeOperation='source-over';
-    ctx.save(); ctx.strokeStyle=`rgba(${col},.32)`; ctx.lineWidth=2; ctx.setLineDash([7,7]); ctx.lineDashOffset=-t*8; ctx.beginPath(); ctx.arc(VX,VY,VR,0,6.283); ctx.stroke(); ctx.restore(); return; }   /* 성이 있으면 포털 대신 성 앞마당(회복 구역) 표시 */
+  if(G.castle){ ctx.globalCompositeOperation='lighter'; { const g=ctx.createRadialGradient(VX,CAS_HY,20,VX,CAS_HY,CAS_HR+14); g.addColorStop(0,`rgba(${col},.16)`); g.addColorStop(.8,`rgba(${col},.1)`); g.addColorStop(1,`rgba(${col},0)`); ctx.fillStyle=g; ctx.beginPath(); ctx.arc(VX,CAS_HY,CAS_HR+14,0,6.283); ctx.fill(); } ctx.globalCompositeOperation='source-over';
+    ctx.save(); ctx.strokeStyle=`rgba(${col},.32)`; ctx.lineWidth=2; ctx.setLineDash([7,7]); ctx.lineDashOffset=-t*8; ctx.beginPath(); ctx.arc(hzX(),hzY(),CAS_HR,0,6.283); ctx.stroke(); ctx.restore(); return; }   /* 성이 있으면 포털 대신 성 앞마당(회복 구역) 표시 */
   ctx.fillStyle='rgba(0,0,0,.4)'; ctx.beginPath(); ctx.ellipse(VX+3,VY+8,58,40,0,0,6.283); ctx.fill();
   ctx.globalCompositeOperation='lighter'; { const g=ctx.createRadialGradient(VX,VY,10,VX,VY,120); g.addColorStop(0,`rgba(${col},.22)`); g.addColorStop(1,`rgba(${col},0)`); ctx.fillStyle=g; ctx.beginPath(); ctx.arc(VX,VY,120,0,6.283); ctx.fill(); } ctx.globalCompositeOperation='source-over';
   ctx.fillStyle='#2c2a30'; ctx.beginPath(); ctx.ellipse(VX,VY,50,36,0,0,6.283); ctx.fill(); ctx.strokeStyle='#4a4650'; ctx.lineWidth=5; ctx.stroke();
@@ -5046,7 +5059,7 @@ function drawMinimap0(){
   const w=mmW(), h=w*WH/WW, x=VW-w-(LAND?8:10), y=LAND?8:Math.max(10,0)+4;
   ctx.fillStyle='rgba(10,8,7,.75)'; ctx.fillRect(x,y,w,h); ctx.strokeStyle='#6b5432'; ctx.lineWidth=1.5; ctx.strokeRect(x+.5,y+.5,w,h); ctx.fillStyle='#2c241c'; ctx.fillRect(x+VX*(w/WW)-2,y,4,VY*(h/WH)); ctx.fillRect(x,y+VY*(h/WH)-2,w,4);
   const sx=w/WW, sy=h/WH;
-  ctx.fillStyle='#8a6a3a'; ctx.beginPath(); ctx.arc(x+VX*sx,y+VY*sy,VR*sx,0,6.283); ctx.fill();
+  ctx.fillStyle='#8a6a3a'; ctx.beginPath(); ctx.arc(x+hzX()*sx,y+hzY()*sy,hzR()*sx,0,6.283); ctx.fill();
   for(const m of G.mobs){ctx.fillStyle=m.boss?'#ff4a8a':m.elite?'#7d96ff':'#c2382e'; const r=m.boss?3:1.4; ctx.fillRect(x+m.x*sx-r,y+m.y*sy-r,r*2,r*2);}
   ctx.save(); ctx.beginPath(); ctx.rect(x,y,w,h); ctx.clip();
   for(const g of ground){ const q=g.it.rar, z=q>=2?2.2:1.5, cx=x+g.x*sx, cy=y+g.y*sy, mx=[5,8,12,17,22][q], ph=((T*.9+(g.it.id||0)*.37)%1); ctx.fillStyle=RBD[q]; ctx.fillRect(cx-z,cy-z,z*2,z*2);
