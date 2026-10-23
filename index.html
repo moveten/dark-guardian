@@ -718,7 +718,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.5.0.0212</div>
+    <div class="ver" id="verT">v0.5.0.0213</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -1214,7 +1214,7 @@ const SPFX={
  hhelm:{n:'그림자 투구',slot:'helm',base:'뿔 달린 투구',il:999,hero:1,d:'생명 붕괴로 잃는 생명력 70% → 50%',ap:()=>{}},
  harmor:{n:'그림자 갑옷',slot:'armor',base:'사슬 갑옷',il:999,hero:1,d:'받는 피해 -10%',ap:d=>{d.dr+=.1;}},
  hamu:{n:'그림자 목걸이',slot:'amulet',base:'목걸이',il:999,hero:1,d:'반격 태세 반사 피해 -50%',ap:()=>{}},
- hring:{n:'그림자 반지',slot:'ring',base:'반지',il:999,hero:1,d:'적 처치 시 생명력 2% 회복 (2개를 껴도 1번만)',ap:()=>{}},
+ hring:{n:'그림자 반지',slot:'ring',base:'반지',il:999,hero:1,d:'적 처치 시 생명력 2% 회복 (2개를 끼면 2배)',ap:()=>{}},
  hoff_war:{n:'그림자 뿔',slot:'shield',base:'전쟁의 뿔',il:999,hero:1,fcls:'war',d:'피해 +12%',ap:d=>{d.dmgPct+=12;}},
  hoff_pal:{n:'그림자 방패',slot:'shield',base:'성스러운 방패',il:999,hero:1,fcls:'pal',d:'막으면 받은 피해의 50%를 가까운 적에게 되돌려요',ap:()=>{}},
  hoff_sorc:{n:'그림자 오브',slot:'shield',base:'별빛 오브',il:999,hero:1,fcls:'sorc',d:'스킬 마나 소모 -15%',ap:()=>{}},
@@ -1472,7 +1472,7 @@ function derive(p){
   const d={rng:0,blk:0,mf:0,pr:0,mr:0,str:p.stats.str,dex:p.stats.dex,vit:p.stats.vit,ene:p.stats.ene,dmg:0,dmgPct:0,def:0,life:0,mana:0,ias:0,ms:0,ls:0,crit:5,cls:0,sk:{},wmn:1,wmx:3,dr:0,regen:0,cdr:0,sm:0,smhp:0,sp:{},hc:0,rbd:0};
   for(const k in p.eq){const it=p.eq[k]; if(!it)continue; if(it.sp&&SPFX[it.sp]&&SPFX[it.sp].fcls&&SPFX[it.sp].fcls!==p.cls)continue; /* 전용 장비는 다른 직업이 끼고 있어도 효과 없음 */
     if(it.slot==='weapon'){d.wmn=it.mn;d.wmx=it.mx; const bf=BASEFX[it.base]; if(bf){ for(const q in bf) if(q!=='t')d[q]+=bf[q]; }}
-    if(it.sp&&SPFX[it.sp]){ SPFX[it.sp].ap(d); d.sp[it.sp]=1; if(SPFX[it.sp].hero&&it.rar===4)d.hc++; }   /* 그림자(영웅) 장비 개수 */
+    if(it.sp&&SPFX[it.sp]){ SPFX[it.sp].ap(d); d.sp[it.sp]=(it.sp==='hring'?(d.sp.hring|0)+1:1);   /* 그림자 반지는 2개 끼면 효과도 2번 */ if(SPFX[it.sp].hero&&it.rar===4)d.hc++; }   /* 그림자(영웅) 장비 개수 */
     if(it.enh>0){ if(it.slot==='amulet'){ const e=it.enh|0; d.str+=e; d.dex+=e; d.vit+=e; d.ene+=e; } else if(it.slot==='ring'&&it.enh>=10)d.cls+=1; }
     if(it.df)d.def+=it.df; if(it.blk)d.blk+=it.blk; if(it.dm)d.dmg+=it.dm; if(it.om)d.mana+=it.om;
     for(const a of it.aff){
@@ -2039,7 +2039,7 @@ function onKill(x,y,xp,tier,ilvl,type,lf){
   spark(x,y,col,bs?60:14); spark(x,y,'#5a0f0c',bs?40:8);
   if(bs){G.shake=1;sfx('boss');} else sfx('kill');
   me.kills=(me.kills||0)+1; G.stKills=(G.stKills||0)+1; bumpCombo();
-  { const sp=me.D&&me.D.sp; if(sp&&!me.dead){ if(sp.bloodoath)me.hp=Math.min(me.D.maxHp,me.hp+me.D.maxHp*.04); if(sp.hring)me.hp=Math.min(me.D.maxHp,me.hp+me.D.maxHp*.02); if(sp.necro)me.mp=Math.min(me.D.maxMp,me.mp+6); if(sp.rvoid)me.mp=Math.min(me.D.maxMp,me.mp+8); } }
+  { const sp=me.D&&me.D.sp; if(sp&&!me.dead){ if(sp.bloodoath)me.hp=Math.min(me.D.maxHp,me.hp+me.D.maxHp*.04); if(sp.hring)me.hp=Math.min(me.D.maxHp,me.hp+me.D.maxHp*.02*sp.hring); if(sp.necro)me.mp=Math.min(me.D.maxMp,me.mp+6); if(sp.rvoid)me.mp=Math.min(me.D.maxMp,me.mp+8); } }
   gainXp(Math.round(xp*comboMul()));
   { const RK=MT[type].raid; if(RK){ const n=ri(1,3); shardAdd(me,n); later(.4,()=>toast(`🌑 그림자 조각 +${n} (보유 ${shardCount(me)})${(me.shard|0)>0?' · 가방이 가득 차서 일부는 보관 중':''}`,'#c9a0ff'));
       if(Math.random()<HERO_P){ const hit=genHero(heroKey(pick(HDROP[RK]))); if(hit)dropItem(hit,x+rand(-20,20),y+rand(-20,20)); } saveChar(); } }
@@ -3563,7 +3563,8 @@ function sortStore(mode){ const S=getStore(); shardRepack(S); let mx=0; for(cons
   S.inv=its.concat(Array(Math.max(0,STORE_N-its.length)).fill(null)); selItem=null; saveStore(); renderStore(); sheetToast(mode==='enh'?'강화순으로 정리했어요':mode==='in'?'입고순으로 정리했어요':'등급순으로 정리했어요'); }
 function storeDetail(){ sellAskIt=null; if(!selItem)return ''; const it=selItem.it; let s=itemLines(it,isShard(it)?null:{lk:1});
   if(isShard(it))return s+`<div class="acts"><button class="btn" id="aShardSell">💰 판매</button><button class="btn" id="aSend">📤 보내기</button></div>`;
-  return s+`<div class="acts iact"><button class="btn tlb" id="aSell"${it.lock?' style="opacity:.45"':''}><span class="ti ph">💰</span><span class="tx">판매 ${sellInfo(it).total}G</span></button><button class="btn tlb" id="aSend"><span class="ti">📤</span> <span class="tx">보내기</span></button></div>`; }
+  const lk=`<button class="btn lkx" id="aLock" data-lk="1">${it.lock?'🔓 잠금 해제':'🔒 잠금'}</button>`;   /* 패드·PC에서도 잠글 수 있게 (폰은 아이콘 모서리 배지) */
+  return s+`<div class="acts iact">${lk}<button class="btn tlb" id="aSell"${it.lock?' style="opacity:.45"':''}><span class="ti ph">💰</span><span class="tx">판매 ${sellInfo(it).total}G</span></button><button class="btn tlb" id="aSend"><span class="ti">📤</span> <span class="tx">보내기</span></button></div>`; }
 function renderStore(){ const S=getStore(); markTabs(); storeHead();
   const bt=(attrs,t)=>`<button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap" ${attrs}>${t}</button>`;
   cellPlain=true; let cells=''; try{ cells=S.inv.map((it,i)=>cellHtml(it,'cell',`data-inv="${i}"`)).join(''); }finally{ cellPlain=false; }
@@ -3782,7 +3783,7 @@ if(!SKM){
     h+='</div>';
     /* 능력치로 바뀐 수치: 기본(직업·레벨) / 스탯(찍은 포인트) / 장비로 나눠서 표시 — 장비를 뺀 값, 스탯을 직업 기본으로 되돌린 값을 각각 계산해서 차이로 구함 */
     const Dn=derive({...me,eq:{}}), Db=derive({...me,eq:{},stats:{...base}}), r1=v=>Math.round(v*10)/10, sg=v=>(v<0?'':'+')+r1(v);
-    const RW=[['생명력',`${Math.ceil(me.hp)} / ${D.maxHp}`,d=>d.maxHp,''],['마나',`${Math.floor(me.mp)} / ${D.maxMp}`,d=>d.maxMp,''],['무기 공격력',`${D.wmn+D.dmg}–${D.wmx+D.dmg}`],['피해 보너스',`+${D.str+D.dmgPct}%`,d=>d.str+d.dmgPct,'%'],['방어력',D.def,d=>d.def,''],...(me.cls==='pal'||D.blk>0?[['막기 확률',capV(D.blk,D.blkMax||BLKMAX,D.blk>=(D.blkMax||BLKMAX))]]:[]),['공격 속도',`+${Math.round(D.ias+D.dex*.25)}%`,d=>d.ias+d.dex*.25,'%'],['치명타',`${Math.round(D.crit*10)/10}%`,d=>d.crit,'%'],['받는 피해 감소',capV(Math.round((D.dr||0)*100),DRMAX,(D.dr||0)>=DRMAX/100-1e-9),d=>(d.dr||0)*100,'%'],['스킬 쿨감',capV(Math.round((D.cdr||0)*100),CDRMAX,(D.cdr||0)>=CDRMAX/100-1e-9),d=>(d.cdr||0)*100,'%'],['이동 속도',`+${D.ms}%`,d=>d.ms,'%'],['생명력 흡수',`${D.ls}%`,d=>d.ls,'%'],['스킬 보너스',`+${D.cls} (전체)`],['⚔️ 총 전투력',`<b style="color:#ffd84a;font-size:16px">${calcCP(me).toLocaleString()}</b>`]];
+    const RW=[['생명력',`${Math.ceil(me.hp)} / ${D.maxHp}`,d=>d.maxHp,''],['마나',`${Math.floor(me.mp)} / ${D.maxMp}`,d=>d.maxMp,''],['무기 공격력',`${D.wmn+D.dmg}–${D.wmx+D.dmg}`],['피해 보너스',`+${D.str+D.dmgPct}%`,d=>d.str+d.dmgPct,'%'],['방어력',D.def,d=>d.def,''],...(me.cls==='pal'||D.blk>0?[['막기 확률',capV(D.blk,D.blkMax||BLKMAX,D.blk>=(D.blkMax||BLKMAX))]]:[]),['공격 속도',`+${Math.round(D.ias+D.dex*.25)}%`,d=>d.ias+d.dex*.25,'%'],['치명타',`${Math.round(D.crit*10)/10}%`,d=>d.crit,'%'],['받는 피해 감소',capV(Math.round((D.dr||0)*100),DRMAX,(D.dr||0)>=DRMAX/100-1e-9),d=>(d.dr||0)*100,'%'],['스킬 쿨감',capV(Math.round((D.cdr||0)*100),CDRMAX,(D.cdr||0)>=CDRMAX/100-1e-9),d=>(d.cdr||0)*100,'%'],['이동 속도',`+${D.ms}%`,d=>d.ms,'%'],['생명력 흡수',`${D.ls}%`,d=>d.ls,'%'],['마나 회복',`+${Math.round((D.mr||0)*10)/10}%${(D.mrx||1)<1?` <small style="color:#ff8a7a">(패널티 ×${D.mrx})</small>`:''}`,d=>d.mr||0,'%'],['스킬 보너스',`+${D.cls} (전체)`],['⚔️ 총 전투력',`<b style="color:#ffd84a;font-size:16px">${calcCP(me).toLocaleString()}</b>`]];
     h+=`<div class="box"><h3 class="bh"><span>🧮 능력치로 바뀐 수치</span><span class="k" style="font-size:11.5px;font-weight:500"><span class="cB">기본</span> · <span class="cS">스탯</span> · <span class="cG">장비</span></span></h3>`;
     for(const [a,v,f,u] of RW){ let sp=''; if(f){ const t=f(D), n=f(Dn), bb=f(Db), st=n-bb, gr=t-n; if(Math.abs(st)>=.05||Math.abs(gr)>=.05) sp=`<div class="brk2"><span class="cB">기본 ${r1(bb)}${u}</span>${Math.abs(st)>=.05?`<span class="cS">스탯 ${sg(st)}${u}</span>`:''}${Math.abs(gr)>=.05?`<span class="cG">장비 ${sg(gr)}${u}</span>`:''}</div>`; }
       h+=`<div class="row dr0"><span class="k">${a}</span><span>${v}</span></div>${sp}`; }
