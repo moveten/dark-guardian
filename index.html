@@ -136,7 +136,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
 #bSpd b{font-size:15px}#bSpd small{font-size:8.5px;font-weight:800;margin-top:2px}
 #bSpd.s0{background:#6b604f}#bSpd.s0 .in{background:radial-gradient(circle at 35% 28%,#4a4034,#1a1510 75%);color:#b9ac96}#bSpd.s0 small{color:#8c806b}
 #bSpd.s1{background:conic-gradient(#ff9a5a,#ff5a3a,#ff9a5a);animation:spdGlow 1.6s ease-in-out infinite}#bSpd.s1 .in{background:radial-gradient(circle at 35% 28%,#c0502a,#4a1608 75%);color:#fff0e0}#bSpd.s1 small{color:#ffd0a8}
-#bSpd.dis{opacity:.75}   /* 협동 참가자: 방장이 정한 속도를 따라가요 */
+#bSpd.dis{opacity:.75}#bSpd.lk{opacity:.7}#bSpd.lk b{font-size:13px}#bSpd.lk small{color:#b9ac96}   /* 협동 참가자: 방장이 정한 속도를 따라가요 */
 @keyframes spdGlow{0%,100%{box-shadow:0 0 10px rgba(255,120,70,.55)}50%{box-shadow:0 0 20px rgba(255,120,70,.95)}}
 .br{flex-direction:column;align-items:flex-end;gap:8px}   /* 세로: AUTO는 스킬 묶음 바로 위, 오른쪽 정렬 */
 #autoT{font-weight:800;font-size:11.5px;padding:3px 11px;border-radius:999px;white-space:nowrap;pointer-events:none;text-shadow:0 1px 2px #000;opacity:0;transition:opacity .25s}
@@ -718,7 +718,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.5.0.0214</div>
+    <div class="ver" id="verT">v0.5.0.0215</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -1750,7 +1750,7 @@ function startStage(){
   G.wave=0;G.skipUsed=false;G.phase='prep';G.timer=2;G.mobs.length=0;G.ev=[];G.spawnQ=0;G.lastSq=-1;G.endShown=false;G.coop=!!guestPeer;
   G.waveSides=[0,1,3]; G.nextSides=sidesFor(1); G.laneShow=G.nextSides;
   if(G.mode!=='guest'&&(me.clear|0)>selStage&&!STAGES[selStage].raid)later(.05,()=>{ if(G.inGame&&!G.allMode&&G.phase==='prep'&&G.wave===0&&G.stageIdx===selStage&&!tutS&&!tutWait&&!storyWait)startAllOut(); }); /* 이미 깬 스테이지는 들어가자마자 총공세 (튜토리얼이 시작되는 스테이지는 제외) */
-  tutWait=tutBegin(); storyWait=storyBegin('pre');
+  tutWait=tutBegin(); storyWait=storyBegin('pre'); spdTip();
 }
 const CLEAR_T=15; /* 보스 처치 후 전리품 줍기 시간(초) */
 const WAVE_CAP=39, ALL_CAP=60; /* 습격 1회 최대 몹 수(모든 스테이지 공통), 총공세 최대 몹 수 */
@@ -3018,11 +3018,13 @@ function cycleAuto(){ if(!G.inGame)return; setAuto((autoMode+1)%3); sfx(autoMode
 $('#bAuto').addEventListener('pointerdown',e=>{ e.preventDefault(); cycleAuto(); });
 /* 1.3배속: 혼자 하기·방장은 직접 켜고 끔(캐릭터별로 저장, 스테이지는 저장된 설정으로 시작), 협동 참가자는 방장의 설정을 따라감.
    게임 시간(dt)만 1.3배 — 클리어 시간(G.runT)은 실제 시간으로 잼 */
-const SPD_ON=1.3;
-function setSpd(on,o){ o=o||{}; G.spd=on?SPD_ON:1; if(me&&o.save&&G.mode!=='guest'&&!!(me.sp|0)!==!!on){ me.sp=on?1:0; saveChar(); }
-  const b=$('#bSpd'); if(b){ b.className=(on?'s1':'s0')+(G.mode==='guest'?' dis':''); b.querySelector('small').textContent=on?'1.3x':'1.0x'; b.setAttribute('aria-label','배속: '+(on?'1.3배':'1배')+(G.mode==='guest'?' (방장이 정해요)':'')); }
+const SPD_ON=1.3, SPD_NEED=5;   /* 1-5 스테이지를 클리어한 캐릭터부터 사용 가능 (me.clear = 클리어한 스테이지 수) */
+const spdOk=()=>!!(me&&(me.clear|0)>=SPD_NEED);
+function setSpd(on,o){ o=o||{}; if(on&&G.mode!=='guest'&&!spdOk())on=false; G.spd=on?SPD_ON:1; if(me&&o.save&&G.mode!=='guest'&&!!(me.sp|0)!==!!on){ me.sp=on?1:0; saveChar(); }
+  const b=$('#bSpd'); if(b){ const lk=G.mode!=='guest'&&!spdOk(); b.className=(on?'s1':'s0')+(G.mode==='guest'?' dis':'')+(lk?' lk':''); b.querySelector('b').textContent=lk?'🔒':'⏩'; b.querySelector('small').textContent=lk?'1-5':on?'1.3x':'1.0x'; b.setAttribute('aria-label',lk?'배속: 1-5 스테이지를 클리어하면 열려요':'배속: '+(on?'1.3배':'1배')+(G.mode==='guest'?' (방장이 정해요)':'')); }
   if(o.hint){ const t=$('#autoT'); if(t){ t.className='s2 show'; t.textContent=on?'⏩ 1.3배속':'▶ 1배속'; clearTimeout(autoHintT); autoHintT=setTimeout(()=>t.classList.remove('show'),2000); } } }
-function cycleSpd(){ if(!G.inGame)return; if(G.mode==='guest'){ toast('배속은 방장이 정해요','#ffb259'); return; } setSpd(!(G.spd>1),{save:true,hint:true}); sfx(G.spd>1?'aura':'auraoff'); }
+function cycleSpd(){ if(!G.inGame)return; if(G.mode==='guest'){ toast('배속은 방장이 정해요','#ffb259'); return; }
+  if(!spdOk()){ toast('🔒 1.3배속은 1-5 스테이지를 클리어하면 열려요','#ffb259'); sfx('ui'); return; } setSpd(!(G.spd>1),{save:true,hint:true}); sfx(G.spd>1?'aura':'auraoff'); }
 $('#bSpd').addEventListener('pointerdown',e=>{ e.preventDefault(); cycleSpd(); });
 const autoBlocked=()=>!G.inGame||G.paused||me.dead||document.body.classList.contains('shopen');
 /* 자동 이동 방향(단위 벡터) — 없으면 null: 위험지대 탈출 > 체력이 낮으면 마을(치유 구역)로 후퇴 > 가까운 전리품 > 마을 근처의 적 추격(근접은 붙고, 원거리는 거리를 유지) > 마을로 복귀 */
@@ -3080,10 +3082,10 @@ function autoSkills(dt){
    - me.tut={on, d:[스테이지별 0 안 함/1 완료/2 건너뜀], rw:[보상 편지 보냈나], g:[튜토리얼 지원 포인트 지급했나], fin:최종 보상 보냈나}
    - 단계 정의(TUTS): t 제목 · b 내용 · tg 강조할 요소 · hud 게임 화면 요소라 창이 열려 있으면 먼저 닫게 함 · ck 행동 완료 조건(주기적으로 확인) · ok 읽기만 하는 단계(확인 버튼, 혼자일 땐 게임 일시정지)
      can 못 하는 상황이면 b2 로 바꿔 읽기 단계로 · pre/post 단계 시작/끝에 할 일 */
-const TUT_TOPIC=['이동 · 공격 · 스킬 · 전리품 · 물약','스킬 포인트 · 능력치 · AUTO 자동 사냥 · 1.3배속','가방 · 장비 착용 · 판매 · 자동 정리','장비 강화 · 상점','아이템 보내기 · 우편함 · 공유보관함'];
+const TUT_TOPIC=['이동 · 공격 · 스킬 · 전리품 · 물약','스킬 포인트 · 능력치 · AUTO 자동 사냥','가방 · 장비 착용 · 판매 · 자동 정리','장비 강화 · 상점','아이템 보내기 · 우편함 · 공유보관함'];
 function tutDef(){ return {on:0,d:[0,0,0,0,0],rw:[0,0,0,0,0],g:[0,0,0,0,0],fin:0,cn:0,sg:{}}; }
-function tutFix(p){ const t=p.tut&&typeof p.tut==='object'?p.tut:tutDef(); for(const k of ['d','rw','g']){ t[k]=Array.isArray(t[k])?t[k].slice(0,5).map(v=>v|0):[]; while(t[k].length<5)t[k].push(0); } t.on=t.on?1:0; t.fin=t.fin?1:0; t.cn=t.cn?1:0; { const sg={}; if(t.sg&&typeof t.sg==='object'&&!Array.isArray(t.sg))for(const k in t.sg)if(t.sg[k]&&String(k).length<12)sg[k]=1; t.sg=sg; } p.tut=t; }
-let tutS=null, tutIv=0, tutWait=false, tutAu=0, tutSp=0;   /* tutAu: 튜토리얼 AUTO 단계 전에 쓰던 AUTO 설정 */
+function tutFix(p){ const t=p.tut&&typeof p.tut==='object'?p.tut:tutDef(); for(const k of ['d','rw','g']){ t[k]=Array.isArray(t[k])?t[k].slice(0,5).map(v=>v|0):[]; while(t[k].length<5)t[k].push(0); } t.on=t.on?1:0; t.fin=t.fin?1:0; t.cn=t.cn?1:0; t.sp=t.sp?1:0; { const sg={}; if(t.sg&&typeof t.sg==='object'&&!Array.isArray(t.sg))for(const k in t.sg)if(t.sg[k]&&String(k).length<12)sg[k]=1; t.sg=sg; } p.tut=t; }
+let tutS=null, tutIv=0, tutWait=false, tutAu=0;   /* tutAu: 튜토리얼 AUTO 단계 전에 쓰던 AUTO 설정 */
 const tutQ=s=>document.querySelector(s), tutShut=()=>document.body.classList.contains('shopen');
 const tutVis=e=>{ if(!e)return null; const r=e.getBoundingClientRect(); return r.width>2&&r.height>2?e:null; };
 const tutBag=fn=>{ for(const e of document.querySelectorAll('#sheetB [data-inv]')){ const it=me.inv[+e.dataset.inv]; if(it&&!isShard(it)&&fn(it))return e; } return null; };
@@ -3104,8 +3106,7 @@ const TUTS=[
   {t:'스킬 올리기',b:'스킬 옆의 ＋ 버튼을 누르면 스킬 레벨이 올라 더 강해져요. 포인트를 아끼지 말고 쓰세요. 나중에 못 쓰는 스킬은 없어요.',can:()=>(me.skillPts|0)>0,b2:'스킬 포인트가 있을 때 스킬 옆 ＋ 버튼으로 스킬 레벨을 올려요. 스킬마다 해금 레벨이 있어요.',pre:S=>{S.p=me.skillPts|0;},tg:()=>tutQ('#sheetB [data-sk]')||tutQ('#bSkillT'),ck:S=>(me.skillPts|0)<S.p},
   {t:'능력치 창 열기',b:'이번에는 📊 능력 버튼을 눌러 능력치 창을 열어 보세요.',...tutOpenTab('bStat','stat')},
   {t:'능력치 올리기',b:'힘은 피해, 민첩은 공격속도·치명타, 체력은 생명력, 에너지는 마나에 영향을 줘요. ＋ 를 눌러 원하는 곳에 포인트를 써 보세요.',can:()=>(me.statPts|0)>0,b2:'레벨이 오를 때마다 능력치 포인트를 얻어요. 힘·민첩·체력·에너지 중 원하는 곳에 ＋ 로 투자해요.',pre:S=>{S.p=me.statPts|0;},tg:()=>tutQ('#sheetB [data-st]')||tutQ('#bStat'),ck:S=>(me.statPts|0)<S.p},
-  {t:'AUTO 자동 사냥',b:'AUTO 버튼을 두 번 눌러 보세요. 한 번은 자동 이동+일반공격, 두 번은 스킬까지 자동이에요. 한 번 더 누르면 꺼져요. 조이스틱을 잡으면 내가 직접 움직여요.',pre:()=>{ tutAu=me.au|0; setAuto(0,true); },tg:()=>tutQ('#bAuto'),hud:1,ck:()=>autoMode===2,post:()=>{ me.au=tutAu; setAuto(tutAu,true); saveChar(); }},
-  {t:'1.3배속',b:'AUTO 왼쪽의 ⏩ 버튼을 누르면 게임이 1.3배 빨라져요. 한 번 더 누르면 원래 속도로 돌아와요. 설정은 캐릭터마다 기억돼요. (협동에서는 방장의 설정을 따라가요)',pre:()=>{ tutSp=me.sp|0; setSpd(false); },tg:()=>tutQ('#bSpd'),hud:1,ck:()=>G.spd>1,post:()=>{ setSpd(!!tutSp,{save:true}); }}
+  {t:'AUTO 자동 사냥',b:'AUTO 버튼을 두 번 눌러 보세요. 한 번은 자동 이동+일반공격, 두 번은 스킬까지 자동이에요. 한 번 더 누르면 꺼져요. 조이스틱을 잡으면 내가 직접 움직여요.',pre:()=>{ tutAu=me.au|0; setAuto(0,true); },tg:()=>tutQ('#bAuto'),hud:1,ck:()=>autoMode===2,post:()=>{ me.au=tutAu; setAuto(tutAu,true); saveChar(); }}
  ],
  [ /* 1-3 */
   {t:'가방 열기',b:'아래 🎒 가방 버튼을 눌러 가방을 열어 보세요. 열려 있는 동안 게임은 잠시 멈춰요.',...tutOpenTab('bBag','bag')},
@@ -3412,6 +3413,10 @@ function ultCut(key){ const sk=SKBY[key]; if(!sk||!me||!hudOn('ult'))return; con
   u.querySelector('img').src='img/hero_'+me.cls+'.png'; u.querySelector('.utx b').textContent=sk.n; u.querySelector('.utx em').textContent=ULTK[key];
   u.hidden=false; u.classList.remove('go'); void u.offsetWidth; u.classList.add('go'); clearTimeout(ultTm); ultTm=setTimeout(()=>{ u.hidden=true; u.classList.remove('go'); },1600); }
 /* 보스 반격 태세로 처음 쓰러졌을 때(캐릭터마다 딱 한 번) 알려 주는 안내 — 수동·AUTO 모두 해당. 튜토리얼이 진행 중이면 다음 기회로 미룸 */
+/* 1.3배속이 열린 캐릭터에게 한 번만 알려 주는 안내창 (이미 1-5를 깬 캐릭터도 다음에 스테이지에 들어가면 한 번 봄) */
+function spdTip(){ const t=me&&me.tut; if(!t||t.sp||G.mode!=='solo'||G.coop||!spdOk())return;
+  later(2.8,()=>{ if(!G.inGame||G.mode!=='solo'||G.coop||tutS||stS||tutWait||storyWait||t.sp||!$('#modal').hidden)return; t.sp=1; saveChar();
+    modal(`<h3>⏩ 1.3배속 해금!</h3><div class="mbody" style="line-height:1.7"><p style="margin:0 0 8px">1-5 스테이지를 클리어해서 <b style="color:#ffb259">배속 기능</b>이 열렸어요.</p><p style="margin:0 0 8px">AUTO 왼쪽의 <b>⏩ 버튼</b>을 누르면 게임이 <b>1.3배</b> 빨라지고, 한 번 더 누르면 원래 속도로 돌아와요.</p><p style="margin:0;color:var(--mute)">설정은 캐릭터마다 기억돼요. 협동에서는 방장의 설정을 따라가요. 클리어 시간은 실제 시간으로 기록돼요.</p></div><div class="row2"><button class="btn" id="spNo">알겠어요</button><button class="btn primary" id="spOn">지금 켜 보기</button></div>`,m=>{ m.querySelector('#spNo').onclick=closeModal; m.querySelector('#spOn').onclick=()=>{ closeModal(); setSpd(true,{save:true,hint:true}); sfx('aura'); }; }); }); }
 function counterTip(){ const t=me&&me.tut; if(!t||t.cn||tutS)return; t.cn=1; saveChar(); const au=autoMode===2;
   later(.7,()=>{ if(!G.inGame)return; modal(`<h3>⚔️ 보스의 반격 태세!</h3><div class="mbody" style="line-height:1.7"><p style="margin:0 0 8px">보스 머리 위에 <b style="color:#ffb347">⚔️ 반격 태세</b>가 뜨는 동안(약 3초)에는 <b>스킬을 쓰면 안 돼요.</b> 쓰는 순간 내 최대 생명력의 <b style="color:#ff8a7a">35%</b>가 피해로 되돌아와요.</p><p style="margin:0 0 8px">일반공격과 소환수 공격은 괜찮아요. 태세가 풀리면 다시 스킬을 쓰세요.</p>${au?'<p style="margin:0;color:#ffb259"><b>AUTO(+스킬)</b>도 태세를 구분하지 못해요. 보스가 태세에 들어가면 AUTO를 1단계(이동)로 낮추거나 직접 조작하세요.</p>':'<p style="margin:0;color:var(--mute)">AUTO(+스킬)를 쓸 때도 태세를 구분하지 못하니 조심하세요.</p>'}</div><div class="row2"><button class="btn primary" id="cnOk" style="grid-column:1/-1">알겠어요</button></div>`,m=>{ m.querySelector('#cnOk').onclick=closeModal; }); }); }
 function tutBegin(){ const k=selStage; if(tutS||!me||!me.tut||!me.tut.on||G.mode!=='solo'||G.coop||k>=TUTS.length||me.tut.d[k]!==0)return false;
@@ -4283,10 +4288,11 @@ async function quitToTitle(){
 }
 const fmtCt=t=>{ t=Math.max(0,Math.round(t)); return (t/60|0)+':'+String(t%60).padStart(2,'0'); };
 /* 클리어 기록: 가장 높이 클리어한 스테이지의 최단 클리어 시간(초)을 ct에 저장 — 랭킹에서 클리어 수가 같으면 ct가 짧은 순 */
-function markClear(){ const n=(G.stageIdx|0)+1, t=Math.max(1,Math.round(G.runT||0)); let ch=false; G.lastCt=t; G.bestCt=false;
+function markClear(){ const n=(G.stageIdx|0)+1, t=Math.max(1,Math.round(G.runT||0)); let ch=false; G.lastCt=t; G.bestCt=false; const wasLk=!spdOk();
   if(n>(me.clear|0)){ me.clear=Math.min(STAGES.length,n); stageClear=me.clear; me.ct=t; me.cat=Math.floor(Date.now()/1000); ch=true; G.bestCt=true; }
   else if(n===(me.clear|0)&&!(me.ct>0&&t>=me.ct)){ me.ct=t; ch=true; G.bestCt=true; }
-  if(ch){ saveChar(); rkSubmitAll(); } }
+  if(ch){ saveChar(); rkSubmitAll(); }
+  if(wasLk&&spdOk()){ G.spdNew=true; setSpd(G.spd>1); later(2,()=>{ if(G.inGame)toast('⏩ 1.3배속이 열렸어요! AUTO 왼쪽 ⏩ 버튼','#ffb259'); }); } }   /* 1-5 첫 클리어 */
 function endTab(t){ const bx=$('#endBox'); bx.dataset.tab=t; bx.querySelectorAll('.etabs button').forEach(b=>{ b.setAttribute('aria-selected',b.dataset.t===t); b.onclick=()=>{ endTab(b.dataset.t); sfx('ui'); }; }); }   /* 가로 모드: 전리품 / 데미지 순위 탭 (세로 모드는 탭 없이 둘 다 표시) */
 function showEnd(msg){
   sfx(G.phase==='win'?'win':'lose');
