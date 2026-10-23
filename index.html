@@ -719,7 +719,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.5.0.0219</div>
+    <div class="ver" id="verT">v0.5.0.0220</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -5107,22 +5107,32 @@ function clNorm(x){ let t=String(x||'').toUpperCase().replace(/[^A-Z0-9]/g,''); 
 function clSnap(){ const o={}; try{ for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k&&k.indexOf('dkdef2.')===0&&!CLSKIP.test(k))o[k]=localStorage.getItem(k); } }catch(e){} return o; }
 async function clRpc(fn,args){ const r=await fetch(SB_URL+'/rest/v1/rpc/'+fn,{method:'POST',headers:rkHead(),body:JSON.stringify(args)}); if(!r.ok)throw new Error('http '+r.status); return r.json(); }
 const clFmt=iso=>{ try{ const d=new Date(iso); if(isNaN(d))return '-'; const n=new Date(), same=d.toDateString()===n.toDateString(); return (same?'오늘 ':`${d.getMonth()+1}월 ${d.getDate()}일 `)+`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; }catch(e){return '-';} };
+/* 저장 내용의 지문(키 이름순으로 훑은 해시). 서버에 있는 내용이 "이 기기가 방금 올린 것"인지 알아보는 데 써요 */
+function clHash(o){ let h1=0xdeadbeef,h2=0x41c6ce57; for(const k of Object.keys(o).sort()){ const t=k+'\u0001'+o[k]+'\u0002'; for(let i=0;i<t.length;i++){ const c=t.charCodeAt(i); h1=Math.imul(h1^c,2654435761); h2=Math.imul(h2^c,1597334677); } }
+  h1=Math.imul(h1^(h1>>>16),2246822507)^Math.imul(h2^(h2>>>13),3266489909); h2=Math.imul(h2^(h2>>>16),2246822507)^Math.imul(h1^(h1>>>13),3266489909); return (4294967296*(2097151&h2)+(h1>>>0)).toString(36); }
+const clPh=()=>(lsGet('dkdef2.cl.ph')||'').split(',').filter(Boolean);
 async function clPut(){  /* 서버에 올리기. 성공 true / 충돌 'conflict' / 실패 false */
   const code=clCode(); if(!code||clBusy)return false; clBusy=true;
-  try{ const res=await clRpc('dd_save_put',{p_code:code,p_data:clSnap(),p_ver:clVer()});
-    if(res&&res.ok){ clHook=null; lsSet('dkdef2.cl.ver',String(res.ver)); lsSet('dkdef2.cl.at',res.at||new Date().toISOString()); clHook=clDirty; clMsg=''; return true; }
-    if(res&&res.conflict){ clMsg='conflict'; return 'conflict'; }
+  try{ const snap=clSnap(), hh=clHash(snap); const phOld=clPh(); lsSet('dkdef2.cl.ph',[hh].concat(phOld.filter(x=>x!==hh)).slice(0,4).join(','));   /* 올리는 중인 내용의 지문(최근 몇 개) — 응답이 끊겨도 서버 내용이 내 것인지 알 수 있음 */
+    const res=await clRpc('dd_save_put',{p_code:code,p_data:snap,p_ver:clVer()});
+    if(res&&res.ok){ clHook=null; lsSet('dkdef2.cl.h',hh); lsSet('dkdef2.cl.ph',''); lsSet('dkdef2.cl.ver',String(res.ver)); lsSet('dkdef2.cl.at',res.at||new Date().toISOString()); clHook=clDirty; clMsg=''; return true; }
+    if(res&&res.conflict){ lsSet('dkdef2.cl.ph',phOld.join(',')); clMsg='conflict'; return 'conflict'; }
     return false; }
   catch(e){ clMsg='fail'; return false; }
   finally{ clBusy=false; } }
 /* 서버 버전이 더 높아도 내용이 이 기기와 똑같으면(저장 응답이 끊겨 버전만 못 받은 경우 등) 물어보지 않고 버전만 맞춘다 */
-async function clResolve(v){ if(clBusy)return; clBusy=true; let same=false;
+async function clResolve(v){ if(clBusy)return; clBusy=true; let same=false, sv=v||null, redo=false, fail=false;
   try{ const res=await clRpc('dd_save_get',{p_code:clCode()});
-    if(res&&res.data){ const a=clSnap(), b={}; for(const k in res.data){ if(k.indexOf('dkdef2.')===0&&!CLSKIP.test(k)&&typeof res.data[k]==='string')b[k]=res.data[k]; }
+    if(res&&res.data){ sv={ver:res.ver}; const a=clSnap(), b={}; for(const k in res.data){ if(k.indexOf('dkdef2.')===0&&!CLSKIP.test(k)&&typeof res.data[k]==='string')b[k]=res.data[k]; }
       const ka=Object.keys(a), kb=Object.keys(b); same=ka.length===kb.length&&ka.every(k=>a[k]===b[k]);
-      if(same){ clHook=null; lsSet('dkdef2.cl.ver',String(res.ver)); lsSet('dkdef2.cl.at',res.at||''); clHook=clDirty; } } }
-  catch(e){ same=false; } finally{ clBusy=false; }
-  if(!same&&!G.inGame)clConflict(v); }
+      /* 서버 내용이 이 기기가 올렸던 것과 똑같으면(응답이 끊겨 버전만 못 받은 경우) 다른 기기가 쓴 게 아니라서 묻지 않고 버전만 맞춰요. 그 뒤로 이 기기에서 바뀐 게 있으면 다시 올려요 */
+      const sh=clHash(b); if(same||clPh().includes(sh)||sh===lsGet('dkdef2.cl.h')){ redo=!same; same=true; clHook=null; lsSet('dkdef2.cl.h',sh); lsSet('dkdef2.cl.ver',String(res.ver)); lsSet('dkdef2.cl.at',res.at||''); clHook=clDirty; } }
+    else fail=true; }
+  catch(e){ fail=true; } finally{ clBusy=false; }
+  if(redo)clDirty();
+  if(fail||same||G.inGame)return;   /* 서버 내용을 못 가져온 건 충돌이 아니에요 — 묻지 않고 다음에 다시 확인 */
+  if(sv&&sv.ver===clLater)return;   /* '나중에'를 누른 같은 서버 버전은 이번 접속 동안 다시 묻지 않음 */
+  clConflict(sv); }
 function clDirty(){ if(!clCode()||clT)return; clT=setTimeout(async()=>{ clT=0; const r=await clPut(); if(r==='conflict'&&!G.inGame)clResolve(); },10000); }
 clHook=clDirty;
 function clFlush(){ if(clT){ clearTimeout(clT); clT=0; clPut().then(r=>{ if(r==='conflict'&&!G.inGame)clResolve(); }); } }
