@@ -139,6 +139,11 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
 #bSpd.dis{opacity:.75}#bSpd.lk{opacity:.7}#bSpd.lk b{font-size:13px}#bSpd.lk small{color:#b9ac96}   /* 협동 참가자: 방장이 정한 속도를 따라가요 */
 @keyframes spdGlow{0%,100%{box-shadow:0 0 10px rgba(255,120,70,.55)}50%{box-shadow:0 0 20px rgba(255,120,70,.95)}}
 .br{flex-direction:column;align-items:flex-end;gap:8px}   /* 세로: AUTO는 스킬 묶음 바로 위, 오른쪽 정렬 */
+#hCastle{display:flex;align-items:center;gap:5px;width:100%;font-size:11.5px;color:#e9d9b4;text-shadow:0 1px 2px #000}
+#hCastle .bar{flex:1;height:9px}
+#hCastle .bar i{background:linear-gradient(90deg,#c0894a,#e8c070);transition:transform .15s}
+#hCastle.low .bar i{background:#e0503a}
+#hCastle b{font-weight:800;min-width:34px;text-align:right;font-size:11.5px}
 #autoT{font-weight:800;font-size:11.5px;padding:3px 11px;border-radius:999px;white-space:nowrap;pointer-events:none;text-shadow:0 1px 2px #000;opacity:0;transition:opacity .25s}
 #autoT.show{opacity:1}
 #autoT.s0{border:2px solid #7d705a;background:rgba(40,34,26,.9);color:#cfc3ad}
@@ -697,6 +702,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     </div>
     <div class="tc">
       <div id="hWave">준비</div>
+      <div id="hCastle" hidden><span>🏰</span><div class="bar"><i id="hCastleHp"></i></div><b id="hCastleT"></b></div>
       <div id="autoT" class="s0"></div>
     </div>
     <div class="orbs">
@@ -719,7 +725,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.5.0.0220</div>
+    <div class="ver" id="verT">v0.5.0.0221</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -1571,7 +1577,7 @@ function netSend(){
   if(!R)return;
   let o;
   if(G.mode==='host'){
-    o={role:'host',sp:G.spd>1?1:0,st:G.stageIdx|0,tw:G.TW|0,ph:G.phase,w:G.wave,tm:Math.ceil(G.timer),ls:G.laneShow||[],pl:myNet(),m:snapMobs(),ev:G.ev,bt:bossTel()};
+    o={role:'host',sp:G.spd>1?1:0,st:G.stageIdx|0,tw:G.TW|0,ph:G.phase,w:G.wave,tm:Math.ceil(G.timer),ls:G.laneShow||[],pl:myNet(),m:snapMobs(),ev:G.ev,bt:bossTel(),cs:G.castle?[Math.max(0,Math.round(G.castle.hp)),G.castle.max]:0};
   }else{
     o={role:'guest',pl:myNet(),h:hitQ,vq:G.vq||0};
   }
@@ -1632,7 +1638,8 @@ function guestNet(){
   const ph=pr.ph;
   if(ph==='lobby'){ if(G.phase!=='lobby'){G.phase='lobby'; showLobbyGuest();} renderLobby(); return; }
   if(G.phase==='lobby'||G.phase==='title'){ startGuestGame(pr); }
-  if(ph==='win'||ph==='lose'){ if(!G.endShown){ G.lostBoss=G.phase==='boss'; G.phase=ph; showEnd(); } return; }
+  if(Array.isArray(pr.cs)){ const c=G.castle; if(!c){ G.castle={hp:pr.cs[0],max:pr.cs[1],fl:0,ph:pr.cs[0]/pr.cs[1],st:0,low:0}; G.castle.st=castleSt(G.castle); } else { if(pr.cs[0]<c.hp-.5)c.fl=.16; c.hp=pr.cs[0]; c.max=pr.cs[1]; } } else G.castle=null;
+  if(ph==='win'||ph==='lose'){ if(!G.endShown){ G.lostBoss=G.phase==='boss'; G.lostCastle=!!(G.castle&&G.castle.hp<=0); G.phase=ph; showEnd(); } return; }
   const prevWave=G.wave;
   G.phase=ph; G.wave=pr.w|0; G.timer=pr.tm|0;
   { const on=!!pr.sp; if(on!==(G.spd>1))setSpd(on,{hint:true}); }   /* 방장이 정한 배속을 따라감 */
@@ -1748,8 +1755,36 @@ function gimmick(dt){
       shots.push({x:sx,y:sy,t:0,dur:2,r:70,dmg:0,rift:1}); pushEv(['e',Math.round(sx),Math.round(sy),70,200]); toast('🌀 차원 균열이 열려요! 정예가 나옵니다','#c58aff'); }
   });
 }
+/* ===== 중앙 성 (1~3챕터): 스킬 없이 맞기만 하는 수호 대상. 체력이 0이 되면 패배, 삼남매(레이드)에는 없음 =====
+   - 몹은 가까이(CAS_AGGRO) 플레이어·소환수가 있으면 그쪽을 먼저 노리고, 없으면 성으로 걸어가 때려요
+   - 피해: 일반 40% · 정예 60% · 보스 100% · 공성병(폭탄) 공격력의 300% · 궁수 화살 40% · 화살비 35%
+   - 체력은 습격이 끝날 때마다 최대의 10%씩 수리. 모습은 체력 65%·30%를 기준으로 3단계(img/castle_c1~c3.png 가로 3칸) */
+const CAS_R=55, CAS_Y=8, CAS_AGGRO=150, CAS_HPK=90, CAS_FIX=.1, CAS_W=150, CAS_BASE=36;
+const CAS_T={x:VX,y:VY+CAS_Y,i:-1,cas:1}; let CASM=1;
+const CAS_IMG=['castle_c1','castle_c2','castle_c3'];
+const castleCh=S=>Math.max(1,Math.min(3,parseInt(String(S&&S.id||'1').split('-')[0],10)||1));
+function castleMax(S){ const nw=(S.waves&&S.waves.length)||8, B=stgBuf(S); return Math.round(MT[0].dmg*1.6*S.dmgM*(B?B.atk:1)*(1+.08*(nw-1)/2)*CAS_HPK); }
+const castleSt=c=>{ const r=c.hp/c.max; return r>.65?0:r>.3?1:2; };
+function castleInit(){ const S=G.stg; if(!S||S.raid){ G.castle=null; return; } const mx=castleMax(S); G.castle={hp:mx,max:mx,fl:0,ph:1,st:0,low:0}; }
+function castleHit(raw){ const c=G.castle; if(!c||c.hp<=0||G.mode==='guest'||G.phase==='clear'||G.phase==='win'||G.phase==='lose')return;
+  const v=Math.min(c.hp,Math.max(0,raw)); if(v<=0)return; c.hp-=v; c.fl=.16;
+  addNum(VX+rand(-34,34),VY-64,Math.round(v),'#ffa27a',false,'castle');
+  if(T-(c.fxT||-9)>.12){ c.fxT=T; spark(VX+rand(-46,46),VY+rand(-30,20),'#cdb9a0',4); }
+  if(T-(c.sfxT||-9)>.22){ c.sfxT=T; sfx('hit'); }
+  if(c.hp<=0)castleFall(); }
+function castleFall(){ if(G.endShown||G.phase==='lose')return; announce('🏰 성이 무너졌어요!','#ff6a4a'); sfx('boss'); G.shake=Math.max(G.shake,1); G.flash=Math.max(G.flash||0,.5);
+  for(let i=0;i<3;i++)later(i*.18,()=>{ efx.push({k:'ring',x:VX+rand(-40,40),y:VY+rand(-30,10),r0:10,r1:130,t:0,life:.6,col:i%2?'#ffb070':'#ff6a3a',w:14}); burst(VX+rand(-50,50),VY+rand(-40,10),'#c9b8a0',36,420); impact(VX,VY-20,'255,150,80',260); });
+  G.lostCastle=true; if(['prep','wave','boss'].includes(G.phase)){ G.lostBoss=G.phase==='boss'; G.phase='lose'; setTimeout(()=>showEnd(),1500); } }
+function castleRepair(){ const c=G.castle; if(!c||c.hp<=0||c.hp>=c.max)return; const v=Math.min(c.max-c.hp,Math.max(1,Math.round(c.max*CAS_FIX))); c.hp+=v;
+  addNum(VX,VY-78,'🏰 +'+v,'#8be07a',true); efx.push({k:'ring',x:VX,y:VY+10,r0:20,r1:110,t:0,life:.6,col:'#8be07a',w:8}); burst(VX,VY-10,'#a9f0a0',18,160); }
+/* 매 프레임: 깜빡임·체력바 지연, 단계가 바뀌는 순간의 흙먼지 */
+function castleTick(dt){ const c=G.castle; if(!c)return; c.fl=Math.max(0,c.fl-dt); c.ph+=((c.hp/c.max)-c.ph)*Math.min(1,dt*3);
+  const st=castleSt(c); if(st!==c.st){ if(st>c.st&&c.hp>0){ for(let i=0;i<3;i++)later(i*.1,()=>{ efx.push({k:'ring',x:VX+rand(-30,30),y:VY+rand(-20,10),r0:10,r1:90,t:0,life:.5,col:'#cdb9a0',w:10}); burst(VX+rand(-50,50),VY+rand(-30,10),'#bfae98',22,300); }); G.shake=Math.max(G.shake,.6); sfx('slam'); announce(st===1?'🏰 성이 부서지고 있어요!':'🏰 성이 무너지기 직전이에요!',st===1?'#ffb070':'#ff5a4a'); } c.st=st; }
+  const low=c.hp>0&&c.hp/c.max<=.2; if(low&&!c.low&&G.inGame)toast('🏰 성이 위험해요! 성 가까이의 적을 막으세요','#ff7a5a'); c.low=low; }
+/* 플레이어는 성 건물 안으로 들어갈 수 없어요 (앞마당 = 중앙 회복 구역은 건물 둘레) */
+function castlePush(o){ if(!G.castle)return; const cx=VX, cy=VY+CAS_Y+4, rx=58, ry=26, dx=(o.x-cx)/rx, dy=(o.y-cy)/ry, q=dx*dx+dy*dy; if(q>=1)return; if(q<1e-6){ o.y=cy+ry; return; } const k=1/Math.sqrt(q); o.x=cx+dx*k*rx; o.y=cy+dy*k*ry; }
 function startStage(){
-  dmgReset(); G.stageIdx=selStage; G.stg=STAGES[selStage]; G.TW=G.stg.waves.length; preBoss(); setTheme(selStage); G.gts=[]; later(.5,()=>{ if(G.inGame)banner(`${G.stg.id} ${G.stg.n}`,`장비 Lv 합 ${Math.max(1,G.stg.icap-12)*EQSL.length}↑ · ${G.stg.tag||''}`); });
+  dmgReset(); G.stageIdx=selStage; G.stg=STAGES[selStage]; G.TW=G.stg.waves.length; preBoss(); setTheme(selStage); castleInit(); if(G.castle)later(3.2,()=>{ if(G.inGame&&G.castle&&G.phase!=='lose')toast('🏰 중앙의 성을 지켜요 · 체력이 0이 되면 패배, 습격이 끝날 때마다 조금씩 수리돼요','#e0c080'); }); G.gts=[]; later(.5,()=>{ if(G.inGame)banner(`${G.stg.id} ${G.stg.n}`,`장비 Lv 합 ${Math.max(1,G.stg.icap-12)*EQSL.length}↑ · ${G.stg.tag||''}`); });
   G.allMode=false; G.allQ=[]; G.fires=[]; G.freeRev=1; me.rvGiven=0; me.seenRg=0; me.out=false; me.rvT=0;
   G.wave=0;G.skipUsed=false;G.phase='prep';G.timer=2;G.mobs.length=0;G.ev=[];G.spawnQ=0;G.lastSq=-1;G.endShown=false;G.coop=!!guestPeer;
   G.waveSides=[0,1,3]; G.nextSides=sidesFor(1); G.laneShow=G.nextSides;
@@ -1792,7 +1827,7 @@ function updateWaves(dt){
     const alive=G.mobs.filter(m=>!m.dead).length;
     if(G.spawnQ>0&&G.spawnT<=0&&alive<45){waveMob();G.spawnQ--;G.spawnT=Math.max(.25,.75-G.wave*.05);}
     if(G.allQ&&G.allQ.length&&G.spawnT<=0&&alive<30){ const wv=G.wave; G.wave=G.allQ.shift(); waveMob(); G.wave=wv; G.spawnT=.35; }
-    if(G.spawnQ<=0&&!(G.allQ&&G.allQ.length)&&alive===0){G.phase='prep';G.skipUsed=false;G.timer=G.wave>=G.TW?4:1.2; G.nextSides=sidesFor(G.wave+1); G.laneShow=G.nextSides; if(G.wave>=G.TW)banner('주변의 어둠이 더 짙어지고 있습니다');}
+    if(G.spawnQ<=0&&!(G.allQ&&G.allQ.length)&&alive===0){G.phase='prep'; castleRepair();G.skipUsed=false;G.timer=G.wave>=G.TW?4:1.2; G.nextSides=sidesFor(G.wave+1); G.laneShow=G.nextSides; if(G.wave>=G.TW)banner('주변의 어둠이 더 짙어지고 있습니다');}
   }
   if(G.allMode&&(G.phase!=='wave'&&G.phase!=='prep'||(G.phase==='prep'&&G.wave>=G.TW)))G.allMode=false;
   if(G.phase==='clear'){ G.clearT-=dt; if(G.clearT<=0)endClear(); }
@@ -1807,7 +1842,7 @@ function playersForAI(){
 const DRNR=165; /* 정예 마나 흡수 범위 */
 function drainPlayer(i,pct){ if(i>=10)return; if(i===1)applyStatus('mdrain',pct); else pushEv(['x',2,'mdrain',pct]); }
 let RAID_HIT=0; /* 지금 처리 중인 몹이 레이드 보스면 1 (방어력 피해 감소 상한을 낮춤) */
-function mobHitPlayer(i,dmg,st,dur){ if(i>=10){ minionHit(i,dmg); return; } if(i===1){takeDmg(dmg,false,RAID_HIT); if(st)applyStatus(st,dur);} else { if(RAID_HIT)G.guestDmgR=(G.guestDmgR||0)+dmg; else G.guestDmg+=dmg; if(st)pushEv(['x',2,st,dur]);} }
+function mobHitPlayer(i,dmg,st,dur){ if(i<0){ castleHit(dmg*CASM); return; } if(i>=10){ minionHit(i,dmg); return; } if(i===1){takeDmg(dmg,false,RAID_HIT); if(st)applyStatus(st,dur);} else { if(RAID_HIT)G.guestDmgR=(G.guestDmgR||0)+dmg; else G.guestDmg+=dmg; if(st)pushEv(['x',2,st,dur]);} }
 const shots=[];
 function bombFx(x,y,r){ efx.push({k:'ring',x,y,r0:r*.2,r1:r,t:0,life:.35,col:'#ff8a2a',w:12}); impact(x,y,'255,150,40',r*1.4); burst(x,y,'#ffb04a',22,300); sfx('boom'); G.shake=Math.max(G.shake,.3); }
 const AFXN=['','돌진','소환','불꽃','마나 흡수'];
@@ -1828,7 +1863,7 @@ function mobSteer(m,dt){
 function mobKb(m,dt){ if(m.kx||m.ky){ m.x+=m.kx*dt; m.y+=m.ky*dt; const f=Math.pow(.004,dt); m.kx*=f; m.ky*=f; if(Math.abs(m.kx)+Math.abs(m.ky)<6)m.kx=m.ky=0; } }
 function updateMobs(dt){
   const pls=playersForAI().concat(minionTargets()); /* 소환수도 몹의 공격 대상 */
-  for(let i=shots.length-1;i>=0;i--){ const sh=shots[i]; sh.t+=dt; if(sh.t>=sh.dur){ shots.splice(i,1); if(sh.rift){ spawnMob(0,sh.x,sh.y,true); for(let k=0;k<4;k++)spawnMob(k%2?10:0,sh.x+rand(-40,40),sh.y+rand(-40,40),false); burst(sh.x,sh.y,'#c070ff',40,320); efx.push({k:'ring',x:sh.x,y:sh.y,r0:10,r1:110,t:0,life:.5,col:'#c070ff',w:12}); sfx('slam'); G.shake=Math.max(G.shake,.4); continue; } for(const p of pls){ if(hyp(p.x-sh.x,p.y-sh.y)<sh.r+10) mobHitPlayer(p.i,sh.dmg); } pushEv(['bx',Math.round(sh.x),Math.round(sh.y),sh.r]); bombFx(sh.x,sh.y,sh.r); } }
+  for(let i=shots.length-1;i>=0;i--){ const sh=shots[i]; sh.t+=dt; if(sh.t>=sh.dur){ shots.splice(i,1); if(sh.rift){ spawnMob(0,sh.x,sh.y,true); for(let k=0;k<4;k++)spawnMob(k%2?10:0,sh.x+rand(-40,40),sh.y+rand(-40,40),false); burst(sh.x,sh.y,'#c070ff',40,320); efx.push({k:'ring',x:sh.x,y:sh.y,r0:10,r1:110,t:0,life:.5,col:'#c070ff',w:12}); sfx('slam'); G.shake=Math.max(G.shake,.4); continue; } for(const p of pls){ if(hyp(p.x-sh.x,p.y-sh.y)<sh.r+10) mobHitPlayer(p.i,sh.dmg); } if(G.castle){ if(sh.cas)castleHit(sh.dmg*.4); else if(sh.vil)castleHit(sh.dmg*.35); } pushEv(['bx',Math.round(sh.x),Math.round(sh.y),sh.r]); bombFx(sh.x,sh.y,sh.r); } }
   RAID_HIT=0;
   for(const m of G.mobs){ if(m.dead)continue; RAID_HIT=m.rk?1:0;
     if(m.slowT>0)m.slowT-=dt; if(m.shockT>0)m.shockT-=dt; if(m.mark&&m.mark.t>0)m.mark.t-=dt; if(m.vuln&&m.vuln.t>0)m.vuln.t-=dt;
@@ -1847,11 +1882,12 @@ function updateMobs(dt){
     m.rt-=dt;
     if(m.rt<=0){m.rt=.4; let best=null,bd=1e9;
       for(const p of pls){const d=hyp(p.x-m.x,p.y-m.y); if(d<bd){bd=d;best=p;}}
-      m.tgt=best?best.i:0; }
+      m.tgt=best?best.i:0; if(G.castle&&G.castle.hp>0&&(!best||bd>CAS_AGGRO))m.tgt=-1; }   /* 가까이에 아무도 없으면 성으로 */
     const tau=!!(m.taunt&&m.taunt.t>0); if(tau&&pls.some(q=>q.i===m.taunt.i))m.tgt=m.taunt.i;
-    const pp=m.tgt?pls.find(q=>q.i===m.tgt):null;
+    const pp=m.tgt===-1?(G.castle&&G.castle.hp>0?CAS_T:null):(m.tgt?pls.find(q=>q.i===m.tgt):null);
     if(!pp){ m.tgt=0; mobKb(m,dt); continue; }
-    const tx=pp.x,ty=pp.y, reach=m.r+26;
+    CASM=m.elite?.6:.4;
+    const tx=pp.x,ty=pp.y, reach=m.r+(pp.cas?CAS_R:26);
     const dx=tx-m.x,dy=ty-m.y,d=hyp(dx,dy)||1;
     m.fa=Math.atan2(dy,dx);
     if(tau&&(m.type===9||m.type===11)){ /* 도발당한 궁수·치유사도 거리를 벌리지 못하고 달려듦 */
@@ -1864,12 +1900,12 @@ function updateMobs(dt){
     }
     if(m.type===9){ const rg=235; if(!m.inn){ const cx=VX-m.x,cy=VY-m.y,cd=hyp(cx,cy)||1; mobMove(m,cx,cy,cd,m.spd*sf,dt); } else if(d>rg){ mobMove(m,dx,dy,d,m.spd*sf,dt); } else if(d<rg*.6){ mobMove(m,-dx,-dy,d,m.spd*.6*sf,dt); }   /* 맵 안으로 들어오기 전엔 뒷걸음질 없이 먼저 들어와요 */
       m.shot=(m.shot==null?rand(.8,2):m.shot)-dt*sf; if(m.shot<=0&&d<rg+40){ m.shot=2.6; m.atk=.3; const sx=tx+rand(-6,6), sy=ty+rand(-6,6);
-        shots.push({x:sx,y:sy,t:0,dur:.8,r:34,dmg:m.dmg*1.8}); pushEv(['e',Math.round(sx),Math.round(sy),34,80]); arrowFx(m.x,m.y,sx,sy); pushEv(['a',Math.round(m.x),Math.round(m.y),Math.round(sx),Math.round(sy)]); }
+        shots.push({x:sx,y:sy,t:0,dur:.8,r:34,dmg:m.dmg*1.8,cas:pp.cas?1:0}); pushEv(['e',Math.round(sx),Math.round(sy),34,80]); arrowFx(m.x,m.y,sx,sy); pushEv(['a',Math.round(m.x),Math.round(m.y),Math.round(sx),Math.round(sy)]); }
       mobKb(m,dt); continue; }
     if(m.type===11){ if(d>150){ mobMove(m,dx,dy,d,m.spd*sf,dt); }
       m.heal=(m.heal==null?rand(1,2.5):m.heal)-dt*sf; if(m.heal<=0){ m.heal=3; let n=0; for(const q of G.mobs){ if(q.dead||q===m||hyp(q.x-m.x,q.y-m.y)>150||q.hp>=q.max)continue; q.hp=Math.min(q.max,q.hp+q.max*.14); n++; spark(q.x,q.y,'#9be38a',4);} if(n){ efx.push({k:'ring',x:m.x,y:m.y,r0:10,r1:150,t:0,life:.5,col:'#9be38a',w:5}); } }
       mobKb(m,dt); continue; }
-    if(m.type===10&&d<=reach+4&&!m.dead){ m.dead=true; const bx=m.x, by=m.y; for(const p of pls){ if(hyp(p.x-bx,p.y-by)<85) mobHitPlayer(p.i,m.dmg*2.6); } pushEv(['bx',Math.round(bx),Math.round(by),85]); bombFx(bx,by,85); continue; }
+    if(m.type===10&&d<=reach+4&&!m.dead){ m.dead=true; const bx=m.x, by=m.y; for(const p of pls){ if(hyp(p.x-bx,p.y-by)<85) mobHitPlayer(p.i,m.dmg*2.6); } if(G.castle&&hyp(bx-CAS_T.x,by-CAS_T.y)<CAS_R+m.r+30)castleHit(m.dmg*3); pushEv(['bx',Math.round(bx),Math.round(by),85]); bombFx(bx,by,85); continue; }
     mobKb(m,dt);
     m.sq=Math.max(0,(m.sq||0)-dt);
     if(d>reach){ const tm=tau?1.25:1; let ux=dx/d*tm,uy=dy/d*tm; if(m.fly){const a=Math.atan2(dy,dx)+Math.sin(T*4+m.id)*.8; ux=Math.cos(a);uy=Math.sin(a);} m.dvx=ux*m.spd*sf;m.dvy=uy*m.spd*sf;}
@@ -1900,6 +1936,7 @@ function halveWarn(){ announce('☠️ 생명 붕괴! 보라색 영역 밖으로
 function bossAI(m,dt,pls,sf){
   const pl1=pls.filter(p=>p.i<10); /* 소환수를 뺀 플레이어 */
   if(m.lock)m.lock.t-=dt; const tau=!!(m.taunt&&m.taunt.t>0); /* 도발에 걸리면 도발한 사람에게 달라붙어 근접 공격만 함 */
+  if(G.castle&&G.castle.hp>0&&!m.rk&&hyp(m.x-CAS_T.x,m.y-CAS_T.y)<m.r+CAS_R+6){ m.cc=(m.cc==null?.6:m.cc)-dt; if(m.cc<=0){ m.cc=1.4; m.atk=.3; castleHit(m.dmg); } }   /* 보스가 성 가까이 오면 성도 때려요 */
   const best=bossTarget(m,pls), bd=best?hyp(best.x-m.x,best.y-m.y):1e9; m.tg=best?best.i:0;
   if(!best)return;
   if(m.wake>0){ m.wake-=dt; m.fa=Math.atan2(best.y-m.y,best.x-m.x); return; } /* 레이드 보스 등장 연출 */
@@ -2010,6 +2047,7 @@ const etels=[];
 function addETel(x,y,r,dur){ etels.push({x,y,r,dur,t:0}); }
 function eliteSlam(m,pls){ const t=m.et;
   for(const p of pls){ if(hyp(p.x-t.x,p.y-t.y)<t.r+14) mobHitPlayer(p.i,m.dmg*1.5); }
+  if(G.castle&&hyp(t.x-CAS_T.x,t.y-CAS_T.y)<t.r+CAS_R)castleHit(m.dmg*1.5*.6);
   pushEv(['s',Math.round(t.x),Math.round(t.y),t.r]); slamFx(t.x,t.y,t.r,'#7d96ff'); }
 function summon(b){ for(let i=0;i<5;i++){const a=i/5*Math.PI*2; spawnMob(i%2?2:0,b.x+Math.cos(a)*80,b.y+Math.sin(a)*80,false);} spark(b.x,b.y,'#b04aa0',30); }
 
@@ -2158,7 +2196,7 @@ function updateMe(dt){
   else if(autoMode>0&&!autoBlocked()&&!(me.stun>0||me.formLock>0)){ const a=autoDir(); if(a){mx=a[0];my=a[1];ml=1;} }   /* AUTO: 조이스틱·키보드·전리품 터치가 없을 때만 자동 이동 */
   if(hazards.length&&!me.dead){ for(const h of hazards){ if(hyp(me.x-h.x,me.y-h.y)<h.r*.9){ if(h.k==='lava'){ me.lavaT=(me.lavaT||0)-dt; if(me.lavaT<=0){ me.lavaT=.5; takeDmg(me.D.maxHp*.05*GZM,true); me.burn=.4; addNum(me.x,me.y-30,'🔥','#ff8a3a',false); } } else me.slowP=Math.max(me.slowP||0,.3); break; } } }
   { const sp=D.spd*(me.slowP>0?.5:1)*(me.buffs.rage&&me.buffs.rage.t>0?1+me.buffs.rage.ms:1)*(me.buffs.fury&&me.buffs.fury.t>0&&me.buffs.fury.ms?1+me.buffs.fury.ms:1), kv=1-Math.exp(-dt*(ml>0.08?20:26)); me.vx=(me.vx||0)+((ml>0.08?mx*sp:0)-(me.vx||0))*kv; me.vy=(me.vy||0)+((ml>0.08?my*sp:0)-(me.vy||0))*kv; if(Math.abs(me.vx)<1)me.vx=0; if(Math.abs(me.vy)<1)me.vy=0;
-    if(me.vx||me.vy){ me.x=clamp(me.x+me.vx*dt,16,WW-16); me.y=clamp(me.y+me.vy*dt,16,WH-16); } }
+    if(me.vx||me.vy){ me.x=clamp(me.x+me.vx*dt,16,WW-16); me.y=clamp(me.y+me.vy*dt,16,WH-16); } castlePush(me); }
   if(ml>0.08){ me.moveDir=Math.atan2(my,mx); me.faceT=Math.max(0,(me.faceT||0)-dt); if(me.swing<=0&&!(me.faceT>0))me.face=me.moveDir; me.walk=(me.walk||0)+dt*ml*10; }
   // held buttons
   autoPick(); autoSkills(dt);
@@ -3041,7 +3079,7 @@ function autoDir(){
   for(const h of hazards){ const dx=me.x-h.x,dy=me.y-h.y,d=hyp(dx,dy); if(d<h.r*.95+6)return d>1?[dx/d,dy/d]:[1,0]; }
   const hr=me.hp/me.D.maxHp, vd=hyp(me.x-VX,me.y-VY);
   if(hr<.28)autoRet=true; else if(hr>=.7)autoRet=false;
-  if(autoRet)return vd<VR*.55?null:toward(VX,VY);
+  if(autoRet)return vd<(G.castle?VR*.9:VR*.55)?null:toward(VX,VY);
   const rg=atkRg(me), melee=meleeOf(me); let near=null,nd=1e9;
   for(const m of G.mobs){ if(m.dead||(!m.boss&&hyp(m.x-VX,m.y-VY)>480))continue; const d=hyp(m.x-me.x,m.y-me.y)-m.r; if(d<nd){nd=d;near=m;} }
   const full=me.inv.indexOf(null)<0; let loot=null,ld=650;
@@ -3503,6 +3541,7 @@ function updateHud(){
   const ph=G.phase;
   $('#hWave').textContent= ph==='prep'?(G.wave>=G.TW?`우두머리 출현까지 ${Math.max(0,Math.ceil(G.timer))}초`:`${G.stg.id} · 습격 ${G.wave+1}/${G.TW} 까지 ${Math.max(0,Math.ceil(G.timer))}초`)
     : ph==='wave'?`${G.stg.id} · 습격 ${G.wave}/${G.TW}` : ph==='boss'?(G.stg&&G.stg.raid?'⚔️ 삼남매 레이드':'우두머리 토벌') : ph==='clear'?(G.mode==='guest'?'전리품 줍기':`전리품 줍기 ${Math.max(0,Math.ceil(G.clearT||0))}초`) : ph==='win'?'승리':'함락';
+  { const c=G.castle, e=$('#hCastle'), on=!!(c&&G.inGame); if(e.hidden===on)e.hidden=!on; if(on){ const r=clamp(c.hp/c.max,0,1); $('#hCastleHp').style.transform=`scaleX(${r})`; const tx=Math.ceil(r*100)+'%'; const te=$('#hCastleT'); if(te.textContent!==tx)te.textContent=tx; e.classList.toggle('low',r<=.3); } }
   { const dd=!!(me.dead&&G.inGame&&['prep','wave','boss'].includes(G.phase)); $('#bSkip').hidden=!(G.phase==='clear'||dd); $('#bRevBig').hidden=!dd; if(dd){ const rn=revItems(); $('#revBigN').textContent=rn; $('#bRevBig').classList.toggle('z',rn<=0); } }   /* 쓰러졌을 때: 승리 때와 같은 자리에 나가기 + 그 위에 부활 버튼 */
   const al=$('#hAlly');
   if(ally&&!ally.lobby){al.hidden=false; $('#hAllyN').textContent=`${ally.name||CLASSES[ally.cls].n} ${ally.lvl}`; $('#hAllyHp').style.transform=`scaleX(${clamp((ally.hp||0)/(ally.mh||1),0,1)})`;} else al.hidden=true;
@@ -4244,7 +4283,7 @@ function patchModal(){
     fetch('patchnotes.txt?'+Date.now(),{cache:'no-store'}).then(r=>{ if(!r.ok)throw 0; return r.text(); }).then(t=>{ m.querySelector('#pnT').textContent=t; }).catch(()=>{ m.querySelector('#pnT').textContent='패치노트를 불러오지 못했어요. (오프라인이거나 서버 점검 중)'; }); }); }
 function prepMe(){ me=loadChar(selId); me.D=derive(me); spawnMe(); }
 function resetWorld(){
-  storyStop(); G.stZ=0; G.aim=null; G.lostBoss=false;
+  storyStop(); G.stZ=0; G.aim=null; G.lostBoss=false; G.castle=null; G.lostCastle=false;
   projs.length=zones.length=timers.length=parts.length=nums.length=ground.length=efx.length=0;
   G.mobs=[]; G.mobMap=new Map(); G.stKills=0; G.stDrops=0; G.stCap=0; G.runT=0; G.stGot=[0,0,0,0,0]; G.sib=0; G.endShown=false; G.clrDone=false; alClear(); G.stRev=0; G.stGold0=me?(me.gold|0):0; G.paused=false; G.bt=null; G.shake=0;
   hitQ=[]; fxQ=[]; lastAllyFx=-1; lastEv=-1; lastHit=0; G.guestDmg=0; G.fires=[]; G.freeRev=1; G.fireT=3; if(me){ me.rvGiven=0; me.seenRg=0; me.out=false; me.rvT=0; }
@@ -4311,6 +4350,7 @@ function showEnd(msg){
   $('#endTitle').textContent=msg?'연결 끊김':(win?'스테이지를 정복했습니다':'쓰러졌습니다');
   $('#endTitle').style.color=win&&!msg?'#e9d9b4':'#e07060';
   $('#endSub').textContent=msg||(win?`${G.stg.bn||MT[G.stg.boss].n}이(가) 쓰러졌습니다. 스테이지 ${G.stg.id} 클리어. ⏱ ${fmtCt(G.lastCt||G.runT||0)}${G.bestCt?' · 최고 기록!':''}`:(G.lostBoss?`${G.stg.bn||MT[G.stg.boss].n} 보스전에서 쓰러졌습니다.`:`습격 ${G.wave}에서 쓰러졌습니다.`));
+  if(!msg&&!win&&G.lostCastle){ $('#endTitle').textContent='성이 무너졌습니다'; $('#endSub').textContent=`습격 ${G.wave}${G.lostBoss?' 보스전':''}에서 중앙의 성이 무너졌어요. 성 가까이의 적을 먼저 막아 보세요.`; }
   $('#endStats').innerHTML=`<div><b>${G.stKills||0}</b>처치</div><div><b>${me.lvl}</b>현재 레벨</div><div><b>${G.stDrops||0}</b>떨어진 아이템</div>`;
   { const rows=dmgRows(true), tot=rows.reduce((a,r)=>a+r.v,0), got=G.stGot||[0,0,0,0,0], f=n=>Math.round(n).toLocaleString('en-US'), gs=got.reduce((a,b)=>a+b,0);
     const TRC=['#f2c14e','#cfd6de','#cd8a4a'], TRN=['금','은','동'];
@@ -4400,8 +4440,19 @@ function drawAmbient(t){ const th=TH(); if(!th.amb||!ambP.length)return; const v
     else if(m==='dust'){ ctx.fillStyle=`rgba(230,200,140,${.12+.18*p.s})`; ctx.fillRect(x,y,6+p.s*10,1.2); }
     else if(m==='ash'){ ctx.fillStyle=`rgba(200,195,185,${.18+.2*p.s})`; ctx.fillRect(x,y,1.6+p.s,1.6+p.s); }
     else { const col=m==='ember'?'255,150,60':m==='spore'?'150,240,130':'190,100,255', fl=.5+.5*Math.sin(t*3+p.s*20); ctx.globalCompositeOperation='lighter'; ctx.fillStyle=`rgba(${col},${.25+.4*fl})`; ctx.beginPath(); ctx.arc(x+Math.sin(t*1.3+p.s*9)*6,y,1.2+p.s*1.6,0,6.283); ctx.fill(); ctx.globalCompositeOperation='source-over'; } } }
+function drawCastle(t){ const c=G.castle; if(!c)return; const st=castleSt(c), im=sprGet(CAS_IMG[castleCh(G.stg)-1]), sc=CAS_W/480, W=CAS_W, H=440*sc, y0=VY+CAS_BASE-430*sc, jx=c.fl>0?Math.sin(t*70)*2.2*(c.fl/.16):0, x0=VX-W/2+jx;
+  ctx.fillStyle='rgba(0,0,0,.38)'; ctx.beginPath(); ctx.ellipse(VX+4,VY+CAS_BASE-8,W*.5,17,0,0,6.283); ctx.fill();
+  if(im){ ctx.drawImage(im,st*480,0,480,440,x0,y0,W,H);
+    if(c.fl>0){ ctx.save(); ctx.globalCompositeOperation='lighter'; ctx.globalAlpha=Math.min(.55,c.fl/.16*.55); ctx.drawImage(im,st*480,0,480,440,x0,y0,W,H); ctx.restore(); } }
+  else { ctx.fillStyle='#4a4650'; ctx.strokeStyle='#1c110c'; ctx.lineWidth=3; const bh=70-st*22; ctx.beginPath(); ctx.rect(VX-62,VY+CAS_BASE-bh,124,bh); ctx.fill(); ctx.stroke(); for(const dx of [-62,62]){ ctx.beginPath(); ctx.rect(VX+dx-14,VY+CAS_BASE-bh-24+st*10,28,bh+24-st*10); ctx.fill(); ctx.stroke(); } }
+  const r=clamp(c.hp/c.max,0,1), bw=92, bx=VX-bw/2, by=y0-4;   /* 성 체력바 */
+  ctx.fillStyle='rgba(8,6,5,.85)'; ctx.fillRect(bx-2,by-2,bw+4,10); ctx.fillStyle='rgba(255,255,255,.35)'; ctx.fillRect(bx,by,bw*clamp(c.ph,0,1),6);
+  ctx.fillStyle=r>.65?'#9ad87a':r>.3?'#f0b25a':'#e5503a'; ctx.fillRect(bx,by,bw*r,6); ctx.strokeStyle='#6b5432'; ctx.lineWidth=1; ctx.strokeRect(bx-1.5,by-1.5,bw+3,9);
+}
 function drawVillage(t){ // 중앙 포털
   const col=TH().pc||'110,180,255';
+  if(G.castle){ ctx.globalCompositeOperation='lighter'; { const g=ctx.createRadialGradient(VX,VY,10,VX,VY,120); g.addColorStop(0,`rgba(${col},.2)`); g.addColorStop(1,`rgba(${col},0)`); ctx.fillStyle=g; ctx.beginPath(); ctx.arc(VX,VY,120,0,6.283); ctx.fill(); } ctx.globalCompositeOperation='source-over';
+    ctx.save(); ctx.strokeStyle=`rgba(${col},.32)`; ctx.lineWidth=2; ctx.setLineDash([7,7]); ctx.lineDashOffset=-t*8; ctx.beginPath(); ctx.arc(VX,VY,VR,0,6.283); ctx.stroke(); ctx.restore(); return; }   /* 성이 있으면 포털 대신 성 앞마당(회복 구역) 표시 */
   ctx.fillStyle='rgba(0,0,0,.4)'; ctx.beginPath(); ctx.ellipse(VX+3,VY+8,58,40,0,0,6.283); ctx.fill();
   ctx.globalCompositeOperation='lighter'; { const g=ctx.createRadialGradient(VX,VY,10,VX,VY,120); g.addColorStop(0,`rgba(${col},.22)`); g.addColorStop(1,`rgba(${col},0)`); ctx.fillStyle=g; ctx.beginPath(); ctx.arc(VX,VY,120,0,6.283); ctx.fill(); } ctx.globalCompositeOperation='source-over';
   ctx.fillStyle='#2c2a30'; ctx.beginPath(); ctx.ellipse(VX,VY,50,36,0,0,6.283); ctx.fill(); ctx.strokeStyle='#4a4650'; ctx.lineWidth=5; ctx.stroke();
@@ -5018,13 +5069,15 @@ function render(t){
     ctx.setTransform(DPR*Z2,0,0,DPR*Z2,(VW/2-cx*Z2+shx)*DPR,(VH/2-cy*Z2+shy)*DPR); }
   { const em=$('#emg'); em.hidden=!(G.inGame&&G.allMode&&(G.phase==='prep'||G.phase==='wave')); }
   drawWorld(t); ctx.save(); ctx.globalCompositeOperation='screen'; ctx.fillStyle='rgba(255,238,215,.13)'; ctx.fillRect(camX-10,camY-10,VW/ZOOM+20,VH/ZOOM+20); ctx.restore(); drawLanesWorld(t); drawZones(t); drawFires(t); drawAuras(t); drawBossTel(); drawItemsWorld(t);
-  const actors=[...G.mobs.filter(m=>!m.dead).map(m=>({y:m.y,f:()=>drawMob(m,t)})),{y:me.y,f:()=>drawPlayer(me,true,t)}];
-  if(ally&&!ally.lobby)actors.push({y:ally.y,f:()=>drawPlayer(ally,false,t)});
-  for(const q of minions)if(q.rez<=0)actors.push({y:q.y,f:()=>drawMinion(q,t)});
+  const actors=[...G.mobs.filter(m=>!m.dead).map(m=>({y:m.y,o:m,f:()=>drawMob(m,t)})),{y:me.y,o:me,f:()=>drawPlayer(me,true,t)}];
+  if(ally&&!ally.lobby)actors.push({y:ally.y,o:ally,f:()=>drawPlayer(ally,false,t)});
+  for(const q of minions)if(q.rez<=0)actors.push({y:q.y,o:q,f:()=>drawMinion(q,t)});
+  if(G.castle)actors.push({y:VY+CAS_BASE,cas:1,f:()=>drawCastle(t)});
   if(me.spirit&&me.spirit.t>0&&!me.dead)actors.push({y:me.y+30,f:()=>drawSpirit(me,t,me.spirit.t,me.spirit.m)});
   if(ally&&!ally.lobby&&!ally.dead&&ally.sp>0&&ally.x!==undefined)actors.push({y:ally.y+30,f:()=>drawSpirit(ally,t,0,0)});
   if(ally&&!ally.lobby&&ally.mnv)for(const q of ally.mnv)actors.push({y:q.y,f:()=>drawMinion(q,t)});
-  actors.sort((a,b)=>a.y-b.y); for(const a of actors)a.f();
+  actors.sort((a,b)=>a.y-b.y); { let past=false; const gh=[]; for(const a of actors){ if(a.cas){ past=true; a.f(); continue; } a.f(); if(!past&&G.castle&&a.o&&a.o.x!==undefined&&Math.abs(a.o.x-VX)<CAS_W*.5+8&&a.y>VY-128)gh.push(a); }
+    if(gh.length){ ctx.save(); ctx.globalAlpha=.5; for(const a of gh)a.f(); ctx.restore(); } }   /* 성 뒤에 가려진 몹·플레이어는 반투명하게 한 번 더 그려서 보이게 */
   drawProjs(); drawEfx(t); drawAmbient(t);
   for(const p of parts){ if(p.glow)continue; ctx.globalAlpha=1-p.t/p.life; ctx.fillStyle=p.col; ctx.fillRect(p.x-p.r/2,p.y-p.r/2,p.r,p.r);} ctx.globalAlpha=1;
   ctx.globalCompositeOperation='lighter';
@@ -5037,6 +5090,7 @@ function render(t){
   vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(0,0,0,.45)'); ctx.fillStyle=vg; ctx.fillRect(0,0,VW,VH); { const tn=TH().tint; if(tn){ ctx.fillStyle=tn; ctx.fillRect(0,0,VW,VH); } }
   if(G.aim){ const sx=(me.x-camX)*ZOOM, sy=(me.y-camY)*ZOOM, rr=(240+4*G.aim.lv)*ZOOM; ctx.save(); ctx.strokeStyle='rgba(185,139,255,.9)'; ctx.lineWidth=2.5; ctx.setLineDash([10,8]); ctx.lineDashOffset=-t*40; ctx.beginPath(); ctx.arc(sx,sy,rr,0,6.283); ctx.stroke(); ctx.fillStyle='rgba(185,139,255,.08)'; ctx.fill(); ctx.restore(); }
   drawItemsScreen(t); drawNums(); drawOffscreen(t); drawAllyArrow(t); drawLanesEdge(t); drawBossBar(); drawMinimap();
+  if(G.castle&&G.castle.hp>0&&G.inGame&&G.castle.hp/G.castle.max<=.2){ const a=.1+.08*Math.sin(t*6), g=ctx.createRadialGradient(VW/2,VH/2,Math.min(VW,VH)*.45,VW/2,VH/2,Math.max(VW,VH)*.75); g.addColorStop(0,'rgba(255,40,30,0)'); g.addColorStop(1,`rgba(255,40,30,${a*2})`); ctx.fillStyle=g; ctx.fillRect(0,0,VW,VH); }   /* 성 체력 20% 이하 */
   if(G.flash>0){ctx.fillStyle=`rgba(255,215,140,${G.flash*.35})`;ctx.fillRect(0,0,VW,VH);}
   if(me.dead){ctx.fillStyle='rgba(60,0,0,.25)';ctx.fillRect(0,0,VW,VH);
     ctx.save(); ctx.textAlign='center'; ctx.font='800 22px "Noto Sans KR",sans-serif'; ctx.lineWidth=5; ctx.strokeStyle='#000'; ctx.strokeText('쓰러졌습니다',VW/2,VH*.38); ctx.fillStyle='#ff8a7a'; ctx.fillText('쓰러졌습니다',VW/2,VH*.38);
@@ -5069,7 +5123,7 @@ function step(now){
         if(hyp(m.ux||0,m.uy||0)>14){m.fa=Math.atan2(m.uy,m.ux);} else if(hyp(m.tx-m.x,m.ty-m.y)>3){m.fa=Math.atan2(m.ty-m.y,m.tx-m.x);}
         m.x+=(ex-m.x)*k; m.y+=(ey-m.y)*k; m.flash=Math.max(0,m.flash-dt); m.sq=Math.max(0,(m.sq||0)-dt); m.anim+=dt; } }
     if(ally&&!ally.lobby&&ally.tx!==undefined){const el=Math.min(.08,(performance.now()-(ally._tu||performance.now()))/1000), k=1-Math.exp(-dt*14); ally.x+=(ally.tx+(ally.ux||0)*el-ally.x)*k; ally.y+=(ally.ty+(ally.uy||0)*el-ally.y)*k; ally.swing=Math.max(0,(ally.swing||0)-dt);}
-    updateMe(dt); updateFires(dt); updateMinions(dt); smoothAllyMn(dt); if((G.rkT=(G.rkT||0)-dt)<=0){ G.rkT=.4; renderDmgRank(); }
+    castleTick(dt); updateMe(dt); updateFires(dt); updateMinions(dt); smoothAllyMn(dt); if((G.rkT=(G.rkT||0)-dt)<=0){ G.rkT=.4; renderDmgRank(); }
     // projectiles
     for(let i=projs.length-1;i>=0;i--){const p=projs[i]; p.life-=dt;
       if(p.kind==='hammer'){p.rad=Math.min(185,p.rad+78*dt); p.a+=3.4*dt; p.x=p.cx+Math.cos(p.a)*p.rad; p.y=p.cy+Math.sin(p.a)*p.rad;}
