@@ -725,7 +725,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.5.0.0230</div>
+    <div class="ver" id="verT">v0.5.0.0231</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -1011,7 +1011,7 @@ const MT0=[
  {n:'그림자 법사',hp:1900,dmg:17,spd:56,r:36,xp:1200,boss:1,raid:'sorc',rhp:4.4e6,rdm:.8,skm:1.5,img:'hero_sorc',bc:['#0d0d1e','#24245a','#1a1a40','#4a4aa0']},
  {n:'검은 그림자',hp:1900,dmg:17,spd:64,r:38,xp:1200,boss:1,raid:'shd',rhp:5.6e6,rdm:1,skm:1,img:'boss_shadow',bc:['#050308','#140c1c','#0c0812','#2a1a36']},
  /* 5스테이지 레이드 보스 — 3페이즈 · 분신술 · 파괴 패턴 */
- {n:'각성 그림자',hp:1900,dmg:17,spd:66,r:44,xp:3000,boss:1,raid:'awk',rhp:36e6,rdm:1.69,skm:1,img:'boss_awake',bc:['#050308','#140c1c','#0c0812','#3a2a66']},
+ {n:'각성 그림자',hp:1900,dmg:17,spd:66,r:44,xp:3000,boss:1,raid:'awk',rhp:32e6,rhpC:54e6,rdm:1.69,skm:1,img:'boss_awake',bc:['#050308','#140c1c','#0c0812','#3a2a66']},
  {n:'봉인 결정',hp:100,dmg:0,spd:0,r:20,xp:0,obj:1}
 ];
 const MT=MT0.map(t=>({...t,r:t.r*MOBS}));
@@ -1783,7 +1783,7 @@ function spawnRaid(){ const pos=[[VX,VY*.5],[(WW+VX)/2,VY],[VX/2,VY]].sort(()=>M
    페이즈: 1(100~70%) 2(70~35%) 3(35~0%) — 한 번 넘어간 페이즈로는 돌아가지 않음(회복도 그 페이즈 상한까지만)
    분신술: 본체와 똑같은 가짜(fake)가 생겨 같은 피해로 공격. 가짜는 숨은 체력(최대 체력의 6%)이 다 닳거나 15초가 지나면 사라짐. 화면에선 구분 불가
    봉인 결정: 보스 무적 + 6초 시전, 결정 3개(각 최대 체력 0.5%, 협동 ×1.6)를 다 깨지 못하면 보스가 최대 체력 50% 회복 */
-const AWK={ph:[1,.7,.35], dmgM:[1,1.15,1.3], fake:.06, fakeT:15, cloneCd:[25,22,20], sealDur:6, sealCd:32, sealN:3, sealHp:.005, sealHeal:.5};
+const AWK={ph:[1,.7,.35], dmgM:[1,1.15,1.3], fake:.06, fakeT:15, cloneCd:[17.5,15.4,14], CDK:.7, sealDur:6, sealCd:32, sealN:3, sealHp:.005, sealHeal:.5};
 const awkType=()=>MT.findIndex(t=>t.raid==='awk'), objType=()=>MT.findIndex(t=>t.obj);
 const awkReal=()=>G.mobs.find(m=>m.rk==='awk'&&!m.fake&&!m.dead);
 const awkCap=m=>AWK.ph[(m.ph||1)-1];   /* 지금 페이즈의 체력 상한 비율 */
@@ -1806,11 +1806,11 @@ function awkClone(m){ const n=m.ph===2?2:1, a0=rand(0,6.283), out=[m];
   efx.push({k:'ring',x:m.x,y:m.y,r0:10,r1:160,t:0,life:.5,col:'#8a6cff',w:10}); G.shake=Math.max(G.shake,.5); sfx('boss');
   announce(n>1?'👥 그림자 분신술! 셋 중 하나만 진짜예요':'👥 그림자 분신술! 둘 중 하나만 진짜예요','#b89cff'); pushEv(['acl',n]); }
 /* 파괴 패턴 3종: 봉인 결정(1페이즈) · 그림자 등불(2페이즈) · 심장 파편(3페이즈) */
-const AWC={seal:{n:3,dur:6,hp:.005/1.5,ok:1,nm:'🔮 봉인 결정',sub:'6초 안에 결정 3개를 모두 부수세요!',warn:'🔮 봉인 결정을 모두 부수세요! 못 부수면 보스가 크게 회복해요'},
-  lantern:{n:4,dur:8,hp:.004/1.5,ok:2,nm:'🏮 그림자 등불',sub:'8초 안에 맵 네 귀퉁이의 등불을 모두 끄세요!',warn:'🏮 그림자 등불을 모두 끄세요! 못 끄면 그림자 잠식에 걸려요'},
-  heart:{n:3,dur:7,hp:.006/1.5,ok:3,nm:'💔 심장 파편',sub:'보스에게 닿기 전에 파편 3개를 부수세요!',warn:'💔 심장 파편이 보스에게 모여요! 닿기 전에 부수세요'}};
+const AWC={seal:{n:3,dur:6,hp:120000,ok:1,nm:'🔮 봉인 결정',sub:'6초 안에 결정 3개를 모두 부수세요!',warn:'🔮 봉인 결정을 모두 부수세요! 못 부수면 보스가 크게 회복해요'},
+  lantern:{n:4,dur:8,hp:96000,ok:2,nm:'🏮 그림자 등불',sub:'8초 안에 맵 네 귀퉁이의 등불을 모두 끄세요!',warn:'🏮 그림자 등불을 모두 끄세요! 못 끄면 그림자 잠식에 걸려요'},
+  heart:{n:3,dur:7,hp:144000,ok:3,nm:'💔 심장 파편',sub:'보스에게 닿기 전에 파편 3개를 부수세요!',warn:'💔 심장 파편이 보스에게 모여요! 닿기 전에 부수세요'}};
 const AWCK=['','seal','lantern','heart'], AWCN={seal:'봉인 결정',lantern:'그림자 등불',heart:'심장 파편'};
-function awkSeal(m){ const kind=m.ph===2?'lantern':m.ph===3?'heart':'seal', C=AWC[kind], hp=m.max*C.hp*(G.coop?1.6:1)/(G.coop?1.5:1), pls=playersForAI(), c=pls[0]||{x:VX,y:VY};
+function awkSeal(m){ const kind=m.ph===2?'lantern':m.ph===3?'heart':'seal', C=AWC[kind], hp=C.hp*(G.coop?1.6:1), pls=playersForAI(), c=pls[0]||{x:VX,y:VY};
   awkFakesClear(true); m.tel=null; m.charge=null; m.counter=0; m.cast={k:kind,t:0,dur:C.dur,abs:0}; m.inv=C.dur+.2; G.awc={k:kind,t:0,dur:C.dur,n:C.n};
   const a0=rand(0,6.283), cor=[[110,110],[WW-110,110],[110,WH-110],[WW-110,WH-110]];
   for(let i=0;i<C.n;i++){ let x,y,g=0;
@@ -1835,7 +1835,7 @@ function awkSealEnd(m){ const c=m.cast||{k:'seal',abs:0}, left=G.mobs.filter(o=>
   m.bt=Math.max(m.bt,1.2); m.sealT=AWK.sealCd*rand(.9,1.1); }
 /* 공허의 낙인: 플레이어마다 발밑에 원 → 안에 있으면 5초간 생명력(💔) 또는 마나(💧) 회복 봉쇄. 2페이즈 번갈아(18초) · 3페이즈 둘 다(14초) */
 function awkBrand(m,best){ const pl1=playersForAI().filter(p=>p.i<10); if(!pl1.length){ m.brT=4; return; }
-  let bk; if(m.ph>=3)bk=['h','m']; else { m.brA=!m.brA; bk=[m.brA?'h':'m']; } m.brT=m.ph>=3?14:18;
+  let bk; if(m.ph>=3)bk=['h','m']; else { m.brA=!m.brA; bk=[m.brA?'h':'m']; } m.brT=m.ph>=3?9.8:12.6;
   const slow=me.erode>0; /* 잠식이 걸려 있으면 피할 시간을 더 줌 */
   m.tel={k:'slam',kind:'multi',x:pl1[0].x,y:pl1[0].y,pts:pl1.map(p=>({x:p.x,y:p.y})),r:120,t:0,dur:slow?1.8:1.2,mul:0,brand:bk,col:'#9a7dff',nm:bk.length>1?'💔💧 공허의 낙인':bk[0]==='h'?'💔 공허의 낙인 · 생명':'💧 공허의 낙인 · 마나'};
   announce(bk.length>1?'💔💧 공허의 낙인! 원 밖으로 피하세요 — 맞으면 5초간 회복 봉쇄':bk[0]==='h'?'💔 공허의 낙인! 원 밖으로 — 맞으면 5초간 생명력 회복 봉쇄':'💧 공허의 낙인! 원 밖으로 — 맞으면 5초간 마나 회복 봉쇄','#c0a8ff'); }
@@ -1873,8 +1873,8 @@ function awkAI(m,dt,pls,sf,best,bd,tau){
       const fk=G.mobs.filter(o=>o.fake&&!o.dead); if(fk.length){ m.swT=(m.swT==null?5:m.swT)-dt; if(m.swT<=0){ m.swT=5; const f=pick(fk); const tx=m.x,ty=m.y; m.x=f.x; m.y=f.y; f.x=tx; f.y=ty; for(const q of [m,f]){ burst(q.x,q.y,'#2a1a4a',18,220); spark(q.x,q.y,'#8a6cff',10); } announce('🔀 분신이 자리를 바꿨어요','#b89cff'); } } } }
   if(m.tel||m.charge||m.counter>0)return false;
   if(m.bt<=0&&bd<900&&!tau){ const du=m.enr?.85:1, a=Math.atan2(best.y-m.y,best.x-m.x), ph=m.ph|0||1;
-    if(!m.fake&&ph>=2){ m.brT=(m.brT==null?6:m.brT); if(m.brT<=0){ awkBrand(m,best); return true; } }
-    if(ph>=3&&!m.fake&&(m.mirT==null||m.mirT<=0)){ m.mirT=rand(9,12); if(awkMirror(m,best,bd,a,du))return true; }
+    if(!m.fake&&ph>=2){ m.brT=(m.brT==null?4.2:m.brT); if(m.brT<=0){ awkBrand(m,best); return true; } }
+    if(ph>=3&&!m.fake&&(m.mirT==null||m.mirT<=0)){ m.mirT=rand(6.3,8.4); if(awkMirror(m,best,bd,a,du))return true; }
     if(ph>=2){ const r2=Math.random();
       if(r2<.28&&bd>120&&bd<560){ const w=88; m.tel={k:'slam',kind:'lines',x:m.x,y:m.y,as:[a-.36,a,a+.36],len:520,w,t:0,dur:1.1*du,mul:1.6,st:'slow',sd:2,col:'#b88aff',nm:'⚔️ 맏이의 검',dash:1}; return true; }
       if(r2<.5){ const pts=[{x:best.x,y:best.y}]; for(let i=0;i<6;i++)pts.push({x:clamp(best.x+rand(-160,160),40,WW-40),y:clamp(best.y+rand(-160,160),40,WH-40)}); m.tel={k:'slam',kind:'multi',x:best.x,y:best.y,pts,r:82,t:0,dur:1.5*du,mul:1.3,st:'slow',sd:2.5,col:'#c8a8ff',nm:'🌠 둘째의 별'}; return true; } }
@@ -1882,14 +1882,14 @@ function awkAI(m,dt,pls,sf,best,bd,tau){
     if(bd<260){ const rr=Math.random();
       if(rr<.45){ m.tel={k:'slam',kind:'aoe',x:m.x+Math.cos(a)*40,y:m.y+Math.sin(a)*40,r:165,t:0,dur:.9*du,mul:1.7,st:0,sd:0,col:'#8a6cff',nm:'🗡️ 그림자 베기'}; return true; }
       if(rr<.6){ m.tel={k:'slam',kind:'counter',x:m.x,y:m.y,r:Math.round(m.r*1.6),t:0,dur:.8}; return true; } }
-    m.bt=rand(1.2,2.2); }
+    m.bt=rand(1.2,2.2)*AWK.CDK; }
   return false; }
 function spawnMob(type,x,y,elite){
   const S=G.stg||STAGES[0], w=Math.max(1,G.wave), hm=(1+.12*(w-1))*(G.coop?1.4:1)*(elite?8:1)*S.hpM*1.2, dm=(1+.08*(w-1))*(elite?4.6:1)*S.dmgM*1.6;
   const t=MT[type], m={id:G.mobId++,type,x,y,hp:t.hp*hm,max:t.hp*hm,dmg:t.dmg*dm,spd:t.spd*(elite?1.3:S.spdM)*(t.boss?.95:.5),r:t.r*(elite?1.5:1),xp:Math.round(t.xp*(1+.1*(w-1))*S.xpM*(elite?5:1)),elite:!!elite,boss:!!t.boss,fly:!!t.fly,cd:rand(0,1),slowT:0,tgt:0,rt:0,atk:0,fa:0,flash:0,anim:Math.random()*6,kx:0,ky:0,sq:0};
   if(m.boss){const sq=Math.sqrt(S.hpM); m.hp=m.max=Math.max(t.hp*sq*1.6,32*S.hpM*1.2*(1+.12*((G.TW||8)-1))*(28+.6*(G.stageIdx|0)))*(G.coop?1.5:1);m.dmg=t.dmg*1.6*1.25*Math.pow(S.dmgM,.8);m.xp=Math.round(t.xp*S.xpM);m.spd=t.spd*.95;m.bt=3;m.sum1=false;m.sum2=false;m.tel=null;m.charge=null;}
   if(m.elite&&type<=2)m.af=1+Math.floor(Math.random()*4);
-  if(t.raid){ m.rk=t.raid; m.hp=m.max=t.rhp*(G.coop?1.5:1); m.dmg0=RAIDB()*t.rdm; m.dmg=m.dmg0*(1+.1*(G.sib||0)); m.skm=t.skm||1; m.spd=t.spd*.95; m.bt=rand(3,4.5); m.wake=2.5; m.hvT=rand(14,18); m.xp=Math.round(t.xp*S.xpM); }
+  if(t.raid){ m.rk=t.raid; m.hp=m.max=G.coop?(t.rhpC||t.rhp*1.5):t.rhp; m.dmg0=RAIDB()*t.rdm; m.dmg=m.dmg0*(1+.1*(G.sib||0)); m.skm=t.skm||1; m.spd=t.spd*.95; m.bt=rand(3,4.5); m.wake=2.5; m.hvT=rand(14,18); m.xp=Math.round(t.xp*S.xpM); }
   { const B=stgBuf(S); if(B){ m.hp*=B.hp; m.max*=B.hp; m.dmg*=B.atk; m.dfM=B.def; } }
   G.mobs.push(m); return m;
 }
@@ -2143,7 +2143,7 @@ function bossAI(m,dt,pls,sf){
       else if(t.k==='slam'){ for(const p of pls){ if(hyp(p.x-t.x,p.y-t.y)<t.r) mobHitPlayer(p.i,m.dmg*1.6*BSKM,'stun',1.2); }
         pushEv(['s',Math.round(t.x),Math.round(t.y),t.r]); slamFx(t.x,t.y,t.r); }
       else { const dx=t.tx-t.x,dy=t.ty-t.y,d=hyp(dx,dy)||1; m.charge={dx:dx/d,dy:dy/d,t:Math.min(.75,450/620),hit:{}}; }
-      m.tel=null; if(!m.counter)m.bt=m.enr?rand(1.0,1.8):rand(1.6,2.8); }
+      m.tel=null; if(!m.counter)m.bt=(m.enr?rand(1.0,1.8):rand(1.6,2.8))*(m.rk==='awk'?AWK.CDK:1); }   /* 각성 그림자: 기술 사이 간격 -30% */
     return; }
   // 시선 돌리기 (협동)
   if(pl1.length>1&&!tau&&best.i<10){ m.shk=(m.shk==null?rand(14,20):m.shk)-dt; if(m.shk<=0){ m.shk=rand(22,30); const top=best.i, other=pl1.find(q=>q.i!==top); if(other){ m.lock={i:other.i,t:5}; if(m.thr)m.thr[top]=(m.thr[top]||0)*.3; pushEv(['ag',other.i]); announce('👁️ 우두머리가 시선을 돌렸어요! 도발로 되찾으세요','#ff9a7a'); } } }
