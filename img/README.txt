@@ -69,3 +69,5 @@
 [팔라딘 공격 시트 — 적용 완료] hero_pal_atk2.png = 6칸 가로 시트 (프롬프트: img/hero_pal_atk_prompt.txt). 코드 HATK.pal 에 칸 수·타이밍·발 높이(dy)·파일 이름(src)이 있어요. 예전 hero_pal_atk.png(4칸)는 캐시 충돌을 피하려고 이름을 바꾸며 삭제.
 
 [중앙 성 3단계 시트 — 그림 준비 완료, 게임 적용 전] castle_c1/c2/c3.png = 챕터별(1-x/2-x/3-x) 성, 각 가로 3칸(칸 480x440, 투명 배경, 기단 아래 10px 맞춤): 1칸 온전 / 2칸 약 30% 파괴 / 3칸 약 70% 파괴. 프롬프트 img/castle_prompt.txt
+
+[5스테이지 각성 그림자 — 그림만 준비, 코드 미적용] boss_awake.png(대기) / boss_awake_atk.png(공격) / boss_awake_sk.png(분신술) / boss_awake_cast.png(무적 시전) — 378×420, 같은 배율·같은 발 위치·머리 기준 가로 정렬
