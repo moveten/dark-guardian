@@ -725,7 +725,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.5.0.0229</div>
+    <div class="ver" id="verT">v0.5.0.0230</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -1011,7 +1011,7 @@ const MT0=[
  {n:'그림자 법사',hp:1900,dmg:17,spd:56,r:36,xp:1200,boss:1,raid:'sorc',rhp:4.4e6,rdm:.8,skm:1.5,img:'hero_sorc',bc:['#0d0d1e','#24245a','#1a1a40','#4a4aa0']},
  {n:'검은 그림자',hp:1900,dmg:17,spd:64,r:38,xp:1200,boss:1,raid:'shd',rhp:5.6e6,rdm:1,skm:1,img:'boss_shadow',bc:['#050308','#140c1c','#0c0812','#2a1a36']},
  /* 5스테이지 레이드 보스 — 3페이즈 · 분신술 · 파괴 패턴 */
- {n:'각성 그림자',hp:1900,dmg:17,spd:66,r:44,xp:3000,boss:1,raid:'awk',rhp:24e6,rdm:1.3,skm:1,img:'boss_awake',bc:['#050308','#140c1c','#0c0812','#3a2a66']},
+ {n:'각성 그림자',hp:1900,dmg:17,spd:66,r:44,xp:3000,boss:1,raid:'awk',rhp:36e6,rdm:1.69,skm:1,img:'boss_awake',bc:['#050308','#140c1c','#0c0812','#3a2a66']},
  {n:'봉인 결정',hp:100,dmg:0,spd:0,r:20,xp:0,obj:1}
 ];
 const MT=MT0.map(t=>({...t,r:t.r*MOBS}));
@@ -1806,9 +1806,9 @@ function awkClone(m){ const n=m.ph===2?2:1, a0=rand(0,6.283), out=[m];
   efx.push({k:'ring',x:m.x,y:m.y,r0:10,r1:160,t:0,life:.5,col:'#8a6cff',w:10}); G.shake=Math.max(G.shake,.5); sfx('boss');
   announce(n>1?'👥 그림자 분신술! 셋 중 하나만 진짜예요':'👥 그림자 분신술! 둘 중 하나만 진짜예요','#b89cff'); pushEv(['acl',n]); }
 /* 파괴 패턴 3종: 봉인 결정(1페이즈) · 그림자 등불(2페이즈) · 심장 파편(3페이즈) */
-const AWC={seal:{n:3,dur:6,hp:.005,ok:1,nm:'🔮 봉인 결정',sub:'6초 안에 결정 3개를 모두 부수세요!',warn:'🔮 봉인 결정을 모두 부수세요! 못 부수면 보스가 크게 회복해요'},
-  lantern:{n:4,dur:8,hp:.004,ok:2,nm:'🏮 그림자 등불',sub:'8초 안에 맵 네 귀퉁이의 등불을 모두 끄세요!',warn:'🏮 그림자 등불을 모두 끄세요! 못 끄면 그림자 잠식에 걸려요'},
-  heart:{n:3,dur:7,hp:.006,ok:3,nm:'💔 심장 파편',sub:'보스에게 닿기 전에 파편 3개를 부수세요!',warn:'💔 심장 파편이 보스에게 모여요! 닿기 전에 부수세요'}};
+const AWC={seal:{n:3,dur:6,hp:.005/1.5,ok:1,nm:'🔮 봉인 결정',sub:'6초 안에 결정 3개를 모두 부수세요!',warn:'🔮 봉인 결정을 모두 부수세요! 못 부수면 보스가 크게 회복해요'},
+  lantern:{n:4,dur:8,hp:.004/1.5,ok:2,nm:'🏮 그림자 등불',sub:'8초 안에 맵 네 귀퉁이의 등불을 모두 끄세요!',warn:'🏮 그림자 등불을 모두 끄세요! 못 끄면 그림자 잠식에 걸려요'},
+  heart:{n:3,dur:7,hp:.006/1.5,ok:3,nm:'💔 심장 파편',sub:'보스에게 닿기 전에 파편 3개를 부수세요!',warn:'💔 심장 파편이 보스에게 모여요! 닿기 전에 부수세요'}};
 const AWCK=['','seal','lantern','heart'], AWCN={seal:'봉인 결정',lantern:'그림자 등불',heart:'심장 파편'};
 function awkSeal(m){ const kind=m.ph===2?'lantern':m.ph===3?'heart':'seal', C=AWC[kind], hp=m.max*C.hp*(G.coop?1.6:1)/(G.coop?1.5:1), pls=playersForAI(), c=pls[0]||{x:VX,y:VY};
   awkFakesClear(true); m.tel=null; m.charge=null; m.counter=0; m.cast={k:kind,t:0,dur:C.dur,abs:0}; m.inv=C.dur+.2; G.awc={k:kind,t:0,dur:C.dur,n:C.n};
