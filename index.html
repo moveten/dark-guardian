@@ -128,7 +128,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
 #bAuto.s1{background:conic-gradient(#7be08f 0 180deg,#2c5a3a 180deg 360deg);box-shadow:0 0 12px rgba(111,208,138,.5)}#bAuto.s1 .in{background:radial-gradient(circle at 35% 28%,#3a8450,#143a26 75%);color:#eaffee}#bAuto.s1 small{color:#a9f2bb}
 #bAuto.s2{background:conic-gradient(#ffd24a,#ff9a2e,#ffd24a);animation:autoGlow 1.6s ease-in-out infinite}#bAuto.s2 .in{background:radial-gradient(circle at 35% 28%,#a8641c,#47240a 75%);color:#fff3d2}#bAuto.s2 small{color:#ffe08a}
 @keyframes autoGlow{0%,100%{box-shadow:0 0 10px rgba(255,190,70,.55)}50%{box-shadow:0 0 20px rgba(255,190,70,.95)}}
-/* 1.5배속 버튼: AUTO 바로 왼쪽, 같은 크기의 둥근 버튼 */
+/* 1.3배속 버튼: AUTO 바로 왼쪽, 같은 크기의 둥근 버튼 */
 .ab{display:flex;align-items:flex-end;gap:8px;align-self:flex-end}
 #bSpd{position:relative;flex:none;align-self:flex-end;width:45px;height:45px;border-radius:50%;padding:3px;border:0;box-sizing:border-box;pointer-events:auto;touch-action:none;font-family:inherit;transition:transform .1s}
 #bSpd:active{transform:scale(.92)}
@@ -718,7 +718,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.5.0.0211</div>
+    <div class="ver" id="verT">v0.5.0.0212</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -1427,7 +1427,7 @@ function loadChar(id){
     for(const k in p.skills){ if(!SKBY[k]){p.skillPts+=p.skills[k]; delete p.skills[k];} } for(const s of SK[cls]){ if(p.skills[s.k]===undefined)p.skills[s.k]=0; else if(p.skills[s.k]>0&&(p.lvl|0)<s.req){ p.skillPts+=p.skills[s.k]; p.skills[s.k]=0; } } /* 해금 레벨 미만인데 투자된 스킬(해금 레벨 상향 등)은 포인트 환급 */
     if(p.clear===undefined)p.clear=Math.max(0,+(lsGet('dkdef2.clear')||0));
     { const lg=k=>{ const v=parseInt(lsGet(k)); return isNaN(v)?-1:clamp(v,-1,2); }; if(p.as===undefined)p.as=lg('dkdef2.asell'); if(p.sy===undefined)p.sy=lg('dkdef2.asyn'); if(p.sy>=0)p.sy=2; } /* 캐릭터별 자동판매/합성: 기존 캐릭터는 예전 전역 설정을 한 번 이어받음 */
-    p.sp=p.sp?1:0;   /* 캐릭터별 1.5배속 설정 */
+    p.sp=p.sp?1:0;   /* 캐릭터별 1.3배속 설정 */
     p.au=Math.max(0,Math.min(2,p.au|0));   /* 캐릭터별 AUTO 설정 (0 꺼짐 · 1 이동 · 2 이동+스킬) — 스테이지를 옮겨도 유지 */
     p.eq=p.eq||{}; if(p.eq.shield===undefined)p.eq.shield=null;
     for(const k in p.eq){ if(p.eq[k])delete p.eq[k].isNew; } /* 장착했던 아이템의 NEW 꼬리표 정리(1회) */ if(!lsGet('dkdef2.nwf.'+id)){ (p.inv||[]).forEach(x=>{ if(x)delete x.isNew; }); lsSet('dkdef2.nwf.'+id,'1'); }
@@ -2986,12 +2986,12 @@ function setAuto(n,quiet){ autoMode=n; autoRet=false; autoGap=0; autoBo={}; if(m
   const t=$('#autoT'); if(quiet&&!n){ t.classList.remove('show'); return; } t.className='s'+n+' show'; t.textContent=AUTO_TX[n]; clearTimeout(autoHintT); autoHintT=setTimeout(()=>t.classList.remove('show'),2600); }
 function cycleAuto(){ if(!G.inGame)return; setAuto((autoMode+1)%3); sfx(autoMode?'aura':'auraoff'); }
 $('#bAuto').addEventListener('pointerdown',e=>{ e.preventDefault(); cycleAuto(); });
-/* 1.5배속: 혼자 하기·방장은 직접 켜고 끔(캐릭터별로 저장, 스테이지는 저장된 설정으로 시작), 협동 참가자는 방장의 설정을 따라감.
-   게임 시간(dt)만 1.5배 — 클리어 시간(G.runT)은 실제 시간으로 잼 */
-const SPD_ON=1.5;
+/* 1.3배속: 혼자 하기·방장은 직접 켜고 끔(캐릭터별로 저장, 스테이지는 저장된 설정으로 시작), 협동 참가자는 방장의 설정을 따라감.
+   게임 시간(dt)만 1.3배 — 클리어 시간(G.runT)은 실제 시간으로 잼 */
+const SPD_ON=1.3;
 function setSpd(on,o){ o=o||{}; G.spd=on?SPD_ON:1; if(me&&o.save&&G.mode!=='guest'&&!!(me.sp|0)!==!!on){ me.sp=on?1:0; saveChar(); }
-  const b=$('#bSpd'); if(b){ b.className=(on?'s1':'s0')+(G.mode==='guest'?' dis':''); b.querySelector('small').textContent=on?'1.5x':'1.0x'; b.setAttribute('aria-label','배속: '+(on?'1.5배':'1배')+(G.mode==='guest'?' (방장이 정해요)':'')); }
-  if(o.hint){ const t=$('#autoT'); if(t){ t.className='s2 show'; t.textContent=on?'⏩ 1.5배속':'▶ 1배속'; clearTimeout(autoHintT); autoHintT=setTimeout(()=>t.classList.remove('show'),2000); } } }
+  const b=$('#bSpd'); if(b){ b.className=(on?'s1':'s0')+(G.mode==='guest'?' dis':''); b.querySelector('small').textContent=on?'1.3x':'1.0x'; b.setAttribute('aria-label','배속: '+(on?'1.3배':'1배')+(G.mode==='guest'?' (방장이 정해요)':'')); }
+  if(o.hint){ const t=$('#autoT'); if(t){ t.className='s2 show'; t.textContent=on?'⏩ 1.3배속':'▶ 1배속'; clearTimeout(autoHintT); autoHintT=setTimeout(()=>t.classList.remove('show'),2000); } } }
 function cycleSpd(){ if(!G.inGame)return; if(G.mode==='guest'){ toast('배속은 방장이 정해요','#ffb259'); return; } setSpd(!(G.spd>1),{save:true,hint:true}); sfx(G.spd>1?'aura':'auraoff'); }
 $('#bSpd').addEventListener('pointerdown',e=>{ e.preventDefault(); cycleSpd(); });
 const autoBlocked=()=>!G.inGame||G.paused||me.dead||document.body.classList.contains('shopen');
@@ -3050,7 +3050,7 @@ function autoSkills(dt){
    - me.tut={on, d:[스테이지별 0 안 함/1 완료/2 건너뜀], rw:[보상 편지 보냈나], g:[튜토리얼 지원 포인트 지급했나], fin:최종 보상 보냈나}
    - 단계 정의(TUTS): t 제목 · b 내용 · tg 강조할 요소 · hud 게임 화면 요소라 창이 열려 있으면 먼저 닫게 함 · ck 행동 완료 조건(주기적으로 확인) · ok 읽기만 하는 단계(확인 버튼, 혼자일 땐 게임 일시정지)
      can 못 하는 상황이면 b2 로 바꿔 읽기 단계로 · pre/post 단계 시작/끝에 할 일 */
-const TUT_TOPIC=['이동 · 공격 · 스킬 · 전리품 · 물약','스킬 포인트 · 능력치 · AUTO 자동 사냥 · 1.5배속','가방 · 장비 착용 · 판매 · 자동 정리','장비 강화 · 상점','아이템 보내기 · 우편함 · 공유보관함'];
+const TUT_TOPIC=['이동 · 공격 · 스킬 · 전리품 · 물약','스킬 포인트 · 능력치 · AUTO 자동 사냥 · 1.3배속','가방 · 장비 착용 · 판매 · 자동 정리','장비 강화 · 상점','아이템 보내기 · 우편함 · 공유보관함'];
 function tutDef(){ return {on:0,d:[0,0,0,0,0],rw:[0,0,0,0,0],g:[0,0,0,0,0],fin:0,cn:0,sg:{}}; }
 function tutFix(p){ const t=p.tut&&typeof p.tut==='object'?p.tut:tutDef(); for(const k of ['d','rw','g']){ t[k]=Array.isArray(t[k])?t[k].slice(0,5).map(v=>v|0):[]; while(t[k].length<5)t[k].push(0); } t.on=t.on?1:0; t.fin=t.fin?1:0; t.cn=t.cn?1:0; { const sg={}; if(t.sg&&typeof t.sg==='object'&&!Array.isArray(t.sg))for(const k in t.sg)if(t.sg[k]&&String(k).length<12)sg[k]=1; t.sg=sg; } p.tut=t; }
 let tutS=null, tutIv=0, tutWait=false, tutAu=0, tutSp=0;   /* tutAu: 튜토리얼 AUTO 단계 전에 쓰던 AUTO 설정 */
@@ -3075,7 +3075,7 @@ const TUTS=[
   {t:'능력치 창 열기',b:'이번에는 📊 능력 버튼을 눌러 능력치 창을 열어 보세요.',...tutOpenTab('bStat','stat')},
   {t:'능력치 올리기',b:'힘은 피해, 민첩은 공격속도·치명타, 체력은 생명력, 에너지는 마나에 영향을 줘요. ＋ 를 눌러 원하는 곳에 포인트를 써 보세요.',can:()=>(me.statPts|0)>0,b2:'레벨이 오를 때마다 능력치 포인트를 얻어요. 힘·민첩·체력·에너지 중 원하는 곳에 ＋ 로 투자해요.',pre:S=>{S.p=me.statPts|0;},tg:()=>tutQ('#sheetB [data-st]')||tutQ('#bStat'),ck:S=>(me.statPts|0)<S.p},
   {t:'AUTO 자동 사냥',b:'AUTO 버튼을 두 번 눌러 보세요. 한 번은 자동 이동+일반공격, 두 번은 스킬까지 자동이에요. 한 번 더 누르면 꺼져요. 조이스틱을 잡으면 내가 직접 움직여요.',pre:()=>{ tutAu=me.au|0; setAuto(0,true); },tg:()=>tutQ('#bAuto'),hud:1,ck:()=>autoMode===2,post:()=>{ me.au=tutAu; setAuto(tutAu,true); saveChar(); }},
-  {t:'1.5배속',b:'AUTO 왼쪽의 ⏩ 버튼을 누르면 게임이 1.5배 빨라져요. 한 번 더 누르면 원래 속도로 돌아와요. 설정은 캐릭터마다 기억돼요. (협동에서는 방장의 설정을 따라가요)',pre:()=>{ tutSp=me.sp|0; setSpd(false); },tg:()=>tutQ('#bSpd'),hud:1,ck:()=>G.spd>1,post:()=>{ setSpd(!!tutSp,{save:true}); }}
+  {t:'1.3배속',b:'AUTO 왼쪽의 ⏩ 버튼을 누르면 게임이 1.3배 빨라져요. 한 번 더 누르면 원래 속도로 돌아와요. 설정은 캐릭터마다 기억돼요. (협동에서는 방장의 설정을 따라가요)',pre:()=>{ tutSp=me.sp|0; setSpd(false); },tg:()=>tutQ('#bSpd'),hud:1,ck:()=>G.spd>1,post:()=>{ setSpd(!!tutSp,{save:true}); }}
  ],
  [ /* 1-3 */
   {t:'가방 열기',b:'아래 🎒 가방 버튼을 눌러 가방을 열어 보세요. 열려 있는 동안 게임은 잠시 멈춰요.',...tutOpenTab('bBag','bag')},
@@ -4206,7 +4206,7 @@ function resetWorld(){
   G.mobs=[]; G.mobMap=new Map(); G.stKills=0; G.stDrops=0; G.stCap=0; G.runT=0; G.stGot=[0,0,0,0,0]; G.sib=0; G.endShown=false; G.clrDone=false; alClear(); G.stRev=0; G.stGold0=me?(me.gold|0):0; G.paused=false; G.bt=null; G.shake=0;
   hitQ=[]; fxQ=[]; lastAllyFx=-1; lastEv=-1; lastHit=0; G.guestDmg=0; G.fires=[]; G.freeRev=1; G.fireT=3; if(me){ me.rvGiven=0; me.seenRg=0; me.out=false; me.rvT=0; }
   spawnMe(); buildSkills(); show(null); G.inGame=true; closeSheet(); setAuto(me?me.au|0:0,true);   /* 이 캐릭터가 마지막으로 정한 AUTO 설정으로 시작 */
-  { const sp=G.mode!=='guest'&&!!(me&&me.sp); setSpd(sp,{hint:sp}); }   /* 1.5배속도 마지막 설정으로 (협동 참가자는 방장 설정을 받을 때까지 1배) */
+  { const sp=G.mode!=='guest'&&!!(me&&me.sp); setSpd(sp,{hint:sp}); }   /* 1.3배속도 마지막 설정으로 (협동 참가자는 방장 설정을 받을 때까지 1배) */
 }
 /* 타이틀 하단 탭 바 */
 $('#tGear').onclick=()=>{ if(selId)openTitleSheet('bag'); };
@@ -4993,7 +4993,7 @@ function render(t){
 let last=performance.now(), T=0;
 function step(now){
   requestAnimationFrame(step);
-  const rdt=Math.min(.05,(now-last)/1000); last=now; let dt=rdt*((G.inGame&&G.spd)||1); T+=dt;   /* rdt: 실제 시간 · dt: 게임 시간(1.5배속이면 1.5배) */
+  const rdt=Math.min(.05,(now-last)/1000); last=now; let dt=rdt*((G.inGame&&G.spd)||1); T+=dt;   /* rdt: 실제 시간 · dt: 게임 시간(1.3배속이면 1.3배) */
   if(R){ if(G.mode==='host')hostNet(); else if(G.mode==='guest')guestNet(); if(G.phase==='lobby'){ netT-=rdt; if(netT<=0){netT=.5; netSend(); renderLobby();} } }
   if(bannerT>0){bannerT-=dt; if(bannerT<=0)$('#banner').style.opacity=0;}
   AUD.setMood(G.inGame?(G.phase==='boss'?'boss':G.phase==='wave'?'battle':'calm'):'calm');
