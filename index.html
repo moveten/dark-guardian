@@ -745,7 +745,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.5.0.0233</div>
+    <div class="ver" id="verT">v0.5.0.0234</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -1661,7 +1661,7 @@ function snapMobs(){
   const out=[];
   for(const m of G.mobs){ if(m.dead)continue;
     const R0=m.fake?G.mobs.find(o=>o.id===m.realId&&!o.dead):null, hq=R0?R0.hp/R0.max:m.hp/m.max;
-    out.push([m.id,m.type,Math.round(m.x),Math.round(m.y),Math.max(1,Math.round(hq*100)),(m.elite?1:0)|(m.slowT>0?4:0)|(m.atk>0?8:0)|(m.boss&&m.tg===2?16:0)|(m.boss&&m.counter>0?32:0)|(m.stunT>0?64:0)|(m.burnT>0?128:0)|(m.taunt&&m.taunt.t>0?256:0)|(m.awk?512:0)|(m.inv>0?1024:0),m.rk==='awk'?(m.ph|0):m.obj?(m.ok|0):m.af|0]); }
+    out.push([m.id,m.type,Math.round(m.x),Math.round(m.y),Math.max(1,Math.round(hq*100)),(m.elite?1:0)|(m.slowT>0?4:0)|(m.atk>0?8:0)|(m.boss&&m.tg===2?16:0)|(m.boss&&m.counter>0?32:0)|(m.stunT>0?64:0)|(m.burnT>0?128:0)|(m.taunt&&m.taunt.t>0?256:0)|(m.awk?512:0)|(m.inv>0?1024:0),m.rk==='awk'?((m.ph|0)+10*Math.max(0,m.shield|0)):m.obj?(m.ok|0):m.af|0]); }
   return out;
 }
 /* 보스 예고(텔레그래프) → 게스트용 배열: [종류,x,y,tx,ty,r,진행%, (선: 길이,폭,각도×100…) (여러 원: x,y…)] — 보스가 여럿이면 여러 개 */
@@ -1688,6 +1688,7 @@ function hostNet(){
     const m=G.mobs.find(x=>x.id===e[1]&&!x.dead); if(!m)continue;
     let dm=clamp(+e[2]||0,0,99999);
     if(m.boss)addThreat(m,2,dm*(TMUL[ally&&ally.cls]||1)+(e[4]?m.max*.04:0)); if(e[4])m.taunt={i:2,t:5};
+    if(m.shield>0){ awkShieldHit(m,true); continue; }   /* 동료 공격도 배리어 1회 */
     applyDmg(m,dm,clamp(+e[3]||0,0,5),(e[5]|0)||(e[6]|0)?{stun:clamp((+e[5]||0)/10,0,4),burn:clamp((+e[6]||0)/10,0,1.5),bd:clamp(+e[7]||0,0,dm*.7)}:null); }
 }
 /* guest reads host */
@@ -1719,7 +1720,7 @@ function guestNet(){
     { const nw=performance.now(); if(m._tu){ const du=Math.max(.05,(nw-m._tu)/1000);   /* 갱신 사이의 이동 속도를 추정해 다음 위치를 미리 예측 */
         if(du<.5&&hyp(a[2]-m.tx,a[3]-m.ty)<160){ let vx=(a[2]-m.tx)/du, vy=(a[3]-m.ty)/du; const sp=hyp(vx,vy); if(sp>640){vx*=640/sp;vy*=640/sp;} m.ux=(m.ux||0)*.5+vx*.5; m.uy=(m.uy||0)*.5+vy*.5; }
         else { m.ux=m.uy=0; } } m._tu=nw; }
-    m.tx=a[2];m.ty=a[3];m.hpp=a[4];m.elite=!!(a[5]&1);m.slowT=a[5]&4?1:0;m.atk=a[5]&8?.2:0; m.tg=a[5]&16?2:1; m.counter=a[5]&32?1:0; m.stunT=a[5]&64?1:0; m.burnT=a[5]&128?1:0; m.taunt=a[5]&256?{i:0,t:1}:null; m.awk=!!(a[5]&512); m.rk=MT[m.type].raid; m.inv=a[5]&1024?1:0; if(m.rk==='awk'){ m.ph=a[6]|0||1; m.af=0; } else if(MT[m.type].obj){ m.ok=a[6]|0; m.af=0; } else m.af=a[6]|0; m.obj=!!MT[m.type].obj;
+    m.tx=a[2];m.ty=a[3];m.hpp=a[4];m.elite=!!(a[5]&1);m.slowT=a[5]&4?1:0;m.atk=a[5]&8?.2:0; m.tg=a[5]&16?2:1; m.counter=a[5]&32?1:0; m.stunT=a[5]&64?1:0; m.burnT=a[5]&128?1:0; m.taunt=a[5]&256?{i:0,t:1}:null; m.awk=!!(a[5]&512); m.rk=MT[m.type].raid; m.inv=a[5]&1024?1:0; if(m.rk==='awk'){ const v=a[6]|0; m.ph=v%10||1; m.shield=(v/10)|0; m.af=0; } else if(MT[m.type].obj){ m.ok=a[6]|0; m.af=0; } else m.af=a[6]|0; m.obj=!!MT[m.type].obj;
   }
   for(let i=G.mobs.length-1;i>=0;i--){const m=G.mobs[i]; if(!seen.has(m.id)){G.mobs.splice(i,1);G.mobMap.delete(m.id);}}
   // events
@@ -1744,6 +1745,7 @@ function guestEvent(e){
   else if(t==='aph'){ const np=e[2]|0, tx=np===2?['🌑 2페이즈 · 삼남매의 잔향','형과 누나의 힘을 삼켰어요']:['🌑 3페이즈 · 각성','마지막 각성 — 모든 것을 걸고 덤벼와요']; banner(tx[0],tx[1]); announce(tx[0],'#a68bff'); G.shake=1.2; sfx('boss'); later(.3,()=>{ if(G.inGame)storyRun('p'+np); }); }
   else if(t==='acl'){ announce((e[2]|0)>1?'👥 그림자 분신술! 셋 중 하나만 진짜예요':'👥 그림자 분신술! 둘 중 하나만 진짜예요','#b89cff'); sfx('boss'); }
   else if(t==='asl'){ const k=AWCK[e[2]|0]||'seal', C=AWC[k]; awkCutin(k,e[3]|0||(awkRealDraw()||{}).ph); announce(C.warn,'#c0a8ff'); sfx('boss'); }
+  else if(t==='ash0'){ announce('🛡️ 그림자 배리어가 깨졌어요! 이제 피해가 들어가요','#c0a8ff'); }
   else if(t==='abz'){ banner('💢 광폭화','각성 그림자의 공격이 빨라져요'); announce('💢 각성 그림자 광폭화!','#ff6a8a'); }
   else if(t==='asf'){ const k=e[2]|0; if(k===1){ banner('💜 봉인 실패','각성 그림자가 크게 회복했어요'); announce('💜 봉인 실패! 보스가 크게 회복했어요','#c090ff'); } else if(k===2){ banner('🌑 그림자 잠식','15초간 받는 피해 +50% · 이동 속도 -40%'); } else if(k===3){ banner('💔 심장 파편 흡수',`${e[3]|0}개가 보스에게 닿았어요`); } else announce('✨ 파괴 성공! 각성 그림자가 잠시 쓰러졌어요','#9fe08a'); G.shake=Math.max(G.shake,.6); }
   else if(t==='b'){ const bt=MT[e[2]]?e[2]:3; banner(G.stg.bn||MT[bt].n,bt===3?'거대한 그림자가 다가옵니다':'우두머리가 모습을 드러냈습니다'); me.pot=3; }
@@ -1808,7 +1810,8 @@ const awkType=()=>MT.findIndex(t=>t.raid==='awk'), objType=()=>MT.findIndex(t=>t
 const awkReal=()=>G.mobs.find(m=>m.rk==='awk'&&!m.fake&&!m.dead);
 const awkCap=m=>AWK.ph[(m.ph||1)-1];   /* 지금 페이즈의 체력 상한 비율 */
 const awkFloor=m=>(m.ph||1)<3?AWK.ph[m.ph||1]:-1;   /* 다음 페이즈 문턱 — 페이즈 전환 전에는 이 아래로 안 깎임 */
-function spawnAwake(){ const b=spawnMob(awkType(),VX,VY*.45,false); b.ph=1; b.wake=3; b.cloneT=10; b.sealT=18; b.dmgB=b.dmg0; b.sum0=b.sum1=b.sum2=true;
+const AWK_SHIELD=10;   /* 1페이즈 그림자 배리어: 공격 10번을 막음 (피해량과 상관없이 한 번 맞을 때마다 1) */
+function spawnAwake(){ const b=spawnMob(awkType(),VX,VY*.45,false); b.ph=1; b.shield=AWK_SHIELD; later(3.2,()=>{ if(G.inGame&&b.shield>0)announce(`🛡️ 그림자 배리어! 공격 ${AWK_SHIELD}번을 막아요 — 궁극기는 배리어가 깨진 뒤에`,'#c0a8ff'); }); b.wake=3; b.cloneT=10; b.sealT=18; b.dmgB=b.dmg0; b.sum0=b.sum1=b.sum2=true;
   efx.push({k:'ring',x:b.x,y:b.y,r0:10,r1:180,t:0,life:.8,col:'#8a6cff',w:12}); burst(b.x,b.y,'#2a1a4a',50,360); impact(b.x,b.y,'130,100,255',240);
   G.laneShow=[0,1,3]; pushEv(['b',awkType()]); banner('🌑 각성 그림자','봉인이 깨지고, 첫 수호자의 그림자가 일어섭니다'); me.pot=3; G.shake=1; sfx('boss'); }
 function awkFakesClear(fx){ for(const o of G.mobs){ if(o.dead||!o.fake)continue; o.dead=true; if(fx){ burst(o.x,o.y,'#2a1a4a',24,260); spark(o.x,o.y,'#8a6cff',16); } } }
@@ -1827,14 +1830,14 @@ function awkClone(m){ const n=m.ph===2?2:1, a0=rand(0,6.283), out=[m];
   announce(n>1?'👥 그림자 분신술! 셋 중 하나만 진짜예요':'👥 그림자 분신술! 둘 중 하나만 진짜예요','#b89cff'); pushEv(['acl',n]); }
 /* 파괴 패턴 3종: 봉인 결정(1페이즈) · 그림자 등불(2페이즈) · 심장 파편(3페이즈) */
 const AWC={seal:{n:3,dur:6,hp:120000,ok:1,nm:'🔮 봉인 결정',sub:'6초 안에 결정 3개를 모두 부수세요!',warn:'🔮 봉인 결정을 모두 부수세요! 못 부수면 보스가 크게 회복해요'},
-  lantern:{n:4,dur:8,hp:96000,ok:2,nm:'🏮 그림자 등불',sub:'8초 안에 맵 네 귀퉁이의 등불을 모두 끄세요!',warn:'🏮 그림자 등불을 모두 끄세요! 못 끄면 그림자 잠식에 걸려요'},
+  lantern:{n:3,dur:8,hp:96000,ok:2,nm:'🏮 그림자 등불',sub:'8초 안에 보스 주변 등불 3개를 모두 끄세요!',warn:'🏮 그림자 등불을 모두 끄세요! 못 끄면 그림자 잠식에 걸려요'},
   heart:{n:3,dur:7,hp:144000,ok:3,nm:'💔 심장 파편',sub:'보스에게 닿기 전에 파편 3개를 부수세요!',warn:'💔 심장 파편이 보스에게 모여요! 닿기 전에 부수세요'}};
 const AWCK=['','seal','lantern','heart'], AWCN={seal:'봉인 결정',lantern:'그림자 등불',heart:'심장 파편'};
 function awkSeal(m){ const kind=m.ph===2?'lantern':m.ph===3?'heart':'seal', C=AWC[kind], hp=C.hp*(G.coop?1.6:1), pls=playersForAI(), c=pls[0]||{x:VX,y:VY};
   awkFakesClear(true); m.tel=null; m.charge=null; m.counter=0; m.cast={k:kind,t:0,dur:C.dur,abs:0}; m.inv=C.dur+.2; G.awc={k:kind,t:0,dur:C.dur,n:C.n};
   const a0=rand(0,6.283), cor=[[110,110],[WW-110,110],[110,WH-110],[WW-110,WH-110]];
   for(let i=0;i<C.n;i++){ let x,y,g=0;
-    if(kind==='lantern'){ x=cor[i][0]+rand(-25,25); y=cor[i][1]+rand(-25,25); }
+    if(kind==='lantern'){ const a=a0+i*6.283/C.n+rand(-.25,.25), d=rand(150,210); x=clamp(m.x+Math.cos(a)*d,60,WW-60); y=clamp(m.y+Math.sin(a)*d,60,WH-60); }   /* 보스 주변 3개 */
     else if(kind==='heart'){ const a=a0+i*6.283/C.n; x=clamp(m.x+Math.cos(a)*340,60,WW-60); y=clamp(m.y+Math.sin(a)*340,60,WH-60); }
     else do{ const a=a0+i*6.283/C.n+rand(-.4,.4), d=rand(170,300); x=clamp(c.x+Math.cos(a)*d,70,WW-70); y=clamp(c.y+Math.sin(a)*d,70,WH-70); }while(++g<12&&hyp(x-m.x,y-m.y)<150);
     const o=spawnMob(objType(),x,y,false); o.obj=1; o.ok=C.ok; o.max=o.hp=hp; o.own=m.id; o.xp=0;
@@ -1883,7 +1886,7 @@ function awkObjTick(o,dt){ if(!o.mv)return; const R=G.mobs.find(q=>q.id===o.own&
 /* 각성 그림자 AI — true 를 돌려주면 이번 프레임은 여기서 끝 (일반 보스 처리로 넘기지 않음) */
 function awkAI(m,dt,pls,sf,best,bd,tau){
   if(m.inv>0&&!m.cast)m.inv-=dt;
-  if(m.fake){ m.life-=dt; const R=G.mobs.find(o=>o.id===m.realId&&!o.dead); if(!R||m.life<=0||R.cast){ m.dead=true; burst(m.x,m.y,'#2a1a4a',22,240); spark(m.x,m.y,'#8a6cff',12); return true; } m.ph=R.ph; m.dmg=R.dmg; m.bzk=R.bzk; }
+  if(m.fake){ m.life-=dt; const R=G.mobs.find(o=>o.id===m.realId&&!o.dead); if(!R||m.life<=0||R.cast){ m.dead=true; burst(m.x,m.y,'#2a1a4a',22,240); spark(m.x,m.y,'#8a6cff',12); return true; } m.ph=R.ph; m.dmg=R.dmg; m.bzk=R.bzk; m.shield=R.shield|0; }   /* 분신도 배리어가 같아 보여야 구분이 안 됨 */
   else {
     const np=m.hp<=m.max*AWK.ph[2]?3:m.hp<=m.max*AWK.ph[1]?2:1; if(np>(m.ph||1)){ awkPhase(m,(m.ph||1)+1); return true; }
     if(m.cast){ const c=m.cast; c.t+=dt; m.inv=c.dur-c.t+.2; if(G.awc)G.awc.t=c.t; m.dvx=m.dvy=0; m.fa=Math.atan2(best.y-m.y,best.x-m.x);
@@ -2250,7 +2253,7 @@ function summon(b){ for(let i=0;i<5;i++){const a=i/5*Math.PI*2; spawnMob(i%2?2:0
 
 function applyDmg(m,dmg,slow,fx){
   if(m.dead||!(dmg>0))return;
-  if(m.inv>0)return;   /* 각성 그림자: 시전·페이즈 전환 중 무적 */
+  if(m.inv>0||m.shield>0)return;   /* 각성 그림자: 시전·페이즈 전환 중 무적, 배리어(지속 피해는 횟수에 안 셈) */
   if(m.dfM>1)dmg/=m.dfM;
   if(m.vuln&&m.vuln.t>0)dmg*=1+m.vuln.v;   /* 위압 함성: 받는 모든 피해 증가 (파티원 피해 포함) */
   m.hp-=dmg; if(m.rk==='awk'&&!m.fake){ const fl=awkFloor(m); if(fl>0&&m.hp<m.max*fl)m.hp=m.max*fl-1; }   /* 다음 페이즈 문턱에서 한 번 멈춤 → 페이즈 전환 */
@@ -2588,7 +2591,10 @@ let HUDS={}; try{ HUDS=JSON.parse(lsGet('dkdef2.hud')||'{}')||{}; }catch(e){ HUD
 const hudOn=k=>HUDS[k]!==0;
 function applyHud(){ for(const k of ['combo','rank'])document.body.classList.toggle('hud-no'+k,!hudOn(k)); dmgRkHtml=''; try{renderDmgRank();}catch(e){} }
 function hudSet(k,on){ HUDS[k]=on?1:0; lsSet('dkdef2.hud',JSON.stringify(HUDS)); applyHud(); }
+function awkShieldHit(m,host){ if(host){ m.shield--; m.shF=.2; } addNum(m.x,m.y-m.r-8,m.shield>0?`🛡️ 막힘 · ${m.shield}`:'🛡️ 배리어 파괴!','#c0a8ff',m.shield<=0); spark(m.x,m.y-m.r*.5,'#c0a8ff',6);
+  if(host&&m.shield<=0){ burst(m.x,m.y,'#c0a8ff',40,360); efx.push({k:'ring',x:m.x,y:m.y,r0:20,r1:150,t:0,life:.5,col:'#c0a8ff',w:10}); G.shake=Math.max(G.shake,.6); sfx('crit'); announce('🛡️ 그림자 배리어가 깨졌어요! 이제 피해가 들어가요','#c0a8ff'); pushEv(['ash0',1]); } }
 function hitMob(m,r,slow,tn,fx){
+  if(m.shield>0){ awkShieldHit(m,G.mode!=='guest'); return; }   /* 각성 그림자 1페이즈 배리어 */
   if(m.inv>0){ if(T-(m._invN||-9)>.45){ m._invN=T; addNum(m.x,m.y-m.r-8,'무적','#b8a8ff',false); } return; }   /* 각성 그림자 무적 */
   const raw=!!(fx&&fx.raw); /* 고정 비율 피해(세크리파이스)는 장비·레벨 보정과 반격 태세를 무시 */
   if(!raw){ const gp=gearPen(); if(gp.wm!==1)r={v:r.v*gp.wm,crit:r.crit}; }
@@ -4922,6 +4928,9 @@ function drawMob(m,t){
   if(m.corpse)return;   /* 쓰러지는 연출용 복사본은 체력바·이름 없이 */
   if(m.boss&&m.counter>0){ const pu=.5+.5*Math.sin(t*14); ctx.save(); ctx.strokeStyle=`rgba(255,170,60,${.6+.35*pu})`; ctx.lineWidth=5; ctx.beginPath(); ctx.arc(x,y,r+12+pu*4,0,6.283); ctx.stroke(); ctx.globalCompositeOperation='lighter'; circle(x,y,r+8,`rgba(255,140,30,${.18+.12*pu})`); ctx.restore();
     ctx.save(); ctx.font='800 15px "Noto Sans KR",sans-serif'; ctx.textAlign='center'; ctx.lineWidth=4; ctx.strokeStyle='#000'; ctx.strokeText('⚔️ 반격 태세!',x,y-r-34); ctx.fillStyle='#ffb347'; ctx.fillText('⚔️ 반격 태세!',x,y-r-34); ctx.restore(); }
+  if(m.shield>0){ const pu=.5+.5*Math.sin(t*5), rr=m.r*2.1, cy=y-m.r*.9; ctx.save(); ctx.globalCompositeOperation='lighter'; const g=ctx.createRadialGradient(x,cy,rr*.4,x,cy,rr); g.addColorStop(0,'rgba(140,110,255,0)'); g.addColorStop(.8,`rgba(150,120,255,${.12+.06*pu+(m.shF>0?.25:0)})`); g.addColorStop(1,`rgba(200,180,255,${.45+.2*pu})`); ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,cy,rr,0,6.283); ctx.fill();
+    ctx.strokeStyle=`rgba(210,190,255,${.6+.3*pu})`; ctx.lineWidth=2; ctx.beginPath(); for(let i=0;i<=6;i++){ const a=i/6*6.283+t*.4; const px=x+Math.cos(a)*rr*.98, py=cy+Math.sin(a)*rr*.98; i?ctx.lineTo(px,py):ctx.moveTo(px,py); } ctx.stroke(); ctx.restore(); if(m.shF>0)m.shF-=1/60;
+    ctx.save(); ctx.font='800 13px "Noto Sans KR",sans-serif'; ctx.textAlign='center'; ctx.lineWidth=3.5; ctx.strokeStyle='#000'; const tx=`🛡️ 배리어 ${m.shield}`; ctx.strokeText(tx,x,cy-rr-6); ctx.fillStyle='#d8c8ff'; ctx.fillText(tx,x,cy-rr-6); ctx.restore(); }
   const R0=m.fake?G.mobs.find(o=>o.id===m.realId&&!o.dead):null;   /* 분신은 본체 체력을 그대로 보여줌 */
   const hpp=Math.max(0,Math.min(1,m.hpp!==undefined?m.hpp/100:R0?R0.hp/R0.max:m.hp/m.max));
   const bw=Math.max(r*2,34), by=y-r-(m.boss?16:12);
