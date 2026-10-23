@@ -718,7 +718,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.5.0.0216</div>
+    <div class="ver" id="verT">v0.5.0.0217</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -3011,10 +3011,13 @@ addEventListener('blur',()=>{for(const k in keys)keys[k]=false; for(const k in h
    물약은 자동으로 쓰지 않아요. 순간이동·세크리파이스(희생)·수호 폭발(수호 영혼 소멸)은 자동에서 제외. */
 let autoMode=0, autoGap=0, autoRet=false, autoBo={}, autoHintT=0;
 const AUTO_LB=[['AUTO','OFF'],['AUTO','이동'],['AUTO','+스킬']], AUTO_TX=['자동 사냥 꺼짐','⚔ 자동 이동 · 일반공격','⚔ 자동 이동 · 스킬까지 자동'];
-function setAuto(n,quiet){ autoMode=n; autoRet=false; autoGap=0; autoBo={}; if(me&&!quiet&&(me.au|0)!==n){ me.au=n; saveChar(); }   /* quiet=true: 저장된 설정을 화면에만 반영(저장값은 안 바꿈) */
+const AUTOSK_NEED=5, autoSkOk=()=>!!(me&&(me.clear|0)>=AUTOSK_NEED);   /* '스킬까지 자동'(2단계)은 1-5 스테이지를 클리어한 캐릭터부터. 1단계(자동 이동·일반공격)는 처음부터 */
+function setAuto(n,quiet){ if(n>=2&&!autoSkOk())n=1; autoMode=n; autoRet=false; autoGap=0; autoBo={}; if(me&&!quiet&&(me.au|0)!==n){ me.au=n; saveChar(); }   /* quiet=true: 저장된 설정을 화면에만 반영(저장값은 안 바꿈) */
   const b=$('#bAuto'); if(!b)return; b.className='s'+n; b.querySelector('b').textContent=AUTO_LB[n][0]; b.querySelector('small').textContent=AUTO_LB[n][1]; b.setAttribute('aria-label','자동 사냥: '+AUTO_TX[n].replace('⚔ ',''));
   const t=$('#autoT'); if(quiet&&!n){ t.classList.remove('show'); return; } t.className='s'+n+' show'; t.textContent=AUTO_TX[n]; clearTimeout(autoHintT); autoHintT=setTimeout(()=>t.classList.remove('show'),2600); }
-function cycleAuto(){ if(!G.inGame)return; setAuto((autoMode+1)%3); sfx(autoMode?'aura':'auraoff'); }
+function cycleAuto(){ if(!G.inGame)return; let n=(autoMode+1)%3;
+  if(n===2&&!autoSkOk()){ n=0; toast('🔒 스킬까지 자동은 1-5 스테이지를 클리어하면 열려요','#ffb259'); }   /* 잠겨 있으면 이동 → 꺼짐 */
+  setAuto(n); sfx(autoMode?'aura':'auraoff'); }
 $('#bAuto').addEventListener('pointerdown',e=>{ e.preventDefault(); cycleAuto(); });
 /* 1.3배속: 혼자 하기·방장은 직접 켜고 끔(캐릭터별로 저장, 스테이지는 저장된 설정으로 시작), 협동 참가자는 방장의 설정을 따라감.
    게임 시간(dt)만 1.3배 — 클리어 시간(G.runT)은 실제 시간으로 잼 */
@@ -3106,7 +3109,7 @@ const TUTS=[
   {t:'스킬 올리기',b:'스킬 옆의 ＋ 버튼을 누르면 스킬 레벨이 올라 더 강해져요. 포인트를 아끼지 말고 쓰세요. 나중에 못 쓰는 스킬은 없어요.',can:()=>(me.skillPts|0)>0,b2:'스킬 포인트가 있을 때 스킬 옆 ＋ 버튼으로 스킬 레벨을 올려요. 스킬마다 해금 레벨이 있어요.',pre:S=>{S.p=me.skillPts|0;},tg:()=>tutQ('#sheetB [data-sk]')||tutQ('#bSkillT'),ck:S=>(me.skillPts|0)<S.p},
   {t:'능력치 창 열기',b:'이번에는 📊 능력 버튼을 눌러 능력치 창을 열어 보세요.',...tutOpenTab('bStat','stat')},
   {t:'능력치 올리기',b:'힘은 피해, 민첩은 공격속도·치명타, 체력은 생명력, 에너지는 마나에 영향을 줘요. ＋ 를 눌러 원하는 곳에 포인트를 써 보세요.',can:()=>(me.statPts|0)>0,b2:'레벨이 오를 때마다 능력치 포인트를 얻어요. 힘·민첩·체력·에너지 중 원하는 곳에 ＋ 로 투자해요.',pre:S=>{S.p=me.statPts|0;},tg:()=>tutQ('#sheetB [data-st]')||tutQ('#bStat'),ck:S=>(me.statPts|0)<S.p},
-  {t:'AUTO 자동 사냥',b:'AUTO 버튼을 두 번 눌러 보세요. 한 번은 자동 이동+일반공격, 두 번은 스킬까지 자동이에요. 한 번 더 누르면 꺼져요. 조이스틱을 잡으면 내가 직접 움직여요.',pre:()=>{ tutAu=me.au|0; setAuto(0,true); },tg:()=>tutQ('#bAuto'),hud:1,ck:()=>autoMode===2,post:()=>{ me.au=tutAu; setAuto(tutAu,true); saveChar(); }}
+  {t:'AUTO 자동 사냥',b:'AUTO 버튼을 눌러 보세요. 누르면 자동 이동+일반공격을 해요. 한 번 더 누르면 꺼져요. 조이스틱을 잡으면 내가 직접 움직여요. (스킬까지 자동으로 쓰는 2단계는 1-5 스테이지를 클리어하면 열려요)',pre:()=>{ tutAu=me.au|0; setAuto(0,true); },tg:()=>tutQ('#bAuto'),hud:1,ck:()=>autoMode>=1,post:()=>{ me.au=tutAu; setAuto(tutAu,true); saveChar(); }}
  ],
  [ /* 1-3 */
   {t:'가방 열기',b:'아래 🎒 가방 버튼을 눌러 가방을 열어 보세요. 열려 있는 동안 게임은 잠시 멈춰요.',...tutOpenTab('bBag','bag')},
@@ -3416,7 +3419,7 @@ function ultCut(key){ const sk=SKBY[key]; if(!sk||!me||!hudOn('ult'))return; con
 /* 1.3배속이 열린 캐릭터에게 한 번만 알려 주는 안내창 (이미 1-5를 깬 캐릭터도 다음에 스테이지에 들어가면 한 번 봄) */
 function spdTip(){ const t=me&&me.tut; if(!t||t.sp||G.mode!=='solo'||G.coop||!spdOk())return;
   later(2.8,()=>{ if(!G.inGame||G.mode!=='solo'||G.coop||tutS||stS||tutWait||storyWait||t.sp||!$('#modal').hidden)return; t.sp=1; saveChar();
-    modal(`<h3>⏩ 1.3배속 해금!</h3><div class="mbody" style="line-height:1.7"><p style="margin:0 0 8px">1-5 스테이지를 클리어해서 <b style="color:#ffb259">배속 기능</b>이 열렸어요.</p><p style="margin:0 0 8px">AUTO 왼쪽의 <b>⏩ 버튼</b>을 누르면 게임이 <b>1.3배</b> 빨라지고, 한 번 더 누르면 원래 속도로 돌아와요.</p><p style="margin:0;color:var(--mute)">설정은 캐릭터마다 기억돼요. 협동에서는 방장의 설정을 따라가요. 클리어 시간은 실제 시간으로 기록돼요.</p></div><div class="row2"><button class="btn" id="spNo">알겠어요</button><button class="btn primary" id="spOn">지금 켜 보기</button></div>`,m=>{ m.querySelector('#spNo').onclick=closeModal; m.querySelector('#spOn').onclick=()=>{ closeModal(); setSpd(true,{save:true,hint:true}); sfx('aura'); }; }); }); }
+    modal(`<h3>⏩ 1.3배속 · 🤖 AUTO 스킬 해금!</h3><div class="mbody" style="line-height:1.7"><p style="margin:0 0 8px">1-5 스테이지를 클리어해서 <b style="color:#ffb259">배속 기능</b>과 <b style="color:#ffb259">AUTO 스킬</b>(AUTO를 두 번 눌러 스킬까지 자동 사용)이 열렸어요.</p><p style="margin:0 0 8px">AUTO 왼쪽의 <b>⏩ 버튼</b>을 누르면 게임이 <b>1.3배</b> 빨라지고, 한 번 더 누르면 원래 속도로 돌아와요.</p><p style="margin:0;color:var(--mute)">설정은 캐릭터마다 기억돼요. 협동에서는 방장의 설정을 따라가요. 클리어 시간은 실제 시간으로 기록돼요.</p></div><div class="row2"><button class="btn" id="spNo">알겠어요</button><button class="btn primary" id="spOn">지금 켜 보기</button></div>`,m=>{ m.querySelector('#spNo').onclick=closeModal; m.querySelector('#spOn').onclick=()=>{ closeModal(); setSpd(true,{save:true,hint:true}); sfx('aura'); }; }); }); }
 function counterTip(){ const t=me&&me.tut; if(!t||t.cn||tutS)return; t.cn=1; saveChar(); const au=autoMode===2;
   later(.7,()=>{ if(!G.inGame)return; modal(`<h3>⚔️ 보스의 반격 태세!</h3><div class="mbody" style="line-height:1.7"><p style="margin:0 0 8px">보스 머리 위에 <b style="color:#ffb347">⚔️ 반격 태세</b>가 뜨는 동안(약 3초)에는 <b>스킬을 쓰면 안 돼요.</b> 쓰는 순간 내 최대 생명력의 <b style="color:#ff8a7a">35%</b>가 피해로 되돌아와요.</p><p style="margin:0 0 8px">일반공격과 소환수 공격은 괜찮아요. 태세가 풀리면 다시 스킬을 쓰세요.</p>${au?'<p style="margin:0;color:#ffb259"><b>AUTO(+스킬)</b>도 태세를 구분하지 못해요. 보스가 태세에 들어가면 AUTO를 1단계(이동)로 낮추거나 직접 조작하세요.</p>':'<p style="margin:0;color:var(--mute)">AUTO(+스킬)를 쓸 때도 태세를 구분하지 못하니 조심하세요.</p>'}</div><div class="row2"><button class="btn primary" id="cnOk" style="grid-column:1/-1">알겠어요</button></div>`,m=>{ m.querySelector('#cnOk').onclick=closeModal; }); }); }
 function tutBegin(){ const k=selStage; if(tutS||!me||!me.tut||!me.tut.on||G.mode!=='solo'||G.coop||k>=TUTS.length||me.tut.d[k]!==0)return false;
@@ -4292,7 +4295,7 @@ function markClear(){ const n=(G.stageIdx|0)+1, t=Math.max(1,Math.round(G.runT||
   if(n>(me.clear|0)){ me.clear=Math.min(STAGES.length,n); stageClear=me.clear; me.ct=t; me.cat=Math.floor(Date.now()/1000); ch=true; G.bestCt=true; }
   else if(n===(me.clear|0)&&!(me.ct>0&&t>=me.ct)){ me.ct=t; ch=true; G.bestCt=true; }
   if(ch){ saveChar(); rkSubmitAll(); }
-  if(wasLk&&spdOk()){ G.spdNew=true; setSpd(G.spd>1); later(2,()=>{ if(G.inGame)toast('⏩ 1.3배속이 열렸어요! AUTO 왼쪽 ⏩ 버튼','#ffb259'); }); } }   /* 1-5 첫 클리어 */
+  if(wasLk&&spdOk()){ G.spdNew=true; setSpd(G.spd>1); later(2,()=>{ if(G.inGame)toast('⏩ 1.3배속 · 🤖 AUTO 스킬이 열렸어요!','#ffb259'); }); } }   /* 1-5 첫 클리어 */
 function endTab(t){ const bx=$('#endBox'); bx.dataset.tab=t; bx.querySelectorAll('.etabs button').forEach(b=>{ b.setAttribute('aria-selected',b.dataset.t===t); b.onclick=()=>{ endTab(b.dataset.t); sfx('ui'); }; }); }   /* 가로 모드: 전리품 / 데미지 순위 탭 (세로 모드는 탭 없이 둘 다 표시) */
 function showEnd(msg){
   sfx(G.phase==='win'?'win':'lose');
