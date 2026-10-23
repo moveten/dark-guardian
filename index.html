@@ -745,7 +745,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.5.0.0234</div>
+    <div class="ver" id="verT">v0.5.0.0235</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -1747,7 +1747,7 @@ function guestEvent(e){
   else if(t==='asl'){ const k=AWCK[e[2]|0]||'seal', C=AWC[k]; awkCutin(k,e[3]|0||(awkRealDraw()||{}).ph); announce(C.warn,'#c0a8ff'); sfx('boss'); }
   else if(t==='ash0'){ announce('🛡️ 그림자 배리어가 깨졌어요! 이제 피해가 들어가요','#c0a8ff'); }
   else if(t==='abz'){ banner('💢 광폭화','각성 그림자의 공격이 빨라져요'); announce('💢 각성 그림자 광폭화!','#ff6a8a'); }
-  else if(t==='asf'){ const k=e[2]|0; if(k===1){ banner('💜 봉인 실패','각성 그림자가 크게 회복했어요'); announce('💜 봉인 실패! 보스가 크게 회복했어요','#c090ff'); } else if(k===2){ banner('🌑 그림자 잠식','15초간 받는 피해 +50% · 이동 속도 -40%'); } else if(k===3){ banner('💔 심장 파편 흡수',`${e[3]|0}개가 보스에게 닿았어요`); } else announce('✨ 파괴 성공! 각성 그림자가 잠시 쓰러졌어요','#9fe08a'); G.shake=Math.max(G.shake,.6); }
+  else if(t==='asf'){ const k=e[2]|0; if(k===1){ banner('💜 봉인 실패','각성 그림자가 크게 회복했어요'); announce('💜 봉인 실패! 보스가 크게 회복했어요','#c090ff'); } else if(k===2){ banner('☠️ 그림자 등불','등불을 끄지 못해 모두 쓰러졌어요'); } else if(k===3){ banner('💔 심장 파편 흡수',`${e[3]|0}개가 보스에게 닿았어요`); } else announce('✨ 파괴 성공! 각성 그림자가 잠시 쓰러졌어요','#9fe08a'); G.shake=Math.max(G.shake,.6); }
   else if(t==='b'){ const bt=MT[e[2]]?e[2]:3; banner(G.stg.bn||MT[bt].n,bt===3?'거대한 그림자가 다가옵니다':'우두머리가 모습을 드러냈습니다'); me.pot=3; }
   else if(t==='a'){ arrowFx(e[2],e[3],e[4],e[5],e[6]|0); }
   else if(t==='s'){ slamFx(e[2],e[3],e[4]); }
@@ -1810,7 +1810,7 @@ const awkType=()=>MT.findIndex(t=>t.raid==='awk'), objType=()=>MT.findIndex(t=>t
 const awkReal=()=>G.mobs.find(m=>m.rk==='awk'&&!m.fake&&!m.dead);
 const awkCap=m=>AWK.ph[(m.ph||1)-1];   /* 지금 페이즈의 체력 상한 비율 */
 const awkFloor=m=>(m.ph||1)<3?AWK.ph[m.ph||1]:-1;   /* 다음 페이즈 문턱 — 페이즈 전환 전에는 이 아래로 안 깎임 */
-const AWK_SHIELD=10;   /* 1페이즈 그림자 배리어: 공격 10번을 막음 (피해량과 상관없이 한 번 맞을 때마다 1) */
+const AWK_SHIELD=20;   /* 1페이즈 그림자 배리어: 공격 10번을 막음 (피해량과 상관없이 한 번 맞을 때마다 1) */
 function spawnAwake(){ const b=spawnMob(awkType(),VX,VY*.45,false); b.ph=1; b.shield=AWK_SHIELD; later(3.2,()=>{ if(G.inGame&&b.shield>0)announce(`🛡️ 그림자 배리어! 공격 ${AWK_SHIELD}번을 막아요 — 궁극기는 배리어가 깨진 뒤에`,'#c0a8ff'); }); b.wake=3; b.cloneT=10; b.sealT=18; b.dmgB=b.dmg0; b.sum0=b.sum1=b.sum2=true;
   efx.push({k:'ring',x:b.x,y:b.y,r0:10,r1:180,t:0,life:.8,col:'#8a6cff',w:12}); burst(b.x,b.y,'#2a1a4a',50,360); impact(b.x,b.y,'130,100,255',240);
   G.laneShow=[0,1,3]; pushEv(['b',awkType()]); banner('🌑 각성 그림자','봉인이 깨지고, 첫 수호자의 그림자가 일어섭니다'); me.pot=3; G.shake=1; sfx('boss'); }
@@ -1830,7 +1830,7 @@ function awkClone(m){ const n=m.ph===2?2:1, a0=rand(0,6.283), out=[m];
   announce(n>1?'👥 그림자 분신술! 셋 중 하나만 진짜예요':'👥 그림자 분신술! 둘 중 하나만 진짜예요','#b89cff'); pushEv(['acl',n]); }
 /* 파괴 패턴 3종: 봉인 결정(1페이즈) · 그림자 등불(2페이즈) · 심장 파편(3페이즈) */
 const AWC={seal:{n:3,dur:6,hp:120000,ok:1,nm:'🔮 봉인 결정',sub:'6초 안에 결정 3개를 모두 부수세요!',warn:'🔮 봉인 결정을 모두 부수세요! 못 부수면 보스가 크게 회복해요'},
-  lantern:{n:3,dur:8,hp:96000,ok:2,nm:'🏮 그림자 등불',sub:'8초 안에 보스 주변 등불 3개를 모두 끄세요!',warn:'🏮 그림자 등불을 모두 끄세요! 못 끄면 그림자 잠식에 걸려요'},
+  lantern:{n:2,dur:8,hp:96000,ok:2,nm:'🏮 그림자 등불',sub:'8초 안에 등불 2개를 끄지 못하면 즉사!',warn:'☠️ 그림자 등불 2개를 모두 끄세요! 못 끄면 모두 즉사해요'},
   heart:{n:3,dur:7,hp:144000,ok:3,nm:'💔 심장 파편',sub:'보스에게 닿기 전에 파편 3개를 부수세요!',warn:'💔 심장 파편이 보스에게 모여요! 닿기 전에 부수세요'}};
 const AWCK=['','seal','lantern','heart'], AWCN={seal:'봉인 결정',lantern:'그림자 등불',heart:'심장 파편'};
 function awkSeal(m){ const kind=m.ph===2?'lantern':m.ph===3?'heart':'seal', C=AWC[kind], hp=C.hp*(G.coop?1.6:1), pls=playersForAI(), c=pls[0]||{x:VX,y:VY};
@@ -1856,7 +1856,7 @@ function awkSealEnd(m){ const c=m.cast||{k:'seal',abs:0}, left=G.mobs.filter(o=>
   const fail=c.k==='heart'?(c.abs|0)+left.length:left.length, cap=m.max*awkCap(m), heal=f=>{ const hl=Math.max(0,Math.min(cap,m.hp+m.max*f)-m.hp); m.hp+=hl; addNum(m.x,m.y-m.r-16,'+'+Math.round(hl).toLocaleString('en-US'),'#c090ff',true); return hl; };
   if(fail){ let msg='';
     if(c.k==='seal'){ const hl=heal(AWK.sealHeal); msg=`💜 봉인 실패! 보스 체력 +${Math.round(hl/m.max*100)}%`; banner('💜 봉인 실패','각성 그림자가 크게 회복했어요'); }
-    else if(c.k==='lantern'){ awkAllStatus('erode',15); msg='🌑 등불 실패! 그림자 잠식 15초 — 받는 피해 +50%, 이동 속도 -40%, 마나 회복 정지'; banner('🌑 그림자 잠식','15초간 받는 피해 +50% · 이동 속도 -40%'); }
+    else if(c.k==='lantern'){ awkAllStatus('doom',0); msg='☠️ 등불 실패! 그림자가 모두를 집어삼켰어요'; banner('☠️ 그림자 등불','등불을 끄지 못해 모두 쓰러졌어요'); }
     else { const hl=heal(.15); msg=`💔 파편 ${fail}개 흡수! 보스 체력 +${Math.round(hl/m.max*100)}%`; if(fail>=2){ awkAllStatus('erode',10); msg+=' · 그림자 잠식 10초'; } if(fail>=3){ awkAllStatus('stun',2); msg+=' · 그림자 사슬 2초'; } banner('💔 심장 파편 흡수',`${fail}개가 보스에게 닿았어요`); }
     announce(msg,'#c090ff'); burst(m.x,m.y,'#8a6cff',50,360); impact(m.x,m.y,'160,120,255',260); G.shake=1; sfx('boss'); pushEv(['asf',c.k==='seal'?1:c.k==='lantern'?2:3,fail]); }
   else { m.stunT=2.5; m.stunImm=0; announce(`✨ ${AWCN[c.k]} 성공! 각성 그림자가 잠시 쓰러졌어요`,'#9fe08a'); burst(m.x,m.y,'#cfe0ff',30,300); G.shake=Math.max(G.shake,.6); pushEv(['asf',0]); }
@@ -2345,6 +2345,7 @@ function guardMul(){let g=0; if(me.aura==='guard')g=Math.max(g,(30+6*skLv(me,'gu
   if(ally&&!ally.lobby&&!ally.dead&&ally.aura==='guard'&&hyp(ally.x-me.x,ally.y-me.y)<320)g=Math.max(g,(30+6*ally.al)/100); return 1+g;}
 function applyStatus(kind,dur){ if(me.dead||me.god>0)return;
   { const ar=(me.D&&me.D.sp&&me.D.sp.aw_ring)|0; if(ar&&['erode','hblock','mblock','slow','stun'].includes(kind))dur*=Math.max(.5,1-.25*ar); }   /* 각성 반지 '속박 해제': 디버프 지속시간 -25% (2개 -50%) */
+  if(kind==='doom'){ if(me.hp>0){ addNum(me.x,me.y-50,'☠️ 즉사','#ff4a6a',true); burst(me.x,me.y,'#2a1a4a',40,320); spark(me.x,me.y,'#8a6cff',30); G.shake=1; sfx('hurt'); goDown(); } return; }   /* 그림자 등불 실패 */
   if(kind==='erode'){ me.erode=Math.max(me.erode||0,dur); addNum(me.x,me.y-46,'🌑 그림자 잠식','#b89cff',true); return; }
   if(kind==='hblock'){ me.hblk=Math.max(me.hblk||0,dur); addNum(me.x,me.y-46,'💔 생명 봉쇄','#ff8ab0',true); return; }
   if(kind==='mblock'){ me.mblk=Math.max(me.mblk||0,dur); addNum(me.x,me.y-30,'💧 마나 봉쇄','#8fb0ff',true); return; }
