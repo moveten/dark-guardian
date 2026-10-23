@@ -67,3 +67,5 @@
 [드루이드 궁극기 곰세마리 소환수 이미지 — 적용 완료] mn_papa / mn_mama / mn_baby .png + _atk.png (대기/공격, 각 쌍은 같은 크기·같은 발 위치). 크기는 index.html 의 MSH(papa/mama/baby h)에서 조절. 없으면 코드가 그리는 기본 곰 그림.
 
 [팔라딘 공격 시트 — 적용 완료] hero_pal_atk2.png = 6칸 가로 시트 (프롬프트: img/hero_pal_atk_prompt.txt). 코드 HATK.pal 에 칸 수·타이밍·발 높이(dy)·파일 이름(src)이 있어요. 예전 hero_pal_atk.png(4칸)는 캐시 충돌을 피하려고 이름을 바꾸며 삭제.
+
+[중앙 성 3단계 시트 — 그림 준비 완료, 게임 적용 전] castle_c1/c2/c3.png = 챕터별(1-x/2-x/3-x) 성, 각 가로 3칸(칸 480x440, 투명 배경, 기단 아래 10px 맞춤): 1칸 온전 / 2칸 약 30% 파괴 / 3칸 약 70% 파괴. 프롬프트 img/castle_prompt.txt
