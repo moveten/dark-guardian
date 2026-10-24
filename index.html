@@ -751,7 +751,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.0.0245</div>
+    <div class="ver" id="verT">v0.6.0.0246</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -2588,7 +2588,7 @@ function doCast(key,range,lv){
   fxQ.push([++fxSeq,key,Math.round(tx),Math.round(ty),lv,key==='divine'?(me.dvPc|0):0]); if(fxQ.length>6)fxQ.shift();
 }
 /* 반격 태세: 우두머리는 무적이 아니라서 일반공격·소환수·스킬 피해가 모두 그대로 들어가고, 태세 중에 내가 스킬을 쓰면 추가로 내 최대 생명력의 CNT_PCT 만큼 방어력·막기 무시로 되돌려받음 */
-const CNT_PCT=.35, CNT_WIN=2; /* 반사 피해(최대 생명력 비율) / 태세 중 시전한 스킬만 반사 대상으로 인정하는 시간(초) — 태세 전에 깔아 둔 장판·지연 피해는 반사 없이 보스에게만 들어감 */
+const CNT_PCT=.4, CNT_WIN=2; /* 반사 피해(최대 생명력 비율) / 태세 중 시전한 스킬만 반사 대상으로 인정하는 시간(초) — 태세 전에 깔아 둔 장판·지연 피해는 반사 없이 보스에게만 들어감 */
 function counterHit(m,v){ if(T-(me.cLast||-9)<.6||me.dead||T-(me.cnCast||-9)>CNT_WIN||me.cnDone===me.cnId)return; me.cLast=T; me.cnDone=me.cnId;   /* 스킬 한 번에 반사는 한 번만 (여러 발·여러 번 맞는 스킬도) */ addNum(me.x,me.y-44,'⚔️ 반격!','#ff8a3a',true); efx.push({k:'ring',x:me.x,y:me.y,r0:8,r1:50,t:0,life:.35,col:'#ff8a3a',w:7});
   if(me.god>0||G.phase==='win'||G.phase==='clear')return; const d=Math.round(me.D.maxHp*CNT_PCT*(me.D.sp&&me.D.sp.hamu?.5:1)); me.hp-=d; me.hurt=.15; sfx('hurt'); G.shake=Math.max(G.shake,.4); addNum(me.x,me.y-24,d,'#ff5a4a',false); if(me.hp<=0){ goDown(); counterTip(); } }
 const LVP0={ex:0,gap:0,dm:1,tk:1,miss:0};
@@ -3766,7 +3766,7 @@ function spdTip(){ const t=me&&me.tut; if(!t||t.sp||G.mode!=='solo'||G.coop||!sp
   later(2.8,()=>{ if(!G.inGame||G.mode!=='solo'||G.coop||tutS||stS||tutWait||storyWait||t.sp||!$('#modal').hidden)return; t.sp=1; saveChar();
     modal(`<h3>⏩ 1.3배속 · 🤖 AUTO 스킬 해금!</h3><div class="mbody" style="line-height:1.7"><p style="margin:0 0 8px">1-5 스테이지를 클리어해서 <b style="color:#ffb259">배속 기능</b>과 <b style="color:#ffb259">AUTO 스킬</b>(AUTO를 두 번 눌러 스킬까지 자동 사용)이 열렸어요.</p><p style="margin:0 0 8px">AUTO 왼쪽의 <b>⏩ 버튼</b>을 누르면 게임이 <b>1.3배</b> 빨라지고, 한 번 더 누르면 원래 속도로 돌아와요.</p><p style="margin:0;color:var(--mute)">설정은 캐릭터마다 기억돼요. 협동에서는 방장의 설정을 따라가요. 클리어 시간은 실제 시간으로 기록돼요.</p></div><div class="row2"><button class="btn" id="spNo">알겠어요</button><button class="btn primary" id="spOn">지금 켜 보기</button></div>`,m=>{ m.querySelector('#spNo').onclick=closeModal; m.querySelector('#spOn').onclick=()=>{ closeModal(); setSpd(true,{save:true,hint:true}); sfx('aura'); }; }); }); }
 function counterTip(){ const t=me&&me.tut; if(!t||t.cn||tutS)return; t.cn=1; saveChar(); const au=autoMode===2;
-  later(.7,()=>{ if(!G.inGame)return; modal(`<h3>⚔️ 보스의 반격 태세!</h3><div class="mbody" style="line-height:1.7"><p style="margin:0 0 8px">보스 머리 위에 <b style="color:#ffb347">⚔️ 반격 태세</b>가 뜨는 동안(약 3초)에는 <b>스킬을 쓰면 안 돼요.</b> 쓰는 순간 내 최대 생명력의 <b style="color:#ff8a7a">35%</b>가 피해로 되돌아와요.</p><p style="margin:0 0 8px">일반공격과 소환수 공격은 괜찮아요. 태세가 풀리면 다시 스킬을 쓰세요.</p>${au?'<p style="margin:0;color:#ffb259"><b>AUTO(+스킬)</b>도 태세를 구분하지 못해요. 보스가 태세에 들어가면 AUTO를 1단계(이동)로 낮추거나 직접 조작하세요.</p>':'<p style="margin:0;color:var(--mute)">AUTO(+스킬)를 쓸 때도 태세를 구분하지 못하니 조심하세요.</p>'}</div><div class="row2"><button class="btn primary" id="cnOk" style="grid-column:1/-1">알겠어요</button></div>`,m=>{ m.querySelector('#cnOk').onclick=closeModal; }); }); }
+  later(.7,()=>{ if(!G.inGame)return; modal(`<h3>⚔️ 보스의 반격 태세!</h3><div class="mbody" style="line-height:1.7"><p style="margin:0 0 8px">보스 머리 위에 <b style="color:#ffb347">⚔️ 반격 태세</b>가 뜨는 동안(약 3초)에는 <b>스킬을 쓰면 안 돼요.</b> 쓰는 순간 내 최대 생명력의 <b style="color:#ff8a7a">40%</b>가 피해로 되돌아와요.</p><p style="margin:0 0 8px">일반공격과 소환수 공격은 괜찮아요. 태세가 풀리면 다시 스킬을 쓰세요.</p>${au?'<p style="margin:0;color:#ffb259"><b>AUTO(+스킬)</b>도 태세를 구분하지 못해요. 보스가 태세에 들어가면 AUTO를 1단계(이동)로 낮추거나 직접 조작하세요.</p>':'<p style="margin:0;color:var(--mute)">AUTO(+스킬)를 쓸 때도 태세를 구분하지 못하니 조심하세요.</p>'}</div><div class="row2"><button class="btn primary" id="cnOk" style="grid-column:1/-1">알겠어요</button></div>`,m=>{ m.querySelector('#cnOk').onclick=closeModal; }); }); }
 function tutBegin(){ const k=selStage; if(tutS||!me||!me.tut||!me.tut.on||G.mode!=='solo'||G.coop||k>=TUTS.length||me.tut.d[k]!==0)return false;
   later(1.4,()=>{ if(G.inGame&&G.stageIdx===k&&!tutS&&G.mode==='solo'&&!G.coop)tutRun(k); }); return true; }
 function tutRun(k){ tutS={k,i:-1,fl:{},S:{},ok:false,pz:false,conf:0,key:''}; $('#tq').hidden=false; clearInterval(tutIv); tutIv=setInterval(tutTick,120); tutGo(0); }
