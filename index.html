@@ -760,7 +760,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.0.0251</div>
+    <div class="ver" id="verT">v0.6.0.0252</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -1822,9 +1822,9 @@ function spawnRaid(){ const pos=[[VX,VY*.5],[(WW+VX)/2,VY],[VX/2,VY]].sort(()=>M
 
 /* ===== 5스테이지 각성 그림자 (방장/솔로만 AI 실행) =====
    페이즈: 1(100~70%) 2(70~35%) 3(35~0%) — 한 번 넘어간 페이즈로는 돌아가지 않음(회복도 그 페이즈 상한까지만)
-   분신술: 본체와 똑같은 가짜(fake)가 생겨 같은 피해로 공격. 가짜는 숨은 체력(최대 체력의 6%)이 다 닳거나 15초가 지나면 사라짐. 화면에선 구분 불가
+   분신술: 본체와 똑같은 가짜(fake)가 생겨 같은 피해로 공격. 가짜는 숨은 체력(본체 체력의 12%)이 다 닳거나 10초가 지나면 사라짐. 화면에선 구분 불가
    봉인 결정: 보스 무적 + 6초 시전, 결정 3개(각 최대 체력 0.5%, 협동 ×1.6)를 다 깨지 못하면 보스가 최대 체력 50% 회복 */
-const AWK={ph:[1,.7,.35], dmgM:[1,1.15,1.3], fake:.06, fakeT:15, cloneCd:[17.5,15.4,14], CDK:.7, sealDur:6, sealCd:32, sealN:3, sealHp:.005, sealHeal:.5, okStun:1};
+const AWK={ph:[1,.7,.35], dmgM:[1,1.15,1.3], fake:.12, fakeT:10, cloneCd:[17.5,15.4,14], CDK:.7, sealDur:6, sealCd:32, sealN:3, sealHp:.005, sealHeal:.5, okStun:1};
 const awkType=()=>MT.findIndex(t=>t.raid==='awk'), objType=()=>MT.findIndex(t=>t.obj);
 const awkReal=()=>G.mobs.find(m=>m.rk==='awk'&&!m.fake&&!m.dead);
 const awkCap=m=>AWK.ph[(m.ph||1)-1];   /* 지금 페이즈의 체력 상한 비율 */
@@ -1908,8 +1908,9 @@ function awkMirror(m,best,bd,a,du){ const cls=best.i===2&&ally?ally.cls:best.i==
   announce(m.tel.nm+'!','#c08bff'); return true; }
 /* 잠식 장판(3페이즈): 맵 가장자리부터 어둠이 차올라 30초 동안 안전 지대가 반경 470 → 230 으로 줄어듦 */
 function awkZone(dt){ if(!G.awz)G.awz={x:VX,y:VY,r0:470,r1:230,t:0,dur:30}; const z=G.awz; z.t=Math.min(z.dur,z.t+dt); z.r=z.r0+(z.r1-z.r0)*(z.t/z.dur); }
-function awkZoneSelf(dt){ const z=G.awz; if(!z||me.dead||G.phase!=='boss')return; if(hyp(me.x-z.x,me.y-z.y)<=z.r){ me.zoT=0; return; }
-  me.zoT=(me.zoT||0)-dt; if(me.zoT<=0){ me.zoT=.5; takeDmg(me.D.maxHp*.04*GZM,true); me.slowP=Math.max(me.slowP||0,.6); addNum(me.x,me.y-34,'🌑 잠식','#b89cff',false); } }
+function awkZoneSelf(dt){ const z=G.awz; if(!z||me.dead||G.phase!=='boss')return; if(hyp(me.x-z.x,me.y-z.y)<=z.r){ me.zoT=.5; return; }
+  if(!(me.hblk>0))me.hpLk=me.hp; me.hblk=Math.max(me.hblk||0,.6);   /* 장판 밖: 생명력 회복 불가(물약만 가능) */
+  me.zoT=(me.zoT==null?.5:me.zoT)-dt; if(me.zoT<=0){ me.zoT=.5; fixDmg(.1,'🌑','#b89cff'); me.slowP=Math.max(me.slowP||0,.6); } }
 /* 심장 파편: 보스 쪽으로 이동, 닿으면 흡수 */
 function awkObjTick(o,dt){ if(!o.mv)return; const R=G.mobs.find(q=>q.id===o.own&&!q.dead); if(!R){ o.dead=true; return; }
   const dx=R.x-o.x, dy=R.y-o.y, d=hyp(dx,dy)||1; if(d<R.r+18){ o.dead=true; if(R.cast)R.cast.abs=(R.cast.abs|0)+1; burst(o.x,o.y,'#ff5a9a',24,260); impact(R.x,R.y,'255,90,150',160); announce('💔 심장 파편이 보스에게 흡수됐어요!','#ff8ab0'); sfx('boss'); return; }
@@ -1947,7 +1948,7 @@ function awkAI(m,dt,pls,sf,best,bd,tau){
     if(pk==='sword'){ m.tel={k:'slam',kind:'lines',x:m.x,y:m.y,as:[a-.36,a,a+.36],len:520,w:88,t:0,dur:1.1*du,mul:1.6,st:'slow',sd:2,col:'#b88aff',nm:'⚔️ 맏이의 검',dash:1,sk:pk}; return true; }
     if(pk==='star'){ const pts=[{x:best.x,y:best.y}]; for(let i=0;i<6;i++)pts.push({x:clamp(best.x+rand(-160,160),40,WW-40),y:clamp(best.y+rand(-160,160),40,WH-40)}); m.tel={k:'slam',kind:'multi',x:best.x,y:best.y,pts,r:82,t:0,dur:1.5*du,mul:1.3,st:'slow',sd:2.5,col:'#c8a8ff',nm:'🌠 둘째의 별',sk:pk}; return true; }
     if(pk==='blink'){ m.tel={k:'slam',kind:'blink',x:clamp(best.x+Math.cos(a)*30,40,WW-40),y:clamp(best.y+Math.sin(a)*30,40,WH-40),r:64,t:0,dur:.85*du,col:'#8a6cff',nm:'🌑 그림자 걸음',sk:pk}; return true; }
-    if(pk==='slash'){ m.tel={k:'slam',kind:'aoe',x:m.x+Math.cos(a)*40,y:m.y+Math.sin(a)*40,r:165,t:0,dur:.9*du,mul:1.7,st:0,sd:0,col:'#8a6cff',nm:'🗡️ 그림자 베기',sk:pk}; return true; }
+    if(pk==='slash'){ m.tel={k:'slam',kind:'aoe',x:m.x+Math.cos(a)*40,y:m.y+Math.sin(a)*40,r:165,t:0,dur:.9*du,mul:1.7,st:'bleed',sd:3,col:'#8a6cff',nm:'🗡️ 그림자 베기',sk:pk}; return true; }
     if(pk==='counter'){ m.tel={k:'slam',kind:'counter',x:m.x,y:m.y,r:Math.round(m.r*1.6),t:0,dur:.8,sk:pk}; return true; }
     if(pk==='wave'){ m.tel={k:'slam',kind:'lines',x:m.x,y:m.y,as:[a-.5,a-.17,a+.17,a+.5],len:560,w:56,t:0,dur:1.0*du,mul:1.4,st:'slow',sd:1.5,col:'#9a7dff',nm:'🌊 그림자 파동',sk:pk}; return true; }
     m.bt=rand(1.2,2.2)*AWK.CDK; }
@@ -2384,9 +2385,12 @@ const ENEM=.003; /* 에너지 1당 마법 피해 +0.3% */
 function spellDmg(base,noPct){const D=me.D; return critRoll(base*(1+D.ene*ENEM+(noPct?0:D.dmgPct/100)+buffDmg())*(1+((D.wmn+D.wmx)/2)/35)*(D.sp.tome?1.2:1));}
 function guardMul(){let g=0; if(me.aura==='guard')g=Math.max(g,(30+6*skLv(me,'guard'))/100);
   if(ally&&!ally.lobby&&!ally.dead&&ally.aura==='guard'&&hyp(ally.x-me.x,ally.y-me.y)<320)g=Math.max(g,(30+6*ally.al)/100); return 1+g;}
+/* 방어력·피해감소를 무시하는 고정 피해 (최대 생명력의 pct) */
+function fixDmg(pct,txt,col){ if(me.dead||me.god>0)return; const loss=Math.max(1,Math.floor(me.D.maxHp*pct)); me.hp-=loss; me.hurt=.3; addNum(me.x,me.y-34,(txt||'')+'-'+loss,col||'#ff5a7a',false); spark(me.x,me.y,col||'#ff5a7a',8); sfx('hurt'); if(me.hp<=0)goDown(); }
 function applyStatus(kind,dur){ if(me.dead||me.god>0)return;
-  { const ar=(me.D&&me.D.sp&&me.D.sp.aw_ring)|0; if(ar&&['erode','hblock','hblockp','mblock','slow','stun'].includes(kind))dur*=Math.max(.5,1-.25*ar); }   /* 각성 반지 '속박 해제': 디버프 지속시간 -25% (2개 -50%) */
+  { const ar=(me.D&&me.D.sp&&me.D.sp.aw_ring)|0; if(ar&&['erode','hblock','hblockp','mblock','slow','stun','bleed'].includes(kind))dur*=Math.max(.5,1-.25*ar); }   /* 각성 반지 '속박 해제': 디버프 지속시간 -25% (2개 -50%) */
   if(kind==='doom'){ if(me.hp>0){ addNum(me.x,me.y-50,'☠️ 즉사','#ff4a6a',true); burst(me.x,me.y,'#2a1a4a',40,320); spark(me.x,me.y,'#8a6cff',30); G.shake=1; sfx('hurt'); goDown(); } return; }   /* 그림자 등불 실패 */
+  if(kind==='bleed'){ if(!(me.bleed>0))me.bleedT=.5; me.bleed=Math.max(me.bleed||0,dur); me.bleedN=Math.max(me.bleedN|0,Math.round(dur/.5)); me.hblk=Math.max(me.hblk||0,dur); if(me.hpLk==null)me.hpLk=me.hp; addNum(me.x,me.y-46,'🩸 출혈 · 물약만 회복','#ff5a6a',true); return; }   /* 그림자 베기: 3초간 0.5초마다 최대 생명력 10% 고정 피해 + 생명력 회복 불가(물약만) */
   if(kind==='erode'){ me.erode=Math.max(me.erode||0,dur); addNum(me.x,me.y-46,'🌑 그림자 잠식','#b89cff',true); return; }
   if(kind==='hblock'||kind==='hblockp'){ const loss=Math.floor(me.D.maxHp*.5); me.hpLk=null; me.hp-=loss; me.hurt=.3; addNum(me.x,me.y-30,'-'+loss,'#ff5a7a',true); spark(me.x,me.y,'#ff5a9a',18); sfx('hurt'); G.shake=Math.max(G.shake,.5); if(me.hp<=0){ goDown(); return; } }   /* 생명 봉쇄: 최대 생명력 50% 고정 피해 후 회복 막힘 */
   if(kind==='mblock'){ me.mpLk=null; me.mp=Math.max(0,me.mp-me.D.maxMp*.5); }   /* 마나 봉쇄: 최대 마나 50% 잃고 회복 막힘 */
@@ -2423,7 +2427,8 @@ function reviveMe(pct,free){ G.stRev=(G.stRev|0)+1; me.vx=me.vy=0; const a=me.au
 function mightLevel(){ let l=0; if(me.aura==='might')l=skLv(me,'might');
   if(ally&&!ally.lobby&&!ally.dead&&ally.aura==='might'&&hyp(ally.x-me.x,ally.y-me.y)<320) l=Math.max(l,ally.al|0); return l; }
 /* 회복 봉쇄: 걸려 있는 동안 생명력·마나가 올라가지 못하게 잠금 (물약·흡혈·재생·오라·회복 구역·처치 회복 등 모든 회복) */
-function blockTick(dt){ if(!me)return; if(dt>0){ me.awArmCd=Math.max(0,(me.awArmCd||0)-dt); me.awkCd=Math.max(0,(me.awkCd||0)-dt); me.erode=Math.max(0,(me.erode||0)-dt); me.hblk=Math.max(0,(me.hblk||0)-dt); me.hbStrict=Math.max(0,(me.hbStrict||0)-dt); me.mblk=Math.max(0,(me.mblk||0)-dt); }
+function blockTick(dt){ if(!me)return; if(dt>0){ me.awArmCd=Math.max(0,(me.awArmCd||0)-dt); me.awkCd=Math.max(0,(me.awkCd||0)-dt); me.erode=Math.max(0,(me.erode||0)-dt); me.hblk=Math.max(0,(me.hblk||0)-dt); me.hbStrict=Math.max(0,(me.hbStrict||0)-dt); me.mblk=Math.max(0,(me.mblk||0)-dt);
+    if(me.bleedN>0){ me.bleed=Math.max(0,me.bleed-dt); me.bleedT-=dt; if(!me.dead&&me.bleedT<=0){ me.bleedT+=.5; me.bleedN--; fixDmg(.1,'🩸','#ff4a5a'); } if(me.bleedN<=0||me.dead){ me.bleed=0; me.bleedN=0; } } }
   if(me.hblk>0&&!me.dead){ if(me.hpLk!=null&&me.hp>me.hpLk){ me.hp=me.hpLk; if(T-(me._hbN||-9)>1){ me._hbN=T; addNum(me.x,me.y-40,'💔 봉쇄','#ff8ab0',false); } } me.hpLk=me.hp; } else me.hpLk=null;
   if((me.mblk>0||me.erode>0)&&!me.dead){ if(me.mpLk!=null&&me.mp>me.mpLk)me.mp=me.mpLk; me.mpLk=me.mp; } else me.mpLk=null; }
 function updateMe(dt){
@@ -4613,7 +4618,7 @@ function patchModal(){
     fetch('patchnotes.txt?'+Date.now(),{cache:'no-store'}).then(r=>{ if(!r.ok)throw 0; return r.text(); }).then(t=>{ m.querySelector('#pnT').textContent=t; }).catch(()=>{ m.querySelector('#pnT').textContent='패치노트를 불러오지 못했어요. (오프라인이거나 서버 점검 중)'; }); }); }
 function prepMe(){ me=loadChar(selId); me.D=derive(me); spawnMe(); }
 function resetWorld(){
-  storyStop(); G.stZ=0; G.aim=null; G.lostBoss=false; G.castle=null; G.lostCastle=false; G.awz=null; G.awc=null; { const ac=$('#awCut'); if(ac)ac.classList.remove('on'); } if(me){ me.erode=me.hblk=me.mblk=me.hbStrict=0; me.hpLk=me.mpLk=null; }
+  storyStop(); G.stZ=0; G.aim=null; G.lostBoss=false; G.castle=null; G.lostCastle=false; G.awz=null; G.awc=null; { const ac=$('#awCut'); if(ac)ac.classList.remove('on'); } if(me){ me.erode=me.hblk=me.mblk=me.hbStrict=me.bleed=me.bleedN=0; me.hpLk=me.mpLk=null; }
   projs.length=zones.length=timers.length=parts.length=nums.length=ground.length=efx.length=0;
   G.mobs=[]; G.mobMap=new Map(); G.stKills=0; G.stDrops=0; G.stCap=0; G.runT=0; G.stGot=[0,0,0,0,0]; G.sib=0; G.endShown=false; G.clrDone=false; alClear(); G.stRev=0; G.stGold0=me?(me.gold|0):0; G.paused=false; G.bt=null; G.shake=0;
   hitQ=[]; fxQ=[]; lastAllyFx=-1; lastEv=-1; lastHit=0; G.guestDmg=0; G.fires=[]; G.freeRev=1; G.fireT=3; if(me){ me.rvGiven=0; me.seenRg=0; me.out=false; me.rvT=0; }
@@ -5173,7 +5178,7 @@ function drawPlayer(o,isMe,t){
   const nm=(isMe?me.name:(o.name||'동료'))||'', label=`Lv${lv} ${nm}`;
   ctx.font='700 11px "Noto Sans KR",sans-serif'; ctx.textAlign='center'; ctx.lineJoin='round'; ctx.lineWidth=3.5; ctx.strokeStyle='rgba(0,0,0,.9)'; ctx.strokeText(label,x,y-45); ctx.fillStyle=isMe?'#fff3dc':C.col; ctx.fillText(label,x,y-45);
   { const ic=[];
-    if(isMe){ const b=me.buffs; if(b.shout&&b.shout.t>0)ic.push(['📣',clamp(1-b.shout.t/(b.shout.m||10),0,1),Math.ceil(b.shout.t),true]); if(b.barrier&&b.barrier.t>0)ic.push(['🔷',clamp(1-b.barrier.t/10,0,1),Math.ceil(b.barrier.t),true]); if(me.stun>0)ic.push(['💫',0,Math.ceil(me.stun),true]); if(me.slowP>0)ic.push(['🐌',0,Math.ceil(me.slowP),true]); if(me.poison>0)ic.push(['☠️',0,Math.ceil(me.poison),true]); if(me.erode>0)ic.push(['🌑',0,Math.ceil(me.erode),true]); if(me.hblk>0)ic.push(['💔',0,Math.ceil(me.hblk),true]); if(me.mblk>0)ic.push(['💧',0,Math.ceil(me.mblk),true]); if(b.berserk&&b.berserk.t>0)ic.push(['😡',clamp(1-b.berserk.t/8,0,1),Math.ceil(b.berserk.t),true]); for(const [bk,be] of [['roar','📢'],['fury','💢'],['hunt','🌕'],['rage','🔥']]){ const bb=b[bk]; if(bb&&bb.t>0)ic.push([be,clamp(1-bb.t/(bb.m||8),0,1),Math.ceil(bb.t),true]); } if(me.spirit&&me.spirit.t>0)ic.push(['👻',clamp(1-me.spirit.t/me.spirit.m,0,1),Math.ceil(me.spirit.t),true]); if(me.aura)ic.push([SKBY[me.aura].e,0,'',true]); }
+    if(isMe){ const b=me.buffs; if(b.shout&&b.shout.t>0)ic.push(['📣',clamp(1-b.shout.t/(b.shout.m||10),0,1),Math.ceil(b.shout.t),true]); if(b.barrier&&b.barrier.t>0)ic.push(['🔷',clamp(1-b.barrier.t/10,0,1),Math.ceil(b.barrier.t),true]); if(me.stun>0)ic.push(['💫',0,Math.ceil(me.stun),true]); if(me.slowP>0)ic.push(['🐌',0,Math.ceil(me.slowP),true]); if(me.poison>0)ic.push(['☠️',0,Math.ceil(me.poison),true]); if(me.erode>0)ic.push(['🌑',0,Math.ceil(me.erode),true]); if(me.bleed>0)ic.push(['🩸',0,Math.ceil(me.bleed),true]); if(me.hblk>0)ic.push(['💔',0,Math.ceil(me.hblk),true]); if(me.mblk>0)ic.push(['💧',0,Math.ceil(me.mblk),true]); if(b.berserk&&b.berserk.t>0)ic.push(['😡',clamp(1-b.berserk.t/8,0,1),Math.ceil(b.berserk.t),true]); for(const [bk,be] of [['roar','📢'],['fury','💢'],['hunt','🌕'],['rage','🔥']]){ const bb=b[bk]; if(bb&&bb.t>0)ic.push([be,clamp(1-bb.t/(bb.m||8),0,1),Math.ceil(bb.t),true]); } if(me.spirit&&me.spirit.t>0)ic.push(['👻',clamp(1-me.spirit.t/me.spirit.m,0,1),Math.ceil(me.spirit.t),true]); if(me.aura)ic.push([SKBY[me.aura].e,0,'',true]); }
     { const oth=isMe?ally:me; if(!isMe&&o.aura&&SKBY[o.aura])ic.push([SKBY[o.aura].e,0,'',true]); if(oth&&!oth.lobby&&!oth.dead&&oth.aura&&oth.aura!==o.aura&&oth.aura!=='holyfire'&&SKBY[oth.aura]&&oth.x!==undefined&&hyp(oth.x-o.x,oth.y-o.y)<320)ic.push([SKBY[oth.aura].e,0,'받음',false]); }
     ctx.textBaseline='middle'; const w=24, x0=x-(ic.length-1)*w/2, cy=y-76;
     ic.forEach((q,i)=>{ const cx=x0+i*w; ctx.fillStyle='rgba(18,14,10,.9)'; ctx.beginPath(); ctx.arc(cx,cy,10,0,6.283); ctx.fill(); ctx.lineWidth=2; ctx.strokeStyle=q[3]?'#ffd84a':'#6a5a3a'; ctx.stroke(); ctx.font='12px sans-serif'; ctx.textAlign='center'; ctx.fillStyle='#fff'; ctx.fillText(q[0],cx,cy+1);
