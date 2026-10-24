@@ -745,7 +745,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.5.0.0238</div>
+    <div class="ver" id="verT">v0.5.0.0239</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -1824,7 +1824,7 @@ function awkPhase(m,np){ m.ph=np; m.dmg0=m.dmgB*AWK.dmgM[np-1]; m.dmg=m.dmg0; m.
   banner(t[0],t[1]); announce(t[0],'#a68bff'); G.shake=1.2; sfx('boss'); burst(m.x,m.y,'#2a1a4a',60,420); impact(m.x,m.y,'130,100,255',300); efx.push({k:'ring',x:m.x,y:m.y,r0:20,r1:260,t:0,life:.9,col:'#8a6cff',w:16});
   pushEv(['aph',np]); if(G.mode==='solo'||G.mode==='host')later(.3,()=>{ if(G.inGame&&G.phase==='boss')storyRun('p'+np); }); }
 function awkClone(m){ const n=m.ph===2?2:1, a0=rand(0,6.283), out=[m];
-  for(let i=0;i<n;i++){ const f=spawnMob(awkType(),m.x,m.y,false); f.fake=1; f.realId=m.id; f.ph=m.ph; f.max=f.hp=m.max*AWK.fake*(G.coop?1.5:1)/(G.coop?1.5:1); f.dmg0=f.dmg=m.dmg0; f.wake=0; f.bt=rand(1.2,2); f.cd=rand(.3,.8); f.life=AWK.fakeT; f.sum0=f.sum1=f.sum2=true; f.enr=m.enr; f.spd=m.spd; out.push(f); }
+  for(let i=0;i<n;i++){ const f=spawnMob(awkType(),m.x,m.y,false); f.fake=1; f.realId=m.id; f.ph=m.ph; f.max=f.hp=m.max*AWK.fake*(G.coop?1.5:1)/(G.coop?1.5:1); f.dmg0=f.dmg=m.dmg0; f.wake=0; f.bt=rand(.6,2.6); f.cd=rand(.3,.8); f.life=AWK.fakeT; f.sum0=f.sum1=f.sum2=true; f.enr=m.enr; f.spd=m.spd; out.push(f); }
   /* 갈라지는 방향을 섞어서 본체가 어디로 갔는지 모르게 */
   const pts=out.map((_,i)=>{ const a=a0+i*6.283/out.length; return {x:clamp(m.x+Math.cos(a)*95,60,WW-60),y:clamp(m.y+Math.sin(a)*95,60,WH-60)}; }).sort(()=>Math.random()-.5);
   out.forEach((o,i)=>{ burst(o.x,o.y,'#2a1a4a',20,240); o.x=pts[i].x; o.y=pts[i].y; spark(o.x,o.y,'#8a6cff',14); o.flash=.2; });
@@ -1905,13 +1905,19 @@ function awkAI(m,dt,pls,sf,best,bd,tau){
   if(m.bt<=0&&bd<900&&!tau){ const du=m.enr?.85:1, a=Math.atan2(best.y-m.y,best.x-m.x), ph=m.ph|0||1;
     if(!m.fake&&ph>=2){ m.brT=(m.brT==null?4.2:m.brT); if(m.brT<=0){ awkBrand(m,best); return true; } }
     if(ph>=3&&!m.fake&&(m.mirT==null||m.mirT<=0)){ m.mirT=rand(6.3,8.4); if(awkMirror(m,best,bd,a,du))return true; }
-    if(ph>=2){ const r2=Math.random();
-      if(r2<.28&&bd>120&&bd<560){ const w=88; m.tel={k:'slam',kind:'lines',x:m.x,y:m.y,as:[a-.36,a,a+.36],len:520,w,t:0,dur:1.1*du,mul:1.6,st:'slow',sd:2,col:'#b88aff',nm:'⚔️ 맏이의 검',dash:1}; return true; }
-      if(r2<.5){ const pts=[{x:best.x,y:best.y}]; for(let i=0;i<6;i++)pts.push({x:clamp(best.x+rand(-160,160),40,WW-40),y:clamp(best.y+rand(-160,160),40,WH-40)}); m.tel={k:'slam',kind:'multi',x:best.x,y:best.y,pts,r:82,t:0,dur:1.5*du,mul:1.3,st:'slow',sd:2.5,col:'#c8a8ff',nm:'🌠 둘째의 별'}; return true; } }
-    if(bd>240&&Math.random()<(bd>480?.9:.5)){ m.tel={k:'slam',kind:'blink',x:clamp(best.x+Math.cos(a)*30,40,WW-40),y:clamp(best.y+Math.sin(a)*30,40,WH-40),r:64,t:0,dur:.85*du,col:'#8a6cff',nm:'🌑 그림자 걸음'}; return true; }
-    if(bd<260){ const rr=Math.random();
-      if(rr<.45){ m.tel={k:'slam',kind:'aoe',x:m.x+Math.cos(a)*40,y:m.y+Math.sin(a)*40,r:165,t:0,dur:.9*du,mul:1.7,st:0,sd:0,col:'#8a6cff',nm:'🗡️ 그림자 베기'}; return true; }
-      if(rr<.6){ m.tel={k:'slam',kind:'counter',x:m.x,y:m.y,r:Math.round(m.r*1.6),t:0,dur:.8}; return true; } }
+    /* 일반 기술: 분신과 본체가 같은 기술을 동시에 쓰지 않게, 다른 그림자가 지금 쓰는 기술은 빼고 고름 */
+    const busy=new Set(G.mobs.filter(o=>o!==m&&!o.dead&&o.rk==='awk'&&o.tel&&o.tel.sk).map(o=>o.tel.sk)), C=[];
+    if(ph>=2&&bd>120&&bd<560)C.push(['sword',.28]);
+    if(ph>=2)C.push(['star',.22]);
+    if(bd>240)C.push(['blink',bd>480?.9:.5]);
+    if(bd<260){ C.push(['slash',.45]); C.push(['counter',.15]); }
+    const ok=C.filter(c=>!busy.has(c[0])); let tot=0; for(const c of ok)tot+=c[1]; let pk=null;
+    if(ok.length){ let r=Math.random()*Math.max(1,tot); for(const c of ok){ r-=c[1]; if(r<=0){ pk=c[0]; break; } } }
+    if(pk==='sword'){ m.tel={k:'slam',kind:'lines',x:m.x,y:m.y,as:[a-.36,a,a+.36],len:520,w:88,t:0,dur:1.1*du,mul:1.6,st:'slow',sd:2,col:'#b88aff',nm:'⚔️ 맏이의 검',dash:1,sk:pk}; return true; }
+    if(pk==='star'){ const pts=[{x:best.x,y:best.y}]; for(let i=0;i<6;i++)pts.push({x:clamp(best.x+rand(-160,160),40,WW-40),y:clamp(best.y+rand(-160,160),40,WH-40)}); m.tel={k:'slam',kind:'multi',x:best.x,y:best.y,pts,r:82,t:0,dur:1.5*du,mul:1.3,st:'slow',sd:2.5,col:'#c8a8ff',nm:'🌠 둘째의 별',sk:pk}; return true; }
+    if(pk==='blink'){ m.tel={k:'slam',kind:'blink',x:clamp(best.x+Math.cos(a)*30,40,WW-40),y:clamp(best.y+Math.sin(a)*30,40,WH-40),r:64,t:0,dur:.85*du,col:'#8a6cff',nm:'🌑 그림자 걸음',sk:pk}; return true; }
+    if(pk==='slash'){ m.tel={k:'slam',kind:'aoe',x:m.x+Math.cos(a)*40,y:m.y+Math.sin(a)*40,r:165,t:0,dur:.9*du,mul:1.7,st:0,sd:0,col:'#8a6cff',nm:'🗡️ 그림자 베기',sk:pk}; return true; }
+    if(pk==='counter'){ m.tel={k:'slam',kind:'counter',x:m.x,y:m.y,r:Math.round(m.r*1.6),t:0,dur:.8,sk:pk}; return true; }
     m.bt=rand(1.2,2.2)*AWK.CDK; }
   return false; }
 function spawnMob(type,x,y,elite){
