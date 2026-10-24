@@ -751,7 +751,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.0.0249</div>
+    <div class="ver" id="verT">v0.6.0.0250</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -4357,8 +4357,8 @@ const rkCat=r=>+(r&&r.data&&r.data.cat)||legacyCat(r&&r.id);
 const rkStageCmp=(a,b)=>(b.clear-a.clear)||(rkCat(a)-rkCat(b))||(b.lvl-a.lvl)||(b.kills-a.kills); /* 클리어 수 → 먼저 클리어한 사람 → 레벨 → 처치 */
 async function rkFetch(mode){
   const M=RKMODES[mode]; let r=null;
-  if(mode==='stage'){ try{ r=await fetch(RK_URL+'?select=id,name,cls,lvl,kills,clear,cp,data&order=clear.desc,data->cat.asc.nullslast,lvl.desc,kills.desc'+M.f+'&limit=30',{headers:rkHead()}); }catch(e){ r=null; } }
-  if(!r||!r.ok) r=await fetch(RK_URL+'?select=id,name,cls,lvl,kills,clear,cp,data&order='+M.o+M.f+'&limit=30',{headers:rkHead()});
+  if(mode==='stage'){ try{ r=await fetch(RK_URL+'?select=id,name,cls,lvl,kills,clear,cp,data&order=clear.desc,data->cat.asc.nullslast,lvl.desc,kills.desc'+M.f+'&limit=50',{headers:rkHead()}); }catch(e){ r=null; } }
+  if(!r||!r.ok) r=await fetch(RK_URL+'?select=id,name,cls,lvl,kills,clear,cp,data&order='+M.o+M.f+'&limit=50',{headers:rkHead()});
   if(!r.ok) throw new Error('rank '+r.status);
   const rows=await r.json(); if(mode==='stage'&&Array.isArray(rows))rows.sort(rkStageCmp); return rows;
 }
