@@ -174,6 +174,15 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
 #awCut.on img{animation:awIm 1.5s cubic-bezier(.2,.8,.2,1) both}
 #awCut.on .tx{animation:awTx 1.5s cubic-bezier(.2,.8,.2,1) both}
 #awCut.on .sp{animation:awSp .5s ease-out both}
+#awCut .z{display:none;position:absolute;left:min(22%,110px);top:14px;margin-left:-8px;font:900 22px var(--f-body);color:#dff8d8;text-shadow:0 0 8px #5fe08a;letter-spacing:2px;transform:skewY(6deg)}
+#awCut.ok .z{display:block}
+#awCut.ok .bd{background:linear-gradient(90deg,rgba(4,18,12,.92),rgba(14,60,40,.88) 55%,rgba(4,18,12,.92));border-color:#9fe08a;box-shadow:0 0 30px rgba(110,230,140,.55)}
+#awCut.ok .bd::before{background:repeating-linear-gradient(90deg,rgba(159,224,138,.07) 0 2px,transparent 2px 26px)}
+#awCut.ok .sp{background:linear-gradient(90deg,transparent,#dff8d8,transparent)}
+#awCut.ok img{transform:translateX(-50%) rotate(-14deg);filter:grayscale(.7) brightness(.7) drop-shadow(0 0 8px rgba(0,0,0,.8))}
+#awCut.ok .k{color:#9fe08a}
+#awCut.ok .n{text-shadow:0 0 14px #5fe08a,0 0 2px #000,0 3px 0 #0e4a2a}
+#awCut.ok .s{color:#dff8d8}
 @keyframes awBd{0%{clip-path:inset(0 0 0 100%)}17%{clip-path:inset(0 0 0 0)}83%{clip-path:inset(0 0 0 0);opacity:1}100%{clip-path:inset(0 100% 0 0);opacity:.6}}
 @keyframes awIm{0%{opacity:0;margin-left:60px}20%{opacity:1;margin-left:0}83%{opacity:1;margin-left:-6px}100%{opacity:0;margin-left:-60px}}
 @keyframes awTx{0%{opacity:0;transform:translateX(70px)}22%{opacity:1;transform:translateX(0)}83%{opacity:1;transform:translateX(-4px)}100%{opacity:0;transform:translateX(-70px)}}
@@ -747,11 +756,11 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     </div>
     <div id="toasts" hidden><div class="al"></div><i class="tg">▾</i></div>
     <div id="banner"></div>
-    <div id="awCut" aria-hidden="true"><div class="bd"><div class="sp" style="top:28px"></div><div class="sp" style="top:66px"></div><div class="sp" style="top:98px"></div></div><img alt=""><div class="tx"><div class="k"></div><div class="n"></div><div class="s"></div></div></div>
+    <div id="awCut" aria-hidden="true"><div class="bd"><div class="sp" style="top:28px"></div><div class="sp" style="top:66px"></div><div class="sp" style="top:98px"></div></div><img alt=""><span class="z">💤</span><div class="tx"><div class="k"></div><div class="n"></div><div class="s"></div></div></div>
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.0.0250</div>
+    <div class="ver" id="verT">v0.6.0.0251</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -1757,7 +1766,7 @@ function guestEvent(e){
   else if(t==='asl'){ const k=AWCK[e[2]|0]||'seal', C=AWC[k]; awkCutin(k,e[3]|0||(awkRealDraw()||{}).ph); announce(C.warn,'#c0a8ff'); sfx('boss'); }
   else if(t==='ash0'){ announce('🛡️ 그림자 배리어가 깨졌어요! 이제 피해가 들어가요','#c0a8ff'); }
   else if(t==='abz'){ banner('💢 광폭화','각성 그림자의 공격이 빨라져요'); announce('💢 각성 그림자 광폭화!','#ff6a8a'); }
-  else if(t==='asf'){ const k=e[2]|0; if(k===1){ banner('💜 봉인 실패','각성 그림자가 크게 회복했어요'); announce('💜 봉인 실패! 보스가 크게 회복했어요','#c090ff'); } else if(k===2){ banner('☠️ 그림자 등불','등불을 끄지 못해 모두 쓰러졌어요'); } else if(k===3){ banner('💔 심장 파편 흡수',`${e[3]|0}개가 보스에게 닿았어요`); } else announce('✨ 파괴 성공! 각성 그림자가 잠시 쓰러졌어요','#9fe08a'); G.shake=Math.max(G.shake,.6); }
+  else if(t==='asf'){ const k=e[2]|0; if(k===1){ banner('💜 봉인 실패','각성 그림자가 크게 회복했어요'); announce('💜 봉인 실패! 보스가 크게 회복했어요','#c090ff'); } else if(k===2){ banner('☠️ 그림자 등불','등불을 끄지 못해 모두 쓰러졌어요'); } else if(k===3){ banner('💔 심장 파편 흡수',`${e[3]|0}개가 보스에게 닿았어요`); } else { awkCutinOk(AWCK[e[4]|0]||'seal',e[3]|0||(awkRealDraw()||{}).ph); announce('✨ 파괴 성공! 각성 그림자가 잠시 쓰러졌어요','#9fe08a'); } G.shake=Math.max(G.shake,.6); }
   else if(t==='b'){ const bt=MT[e[2]]?e[2]:3; banner(G.stg.bn||MT[bt].n,bt===3?'거대한 그림자가 다가옵니다':'우두머리가 모습을 드러냈습니다'); me.pot=3; }
   else if(t==='a'){ arrowFx(e[2],e[3],e[4],e[5],e[6]|0); }
   else if(t==='s'){ slamFx(e[2],e[3],e[4]); }
@@ -1815,7 +1824,7 @@ function spawnRaid(){ const pos=[[VX,VY*.5],[(WW+VX)/2,VY],[VX/2,VY]].sort(()=>M
    페이즈: 1(100~70%) 2(70~35%) 3(35~0%) — 한 번 넘어간 페이즈로는 돌아가지 않음(회복도 그 페이즈 상한까지만)
    분신술: 본체와 똑같은 가짜(fake)가 생겨 같은 피해로 공격. 가짜는 숨은 체력(최대 체력의 6%)이 다 닳거나 15초가 지나면 사라짐. 화면에선 구분 불가
    봉인 결정: 보스 무적 + 6초 시전, 결정 3개(각 최대 체력 0.5%, 협동 ×1.6)를 다 깨지 못하면 보스가 최대 체력 50% 회복 */
-const AWK={ph:[1,.7,.35], dmgM:[1,1.15,1.3], fake:.06, fakeT:15, cloneCd:[17.5,15.4,14], CDK:.7, sealDur:6, sealCd:32, sealN:3, sealHp:.005, sealHeal:.5};
+const AWK={ph:[1,.7,.35], dmgM:[1,1.15,1.3], fake:.06, fakeT:15, cloneCd:[17.5,15.4,14], CDK:.7, sealDur:6, sealCd:32, sealN:3, sealHp:.005, sealHeal:.5, okStun:1};
 const awkType=()=>MT.findIndex(t=>t.raid==='awk'), objType=()=>MT.findIndex(t=>t.obj);
 const awkReal=()=>G.mobs.find(m=>m.rk==='awk'&&!m.fake&&!m.dead);
 const awkCap=m=>AWK.ph[(m.ph||1)-1];   /* 지금 페이즈의 체력 상한 비율 */
@@ -1863,8 +1872,14 @@ function awkSeal(m){ const kind=m.ph===2?'lantern':m.ph===3?'heart':'seal', C=AW
 /* 모든 플레이어(나 + 동료)에게 상태이상 */
 /* 파괴 미션 컷인: 보스 시전 자세 전신(얼굴이 잘리지 않게 띠 위로 올라와도 그대로 보임) + 기술 이름 */
 function awkCutin(kind,ph){ const C=AWC[kind]; if(!C)return; const el=$('#awCut'); if(!el)return; ph=ph|0||1;
-  el.querySelector('img').src='img/boss_awake'+(ph>1?ph:'')+'_cast.png'; el.querySelector('.k').textContent=`각성 그림자 · ${ph}페이즈 궁극기`;
+  el.classList.remove('ok'); el.querySelector('img').src='img/boss_awake'+(ph>1?ph:'')+'_cast.png'; el.querySelector('.k').textContent=`각성 그림자 · ${ph}페이즈 궁극기`;
   el.querySelector('.n').textContent=C.nm.replace(/^\S+\s/,''); el.querySelector('.s').textContent=C.sub;
+  el.classList.remove('on'); void el.offsetWidth; el.classList.add('on'); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('on'),1550); }
+/* 파괴 미션 성공 컷인: 같은 띠, 초록색 · 쓰러진(기울어진) 보스 + 💤 */
+const AWOK={seal:['봉인 성공!','결정 3개 파괴'],lantern:['소등 성공!','등불 2개 소등'],heart:['차단 성공!','심장 파편 3개 파괴']};
+function awkCutinOk(kind,ph){ const T=AWOK[kind], el=$('#awCut'); if(!T||!el)return; ph=ph|0||1;
+  el.classList.add('ok'); el.querySelector('img').src='img/boss_awake'+(ph>1?ph:'')+'.png'; el.querySelector('.k').textContent=`각성 그림자 · ${ph}페이즈 궁극기`;
+  el.querySelector('.n').textContent=T[0]; el.querySelector('.s').textContent=`${T[1]} · 보스 기절 ${AWK.okStun}초`;
   el.classList.remove('on'); void el.offsetWidth; el.classList.add('on'); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('on'),1550); }
 function awkAllStatus(kind,dur){ applyStatus(kind,dur); if(ally&&!ally.lobby&&G.mode==='host')pushEv(['x',2,kind,dur]); }
 function awkSealEnd(m){ const c=m.cast||{k:'seal',abs:0}, left=G.mobs.filter(o=>!o.dead&&o.obj&&o.own===m.id); m.cast=null; m.inv=0; G.awc=null;
@@ -1875,7 +1890,7 @@ function awkSealEnd(m){ const c=m.cast||{k:'seal',abs:0}, left=G.mobs.filter(o=>
     else if(c.k==='lantern'){ awkAllStatus('doom',0); msg='☠️ 등불 실패! 그림자가 모두를 집어삼켰어요'; banner('☠️ 그림자 등불','등불을 끄지 못해 모두 쓰러졌어요'); }
     else { const hl=heal(.15); awkAllStatus('hblockp',10); awkAllStatus('mblock',10); msg=`💔 파편 ${fail}개 흡수! 보스 체력 +${Math.round(hl/m.max*100)}% · 10초 봉쇄(물약만 회복)`; if(fail>=2){ awkAllStatus('erode',10); msg+=' · 그림자 잠식 10초'; } if(fail>=3){ awkAllStatus('stun',2); msg+=' · 그림자 사슬 2초'; } banner('💔 심장 파편 흡수',`${fail}개가 보스에게 닿았어요`); }
     announce(msg,'#c090ff'); burst(m.x,m.y,'#8a6cff',50,360); impact(m.x,m.y,'160,120,255',260); G.shake=1; sfx('boss'); pushEv(['asf',c.k==='seal'?1:c.k==='lantern'?2:3,fail]); }
-  else { m.stunT=2.5; m.stunImm=0; announce(`✨ ${AWCN[c.k]} 성공! 각성 그림자가 잠시 쓰러졌어요`,'#9fe08a'); burst(m.x,m.y,'#cfe0ff',30,300); G.shake=Math.max(G.shake,.6); pushEv(['asf',0]); }
+  else { m.stunT=AWK.okStun; m.stunImm=0; awkCutinOk(c.k,m.ph); announce(`✨ ${AWCN[c.k]} 성공! 각성 그림자가 잠시 쓰러졌어요`,'#9fe08a'); burst(m.x,m.y,'#cfe0ff',30,300); G.shake=Math.max(G.shake,.6); pushEv(['asf',0,0,m.ph|0,c.k==='seal'?1:c.k==='lantern'?2:3]); }
   m.bt=Math.max(m.bt,1.2); m.sealT=AWK.sealCd*rand(.9,1.1); }
 /* 공허의 낙인: 플레이어마다 발밑에 원 → 안에 있으면 5초간 생명력(💔) 또는 마나(💧) 회복 봉쇄. 2페이즈 번갈아(18초) · 3페이즈 둘 다(14초) */
 function awkBrand(m,best){ const pl1=playersForAI().filter(p=>p.i<10); if(!pl1.length){ m.brT=4; return; }
