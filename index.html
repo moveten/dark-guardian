@@ -771,7 +771,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.0.0257</div>
+    <div class="ver" id="verT">v0.6.0.0258</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -3900,7 +3900,8 @@ function updateHud(){
 /* ================= SHEETS ================= */
 let sheetMode=null, selItem=null;
 let shopMsg='', buyMsg='', sellAskIt=null;
-function openSheet(m){ if(!G.inGame&&!G.titleSheet)return; document.body.classList.add('shopen'); sheetMode=m; selItem=null; shopMsg=''; buyMsg=''; $('#sheet').hidden=false; if(G.inGame&&G.mode==='solo')G.paused=true; for(const k in held)held[k]=false; joy.active=false;
+let sortFresh=true;   /* 가방을 연 뒤 첫 정렬 누름: 저장된 방식 그대로 정렬 → 그다음부터 방식을 바꿔 가며 정렬 */
+function openSheet(m){ sortFresh=true; if(!G.inGame&&!G.titleSheet)return; document.body.classList.add('shopen'); sheetMode=m; selItem=null; shopMsg=''; buyMsg=''; $('#sheet').hidden=false; if(G.inGame&&G.mode==='solo')G.paused=true; for(const k in held)held[k]=false; joy.active=false;
   rerender(); $('#sheetB').scrollTop=0; }
 function rerender(){ $('#sheet').classList.toggle('isstore',sheetMode==='store'); if(sheetMode==='store')renderStore(); else if(sheetMode==='bag')renderBag(); else if(sheetMode==='stat'||sheetMode==='skill'||sheetMode==='passive')renderStat(); else if(sheetMode==='shop')renderShop(); else renderMenu(); }
 function markTabs(){ $('#itemPop').hidden=true; $('#ptsBar').hidden=true; const t=$('#sheetTabs'), cm=sheetMode==='passive'?'skill':sheetMode; t.hidden=sheetMode==='menu'||sheetMode==='store'||!!G.inGame; /* 게임 중에는 하단 독 하나만 사용 */ for(const [id,m] of [['bBag','bag'],['bStat','stat'],['bSkillT','skill'],['bMenu','menu']]){ const e=$('#'+id); if(e)e.setAttribute('aria-pressed',cm===m); } t.querySelectorAll('button').forEach(b=>{b.setAttribute('aria-pressed',b.dataset.m===cm); if(b.dataset.m==='shop')b.hidden=!!G.inGame&&sheetMode!=='shop'; const n=b.dataset.m==='bag'?me.inv.reduce((t,x)=>t+(x&&x.isNew?1:0),0):b.dataset.m==='stat'?(me.statPts|0):b.dataset.m==='skill'?(me.skillPts|0):0; let bd=b.querySelector('.pl'); if(!bd){bd=document.createElement('span');bd.className='pl';b.appendChild(bd);} bd.textContent=n>0?(b.dataset.m==='bag'?'NEW':'+'+n):''; bd.hidden=!(n>0); }); }
@@ -4035,7 +4036,7 @@ function renderBag(){
   const ab=pq('#aEquip'); if(ab)ab.onclick=()=>{equip(selItem.inv);};
   const asl=pq('#aSell'); if(asl)asl.onclick=()=>sellBtn(asl);
   $('#itemPop').querySelectorAll('[data-lk]').forEach(alk=>alk.onclick=()=>{ const it=selItem&&selItem.it; if(!it)return; it.lock=!it.lock; saveChar(); sheetToast(it.lock?'🔒 잠갔어요. 일괄 판매에서 제외돼요':'🔓 잠금을 풀었어요'); renderBag(); });
-  b.querySelectorAll('[data-sort]').forEach(e=>e.onclick=()=>{ sortInv(e.dataset.sort); });
+  b.querySelectorAll('[data-sort]').forEach(e=>e.onclick=()=>{ if(sortFresh){ sortFresh=false; sortInv(SORTM[sortCur()]); } else sortInv(e.dataset.sort); });
   b.querySelector('#aBulk').onclick=()=>bulkSell(); { const aa=b.querySelector('#aAsh'); if(aa)aa.onclick=()=>ashardModal(); }
   b.querySelector('#aAuto').onclick=autoSellModal; b.querySelector('#aSyn').onclick=synToggle; 
   enableDrag(b);
