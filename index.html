@@ -144,6 +144,16 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
 #hCastle .bar i{background:linear-gradient(90deg,#c0894a,#e8c070);transition:transform .15s}
 #hCastle.low .bar i{background:#e0503a}
 #hCastle b{font-weight:800;min-width:34px;text-align:right;font-size:11.5px}
+#hCastle .bar::after{content:'';position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(90deg,transparent 0 calc(10% - 1px),rgba(255,255,255,.55) calc(10% - 1px) calc(10% + 1px),transparent calc(10% + 1px) 20%)}   /* 성 파괴 단계(30·50·70·90%) 눈금 */
+#hCastle.atk .bar i{background:linear-gradient(90deg,#d23a2a,#ff7a5a)}
+/* 성 공격 경고 띠 + 파괴 단계 메시지 */
+#casAl{position:absolute;left:0;right:0;top:100px;height:30px;display:none;align-items:center;justify-content:center;gap:8px;pointer-events:none;z-index:6;background:linear-gradient(90deg,rgba(30,0,0,0),rgba(34,2,2,.9) 16%,rgba(34,2,2,.9) 84%,rgba(30,0,0,0));border-top:1px solid rgba(255,80,80,.7);border-bottom:1px solid rgba(255,80,80,.7);font:900 15px var(--f-body);color:#ff4040;text-shadow:0 0 8px rgba(255,30,30,.7),0 0 2px #000,0 1px 0 #000;letter-spacing:1px;white-space:nowrap}
+#casAl.on{display:flex;animation:casAl 2.4s both}
+@keyframes casAl{0%{opacity:0}8%{opacity:1}22%{opacity:.5}36%{opacity:1}50%{opacity:.5}64%{opacity:1}85%{opacity:1}100%{opacity:0}}
+#casMs{position:absolute;left:0;right:0;top:36%;text-align:center;pointer-events:none;z-index:6;display:none;font-family:var(--f-disp);font-weight:800;font-size:clamp(28px,8.6vw,38px);color:#ff5a4a;text-shadow:0 0 14px rgba(255,40,30,.8),0 0 2px #000,0 3px 0 #4a0a08;letter-spacing:2px}
+#casMs small{display:block;font:700 13px var(--f-body);color:#ffd0c8;letter-spacing:0;margin-top:2px;text-shadow:0 1px 3px #000}
+#casMs.on{display:block;animation:casMs 1.8s cubic-bezier(.2,.8,.2,1) both}
+@keyframes casMs{0%{opacity:0;transform:scale(1.5)}12%{opacity:1;transform:scale(1)}78%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(.96)}}
 #autoT{font-weight:800;font-size:11.5px;padding:3px 11px;border-radius:999px;white-space:nowrap;pointer-events:none;text-shadow:0 1px 2px #000;opacity:0;transition:opacity .25s}
 #autoT.show{opacity:1}
 #autoT.s0{border:2px solid #7d705a;background:rgba(40,34,26,.9);color:#cfc3ad}
@@ -756,11 +766,12 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     </div>
     <div id="toasts" hidden><div class="al"></div><i class="tg">▾</i></div>
     <div id="banner"></div>
+    <div id="casAl" aria-hidden="true">⚠️ <span>성이 공격받고 있습니다!</span> ⚠️</div><div id="casMs" aria-hidden="true"></div>
     <div id="awCut" aria-hidden="true"><div class="bd"><div class="sp" style="top:28px"></div><div class="sp" style="top:66px"></div><div class="sp" style="top:98px"></div></div><img alt=""><span class="z">💤</span><div class="tx"><div class="k"></div><div class="n"></div><div class="s"></div></div></div>
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.0.0255</div>
+    <div class="ver" id="verT">v0.6.0.0256</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -1763,6 +1774,7 @@ function guestEvent(e){
   else if(t==='awk'){ announce('🩸 검은 그림자가 깨어났어요! 공격·이동 속도 +50%','#ff4a4a'); }
   else if(t==='aph'){ const np=e[2]|0, tx=np===2?['🌑 2페이즈 · 삼남매의 잔향','형과 누나의 힘을 삼켰어요']:['🌑 3페이즈 · 각성','마지막 각성 — 모든 것을 걸고 덤벼와요']; banner(tx[0],tx[1]); announce(tx[0],'#a68bff'); G.shake=1.2; sfx('boss'); later(.3,()=>{ if(G.inGame)storyRun('p'+np); }); }
   else if(t==='acl'){ announce((e[2]|0)>1?'👥 그림자 분신술! 셋 중 하나만 진짜예요':'👥 그림자 분신술! 둘 중 하나만 진짜예요','#b89cff'); sfx('boss'); }
+  else if(t==='cat'){ casAlert(); } else if(t==='cms'){ casMs(e[2]|0); }
   else if(t==='asl'){ const k=AWCK[e[2]|0]||'seal', C=AWC[k]; awkCutin(k,e[3]|0||(awkRealDraw()||{}).ph); announce(C.warn,'#c0a8ff'); sfx('boss'); }
   else if(t==='ash0'){ announce('🛡️ 그림자 배리어가 깨졌어요! 이제 피해가 들어가요','#c0a8ff'); }
   else if(t==='abz'){ banner('💢 광폭화','각성 그림자의 공격이 빨라져요'); announce('💢 각성 그림자 광폭화!','#ff6a8a'); }
@@ -2003,9 +2015,14 @@ const CAS_IMG=['castle_c1','castle_c2','castle_c3'];
 const castleCh=S=>Math.max(1,Math.min(3,parseInt(String(S&&S.id||'1').split('-')[0],10)||1));
 function castleMax(S){ const nw=(S.waves&&S.waves.length)||8, B=stgBuf(S); return Math.round(MT[0].dmg*1.6*S.dmgM*(B?B.atk:1)*(1+.08*(nw-1)/2)*CAS_HPK); }
 const castleSt=c=>{ const r=c.hp/c.max; return r>.65?0:r>.3?1:2; };
-function castleInit(){ const S=G.stg; if(!S||S.raid){ G.castle=null; return; } const mx=castleMax(S); G.castle={hp:mx,max:mx,fl:0,ph:1,st:0,low:0}; }
+function castleInit(){ const S=G.stg; if(!S||S.raid){ G.castle=null; return; } const mx=castleMax(S); G.castle={hp:mx,max:mx,fl:0,ph:1,st:0,low:0,msN:0,alT:-99}; }
+const CAS_MS=[30,50,70,90];   /* 성 파괴 단계 메시지 */
+function casAlert(){ const el=$('#casAl'), h=$('#hCastle'); if(!el||!h||h.hidden)return; const b=el.parentNode.getBoundingClientRect(), r=h.getBoundingClientRect(); el.style.top=Math.round(r.bottom-b.top+4)+'px'; el.classList.remove('on'); void el.offsetWidth; el.classList.add('on'); h.classList.add('atk'); clearTimeout(el._t); el._t=setTimeout(()=>{ el.classList.remove('on'); h.classList.remove('atk'); },2400); }
+function casMs(p){ const el=$('#casMs'); if(!el)return; el.innerHTML=`🏰 성 ${p}% 파괴!<small>남은 성 체력 ${100-p}%</small>`; el.classList.remove('on'); void el.offsetWidth; el.classList.add('on'); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('on'),1800); }
 function castleHit(raw){ const c=G.castle; if(!c||c.hp<=0||G.mode==='guest'||G.phase==='clear'||G.phase==='win'||G.phase==='lose')return;
   const v=Math.min(c.hp,Math.max(0,raw)); if(v<=0)return; c.hp-=v; c.fl=.16;
+  if(c.hp>0&&G.inGame){ if(T-(c.alT==null?-99:c.alT)>=6){ c.alT=T; casAlert(); pushEv(['cat']); }   /* 성이 맞는 동안 6초에 한 번 붉은 경고 */
+    const dp=(1-c.hp/c.max)*100, n=CAS_MS.filter(x=>x<=dp+1e-6).length; if(n>(c.msN|0)){ c.msN=n; casMs(CAS_MS[n-1]); pushEv(['cms',CAS_MS[n-1]]); } }
   addNum(VX+rand(-34,34),VY-64,Math.round(v),'#ffa27a',false,'castle');
   if(T-(c.fxT||-9)>.12){ c.fxT=T; spark(VX+rand(-46,46),VY+rand(-30,20),'#cdb9a0',4); }
   if(T-(c.sfxT||-9)>.22){ c.sfxT=T; sfx('hit'); }
@@ -2013,7 +2030,7 @@ function castleHit(raw){ const c=G.castle; if(!c||c.hp<=0||G.mode==='guest'||G.p
 function castleFall(){ if(G.endShown||G.phase==='lose')return; announce('🏰 성이 무너졌어요!','#ff6a4a'); sfx('boss'); G.shake=Math.max(G.shake,1); G.flash=Math.max(G.flash||0,.5);
   for(let i=0;i<3;i++)later(i*.18,()=>{ efx.push({k:'ring',x:VX+rand(-40,40),y:VY+rand(-30,10),r0:10,r1:130,t:0,life:.6,col:i%2?'#ffb070':'#ff6a3a',w:14}); burst(VX+rand(-50,50),VY+rand(-40,10),'#c9b8a0',36,420); impact(VX,VY-20,'255,150,80',260); });
   G.lostCastle=true; if(['prep','wave','boss'].includes(G.phase)){ G.lostBoss=G.phase==='boss'; G.phase='lose'; setTimeout(()=>showEnd(),1500); } }
-function castleRepair(){ const c=G.castle; if(!c||c.hp<=0||c.hp>=c.max)return; const v=Math.min(c.max-c.hp,Math.max(1,Math.round(c.max*CAS_FIX))); c.hp+=v;
+function castleRepair(){ const c=G.castle; if(!c||c.hp<=0||c.hp>=c.max)return; const v=Math.min(c.max-c.hp,Math.max(1,Math.round(c.max*CAS_FIX))); c.hp+=v; c.msN=Math.min(c.msN|0,CAS_MS.filter(x=>x<=(1-c.hp/c.max)*100+1e-6).length);   /* 수리하면 파괴 단계도 되돌아가요 */
   addNum(VX,VY-78,'🏰 +'+v,'#8be07a',true); efx.push({k:'ring',x:VX,y:VY+10,r0:20,r1:110,t:0,life:.6,col:'#8be07a',w:8}); burst(VX,VY-10,'#a9f0a0',18,160); }
 /* 매 프레임: 깜빡임·체력바 지연, 단계가 바뀌는 순간의 흙먼지 */
 function castleTick(dt){ const c=G.castle; if(!c)return; c.fl=Math.max(0,c.fl-dt); c.ph+=((c.hp/c.max)-c.ph)*Math.min(1,dt*3);
@@ -4619,7 +4636,7 @@ function patchModal(){
     fetch('patchnotes.txt?'+Date.now(),{cache:'no-store'}).then(r=>{ if(!r.ok)throw 0; return r.text(); }).then(t=>{ m.querySelector('#pnT').textContent=t; }).catch(()=>{ m.querySelector('#pnT').textContent='패치노트를 불러오지 못했어요. (오프라인이거나 서버 점검 중)'; }); }); }
 function prepMe(){ me=loadChar(selId); me.D=derive(me); spawnMe(); }
 function resetWorld(){
-  storyStop(); G.stZ=0; G.aim=null; G.lostBoss=false; G.castle=null; G.lostCastle=false; G.awz=null; G.awc=null; { const ac=$('#awCut'); if(ac)ac.classList.remove('on'); } if(me){ me.erode=me.hblk=me.mblk=me.hbStrict=me.bleed=me.bleedN=0; me.hpLk=me.mpLk=null; }
+  storyStop(); G.stZ=0; G.aim=null; G.lostBoss=false; G.castle=null; G.lostCastle=false; G.awz=null; G.awc=null; { const ac=$('#awCut'); if(ac)ac.classList.remove('on'); for(const q of ['#casAl','#casMs']){ const z=$(q); if(z)z.classList.remove('on'); } const hc=$('#hCastle'); if(hc)hc.classList.remove('atk'); } if(me){ me.erode=me.hblk=me.mblk=me.hbStrict=me.bleed=me.bleedN=0; me.hpLk=me.mpLk=null; }
   projs.length=zones.length=timers.length=parts.length=nums.length=ground.length=efx.length=0;
   G.mobs=[]; G.mobMap=new Map(); G.stKills=0; G.stDrops=0; G.stCap=0; G.runT=0; G.stGot=[0,0,0,0,0]; G.sib=0; G.endShown=false; G.clrDone=false; alClear(); G.stRev=0; G.stGold0=me?(me.gold|0):0; G.paused=false; G.bt=null; G.shake=0;
   hitQ=[]; fxQ=[]; lastAllyFx=-1; lastEv=-1; lastHit=0; G.guestDmg=0; G.fires=[]; G.freeRev=1; G.fireT=3; if(me){ me.rvGiven=0; me.seenRg=0; me.out=false; me.rvT=0; }
