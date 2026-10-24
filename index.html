@@ -794,7 +794,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 <symbol id="tw-mill" viewBox="0 0 110 120"><ellipse cx="55" cy="113" rx="36" ry="6" fill="#000" opacity=".5"/><polygon points="30,112 36,56 74,56 80,112" fill="#1d1830" stroke="#3a2f66"/><polygon points="32,58 55,38 78,58" fill="#120e1c" stroke="#7a5ae0"/><g transform="translate(55 52)"><g stroke="#8a6cff" stroke-width="1.3" fill="#2a2540"><rect x="-3" y="-46" width="6" height="46"/><rect x="-3" y="0" width="6" height="46"/><rect x="-46" y="-3" width="46" height="6"/><rect x="0" y="-3" width="46" height="6"/><rect x="3" y="-44" width="14" height="22"/><rect x="-17" y="22" width="14" height="22"/><rect x="-44" y="-17" width="22" height="14"/><rect x="22" y="3" width="22" height="14"/></g><circle r="6" fill="#e6dcff"/></g><path d="M47 78 Q55 66 63 78 Q55 73 47 78Z" fill="#e6dcff"/><path d="M40 90 L47 98 L43 108 M66 86 L62 96 L69 104" stroke="#b89cff" stroke-width="1.1" fill="none"/><path d="M47 112 V100 Q55 93 63 100 V112Z" fill="#0a0810" stroke="#5a4aa8"/></symbol>
 </defs></svg>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.0.0264</div>
+    <div class="ver" id="verT">v0.6.0.0265</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -1354,7 +1354,7 @@ const HEROI={
  awoff_sorc:{om:40,fx:[['clsM',1,2],...AW_AFC]},
  awoff_necro:{om:40,fx:[['clsM',1,2],...AW_AFC]},
  awoff_druid:{dm:6,om:20,fx:[['clsM',1,2],...AW_AFC]}};
-const AW_IL=102, AW_REQ=92, AW_M=2.11, ASHARD_N=120, AW_P=.05;   /* 각성 장비: 아이템 레벨·착용 레벨·기본 성능 배율 / 교환에 필요한 각성 그림자 조각 / 처치당 각성 장비 직접 드랍 확률 */
+const AW_IL=102, AW_REQ=92, AW_M=2.11, ASHARD_N=120, AW_P=.03;   /* 각성 장비: 아이템 레벨·착용 레벨·기본 성능 배율 / 교환에 필요한 각성 그림자 조각 / 처치당 각성 장비 직접 드랍 확률 */
 const AW_PART={weapon:'aw_wpn',helm:'aw_helm',armor:'aw_armor',amulet:'aw_amu',ring:'aw_ring'};
 const awKey=(part,cls)=>part==='shield'?'awoff_'+(cls||(me&&me.cls)||'war'):AW_PART[part];
 const HERO_PART={weapon:'hdag',helm:'hhelm',armor:'harmor',amulet:'hamu',ring:'hring'}; /* 부위 → 영웅 아이템 (보조무기는 직업별) */
@@ -1584,6 +1584,7 @@ function loadChar(id){
   const raw=lsGet(charKey(id)); if(!raw)return null;
   try{ const p=JSON.parse(raw); if(!p||!CLASSES[p.cls])return null; const cls=p.cls; p.id=id;
     for(const k in p.skills){ if(!SKBY[k]){p.skillPts+=p.skills[k]; delete p.skills[k];} } for(const s of SK[cls]){ if(p.skills[s.k]===undefined)p.skills[s.k]=0; else if(p.skills[s.k]>0&&(p.lvl|0)<s.req){ p.skillPts+=p.skills[s.k]; p.skills[s.k]=0; } } /* 해금 레벨 미만인데 투자된 스킬(해금 레벨 상향 등)은 포인트 환급 */
+    { const q={}; if(p.cc&&typeof p.cc==='object')for(const k in p.cc){ const v=Math.floor(+p.cc[k]); if(v>0&&isFinite(v))q[k]=Math.min(v,999999); } p.cc=q; }   /* 스테이지별 누적 클리어 횟수(0.6.0.0265부터 집계) */
     if(p.clear===undefined)p.clear=Math.max(0,+(lsGet('dkdef2.clear')||0));
     { const lg=k=>{ const v=parseInt(lsGet(k)); return isNaN(v)?-1:clamp(v,-1,2); }; if(p.as===undefined)p.as=lg('dkdef2.asell'); if(p.sy===undefined)p.sy=lg('dkdef2.asyn'); if(p.sy>=0)p.sy=2; } /* 캐릭터별 자동판매/합성: 기존 캐릭터는 예전 전역 설정을 한 번 이어받음 */
     p.sp=p.sp?1:0;   /* 캐릭터별 1.3배속 설정 */
@@ -1620,7 +1621,7 @@ function migrateChars(){
 }
 function createChar(cls,name){ const ids=charIds(); if(ids.length>=MAXCHAR||!CLASSES[cls])return null; if(nameTaken(name))return null; const p=newChar(cls,name); p.ms=MAILQ.map(q=>q.id); lsSet(charKey(p.id),JSON.stringify(packChar(p))); ids.push(p.id); setIds(ids); selId=p.id; lsSet('dkdef2.sel',selId); return p; }
 function deleteChar(id){ setIds(charIds().filter(x=>x!==id)); lsDel(charKey(id)); lsDel('dkdef2.rk.'+id); if(selId===id){selId='';lsSet('dkdef2.sel','');} rkQueueDel(id); }
-function packChar(p){ const {id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear,as,sy,au,sp,ct,cat,dv4,shard,ashard,mail,ms,tut}=p; return {id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear:clear|0,au:Math.max(0,Math.min(2,au|0)),sp:sp?1:0,ct:ct>0?ct|0:0,cat:cat>0?cat|0:0,as:as===undefined?-1:as,sy:sy===undefined?-1:sy,dv4:dv4?1:0,shard:shard|0,ashard:(ashard|0)||undefined,mail:Array.isArray(mail)?mail:undefined,ms:Array.isArray(ms)?ms:undefined,tut:tut||undefined}; }
+function packChar(p){ const {id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear,as,sy,au,sp,ct,cat,dv4,shard,ashard,mail,ms,tut,cc}=p; return {id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear:clear|0,au:Math.max(0,Math.min(2,au|0)),sp:sp?1:0,ct:ct>0?ct|0:0,cat:cat>0?cat|0:0,as:as===undefined?-1:as,sy:sy===undefined?-1:sy,dv4:dv4?1:0,shard:shard|0,ashard:(ashard|0)||undefined,mail:Array.isArray(mail)?mail:undefined,ms:Array.isArray(ms)?ms:undefined,tut:tut||undefined,cc:cc&&Object.keys(cc).length?cc:undefined}; }
 function saveChar(){ if(!me||!me.id)return; lsSet(charKey(me.id),JSON.stringify(packChar(me))); }
 const dispName=p=>(p&&p.name)||CLASSES[p.cls].n;
 const SELLBASE=[100,200,400,800,3000], ADVAFX=['ls','crit','ias','ms','mf','pr','mr'];
@@ -2462,20 +2463,21 @@ function spellDmg(base,noPct){const D=me.D; return critRoll(base*(1+D.ene*ENEM+(
 function guardMul(){let g=0; if(me.aura==='guard')g=Math.max(g,(30+6*skLv(me,'guard'))/100);
   if(ally&&!ally.lobby&&!ally.dead&&ally.aura==='guard'&&hyp(ally.x-me.x,ally.y-me.y)<320)g=Math.max(g,(30+6*ally.al)/100); return 1+g;}
 /* 방어력·피해감소를 무시하는 고정 피해 (최대 생명력의 pct) */
-function fixDmg(pct,txt,col){ if(me.dead||me.god>0)return; const loss=Math.max(1,Math.floor(me.D.maxHp*pct)); me.hp-=loss; me.hurt=.3; addNum(me.x,me.y-34,(txt||'')+'-'+loss,col||'#ff5a7a',false); spark(me.x,me.y,col||'#ff5a7a',8); sfx('hurt'); if(me.hp<=0)goDown(); }
+const tkAdd=n=>{ if(n>0&&G.inGame)G.stTaken=(G.stTaken||0)+n; };   /* 이번 판에 내가 받은 누적 피해(클리어 화면 표시) */
+function fixDmg(pct,txt,col){ if(me.dead||me.god>0)return; const loss=Math.max(1,Math.floor(me.D.maxHp*pct)); tkAdd(loss); me.hp-=loss; me.hurt=.3; addNum(me.x,me.y-34,(txt||'')+'-'+loss,col||'#ff5a7a',false); spark(me.x,me.y,col||'#ff5a7a',8); sfx('hurt'); if(me.hp<=0)goDown(); }
 function applyStatus(kind,dur){ if(me.dead||me.god>0)return;
   { const ar=(me.D&&me.D.sp&&me.D.sp.aw_ring)|0; if(ar&&['erode','hblock','hblockp','mblock','slow','stun','bleed'].includes(kind))dur*=Math.max(.5,1-.25*ar); }   /* 각성 반지 '속박 해제': 디버프 지속시간 -25% (2개 -50%) */
   if(kind==='doom'){ if(me.hp>0){ addNum(me.x,me.y-50,'☠️ 즉사','#ff4a6a',true); burst(me.x,me.y,'#2a1a4a',40,320); spark(me.x,me.y,'#8a6cff',30); G.shake=1; sfx('hurt'); goDown(); } return; }   /* 그림자 등불 실패 */
   if(kind==='bleed'){ if(!(me.bleed>0))me.bleedT=.5; me.bleed=Math.max(me.bleed||0,dur); me.bleedN=Math.max(me.bleedN|0,Math.round(dur/.5)); me.hblk=Math.max(me.hblk||0,dur); if(me.hpLk==null)me.hpLk=me.hp; addNum(me.x,me.y-46,'🩸 출혈 · 물약만 회복','#ff5a6a',true); return; }   /* 그림자 베기: 3초간 0.5초마다 최대 생명력 10% 고정 피해 + 생명력 회복 불가(물약만) */
   if(kind==='erode'){ me.erode=Math.max(me.erode||0,dur); addNum(me.x,me.y-46,'🌑 그림자 잠식','#b89cff',true); return; }
-  if(kind==='hblock'||kind==='hblockp'){ const loss=Math.floor(me.D.maxHp*.5); me.hpLk=null; me.hp-=loss; me.hurt=.3; addNum(me.x,me.y-30,'-'+loss,'#ff5a7a',true); spark(me.x,me.y,'#ff5a9a',18); sfx('hurt'); G.shake=Math.max(G.shake,.5); if(me.hp<=0){ goDown(); return; } }   /* 생명 봉쇄: 최대 생명력 50% 고정 피해 후 회복 막힘 */
+  if(kind==='hblock'||kind==='hblockp'){ const loss=Math.floor(me.D.maxHp*.5); tkAdd(loss); me.hpLk=null; me.hp-=loss; me.hurt=.3; addNum(me.x,me.y-30,'-'+loss,'#ff5a7a',true); spark(me.x,me.y,'#ff5a9a',18); sfx('hurt'); G.shake=Math.max(G.shake,.5); if(me.hp<=0){ goDown(); return; } }   /* 생명 봉쇄: 최대 생명력 50% 고정 피해 후 회복 막힘 */
   if(kind==='mblock'){ me.mpLk=null; me.mp=Math.max(0,me.mp-me.D.maxMp*.5); }   /* 마나 봉쇄: 최대 마나 50% 잃고 회복 막힘 */
   if(kind==='hblock'){ me.hblk=Math.max(me.hblk||0,dur); me.hpLk=me.hp;   /* 공허의 낙인: 물약으로만 회복 가능 */ addNum(me.x,me.y-46,'💔 봉쇄 · 물약만 회복','#ff8ab0',true); return; }
   if(kind==='hblockp'){ me.hblk=Math.max(me.hblk||0,dur); me.hpLk=me.hp; addNum(me.x,me.y-46,'💔 봉쇄 · 물약만 회복','#ff8ab0',true); return; }   /* 심장 파편 실패: 물약으로만 생명력 회복 */
   if(kind==='mblock'){ me.mblk=Math.max(me.mblk||0,dur); me.mpLk=me.mp; addNum(me.x,me.y-30,'💧 마나 봉쇄','#8fb0ff',true); return; }
   if(kind==='stun'){ if(me.stunImm>0)return; me.stun=dur; me.stunImm=dur+2.5; addNum(me.x,me.y-40,'💫 기절!','#ffd84a',true); }
   else if(kind==='slow'){ me.slowP=Math.max(me.slowP||0,dur); addNum(me.x,me.y-40,'🐌 둔화','#8fdcff',false); }
-  else if(kind==='halve'){ const loss=Math.floor(me.D.maxHp*(me.D.sp&&me.D.sp.hhelm?.5:HALVE_PCT)); /* 현재가 아니라 '최대 생명력'의 70%가 고정 피해 — 남은 체력이 70% 이하면 즉사 */ if(loss>0){ me.hp-=loss; me.hurt=.3; addNum(me.x,me.y-44,'☠️ -'+loss,'#e070ff',true); spark(me.x,me.y,'#c040e0',24); sfx('hurt'); G.shake=Math.max(G.shake,.5); if(me.hp<=0)goDown(); } }
+  else if(kind==='halve'){ const loss=Math.floor(me.D.maxHp*(me.D.sp&&me.D.sp.hhelm?.5:HALVE_PCT)); /* 현재가 아니라 '최대 생명력'의 70%가 고정 피해 — 남은 체력이 70% 이하면 즉사 */ if(loss>0){ tkAdd(loss); me.hp-=loss; me.hurt=.3; addNum(me.x,me.y-44,'☠️ -'+loss,'#e070ff',true); spark(me.x,me.y,'#c040e0',24); sfx('hurt'); G.shake=Math.max(G.shake,.5); if(me.hp<=0)goDown(); } }
   else if(kind==='mdrain'){ if(me.mp>0){ me.mp=Math.max(0,me.mp-me.D.maxMp*dur*Math.max(.3,1/(1+(me.D.ene||0)/120))); me.drainT=.4; if(!(me.dnT>0)){ me.dnT=.7; addNum(me.x,me.y-44,'🌀 마나 흡수','#b070ff',false); } if(!G.mdw){ G.mdw=1; announce('🌀 마나 흡수 정예! 마나가 빨려나가요. 거리를 벌리거나 처치하세요','#c090ff'); } } }
   else if(kind==='poison'){ me.poison=Math.max(me.poison||0,dur); addNum(me.x,me.y-40,'☠️ 중독','#7ad04a',false); } }
 function takeDmg(raw,fire,rh){
@@ -2484,7 +2486,7 @@ function takeDmg(raw,fire,rh){
   const def=me.D.def*guardMul(), red=Math.min(rh&&!fire?RAID_RED:.8,def/(def+50+G.wave*8));
   let d=raw*lvPen().tk*gearPen().tk*(1-red)*(1-(me.D.dr||0))*(me.buffs.barrier&&me.buffs.barrier.t>0?1-me.buffs.barrier.v:1)*drMul(); if(me.D.sp&&me.D.sp.martyr&&me.hp<me.D.maxHp*.35) d*=.6; if(me.erode>0)d*=1.5; if(me.D.sp&&me.D.sp.hoff_druid&&me.form) d*=.9; if(me.D.sp&&me.D.sp.awoff_druid&&me.form) d*=.88;
   { const ms=skLv(me,'mshield'); if(ms&&me.mp>0&&d>0){ const sh=Math.min(.65,.2+.02*ms), cost=Math.max(.5,1.6-.04*ms), ab=Math.min(d*sh,me.mp/cost); me.mp-=ab*cost; d-=ab; if(ab>=1){ addNum(me.x+10,me.y-38,Math.round(ab),'#6fb0ff',false); efx.push({k:'ring',x:me.x,y:me.y,r0:10,r1:30,t:0,life:.25,col:'#7fb4ff',w:4}); } } }
-  me.hp-=d; me.hurt=.15; sfx('hurt'); G.shake=Math.max(G.shake,.2);
+  tkAdd(d); me.hp-=d; me.hurt=.15; sfx('hurt'); G.shake=Math.max(G.shake,.2);
   addNum(me.x,me.y-24,Math.round(d),'#ff5a4a',false);
   { const sp=me.D.sp||{}; const mx=me.D.maxHp;
     if(sp.aw_armor&&me.hp>0&&me.hp<mx*.3&&!(me.awArmCd>0)){ me.god=2; me.awArmCd=60; addNum(me.x,me.y-50,'🌑 그림자 회피 · 무적','#c0a8ff',true); efx.push({k:'ring',x:me.x,y:me.y,r0:10,r1:60,t:0,life:.5,col:'#a68bff',w:8}); }   /* 공허의 망토 */
@@ -2516,7 +2518,7 @@ function updateMe(dt){
   me.formLock=Math.max(0,(me.formLock||0)-dt); if(me.spirit){ me.spirit.t-=dt; if(me.spirit.t<=0)me.spirit=null; }
   me.hurt=Math.max(0,(me.hurt||0)-dt); me.god=Math.max(0,(me.god||0)-dt); me.stun=Math.max(0,(me.stun||0)-dt); me.stunImm=Math.max(0,(me.stunImm||0)-dt); me.slowP=Math.max(0,(me.slowP||0)-dt);
   if(me.buffs.rage&&me.buffs.rage.t>0&&!me.dead&&Math.random()<dt*34)parts.push({x:me.x+rand(-14,14),y:me.y+rand(-4,16),vx:rand(-12,12),vy:-rand(50,95),t:0,life:.75,col:Math.random()<.4?'#ff7a3a':'#ff2a1a',r:2.6,glow:1,dm:.95});   /* 폭주: 몸에서 붉은 기운이 피어오름 */
-  if(me.poison>0&&!me.dead){ me.poison-=dt; me.hp=Math.max(1,me.hp-me.D.maxHp*.03*dt); if(Math.random()<dt*6)parts.push({x:me.x+rand(-10,10),y:me.y-8,vx:0,vy:-30,t:0,life:.6,col:'#7ad04a',r:2.5,glow:1,dm:.95}); }
+  if(me.poison>0&&!me.dead){ me.poison-=dt; tkAdd(Math.min(me.D.maxHp*.03*dt,Math.max(0,me.hp-1))); me.hp=Math.max(1,me.hp-me.D.maxHp*.03*dt); if(Math.random()<dt*6)parts.push({x:me.x+rand(-10,10),y:me.y-8,vx:0,vy:-30,t:0,life:.6,col:'#7ad04a',r:2.5,glow:1,dm:.95}); }
   if(me.dead){ me.respawn-=dt; if(me.respawn<=0&&!me.out){ me.respawn=0; if(G.freeRev>0){ G.freeRev--; reviveMe(.6); saveChar(); toast('✨ 무료 부활 물약이 자동으로 사용됐어요','#ffd84a'); return; } me.out=true; } if(ally&&!ally.lobby&&ally.rg>(me.seenRg|0)){ me.seenRg=ally.rg; if(!me.out){ reviveMe(.45); toast('동료가 구해줬어요!','#9be38a'); } } return;}
   if(ally&&!ally.lobby){ if(ally.rg>(me.seenRg|0))me.seenRg=ally.rg;
     if(ally.dead&&!ally.out&&hyp(me.x-ally.x,me.y-ally.y)<64){ me.rvT=(me.rvT||0)+dt; if(me.rvT>=3){ me.rvT=0; me.rvGiven=(me.rvGiven|0)+1; toast('동료를 일으켰어요!','#9be38a'); sfx('revive'); } } else me.rvT=0; }
@@ -2686,7 +2688,7 @@ function doCast(key,range,lv){
 /* 반격 태세: 우두머리는 무적이 아니라서 일반공격·소환수·스킬 피해가 모두 그대로 들어가고, 태세 중에 내가 스킬을 쓰면 추가로 내 최대 생명력의 CNT_PCT 만큼 방어력·막기 무시로 되돌려받음 */
 const CNT_PCT=.4, CNT_WIN=2; /* 반사 피해(최대 생명력 비율) / 태세 중 시전한 스킬만 반사 대상으로 인정하는 시간(초) — 태세 전에 깔아 둔 장판·지연 피해는 반사 없이 보스에게만 들어감 */
 function counterHit(m,v){ if(T-(me.cLast||-9)<.6||me.dead||T-(me.cnCast||-9)>CNT_WIN||me.cnDone===me.cnId)return; me.cLast=T; me.cnDone=me.cnId;   /* 스킬 한 번에 반사는 한 번만 (여러 발·여러 번 맞는 스킬도) */ addNum(me.x,me.y-44,'⚔️ 반격!','#ff8a3a',true); efx.push({k:'ring',x:me.x,y:me.y,r0:8,r1:50,t:0,life:.35,col:'#ff8a3a',w:7});
-  if(me.god>0||G.phase==='win'||G.phase==='clear')return; const d=Math.round(me.D.maxHp*CNT_PCT*(me.D.sp&&me.D.sp.hamu?.5:1)); me.hp-=d; me.hurt=.15; sfx('hurt'); G.shake=Math.max(G.shake,.4); addNum(me.x,me.y-24,d,'#ff5a4a',false); if(me.hp<=0){ goDown(); counterTip(); } }
+  if(me.god>0||G.phase==='win'||G.phase==='clear')return; const d=Math.round(me.D.maxHp*CNT_PCT*(me.D.sp&&me.D.sp.hamu?.5:1)); tkAdd(d); me.hp-=d; me.hurt=.15; sfx('hurt'); G.shake=Math.max(G.shake,.4); addNum(me.x,me.y-24,d,'#ff5a4a',false); if(me.hp<=0){ goDown(); counterTip(); } }
 const LVP0={ex:0,gap:0,dm:1,tk:1,miss:0};
 /* 장비 레벨 페널티: 착용 중인 7칸의 아이템 레벨 총합(강화 1단계 = +1, 빈 칸 = 0)을 스테이지 권장 합(칸당 icap-12)과 비교해 주는 피해·받는 피해에 똑같이 반영 */
 const GP0={wm:1,tk:1,gl:0,sum:0,need:0,slots:7};
@@ -4716,7 +4718,7 @@ function prepMe(){ me=loadChar(selId); me.D=derive(me); spawnMe(); }
 function resetWorld(){
   storyStop(); G.stZ=0; G.aim=null; G.lostBoss=false; G.castle=null; G.lostCastle=false; G.awz=null; G.awc=null; { const ac=$('#awCut'); if(ac)ac.classList.remove('on'); for(const q of ['#casAl','#casMs']){ const z=$(q); if(z)z.classList.remove('on'); } const hc=$('#hCastle'); if(hc)hc.classList.remove('atk'); } if(me){ me.erode=me.hblk=me.mblk=me.hbStrict=me.bleed=me.bleedN=0; me.hpLk=me.mpLk=null; }
   projs.length=zones.length=timers.length=parts.length=nums.length=ground.length=efx.length=0;
-  G.mobs=[]; G.mobMap=new Map(); G.stKills=0; G.stDrops=0; G.stCap=0; G.runT=0; G.stGot=[0,0,0,0,0]; G.sib=0; G.endShown=false; G.clrDone=false; alClear(); G.stRev=0; G.stGold0=me?(me.gold|0):0; G.paused=false; G.bt=null; G.shake=0;
+  G.mobs=[]; G.mobMap=new Map(); G.stKills=0; G.stDrops=0; G.stCap=0; G.runT=0; G.stGot=[0,0,0,0,0]; G.sib=0; G.endShown=false; G.clrDone=false; alClear(); G.stRev=0; G.stTaken=0; G.stGold0=me?(me.gold|0):0; G.paused=false; G.bt=null; G.shake=0;
   hitQ=[]; fxQ=[]; lastAllyFx=-1; lastEv=-1; lastHit=0; G.guestDmg=0; G.fires=[]; G.freeRev=1; G.fireT=3; if(me){ me.rvGiven=0; me.seenRg=0; me.out=false; me.rvT=0; }
   spawnMe(); buildSkills(); show(null); G.inGame=true; closeSheet(); setAuto(me?me.au|0:0,true);   /* 이 캐릭터가 마지막으로 정한 AUTO 설정으로 시작 */
   { const sp=G.mode!=='guest'&&!!(me&&me.sp); setSpd(sp,{hint:sp}); }   /* 1.3배속도 마지막 설정으로 (협동 참가자는 방장 설정을 받을 때까지 1배) */
@@ -4801,6 +4803,7 @@ const fmtCt=t=>{ t=Math.max(0,Math.round(t)); return (t/60|0)+':'+String(t%60).p
 function markClear(){ const n=(G.stageIdx|0)+1, t=Math.max(1,Math.round(G.runT||0)); let ch=false; G.lastCt=t; G.bestCt=false; const wasLk=!spdOk();
   if(n>(me.clear|0)){ me.clear=Math.min(STAGES.length,n); stageClear=me.clear; me.ct=t; me.cat=Math.floor(Date.now()/1000); ch=true; G.bestCt=true; }
   else if(n===(me.clear|0)&&!(me.ct>0&&t>=me.ct)){ me.ct=t; ch=true; G.bestCt=true; }
+  { const cc=me.cc||(me.cc={}); cc[n]=Math.min(999999,(cc[n]|0)+1); G.ccThis=cc[n]; G.ccAll=Object.values(cc).reduce((a,b)=>a+b,0); ch=true; }   /* 누적 클리어 횟수: 스테이지별로, 클리어할 때마다 +1 (최고 기록과 상관없이) */
   if(ch){ saveChar(); rkSubmitAll(); }
   if(wasLk&&spdOk()){ G.spdNew=true; setSpd(G.spd>1); later(2,()=>{ if(G.inGame)toast('⏩ 1.3배속 · 🤖 AUTO 스킬이 열렸어요!','#ffb259'); }); } }   /* 1-5 첫 클리어 */
 function endTab(t){ const bx=$('#endBox'); bx.dataset.tab=t; bx.querySelectorAll('.etabs button').forEach(b=>{ b.setAttribute('aria-selected',b.dataset.t===t); b.onclick=()=>{ endTab(b.dataset.t); sfx('ui'); }; }); }   /* 가로 모드: 전리품 / 데미지 순위 탭 (세로 모드는 탭 없이 둘 다 표시) */
@@ -4822,7 +4825,7 @@ function showEnd(msg){
     const top3=rows.slice(0,3).map((r,i)=>`<div class="dr"><span role="img" aria-label="${TRN[i]}트로피">${trophy(TRC[i])}</span><span class="nm">${esc(r.n)}</span><b>${f(r.v)}${tot>0?` <small>${Math.round(r.v/tot*100)}%</small>`:''}</b></div>`).join('')||'<div class="dr"><span class="nm">-</span></div>';
     const gd=G.stGold0===undefined?null:(me.gold|0)-(G.stGold0|0); const miss=Math.max(0,(G.stDrops|0)-gs), left=Math.min(miss,ground.length), lost=Math.min(miss-left,G.stCap|0), oth=miss-left-lost;
     const missLn=miss>0?`<div class="meta" style="margin-top:6px">못 주운 아이템 ${miss}개 — ${[left?`바닥에 남음 ${left}`:'',lost?`바닥에 90개가 넘어 사라짐 ${lost}`:'',oth?`기타 ${oth}`:''].filter(Boolean).join(' · ')}</div>`:'';
-    $('#endBox').innerHTML=`<div class="etabs" role="tablist"><button type="button" data-t="l" role="tab">📦 전리품</button><button type="button" data-t="r" role="tab">⚔️ 데미지 순위</button></div><div class="epg" id="epR"><div><div style="margin-bottom:6px">데미지 순위</div>${top3}</div><div class="tp"><span>⚔️ 총 데미지</span><b>${f(tot)}</b></div></div><div class="epg" id="epL">${gd!==null?`<div class="tp"><span>💰 골드 변화</span><b style="color:${gd>0?'#9fd18b':gd<0?'#ff8a7a':'var(--ink)'}">${gd>0?'+':gd<0?'−':''}${f(Math.abs(gd))}G</b></div>`:''}${(G.stRev|0)>0?`<div class="tp"><span>✨ 부활한 횟수</span><b>${G.stRev|0}회</b></div>`:''}<div><div style="margin-bottom:6px">📦 획득한 아이템 <b style="display:inline;font-size:14px;color:var(--ink)">${gs}</b>개</div><div class="rr">${[0,1,2,3].concat(got[4]?[4]:[]).map(r=>`<div style="color:${RARC[r]}">${RARN[r]}<b>${got[r]|0}</b></div>`).join('')}</div>${missLn}</div></div>`;
+    $('#endBox').innerHTML=`<div class="etabs" role="tablist"><button type="button" data-t="l" role="tab">📦 전리품</button><button type="button" data-t="r" role="tab">⚔️ 데미지 순위</button></div><div class="epg" id="epR"><div><div style="margin-bottom:6px">데미지 순위</div>${top3}</div><div class="tp"><span>⚔️ 총 데미지</span><b>${f(tot)}</b></div><div class="tp"><span>🩸 내가 받은 피해</span><b>${f(G.stTaken||0)}</b></div></div><div class="epg" id="epL">${gd!==null?`<div class="tp"><span>💰 골드 변화</span><b style="color:${gd>0?'#9fd18b':gd<0?'#ff8a7a':'var(--ink)'}">${gd>0?'+':gd<0?'−':''}${f(Math.abs(gd))}G</b></div>`:''}${(G.stRev|0)>0?`<div class="tp"><span>✨ 부활한 횟수</span><b>${G.stRev|0}회</b></div>`:''}${win&&!msg&&G.ccThis?`<div class="tp"><span>🏆 누적 클리어</span><b>${G.ccThis}회 <small>전체 ${G.ccAll}회</small></b></div>`:''}<div><div style="margin-bottom:6px">📦 획득한 아이템 <b style="display:inline;font-size:14px;color:var(--ink)">${gs}</b>개</div><div class="rr">${[0,1,2,3].concat(got[4]?[4]:[]).map(r=>`<div style="color:${RARC[r]}">${RARN[r]}<b>${got[r]|0}</b></div>`).join('')}</div>${missLn}</div></div>`;
     endTab('l'); }
   show('#sEnd');
 }
