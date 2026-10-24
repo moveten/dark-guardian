@@ -760,7 +760,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.0.0253</div>
+    <div class="ver" id="verT">v0.6.0.0254</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -1906,8 +1906,9 @@ function awkMirror(m,best,bd,a,du){ const cls=best.i===2&&ally?ally.cls:best.i==
   else if(cls==='druid'){ m.tel={k:'slam',kind:'lines',x:m.x,y:m.y,as:[a-.25,a,a+.25],len:540,w:62,t:0,dur:1.0*du,mul:1.2,st:'slow',sd:2,col,nm:'🪞 거울 · 까마귀 떼'}; }
   else { summon(m); for(let i=0;i<2;i++)spawnMob(2,m.x+rand(-70,70),m.y+rand(-70,70),true); announce('🪞 거울 · 영혼 소환! 해골 정예가 나타났어요','#c08bff'); efx.push({k:'ring',x:m.x,y:m.y,r0:10,r1:150,t:0,life:.5,col,w:10}); m.bt=rand(1.4,2); return true; }
   announce(m.tel.nm+'!','#c08bff'); return true; }
-/* 잠식 장판(3페이즈): 맵 가장자리부터 어둠이 차올라 30초 동안 안전 지대가 반경 376 → 184 로 줄어듦(예전 470 → 230 의 80%) */
-function awkZone(dt){ if(!G.awz)G.awz={x:VX,y:VY,r0:376,r1:184,t:0,dur:30}; const z=G.awz; z.t=Math.min(z.dur,z.t+dt); z.r=z.r0+(z.r1-z.r0)*(z.t/z.dur); }
+/* 잠식 장판(3페이즈): 처음 안전 지대 반경 470 → 보스 체력에 비례해 줄어들어 체력 0%에서 처음의 40%(188)가 됨 (3페이즈 시작 체력 35% = 470) */
+const AWZ_R0=470, AWZ_MIN=.4;
+function awkZone(dt,m){ const f=clamp(m.hp/(m.max*AWK.ph[2]),0,1), tr=AWZ_R0*(AWZ_MIN+(1-AWZ_MIN)*f); if(!G.awz)G.awz={x:VX,y:VY,r:Math.min(AWZ_R0,tr)}; const z=G.awz; z.r+=(tr-z.r)*Math.min(1,dt*4); }
 function awkZoneSelf(dt){ const z=G.awz; if(!z||me.dead||G.phase!=='boss')return; if(hyp(me.x-z.x,me.y-z.y)<=z.r){ me.zoT=.5; return; }
   if(!(me.hblk>0))me.hpLk=me.hp; me.hblk=Math.max(me.hblk||0,.6);   /* 장판 밖: 생명력 회복 불가(물약만 가능) */
   me.zoT=(me.zoT==null?.5:me.zoT)-dt; if(me.zoT<=0){ me.zoT=.5; fixDmg(.1,'🌑','#b89cff'); me.slowP=Math.max(me.slowP||0,.6); } }
@@ -1929,7 +1930,7 @@ function awkAI(m,dt,pls,sf,best,bd,tau){
       if(m.sealT<=0&&m.bt<=.5){ awkSeal(m); return true; }
       if(m.cloneT<=0&&!G.mobs.some(o=>o.fake&&!o.dead)){ m.cloneT=AWK.cloneCd[m.ph-1]*(m.bzk?.5:1); awkClone(m); m.bt=Math.max(m.bt,.8); m.swT=5; return true; } }
     if(m.brT!=null)m.brT-=dt; if(m.mirT!=null)m.mirT-=dt;
-    if(m.ph===3){ awkZone(dt); if(!m.bzk&&m.hp<m.max*.1){ m.bzk=true; m.cloneT=Math.min(m.cloneT,3); banner('💢 광폭화','각성 그림자의 공격이 빨라져요'); announce('💢 각성 그림자 광폭화! 공격 속도 +56%, 분신술이 더 자주 나와요','#ff6a8a'); G.shake=1; sfx('boss'); pushEv(['abz',1]); }
+    if(m.ph===3){ awkZone(dt,m); if(!m.bzk&&m.hp<m.max*.1){ m.bzk=true; m.cloneT=Math.min(m.cloneT,3); banner('💢 광폭화','각성 그림자의 공격이 빨라져요'); announce('💢 각성 그림자 광폭화! 공격 속도 +56%, 분신술이 더 자주 나와요','#ff6a8a'); G.shake=1; sfx('boss'); pushEv(['abz',1]); }
       const fk=G.mobs.filter(o=>o.fake&&!o.dead); if(fk.length){ m.swT=(m.swT==null?5:m.swT)-dt; if(m.swT<=0){ m.swT=5; const f=pick(fk); const tx=m.x,ty=m.y; m.x=f.x; m.y=f.y; f.x=tx; f.y=ty; for(const q of [m,f]){ burst(q.x,q.y,'#2a1a4a',18,220); spark(q.x,q.y,'#8a6cff',10); } announce('🔀 분신이 자리를 바꿨어요','#b89cff'); } } } }
   if(m.tel||m.charge||m.counter>0)return false;
   if(m.bt<=0&&bd<900&&!tau){ const du=m.enr?.85:1, a=Math.atan2(best.y-m.y,best.x-m.x), ph=m.ph|0||1;
