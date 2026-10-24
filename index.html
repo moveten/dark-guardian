@@ -745,7 +745,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.5.0.0236</div>
+    <div class="ver" id="verT">v0.5.0.0237</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -1863,7 +1863,7 @@ function awkSealEnd(m){ const c=m.cast||{k:'seal',abs:0}, left=G.mobs.filter(o=>
   m.bt=Math.max(m.bt,1.2); m.sealT=AWK.sealCd*rand(.9,1.1); }
 /* 공허의 낙인: 플레이어마다 발밑에 원 → 안에 있으면 5초간 생명력(💔) 또는 마나(💧) 회복 봉쇄. 2페이즈 번갈아(18초) · 3페이즈 둘 다(14초) */
 function awkBrand(m,best){ const pl1=playersForAI().filter(p=>p.i<10); if(!pl1.length){ m.brT=4; return; }
-  let bk; if(m.ph>=3)bk=['h','m']; else { m.brA=!m.brA; bk=[m.brA?'h':'m']; } m.brT=m.ph>=3?9.8:12.6;
+  const bk=['h','m']; m.brT=m.ph>=3?9.8:12.6;   /* 생명·마나 봉쇄 동시 */
   const slow=me.erode>0; /* 잠식이 걸려 있으면 피할 시간을 더 줌 */
   m.tel={k:'slam',kind:'multi',x:pl1[0].x,y:pl1[0].y,pts:pl1.map(p=>({x:p.x,y:p.y})),r:120,t:0,dur:slow?1.8:1.2,mul:0,brand:bk,col:'#9a7dff',nm:bk.length>1?'💔💧 공허의 낙인':bk[0]==='h'?'💔 공허의 낙인 · 생명':'💧 공허의 낙인 · 마나'};
   announce(bk.length>1?'💔💧 공허의 낙인! 원 밖으로 피하세요 — 맞으면 5초간 회복 봉쇄':bk[0]==='h'?'💔 공허의 낙인! 원 밖으로 — 맞으면 5초간 생명력 회복 봉쇄':'💧 공허의 낙인! 원 밖으로 — 맞으면 5초간 마나 회복 봉쇄','#c0a8ff'); }
@@ -2595,6 +2595,7 @@ function hudSet(k,on){ HUDS[k]=on?1:0; lsSet('dkdef2.hud',JSON.stringify(HUDS));
 function awkShieldHit(m,host){ if(host){ m.shield--; m.shF=.2; } addNum(m.x,m.y-m.r-8,m.shield>0?`🛡️ 막힘 · ${m.shield}`:'🛡️ 배리어 파괴!','#c0a8ff',m.shield<=0); spark(m.x,m.y-m.r*.5,'#c0a8ff',6);
   if(host&&m.shield<=0){ burst(m.x,m.y,'#c0a8ff',40,360); efx.push({k:'ring',x:m.x,y:m.y,r0:20,r1:150,t:0,life:.5,col:'#c0a8ff',w:10}); G.shake=Math.max(G.shake,.6); sfx('crit'); announce('🛡️ 그림자 배리어가 깨졌어요! 이제 피해가 들어가요','#c0a8ff'); pushEv(['ash0',1]); } }
 function hitMob(m,r,slow,tn,fx){
+  if((m.shield>0||m.inv>0)&&m.boss&&m.counter>0&&!(fx&&(fx.basic||fx.raw))&&!G.inProc)counterHit(m,r.v);   /* 배리어·무적이어도 반격 태세는 그대로 반사 */
   if(m.shield>0){ awkShieldHit(m,G.mode!=='guest'); return; }   /* 각성 그림자 1페이즈 배리어 */
   if(m.inv>0){ if(T-(m._invN||-9)>.45){ m._invN=T; addNum(m.x,m.y-m.r-8,'무적','#b8a8ff',false); } return; }   /* 각성 그림자 무적 */
   const raw=!!(fx&&fx.raw); /* 고정 비율 피해(세크리파이스)는 장비·레벨 보정과 반격 태세를 무시 */
