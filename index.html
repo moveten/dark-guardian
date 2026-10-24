@@ -745,7 +745,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.5.0.0240</div>
+    <div class="ver" id="verT">v0.5.0.0241</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -1812,14 +1812,15 @@ const awkType=()=>MT.findIndex(t=>t.raid==='awk'), objType=()=>MT.findIndex(t=>t
 const awkReal=()=>G.mobs.find(m=>m.rk==='awk'&&!m.fake&&!m.dead);
 const awkCap=m=>AWK.ph[(m.ph||1)-1];   /* 지금 페이즈의 체력 상한 비율 */
 const awkFloor=m=>(m.ph||1)<3?AWK.ph[m.ph||1]:-1;   /* 다음 페이즈 문턱 — 페이즈 전환 전에는 이 아래로 안 깎임 */
-const AWK_SHIELD=20;   /* 1페이즈 그림자 배리어: 공격 10번을 막음 (피해량과 상관없이 한 번 맞을 때마다 1) */
-function spawnAwake(){ const b=spawnMob(awkType(),VX,VY*.45,false); b.ph=1; b.shield=AWK_SHIELD; later(3.2,()=>{ if(G.inGame&&b.shield>0)announce(`🛡️ 그림자 배리어! 공격 ${AWK_SHIELD}번을 막아요 — 궁극기는 배리어가 깨진 뒤에`,'#c0a8ff'); }); b.wake=3; b.cloneT=10; b.sealT=18; b.dmgB=b.dmg0; b.sum0=b.sum1=b.sum2=true;
+const AWK_ULT0=.6;   /* 페이즈 시작 시 곧바로 궁극기(파괴 미션)를 쓸 확률 */
+const AWK_SHIELD=30;   /* 1페이즈 그림자 배리어: 공격 30번을 막음 (피해량과 상관없이 한 번 맞을 때마다 1) */
+function spawnAwake(){ const b=spawnMob(awkType(),VX,VY*.45,false); b.ph=1; b.shield=AWK_SHIELD; later(3.2,()=>{ if(G.inGame&&b.shield>0)announce(`🛡️ 그림자 배리어! 공격 ${AWK_SHIELD}번을 막아요 — 궁극기는 배리어가 깨진 뒤에`,'#c0a8ff'); }); b.wake=3; b.cloneT=10; b.sealT=Math.random()<AWK_ULT0?.1:18; if(b.sealT<1)b.bt=.3;   /* 페이즈 시작 60%: 바로 궁극기(파괴 미션) */ b.dmgB=b.dmg0; b.sum0=b.sum1=b.sum2=true;
   efx.push({k:'ring',x:b.x,y:b.y,r0:10,r1:180,t:0,life:.8,col:'#8a6cff',w:12}); burst(b.x,b.y,'#2a1a4a',50,360); impact(b.x,b.y,'130,100,255',240);
   G.laneShow=[0,1,3]; pushEv(['b',awkType()]); banner('🌑 각성 그림자','봉인이 깨지고, 첫 수호자의 그림자가 일어섭니다'); me.pot=3; G.shake=1; sfx('boss'); }
 function awkFakesClear(fx){ for(const o of G.mobs){ if(o.dead||!o.fake)continue; o.dead=true; if(fx){ burst(o.x,o.y,'#2a1a4a',24,260); spark(o.x,o.y,'#8a6cff',16); } } }
 function awkObjsClear(){ for(const o of G.mobs){ if(!o.dead&&o.obj)o.dead=true; } }
 function awkPhase(m,np){ m.ph=np; if(np===3)m.dfM=(m.dfM||1)*1.2;   /* 3페이즈: 받는 피해 ÷1.2 (방어력 +20%) */ m.dmg0=m.dmgB*AWK.dmgM[np-1]; m.dmg=m.dmg0; m.tel=null; m.charge=null; m.counter=0; m.cast=null; G.awc=null; awkFakesClear(true); awkObjsClear();
-  m.inv=2.2; m.bt=2.6; m.cloneT=Math.min(m.cloneT||0,6); m.sealT=Math.max(m.sealT||0,14);
+  m.inv=2.2; m.bt=2.6; m.cloneT=Math.min(m.cloneT||0,6); m.sealT=Math.random()<AWK_ULT0?2.3:Math.max(m.sealT||0,14);   /* 페이즈 시작 60%: 무적이 끝나자마자 궁극기 */
   const t=np===2?['🌑 2페이즈 · 삼남매의 잔향','형과 누나의 힘을 삼켰어요']:['🌑 3페이즈 · 각성','마지막 각성 — 모든 것을 걸고 덤벼와요'];
   banner(t[0],t[1]); announce(t[0],'#a68bff'); G.shake=1.2; sfx('boss'); burst(m.x,m.y,'#2a1a4a',60,420); impact(m.x,m.y,'130,100,255',300); efx.push({k:'ring',x:m.x,y:m.y,r0:20,r1:260,t:0,life:.9,col:'#8a6cff',w:16});
   pushEv(['aph',np]); if(G.mode==='solo'||G.mode==='host')later(.3,()=>{ if(G.inGame&&G.phase==='boss')storyRun('p'+np); }); }
@@ -1831,9 +1832,9 @@ function awkClone(m){ const n=m.ph===2?2:1, a0=rand(0,6.283), out=[m];
   efx.push({k:'ring',x:m.x,y:m.y,r0:10,r1:160,t:0,life:.5,col:'#8a6cff',w:10}); G.shake=Math.max(G.shake,.5); sfx('boss');
   announce(n>1?'👥 그림자 분신술! 셋 중 하나만 진짜예요':'👥 그림자 분신술! 둘 중 하나만 진짜예요','#b89cff'); pushEv(['acl',n]); }
 /* 파괴 패턴 3종: 봉인 결정(1페이즈) · 그림자 등불(2페이즈) · 심장 파편(3페이즈) */
-const AWC={seal:{n:3,dur:6,hp:120000,ok:1,nm:'🔮 봉인 결정',sub:'6초 안에 결정 3개를 모두 부수세요!',warn:'🔮 봉인 결정을 모두 부수세요! 못 부수면 보스가 크게 회복해요'},
-  lantern:{n:2,dur:8,hp:96000,ok:2,nm:'🏮 그림자 등불',sub:'8초 안에 등불 2개를 끄지 못하면 즉사!',warn:'☠️ 그림자 등불 2개를 모두 끄세요! 못 끄면 모두 즉사해요'},
-  heart:{n:3,dur:7,hp:144000,ok:3,nm:'💔 심장 파편',sub:'보스에게 닿기 전에 파편 3개를 부수세요!',warn:'💔 심장 파편이 보스에게 모여요! 놓치면 10초간 물약으로만 회복돼요'}};
+const AWC={seal:{n:3,dur:10,hp:120000,ok:1,nm:'🔮 봉인 결정',sub:'10초 안에 결정 3개를 모두 부수세요!',warn:'🔮 봉인 결정을 모두 부수세요! 못 부수면 보스가 크게 회복해요'},
+  lantern:{n:2,dur:10,hp:96000,ok:2,nm:'🏮 그림자 등불',sub:'10초 안에 등불 2개를 끄지 못하면 즉사!',warn:'☠️ 그림자 등불 2개를 모두 끄세요! 못 끄면 모두 즉사해요'},
+  heart:{n:3,dur:10,hp:144000,ok:3,nm:'💔 심장 파편',sub:'보스에게 닿기 전에 파편 3개를 부수세요!',warn:'💔 심장 파편이 보스에게 모여요! 놓치면 10초간 물약으로만 회복돼요'}};
 const AWCK=['','seal','lantern','heart'], AWCN={seal:'봉인 결정',lantern:'그림자 등불',heart:'심장 파편'};
 function awkSeal(m){ const kind=m.ph===2?'lantern':m.ph===3?'heart':'seal', C=AWC[kind], hp=C.hp*(G.coop?1.6:1), pls=playersForAI(), c=pls[0]||{x:VX,y:VY};
   awkFakesClear(true); m.tel=null; m.charge=null; m.counter=0; m.cast={k:kind,t:0,dur:C.dur,abs:0}; m.inv=C.dur+.2; G.awc={k:kind,t:0,dur:C.dur,n:C.n};
@@ -4436,12 +4437,11 @@ function renderStagePanel(){
   const chars=charIds().map(loadChar).filter(Boolean);
   $('#playPanel').hidden=!selId;
   { const cur=chars.find(c=>c.id===selId); stageClear=cur?Math.min(STAGES.length,cur.clear|0):0; }
-  if(selStage>stageClear&&!(selStage===S5I&&s5Open())) selStage=stageClear; try{fieldGet(selStage);}catch(e){}   /* 5스테이지: 비밀번호를 맞힌 기기는 4스테이지를 안 깼어도 테스트 입장 가능 */
+  if(selStage>stageClear) selStage=stageClear; try{fieldGet(selStage);}catch(e){}   /* 5스테이지: 비밀번호를 맞힌 기기는 4스테이지를 안 깼어도 테스트 입장 가능 */
   const sb=$('#stageBar'); sb.innerHTML='';
-  const nOpen=STAGES.length-1; if(selStage>=nOpen&&!(selStage===S5I&&s5Open())){ selStage=nOpen-1; }   /* 5스테이지 버튼은 아래 '업데이트 예정' 칸이 대신함 */
+  const nOpen=STAGES.length;   /* 5스테이지 공개 */
   STAGES.forEach((st,i)=>{ if(i>=nOpen)return; const b=document.createElement('button'); b.className='stg'; b.setAttribute('aria-pressed',i===selStage); b.disabled=i>stageClear; b.textContent=(i>stageClear?'🔒 ':'')+st.id; if(st.raid){ b.classList.add('dg'); b.insertAdjacentHTML('beforeend',dragonBadge()); } b.onclick=()=>{ selStage=i; lsSet('dkdef2.stage',String(i)); renderStagePanel(); }; sb.appendChild(b); });
-  { const b=document.createElement('button'); b.className='stg soon'; b.setAttribute('aria-disabled','true'); b.setAttribute('aria-pressed',selStage===S5I); b.innerHTML='🔒 5<small>업데이트 예정</small>';
-    const go=()=>{ selStage=S5I; lsSet('dkdef2.stage',String(S5I)); renderStagePanel(); }; b.onclick=()=>{ if(s5Open())go(); else s5Ask(go); }; sb.appendChild(b); }   /* 다음 스테이지 자리 표시 */
+  { const b=document.createElement('button'); b.className='stg soon'; b.setAttribute('aria-disabled','true'); b.innerHTML='🔒 6<small>업데이트 예정</small>'; b.onclick=()=>{ if(typeof toast==='function')toast('6스테이지는 업데이트 예정이에요'); }; sb.appendChild(b); }   /* 다음 스테이지 자리 표시 */
   { const ctr=()=>{ const cb=sb.children[selStage]; if(cb&&sb.clientWidth) sb.scrollLeft=cb.offsetLeft+cb.offsetWidth/2-sb.clientWidth/2; }; ctr(); requestAnimationFrame(ctr); setTimeout(ctr,120); }
   const S=STAGES[selStage]; $('#stageBig').innerHTML=`<small>STAGE</small>${esc(S.id)} · ${esc(S.n)}`;
   { const cur=chars.find(c=>c.id===selId), low=cur&&cur.lvl<S.rl, gp0=cur&&cur.eq?gearPenOf(cur.eq,S.icap):null, gw=!!gp0&&gp0.wm<.97; $('#stageInfo').innerHTML=`<span style="color:${gw?'#e07060':'#9fd18b'};font-weight:700">장비 Lv 합 ${Math.max(1,S.icap-12)*EQSL.length}↑${gp0?` (내 합 ${gp0.sum}${gw?' · 부족':''})`:''}</span><span class="sd">${esc(S.d)}</span>`; }
