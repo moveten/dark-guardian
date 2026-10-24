@@ -771,7 +771,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.0.0261</div>
+    <div class="ver" id="verT">v0.6.0.0262</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -4044,6 +4044,7 @@ function renderBag(){
   const ase=pq('#aShardEx'); if(ase)ase.onclick=()=>(selItem&&shMat(selItem.it)==='ashard'?ashardModal():shardModal());
   const ass=pq('#aShardSell'); if(ass)ass.onclick=()=>sellShard();
   const aen=pq('#aEnh'); if(aen)aen.onclick=()=>enhModal();
+  const asx=pq('#aShEx'); if(asx)asx.onclick=()=>shExModal();
   const au=pq('#aUnequip'); if(au)au.onclick=()=>{unequip(selItem.eq);};
 }
 const SLOTO={weapon:0,shield:1,helm:2,armor:3,amulet:4,ring:5};
@@ -4099,6 +4100,23 @@ function sendPick(){
       delete it.isNew; if(t.k==='s')stamp(it); t.o.inv[i]=it; saveTarget(t); saveSrc(P); selItem=null; closeModal(); sfx('pick'); shopMsg=''; rerender(); toast(`${tgName(t)}에게 보냈어요`,'#9fd18b'); });
   });
 }
+/* 조각 교환: 유니크 이상 +10강 장비 1개 → 원하는 종류의 조각 SHEX_N개. 조각 종류는 SHDK 에 추가되는 대로 목록에 자동으로 늘어남 */
+const SHEX_N=10, SHEX_RAR=3, SHEX_ENH=10;
+const canShEx=it=>!!(it&&!isShard(it)&&it.slot!=='mat'&&(it.rar|0)>=SHEX_RAR&&(it.enh|0)>=SHEX_ENH);
+function shExModal(){ const it=selItem&&selItem.it, ix=selItem&&selItem.inv; if(!canShEx(it)||ix===undefined||selItem.store||me.inv[ix]!==it)return;
+  if(it.lock){ sheetToast('🔒 잠긴 아이템이에요. 잠금을 먼저 풀어 주세요','#ff8a7a'); return; }
+  const ks=Object.keys(SHDK); let pick=null;
+  const row=k=>`<button class="btn" data-pk="${k}" style="width:100%;display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 10px;margin:0 0 4px;text-align:left"><span>${SHDK[k].e} ${esc(SHDK[k].n)}</span><span style="font-size:11.5px;color:var(--mute)">보유 ${shardCount(me,k)}개</span></button>`;
+  modal(`<h3>🔮 조각으로 교환</h3><p style="margin:0 0 8px;font-size:13px;color:${RARC[it.rar]}">${esc(it.name)}${it.enh>0?' +'+it.enh:''}</p><p class="meta" style="margin:0 0 8px;font-size:12.5px">이 아이템이 사라지고 원하는 조각 <b style="color:#ffd34d">${SHEX_N}개</b>를 받아요. 되돌릴 수 없어요</p>
+    <button class="btn" id="shxSel" style="width:100%;display:flex;justify-content:space-between;align-items:center;padding:10px;border-color:#c9a0ff"><span id="shxTx">조각 종류를 선택하세요</span><span>▾</span></button>
+    <div id="shxList" hidden style="max-height:190px;overflow-y:auto;overscroll-behavior:contain;margin-top:6px;padding:4px;border:1px solid var(--line);border-radius:8px;background:rgba(0,0,0,.35)">${ks.map(row).join('')}</div>
+    <div class="row2" style="margin-top:10px"><button class="btn" id="shxNo">취소</button><button class="btn primary" id="shxGo" disabled style="opacity:.5">교환하기</button></div>`,m=>{
+    const list=m.querySelector('#shxList'), go=m.querySelector('#shxGo');
+    m.querySelector('#shxNo').onclick=closeModal;
+    m.querySelector('#shxSel').onclick=()=>{ list.hidden=!list.hidden; };
+    m.querySelectorAll('[data-pk]').forEach(b=>b.onclick=()=>{ pick=b.dataset.pk; const K=SHDK[pick]; m.querySelector('#shxTx').textContent=`${K.e} ${K.n} ×${SHEX_N}`; m.querySelectorAll('[data-pk]').forEach(o=>{ o.style.borderColor=o===b?'#c9a0ff':''; o.style.background=o===b?'rgba(150,90,255,.25)':''; }); list.hidden=true; go.disabled=false; go.style.opacity=''; });
+    go.onclick=()=>{ if(!pick||!SHDK[pick]||me.inv[ix]!==it||it.lock||!canShEx(it))return; me.inv[ix]=null; shardAdd(me,SHEX_N,pick); const K=SHDK[pick]; selItem=null; saveSrc(me); closeModal(); sfx('pick'); shopMsg=''; rerender(); toast(`${K.e} ${K.n} ${SHEX_N}개로 교환했어요`,'#c9a0ff'); };
+  }); }
 function sellBtn(btn){ const it=selItem&&selItem.it; if(!it||selItem.inv===undefined)return; if(it.lock){ sheetToast('🔒 잠긴 아이템이에요. 잠금을 먼저 풀어 주세요','#ff8a7a'); return; }
   if(it.enh>0&&sellAskIt!==it){ sellAskIt=it; if(btn){ const tx=btn.querySelector('.tx'); if(tx)tx.textContent='⚠️ 판매 '+sellInfo(it).total+'G'; else btn.textContent='⚠️ 판매 '+sellInfo(it).total+'G'; btn.style.background='#a62a22'; btn.style.borderColor='#ff6a5a'; btn.style.color='#fff'; btn.style.opacity='1'; } sheetToast&&sheetToast(`⚠️ +${it.enh} 강화 아이템이에요. 한 번 더 누르면 판매돼요`,'#ffb259'); return; }   /* 강화한 아이템은 두 번 눌러야 판매 */
   sellAskIt=null; sellItem(selItem.inv); }
@@ -4174,9 +4192,10 @@ function detailHtml(){
   /* 폰 화면(560px 이하)에서는 장착/해제가 한 줄 전체, 강화·판매·보내기는 아이콘 타일 한 줄, 잠금은 아이콘 모서리 배지. 패드·PC는 예전 그대로 */
   const lk=`<button class="btn lkx" id="aLock" data-lk="1">${it.lock?'🔓 잠금 해제':'🔒 잠금'}</button>`,
     enh=canEnh(it)?`<button class="btn tlb" id="aEnh"><span class="ti">⚒</span> <span class="tx">강화${it.enh>0?' +'+it.enh:''}</span></button>`:'',
-    send=(G.titleSheet&&charIds().length>1)?'<button class="btn tlb" id="aSend"><span class="ti">📤</span> <span class="tx">보내기</span></button>':'';
+    send=(G.titleSheet&&charIds().length>1)?'<button class="btn tlb" id="aSend"><span class="ti">📤</span> <span class="tx">보내기</span></button>':'',
+    shx=(selItem.inv!==undefined&&!selItem.store&&canShEx(it))?'<button class="btn tlb" id="aShEx" style="border-color:#c9a0ff;color:#d9b8ff"><span class="ti">🔮</span> <span class="tx">조각 교환</span></button>':'';
   if(selItem.inv!==undefined){
-    s+=`<div class="acts iact"><button class="btn primary" id="aEquip"${!canWear(it)?' style="opacity:.5"':''}>장착</button>${lk}${enh}<button class="btn tlb" id="aSell"${it.lock?' style="opacity:.45"':''}><span class="ti ph">💰</span><span class="tx">판매 ${sellInfo(it).total}G</span></button>${send}</div>`;
+    s+=`<div class="acts iact"><button class="btn primary" id="aEquip"${!canWear(it)?' style="opacity:.5"':''}>장착</button>${lk}${enh}${shx}<button class="btn tlb" id="aSell"${it.lock?' style="opacity:.45"':''}><span class="ti ph">💰</span><span class="tx">판매 ${sellInfo(it).total}G</span></button>${send}</div>`;
   }else s+=`<div class="acts iact"><button class="btn" id="aUnequip">해제</button>${lk}${enh}${send}</div>`;
   return s;
 }
