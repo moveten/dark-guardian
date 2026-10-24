@@ -760,7 +760,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.0.0254</div>
+    <div class="ver" id="verT">v0.6.0.0255</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -1831,7 +1831,7 @@ const awkCap=m=>AWK.ph[(m.ph||1)-1];   /* 지금 페이즈의 체력 상한 비�
 const awkFloor=m=>(m.ph||1)<3?AWK.ph[m.ph||1]:-1;   /* 다음 페이즈 문턱 — 페이즈 전환 전에는 이 아래로 안 깎임 */
 const AWK_ULT0=.6;   /* 페이즈 시작 시 곧바로 궁극기(파괴 미션)를 쓸 확률 */
 const AWK_SHIELD=30;   /* 1페이즈 그림자 배리어: 공격 30번을 막음 (피해량과 상관없이 한 번 맞을 때마다 1) */
-function spawnAwake(){ const b=spawnMob(awkType(),VX,VY*.45,false); b.ph=1; b.shield=AWK_SHIELD; later(3.2,()=>{ if(G.inGame&&b.shield>0)announce(`🛡️ 그림자 배리어! 공격 ${AWK_SHIELD}번을 막아요 — 궁극기는 배리어가 깨진 뒤에`,'#c0a8ff'); }); b.wake=3; b.cloneT=10; b.sealT=Math.random()<AWK_ULT0?.1:18; if(b.sealT<1)b.bt=.3;   /* 페이즈 시작 60%: 바로 궁극기(파괴 미션) */ b.dmgB=b.dmg0; b.sum0=b.sum1=b.sum2=true;
+function spawnAwake(){ const b=spawnMob(awkType(),VX,VY*.45,false); b.ph=1; b.shield=AWK_SHIELD; later(3.2,()=>{ if(G.inGame&&b.shield>0)announce(`🛡️ 그림자 배리어! 공격 ${AWK_SHIELD}번을 막아요 — 보스는 배리어 중에도 공격해요, 깨져야 피해가 들어가요`,'#c0a8ff'); }); b.wake=3; b.cloneT=10; b.sealT=Math.random()<AWK_ULT0?.1:18; if(b.sealT<1)b.bt=.3;   /* 페이즈 시작 60%: 바로 궁극기(파괴 미션) */ b.dmgB=b.dmg0; b.sum0=b.sum1=b.sum2=true;
   efx.push({k:'ring',x:b.x,y:b.y,r0:10,r1:180,t:0,life:.8,col:'#8a6cff',w:12}); burst(b.x,b.y,'#2a1a4a',50,360); impact(b.x,b.y,'130,100,255',240);
   G.laneShow=[0,1,3]; pushEv(['b',awkType()]); banner('🌑 각성 그림자','봉인이 깨지고, 첫 수호자의 그림자가 일어섭니다'); me.pot=3; G.shake=1; sfx('boss'); }
 function awkFakesClear(fx){ for(const o of G.mobs){ if(o.dead||!o.fake)continue; o.dead=true; if(fx){ burst(o.x,o.y,'#2a1a4a',24,260); spark(o.x,o.y,'#8a6cff',16); } } }
