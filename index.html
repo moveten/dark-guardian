@@ -751,7 +751,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.0.0244</div>
+    <div class="ver" id="verT">v0.6.0.0245</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -1913,7 +1913,7 @@ function awkAI(m,dt,pls,sf,best,bd,tau){
       if(m.sealT<=0&&m.bt<=.5){ awkSeal(m); return true; }
       if(m.cloneT<=0&&!G.mobs.some(o=>o.fake&&!o.dead)){ m.cloneT=AWK.cloneCd[m.ph-1]*(m.bzk?.5:1); awkClone(m); m.bt=Math.max(m.bt,.8); m.swT=5; return true; } }
     if(m.brT!=null)m.brT-=dt; if(m.mirT!=null)m.mirT-=dt;
-    if(m.ph===3){ awkZone(dt); if(!m.bzk&&m.hp<m.max*.1){ m.bzk=true; m.cloneT=Math.min(m.cloneT,3); banner('💢 광폭화','각성 그림자의 공격이 빨라져요'); announce('💢 각성 그림자 광폭화! 공격 속도 +20%, 분신술이 더 자주 나와요','#ff6a8a'); G.shake=1; sfx('boss'); pushEv(['abz',1]); }
+    if(m.ph===3){ awkZone(dt); if(!m.bzk&&m.hp<m.max*.1){ m.bzk=true; m.cloneT=Math.min(m.cloneT,3); banner('💢 광폭화','각성 그림자의 공격이 빨라져요'); announce('💢 각성 그림자 광폭화! 공격 속도 +56%, 분신술이 더 자주 나와요','#ff6a8a'); G.shake=1; sfx('boss'); pushEv(['abz',1]); }
       const fk=G.mobs.filter(o=>o.fake&&!o.dead); if(fk.length){ m.swT=(m.swT==null?5:m.swT)-dt; if(m.swT<=0){ m.swT=5; const f=pick(fk); const tx=m.x,ty=m.y; m.x=f.x; m.y=f.y; f.x=tx; f.y=ty; for(const q of [m,f]){ burst(q.x,q.y,'#2a1a4a',18,220); spark(q.x,q.y,'#8a6cff',10); } announce('🔀 분신이 자리를 바꿨어요','#b89cff'); } } } }
   if(m.tel||m.charge||m.counter>0)return false;
   if(m.bt<=0&&bd<900&&!tau){ const du=m.enr?.85:1, a=Math.atan2(best.y-m.y,best.x-m.x), ph=m.ph|0||1;
@@ -2223,7 +2223,7 @@ function bossAI(m,dt,pls,sf){
     return; }
   m._mv=m._mv?d>reach-5:d>reach;   /* 사거리 경계에서 이동·정지가 번갈아 떨리지 않게: 걷기 시작은 사거리 밖, 멈춤은 5px 안쪽 */
   if(m._mv){const tm=tau?1.35:1; m.dvx=dx/d*m.spd*sf*tm;m.dvy=dy/d*m.spd*sf*tm;}
-  if(d<=reach&&m.cd<=0){m.cd=(tau?.95:m.rk==='shd'?1.0:1.4)/(m.awk?1.5:1)/(m.bzk?1.2:1);m.atk=.3; mobHitPlayer(best.i,m.rk==='shd'?m.dmg*2:m.dmg);}
+  if(d<=reach&&m.cd<=0){m.cd=(tau?.95:m.rk==='shd'?1.0:1.4)/(m.awk?1.5:1)/(m.bzk?1.56:1);m.atk=.3; mobHitPlayer(best.i,m.rk==='shd'?m.dmg*2:m.dmg);}
 }
 /* 삼남매 스킬 고르기 — 전사·법사: 고유 스킬 + 반격 태세 + 돌진 (생명 붕괴는 법사만, 위 hvC) · 그림자: 반격 태세만 */
 function raidPick(m,best,bd,pls){
@@ -2589,7 +2589,7 @@ function doCast(key,range,lv){
 }
 /* 반격 태세: 우두머리는 무적이 아니라서 일반공격·소환수·스킬 피해가 모두 그대로 들어가고, 태세 중에 내가 스킬을 쓰면 추가로 내 최대 생명력의 CNT_PCT 만큼 방어력·막기 무시로 되돌려받음 */
 const CNT_PCT=.35, CNT_WIN=2; /* 반사 피해(최대 생명력 비율) / 태세 중 시전한 스킬만 반사 대상으로 인정하는 시간(초) — 태세 전에 깔아 둔 장판·지연 피해는 반사 없이 보스에게만 들어감 */
-function counterHit(m,v){ if(T-(me.cLast||-9)<.6||me.dead||T-(me.cnCast||-9)>CNT_WIN)return; me.cLast=T; addNum(me.x,me.y-44,'⚔️ 반격!','#ff8a3a',true); efx.push({k:'ring',x:me.x,y:me.y,r0:8,r1:50,t:0,life:.35,col:'#ff8a3a',w:7});
+function counterHit(m,v){ if(T-(me.cLast||-9)<.6||me.dead||T-(me.cnCast||-9)>CNT_WIN||me.cnDone===me.cnId)return; me.cLast=T; me.cnDone=me.cnId;   /* 스킬 한 번에 반사는 한 번만 (여러 발·여러 번 맞는 스킬도) */ addNum(me.x,me.y-44,'⚔️ 반격!','#ff8a3a',true); efx.push({k:'ring',x:me.x,y:me.y,r0:8,r1:50,t:0,life:.35,col:'#ff8a3a',w:7});
   if(me.god>0||G.phase==='win'||G.phase==='clear')return; const d=Math.round(me.D.maxHp*CNT_PCT*(me.D.sp&&me.D.sp.hamu?.5:1)); me.hp-=d; me.hurt=.15; sfx('hurt'); G.shake=Math.max(G.shake,.4); addNum(me.x,me.y-24,d,'#ff5a4a',false); if(me.hp<=0){ goDown(); counterTip(); } }
 const LVP0={ex:0,gap:0,dm:1,tk:1,miss:0};
 /* 장비 레벨 페널티: 착용 중인 7칸의 아이템 레벨 총합(강화 1단계 = +1, 빈 칸 = 0)을 스테이지 권장 합(칸당 icap-12)과 비교해 주는 피해·받는 피해에 똑같이 반영 */
@@ -2954,7 +2954,7 @@ function divineStrike(lv,who,pc){ const dvF=Math.min(.9,.5+.02*(Math.max(1,lv)-1
       burst(m.x,m.y,'#ff4a4a',12,260); efx.push({k:'ring',x:m.x,y:m.y,r0:10,r1:m.r*2.4,t:0,life:.5,col:'#ff6a6a',w:6}); }
     if(n)toast(who===1?`세크리파이스! 적 ${n}마리의 생명력이 크게 깎였어요 (일반 ${Math.round(dvF*100)}% · 우두머리 ${Math.round(bF*100)}%)`:`동료의 세크리파이스! 적 ${n}마리의 생명력이 크게 깎였어요`,'#ff8a8a'); }); }
 function castSkill(o,key,real,tx,ty,lv,tgt){
-  if(o===me&&real&&G.mobs.some(b=>b.boss&&!b.dead&&b.counter>0))me.cnCast=T; /* 반격 태세 중에 스킬을 썼음 */
+  if(o===me&&real&&G.mobs.some(b=>b.boss&&!b.dead&&b.counter>0)){ me.cnCast=T; me.cnId=(me.cnId|0)+1; } /* 반격 태세 중에 스킬을 썼음 */
   const ang=Math.atan2(ty-o.y,tx-o.x), dx=Math.cos(ang), dy=Math.sin(ang);
   o.face=ang; o.swing=.22; if(o===me)me.faceT=.9;
   const C=CLASSES[o.cls]; const s=SKBY[key]; const rbm=((o===me&&me.D&&me.D.rng>0)?1+me.D.rng/100:1)*((o===me&&me.buffs.rage&&me.buffs.rage.t>0)?1.25:1), RS=l=>RS0(l)*rbm;
