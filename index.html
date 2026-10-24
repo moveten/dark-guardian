@@ -327,6 +327,8 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 #sTitle h1{margin:0}
 #sTitle .pp{gap:10px}
 #sTitle .pp .modes{flex-wrap:nowrap}
+#bSolo .newb{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:9px;background:#e0483c;color:#fff;font-size:11px;font-weight:800;vertical-align:middle;letter-spacing:.5px;box-shadow:0 0 8px rgba(224,72,60,.7)}
+#bStory[aria-pressed="true"]{border-color:#e0b04a;color:#ffe08a;box-shadow:0 0 10px rgba(224,176,74,.5)}
 #bStory{flex:0 0 86px;align-self:stretch;min-height:0;padding:0 6px;font-size:13px;line-height:1.35;font-weight:600;border-radius:14px;white-space:normal}   /* 가로만 시작하기 버튼의 절반 · 세로는 시작하기와 같은 높이(stretch) */
 #bSolo{flex:1;min-height:66px;font-size:22px;border-radius:14px;box-shadow:0 6px 22px rgba(163,48,42,.35)}
 #stageInfo{padding:9px 12px;text-align:center;cursor:pointer;line-height:1.45}
@@ -745,7 +747,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.5.0.0241</div>
+    <div class="ver" id="verT">v0.6.0.0241</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -1999,6 +2001,7 @@ function startStage(){
   G.wave=0;G.skipUsed=false;G.phase='prep';G.timer=2;G.mobs.length=0;G.ev=[];G.spawnQ=0;G.lastSq=-1;G.endShown=false;G.coop=!!guestPeer;
   G.waveSides=[0,1,3]; G.nextSides=sidesFor(1); G.laneShow=G.nextSides;
   if(G.mode!=='guest'&&(me.clear|0)>selStage&&!STAGES[selStage].raid)later(.05,()=>{ if(G.inGame&&!G.allMode&&G.phase==='prep'&&G.wave===0&&G.stageIdx===selStage&&!tutS&&!tutWait&&!storyWait)startAllOut(); }); /* 이미 깬 스테이지는 들어가자마자 총공세 (튜토리얼이 시작되는 스테이지는 제외) */
+  if(G.mode==='solo'&&storyRe&&G.stg&&storyRe===G.stg.id&&me&&me.tut&&me.tut.sg){ const id=G.stg.id; for(const k of ['a','z','p2','p3'])delete me.tut.sg[id+k]; storyRe=null; storyReUi(); saveChar(); }   /* 스토리 다시 보기: 이 스테이지 대화 기록을 지워 처음처럼 */
   tutWait=tutBegin(); storyWait=storyBegin('pre'); spdTip();
 }
 const CLEAR_T=15; /* 보스 처치 후 전리품 줍기 시간(초) */
@@ -3723,17 +3726,14 @@ function storyTick(){ const S=stS; if(!S){ clearInterval(stTm); return; } S.n=Ma
 function storyNext(){ const S=stS; if(!S)return; if(S.n<S.full.length){ S.n=S.full.length; storyTick(); return; } sfx('ui'); if(S.i+1>=S.ls.length)storyEnd(); else storyShow(S.i+1); }
 function storySkip(){ if(stS){ sfx('ui'); storyEnd(); } }
 function storyClose(){ const S=stS; clearInterval(stTm); stS=null; const el=$('#sty'); if(el){ el.hidden=true; el.classList.remove('nar','nb','rt'); } if(S&&S.pz)G.paused=G.mode==='solo'&&!$('#sheet').hidden; return S; }
-function storyReplay(id,kind,ch,back){ const ls=STORY[id]&&STORY[id][kind]; if(!ls||stS||!ch)return false;   /* 시작 화면에서 본 대화 다시 보기: 기록·게임 멈춤 없이 */
-  stS={ls,i:-1,kind:'re',solo:true,pz:false,foe:null,full:'',n:0,ch,back}; const el=$('#sty'); el.hidden=false; el.classList.remove('nb'); storyShow(0); return true; }
-function storyMenu(){ const ch=selId&&loadChar(selId); if(!ch||stS)return; const S=STAGES[selStage], st=STORY[S.id]; if(!st)return; const sg=(ch.tut&&ch.tut.sg)||{};
-  const row=(k,lb)=>{ const ok=!!sg[storyKey(S.id,k)]; return `<button class="btn${ok?' primary':''}" data-k="${k}"${ok?'':' disabled'}>${lb}${ok?'':' <small style="font-weight:400">· 아직 안 봤어요</small>'}</button>`; };
-  modal(`<h3>📖 스토리 · ${esc(S.id)} ${esc(S.bn)}</h3><p class="meta" style="margin:0 0 10px">이미 본 대화를 다시 볼 수 있어요. 아직 못 본 대화는 그 스테이지에서 처음 플레이할 때 나와요.</p><div class="col">${row('pre','▶ 시작 대화')}${row('post','▶ 끝 대화')}<button class="btn" id="stmX">닫기</button></div>`,m=>{
-    m.querySelector('#stmX').onclick=closeModal;
-    m.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{ const k=b.dataset.k; closeModal(); storyReplay(S.id,k,ch,()=>storyMenu()); }); }); }
+/* 스토리 다시 보기: 버튼을 누르면 '시작하기'에 NEW가 붙고, 그 스테이지를 시작하면 처음처럼 모든 대화(시작·페이즈·끝)가 다시 나와요. 한 번 더 누르면 취소 */
+let storyRe=null;
+function storyReUi(){ const S=STAGES[selStage], on=!!(S&&storyRe===S.id); if(!on)storyRe=null; const b=$('#bSolo'); if(b)b.innerHTML='▶ 시작하기'+(on?' <span class="newb">NEW</span>':''); const st=$('#bStory'); if(st)st.setAttribute('aria-pressed',on); }
+function storyReToggle(){ const S=STAGES[selStage]; if(!S||!STORY[S.id])return; storyRe=storyRe===S.id?null:S.id; storyReUi(); toast(storyRe?'📖 이번 판은 스토리 대화가 처음처럼 모두 나와요':'📖 스토리 다시 보기를 취소했어요','#c9b48a'); }
 function storyStop(){ storyClose(); storyWait=false; }
-function storyEnd(){ const S=storyClose(); if(S&&S.kind==='re'){ if(S.back)S.back(); return; } if(S&&S.kind==='pre'){ storyWait=false;
+function storyEnd(){ const S=storyClose(); if(S&&S.kind==='pre'){ storyWait=false;
   if(G.mode!=='guest'&&(me.clear|0)>selStage&&!STAGES[selStage].raid&&G.inGame&&!G.allMode&&G.phase==='prep'&&G.wave===0&&G.stageIdx===selStage)startAllOut(); } }   /* 이미 깬 스테이지는 대화 뒤 바로 총공세 */
-$('#bStory').addEventListener('click',()=>{ sfx('ui'); storyMenu(); });
+$('#bStory').addEventListener('click',()=>{ sfx('ui'); storyReToggle(); });
 $('#sty').addEventListener('click',e=>{ if(e.target.closest('#stSk')){ storySkip(); return; } storyNext(); });
 window.addEventListener('keydown',e=>{ if(!stS||!stS.solo)return; if(e.key==='Enter'||e.key===' '){ e.preventDefault(); e.stopPropagation(); storyNext(); } else if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); storySkip(); } },true);
 /* 궁극기 컷인: 내가 궁극기를 쓰면 직업 얼굴 + 스킬 이름 띠가 1.5초간 화면을 가로질러요 (게임은 멈추지 않음 · 메뉴 '화면 표시'에서 끌 수 있음) */
@@ -4448,7 +4448,7 @@ function renderStagePanel(){
   { const cur=chars.find(c=>c.id===selId), nw=!!cur&&(cur.inv||[]).some(x=>x&&x.isNew), pt=cur?(cur.statPts|0)+(cur.skillPts|0):0;
     $('#tGearB').hidden=!nw; $('#menuB').hidden=!mailUnreadAll(chars); const pb=$('#tGearP'); pb.hidden=!pt; pb.textContent=pt; for(const id of ['tGear','tStore'])$('#'+id).disabled=!cur; }
   { const cur=chars.find(c=>c.id===selId), sg=(cur&&cur.tut&&cur.tut.sg)||{}; $('#bStory').hidden=!(STORY[S.id]&&(sg[storyKey(S.id,'pre')]||sg[storyKey(S.id,'post')])); }   /* 이 스테이지의 대화를 하나라도 본 캐릭터만 */
-  $('#bSolo').disabled=!selId; if(room){ $('#bHost').disabled=!selId; $('#bJoin').disabled=!selId; }
+  storyReUi(); $('#bSolo').disabled=!selId; if(room){ $('#bHost').disabled=!selId; $('#bJoin').disabled=!selId; }
 }
 function renderTitle(){
   migrateChars();
