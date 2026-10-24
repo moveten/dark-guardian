@@ -747,7 +747,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.0.0241</div>
+    <div class="ver" id="verT">v0.6.0.0242</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -1919,13 +1919,16 @@ function awkAI(m,dt,pls,sf,best,bd,tau){
     if(ph>=2)C.push(['star',.22]);
     if(bd>240)C.push(['blink',bd>480?.9:.5]);
     if(bd<260){ C.push(['slash',.45]); C.push(['counter',.15]); }
+    if(bd<620)C.push(['wave',ph===1?.4:.2]);   /* 그림자 파동: 거리 상관없이 쓰는 원거리 기술 */
+    for(const c of C)if(c[0]===m.lastSk)c[1]*=.35;   /* 같은 기술 연속 사용은 덜 나오게 */
     const ok=C.filter(c=>!busy.has(c[0])); let tot=0; for(const c of ok)tot+=c[1]; let pk=null;
-    if(ok.length){ let r=Math.random()*Math.max(1,tot); for(const c of ok){ r-=c[1]; if(r<=0){ pk=c[0]; break; } } }
+    if(ok.length){ let r=Math.random()*tot;   /* 후보가 있으면 반드시 하나 씀 */ for(const c of ok){ r-=c[1]; if(r<=0){ pk=c[0]; break; } } if(!pk)pk=ok[ok.length-1][0]; m.lastSk=pk; }
     if(pk==='sword'){ m.tel={k:'slam',kind:'lines',x:m.x,y:m.y,as:[a-.36,a,a+.36],len:520,w:88,t:0,dur:1.1*du,mul:1.6,st:'slow',sd:2,col:'#b88aff',nm:'⚔️ 맏이의 검',dash:1,sk:pk}; return true; }
     if(pk==='star'){ const pts=[{x:best.x,y:best.y}]; for(let i=0;i<6;i++)pts.push({x:clamp(best.x+rand(-160,160),40,WW-40),y:clamp(best.y+rand(-160,160),40,WH-40)}); m.tel={k:'slam',kind:'multi',x:best.x,y:best.y,pts,r:82,t:0,dur:1.5*du,mul:1.3,st:'slow',sd:2.5,col:'#c8a8ff',nm:'🌠 둘째의 별',sk:pk}; return true; }
     if(pk==='blink'){ m.tel={k:'slam',kind:'blink',x:clamp(best.x+Math.cos(a)*30,40,WW-40),y:clamp(best.y+Math.sin(a)*30,40,WH-40),r:64,t:0,dur:.85*du,col:'#8a6cff',nm:'🌑 그림자 걸음',sk:pk}; return true; }
     if(pk==='slash'){ m.tel={k:'slam',kind:'aoe',x:m.x+Math.cos(a)*40,y:m.y+Math.sin(a)*40,r:165,t:0,dur:.9*du,mul:1.7,st:0,sd:0,col:'#8a6cff',nm:'🗡️ 그림자 베기',sk:pk}; return true; }
     if(pk==='counter'){ m.tel={k:'slam',kind:'counter',x:m.x,y:m.y,r:Math.round(m.r*1.6),t:0,dur:.8,sk:pk}; return true; }
+    if(pk==='wave'){ m.tel={k:'slam',kind:'lines',x:m.x,y:m.y,as:[a-.5,a-.17,a+.17,a+.5],len:560,w:56,t:0,dur:1.0*du,mul:1.4,st:'slow',sd:1.5,col:'#9a7dff',nm:'🌊 그림자 파동',sk:pk}; return true; }
     m.bt=rand(1.2,2.2)*AWK.CDK; }
   return false; }
 function spawnMob(type,x,y,elite){
@@ -2188,7 +2191,7 @@ function bossAI(m,dt,pls,sf){
       else if(t.k==='slam'){ for(const p of pls){ if(hyp(p.x-t.x,p.y-t.y)<t.r) mobHitPlayer(p.i,m.dmg*1.6*BSKM,'stun',1.2); }
         pushEv(['s',Math.round(t.x),Math.round(t.y),t.r]); slamFx(t.x,t.y,t.r); }
       else { const dx=t.tx-t.x,dy=t.ty-t.y,d=hyp(dx,dy)||1; m.charge={dx:dx/d,dy:dy/d,t:Math.min(.75,450/620),hit:{}}; }
-      m.tel=null; if(!m.counter)m.bt=(m.enr?rand(1.0,1.8):rand(1.6,2.8))*(m.rk==='awk'?AWK.CDK:1); }   /* 각성 그림자: 기술 사이 간격 -30% */
+      m.tel=null; if(!m.counter)m.bt=(m.enr?rand(1.0,1.8):rand(1.6,2.8))*(m.rk==='awk'?AWK.CDK*((m.ph|0)<=1?.75:1):1); }   /* 각성 그림자 1페이즈는 기술 사이 쉬는 시간 추가 -25% */   /* 각성 그림자: 기술 사이 간격 -30% */
     return; }
   // 시선 돌리기 (협동)
   if(pl1.length>1&&!tau&&best.i<10){ m.shk=(m.shk==null?rand(14,20):m.shk)-dt; if(m.shk<=0){ m.shk=rand(22,30); const top=best.i, other=pl1.find(q=>q.i!==top); if(other){ m.lock={i:other.i,t:5}; if(m.thr)m.thr[top]=(m.thr[top]||0)*.3; pushEv(['ag',other.i]); announce('👁️ 우두머리가 시선을 돌렸어요! 도발로 되찾으세요','#ff9a7a'); } } }
@@ -2364,9 +2367,11 @@ function applyStatus(kind,dur){ if(me.dead||me.god>0)return;
   { const ar=(me.D&&me.D.sp&&me.D.sp.aw_ring)|0; if(ar&&['erode','hblock','hblockp','mblock','slow','stun'].includes(kind))dur*=Math.max(.5,1-.25*ar); }   /* 각성 반지 '속박 해제': 디버프 지속시간 -25% (2개 -50%) */
   if(kind==='doom'){ if(me.hp>0){ addNum(me.x,me.y-50,'☠️ 즉사','#ff4a6a',true); burst(me.x,me.y,'#2a1a4a',40,320); spark(me.x,me.y,'#8a6cff',30); G.shake=1; sfx('hurt'); goDown(); } return; }   /* 그림자 등불 실패 */
   if(kind==='erode'){ me.erode=Math.max(me.erode||0,dur); addNum(me.x,me.y-46,'🌑 그림자 잠식','#b89cff',true); return; }
-  if(kind==='hblock'){ me.hblk=Math.max(me.hblk||0,dur); me.hbStrict=Math.max(me.hbStrict||0,dur); addNum(me.x,me.y-46,'💔 생명 봉쇄','#ff8ab0',true); return; }
-  if(kind==='hblockp'){ me.hblk=Math.max(me.hblk||0,dur); addNum(me.x,me.y-46,'💔 봉쇄 · 물약만 회복','#ff8ab0',true); return; }   /* 심장 파편 실패: 물약으로만 생명력 회복 */
-  if(kind==='mblock'){ me.mblk=Math.max(me.mblk||0,dur); addNum(me.x,me.y-30,'💧 마나 봉쇄','#8fb0ff',true); return; }
+  if(kind==='hblock'||kind==='hblockp'){ const loss=Math.floor(me.D.maxHp*.5); me.hpLk=null; me.hp-=loss; me.hurt=.3; addNum(me.x,me.y-30,'-'+loss,'#ff5a7a',true); spark(me.x,me.y,'#ff5a9a',18); sfx('hurt'); G.shake=Math.max(G.shake,.5); if(me.hp<=0){ goDown(); return; } }   /* 생명 봉쇄: 최대 생명력 50% 고정 피해 후 회복 막힘 */
+  if(kind==='mblock'){ me.mpLk=null; me.mp=Math.max(0,me.mp-me.D.maxMp*.5); }   /* 마나 봉쇄: 최대 마나 50% 잃고 회복 막힘 */
+  if(kind==='hblock'){ me.hblk=Math.max(me.hblk||0,dur); me.hbStrict=Math.max(me.hbStrict||0,dur); me.hpLk=me.hp; addNum(me.x,me.y-46,'💔 생명 봉쇄','#ff8ab0',true); return; }
+  if(kind==='hblockp'){ me.hblk=Math.max(me.hblk||0,dur); me.hpLk=me.hp; addNum(me.x,me.y-46,'💔 봉쇄 · 물약만 회복','#ff8ab0',true); return; }   /* 심장 파편 실패: 물약으로만 생명력 회복 */
+  if(kind==='mblock'){ me.mblk=Math.max(me.mblk||0,dur); me.mpLk=me.mp; addNum(me.x,me.y-30,'💧 마나 봉쇄','#8fb0ff',true); return; }
   if(kind==='stun'){ if(me.stunImm>0)return; me.stun=dur; me.stunImm=dur+2.5; addNum(me.x,me.y-40,'💫 기절!','#ffd84a',true); }
   else if(kind==='slow'){ me.slowP=Math.max(me.slowP||0,dur); addNum(me.x,me.y-40,'🐌 둔화','#8fdcff',false); }
   else if(kind==='halve'){ const loss=Math.floor(me.D.maxHp*(me.D.sp&&me.D.sp.hhelm?.5:HALVE_PCT)); /* 현재가 아니라 '최대 생명력'의 70%가 고정 피해 — 남은 체력이 70% 이하면 즉사 */ if(loss>0){ me.hp-=loss; me.hurt=.3; addNum(me.x,me.y-44,'☠️ -'+loss,'#e070ff',true); spark(me.x,me.y,'#c040e0',24); sfx('hurt'); G.shake=Math.max(G.shake,.5); if(me.hp<=0)goDown(); } }
