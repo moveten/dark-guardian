@@ -73,3 +73,5 @@
 [5스테이지 각성 그림자 — 그림만 준비, 코드 미적용] boss_awake.png(대기) / boss_awake_atk.png(공격) / boss_awake_sk.png(분신술) / boss_awake_cast.png(무적 시전) — 378×420, 같은 배율·같은 발 위치·머리 기준 가로 정렬
 [5스테이지 각성 그림자 2페이즈 — 그림만 준비] boss_awake2.png / _atk / _sk / _cast — 832×420(대검·별 때문에 가로가 넓음), 그림 가로 중앙 = 머리(1페이즈)·발(2페이즈) 기준. 배율: 1페이즈 0.593, 2페이즈 0.578(별이 위로 솟아 살짝 줄임)
 [5스테이지 각성 그림자 3페이즈 — 그림만 준비] boss_awake3.png / _atk / _sk / _cast — 692×420, 발 기준 가로 중앙, 배율 0.625(원본이 작게 나와서 2페이즈와 키를 맞춤)
+
+[스테이지 5 각성 영웅 아이템 아이콘 — 적용 완료] item_aw_wpn / helm / armor / amu / ring · item_awoff_war / pal / sorc / necro / druid .png (192×192, 투명 배경). 이름 연결은 index.html 의 UNQIMG
