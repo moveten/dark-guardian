@@ -751,7 +751,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.0.0248</div>
+    <div class="ver" id="verT">v0.6.0.0249</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -3989,7 +3989,7 @@ function renderBag(){
   shardAdd(me,0); shardAdd(me,0,'ashard'); markTabs(); sheetHead();
   const eqOrder=['weapon','armor','helm','amulet','ring1','ring2'].concat(['shield']);
   let h='<div class="bagtop" style="display:flex;flex-direction:column;gap:10px;min-width:0"><div class="eq">'+eqOrder.map(k=>{const it=me.eq[k]; return `<div style="position:relative">${cellHtml(it,'slot',`data-eq="${k}"`)}<div class="sl" style="position:absolute;bottom:2px;left:0;right:0;font-size:9.5px;color:var(--mute);text-align:center;pointer-events:none">${eqLbl(k)}</div></div>`;}).join('')+'</div>';
-  h+=`<div class="meta" style="font-size:12px;color:var(--mute)">⚔️ 전투력 <b style="color:#ffd84a">${calcCP(me).toLocaleString()}</b></div><div class="bagbtns" style="display:flex;flex-wrap:nowrap;gap:4px"><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap" data-sort="${SORTM[sortNext()]}">정렬(${SORTN[sortNext()]})</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap" id="aBulk">일괄 판매</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap;${asLv>=0?`border-color:${RARC[asLv]};color:${RARC[asLv]};background:${['rgba(233,226,212,.14)','rgba(90,120,255,.28)','rgba(255,214,60,.24)'][asLv]};box-shadow:0 0 8px ${['rgba(233,226,212,.3)','rgba(110,140,255,.6)','rgba(255,214,60,.55)'][asLv]};font-weight:800`:''}" id="aAuto">자동판매 ${ASN[asLv+1]}</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap;${syLv>=0?`border-color:#c9a0ff;color:#d9b8ff;background:rgba(150,90,255,.22);box-shadow:0 0 8px rgba(150,90,255,.5);font-weight:800`:''}" id="aSyn" aria-pressed="${syLv>=0}">자동합성 ${syLv>=0?'ON':'OFF'}</button></div>`;
+  h+=`<div class="meta" style="font-size:12px;color:var(--mute)">⚔️ 전투력 <b style="color:#ffd84a">${calcCP(me).toLocaleString()}</b></div><div class="bagbtns" style="display:flex;flex-wrap:nowrap;gap:4px"><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap" data-sort="${SORTM[(sortCur()+1)%3]}">정렬(${SORTN[sortCur()]})</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap" id="aBulk">일괄 판매</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap;${asLv>=0?`border-color:${RARC[asLv]};color:${RARC[asLv]};background:${['rgba(233,226,212,.14)','rgba(90,120,255,.28)','rgba(255,214,60,.24)'][asLv]};box-shadow:0 0 8px ${['rgba(233,226,212,.3)','rgba(110,140,255,.6)','rgba(255,214,60,.55)'][asLv]};font-weight:800`:''}" id="aAuto">자동판매 ${ASN[asLv+1]}</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap;${syLv>=0?`border-color:#c9a0ff;color:#d9b8ff;background:rgba(150,90,255,.22);box-shadow:0 0 8px rgba(150,90,255,.5);font-weight:800`:''}" id="aSyn" aria-pressed="${syLv>=0}">자동합성 ${syLv>=0?'ON':'OFF'}</button></div>`;
   h+='<div class="inv">'+me.inv.map((it,i)=>cellHtml(it,'cell',`data-inv="${i}"`)).join('')+'</div>';
   const b=$('#sheetB'); b.className='sbody bag'; b.innerHTML=h; fitInv(); try{ showPop(detailHtml(),curCmpHtml()); }catch(e){ console.error(e); selItem=null; showPop(''); }
   b.querySelectorAll('[data-eq]').forEach(el=>el.onclick=()=>{const k=el.dataset.eq; if(me.eq[k]){selItem={it:me.eq[k],eq:k};renderBag();}});
@@ -4009,12 +4009,12 @@ function renderBag(){
 }
 const SLOTO={weapon:0,shield:1,helm:2,armor:3,amulet:4,ring:5};
 const bk=(a,b)=>(a.base||'')<(b.base||'')?-1:(a.base||'')>(b.base||'')?1:0;
-/* 가방 정렬 버튼: 등급순 → Lv순 → 강화순 → 등급순… 번갈아 (기기별 기억) */
+/* 가방 정렬 버튼: 버튼 글자 = 지금 정렬 상태. 누르면 다음 방식(등급순 → Lv순 → 강화순 → 등급순…)으로 정렬하고 글자도 그 방식으로 (기기별 기억) */
 const SORTM=['rar','lv','enh'], SORTN=['등급순','Lv순','강화순'];
-const sortNext=()=>{ const v=+lsGet('dkdef2.sortN'); return (isNaN(v)?0:v)%3; };
+const sortCur=()=>{ const v=+lsGet('dkdef2.sortC'); return (isNaN(v)?0:v)%3; };
 function sortInv(mode){ shardRepack(me); const its=me.inv.filter(Boolean);
   const rarC=(a,b)=>(b.rar|0)-(a.rar|0)||(SLOTO[a.slot]|0)-(SLOTO[b.slot]|0)||bk(a,b)||(b.ilvl|0)-(a.ilvl|0)||String(a.name).localeCompare(String(b.name));
-  if(SORTM.includes(mode)){ const i=SORTM.indexOf(mode); lsSet('dkdef2.sortN',String((i+1)%3)); }
+  if(SORTM.includes(mode))lsSet('dkdef2.sortC',String(SORTM.indexOf(mode)));
   if(mode==='lv'||mode==='enh'){ its.sort(mode==='lv'?((a,b)=>(isShard(a)-isShard(b))||ilvOf(b)-ilvOf(a)||rarC(a,b)):((a,b)=>(isShard(a)-isShard(b))||((b.enh|0)-(a.enh|0))||rarC(a,b)));
     me.inv=its.concat(Array(Math.max(0,INVN-its.length)).fill(null)); selItem=null; saveChar(); renderBag(); sheetToast(mode==='lv'?'아이템 레벨순으로 정리했어요':'강화 단계순으로 정리했어요'); return; }
   its.sort(mode==='type'?((a,b)=>(SLOTO[a.slot]|0)-(SLOTO[b.slot]|0)||(b.rar|0)-(a.rar|0)||bk(a,b)||(b.ilvl|0)-(a.ilvl|0)||String(a.name).localeCompare(String(b.name))):((a,b)=>(b.rar|0)-(a.rar|0)||(SLOTO[a.slot]|0)-(SLOTO[b.slot]|0)||bk(a,b)||(b.ilvl|0)-(a.ilvl|0)||String(a.name).localeCompare(String(b.name))));
