@@ -771,7 +771,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.0.0256</div>
+    <div class="ver" id="verT">v0.6.0.0257</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -2005,9 +2005,9 @@ function gimmick(dt){
 }
 /* ===== 중앙 성 (1~3챕터): 스킬 없이 맞기만 하는 수호 대상. 체력이 0이 되면 패배, 삼남매(레이드)에는 없음 =====
    - 몹은 가까이(CAS_AGGRO) 플레이어·소환수가 있으면 그쪽을 먼저 노리고, 없으면 성으로 걸어가 때려요
-   - 피해: 일반 40% · 정예 60% · 보스 100% · 공성병(폭탄) 공격력의 300% · 궁수 화살 40% · 화살비 35%
+   - 피해: 일반 40% · 정예 60% · 보스 100% · 공성병(폭탄) 공격력의 200% · 궁수 화살 40% · 화살비 35%
    - 체력은 습격이 끝날 때마다 최대의 10%씩 수리. 모습은 체력 65%·30%를 기준으로 3단계(img/castle_c1~c3.png 가로 3칸) */
-const CAS_R=55, CAS_Y=8, CAS_AGGRO=150, CAS_HPK=90, CAS_FIX=.1, CAS_W=150, CAS_BASE=36;
+const CAS_R=55, CAS_Y=8, CAS_AGGRO=150, CAS_HPK=100, CAS_FIX=.1, CAS_W=150, CAS_BASE=36;
 const CAS_T={x:VX,y:VY+CAS_Y,i:-1,cas:1}; let CASM=1;
 const CAS_HR=112, CAS_HY=VY+14;   /* 성이 있는 스테이지의 회복 구역: 성 둘레 반경 112 (성 안으로는 못 들어가니 성 둘레를 걸으면 회복돼요) */
 const hzX=()=>VX, hzY=()=>G.castle?CAS_HY:VY, hzR=()=>G.castle?CAS_HR:VR;
@@ -2162,7 +2162,7 @@ function updateMobs(dt){
     if(m.type===11){ if(d>150){ mobMove(m,dx,dy,d,m.spd*sf,dt); }
       m.heal=(m.heal==null?rand(1,2.5):m.heal)-dt*sf; if(m.heal<=0){ m.heal=3; let n=0; for(const q of G.mobs){ if(q.dead||q===m||hyp(q.x-m.x,q.y-m.y)>150||q.hp>=q.max)continue; q.hp=Math.min(q.max,q.hp+q.max*.14); n++; spark(q.x,q.y,'#9be38a',4);} if(n){ efx.push({k:'ring',x:m.x,y:m.y,r0:10,r1:150,t:0,life:.5,col:'#9be38a',w:5}); } }
       mobKb(m,dt); continue; }
-    if(m.type===10&&d<=reach+4&&!m.dead){ m.dead=true; const bx=m.x, by=m.y; for(const p of pls){ if(hyp(p.x-bx,p.y-by)<85) mobHitPlayer(p.i,m.dmg*2.6); } if(G.castle&&hyp(bx-CAS_T.x,by-CAS_T.y)<CAS_R+m.r+30)castleHit(m.dmg*3); pushEv(['bx',Math.round(bx),Math.round(by),85]); bombFx(bx,by,85); continue; }
+    if(m.type===10&&d<=reach+4&&!m.dead){ m.dead=true; const bx=m.x, by=m.y; for(const p of pls){ if(hyp(p.x-bx,p.y-by)<85) mobHitPlayer(p.i,m.dmg*2.6); } if(G.castle&&hyp(bx-CAS_T.x,by-CAS_T.y)<CAS_R+m.r+30)castleHit(m.dmg*2); pushEv(['bx',Math.round(bx),Math.round(by),85]); bombFx(bx,by,85); continue; }
     mobKb(m,dt);
     m.sq=Math.max(0,(m.sq||0)-dt);
     if(d>reach){ const tm=tau?1.25:1; let ux=dx/d*tm,uy=dy/d*tm; if(m.fly){const a=Math.atan2(dy,dx)+Math.sin(T*4+m.id)*.8; ux=Math.cos(a);uy=Math.sin(a);} m.dvx=ux*m.spd*sf;m.dvy=uy*m.spd*sf;}
