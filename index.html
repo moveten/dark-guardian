@@ -751,7 +751,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.0.0247</div>
+    <div class="ver" id="verT">v0.6.0.0248</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -2375,7 +2375,7 @@ function applyStatus(kind,dur){ if(me.dead||me.god>0)return;
   if(kind==='erode'){ me.erode=Math.max(me.erode||0,dur); addNum(me.x,me.y-46,'🌑 그림자 잠식','#b89cff',true); return; }
   if(kind==='hblock'||kind==='hblockp'){ const loss=Math.floor(me.D.maxHp*.5); me.hpLk=null; me.hp-=loss; me.hurt=.3; addNum(me.x,me.y-30,'-'+loss,'#ff5a7a',true); spark(me.x,me.y,'#ff5a9a',18); sfx('hurt'); G.shake=Math.max(G.shake,.5); if(me.hp<=0){ goDown(); return; } }   /* 생명 봉쇄: 최대 생명력 50% 고정 피해 후 회복 막힘 */
   if(kind==='mblock'){ me.mpLk=null; me.mp=Math.max(0,me.mp-me.D.maxMp*.5); }   /* 마나 봉쇄: 최대 마나 50% 잃고 회복 막힘 */
-  if(kind==='hblock'){ me.hblk=Math.max(me.hblk||0,dur); me.hbStrict=Math.max(me.hbStrict||0,dur); me.hpLk=me.hp; addNum(me.x,me.y-46,'💔 생명 봉쇄','#ff8ab0',true); return; }
+  if(kind==='hblock'){ me.hblk=Math.max(me.hblk||0,dur); me.hpLk=me.hp;   /* 공허의 낙인: 물약으로만 회복 가능 */ addNum(me.x,me.y-46,'💔 봉쇄 · 물약만 회복','#ff8ab0',true); return; }
   if(kind==='hblockp'){ me.hblk=Math.max(me.hblk||0,dur); me.hpLk=me.hp; addNum(me.x,me.y-46,'💔 봉쇄 · 물약만 회복','#ff8ab0',true); return; }   /* 심장 파편 실패: 물약으로만 생명력 회복 */
   if(kind==='mblock'){ me.mblk=Math.max(me.mblk||0,dur); me.mpLk=me.mp; addNum(me.x,me.y-30,'💧 마나 봉쇄','#8fb0ff',true); return; }
   if(kind==='stun'){ if(me.stunImm>0)return; me.stun=dur; me.stunImm=dur+2.5; addNum(me.x,me.y-40,'💫 기절!','#ffd84a',true); }
