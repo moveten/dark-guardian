@@ -760,7 +760,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   </div>
 
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.0.0252</div>
+    <div class="ver" id="verT">v0.6.0.0253</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -1906,8 +1906,8 @@ function awkMirror(m,best,bd,a,du){ const cls=best.i===2&&ally?ally.cls:best.i==
   else if(cls==='druid'){ m.tel={k:'slam',kind:'lines',x:m.x,y:m.y,as:[a-.25,a,a+.25],len:540,w:62,t:0,dur:1.0*du,mul:1.2,st:'slow',sd:2,col,nm:'🪞 거울 · 까마귀 떼'}; }
   else { summon(m); for(let i=0;i<2;i++)spawnMob(2,m.x+rand(-70,70),m.y+rand(-70,70),true); announce('🪞 거울 · 영혼 소환! 해골 정예가 나타났어요','#c08bff'); efx.push({k:'ring',x:m.x,y:m.y,r0:10,r1:150,t:0,life:.5,col,w:10}); m.bt=rand(1.4,2); return true; }
   announce(m.tel.nm+'!','#c08bff'); return true; }
-/* 잠식 장판(3페이즈): 맵 가장자리부터 어둠이 차올라 30초 동안 안전 지대가 반경 470 → 230 으로 줄어듦 */
-function awkZone(dt){ if(!G.awz)G.awz={x:VX,y:VY,r0:470,r1:230,t:0,dur:30}; const z=G.awz; z.t=Math.min(z.dur,z.t+dt); z.r=z.r0+(z.r1-z.r0)*(z.t/z.dur); }
+/* 잠식 장판(3페이즈): 맵 가장자리부터 어둠이 차올라 30초 동안 안전 지대가 반경 376 → 184 로 줄어듦(예전 470 → 230 의 80%) */
+function awkZone(dt){ if(!G.awz)G.awz={x:VX,y:VY,r0:376,r1:184,t:0,dur:30}; const z=G.awz; z.t=Math.min(z.dur,z.t+dt); z.r=z.r0+(z.r1-z.r0)*(z.t/z.dur); }
 function awkZoneSelf(dt){ const z=G.awz; if(!z||me.dead||G.phase!=='boss')return; if(hyp(me.x-z.x,me.y-z.y)<=z.r){ me.zoT=.5; return; }
   if(!(me.hblk>0))me.hpLk=me.hp; me.hblk=Math.max(me.hblk||0,.6);   /* 장판 밖: 생명력 회복 불가(물약만 가능) */
   me.zoT=(me.zoT==null?.5:me.zoT)-dt; if(me.zoT<=0){ me.zoT=.5; fixDmg(.1,'🌑','#b89cff'); me.slowP=Math.max(me.slowP||0,.6); } }
