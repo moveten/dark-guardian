@@ -325,6 +325,8 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 #bRev{border:2px solid #8a7440;color:#bba878}
 #bRevBig{position:absolute;left:50%;transform:translateX(-50%);bottom:228px;z-index:20;padding:11px 31px;min-height:64px;font-size:21px;border-radius:32px;border:2px solid #ffd84a;background:rgba(88,64,8,.92);color:#fff2b0;font-weight:800;box-shadow:0 0 18px rgba(255,216,74,.7);animation:rv 1s infinite alternate}
 #bRevBig b{margin-left:4px}
+.kh{display:none;margin-left:8px;padding:0 6px;font:700 .62em/1.5 var(--f-body);border:1px solid currentColor;border-radius:5px;opacity:.7;vertical-align:middle}
+@media (hover:hover) and (pointer:fine){ .kh{display:inline-block} }   /* 키보드 단축키 안내는 마우스를 쓰는 PC에서만 */
 #bRevBig.z{border-color:#7a6a40;color:#a89a70;box-shadow:none;animation:none;opacity:.8}
 #bRev.rdy{border-color:#ffd84a;color:#fff2b0;box-shadow:0 0 16px #ffd84a;animation:rv 1s infinite alternate}
 @keyframes rv{to{box-shadow:0 0 5px #ffd84a}}
@@ -945,7 +947,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
       <div class="ab"><button id="bSpd" class="s0" aria-label="배속: 1배"><span class="in"><b>⏩</b><small>1.0x</small></span></button><button id="bAuto" class="s0" aria-label="자동 사냥: 꺼짐"><span class="in"><b>AUTO</b><small>OFF</small></span></button></div>
       <div id="skills"></div>
     </div>
-    <button id="bSkip" hidden aria-label="나가기">🚪 나가기</button><button id="bRevBig" hidden aria-label="즉시 부활">✨ 부활 <b id="revBigN">0</b></button><div id="emg" hidden></div>
+    <button id="bSkip" hidden aria-label="나가기">🚪 나가기</button><button id="bRevBig" hidden aria-label="즉시 부활">✨ 부활 <b id="revBigN">0</b><kbd class="kh">R</kbd></button><div id="emg" hidden></div>
     <div id="rageV"></div>
     <div id="stoast"></div>
     <div class="qb">
@@ -972,7 +974,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.0.0303</div>
+    <div class="ver" id="verT">v0.6.0.0304</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1026,7 +1028,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="endbox" id="endBox"></div>
     <div class="modes">
       <button class="btn primary" id="bToTitle">🚪 나가기</button>
-      <button class="btn" id="bRetry" hidden>🔁 다시하기</button>
+      <button class="btn" id="bRetry" hidden>🔁 다시하기<kbd class="kh">R</kbd></button>
     </div>
     <button class="btn primary" id="bBack" hidden>🎮 게임화면으로 돌아가기</button>
   </section>
@@ -2573,7 +2575,7 @@ function killMob(m){
   onKill(Math.round(m.x),Math.round(m.y),m.xp,tier,ilvl,m.type,m.lf||1);
   if(m.boss&&m.rk){ const alive=G.mobs.filter(o=>o.rk&&!o.dead); if(alive.length){ G.sib=(G.sib||0)+1; for(const o of alive){ o.dmg=o.dmg0*(1+.1*G.sib); spark(o.x,o.y,'#ff3a2a',40); }
       announce(`💢 ${MT[m.type].n} 쓰러짐! 남은 형제의 피해 +${10*G.sib}%`,'#ff6a5a'); banner('💢 형제의 분노',`남은 형제의 피해 +${10*G.sib}%`); pushEv(['sib',G.sib]); sfx('boss'); return; } }
-  if(m.boss){ G.phase='clear'; G.clearT=CLEAR_T; for(const o of G.mobs) if(o!==m)o.dead=true; banner('우두머리 처치!',`${CLEAR_T}초 안에 전리품을 주워 보세요`); }
+  if(m.boss){ G.phase='clear'; G.clearT=CLEAR_T; me.god=Math.max(me.god||0,CLEAR_T+5); me.poison=0; if(!me.dead)addNum(me.x,me.y-50,'🛡️ 무적','#9fd0ff',true); for(const o of G.mobs) if(o!==m)o.dead=true; banner('우두머리 처치!',`${CLEAR_T}초 안에 전리품을 주워 보세요`); }
 }
 
 /* ================= KILL / LOOT / XP ================= */
@@ -2699,9 +2701,10 @@ function updateMe(dt){
   for(const k in me.buffs){me.buffs[k].t-=dt; if(me.buffs[k].t<=0){ if(k==='barrier'&&!me.dead)fxSpr(5,4,7,me.x,me.y,96,.45); delete me.buffs[k]; if(k==='bless')reBless(); }}
   me.atkCd=Math.max(0,me.atkCd-dt); me.swing=Math.max(0,me.swing-dt); if(G.combo&&G.combo.n>0){ G.combo.t-=dt; if(G.combo.t<=0){ G.combo.n=0; $('#combo').hidden=true; } }
   me.formLock=Math.max(0,(me.formLock||0)-dt); if(me.spirit){ me.spirit.t-=dt; if(me.spirit.t<=0)me.spirit=null; }
+  if(G.phase==='clear'&&!(me.god>1))me.god=Math.max(me.god||0,1);   /* 우두머리 처치 뒤 전리품 줍는 동안은 계속 무적 (협동 참가자·'게임화면으로 돌아가기'도 포함) */
   me.hurt=Math.max(0,(me.hurt||0)-dt); me.god=Math.max(0,(me.god||0)-dt); me.stun=Math.max(0,(me.stun||0)-dt); me.stunImm=Math.max(0,(me.stunImm||0)-dt); me.slowP=Math.max(0,(me.slowP||0)-dt);
   if(me.buffs.rage&&me.buffs.rage.t>0&&!me.dead&&Math.random()<dt*34)parts.push({x:me.x+rand(-14,14),y:me.y+rand(-4,16),vx:rand(-12,12),vy:-rand(50,95),t:0,life:.75,col:Math.random()<.4?'#ff7a3a':'#ff2a1a',r:2.6,glow:1,dm:.95});   /* 폭주: 몸에서 붉은 기운이 피어오름 */
-  if(me.poison>0&&!me.dead){ me.poison-=dt; tkAdd(Math.min(me.D.maxHp*.03*dt,Math.max(0,me.hp-1))); me.hp=Math.max(1,me.hp-me.D.maxHp*.03*dt); if(Math.random()<dt*6)parts.push({x:me.x+rand(-10,10),y:me.y-8,vx:0,vy:-30,t:0,life:.6,col:'#7ad04a',r:2.5,glow:1,dm:.95}); }
+  if(me.poison>0&&!me.dead&&G.phase!=='clear'){ me.poison-=dt; tkAdd(Math.min(me.D.maxHp*.03*dt,Math.max(0,me.hp-1))); me.hp=Math.max(1,me.hp-me.D.maxHp*.03*dt); if(Math.random()<dt*6)parts.push({x:me.x+rand(-10,10),y:me.y-8,vx:0,vy:-30,t:0,life:.6,col:'#7ad04a',r:2.5,glow:1,dm:.95}); }
   if(me.dead){ me.respawn-=dt; if(me.respawn<=0&&!me.out){ me.respawn=0; if(G.freeRev>0){ G.freeRev--; reviveMe(.6); saveChar(); toast('✨ 무료 부활 물약이 자동으로 사용됐어요','#ffd84a'); return; } me.out=true; } if(ally&&!ally.lobby&&ally.rg>(me.seenRg|0)){ me.seenRg=ally.rg; if(!me.out){ reviveMe(.45); toast('동료가 구해줬어요!','#9be38a'); } } return;}
   if(ally&&!ally.lobby){ if(ally.rg>(me.seenRg|0))me.seenRg=ally.rg;
     if(ally.dead&&!ally.out&&hyp(me.x-ally.x,me.y-ally.y)<64){ me.rvT=(me.rvT||0)+dt; if(me.rvT>=3){ me.rvT=0; me.rvGiven=(me.rvGiven|0)+1; toast('동료를 일으켰어요!','#9be38a'); sfx('revive'); } } else me.rvT=0; }
@@ -4092,25 +4095,30 @@ addEventListener('pointerdown',()=>{ kbNav=false; },true);
 addEventListener('keydown',e=>{ if(e.key==='Tab')kbNav=true; },true);
 addEventListener('keydown',e=>{
   if(e.altKey||e.ctrlKey||e.metaKey||e.isComposing||(stS&&stS.solo))return;
-  const esc_=e.key==='Escape', ok=!e.repeat&&(e.key==='Enter'||e.key===' ');
-  if(!esc_&&!ok)return;
+  const esc_=e.key==='Escape', ok=!e.repeat&&(e.key==='Enter'||e.key===' '), rk=!e.repeat&&e.code==='KeyR';   /* R(한글 자판 ㄱ 포함) = 부활하기 · 다시하기 */
+  if(!esc_&&!ok&&!rk)return;
   const vis=el=>!!el&&!el.closest('[hidden]')&&!!(el.offsetWidth||el.offsetHeight||el.getClientRects().length);
   const clk=el=>{ if(!vis(el)||el.disabled||el.getAttribute('aria-disabled')==='true')return false; el.click(); return true; };
   const done=()=>{ e.preventDefault(); e.stopPropagation(); try{ if(document.activeElement&&document.activeElement!==document.body)document.activeElement.blur(); }catch(_){} return true; };
+  if(rk&&e.target&&e.target.closest&&e.target.closest('input,textarea,select,[contenteditable]'))return;
   { const t=e.target; if(ok&&t&&t.closest&&t!==document.body&&t.id!=='sSplash'){ if(t.closest('input,textarea,select,[contenteditable]'))return;
       if(kbNav&&t.closest('button,a,[role="button"]'))return; } }   /* 입력칸이나 키보드(Tab)로 버튼에 포커스를 둔 경우는 원래 동작(그 버튼 누르기)을 그대로 둠 — 마우스로 눌러서 남은 포커스는 무시 */
   const sp=$('#sSplash');
   if(vis(sp)&&!sp.classList.contains('go')){ if(ok||esc_){ sp.dispatchEvent(new Event('pointerdown')); return done(); } return; }
-  const md=$('#modal'), sh=$('#sheet'), mo=$('#mapOv'), ip=$('#itemPop');
+  const md=$('#modal'), sh=$('#sheet'), mo=$('#mapOv'), ip=$('#itemPop'), tqBlk=()=>vis($('#tq'))&&$('#tq').classList.contains('blk');
+  if(rk){ if(vis($('#modal'))||vis($('#mapOv'))||vis($('#sheet'))||tqBlk())return;   /* R: 다른 창이 없을 때만 — 결과 화면 '다시하기' / 쓰러졌을 때 '부활' */
+    if(vis($('#sEnd'))){ if(clk($('#bRetry')))return done(); return; }
+    if(G.inGame&&me.dead&&['prep','wave','boss'].includes(G.phase)&&vis($('#bRevBig'))){ useRevive(); return done(); } return; }
   if(vis(md)){ if(esc_){ closeModal(); return done(); } const p=[...md.querySelectorAll('.btn.primary')].find(b=>vis(b)&&!b.disabled); if(p){ p.click(); return done(); } return; }
   if(vis(mo)){ if(esc_){ if(clk($('#mapC'))||clk($('#mapX'))) return done(); } else if(clk($('#mapGo'))) return done(); return; }
   if(vis(sh)){
     if(vis(ip)&&selItem){ if(esc_){ selItem=null; rerender(); return done(); } const p=ip.querySelector('#aEquip')||ip.querySelector('#aUnequip')||ip.querySelector('.btn.primary'); if(p&&clk(p))return done(); return; }
     if(esc_){ closeSheet(); return done(); } return; }
-  if(vis($('#tq'))){ if(ok&&clk($('#tqOk')))return done(); return; }
+  if(tqBlk()){ if(ok&&clk($('#tqOk')))return done(); return; }   /* 튜토리얼 안내창은 '확인' 단계(blk)일 때만 키를 가져가요 */
   const ti=$('#sTitle'), nw=$('#sNew'), lb=$('#sLobby'), en=$('#sEnd');
   if(vis(en)){ if(clk($('#bBack'))||clk($('#bToTitle')))return done(); return; }
-  if(G.inGame){ if(esc_&&!vis($('#ult'))){ openSheet('menu'); return done(); } return; }
+  if(G.inGame){ if(ok&&me.dead&&['prep','wave','boss'].includes(G.phase)&&vis($('#bRevBig'))){ useRevive(); return done(); }
+    if(esc_&&!vis($('#ult'))){ openSheet('menu'); return done(); } return; }
   if(vis(lb)){ if(esc_){ if(clk($('#bLeave')))return done(); } else if(clk($('#bStart')))return done(); return; }
   if(vis(nw)){ if(esc_&&clk($('#bNewBack')))return done(); return; }
   if(vis(ti)){ if(esc_){ if(clk($('#bSet')))return done(); } else if(vis($('#playPanel'))&&clk($('#bSolo')))return done(); return; }
