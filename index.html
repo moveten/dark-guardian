@@ -763,7 +763,8 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 @media (prefers-reduced-motion:reduce){#sSplash .spTap{animation:none}}
 #sSplash.go .spTap{opacity:0;animation:none;transition:opacity .2s}
 /* 결과 화면 연출(Phaser) 레이어: 글자 뒤에 깔려요 */
-#sEnd{isolation:isolate}
+#sEnd,#sTitle{isolation:isolate}
+#sTitle>.efx{position:absolute;inset:0;z-index:-1;pointer-events:none;mix-blend-mode:screen;overflow:hidden}
 #sEnd .efx{position:absolute;inset:0;z-index:-1;pointer-events:none;mix-blend-mode:screen;overflow:hidden}
 /* 마을 연출(Phaser) 레이어: 건물 버튼 뒤, 화면 합성(screen)이라 검은 부분은 투명하게 보임 */
 .tmap .tfx{position:absolute;inset:0;z-index:0;pointer-events:none;mix-blend-mode:screen;overflow:hidden}
@@ -832,7 +833,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.0.0272</div>
+    <div class="ver" id="verT">v0.6.0.0273</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -6081,6 +6082,79 @@ function start(my,win){
     if(window.ResizeObserver){ ro=new ResizeObserver(()=>{ try{ if(game)game.scale.refresh(); }catch(e){} }); ro.observe(my); }
   }catch(err){ destroy(); }
 }
+})();
+</script>
+
+<script>
+/* ===== 타이틀(캐릭터 선택) 연출: 가운데 놓인 캐릭터의 직업 색에 맞춰 불씨·빛·별·영혼이 떠다녀요 — 못 불러오면 기존 화면 그대로 ===== */
+(function(){
+'use strict';
+const TAU=6.2832, $=id=>document.getElementById(id);
+const CL={ war:{c:[255,120,50],vy:-52,sw:14,star:.1,tw:2.2,rays:0,gg:.2}, pal:{c:[255,214,120],vy:-22,sw:10,star:.3,tw:1.6,rays:.17,gg:.08}, sorc:{c:[110,160,255],vy:-6,sw:8,star:.6,tw:2.6,rays:0,gg:.08},
+  necro:{c:[100,230,200],vy:-32,sw:28,star:.05,tw:1.4,rays:0,gg:.14}, druid:{c:[150,230,110],vy:-14,sw:36,star:.1,tw:1.8,rays:.06,gg:.08}, none:{c:[170,140,255],vy:-18,sw:12,star:.25,tw:1.8,rays:0,gg:.05} };
+let host=null, game=null, starting=false, sleeping=false, ro=null;
+const mulberry=a=>()=>{ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return((t^t>>>14)>>>0)/4294967296; };
+const mk=(w,h,fn)=>{ const c=document.createElement('canvas'); c.width=w; c.height=h; fn(c.getContext('2d'),w,h); return c; };
+const bakeGlow=()=>mk(128,128,g=>{ const r=g.createRadialGradient(64,64,0,64,64,64); r.addColorStop(0,'rgba(255,255,255,1)'); r.addColorStop(.35,'rgba(255,255,255,.55)'); r.addColorStop(1,'rgba(255,255,255,0)'); g.fillStyle=r; g.fillRect(0,0,128,128); });
+const bakeStar=()=>mk(64,64,g=>{ g.translate(32,32); for(const [sx,sy] of [[1,.12],[.12,1]]){ g.save(); g.scale(sx,sy); const r=g.createRadialGradient(0,0,0,0,0,30); r.addColorStop(0,'rgba(255,255,255,1)'); r.addColorStop(1,'rgba(255,255,255,0)'); g.fillStyle=r; g.beginPath(); g.arc(0,0,30,0,TAU); g.fill(); g.restore(); }
+  const c=g.createRadialGradient(0,0,0,0,0,9); c.addColorStop(0,'rgba(255,255,255,1)'); c.addColorStop(1,'rgba(255,255,255,0)'); g.fillStyle=c; g.beginPath(); g.arc(0,0,9,0,TAU); g.fill(); });
+const bakeRays=()=>mk(1024,1024,g=>{ const r=g.createRadialGradient(512,512,0,512,512,512); r.addColorStop(0,'rgba(255,255,255,.75)'); r.addColorStop(.55,'rgba(255,255,255,.28)'); r.addColorStop(1,'rgba(255,255,255,0)'); g.fillStyle=r;
+  const n=14; for(let i=0;i<n;i++){ const a=i*TAU/n, w=TAU/n*.32; g.beginPath(); g.moveTo(512,512); g.arc(512,512,512,a,a+w); g.closePath(); g.fill(); } });
+const bakeFog=(seed)=>{ const R=mulberry(seed); return mk(1024,300,g=>{ for(let i=0;i<8;i++){ const cx=R()*1024, cy=110+R()*80, rx=170+R()*170, ry=50+R()*50, a=.3+R()*.25;
+  for(const o of [-1024,0,1024]){ g.save(); g.translate(cx+o,cy); g.scale(rx/ry,1); const r=g.createRadialGradient(0,0,0,0,0,ry); r.addColorStop(0,`rgba(255,255,255,${a})`); r.addColorStop(1,'rgba(255,255,255,0)'); g.fillStyle=r; g.beginPath(); g.arc(0,0,ry,0,TAU); g.fill(); g.restore(); } } }); };
+function curCls(){ const el=document.querySelector('#charList .cc[aria-current="true"] .cpic'); if(!el)return 'none'; for(const k of el.classList)if(CL[k]&&k!=='none')return k; return 'none'; }
+function destroy(){ try{ if(ro)ro.disconnect(); }catch(e){} ro=null; try{ if(game)game.destroy(true); }catch(e){} game=null; try{ if(host&&host.parentNode)host.parentNode.removeChild(host); }catch(e){} host=null; starting=false; sleeping=false; }
+function wanted(){ const t=$('sTitle'), s=$('sSplash'); return !!t&&!t.hidden&&(!s||s.hidden); }
+function sync(){
+  if(!wanted()){ destroy(); return; }
+  if(game){ const sh=$('sheet'), p=!!sh&&!sh.hidden; if(p!==sleeping){ sleeping=p; try{ p?game.loop.sleep():game.loop.wake(); }catch(e){} } return; }   /* 가방·보관함·마을이 열려 있는 동안은 멈춰요 */
+  if(starting||!window.__loadPhaser)return;
+  try{ if(matchMedia('(prefers-reduced-motion: reduce)').matches)return; }catch(e){}
+  starting=true; window.__loadPhaser(ok=>{ starting=false; if(ok&&wanted()&&!game)start(); });
+}
+function start(){
+  const P=window.Phaser, t=$('sTitle'); if(!P||!t)return;
+  host=document.createElement('div'); host.className='efx'; host.setAttribute('aria-hidden','true'); t.insertBefore(host,t.firstChild);
+  const my=host;
+  class Title extends P.Scene{
+    constructor(){ super('title'); }
+    create(){
+      const sc=this, R=mulberry(77), tex=(k,c)=>{ if(sc.textures.exists(k))sc.textures.remove(k); sc.textures.addCanvas(k,c); };
+      tex('glow',bakeGlow()); tex('star',bakeStar()); tex('rays',bakeRays()); tex('fog',bakeFog(12));
+      const W=sc.scale.width||my.clientWidth||390, H=sc.scale.height||my.clientHeight||780, img=k=>sc.add.image(0,0,k);
+      sc.c=CL.none.c.slice(); sc.p={}; for(const k of ['vy','sw','star','tw','rays','gg'])sc.p[k]=CL.none[k]; sc.tg=CL.none; sc.poll=0; sc.t=0;
+      sc.moon=img('glow'); sc.rays=img('rays'); sc.gg=img('glow');
+      sc.fogs=[[.34,7,.13],[.8,-10,.17]].map(([y,v,al])=>({a:img('fog').setOrigin(0,.5).setAlpha(al),b:img('fog').setOrigin(0,.5).setAlpha(al),y,v,off:R()*600}));
+      sc.pt=[]; for(let i=0;i<66;i++){ const star=i>=46; sc.pt.push({img:img(star?'star':'glow'),star,x:R()*W,y:R()*H,sp:R(),f:.4+R()*1.1,p:R()*6.28,tw:.7+R()*1.6,sz:star?.14+R()*.22:.05+R()*.13}); }
+    }
+    update(time,dt){
+      try{
+        const W=this.scale.width, H=this.scale.height; if(!W||!H)return;
+        const d=Math.min(dt,50)/1000; this.t+=d; const t=this.t, p=this.p, c=this.c;
+        this.poll-=d; if(this.poll<=0){ this.poll=.3; this.tg=CL[curCls()]||CL.none; }
+        const tg=this.tg, k=Math.min(1,d*3.5); for(let i=0;i<3;i++)c[i]+=(tg.c[i]-c[i])*k; for(const key in p)p[key]+=(tg[key]-p[key])*k;
+        const tint=((c[0]|0)<<16)|((c[1]|0)<<8)|(c[2]|0);
+        this.moon.setPosition(W*.62,H*.06).setScale(W/128*1.3,W/128*.9).setTint(tint).setAlpha(.1+.03*Math.sin(t*.7));
+        this.gg.setPosition(W/2,H).setScale(W/128*1.8,H/128*.5).setTint(tint).setAlpha(p.gg+.03*Math.sin(t*1.2));
+        this.rays.setVisible(p.rays>.01).setPosition(W*.5,-H*.05).setScale(Math.max(W,H)*2.2/1024).setRotation(Math.sin(t*.1)*.3).setTint(tint).setAlpha(p.rays);
+        const fs=Math.max(W,600)/1024, TW=1024*fs;
+        for(const f of this.fogs){ f.off=((f.off+f.v*d)%TW+TW)%TW; f.a.setScale(fs).setTint(tint).setPosition(f.off,f.y*H); f.b.setScale(fs).setTint(tint).setPosition(f.off-TW,f.y*H); }
+        const sm=Math.min(1,p.star/.5), gm=1-p.star*.6;
+        for(const q of this.pt){ q.y+=p.vy*(.6+q.sp)*d; if(q.y<-20){ q.y=H+20; q.x=Math.random()*W; } else if(q.y>H+20)q.y=-20;
+          const m=q.star?sm:gm, a=Math.max(0,.15+.85*Math.sin(t*q.tw*p.tw*.6+q.p))*m*.85;
+          q.img.setPosition(q.x+Math.sin(t*q.f+q.p)*p.sw*(.5+q.sp*.5),q.y).setScale(q.sz).setTint(tint).setAlpha(a); if(q.star)q.img.setRotation(t*.3+q.p); }
+      }catch(err){ destroy(); }
+    }
+  }
+  try{
+    game=new P.Game({type:P.AUTO,parent:my,width:my.clientWidth||390,height:my.clientHeight||780,transparent:true,banner:false,
+      scale:{mode:P.Scale.RESIZE},scene:[Title],render:{antialias:true},fps:{target:60,smoothStep:true},audio:{noAudio:true},input:{keyboard:false,mouse:false,touch:false,gamepad:false}});
+    if(window.ResizeObserver){ ro=new ResizeObserver(()=>{ try{ if(game)game.scale.refresh(); }catch(e){} }); ro.observe(my); }
+    sync();
+  }catch(err){ destroy(); }
+}
+try{ const mo=new MutationObserver(sync); for(const id of ['sTitle','sSplash','sheet']){ const el=$(id); if(el)mo.observe(el,{attributes:true,attributeFilter:['hidden']}); } }catch(e){}
+sync(); setTimeout(sync,1500);
 })();
 </script>
 
