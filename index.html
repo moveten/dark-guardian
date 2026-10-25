@@ -527,16 +527,12 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   #sTitle .cc .cpic{width:150px;height:clamp(140px,21vh,190px);margin-top:26px}
   #sTitle .cc .cl+.cl,#sTitle .cc .cpt{display:none}   /* 골드·포인트는 카드 아래 정보칸으로 */
   #sTitle .pp{margin-top:auto;gap:12px}
-  #sTitle .pp .scard{padding:14px 14px}
   #sTitle #bSolo{min-height:72px;font-size:24px}
   #sTitle .ttabs{margin-top:0}
 }
 /* ===== 타이틀 꾸미기: 이중 금테 카드, 직업색 룬 고리, 금빛 제목, 빛이 지나가는 시작 버튼 ===== */
 #sTitle[data-ch="1"]{--tbg:url(img/map_ch1.webp)}#sTitle[data-ch="2"]{--tbg:url(img/map_ch2.webp)}#sTitle[data-ch="3"]{--tbg:url(img/map_ch3.webp)}#sTitle[data-ch="4"]{--tbg:url(img/map_raid.webp)}
 .cpic.war{--ac:255,120,50}.cpic.pal{--ac:255,214,120}.cpic.sorc{--ac:110,160,255}.cpic.necro{--ac:100,230,200}.cpic.druid{--ac:150,230,110}
-.scard>.drg{display:none;position:absolute;left:-6px;top:-6px;right:-6px;bottom:-6px;pointer-events:none;background:var(--gold);-webkit-mask-box-image:url(img/dragon_frame.png) 90 90 130 180 / 25px 25px 36px 50px stretch;mask-border:url(img/dragon_frame.png) 90 90 130 180 / 25px 25px 36px 50px stretch;filter:drop-shadow(0 0 6px rgba(214,170,78,.55))}
-.scard.dg>.drg{display:block}
-#sTitle .scard.dg{border-color:transparent;box-shadow:none;padding:22px 34px 24px}
 .cdots{display:flex;justify-content:center;gap:7px;margin:-6px 0 -4px}
 .cdots i{width:7px;height:7px;border-radius:50%;background:#4a3f33;transition:background .2s,box-shadow .2s}
 .cdots i.on{background:var(--gold);box-shadow:0 0 8px rgba(214,170,78,.8)}
@@ -546,12 +542,6 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 .cchips span b{display:block;font-size:15px;color:#f1e3c4;white-space:nowrap}
 .cchips span.warn b{color:#e07060}.cchips span.hi b{color:#ffd36a}
 /* 스테이지 카드: 보스 얼굴 + 글자 */
-#sTitle .scard{flex-direction:row;align-items:center;gap:10px}
-.scard .sbth{flex:none;width:56px;height:54px;display:flex;align-items:flex-end;justify-content:center}
-.scard .sbth:empty{display:none}
-.scard .sbth img{max-width:100%;max-height:100%;object-fit:contain;filter:brightness(1.5) saturate(1.2) drop-shadow(0 2px 3px #000a)}
-.scard.dg .sbth{display:none}
-.scard .sctx{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
 /* 안 B 황금 장식: 이중 금테 카드, 룬 문양 고리, 금빛 제목, 빛이 지나가는 시작 버튼 */
 #sTitle .eyebrow{display:flex;align-items:center;justify-content:center;gap:10px}
 #sTitle .eyebrow::before,#sTitle .eyebrow::after{content:"";width:38px;height:1px;background:linear-gradient(90deg,transparent,var(--gold))}
@@ -563,43 +553,40 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 #sTitle .cc[aria-current="true"] .cpic::before{content:"";position:absolute;left:50%;top:54%;width:140px;height:140px;margin:-70px 0 0 -70px;border-radius:50%;border:1px dashed rgba(var(--ac,255,214,120),.55);box-shadow:inset 0 0 0 7px rgba(var(--ac,255,214,120),.04),inset 0 0 28px rgba(var(--ac,255,214,120),.14),0 0 26px rgba(var(--ac,255,214,120),.25);animation:runeSpin 28s linear infinite;z-index:-1;pointer-events:none}
 #sTitle .cc[aria-current="true"] .cpic::after{content:"";position:absolute;inset:0 -20%;z-index:-1;background:radial-gradient(ellipse at 50% 56%,rgba(var(--ac,255,214,120),.28),transparent 62%);pointer-events:none}
 @keyframes runeSpin{to{transform:rotate(360deg)}}
-#sTitle .scard{border-color:var(--gold);box-shadow:0 0 0 3px #0f0b09,0 0 0 4px rgba(214,170,78,.5);background:linear-gradient(#1d1511,#120d0b)}
 #sTitle #bSolo{position:relative;overflow:hidden;background:linear-gradient(#c8403a,#8e231d);border:1px solid #f1c75a;box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 0 20px rgba(214,170,78,.35)}
 #sTitle #bSolo::after{content:"";position:absolute;top:0;bottom:0;left:-40%;width:30%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.32),transparent);transform:skewX(-20deg);animation:btnSheen 3.4s ease-in-out infinite}
 @keyframes btnSheen{0%,55%{left:-40%}100%{left:130%}}
 @media (prefers-reduced-motion:reduce){#sTitle .cc .cpic::before,#sTitle #bSolo::after{animation:none!important}}
-/* ===== 타이틀: 왼쪽 스테이지 카드 · 오른쪽 시작하기 버튼을 한 줄에 (스토리 다시 보기 삭제) ===== */
+/* ===== 타이틀: 왼쪽 시작하기 버튼 · 오른쪽 작은 상점 버튼을 한 줄에 (스테이지는 위쪽 보스 배너를 눌러 지도에서 고름) ===== */
 #sTitle .pp{flex-direction:row;align-items:stretch;gap:10px}
-#sTitle .pp .scard{flex:1.5 1 0;min-width:0;width:auto;min-height:72px;padding:6px 12px;justify-content:center;gap:2px}
+#sTitle #bShop{flex:none;width:72px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:0;border-radius:16px;border:1px solid var(--gold);background:linear-gradient(#1d1511,#120d0b);box-shadow:0 0 0 3px #0f0b09,0 0 0 4px rgba(214,170,78,.5);color:#ffd36a;font:700 12px var(--f-disp,inherit);cursor:pointer;-webkit-tap-highlight-color:transparent}
+#sTitle #bShop span{font-size:26px;line-height:1}
+#sTitle #bShop:active{background:#2a2018}
+#sTitle #bShop:disabled{opacity:.45}
 #sTitle .pp .modes{flex:1 1 0;min-width:0;width:auto;max-width:none;flex-wrap:nowrap}
 #sTitle #bSolo{width:100%;min-height:72px;font-size:19px;border-radius:16px;white-space:nowrap;padding-inline:6px}
-#sTitle .scard .stbig{font-size:17px;text-align:left;line-height:1.25;letter-spacing:.02em;text-shadow:none}
-#sTitle .scard #stageInfo{font-size:11px;line-height:1.3;text-align:left}
-#sTitle .scard.dg{min-height:96px;padding:18px 24px 28px 36px}
-#sTitle .scard.dg #stageInfo{font-size:10.5px;white-space:nowrap}
-@media (orientation:landscape) and (max-height:500px){#sTitle .cdots,#sTitle .cchips{display:none}#sTitle .pp{flex-direction:column}#sTitle .pp .scard,#sTitle .pp .modes{flex:none;width:100%}#sTitle .scard .stbig{text-align:center}#sTitle #bSolo{min-height:54px}}
+@media (orientation:landscape) and (max-height:500px){#sTitle .cdots,#sTitle .cchips{display:none}#sTitle #bSolo{min-height:54px}#sTitle #bShop{width:60px}}
 @media (orientation:landscape) and (max-height:500px){#sTitle .cc[aria-current="true"] .cpic::before{width:120px;height:120px;margin:-60px 0 0 -60px}}
-/* ===== 타이틀 세로 통일안 A: 캐릭터 위쪽 고정 + '이번 도전' 보스 배너 + 스테이지·시작 줄 높이 고정 (일반/레이드 스테이지, 캐릭터가 바뀌어도 위치 동일) ===== */
-.ban{display:none}
+/* ===== 타이틀 세로 통일안 A: 캐릭터 위쪽 고정 + '이번 도전' 보스 배너(누르면 지도) + 시작·상점 줄 높이 고정 (일반/레이드 스테이지, 캐릭터가 바뀌어도 위치 동일) ===== */
+.ban{display:none;width:100%;max-width:440px;box-sizing:border-box;height:138px;border-radius:16px;position:relative;overflow:hidden;border:1px solid var(--gold);background:linear-gradient(90deg,rgba(10,7,6,.92),rgba(10,7,6,.3) 70%),var(--tbg,#1d1511) center 55%/cover;flex:none;cursor:pointer;-webkit-tap-highlight-color:transparent;box-shadow:0 0 0 3px #0f0b09,0 0 0 4px rgba(214,170,78,.5)}
+.ban:empty{display:none!important}
+.ban:active{filter:brightness(1.18)}
+.ban.pick{animation:scPick .9s ease-out}
+.ban.new::after{content:"NEW";position:absolute;top:8px;right:10px;padding:1px 6px;border-radius:8px;background:var(--blood);color:#fff;font-size:10px}
+.ban .t{position:absolute;left:14px;top:11px;right:130px}
+.ban.noimg .t{right:14px}
+.ban small{font-size:11px;color:var(--mute);letter-spacing:.14em}
+.ban b{display:block;font-family:var(--f-disp);font-size:17px;color:#ffd36a;margin-top:2px}
+.ban span{display:block;font-size:12px;color:#e8dcc4;margin-top:5px}
+.ban i{display:block;font-style:normal;font-size:11.5px;color:#9fd18b;font-weight:700;margin-top:4px}
+.ban i.warn{color:#e07060}
+.ban em.go{display:inline-block;margin-top:9px;font-style:normal;font-size:12px;font-weight:700;color:#ffd36a;padding:3px 11px;border-radius:999px;border:1px solid rgba(214,170,78,.7);background:rgba(10,7,6,.72)}
+.ban img{position:absolute;right:10px;bottom:4px;height:100px;max-width:130px;object-fit:contain;filter:brightness(1.35) saturate(1.2) drop-shadow(0 6px 8px #000c);pointer-events:none}
 @media (orientation:portrait) and (min-height:700px){
   #sTitle .clist.car{margin-top:6px}
   #sTitle .pp{margin-top:auto;height:76px;min-height:76px;flex:none}
-  #sTitle .pp .scard,#sTitle .pp .scard.dg{min-height:0;height:100%;box-sizing:border-box;flex:0 0 61%;max-width:61%}
   #sTitle .pp #bSolo{min-height:0;height:100%}
-  #sTitle .scard.dg{padding:6px 28px 6px 44px;justify-content:center}
-  .scard.dg .mapb span,.scard.dg .mapb .mbGo{display:none}
-  .scard.dg .mapb{height:0;min-height:0}
-  .scard>.drg{left:-9px;top:-9px;right:-9px;bottom:-9px}
-  .ban{display:block;width:100%;max-width:440px;box-sizing:border-box;height:112px;border-radius:16px;position:relative;overflow:hidden;border:1px solid var(--line2);background:linear-gradient(90deg,rgba(10,7,6,.92),rgba(10,7,6,.3) 70%),var(--tbg,#1d1511) center 55%/cover;flex:none}
-  .ban:empty{display:none}
-  .ban .t{position:absolute;left:14px;top:12px;right:130px}
-  .ban.noimg .t{right:14px}
-  .ban small{font-size:11px;color:var(--mute);letter-spacing:.14em}
-  .ban b{display:block;font-family:var(--f-disp);font-size:17px;color:#ffd36a;margin-top:2px}
-  .ban span{display:block;font-size:12px;color:#e8dcc4;margin-top:6px}
-  .ban i{display:block;font-style:normal;font-size:11.5px;color:#9fd18b;font-weight:700;margin-top:5px}
-  .ban i.warn{color:#e07060}
-  .ban img{position:absolute;right:10px;bottom:4px;height:96px;max-width:130px;object-fit:contain;filter:brightness(1.35) saturate(1.2) drop-shadow(0 6px 8px #000c)}
+  .ban{display:block}
 }
 /* ===== 폰 가로 모드 타이틀: 좌(캐릭터) · 우(스테이지+시작) 2단, 하단 탭바는 얇은 한 줄 → 스테이지 선택·시작 버튼이 안 잘림 ===== */
 @media (orientation:landscape) and (max-height:500px){
@@ -607,7 +594,8 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   #sTitle .eyebrow{grid-column:1;grid-row:1;text-align:center;font-size:10px;margin-top:2px}
   #sTitle h1{grid-column:1;grid-row:2;font-size:26px;margin:0 0 2px}
   #sTitle .clist.car{grid-column:1;grid-row:3;width:100%;margin:0;padding:4px calc(50% - 72px);align-self:center}
-  #sTitle .pp{grid-column:2;grid-row:1/4;align-self:center;max-width:none;gap:8px}
+  #sTitle .pp{grid-column:2;grid-row:1/4;align-self:center;margin-top:110px;max-width:none;gap:8px}
+  #sTitle .ban{display:block;grid-column:2;grid-row:1/4;align-self:center;margin-bottom:110px;height:138px;max-width:none}
   #sTitle .cc{flex:0 0 144px;padding:8px 6px;gap:1px}
   #sTitle .cc .cpic{width:112px;height:104px}
   #sTitle .cc b{font-size:17px}#sTitle .cc .cl{font-size:13px}#sTitle .cc .cpt{font-size:12px}
@@ -834,16 +822,8 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 #sEnd .efx{position:absolute;inset:0;z-index:-1;pointer-events:none;mix-blend-mode:screen;overflow:hidden}
 /* 스테이지 지도 */
 .pp{position:relative}
-.scard{position:relative;width:100%;box-sizing:border-box;border:1px solid var(--gold);border-radius:14px;background:rgba(15,11,9,.72);display:flex;flex-direction:column;align-items:stretch;gap:6px;padding:10px 12px;cursor:pointer;-webkit-tap-highlight-color:transparent}
-.scard:active{background:rgba(40,30,20,.85)}
-.scard.pick{animation:scPick .9s ease-out}
+.ban.pick{animation:scPick .9s ease-out}
 @keyframes scPick{0%{box-shadow:0 0 0 rgba(255,211,106,0)}30%{box-shadow:0 0 22px rgba(255,211,106,.9)}100%{box-shadow:0 0 0 rgba(255,211,106,0)}}
-.scard .mapb{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:15px;font-weight:700;color:#ffd36a}
-.scard .mapb .mbGo{font-style:normal;font-size:20px;line-height:1;color:var(--mute)}
-.scard .mapb.new::after{content:"NEW";position:absolute;top:-8px;right:12px;padding:1px 6px;border-radius:8px;background:var(--blood);color:#fff;font-size:10px}
-.scard #stageInfo{border:0;background:none;padding:0;width:100%;cursor:inherit}
-.scard .stbig small{display:none}
-.scard .mapb{font-size:13px}
 .mpin{position:absolute;z-index:4;transform:translate(-50%,-100%);padding:3px 10px;border-radius:999px;background:linear-gradient(#ffd36a,#e0a63a);color:#2a1a08;font:800 12px var(--f-body);white-space:nowrap;pointer-events:none;box-shadow:0 2px 8px #000a}
 .mpin::after{content:"";position:absolute;left:50%;bottom:-5px;transform:translateX(-50%);border:6px solid transparent;border-top-color:#e0a63a;border-bottom:0}
 .mboss{position:absolute;z-index:3;width:66px;height:62px;transform:translate(-50%,-100%);display:flex;align-items:flex-end;justify-content:center;pointer-events:none}
@@ -947,26 +927,18 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.0.0294</div>
+    <div class="ver" id="verT">v0.6.0.0295</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
     <div class="clist car" id="charList"></div>
     <div class="cdots" id="cDots" aria-hidden="true"></div>
     <div class="cchips" id="cChips" hidden></div>
-    <div class="ban" id="stageBan"></div>
+    <div class="ban" id="stageBan" role="button" tabindex="0" aria-label="스테이지 고르기"></div>
     <button id="bNew" hidden></button>
     <div class="pp" id="playPanel" hidden>
-      <div class="scard" id="stageCard" role="button" tabindex="0" aria-label="스테이지 고르기">
-        <i class="drg" aria-hidden="true"></i>
-        <span class="sbth" id="stageBoss" aria-hidden="true"></span>
-        <div class="sctx">
-          <div class="mapb" id="mapBtn"><span>🗺️ 스테이지</span></div>
-          <div class="stbig" id="stageBig"></div>
-          <div id="stageInfo"></div>
-        </div>
-      </div>
       <div class="modes"><button class="btn primary" id="bSolo">▶ 시작하기</button></div>
+      <button class="btn" id="bShop" aria-label="상점"><span aria-hidden="true">🛒</span>상점</button>
     </div>
     <div hidden><button id="bHost" disabled></button><button id="bJoin" disabled></button><p class="note" id="netNote">온라인 연결 확인 중…</p></div>
     <nav class="ttabs" id="titleTabs" aria-label="메뉴">
@@ -4738,14 +4710,14 @@ function buildCarousel(chars){
 }
 function carCenter2(box,el){ box.scrollTo({left:el.offsetLeft+el.offsetWidth/2-box.clientWidth/2,behavior:'smooth'}); }
 /* ===== 스테이지 지도: 길을 따라 스테이지를 보고 고르는 화면 (연출은 아래 Phaser 스크립트가 위에 얹어줘요 — 없어도 지도는 그대로 동작) ===== */
-$('#stageCard').onclick=()=>{ sfx('ui'); openMap(); };
-$('#stageCard').onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); sfx('ui'); openMap(); } };
+$('#stageBan').onclick=()=>{ sfx('ui'); openMap(); };
+$('#stageBan').onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); sfx('ui'); openMap(); } };
 const MAPBOSS={'1-1':'mob_grak','1-2':'mob_malek','1-3':'mob_morg','1-4':'mob_kargon','1-5':'mob_izra','4':'mn_papa','5':'boss_awake'};   /* 지도에 서 있는 보스 그림 (2·3장은 스테이지의 bs 그림) */
 function openMap(){
   const ov=$('#mapOv'); if(!ov||!selId)return;
   const cur=charIds().map(loadChar).filter(Boolean).find(c=>c.id===selId), clr=cur?Math.min(STAGES.length,cur.clear|0):0;
   const N=STAGES.length, T=N+1, GAP=96, PB=120, PT=130, H=PT+(T-1)*GAP+PB;
-  try{ lsSet('dkdef2.mapSeen',String(Math.min(STAGES.length,cur?cur.clear|0:0))); $('#mapBtn').classList.remove('new'); }catch(e){}
+  try{ lsSet('dkdef2.mapSeen',String(Math.min(STAGES.length,cur?cur.clear|0:0))); $('#stageBan').classList.remove('new'); }catch(e){}
   ov.hidden=false; const Wd=Math.max(300,Math.min(ov.clientWidth||390,520));
   const px=i=>Wd/2+Wd*.27*Math.sin(i*1.05+.4), py=i=>H-PB-i*GAP, P=[]; for(let i=0;i<T;i++)P.push([px(i),py(i)]);
   let d=`M${P[0][0].toFixed(1)} ${P[0][1].toFixed(1)}`; for(let i=0;i<T-1;i++){ const p0=P[Math.max(0,i-1)], p1=P[i], p2=P[i+1], p3=P[Math.min(T-1,i+2)];
@@ -4781,28 +4753,25 @@ function openMap(){
     if(!h){ nb.parentNode.insertAdjacentHTML('beforeend',`<div class="mhero" style="left:${hx.toFixed(1)}px;top:${hy.toFixed(1)}px"><span class="cem">${clsIc(cur.cls,34)}</span><img src="img/hero_${cur.cls}.png" alt="" onload="this.previousElementSibling.style.display='none'" onerror="this.remove()"></div>`); }
     else{ h.style.left=hx.toFixed(1)+'px'; h.style.top=hy.toFixed(1)+'px'; } };
   const go=()=>{ if(pick>clr||going)return; going=true; selStage=pick; lsSet('dkdef2.stage',String(pick)); renderStagePanel(); mark(); place(pick); show(); sfx('pick');
-    setTimeout(()=>{ close(); const sb=$('#stageCard'); if(sb){ sb.classList.remove('pick'); void sb.offsetWidth; sb.classList.add('pick'); } try{ toast(`✔ ${STAGES[pick].id} · ${STAGES[pick].n} 선택`); }catch(e){} },420); };
+    setTimeout(()=>{ close(); const sb=$('#stageBan'); if(sb){ sb.classList.remove('pick'); void sb.offsetWidth; sb.classList.add('pick'); } try{ toast(`✔ ${STAGES[pick].id} · ${STAGES[pick].n} 선택`); }catch(e){} },420); };
   mark(); place(pick);
   ov.querySelectorAll('.mn[data-i]').forEach(b=>b.onclick=()=>{ pick=+b.dataset.i; sfx('ui'); if(pick<=clr)place(pick); show(); });   /* 스테이지를 누르면 캐릭터가 그곳으로 이동하고 아래 카드만 바뀌어요 — '이 스테이지로 선택'을 눌러야 정해져요 */
   $('#mapX').onclick=close; show();
   const sc=$('#mapSc'); sc.scrollTop=Math.max(0,py(Math.min(pick,N-1))-sc.clientHeight*.45);
 }
-$('#mapBtn').onclick=()=>{ sfx('ui'); openMap(); };
 function renderStagePanel(){
   const chars=charIds().map(loadChar).filter(Boolean);
   $('#playPanel').hidden=!selId;
   { const cur=chars.find(c=>c.id===selId); stageClear=cur?Math.min(STAGES.length,cur.clear|0):0; }
   if(selStage>stageClear) selStage=stageClear; try{fieldGet(selStage);}catch(e){}
-  { const mb=$('#mapBtn'); if(mb)mb.classList.toggle('new',stageClear>(+lsGet('dkdef2.mapSeen')||0)&&stageClear<STAGES.length); }   /* 5스테이지: 비밀번호를 맞힌 기기는 4스테이지를 안 깼어도 테스트 입장 가능 */
-  { const sc=$('#stageCard'); if(sc)sc.classList.toggle('dg',!!STAGES[selStage].raid); }   /* 레이드 스테이지: 카드를 용이 한 바퀴 감쌈 */
-  const S=STAGES[selStage]; { const t=$('#sTitle'); if(t)t.dataset.ch=selStage<5?'1':selStage<10?'2':selStage<15?'3':'4'; const bi=S.bs||MAPBOSS[S.id]; $('#stageBoss').innerHTML=bi&&!S.raid?`<img src="img/${bi}.png" alt="" onerror="this.remove()">`:''; }
-  $('#stageBig').innerHTML=`<small>STAGE</small>${esc(S.id)} · ${esc(S.n)}`; { const mb=$('#mapBtn'); if(mb)mb.innerHTML=`<span>🗺️ 스테이지</span><i class="mbGo">›</i>`; }
-  { const cur=chars.find(c=>c.id===selId), low=cur&&cur.lvl<S.rl, gp0=cur&&cur.eq?gearPenOf(cur.eq,S.icap):null, gw=!!gp0&&gp0.wm<.97; $('#stageInfo').innerHTML=`<span style="color:${gw?'#e07060':'#9fd18b'};font-weight:700">장비 Lv 합 ${Math.max(1,S.icap-12)*EQSL.length}↑${gw?' · 부족':''}</span>`;
-    { const ban=$('#stageBan'); if(ban){ if(!cur){ ban.innerHTML=''; } else { const bi2=S.bs||MAPBOSS[S.id]; ban.classList.toggle('noimg',!bi2); ban.innerHTML=`<div class="t"><small>이번 도전 · 우두머리</small><b>${esc(S.bn||'')}</b><span>${esc(S.id)} · ${esc(S.n)}</span><i class="${gw?'warn':''}">권장 장비 Lv 합 ${Math.max(1,S.icap-12)*EQSL.length}↑${gw?' · 부족':''}</i></div>${bi2?`<img src="img/${bi2}.png" alt="" onerror="this.remove()">`:''}`; } } }
+  { const mb=$('#stageBan'); if(mb)mb.classList.toggle('new',stageClear>(+lsGet('dkdef2.mapSeen')||0)&&stageClear<STAGES.length); }   /* 5스테이지: 비밀번호를 맞힌 기기는 4스테이지를 안 깼어도 테스트 입장 가능 */
+  const S=STAGES[selStage]; { const t=$('#sTitle'); if(t)t.dataset.ch=selStage<5?'1':selStage<10?'2':selStage<15?'3':'4'; }
+  { const cur=chars.find(c=>c.id===selId), low=cur&&cur.lvl<S.rl, gp0=cur&&cur.eq?gearPenOf(cur.eq,S.icap):null, gw=!!gp0&&gp0.wm<.97; 
+    { const ban=$('#stageBan'); if(ban){ if(!cur){ ban.innerHTML=''; } else { const bi2=S.bs||MAPBOSS[S.id]; ban.classList.toggle('noimg',!bi2); ban.innerHTML=`<div class="t"><small>이번 도전 · 우두머리</small><b>${esc(S.bn||'')}</b><span>${esc(S.id)} · ${esc(S.n)}</span><i class="${gw?'warn':''}">권장 장비 Lv 합 ${Math.max(1,S.icap-12)*EQSL.length}↑${gw?' · 부족':''}</i><em class="go">🗺️ 스테이지 선택 ›</em></div>${bi2?`<img src="img/${bi2}.png" alt="" onerror="this.remove()">`:''}`; } } }
     const chp=$('#cChips'); if(chp){ if(!cur){ chp.hidden=true; } else { const pt2=(cur.statPts|0)+(cur.skillPts|0); chp.hidden=false; chp.innerHTML=`<span>보유 골드<b>💰 ${(cur.gold|0).toLocaleString()}</b></span><span class="${gw?'warn':''}">내 장비 Lv 합<b>${gp0?gp0.sum:'-'}</b></span><span class="${pt2?'hi':''}">분배할 포인트<b>${pt2}</b></span>`; } } }
   { const cur=chars.find(c=>c.id===selId), nw=!!cur&&(cur.inv||[]).some(x=>x&&x.isNew), pt=cur?(cur.statPts|0)+(cur.skillPts|0):0;
     $('#tGearB').hidden=!nw; $('#menuB').hidden=!mailUnreadAll(chars); const pb=$('#tGearP'); pb.hidden=!pt; pb.textContent=pt; for(const id of ['tGear','tStore'])$('#'+id).disabled=!cur; }
-  storyReUi(); $('#bSolo').disabled=!selId; if(room){ $('#bHost').disabled=!selId; $('#bJoin').disabled=!selId; }
+  storyReUi(); $('#bSolo').disabled=!selId; $('#bShop').disabled=!selId; if(room){ $('#bHost').disabled=!selId; $('#bJoin').disabled=!selId; }
 }
 function renderTitle(){
   migrateChars();
@@ -4972,6 +4941,7 @@ function townPick(k){ townTick(k); const B=getTown()[k], D=TOWN_B[k], n=B.n|0; i
 /* 타이틀 하단 탭 바 */
 $('#tGear').onclick=()=>{ if(selId)openTitleSheet('bag'); };
 $('#tStore').onclick=()=>{ if(selId)openTitleSheet('store'); };
+$('#bShop').onclick=()=>{ if(selId){ sfx('ui'); openTitleSheet('shop'); } };
 $('#tTown').onclick=()=>openTown();
 $('#bSolo').onclick=()=>{ G.mode='solo';  prepMe(); ally=null; resetWorld(); startStage(); };
 $('#bHost').onclick=async()=>{
