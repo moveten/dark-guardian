@@ -761,6 +761,8 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 .pp #stageBig::after{content:"👆 눌러서 지도 열기";display:block;font:500 11px var(--f-body);letter-spacing:0;color:var(--mute);text-shadow:none;margin-top:2px}
 .pp #stageBig.pick{animation:stPick .9s ease-out}
 @keyframes stPick{0%{transform:scale(1);text-shadow:0 0 0 rgba(255,211,106,0)}30%{transform:scale(1.1);text-shadow:0 0 22px rgba(255,211,106,.95)}100%{transform:scale(1);text-shadow:0 2px 12px rgba(214,170,78,.35)}}
+.pp .mapb{display:flex;align-items:center;justify-content:center;gap:10px}
+.pp .mapb .mbSel{padding:3px 11px;border-radius:999px;background:rgba(214,170,78,.2);border:1px solid rgba(214,170,78,.55);color:#fff3c4;font-size:14px;font-weight:700}
 .pp .mapb.new::after{content:"NEW";margin-left:6px;padding:1px 5px;border-radius:8px;background:var(--blood);color:#fff;font-size:10px}
 .pp .mapb{order:0;align-self:stretch;margin:0;min-height:48px;border-radius:12px;font-size:15px;font-weight:700;border:1px solid var(--gold);background:rgba(15,11,9,.72);color:#ffd36a}
 .mpin{position:absolute;z-index:4;transform:translate(-50%,-100%);padding:3px 10px;border-radius:999px;background:linear-gradient(#ffd36a,#e0a63a);color:#2a1a08;font:800 12px var(--f-body);white-space:nowrap;pointer-events:none;box-shadow:0 2px 8px #000a}
@@ -854,14 +856,14 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.0.0277</div>
+    <div class="ver" id="verT">v0.6.0.0278</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
     <div class="clist car" id="charList"></div>
     <button id="bNew" hidden></button>
     <div class="pp" id="playPanel" hidden>
-      <button class="mapb" id="mapBtn" type="button">🗺️ 지도에서 스테이지 고르기</button>
+      <button class="mapb" id="mapBtn" type="button">🗺️ 스테이지</button>
       <div class="stbig" id="stageBig"></div>
       <div id="stageInfo" role="button" tabindex="0" title="누르면 설명이 펼쳐져요"></div>
       <div class="modes"><button class="btn primary" id="bSolo">▶ 시작하기</button><button class="btn" id="bStory" aria-label="스토리 다시 보기" hidden>📖 스토리<br>다시 보기</button></div>
@@ -3904,7 +3906,7 @@ function storySkip(){ if(stS){ sfx('ui'); storyEnd(); } }
 function storyClose(){ const S=stS; clearInterval(stTm); stS=null; const el=$('#sty'); if(el){ el.hidden=true; el.classList.remove('nar','nb','rt'); } if(S&&S.pz)G.paused=G.mode==='solo'&&!$('#sheet').hidden; return S; }
 /* 스토리 다시 보기: 버튼을 누르면 '시작하기'에 NEW가 붙고, 그 스테이지를 시작하면 처음처럼 모든 대화(시작·페이즈·끝)가 다시 나와요. 한 번 더 누르면 취소 */
 let storyRe=null;
-function storyReUi(){ const S=STAGES[selStage], on=!!(S&&storyRe===S.id); if(!on)storyRe=null; const b=$('#bSolo'); if(b)b.innerHTML='▶ '+(S?S.id+' ':'')+'시작하기'+(on?' <span class="newb">NEW</span>':''); const st=$('#bStory'); if(st)st.setAttribute('aria-pressed',on); }
+function storyReUi(){ const S=STAGES[selStage], on=!!(S&&storyRe===S.id); if(!on)storyRe=null; const b=$('#bSolo'); if(b)b.innerHTML='▶ 시작하기'+(on?' <span class="newb">NEW</span>':''); const st=$('#bStory'); if(st)st.setAttribute('aria-pressed',on); }
 function storyReToggle(){ const S=STAGES[selStage]; if(!S||!STORY[S.id])return; storyRe=storyRe===S.id?null:S.id; storyReUi(); toast(storyRe?'📖 이번 판은 스토리 대화가 처음처럼 모두 나와요':'📖 스토리 다시 보기를 취소했어요','#c9b48a'); }
 function storyStop(){ storyClose(); storyWait=false; }
 function storyEnd(){ const S=storyClose(); if(S&&S.kind==='pre'){ storyWait=false;
@@ -4683,7 +4685,7 @@ function renderStagePanel(){
   { const cur=chars.find(c=>c.id===selId); stageClear=cur?Math.min(STAGES.length,cur.clear|0):0; }
   if(selStage>stageClear) selStage=stageClear; try{fieldGet(selStage);}catch(e){}
   { const mb=$('#mapBtn'); if(mb)mb.classList.toggle('new',stageClear>(+lsGet('dkdef2.mapSeen')||0)&&stageClear<STAGES.length); }   /* 5스테이지: 비밀번호를 맞힌 기기는 4스테이지를 안 깼어도 테스트 입장 가능 */
-  const S=STAGES[selStage]; $('#stageBig').innerHTML=`<small>✔ 선택한 스테이지</small>${esc(S.id)} · ${esc(S.n)}`;
+  const S=STAGES[selStage]; $('#stageBig').innerHTML=`<small>✔ 선택한 스테이지</small>${esc(S.id)} · ${esc(S.n)}`; { const mb=$('#mapBtn'); if(mb)mb.innerHTML=`<span>🗺️ 스테이지</span><b class="mbSel">✔ ${esc(S.id)} · ${esc(S.n)}</b>`; }
   { const cur=chars.find(c=>c.id===selId), low=cur&&cur.lvl<S.rl, gp0=cur&&cur.eq?gearPenOf(cur.eq,S.icap):null, gw=!!gp0&&gp0.wm<.97; $('#stageInfo').innerHTML=`<span style="color:${gw?'#e07060':'#9fd18b'};font-weight:700">장비 Lv 합 ${Math.max(1,S.icap-12)*EQSL.length}↑${gp0?` (내 합 ${gp0.sum}${gw?' · 부족':''})`:''}</span><span class="sd">${esc(S.d)}</span>`; }
   { const cur=chars.find(c=>c.id===selId), nw=!!cur&&(cur.inv||[]).some(x=>x&&x.isNew), pt=cur?(cur.statPts|0)+(cur.skillPts|0):0;
     $('#tGearB').hidden=!nw; $('#menuB').hidden=!mailUnreadAll(chars); const pb=$('#tGearP'); pb.hidden=!pt; pb.textContent=pt; for(const id of ['tGear','tStore'])$('#'+id).disabled=!cur; }
