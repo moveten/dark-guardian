@@ -972,7 +972,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.0.0301</div>
+    <div class="ver" id="verT">v0.6.0.0302</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -4086,6 +4086,35 @@ function tutTick(){ const T=tutS; if(!T)return;
   tutPlace(); }
 $('#tqOk').onclick=()=>tutNext();
 $('#tqSk').onclick=()=>{ const T=tutS; if(!T)return; if(!T.conf){ T.conf=1; const b=$('#tqSk'); b.textContent='정말 건너뛸까요? (보상 없음)'; b.classList.add('warn'); T.ct=setTimeout(()=>{ if(tutS===T)tutSkReset(); },3200); return; } tutSkip(); };
+/* ⌨ 단축키: Esc = 닫기/취소/뒤로, Enter·Space = 확인/주요 버튼. 창이 겹쳐 있으면 맨 위 창부터 처리해요 (이야기 장면은 위쪽 핸들러가 먼저) */
+let kbNav=false;   /* Tab으로 버튼에 포커스를 옮긴 상태인지 (마우스로 누르고 남은 포커스와 구분) */
+addEventListener('pointerdown',()=>{ kbNav=false; },true);
+addEventListener('keydown',e=>{ if(e.key==='Tab')kbNav=true; },true);
+addEventListener('keydown',e=>{
+  if(e.altKey||e.ctrlKey||e.metaKey||e.isComposing||(stS&&stS.solo))return;
+  const esc_=e.key==='Escape', ok=!e.repeat&&(e.key==='Enter'||e.key===' ');
+  if(!esc_&&!ok)return;
+  const vis=el=>!!el&&!el.closest('[hidden]')&&!!(el.offsetWidth||el.offsetHeight||el.getClientRects().length);
+  const clk=el=>{ if(!vis(el)||el.disabled||el.getAttribute('aria-disabled')==='true')return false; el.click(); return true; };
+  const done=()=>{ e.preventDefault(); e.stopPropagation(); try{ if(document.activeElement&&document.activeElement!==document.body)document.activeElement.blur(); }catch(_){} return true; };
+  { const t=e.target; if(ok&&t&&t.closest&&t!==document.body&&t.id!=='sSplash'){ if(t.closest('input,textarea,select,[contenteditable]'))return;
+      if(kbNav&&t.closest('button,a,[role="button"]'))return; } }   /* 입력칸이나 키보드(Tab)로 버튼에 포커스를 둔 경우는 원래 동작(그 버튼 누르기)을 그대로 둠 — 마우스로 눌러서 남은 포커스는 무시 */
+  const sp=$('#sSplash');
+  if(vis(sp)&&!sp.classList.contains('go')){ if(ok||esc_){ sp.dispatchEvent(new Event('pointerdown')); return done(); } return; }
+  const md=$('#modal'), sh=$('#sheet'), mo=$('#mapOv'), ip=$('#itemPop');
+  if(vis(md)){ if(esc_){ closeModal(); return done(); } const p=[...md.querySelectorAll('.btn.primary')].find(b=>vis(b)&&!b.disabled); if(p){ p.click(); return done(); } return; }
+  if(vis(mo)){ if(esc_){ if(clk($('#mapC'))||clk($('#mapX'))) return done(); } else if(clk($('#mapGo'))) return done(); return; }
+  if(vis(sh)){
+    if(vis(ip)&&selItem){ if(esc_){ selItem=null; rerender(); return done(); } const p=ip.querySelector('#aEquip')||ip.querySelector('#aUnequip')||ip.querySelector('.btn.primary'); if(p&&clk(p))return done(); return; }
+    if(esc_){ closeSheet(); return done(); } return; }
+  if(vis($('#tq'))){ if(ok&&clk($('#tqOk')))return done(); return; }
+  const ti=$('#sTitle'), nw=$('#sNew'), lb=$('#sLobby'), en=$('#sEnd');
+  if(vis(en)){ if(clk($('#bBack'))||clk($('#bToTitle')))return done(); return; }
+  if(G.inGame){ if(esc_&&!vis($('#ult'))){ openSheet('menu'); return done(); } return; }
+  if(vis(lb)){ if(esc_){ if(clk($('#bLeave')))return done(); } else if(clk($('#bStart')))return done(); return; }
+  if(vis(nw)){ if(esc_&&clk($('#bNewBack')))return done(); return; }
+  if(vis(ti)){ if(esc_){ if(clk($('#bSet')))return done(); } else if(vis($('#playPanel'))&&clk($('#bSolo')))return done(); return; }
+},true);
 /* 📖 모험 안내 창: 진행 상황 · 보상 · 시작/다시 하기 (타이틀의 캐릭터 메뉴와 게임 중 메뉴에서 열림) */
 function tutModal(id,note){
   const live=!!(G.inGame&&me&&me.id===id), P=live?me:loadChar(id); if(!P)return; const t=P.tut, nd=t.rw.filter(Boolean).length, sv=()=>{ if(live)saveChar(); else mailSave(P); };
@@ -4369,7 +4398,7 @@ function hoverHide(){ const t=$('#hoverTip'); if(t)t.hidden=true; }
 function hoverShow(it,el,own){
   let t=$('#hoverTip'); if(!t){ t=document.createElement('div'); t.id='hoverTip'; t.className='htip'; document.body.appendChild(t); }
   let cmp=''; try{ if(own===me&&el.dataset.inv!==undefined&&!isShard(it)){ if(it.slot==='ring'&&me.eq.ring1&&me.eq.ring2) cmp=itemLines(me.eq.ring1)+'<hr style="border:0;border-top:1px dashed var(--line2);margin:8px 0">'+itemLines(me.eq.ring2); else { const cur=me.eq[eqKeyFor(it)]; if(cur&&cur!==it)cmp=itemLines(cur); } } }catch(e){ cmp=''; }
-  t.innerHTML=(cmp?`<div class="meta" style="color:#9fd0ff;margin-bottom:4px">▼ 지금 착용 중</div>${cmp}<hr style="border:0;border-top:1px solid var(--line2);margin:8px 0"><div class="meta" style="color:#ffd84a;margin-bottom:4px">▼ 이 아이템</div>`:'')+itemLines(it);
+  t.innerHTML=(cmp?`<div class="meta" style="color:#ffd84a;margin-bottom:4px">▼ 이 아이템</div>`:'')+itemLines(it)+(cmp?`<hr style="border:0;border-top:1px solid var(--line2);margin:8px 0"><div class="meta" style="color:#9fd0ff;margin-bottom:4px">▼ 지금 착용 중</div>${cmp}`:'');
   t.hidden=false; t.style.left='0px'; t.style.top='0px';
   const r=el.getBoundingClientRect(), w=t.offsetWidth, h=t.offsetHeight, vw=innerWidth, vh=innerHeight;
   let x=r.right+8; if(x+w>vw-8)x=r.left-w-8; if(x<8)x=Math.max(8,Math.min(vw-w-8,r.left));
