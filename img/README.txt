@@ -75,3 +75,5 @@
 [5스테이지 각성 그림자 3페이즈 — 그림만 준비] boss_awake3.png / _atk / _sk / _cast — 692×420, 발 기준 가로 중앙, 배율 0.625(원본이 작게 나와서 2페이즈와 키를 맞춤)
 
 [스테이지 5 각성 영웅 아이템 아이콘 — 적용 완료] item_aw_wpn / helm / armor / amu / ring · item_awoff_war / pal / sorc / necro / druid .png (192×192, 투명 배경). 이름 연결은 index.html 의 UNQIMG
+
+[마을 배경 — 적용 완료] town_bg.webp (848×1264, 빈터 4곳 2×2). 건물 자리 좌표는 index.html 의 renderTown (--x/--y 퍼센트)

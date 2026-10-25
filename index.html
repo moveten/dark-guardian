@@ -227,7 +227,13 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 /* 마을 (A안 지도형) */
 .sbody.town{padding:10px 12px;gap:8px}
 .tcur{display:flex;gap:8px;align-items:center;font-size:12.5px;color:#c9b99a}.tcur span:first-child{flex:1;color:#8a7e6c}.tcur span+span{background:#1a1410;border:1px solid #4a3a2a;border-radius:99px;padding:3px 10px;font-weight:700;color:#f1e8ff}
-.tmap{position:relative;border-radius:12px;border:1px solid #2a2240;background:radial-gradient(ellipse at 50% 30%,#2a1f42 0%,#140e20 58%,#0a0710 100%);padding:6px 8px 10px;overflow:hidden}
+.tmap{position:relative;border-radius:12px;border:1px solid #2a2240;background:url(img/town_bg.webp) center/100% 100% no-repeat,radial-gradient(ellipse at 50% 30%,#2a1f42 0%,#140e20 58%,#0a0710 100%);aspect-ratio:848/1264;width:100%;max-width:440px;margin:0 auto;overflow:hidden}
+.tmap .tsl{position:absolute;left:var(--x);top:var(--y);transform:translate(-50%,calc(-100% + 26px));padding:0;width:max-content;max-width:48%}
+.tmap .tbub{margin-bottom:-8px;z-index:1}
+.tmap .tbd svg{width:92px;height:112px}
+.tmap .tsl.e{transform:translate(-50%,-42%)}
+.tmap .tplot{margin-top:0;width:100px;height:74px;background:#0006}
+.tmap .tfh{position:absolute;left:3%;top:var(--y);margin:0;background:#000b;border:1px solid #4a3a2a;border-radius:6px;padding:1px 8px;font-size:11px;color:#d9ccb0}
 .tfh{font-size:12px;color:#8a7e6c;margin:8px 6px 0;font-weight:700}
 .trow{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px}
 .tsl{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0;padding-top:4px}
@@ -794,7 +800,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 <symbol id="tw-mill" viewBox="0 0 110 120"><ellipse cx="55" cy="113" rx="36" ry="6" fill="#000" opacity=".5"/><polygon points="30,112 36,56 74,56 80,112" fill="#1d1830" stroke="#3a2f66"/><polygon points="32,58 55,38 78,58" fill="#120e1c" stroke="#7a5ae0"/><g transform="translate(55 52)"><g stroke="#8a6cff" stroke-width="1.3" fill="#2a2540"><rect x="-3" y="-46" width="6" height="46"/><rect x="-3" y="0" width="6" height="46"/><rect x="-46" y="-3" width="46" height="6"/><rect x="0" y="-3" width="46" height="6"/><rect x="3" y="-44" width="14" height="22"/><rect x="-17" y="22" width="14" height="22"/><rect x="-44" y="-17" width="22" height="14"/><rect x="22" y="3" width="22" height="14"/></g><circle r="6" fill="#e6dcff"/></g><path d="M47 78 Q55 66 63 78 Q55 73 47 78Z" fill="#e6dcff"/><path d="M40 90 L47 98 L43 108 M66 86 L62 96 L69 104" stroke="#b89cff" stroke-width="1.1" fill="none"/><path d="M47 112 V100 Q55 93 63 100 V112Z" fill="#0a0810" stroke="#5a4aa8"/></symbol>
 </defs></svg>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.0.0266</div>
+    <div class="ver" id="verT">v0.6.0.0267</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -4730,14 +4736,14 @@ function openTown(){ G.titleSheet=true; STORE=loadStore(); openSheet('town'); }
 function townBub(k){ const B=getTown()[k], D=TOWN_B[k], lv=B.lv|0; if(lv<1)return null;
   if(D.stat)return {tx:`⭐ 올스탯 +${lv*TOWN_STAT}`,cls:''};
   const P=townProd(k), n=B.n|0, full=n>=P.cap; return {tx:`${D.pot?'🧪':D.e} ${n}/${P.cap}${full?' 가득!':n>0?' ▸ 받기':''}`,cls:full?'f':n>0?'g':'z'}; }
-function townSlot(k){ const B=getTown()[k], D=TOWN_B[k], lv=B.lv|0, tag=D.main?'<span class="tmn">메인</span>':'<span class="tsb">보조</span>';
-  if(lv<1)return `<div class="tsl"><button class="tplot" data-tbld="${k}"><b>＋</b>건설<br><span style="color:#ffd34d">${D.e} ${TOWN_BUILD}</span></button><div class="tlb">${tag}${D.n}</div></div>`;
+function townSlot(k,pos){ pos=pos||''; const B=getTown()[k], D=TOWN_B[k], lv=B.lv|0, tag=D.main?'<span class="tmn">메인</span>':'<span class="tsb">보조</span>';
+  if(lv<1)return `<div class="tsl e" style="${pos}"><button class="tplot" data-tbld="${k}"><b>＋</b>건설<br><span style="color:#ffd34d">${D.e} ${TOWN_BUILD}</span></button><div class="tlb">${tag}${D.n}</div></div>`;
   const b=townBub(k);
-  return `<div class="tsl"><button class="tbub ${b.cls}" data-tbub="${k}">${b.tx}</button><button class="tbd" data-tbld="${k}" aria-label="${D.n}"><svg viewBox="0 0 100 120" preserveAspectRatio="xMidYMax meet"><use href="#${D.sy}" width="100" height="120"/></svg></button><div class="tlb">${tag}${D.n}${D.main?'':' Lv.'+lv}</div></div>`; }
+  return `<div class="tsl" style="${pos}"><button class="tbub ${b.cls}" data-tbub="${k}">${b.tx}</button><button class="tbd" data-tbld="${k}" aria-label="${D.n}"><svg viewBox="0 0 100 120" preserveAspectRatio="xMidYMax meet"><use href="#${D.sy}" width="100" height="120"/></svg></button><div class="tlb">${tag}${D.n}${D.main?'':' Lv.'+lv}</div></div>`; }
 function renderTown(){ const S=getStore(), now=Date.now(); let ch=false; for(const k of ['tw','al','mill'])if(townTick(k,now))ch=true; if(ch)saveTown();
   $('#itemPop').hidden=true; $('#ptsBar').hidden=true; $('#sheetTabs').hidden=true; $('#sheetT').innerHTML='🏘️ 마을';
   const b=$('#sheetB'); b.className='sbody town';
-  b.innerHTML=`<div class="tcur"><span>공유보관함 조각</span><span>🌑 ${shardCount(S,'shard')}</span><span>✦ ${shardCount(S,'ashard')}</span></div>${townMsg?`<div class="tqnote">${esc(townMsg)}</div>`:''}<div class="tmap">${TOWN_FAM.map(f=>`<div class="tfh">${f.e} ${f.nm} 계열</div><div class="trow">${townSlot(f.main)}${townSlot(f.aux)}</div>`).join('')}</div><p class="meta" style="margin:0;font-size:12px;line-height:1.5">건물을 누르면 자세히 볼 수 있어요. 건설과 업그레이드에는 <b>공유보관함</b>에 있는 조각만 쓸 수 있어요. 말풍선을 누르면 만든 것을 캐릭터 우편으로 받아요.</p>`;
+  b.innerHTML=`<div class="tcur"><span>공유보관함 조각</span><span>🌑 ${shardCount(S,'shard')}</span><span>✦ ${shardCount(S,'ashard')}</span></div>${townMsg?`<div class="tqnote">${esc(townMsg)}</div>`:''}<div class="tmap">${TOWN_FAM.map((f,i)=>{ const y=i?[69,68]:[26,25.5], ty=i?55:13; return `${townSlot(f.main,`--x:${i?29:30}%;--y:${y[0]}%`)}${townSlot(f.aux,`--x:71%;--y:${y[1]}%`)}`; }).join('')}</div><p class="meta" style="margin:0;font-size:12px;line-height:1.5">건물을 누르면 자세히 볼 수 있어요. 건설과 업그레이드에는 <b>공유보관함</b>에 있는 조각만 쓸 수 있어요. 말풍선을 누르면 만든 것을 캐릭터 우편으로 받아요.</p>`;
   townMsg='';
   b.querySelectorAll('[data-tbub]').forEach(e=>e.onclick=()=>{ const k=e.dataset.tbub; if(TOWN_B[k].stat)townInfo(k); else townPick(k); });
   b.querySelectorAll('[data-tbld]').forEach(e=>e.onclick=()=>townInfo(e.dataset.tbld));
