@@ -974,7 +974,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.0.0304</div>
+    <div class="ver" id="verT">v0.6.0.0305</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -4095,17 +4095,21 @@ addEventListener('pointerdown',()=>{ kbNav=false; },true);
 addEventListener('keydown',e=>{ if(e.key==='Tab')kbNav=true; },true);
 addEventListener('keydown',e=>{
   if(e.altKey||e.ctrlKey||e.metaKey||e.isComposing||(stS&&stS.solo))return;
-  const esc_=e.key==='Escape', ok=!e.repeat&&(e.key==='Enter'||e.key===' '), rk=!e.repeat&&e.code==='KeyR';   /* R(한글 자판 ㄱ 포함) = 부활하기 · 다시하기 */
-  if(!esc_&&!ok&&!rk)return;
+  const esc_=e.key==='Escape', ok=!e.repeat&&(e.key==='Enter'||e.key===' '), rk=!e.repeat&&e.code==='KeyR', hk=e.repeat?'':({KeyI:'bag',KeyC:'stat',KeyT:'skill'})[e.code];   /* R = 부활하기·다시하기, I/C/T = 가방·능력·스킬 창 (한글 자판에서도 동작) */
+  if(!esc_&&!ok&&!rk&&!hk)return;
   const vis=el=>!!el&&!el.closest('[hidden]')&&!!(el.offsetWidth||el.offsetHeight||el.getClientRects().length);
   const clk=el=>{ if(!vis(el)||el.disabled||el.getAttribute('aria-disabled')==='true')return false; el.click(); return true; };
   const done=()=>{ e.preventDefault(); e.stopPropagation(); try{ if(document.activeElement&&document.activeElement!==document.body)document.activeElement.blur(); }catch(_){} return true; };
-  if(rk&&e.target&&e.target.closest&&e.target.closest('input,textarea,select,[contenteditable]'))return;
+  if((rk||hk)&&e.target&&e.target.closest&&e.target.closest('input,textarea,select,[contenteditable]'))return;
   { const t=e.target; if(ok&&t&&t.closest&&t!==document.body&&t.id!=='sSplash'){ if(t.closest('input,textarea,select,[contenteditable]'))return;
       if(kbNav&&t.closest('button,a,[role="button"]'))return; } }   /* 입력칸이나 키보드(Tab)로 버튼에 포커스를 둔 경우는 원래 동작(그 버튼 누르기)을 그대로 둠 — 마우스로 눌러서 남은 포커스는 무시 */
   const sp=$('#sSplash');
   if(vis(sp)&&!sp.classList.contains('go')){ if(ok||esc_){ sp.dispatchEvent(new Event('pointerdown')); return done(); } return; }
   const md=$('#modal'), sh=$('#sheet'), mo=$('#mapOv'), ip=$('#itemPop'), tqBlk=()=>vis($('#tq'))&&$('#tq').classList.contains('blk');
+  if(hk){ if(vis(md)||vis(mo)||tqBlk()||vis($('#sEnd'))||vis(sp))return;
+    if(vis(sh)){ const cur=sheetMode==='passive'?'skill':sheetMode; if(cur===hk){ closeSheet(); return done(); } if(['bag','stat','skill'].includes(cur)){ openSheet(hk); return done(); } return; }   /* 같은 키를 다시 누르면 닫고, 가방·능력·스킬끼리는 바로 넘어가요 */
+    if(G.inGame){ openSheet(hk); return done(); }
+    if(vis($('#sTitle'))&&selId){ openTitleSheet(hk); return done(); } return; }
   if(rk){ if(vis($('#modal'))||vis($('#mapOv'))||vis($('#sheet'))||tqBlk())return;   /* R: 다른 창이 없을 때만 — 결과 화면 '다시하기' / 쓰러졌을 때 '부활' */
     if(vis($('#sEnd'))){ if(clk($('#bRetry')))return done(); return; }
     if(G.inGame&&me.dead&&['prep','wave','boss'].includes(G.phase)&&vis($('#bRevBig'))){ useRevive(); return done(); } return; }
