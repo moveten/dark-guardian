@@ -769,6 +769,16 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 /* 스테이지 지도 */
 .pp{position:relative}
 .pp .mapb{align-self:flex-end;margin-bottom:-40px;position:relative;z-index:1;min-height:34px;padding:0 12px;border-radius:999px;border:1px solid var(--line2);background:rgba(15,11,9,.72);font-size:12.5px;font-weight:700;color:#e9d9b4}
+.uiPick{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;width:100%;margin-top:2px}
+.uiPick small{font-size:11px;color:var(--mute);width:100%;text-align:center}
+.uiPick button{font:700 12px var(--f-body);color:#e7dcff;background:#0a0610b8;border:1.5px solid #8a78c8aa;border-radius:999px;padding:6px 11px}
+.uiPick button.on{background:#5a3aa8;border-color:#ffe2a0;color:#fff}
+.pp[data-ui="2"] #stageBig,.pp[data-ui="3"] #stageBig{cursor:pointer}
+.pp[data-ui="2"] #stageBig::after,.pp[data-ui="3"] #stageBig::after{content:"👆 눌러서 지도 열기";display:block;font:500 11px var(--f-body);letter-spacing:0;color:var(--mute);text-shadow:none;margin-top:2px}
+.pp[data-ui="2"] .mapb.new::after,.pp[data-ui="3"] .mapb.new::after{content:"NEW";margin-left:6px;padding:1px 5px;border-radius:8px;background:var(--blood);color:#fff;font-size:10px}
+.pp[data-ui="3"] #stageBar{display:none}
+.pp[data-ui="3"] #stageBig{order:-1}
+.pp[data-ui="3"] .mapb{order:0;align-self:stretch;margin:0;min-height:48px;border-radius:12px;font-size:15px;border-color:var(--gold);color:#ffd36a}
 .mapov{position:absolute;inset:0;z-index:26;background:#0b0810;display:flex;flex-direction:column}
 .mapsc{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y}
 .mapin{position:relative;margin:0 auto;width:min(100%,520px);isolation:isolate;overflow:hidden}
@@ -857,7 +867,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.0.0275</div>
+    <div class="ver" id="verT">v0.6.0.0276</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -869,6 +879,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
       <div class="stagebar" id="stageBar"></div>
       <div id="stageInfo" role="button" tabindex="0" title="누르면 설명이 펼쳐져요"></div>
       <div class="modes"><button class="btn primary" id="bSolo">▶ 시작하기</button><button class="btn" id="bStory" aria-label="스토리 다시 보기" hidden>📖 스토리<br>다시 보기</button></div>
+      <div class="uiPick" id="uiPick" aria-label="스테이지 선택 방식 체험"><small>스테이지 고르는 방식 체험 (임시)</small><button type="button" data-v="1">1안 지금</button><button type="button" data-v="2">2안 제목 터치</button><button type="button" data-v="3">3안 지도 중심</button></div>
     </div>
     <div hidden><button id="bHost" disabled></button><button id="bJoin" disabled></button><p class="note" id="netNote">온라인 연결 확인 중…</p></div>
     <nav class="ttabs" id="titleTabs" aria-label="메뉴">
@@ -4643,10 +4654,16 @@ function carCenter2(box,el){ box.scrollTo({left:el.offsetLeft+el.offsetWidth/2-b
 /* ===== 4스테이지 카드 테두리: 카드 둘레를 한 바퀴 감싼 용 (img/dragon_frame.png 흰색 실루엣을 마스크로 써서 카드 테두리 색으로 칠함 — CSS .drg) ===== */
 const dragonBadge=()=>'<i class="drg" aria-hidden="true"></i>';
 /* ===== 스테이지 지도: 길을 따라 스테이지를 보고 고르는 화면 (연출은 아래 Phaser 스크립트가 위에 얹어줘요 — 없어도 지도는 그대로 동작) ===== */
+let mapUi=Math.max(1,Math.min(3,+(lsGet('dkdef2.mapUi')||1)));   /* 스테이지 고르는 방식 체험용(임시): 1 지금 · 2 제목 터치+NEW · 3 지도 중심 */
+function applyMapUi(){ const pp=$('#playPanel'); if(pp)pp.dataset.ui=mapUi; const mb=$('#mapBtn'); if(mb)mb.textContent=mapUi===3?'🗺️ 지도에서 스테이지 고르기':'🗺️ 지도'; document.querySelectorAll('#uiPick button').forEach(b=>b.classList.toggle('on',+b.dataset.v===mapUi)); }
+document.querySelectorAll('#uiPick button').forEach(b=>b.onclick=()=>{ mapUi=+b.dataset.v; lsSet('dkdef2.mapUi',String(mapUi)); applyMapUi(); sfx('ui'); });
+$('#stageBig').onclick=()=>{ if(mapUi>=2){ sfx('ui'); openMap(); } };
+applyMapUi();
 function openMap(){
   const ov=$('#mapOv'); if(!ov||!selId)return;
   const cur=charIds().map(loadChar).filter(Boolean).find(c=>c.id===selId), clr=cur?Math.min(STAGES.length,cur.clear|0):0;
   const N=STAGES.length, T=N+1, GAP=96, PB=120, PT=130, H=PT+(T-1)*GAP+PB;
+  try{ lsSet('dkdef2.mapSeen',String(Math.min(STAGES.length,cur?cur.clear|0:0))); $('#mapBtn').classList.remove('new'); }catch(e){}
   ov.hidden=false; const Wd=Math.max(300,Math.min(ov.clientWidth||390,520));
   const px=i=>Wd/2+Wd*.27*Math.sin(i*1.05+.4), py=i=>H-PB-i*GAP, P=[]; for(let i=0;i<T;i++)P.push([px(i),py(i)]);
   let d=`M${P[0][0].toFixed(1)} ${P[0][1].toFixed(1)}`; for(let i=0;i<T-1;i++){ const p0=P[Math.max(0,i-1)], p1=P[i], p2=P[i+1], p3=P[Math.min(T-1,i+2)];
@@ -4669,8 +4686,9 @@ function openMap(){
   const show=()=>{ const S=STAGES[pick], st=pick<clr?'clear':pick===clr?'next':'lock', can=pick<=clr;
     ov.querySelectorAll('.mn[data-i]').forEach(b=>b.classList.toggle('sel',+b.dataset.i===pick));
     bar.innerHTML=`<div class="mt"><small>STAGE</small>${esc(S.id)} · ${esc(S.n)}</div><div class="mb">우두머리 <b>${esc(S.bn||'')}</b> · 장비 Lv 합 ${Math.max(1,S.icap-12)*EQSL.length}↑${st==='clear'?' · <span style="color:#9fd18b">클리어 ✔</span>':''}</div><div class="md">${esc(S.tag||S.d||'')}</div><div class="row2"><button class="btn" id="mapC" type="button">닫기</button><button class="btn primary" id="mapGo" type="button"${can?'':' disabled'}>${can?'이 스테이지로 선택':'🔒 이전 스테이지를 먼저 클리어'}</button></div>`;
-    $('#mapC').onclick=close; $('#mapGo').onclick=()=>{ if(!can)return; selStage=pick; lsSet('dkdef2.stage',String(pick)); close(); renderStagePanel(); }; };
-  ov.querySelectorAll('.mn[data-i]').forEach(b=>b.onclick=()=>{ pick=+b.dataset.i; sfx('ui'); show(); });
+    $('#mapC').onclick=close; $('#mapGo').onclick=go; };
+  const go=()=>{ if(pick>clr)return; selStage=pick; lsSet('dkdef2.stage',String(pick)); close(); renderStagePanel(); };
+  ov.querySelectorAll('.mn[data-i]').forEach(b=>b.onclick=()=>{ pick=+b.dataset.i; sfx('ui'); if(mapUi===3&&pick<=clr){ go(); return; } show(); });   /* 3안: 갈 수 있는 곳을 누르면 바로 선택하고 닫혀요 */
   $('#mapX').onclick=close; show();
   const sc=$('#mapSc'); sc.scrollTop=Math.max(0,py(Math.min(pick,N-1))-sc.clientHeight*.45);
 }
@@ -4679,7 +4697,8 @@ function renderStagePanel(){
   const chars=charIds().map(loadChar).filter(Boolean);
   $('#playPanel').hidden=!selId;
   { const cur=chars.find(c=>c.id===selId); stageClear=cur?Math.min(STAGES.length,cur.clear|0):0; }
-  if(selStage>stageClear) selStage=stageClear; try{fieldGet(selStage);}catch(e){}   /* 5스테이지: 비밀번호를 맞힌 기기는 4스테이지를 안 깼어도 테스트 입장 가능 */
+  if(selStage>stageClear) selStage=stageClear; try{fieldGet(selStage);}catch(e){}
+  { const mb=$('#mapBtn'); if(mb)mb.classList.toggle('new',stageClear>(+lsGet('dkdef2.mapSeen')||0)&&stageClear<STAGES.length); }   /* 5스테이지: 비밀번호를 맞힌 기기는 4스테이지를 안 깼어도 테스트 입장 가능 */
   const sb=$('#stageBar'); sb.innerHTML='';
   const nOpen=STAGES.length;   /* 5스테이지 공개 */
   STAGES.forEach((st,i)=>{ if(i>=nOpen)return; const b=document.createElement('button'); b.className='stg'; b.setAttribute('aria-pressed',i===selStage); b.disabled=i>stageClear; b.textContent=(i>stageClear?'🔒 ':'')+st.id; if(st.raid){ b.classList.add('dg'); b.insertAdjacentHTML('beforeend',dragonBadge()); } b.onclick=()=>{ selStage=i; lsSet('dkdef2.stage',String(i)); renderStagePanel(); }; sb.appendChild(b); });
