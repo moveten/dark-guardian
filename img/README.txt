@@ -77,3 +77,5 @@
 [스테이지 5 각성 영웅 아이템 아이콘 — 적용 완료] item_aw_wpn / helm / armor / amu / ring · item_awoff_war / pal / sorc / necro / druid .png (192×192, 투명 배경). 이름 연결은 index.html 의 UNQIMG
 
 [마을 배경 — 적용 완료] town_bg.webp (848×1264, 빈터 4곳 2×2). 건물 자리 좌표는 index.html 의 renderTown (--x/--y 퍼센트)
+
+[전사 새 그림 — 적용 완료 (카툰풍)] hero_war.png(타이틀·카드용 한 장) · hero_war_idle.png(대기 3칸 왕복) · hero_war_walk.png(걷기 6칸) · hero_war_atk2.png(공격 5칸, 파일 이름 꼬리 _atk2). index.html 의 HIDLE(대기 시트) · HATK.war · RGW(폭주 눈 위치) 참고.
