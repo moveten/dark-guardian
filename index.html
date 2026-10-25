@@ -757,14 +757,26 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 #sEnd .efx{position:absolute;inset:0;z-index:-1;pointer-events:none;mix-blend-mode:screen;overflow:hidden}
 /* 스테이지 지도 */
 .pp{position:relative}
-.pp #stageBig{cursor:pointer;order:-1}
-.pp #stageBig::after{content:"👆 눌러서 지도 열기";display:block;font:500 11px var(--f-body);letter-spacing:0;color:var(--mute);text-shadow:none;margin-top:2px}
-.pp #stageBig.pick{animation:stPick .9s ease-out}
-@keyframes stPick{0%{transform:scale(1);text-shadow:0 0 0 rgba(255,211,106,0)}30%{transform:scale(1.1);text-shadow:0 0 22px rgba(255,211,106,.95)}100%{transform:scale(1);text-shadow:0 2px 12px rgba(214,170,78,.35)}}
-.pp .mapb{display:flex;align-items:center;justify-content:center;gap:10px}
-.pp .mapb .mbSel{padding:3px 11px;border-radius:999px;background:rgba(214,170,78,.2);border:1px solid rgba(214,170,78,.55);color:#fff3c4;font-size:14px;font-weight:700}
-.pp .mapb.new::after{content:"NEW";margin-left:6px;padding:1px 5px;border-radius:8px;background:var(--blood);color:#fff;font-size:10px}
-.pp .mapb{order:0;align-self:stretch;margin:0;min-height:48px;border-radius:12px;font-size:15px;font-weight:700;border:1px solid var(--gold);background:rgba(15,11,9,.72);color:#ffd36a}
+.scard{position:relative;width:100%;box-sizing:border-box;border:1px solid var(--gold);border-radius:14px;background:rgba(15,11,9,.72);display:flex;flex-direction:column;align-items:stretch;gap:6px;padding:10px 12px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.scard:active{background:rgba(40,30,20,.85)}
+.scard.pick{animation:scPick .9s ease-out}
+@keyframes scPick{0%{box-shadow:0 0 0 rgba(255,211,106,0)}30%{box-shadow:0 0 22px rgba(255,211,106,.9)}100%{box-shadow:0 0 0 rgba(255,211,106,0)}}
+.scard .mapb{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:15px;font-weight:700;color:#ffd36a}
+.scard .mapb .mbSel{padding:3px 11px;border-radius:999px;background:rgba(214,170,78,.2);border:1px solid rgba(214,170,78,.55);color:#fff3c4;font-size:14px;font-weight:700}
+.scard .mapb .mbGo{font-style:normal;font-size:20px;line-height:1;color:var(--mute)}
+.scard .mapb.new::after{content:"NEW";position:absolute;top:-8px;right:12px;padding:1px 6px;border-radius:8px;background:var(--blood);color:#fff;font-size:10px}
+.scard #stageInfo{border:0;background:none;padding:6px 0 0;border-top:1px dashed var(--line2);width:100%;cursor:inherit}
+.scard #stageInfo .sd{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.scard .stbig{display:none}
+.pp[data-card="A"] .scard .mapb .mbSel{display:inline-block}
+.pp[data-card="B"] .scard .mapb .mbSel{display:none}
+.pp[data-card="B"] .scard .mapb{justify-content:space-between;font-size:13px}
+.pp[data-card="B"] .scard .stbig{display:block}
+.pp[data-card="B"] .scard .stbig small{display:none}
+.uiPick{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;width:100%;margin-top:2px}
+.uiPick small{font-size:11px;color:var(--mute);width:100%;text-align:center}
+.uiPick button{font:700 12px var(--f-body);color:#e7dcff;background:#0a0610b8;border:1.5px solid #8a78c8aa;border-radius:999px;padding:6px 12px}
+.uiPick button.on{background:#5a3aa8;border-color:#ffe2a0;color:#fff}
 .mpin{position:absolute;z-index:4;transform:translate(-50%,-100%);padding:3px 10px;border-radius:999px;background:linear-gradient(#ffd36a,#e0a63a);color:#2a1a08;font:800 12px var(--f-body);white-space:nowrap;pointer-events:none;box-shadow:0 2px 8px #000a}
 .mpin::after{content:"";position:absolute;left:50%;bottom:-5px;transform:translateX(-50%);border:6px solid transparent;border-top-color:#e0a63a;border-bottom:0}
 .mn.chosen{box-shadow:0 0 0 4px #ffd36a66,0 0 18px #ffd36a99}
@@ -856,17 +868,20 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.0.0278</div>
+    <div class="ver" id="verT">v0.6.0.0279</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
     <div class="clist car" id="charList"></div>
     <button id="bNew" hidden></button>
     <div class="pp" id="playPanel" hidden>
-      <button class="mapb" id="mapBtn" type="button">🗺️ 스테이지</button>
-      <div class="stbig" id="stageBig"></div>
-      <div id="stageInfo" role="button" tabindex="0" title="누르면 설명이 펼쳐져요"></div>
+      <div class="scard" id="stageCard" role="button" tabindex="0" aria-label="스테이지 고르기">
+        <div class="mapb" id="mapBtn"><span>🗺️ 스테이지</span></div>
+        <div class="stbig" id="stageBig"></div>
+        <div id="stageInfo"></div>
+      </div>
       <div class="modes"><button class="btn primary" id="bSolo">▶ 시작하기</button><button class="btn" id="bStory" aria-label="스토리 다시 보기" hidden>📖 스토리<br>다시 보기</button></div>
+      <div class="uiPick" id="uiPick" aria-label="스테이지 카드 안 체험"><small>스테이지 카드 체험 (임시)</small><button type="button" data-v="A">안 A 한 줄 카드</button><button type="button" data-v="B">안 B 큰 제목 카드</button></div>
     </div>
     <div hidden><button id="bHost" disabled></button><button id="bJoin" disabled></button><p class="note" id="netNote">온라인 연결 확인 중…</p></div>
     <nav class="ttabs" id="titleTabs" aria-label="메뉴">
@@ -4639,7 +4654,12 @@ function buildCarousel(chars){
 }
 function carCenter2(box,el){ box.scrollTo({left:el.offsetLeft+el.offsetWidth/2-box.clientWidth/2,behavior:'smooth'}); }
 /* ===== 스테이지 지도: 길을 따라 스테이지를 보고 고르는 화면 (연출은 아래 Phaser 스크립트가 위에 얹어줘요 — 없어도 지도는 그대로 동작) ===== */
-$('#stageBig').onclick=()=>{ sfx('ui'); openMap(); };
+let cardUi=lsGet('dkdef2.cardUi')==='B'?'B':'A';   /* 스테이지 카드 체험용(임시): A 한 줄 카드 · B 큰 제목 카드 */
+function applyCardUi(){ const pp=$('#playPanel'); if(pp)pp.dataset.card=cardUi; document.querySelectorAll('#uiPick button').forEach(b=>b.classList.toggle('on',b.dataset.v===cardUi)); }
+document.querySelectorAll('#uiPick button').forEach(b=>b.onclick=()=>{ cardUi=b.dataset.v; lsSet('dkdef2.cardUi',cardUi); applyCardUi(); sfx('ui'); });
+applyCardUi();
+$('#stageCard').onclick=()=>{ sfx('ui'); openMap(); };
+$('#stageCard').onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); sfx('ui'); openMap(); } };
 function openMap(){
   const ov=$('#mapOv'); if(!ov||!selId)return;
   const cur=charIds().map(loadChar).filter(Boolean).find(c=>c.id===selId), clr=cur?Math.min(STAGES.length,cur.clear|0):0;
@@ -4672,7 +4692,7 @@ function openMap(){
   const mark=()=>{ ov.querySelectorAll('.mpin').forEach(e=>e.remove()); ov.querySelectorAll('.mn.chosen').forEach(e=>e.classList.remove('chosen')); const nb=ov.querySelector(`.mn[data-i="${selStage}"]`); if(!nb)return; nb.classList.add('chosen');
     nb.parentNode.insertAdjacentHTML('beforeend',`<div class="mpin" style="left:${nb.style.left};top:calc(${nb.style.top} - 36px)">📍 선택</div>`); };
   const go=()=>{ if(pick>clr||going)return; going=true; selStage=pick; lsSet('dkdef2.stage',String(pick)); renderStagePanel(); mark(); show(); sfx('pick');
-    setTimeout(()=>{ close(); const sb=$('#stageBig'); if(sb){ sb.classList.remove('pick'); void sb.offsetWidth; sb.classList.add('pick'); } try{ toast(`✔ ${STAGES[pick].id} · ${STAGES[pick].n} 선택`); }catch(e){} },420); };
+    setTimeout(()=>{ close(); const sb=$('#stageCard'); if(sb){ sb.classList.remove('pick'); void sb.offsetWidth; sb.classList.add('pick'); } try{ toast(`✔ ${STAGES[pick].id} · ${STAGES[pick].n} 선택`); }catch(e){} },420); };
   mark();
   ov.querySelectorAll('.mn[data-i]').forEach(b=>b.onclick=()=>{ pick=+b.dataset.i; sfx('ui'); if(pick<=clr){ go(); return; } show(); });   /* 갈 수 있는 곳을 누르면 바로 선택하고(📍 표시) 잠깐 뒤 닫혀요 */
   $('#mapX').onclick=close; show();
@@ -4685,7 +4705,7 @@ function renderStagePanel(){
   { const cur=chars.find(c=>c.id===selId); stageClear=cur?Math.min(STAGES.length,cur.clear|0):0; }
   if(selStage>stageClear) selStage=stageClear; try{fieldGet(selStage);}catch(e){}
   { const mb=$('#mapBtn'); if(mb)mb.classList.toggle('new',stageClear>(+lsGet('dkdef2.mapSeen')||0)&&stageClear<STAGES.length); }   /* 5스테이지: 비밀번호를 맞힌 기기는 4스테이지를 안 깼어도 테스트 입장 가능 */
-  const S=STAGES[selStage]; $('#stageBig').innerHTML=`<small>✔ 선택한 스테이지</small>${esc(S.id)} · ${esc(S.n)}`; { const mb=$('#mapBtn'); if(mb)mb.innerHTML=`<span>🗺️ 스테이지</span><b class="mbSel">✔ ${esc(S.id)} · ${esc(S.n)}</b>`; }
+  const S=STAGES[selStage]; $('#stageBig').innerHTML=`<small>STAGE</small>${esc(S.id)} · ${esc(S.n)}`; { const mb=$('#mapBtn'); if(mb)mb.innerHTML=`<span>🗺️ 스테이지</span><b class="mbSel">✔ ${esc(S.id)} · ${esc(S.n)}</b><i class="mbGo">›</i>`; }
   { const cur=chars.find(c=>c.id===selId), low=cur&&cur.lvl<S.rl, gp0=cur&&cur.eq?gearPenOf(cur.eq,S.icap):null, gw=!!gp0&&gp0.wm<.97; $('#stageInfo').innerHTML=`<span style="color:${gw?'#e07060':'#9fd18b'};font-weight:700">장비 Lv 합 ${Math.max(1,S.icap-12)*EQSL.length}↑${gp0?` (내 합 ${gp0.sum}${gw?' · 부족':''})`:''}</span><span class="sd">${esc(S.d)}</span>`; }
   { const cur=chars.find(c=>c.id===selId), nw=!!cur&&(cur.inv||[]).some(x=>x&&x.isNew), pt=cur?(cur.statPts|0)+(cur.skillPts|0):0;
     $('#tGearB').hidden=!nw; $('#menuB').hidden=!mailUnreadAll(chars); const pb=$('#tGearP'); pb.hidden=!pt; pb.textContent=pt; for(const id of ['tGear','tStore'])$('#'+id).disabled=!cur; }
@@ -4861,7 +4881,6 @@ function townPick(k){ townTick(k); const B=getTown()[k], D=TOWN_B[k], n=B.n|0; i
 $('#tGear').onclick=()=>{ if(selId)openTitleSheet('bag'); };
 $('#tStore').onclick=()=>{ if(selId)openTitleSheet('store'); };
 $('#tTown').onclick=()=>openTown();
-$('#stageInfo').onclick=()=>$('#stageInfo').classList.toggle('open');
 $('#bSolo').onclick=()=>{ G.mode='solo';  prepMe(); ally=null; resetWorld(); startStage(); };
 $('#bHost').onclick=async()=>{
   if(!room)return; G.mode='host';  prepMe();
