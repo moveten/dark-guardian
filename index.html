@@ -972,7 +972,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.0.0302</div>
+    <div class="ver" id="verT">v0.6.0.0303</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -4115,6 +4115,13 @@ addEventListener('keydown',e=>{
   if(vis(nw)){ if(esc_&&clk($('#bNewBack')))return done(); return; }
   if(vis(ti)){ if(esc_){ if(clk($('#bSet')))return done(); } else if(vis($('#playPanel'))&&clk($('#bSolo')))return done(); return; }
 },true);
+/* 화면 맨 위/아래에서 더 끌어당겨도 고무줄처럼 늘어나 빈 공간이 보이지 않게 막음 (iOS) — 가로 스와이프와 안쪽 스크롤은 그대로 */
+(()=>{ let x0=0,y0=0,sc=null;
+  const scroller=el=>{ for(;el&&el!==document.body&&el.nodeType===1;el=el.parentElement){ const o=getComputedStyle(el).overflowY; if((o==='auto'||o==='scroll')&&el.scrollHeight>el.clientHeight+1)return el; } return null; };
+  addEventListener('touchstart',e=>{ const t=e.touches[0]; x0=t.clientX; y0=t.clientY; sc=scroller(e.target); },{passive:true,capture:true});
+  addEventListener('touchmove',e=>{ if(!sc||e.touches.length>1||!e.cancelable)return; const t=e.touches[0], dy=t.clientY-y0, dx=t.clientX-x0; if(Math.abs(dy)<Math.abs(dx))return;
+    if((dy>0&&sc.scrollTop<=0)||(dy<0&&sc.scrollTop+sc.clientHeight>=sc.scrollHeight-1))e.preventDefault(); },{passive:false,capture:true});
+})();
 /* 📖 모험 안내 창: 진행 상황 · 보상 · 시작/다시 하기 (타이틀의 캐릭터 메뉴와 게임 중 메뉴에서 열림) */
 function tutModal(id,note){
   const live=!!(G.inGame&&me&&me.id===id), P=live?me:loadChar(id); if(!P)return; const t=P.tut, nd=t.rw.filter(Boolean).length, sv=()=>{ if(live)saveChar(); else mailSave(P); };
