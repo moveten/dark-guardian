@@ -901,7 +901,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.0.0288</div>
+    <div class="ver" id="verT">v0.6.0.0289</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -4722,16 +4722,17 @@ function openMap(){
     $('#mapC').onclick=close; $('#mapGo').onclick=go; };
   let going=false;
   const mark=()=>{ ov.querySelectorAll('.mpin').forEach(e=>e.remove()); ov.querySelectorAll('.mn.chosen').forEach(e=>e.classList.remove('chosen')); const nb=ov.querySelector(`.mn[data-i="${selStage}"]`); if(!nb)return; nb.classList.add('chosen');
-    ov.querySelectorAll('.ml').forEach(l=>l.style.removeProperty('--lx')); { const lb=nb.nextElementSibling; if(lb&&lb.classList.contains('ml'))lb.style.setProperty('--lx',(P[+nb.dataset.i][0]<Wd/2?'56px':'-56px')); }   /* 내 캐릭터가 서 있을 자리만큼 이름표를 바깥으로 밀어요 */
-    nb.parentNode.insertAdjacentHTML('beforeend',`<div class="mpin" style="left:${nb.style.left};top:calc(${nb.style.top} - 36px)">📍 선택</div>`);
-    /* 선택한 스테이지 바로 옆(이름표 쪽, 보스 반대편)에 내 캐릭터가 서 있어요. 다른 곳을 고르면 그쪽으로 걸어가요 */
-    if(cur){ const i=+nb.dataset.i, hx=P[i][0]+(P[i][0]<Wd/2?64:-64), hy=P[i][1]+24; let h=ov.querySelector('.mhero');
-      if(!h){ nb.parentNode.insertAdjacentHTML('beforeend',`<div class="mhero" style="left:${hx.toFixed(1)}px;top:${hy.toFixed(1)}px"><span class="cem">${clsIc(cur.cls,34)}</span><img src="img/hero_${cur.cls}.png" alt="" onload="this.previousElementSibling.style.display='none'" onerror="this.remove()"></div>`); }
-      else{ h.style.left=hx.toFixed(1)+'px'; h.style.top=hy.toFixed(1)+'px'; } } };
-  const go=()=>{ if(pick>clr||going)return; going=true; selStage=pick; lsSet('dkdef2.stage',String(pick)); renderStagePanel(); mark(); show(); sfx('pick');
+    nb.parentNode.insertAdjacentHTML('beforeend',`<div class="mpin" style="left:${nb.style.left};top:calc(${nb.style.top} - 36px)">📍 선택</div>`); };   /* 📍는 '이 스테이지로 선택'을 눌러 정한 곳 */
+  /* 내 캐릭터는 누른 스테이지 바로 옆(이름표 쪽, 보스 반대편)으로 걸어가요. 이름표는 캐릭터가 설 자리만큼 바깥으로 비켜요 */
+  const place=i=>{ if(!cur)return; const nb=ov.querySelector(`.mn[data-i="${i}"]`); if(!nb)return;
+    ov.querySelectorAll('.ml').forEach(l=>l.style.removeProperty('--lx')); { const lb=nb.nextElementSibling; if(lb&&lb.classList.contains('ml'))lb.style.setProperty('--lx',(P[i][0]<Wd/2?'56px':'-56px')); }
+    const hx=P[i][0]+(P[i][0]<Wd/2?64:-64), hy=P[i][1]+24; let h=ov.querySelector('.mhero');
+    if(!h){ nb.parentNode.insertAdjacentHTML('beforeend',`<div class="mhero" style="left:${hx.toFixed(1)}px;top:${hy.toFixed(1)}px"><span class="cem">${clsIc(cur.cls,34)}</span><img src="img/hero_${cur.cls}.png" alt="" onload="this.previousElementSibling.style.display='none'" onerror="this.remove()"></div>`); }
+    else{ h.style.left=hx.toFixed(1)+'px'; h.style.top=hy.toFixed(1)+'px'; } };
+  const go=()=>{ if(pick>clr||going)return; going=true; selStage=pick; lsSet('dkdef2.stage',String(pick)); renderStagePanel(); mark(); place(pick); show(); sfx('pick');
     setTimeout(()=>{ close(); const sb=$('#stageCard'); if(sb){ sb.classList.remove('pick'); void sb.offsetWidth; sb.classList.add('pick'); } try{ toast(`✔ ${STAGES[pick].id} · ${STAGES[pick].n} 선택`); }catch(e){} },420); };
-  mark();
-  ov.querySelectorAll('.mn[data-i]').forEach(b=>b.onclick=()=>{ pick=+b.dataset.i; sfx('ui'); if(pick<=clr){ go(); return; } show(); });   /* 갈 수 있는 곳을 누르면 바로 선택하고(📍 표시) 잠깐 뒤 닫혀요 */
+  mark(); place(pick);
+  ov.querySelectorAll('.mn[data-i]').forEach(b=>b.onclick=()=>{ pick=+b.dataset.i; sfx('ui'); if(pick<=clr)place(pick); show(); });   /* 스테이지를 누르면 캐릭터가 그곳으로 이동하고 아래 카드만 바뀌어요 — '이 스테이지로 선택'을 눌러야 정해져요 */
   $('#mapX').onclick=close; show();
   const sc=$('#mapSc'); sc.scrollTop=Math.max(0,py(Math.min(pick,N-1))-sc.clientHeight*.45);
 }
