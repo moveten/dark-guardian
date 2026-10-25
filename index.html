@@ -762,6 +762,9 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 #sSplash .spVer{position:absolute;left:14px;bottom:max(10px,env(safe-area-inset-bottom));font-size:11px;color:#bfaed0aa;letter-spacing:.08em;pointer-events:none}
 @media (prefers-reduced-motion:reduce){#sSplash .spTap{animation:none}}
 #sSplash.go .spTap{opacity:0;animation:none;transition:opacity .2s}
+/* 마을 연출(Phaser) 레이어: 건물 버튼 뒤, 화면 합성(screen)이라 검은 부분은 투명하게 보임 */
+.tmap .tfx{position:absolute;inset:0;z-index:0;pointer-events:none;mix-blend-mode:screen;overflow:hidden}
+.tmap .tfx canvas{display:block}
 </style>
 
 <nav id="dock" hidden>
@@ -826,7 +829,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.0.0270</div>
+    <div class="ver" id="verT">v0.6.0.0271</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -4770,7 +4773,7 @@ function renderTown(){ const S=getStore(), now=Date.now(); let ch=false; for(con
   $('#itemPop').hidden=true; $('#ptsBar').hidden=true; $('#sheetTabs').hidden=true; $('#sheetT').innerHTML='🏘️ 마을';
   const b=$('#sheetB'); b.className='sbody town';
   b.innerHTML=`<div class="tcur"><span>공유보관함 조각</span><span>🌑 ${shardCount(S,'shard')}</span><span>✦ ${shardCount(S,'ashard')}</span></div>${townMsg?`<div class="tqnote">${esc(townMsg)}</div>`:''}<div class="tmap">${TOWN_FAM.map((f,i)=>{ const y=i?[69,68]:[26,25.5], ty=i?55:13; return `${townSlot(f.main,`--x:${i?29:30}%;--y:${y[0]}%`)}${townSlot(f.aux,`--x:71%;--y:${y[1]}%`)}`; }).join('')}</div><p class="meta" style="margin:0;font-size:12px;line-height:1.5">건물을 누르면 자세히 볼 수 있어요. 건설과 업그레이드에는 <b>공유보관함</b>에 있는 조각만 쓸 수 있어요. 말풍선을 누르면 만든 것을 캐릭터 우편으로 받아요.</p>`;
-  townMsg='';
+  townMsg=''; try{ window.__townFx&&window.__townFx.mount(b.querySelector('.tmap')); }catch(e){}
   b.querySelectorAll('[data-tbub]').forEach(e=>e.onclick=()=>{ const k=e.dataset.tbub; if(TOWN_B[k].stat)townInfo(k); else townPick(k); });
   b.querySelectorAll('[data-tbld]').forEach(e=>e.onclick=()=>townInfo(e.dataset.tbld));
   clearInterval(townTimer); townTimer=setInterval(townLive,1000); }
@@ -5803,6 +5806,7 @@ requestAnimationFrame(step);
 const sp=document.getElementById('sSplash'); if(!sp)return;
 try{ const v=document.getElementById('verT'), t=document.getElementById('spVer'); if(v&&t)t.textContent=v.textContent; }catch(e){}
 const PH_URL='https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js';
+let phQ=null; window.__loadPhaser=loadPhaser;   /* 마을 연출도 같은 로더를 써요 */
 let game=null, scene=null, leaving=false;
 function kill(){ try{ if(game)game.destroy(true); }catch(e){} game=null; scene=null; }
 function finish(){ kill(); sp.hidden=true; }
@@ -5821,7 +5825,8 @@ try{ sp.focus({preventScroll:true}); }catch(e){}
 
 function loadPhaser(cb){
   if(window.Phaser){ cb(true); return; }
-  let done=false, tm=0; const fin=ok=>{ if(done)return; done=true; clearTimeout(tm); cb(ok); };
+  if(phQ){ phQ.push(cb); return; }
+  phQ=[cb]; let done=false, tm=0; const fin=ok=>{ if(done)return; done=true; clearTimeout(tm); const q=phQ; phQ=null; q.forEach(f=>{ try{ f(ok); }catch(e){} }); };
   const s=document.createElement('script'); s.src=PH_URL; s.async=true; s.onload=()=>fin(!!window.Phaser); s.onerror=()=>fin(false);
   tm=setTimeout(()=>fin(false),8000); document.head.appendChild(s);
 }
@@ -5921,6 +5926,78 @@ function start(){
   }catch(err){ bail(); }
 }
 loadPhaser(ok=>{ if(ok)start(); });
+})();
+</script>
+
+<script>
+/* ===== 마을 연출: 건물 뒤 배경 위에 Phaser로 횃불·안개·반딧불을 깔아요 — 못 불러오면 그냥 배경 그림만 보여요 ===== */
+(function(){
+'use strict';
+const TAU=6.2832, DW=848, DH=1264;
+let host=null, game=null, starting=false, watch=0, gone=0, ro=null;
+const mulberry=a=>()=>{ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return((t^t>>>14)>>>0)/4294967296; };
+const mk=(w,h,fn)=>{ const c=document.createElement('canvas'); c.width=w; c.height=h; fn(c.getContext('2d'),w,h); return c; };
+const bakeGlow=()=>mk(128,128,g=>{ const r=g.createRadialGradient(64,64,0,64,64,64); r.addColorStop(0,'rgba(255,255,255,1)'); r.addColorStop(.35,'rgba(255,255,255,.55)'); r.addColorStop(1,'rgba(255,255,255,0)'); g.fillStyle=r; g.fillRect(0,0,128,128); });
+const bakeStar=()=>mk(64,64,g=>{ g.translate(32,32); for(const [sx,sy] of [[1,.1],[.1,1]]){ g.save(); g.scale(sx,sy); const r=g.createRadialGradient(0,0,0,0,0,30); r.addColorStop(0,'rgba(255,255,255,1)'); r.addColorStop(1,'rgba(255,255,255,0)'); g.fillStyle=r; g.beginPath(); g.arc(0,0,30,0,TAU); g.fill(); g.restore(); }
+  const c=g.createRadialGradient(0,0,0,0,0,9); c.addColorStop(0,'rgba(255,255,255,1)'); c.addColorStop(1,'rgba(255,255,255,0)'); g.fillStyle=c; g.beginPath(); g.arc(0,0,9,0,TAU); g.fill(); });
+const bakeTrail=()=>mk(128,8,g=>{ const r=g.createLinearGradient(0,0,128,0); r.addColorStop(0,'rgba(255,255,255,0)'); r.addColorStop(1,'rgba(255,255,255,1)'); g.fillStyle=r; g.beginPath(); g.ellipse(64,4,64,2.2,0,0,TAU); g.fill(); });
+const bakeFog=(seed,rgb)=>{ const R=mulberry(seed); return mk(DW,260,g=>{ for(let i=0;i<8;i++){ const cx=R()*DW, cy=90+R()*80, rx=150+R()*150, ry=44+R()*40, a=.3+R()*.25;
+  for(const o of [-DW,0,DW]){ g.save(); g.translate(cx+o,cy); g.scale(rx/ry,1); const r=g.createRadialGradient(0,0,0,0,0,ry); r.addColorStop(0,`rgba(${rgb},${a})`); r.addColorStop(1,`rgba(${rgb},0)`); g.fillStyle=r; g.beginPath(); g.arc(0,0,ry,0,TAU); g.fill(); g.restore(); } } }); };
+
+function destroy(){ clearInterval(watch); watch=0; try{ if(ro)ro.disconnect(); }catch(e){} ro=null; try{ if(game)game.destroy(true); }catch(e){} game=null; try{ if(host&&host.parentNode)host.parentNode.removeChild(host); }catch(e){} host=null; starting=false; gone=0; }
+function check(){ const s=document.getElementById('sheet'); if(!host||!s||s.hidden){ destroy(); return; } if(!host.isConnected){ if(++gone>=2)destroy(); } else gone=0; }
+function mount(tmap){
+  if(!tmap||!window.__loadPhaser)return;
+  try{ if(matchMedia('(prefers-reduced-motion: reduce)').matches)return; }catch(e){}
+  if(!host){ host=document.createElement('div'); host.className='tfx'; host.setAttribute('aria-hidden','true'); }
+  tmap.insertBefore(host,tmap.firstChild); gone=0;     /* 마을이 다시 그려져도 같은 연출 레이어를 새 지도에 옮겨 붙여요 */
+  if(!watch)watch=setInterval(check,1500);
+  if(game){ try{ game.scale.refresh(); }catch(e){} return; }
+  if(starting)return; starting=true;
+  window.__loadPhaser(ok=>{ starting=false; if(ok&&host&&host.isConnected&&!game)start(); });
+}
+window.__townFx={mount,destroy};
+
+function start(){
+  const P=window.Phaser; if(!P||!host)return;
+  class Town extends P.Scene{
+    constructor(){ super('town'); }
+    create(){
+      const sc=this, R=mulberry(2024);
+      const tex=(k,c)=>{ if(sc.textures.exists(k))sc.textures.remove(k); sc.textures.addCanvas(k,c); };
+      tex('glow',bakeGlow()); tex('star',bakeStar()); tex('trail',bakeTrail()); tex('fogT',bakeFog(4,'175,215,240')); tex('fogP',bakeFog(9,'170,110,255'));
+      const root=sc.add.container(0,0), A=o=>{ root.add(o); return o; }, img=(x,y,k)=>A(sc.add.image(x,y,k));
+      sc.moon=img(430,10,'glow').setTint(0xc8c0ff).setScale(9,6).setAlpha(.22);
+      sc.fogs=[]; const fog=(key,y,v,al)=>{ const a=A(sc.add.image(0,y,key).setOrigin(0,.5).setAlpha(al)), b=A(sc.add.image(0,y,key).setOrigin(0,.5).setAlpha(al)); sc.fogs.push({a,b,v,off:R()*DW}); };
+      fog('fogP',330,6,.34); fog('fogT',470,9,.24); fog('fogT',760,-12,.22); fog('fogT',1130,14,.28);
+      sc.lan=[[148,144],[714,180],[112,546],[752,596],[776,956],[116,1042]].map(([x,y],i)=>({g:img(x,y,'glow').setTint(0xff9a28).setScale(1.5),c:img(x,y,'glow').setTint(0xffe2a0).setScale(.4),p:i*1.9}));
+      sc.wisps=[]; for(let i=0;i<16;i++){ const w={img:img(0,0,'glow').setTint(0xb67cff),life:3+R()*2.4,age:R()*4,vy:30+R()*40,sx:0,sy:0,dx:(R()-.5)*20,p:R()*6.28,sc:.25+R()*.3}; sc.wisps.push(w); w.reset=()=>{ const c=R()<.5?254:602; w.sx=c+(R()-.5)*230; w.sy=329+(R()-.2)*70; w.age=0; }; w.reset(); w.age=R()*w.life; }
+      sc.tw=[[372,260],[152,396],[706,408],[300,740],[660,760],[250,880],[600,900]].map(([x,y],i)=>({img:img(x,y,'star').setTint(i<3?0xe0c8ff:0xd8e8ff),p:i*1.3,f:1.2+R()*1.4}));
+      sc.fl=[]; for(let i=0;i<16;i++){ sc.fl.push({img:img(0,0,'glow').setTint(0xd8ff7a).setScale(.1+R()*.08),bx:40+R()*770,by:120+R()*1080,ax:20+R()*50,ay:14+R()*34,f1:.25+R()*.4,f2:.3+R()*.4,p:R()*6.28,q:R()*6.28,tw:1.6+R()*2.4}); }
+      sc.ss={img:A(sc.add.image(0,0,'trail').setOrigin(1,.5).setAlpha(0).setTint(0xeef2ff)),next:5+R()*5,age:-1,x:0,y:0,vx:0,vy:0};
+      const layout=()=>{ const W=sc.scale.width, H=sc.scale.height; if(!W||!H)return; root.setScale(W/DW,H/DH); };
+      layout(); sc.scale.on('resize',layout); sc.t=0; sc.RR=R;
+    }
+    update(time,dt){
+      try{
+        const d=Math.min(dt,50)/1000; this.t+=d; const t=this.t, R=this.RR;
+        this.moon.setAlpha(.2+.07*Math.sin(t*.6));
+        for(const f of this.fogs){ f.off=((f.off+f.v*d)%DW+DW)%DW; f.a.x=f.off; f.b.x=f.off-DW; }
+        for(const l of this.lan){ const k=.78+.14*Math.sin(t*7+l.p)+.08*Math.sin(t*19+l.p*2.3); l.g.setAlpha(.5*k); l.c.setAlpha(.8*k); }
+        for(const w of this.wisps){ w.age+=d; if(w.age>w.life)w.reset(); const u=w.age/w.life; w.img.setPosition(w.sx+Math.sin(t*.9+w.p)*14+w.dx*w.age,w.sy-w.vy*w.age); w.img.setAlpha(.55*Math.sin(u*Math.PI)); w.img.setScale(w.sc*(.7+.6*u)); }
+        for(const s of this.tw){ const k=Math.max(0,Math.sin(t*s.f+s.p)); s.img.setAlpha(k*.95).setScale(.35+.55*k).setRotation(t*.3+s.p); }
+        for(const f of this.fl){ f.img.setPosition(f.bx+Math.sin(t*f.f1+f.p)*f.ax,f.by+Math.cos(t*f.f2+f.q)*f.ay); f.img.setAlpha(Math.max(0,.2+.8*Math.sin(t*f.tw+f.p))); }
+        const s=this.ss; if(s.age<0){ s.next-=d; if(s.next<=0){ s.age=0; const dir=R()<.5?1:-1; s.x=dir>0?60+R()*300:DW-60-R()*300; s.y=30+R()*160; s.vx=dir*(650+R()*250); s.vy=260+R()*160; s.img.setRotation(Math.atan2(s.vy,s.vx)); } }
+        else{ s.age+=d; s.x+=s.vx*d; s.y+=s.vy*d; s.img.setPosition(s.x,s.y); s.img.setAlpha(Math.max(0,.9*(1-s.age/.9))); if(s.age>.9){ s.age=-1; s.next=9+R()*9; s.img.setAlpha(0); } }
+      }catch(err){ destroy(); }
+    }
+  }
+  try{
+    game=new P.Game({type:P.AUTO,parent:host,width:host.clientWidth||340,height:host.clientHeight||507,transparent:true,banner:false,
+      scale:{mode:P.Scale.RESIZE},scene:[Town],render:{antialias:true},fps:{target:60,smoothStep:true},audio:{noAudio:true},input:{keyboard:false,mouse:false,touch:false,gamepad:false}});
+    if(window.ResizeObserver){ ro=new ResizeObserver(()=>{ try{ if(game)game.scale.refresh(); }catch(e){} }); ro.observe(host); }
+  }catch(err){ destroy(); }
+}
 })();
 </script>
 
