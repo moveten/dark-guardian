@@ -759,11 +759,6 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 #sSplash .spLogo small{display:block;letter-spacing:.5em;padding-left:.5em;font-size:clamp(10px,3.3vw,16px);font-weight:700;color:#d8c8ff;margin-top:8px;text-shadow:0 0 8px #000}
 #sSplash .spTap{position:absolute;left:50%;bottom:calc(max(7vh,env(safe-area-inset-bottom)) + 12px);transform:translateX(-50%);padding:12px 28px;border-radius:999px;border:1.5px solid #ffe2a0aa;background:#0a0610a8;color:#ffefd0;font-weight:800;font-size:clamp(15px,4.6vw,20px);letter-spacing:.04em;white-space:nowrap;pointer-events:none;animation:spPulse 1.9s ease-in-out infinite}
 @keyframes spPulse{0%,100%{opacity:.55;transform:translateX(-50%) scale(1)}50%{opacity:1;transform:translateX(-50%) scale(1.045)}}
-#sSplash .spPick{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(max(7vh,env(safe-area-inset-bottom)) + 76px);display:none;gap:8px;z-index:2}
-#sSplash.ph .spPick{display:flex}
-#sSplash .spPick button{font:700 13px var(--f-body);color:#e7dcff;background:#0a0610b8;border:1.5px solid #8a78c8aa;border-radius:999px;padding:7px 14px;cursor:pointer}
-#sSplash .spPick button.on{background:#5a3aa8;border-color:#ffe2a0;color:#fff}
-#sSplash.go .spPick{display:none}
 #sSplash .spVer{position:absolute;left:14px;bottom:max(10px,env(safe-area-inset-bottom));font-size:11px;color:#bfaed0aa;letter-spacing:.08em;pointer-events:none}
 @media (prefers-reduced-motion:reduce){#sSplash .spTap{animation:none}}
 #sSplash.go .spTap{opacity:0;animation:none;transition:opacity .2s}
@@ -827,12 +822,11 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spFb"><img class="b" src="img/boss_awake3.png" alt=""><img class="c" src="img/splash_castle.png" alt=""></div>
     <div id="phHost"></div>
     <div class="spLogo"><h2>어둠의 수호자</h2><small>DARK GUARDIAN</small></div>
-    <div class="spPick" aria-label="시작 화면 연출 고르기"><button type="button" data-v="1">1안 보스</button><button type="button" data-v="2">2안 수호자</button></div>
     <div class="spTap">화면을 터치해서 시작</div>
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.0.0269</div>
+    <div class="ver" id="verT">v0.6.0.0270</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -5809,8 +5803,7 @@ requestAnimationFrame(step);
 const sp=document.getElementById('sSplash'); if(!sp)return;
 try{ const v=document.getElementById('verT'), t=document.getElementById('spVer'); if(v&&t)t.textContent=v.textContent; }catch(e){}
 const PH_URL='https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js';
-let game=null, scene=null, leaving=false, curV=1;
-try{ curV=localStorage.getItem('dkdef2.splashV')==='2'?2:1; }catch(e){}
+let game=null, scene=null, leaving=false;
 function kill(){ try{ if(game)game.destroy(true); }catch(e){} game=null; scene=null; }
 function finish(){ kill(); sp.hidden=true; }
 function bail(){ try{ sp.classList.remove('ph'); }catch(e){} kill(); }   /* 연출 오류 → 기본 그림으로 */
@@ -5823,9 +5816,6 @@ function leave(){
 }
 sp.addEventListener('pointerdown',leave);
 sp.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); leave(); } });
-const pick=sp.querySelector('.spPick');
-function markPick(){ if(pick)pick.querySelectorAll('button').forEach(b=>b.classList.toggle('on',+b.dataset.v===curV)); }
-if(pick){ pick.addEventListener('pointerdown',e=>e.stopPropagation()); pick.querySelectorAll('button').forEach(b=>b.addEventListener('click',e=>{ e.stopPropagation(); const v=+b.dataset.v; if(v===curV||leaving)return; curV=v; try{ localStorage.setItem('dkdef2.splashV',String(v)); }catch(_){} markPick(); kill(); setTimeout(()=>start(),80); })); markPick(); }
 if(/[?&#]nosplash\b/.test(location.search+location.hash)){ sp.hidden=true; return; }
 try{ sp.focus({preventScroll:true}); }catch(e){}
 
@@ -5838,8 +5828,6 @@ function loadPhaser(cb){
 const mulberry=a=>()=>{ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return((t^t>>>14)>>>0)/4294967296; };
 const mk=(w,h,fn)=>{ const c=document.createElement('canvas'); c.width=w; c.height=h; fn(c.getContext('2d'),w,h); return c; };
 const TAU=6.2832;
-function myClass(){ try{ const id=localStorage.getItem('dkdef2.sel'); if(id){ const c=JSON.parse(localStorage.getItem('dkdef2.c.'+id)||'null'); if(c&&c.cls)return c.cls; } }catch(e){} return 'war'; }
-const HERO={war:'hero_war',pal:'hero_pal',sorc:'hero_sorc',necro:'hero_necro',druid:'hero_druid'};
 
 /* ---------- 그림 굽기 (한 번 그려서 텍스처로) ---------- */
 function stars(g,R,n,maxY,col){ g.fillStyle=col; for(let i=0;i<n;i++){ g.globalAlpha=.35+R()*.6; g.beginPath(); g.arc(R()*780,R()*maxY,R()<.2?1.6:.9,0,TAU); g.fill(); } g.globalAlpha=1; }
@@ -5861,11 +5849,6 @@ function bakeBg1(){ const R=mulberry(7); return mk(780,1560,g=>{
   const sky=g.createLinearGradient(0,0,0,1560); sky.addColorStop(0,'#150d40'); sky.addColorStop(.4,'#2b1a66'); sky.addColorStop(.72,'#150e38'); sky.addColorStop(1,'#07050f'); g.fillStyle=sky; g.fillRect(0,0,780,1560);
   stars(g,R,130,760,'#dfe4ff'); moon(g,520,520,140,'#ece8ff',['rgba(190,170,255,.55)','rgba(130,100,220,.22)','rgba(90,60,180,0)'],'rgba(170,160,215,.45)');
   hills(g,790,'#1b1440'); ground(g,R,1150,'#34285a','#1d1636','rgba(190,170,255,.28)','#4a3f78'); road(g,R,390,1196,170,660,'#241d3c','#40385f'); }); }
-function bakeBg2(){ const R=mulberry(11); return mk(780,1560,g=>{
-  const sky=g.createLinearGradient(0,0,0,1560); sky.addColorStop(0,'#2a0f2e'); sky.addColorStop(.38,'#6a2040'); sky.addColorStop(.62,'#3a1530'); sky.addColorStop(1,'#10060f'); g.fillStyle=sky; g.fillRect(0,0,780,1560);
-  stars(g,R,90,520,'#ffd6cc'); moon(g,560,480,120,'#ffc0a0',['rgba(255,110,90,.55)','rgba(220,70,70,.2)','rgba(160,30,50,0)'],'rgba(215,130,110,.5)');
-  hills(g,1010,'#3a1226'); ground(g,R,1190,'#4a2030','#26101e','rgba(255,150,110,.3)','#5a3040');
-  g.strokeStyle='rgba(255,120,50,.35)'; g.lineWidth=2.5; for(let i=0;i<9;i++){ let x=R()*780,y=1260+R()*260; g.beginPath(); g.moveTo(x,y); for(let k=0;k<4;k++){ x+=(R()-.5)*70; y+=10+R()*26; g.lineTo(x,y); } g.stroke(); } }); }
 const bakeGlow=()=>mk(128,128,g=>{ const r=g.createRadialGradient(64,64,0,64,64,64); r.addColorStop(0,'rgba(255,255,255,1)'); r.addColorStop(.35,'rgba(255,255,255,.55)'); r.addColorStop(1,'rgba(255,255,255,0)'); g.fillStyle=r; g.fillRect(0,0,128,128); });
 const bakeShadow=()=>mk(128,128,g=>{ const r=g.createRadialGradient(64,64,0,64,64,64); r.addColorStop(0,'rgba(0,0,0,.85)'); r.addColorStop(.6,'rgba(0,0,0,.4)'); r.addColorStop(1,'rgba(0,0,0,0)'); g.fillStyle=r; g.fillRect(0,0,128,128); });
 const bakeFog=(seed,rgb)=>{ const R=mulberry(seed); return mk(780,220,g=>{ for(let i=0;i<9;i++){ const cx=R()*780, cy=70+R()*80, rx=110+R()*130, ry=34+R()*30, a=.22+R()*.2;
@@ -5875,18 +5858,17 @@ const bakeVig=()=>mk(64,128,g=>{ const r=g.createRadialGradient(32,58,16,32,58,8
 function start(){
   if(leaving||sp.hidden)return;
   const P=window.Phaser, host=document.getElementById('phHost'); if(!P||!host)return;
-  const ADD=P.BlendModes.ADD, V=curV, cls=myClass();
+  const ADD=P.BlendModes.ADD;
   class Splash extends P.Scene{
     constructor(){ super('splash'); }
     preload(){
-      if(V===1){ this.load.image('boss','img/boss_awake3.png'); this.load.image('castle','img/splash_castle.png'); }
-      else{ this.load.image('castle','img/splash_castle2.png'); this.load.image('hero','img/'+(HERO[cls]||'hero_war')+'.png'); this.load.image('mz','img/mob_zombie.png'); this.load.image('mi','img/mob_imp.png'); this.load.image('ms','img/mob_skeleton.png'); }
+      this.load.image('boss','img/boss_awake3.png'); this.load.image('castle','img/splash_castle.png');
     }
     create(){
-      const sc=this, R=mulberry(99+V), has=k=>sc.textures.exists(k);
+      const sc=this, R=mulberry(100), has=k=>sc.textures.exists(k);
       const tex=(k,c)=>{ if(sc.textures.exists(k))sc.textures.remove(k); sc.textures.addCanvas(k,c); };
-      tex('bg',V===1?bakeBg1():bakeBg2()); tex('glow',bakeGlow()); tex('shadow',bakeShadow()); tex('vig',bakeVig());
-      const fogRgb=V===1?'150,135,230':'210,100,120'; tex('fog1',bakeFog(3,fogRgb)); tex('fog2',bakeFog(5,fogRgb)); tex('fog3',bakeFog(8,fogRgb));
+      tex('bg',bakeBg1()); tex('glow',bakeGlow()); tex('shadow',bakeShadow()); tex('vig',bakeVig());
+      const fogRgb='150,135,230'; tex('fog1',bakeFog(3,fogRgb)); tex('fog2',bakeFog(5,fogRgb)); tex('fog3',bakeFog(8,fogRgb));
       const root=sc.add.container(0,0); const A=o=>{ root.add(o); return o; };
       const C=(x,y)=>[x-390,y-780];
       A(sc.add.image(0,0,'bg'));
@@ -5894,8 +5876,8 @@ function start(){
       const pulse=(o,a,b,ms)=>sc.tweens.add({targets:o,alpha:{from:a,to:b},duration:ms,yoyo:true,repeat:-1,ease:'Sine.easeInOut'});
       sc.fogs=[]; const fog=(key,y,v,alpha)=>{ const a=A(sc.add.image(0,0,key).setAlpha(alpha)), b=A(sc.add.image(0,0,key).setAlpha(alpha)); a.y=b.y=y-780; sc.fogs.push({a,b,v,off:R()*780}); };
       const shadow=(x,y,sx,sy,al)=>A(sc.add.image(...C(x,y),'shadow').setScale(sx,sy).setAlpha(al));
-      let focus=[390,1043], embCols;
-      if(V===1){
+      const focus=[390,1043];
+      {
         pulse(gl(520,520,0x9a82ff,7,.5),.32,.62,2800);
         gl(390,830,0x7a3cff,9,.32);
         if(has('boss')){
@@ -5911,31 +5893,9 @@ function start(){
         if(has('castle'))A(sc.add.image(...C(390,1238),'castle').setOrigin(.5,1).setScale(.896));
         pulse(gl(390,1195,0x58a8ff,2.2,.8),.5,.95,1700);
         fog('fog2',1150,-16,.5); fog('fog3',1262,24,.55);
-        embCols=[0xffa050,0xffc070,0xb078ff,0xa0c8ff];
-      }else{
-        pulse(gl(560,480,0xff5a4a,7,.5),.35,.62,3000);
-        const cx=575;
-        gl(cx,1000,0xff6a2a,8,.36);
-        fog('fog1',1090,8,.45);
-        const mob=(key,x,feet,sc0,flip,eyeDx,eyeDy)=>{ if(!has(key))return; const m=A(sc.add.image(...C(x,feet),key).setOrigin(.5,1).setScale(sc0).setFlipX(!!flip).setTint(0x4a2438).setAlpha(.92));
-          sc.tweens.add({targets:m,y:m.y-4,duration:1700+R()*900,yoyo:true,repeat:-1,ease:'Sine.easeInOut'});
-          const h=m.height*sc0; const e=[gl(x+eyeDx,feet-h*eyeDy,0xff3a28,.55,.9),gl(x+eyeDx+(flip?-1:1)*20,feet-h*eyeDy,0xff3a28,.55,.9)]; pulse(e,.9,.35,900+R()*900); return m; };
-        shadow(cx,1236,6.6,.9,.75); gl(cx,1240,0xff7a2a,6,.22,1);
-        if(has('castle'))A(sc.add.image(...C(cx,1236),'castle').setOrigin(.5,1).setScale(1.0));
-        for(const [dx,dy,sz] of [[-185,-165,2.4],[205,-120,2.8],[15,-205,2.2]]){ const f=gl(cx+dx,1236+dy,0xff7a30,sz,.8); sc.tweens.add({targets:f,alpha:{from:.45,to:.95},scale:{from:sz*.85,to:sz*1.1},duration:380+R()*500,yoyo:true,repeat:-1,ease:'Sine.easeInOut'}); }
-        mob('mz',70,1262,.85,false,10,.72); mob('mi',690,1290,.8,true,-8,.72);
-        fog('fog2',1200,-14,.5);
-        mob('ms',640,1318,.62,true,-4,.72);
-        gl(300,1010,0xff8a3a,6,.3);
-        if(has('hero')){ const hs=has('hero')?(sc.textures.get('hero').getSourceImage().height):420, k=520/hs;
-          shadow(300,1268,3.2,.55,.8);
-          const hero=A(sc.add.image(...C(300,1272),'hero').setOrigin(.5,1).setScale(k));
-          sc.tweens.add({targets:hero,scaleY:k*1.018,scaleX:k*.992,duration:1500,yoyo:true,repeat:-1,ease:'Sine.easeInOut'});
-          sc.tweens.add({targets:hero,angle:{from:-.5,to:.5},duration:2600,yoyo:true,repeat:-1,ease:'Sine.easeInOut'}); }
-        fog('fog3',1300,22,.5);
-        focus=[300,1000]; embCols=[0xff8a3a,0xffb060,0xff5a3a,0xffd090];
       }
-      sc.embers=[]; for(let i=0;i<(V===1?56:70);i++){ const img=A(sc.add.image(0,0,'glow').setBlendMode(ADD).setTint(embCols[(R()*4)|0]));
+      const embCols=[0xffa050,0xffc070,0xb078ff,0xa0c8ff];
+      sc.embers=[]; for(let i=0;i<56;i++){ const img=A(sc.add.image(0,0,'glow').setBlendMode(ADD).setTint(embCols[(R()*4)|0]));
         const e={img,x:(R()-.5)*820,y:-840+R()*1700,vy:14+R()*34,dx:6+R()*16,f:.6+R()*1.2,p:R()*6.28,tw:1.4+R()*2.2,al:.35+R()*.6}; img.setScale(.14+R()*.34); sc.embers.push(e); }
       sc.vig=sc.add.image(0,0,'vig').setOrigin(0,0).setDepth(10);
       sc.layout=null;
