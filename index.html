@@ -743,6 +743,25 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 @keyframes ultBand{0%{transform:skewY(-6deg) translateX(-110%)}12%{transform:skewY(-6deg) translateX(0)}80%{transform:skewY(-6deg) translateX(0);opacity:1}100%{transform:skewY(-6deg) translateX(8%);opacity:0}}
 @keyframes ultFace{0%{transform:translateX(-130%)}16%{transform:translateX(0) scale(1.04)}24%{transform:scale(1)}78%{transform:translateX(0);opacity:1}100%{transform:translateX(30px);opacity:0}}
 @keyframes ultTx{0%,10%{opacity:0;transform:translate(40px,-50%)}22%{opacity:1;transform:translate(0,-50%)}78%{opacity:1}100%{opacity:0}}
+/* ===== 시작 화면 ("화면을 터치해서 시작") — Phaser 연출 + 불러오지 못하면 기본 그림 ===== */
+#sSplash{position:absolute;inset:0;z-index:25;overflow:hidden;background:#07050f;cursor:pointer;touch-action:none;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;transition:opacity .5s ease}
+#sSplash.out{opacity:0;pointer-events:none}
+#sSplash:focus{outline:none}
+#sSplash .spFb{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 38%,#4a2d8c 0%,#24164f 42%,#0a0716 100%);transition:opacity .6s}
+#sSplash .spFb img{position:absolute;left:50%;transform:translateX(-50%);pointer-events:none}
+#sSplash .spFb .b{bottom:27%;width:150%;max-width:none;opacity:.8;filter:brightness(.6) saturate(.9)}
+#sSplash .spFb .c{bottom:19%;width:62%;max-width:360px}
+#sSplash.ph .spFb{opacity:0}
+#phHost{position:absolute;inset:0}
+#phHost canvas{display:block;width:100%;height:100%}
+#sSplash .spLogo{position:absolute;left:0;right:0;top:calc(max(5vh,env(safe-area-inset-top)) + 10px);text-align:center;pointer-events:none}
+#sSplash .spLogo h2{font-family:var(--f-disp);font-weight:800;font-size:clamp(38px,12.5vw,78px);letter-spacing:.03em;margin:0;color:#ffe29c;text-shadow:0 0 22px #ffb84aaa,0 0 3px #3a1a08,2px 3px 0 #3a1a08,-2px 3px 0 #3a1a08,0 -2px 0 #3a1a08}
+#sSplash .spLogo small{display:block;letter-spacing:.5em;padding-left:.5em;font-size:clamp(10px,3.3vw,16px);font-weight:700;color:#d8c8ff;margin-top:8px;text-shadow:0 0 8px #000}
+#sSplash .spTap{position:absolute;left:50%;bottom:calc(max(7vh,env(safe-area-inset-bottom)) + 12px);transform:translateX(-50%);padding:12px 28px;border-radius:999px;border:1.5px solid #ffe2a0aa;background:#0a0610a8;color:#ffefd0;font-weight:800;font-size:clamp(15px,4.6vw,20px);letter-spacing:.04em;white-space:nowrap;pointer-events:none;animation:spPulse 1.9s ease-in-out infinite}
+@keyframes spPulse{0%,100%{opacity:.55;transform:translateX(-50%) scale(1)}50%{opacity:1;transform:translateX(-50%) scale(1.045)}}
+#sSplash .spVer{position:absolute;left:14px;bottom:max(10px,env(safe-area-inset-bottom));font-size:11px;color:#bfaed0aa;letter-spacing:.08em;pointer-events:none}
+@media (prefers-reduced-motion:reduce){#sSplash .spTap{animation:none}}
+#sSplash.go .spTap{opacity:0;animation:none;transition:opacity .2s}
 </style>
 
 <nav id="dock" hidden>
@@ -799,8 +818,15 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 <symbol id="tw-altar" viewBox="0 0 100 120"><ellipse cx="50" cy="113" rx="38" ry="6" fill="#000" opacity=".5"/><polygon points="14,110 22,92 78,92 86,110" fill="#1d1830" stroke="#3a2f66"/><polygon points="26,92 32,80 68,80 74,92" fill="#241d3a" stroke="#4a3a8a"/><polygon points="50,6 68,44 50,74 32,44" fill="#cdbcff" opacity=".95" stroke="#fff"/><polygon points="50,6 68,44 50,74" fill="#8a6cff" opacity=".8"/><path d="M50 14 L46 44 L53 60" stroke="#14101f" stroke-width="1.4" fill="none"/><path d="M40 100 L44 108 M60 98 L57 106" stroke="#b89cff" stroke-width="1.1"/><circle cx="26" cy="46" r="2" fill="#e6dcff"/><circle cx="76" cy="32" r="1.6" fill="#e6dcff"/></symbol>
 <symbol id="tw-mill" viewBox="0 0 110 120"><ellipse cx="55" cy="113" rx="36" ry="6" fill="#000" opacity=".5"/><polygon points="30,112 36,56 74,56 80,112" fill="#1d1830" stroke="#3a2f66"/><polygon points="32,58 55,38 78,58" fill="#120e1c" stroke="#7a5ae0"/><g transform="translate(55 52)"><g stroke="#8a6cff" stroke-width="1.3" fill="#2a2540"><rect x="-3" y="-46" width="6" height="46"/><rect x="-3" y="0" width="6" height="46"/><rect x="-46" y="-3" width="46" height="6"/><rect x="0" y="-3" width="46" height="6"/><rect x="3" y="-44" width="14" height="22"/><rect x="-17" y="22" width="14" height="22"/><rect x="-44" y="-17" width="22" height="14"/><rect x="22" y="3" width="22" height="14"/></g><circle r="6" fill="#e6dcff"/></g><path d="M47 78 Q55 66 63 78 Q55 73 47 78Z" fill="#e6dcff"/><path d="M40 90 L47 98 L43 108 M66 86 L62 96 L69 104" stroke="#b89cff" stroke-width="1.1" fill="none"/><path d="M47 112 V100 Q55 93 63 100 V112Z" fill="#0a0810" stroke="#5a4aa8"/></symbol>
 </defs></svg>
+  <section id="sSplash" role="button" tabindex="0" aria-label="화면을 터치해서 시작">
+    <div class="spFb"><img class="b" src="img/boss_awake3.png" alt=""><img class="c" src="img/splash_castle.png" alt=""></div>
+    <div id="phHost"></div>
+    <div class="spLogo"><h2>어둠의 수호자</h2><small>DARK GUARDIAN</small></div>
+    <div class="spTap">화면을 터치해서 시작</div>
+    <div class="spVer" id="spVer"></div>
+  </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.0.0267</div>
+    <div class="ver" id="verT">v0.6.0.0268</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -5767,6 +5793,114 @@ function clLoadModal(){
 let clBooted=false; function clBoot(){ if(clBooted)return; clBooted=true; if(clCode())setTimeout(clCheck,1200); }
 fxAtlas(); applyHud(); show('#sTitle'); renderClassCards(); clBoot();
 requestAnimationFrame(step);
+})();
+</script>
+
+<script>
+/* ===== 시작 화면: Phaser(CDN)로 배경 연출 — 불러오지 못하거나 오류가 나도 기본 그림 + 터치 시작은 항상 동작 ===== */
+(function(){
+'use strict';
+const sp=document.getElementById('sSplash'); if(!sp)return;
+try{ const v=document.getElementById('verT'), t=document.getElementById('spVer'); if(v&&t)t.textContent=v.textContent; }catch(e){}
+const PH_URL='https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js';
+let game=null, scene=null, leaving=false;
+function finish(){ try{ if(game)game.destroy(true); }catch(e){} game=null; scene=null; sp.hidden=true; }
+function bail(){ try{ sp.classList.remove('ph'); }catch(e){} try{ if(game)game.destroy(true); }catch(e){} game=null; scene=null; }   /* 연출 오류 → 기본 그림으로 */
+function leave(){
+  if(leaving)return; leaving=true; sp.classList.add('go');
+  let fade=250, end=800;
+  try{ if(scene&&scene.zoomOut){ scene.zoomOut(); fade=420; end=1000; } }catch(e){}
+  setTimeout(()=>sp.classList.add('out'),fade);
+  setTimeout(finish,end);
+}
+sp.addEventListener('pointerdown',leave);
+sp.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); leave(); } });
+if(/[?&#]nosplash\b/.test(location.search+location.hash)){ sp.hidden=true; return; }
+try{ sp.focus({preventScroll:true}); }catch(e){}
+
+function loadPhaser(cb){
+  if(window.Phaser){ cb(true); return; }
+  let done=false, tm=0; const fin=ok=>{ if(done)return; done=true; clearTimeout(tm); cb(ok); };
+  const s=document.createElement('script'); s.src=PH_URL; s.async=true; s.onload=()=>fin(!!window.Phaser); s.onerror=()=>fin(false);
+  tm=setTimeout(()=>fin(false),8000); document.head.appendChild(s);
+}
+const mulberry=a=>()=>{ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return((t^t>>>14)>>>0)/4294967296; };
+const mk=(w,h,fn)=>{ const c=document.createElement('canvas'); c.width=w; c.height=h; fn(c.getContext('2d'),w,h); return c; };
+
+function bakeBg(){ const R=mulberry(7); return mk(780,1560,g=>{
+  const sky=g.createLinearGradient(0,0,0,1560); sky.addColorStop(0,'#150d40'); sky.addColorStop(.4,'#2b1a66'); sky.addColorStop(.72,'#150e38'); sky.addColorStop(1,'#07050f'); g.fillStyle=sky; g.fillRect(0,0,780,1560);
+  g.fillStyle='#dfe4ff'; for(let i=0;i<130;i++){ g.globalAlpha=.35+R()*.6; g.beginPath(); g.arc(R()*780,R()*760,R()<.2?1.6:.9,0,6.2832); g.fill(); } g.globalAlpha=1;
+  const h=g.createRadialGradient(520,520,10,520,520,420); h.addColorStop(0,'rgba(190,170,255,.55)'); h.addColorStop(.5,'rgba(130,100,220,.22)'); h.addColorStop(1,'rgba(90,60,180,0)'); g.fillStyle=h; g.fillRect(0,100,780,860);
+  g.fillStyle='#ece8ff'; g.beginPath(); g.arc(520,520,140,0,6.2832); g.fill();
+  g.fillStyle='rgba(170,160,215,.45)'; for(const [x,y,r] of [[470,480,34],[570,570,26],[500,590,18],[590,480,16],[450,550,12]]){ g.beginPath(); g.arc(x,y,r,0,6.2832); g.fill(); }
+  g.fillStyle='#1b1440'; g.beginPath(); g.moveTo(0,1000); for(let x=0;x<=780;x+=20)g.lineTo(x,790-(70*Math.sin(x/90)+50*Math.sin(x/37+1))); g.lineTo(780,1000); g.closePath(); g.fill();
+  g.fillRect(0,780,780,420);
+  g.fillStyle='#0a0714'; g.beginPath(); g.moveTo(0,1180); for(let x=0;x<=780;x+=20)g.lineTo(x,1160+18*Math.sin(x/70)); g.lineTo(780,1560); g.lineTo(0,1560); g.closePath(); g.fill();
+}); }
+const bakeGlow=()=>mk(128,128,g=>{ const r=g.createRadialGradient(64,64,0,64,64,64); r.addColorStop(0,'rgba(255,255,255,1)'); r.addColorStop(.35,'rgba(255,255,255,.55)'); r.addColorStop(1,'rgba(255,255,255,0)'); g.fillStyle=r; g.fillRect(0,0,128,128); });
+const bakeFog=seed=>{ const R=mulberry(seed); return mk(780,220,g=>{ for(let i=0;i<9;i++){ const cx=R()*780, cy=70+R()*80, rx=110+R()*130, ry=34+R()*30, a=.22+R()*.2;
+  for(const o of [-780,0,780]){ g.save(); g.translate(cx+o,cy); g.scale(rx/ry,1); const r=g.createRadialGradient(0,0,0,0,0,ry); r.addColorStop(0,`rgba(150,135,230,${a})`); r.addColorStop(1,'rgba(150,135,230,0)'); g.fillStyle=r; g.beginPath(); g.arc(0,0,ry,0,6.2832); g.fill(); g.restore(); } } }); };
+const bakeVig=()=>mk(64,128,g=>{ const r=g.createRadialGradient(32,58,16,32,58,84); r.addColorStop(0,'rgba(4,2,10,0)'); r.addColorStop(.55,'rgba(4,2,10,.25)'); r.addColorStop(1,'rgba(4,2,10,.88)'); g.fillStyle=r; g.fillRect(0,0,64,128); });
+
+function start(){
+  if(leaving||sp.hidden)return;
+  const P=window.Phaser, host=document.getElementById('phHost'); if(!P||!host)return;
+  const ADD=P.BlendModes.ADD;
+  class Splash extends P.Scene{
+    constructor(){ super('splash'); }
+    preload(){ this.load.image('boss','img/boss_awake3.png'); this.load.image('castle','img/splash_castle.png'); }
+    create(){
+      const sc=this, R=mulberry(99);
+      const tex=(k,c)=>{ if(sc.textures.exists(k))sc.textures.remove(k); sc.textures.addCanvas(k,c); };
+      tex('bg',bakeBg()); tex('glow',bakeGlow()); tex('fog1',bakeFog(3)); tex('fog2',bakeFog(5)); tex('fog3',bakeFog(8)); tex('vig',bakeVig());
+      const root=sc.add.container(0,0); const A=o=>{ root.add(o); return o; };
+      const C=(x,y)=>[x-390,y-780];
+      A(sc.add.image(0,0,'bg'));
+      const gl=(x,y,col,scale,alpha)=>A(sc.add.image(...C(x,y),'glow').setTint(col).setBlendMode(ADD).setScale(scale).setAlpha(alpha));
+      const moon=gl(520,520,0x9a82ff,7,.5);
+      sc.tweens.add({targets:moon,alpha:{from:.32,to:.62},duration:2800,yoyo:true,repeat:-1,ease:'Sine.easeInOut'});
+      gl(390,820,0x7a3cff,9,.32);
+      if(sc.textures.exists('boss')){
+        const boss=A(sc.add.image(...C(390,911),'boss').setScale(2.1).setTint(0x9886c6).setAlpha(.96));
+        sc.tweens.add({targets:boss,scaleY:2.145,y:boss.y-6,duration:3200,yoyo:true,repeat:-1,ease:'Sine.easeInOut'});
+        const eye=gl(476,789,0xd9a8ff,.9,.95), mouth=gl(472,818,0xc98cff,1.2,.7); mouth.setScale(1.3,.45);
+        sc.tweens.add({targets:[eye,mouth],alpha:{from:.95,to:.4},duration:1300,yoyo:true,repeat:-1,ease:'Sine.easeInOut'});
+        sc.time.addEvent({delay:3100,loop:true,callback:()=>{ sc.tweens.add({targets:eye,scaleY:.05,duration:90,yoyo:true}); }});
+      }
+      sc.fogs=[]; const fog=(key,y,v,alpha)=>{ const a=A(sc.add.image(0,0,key).setAlpha(alpha)), b=A(sc.add.image(0,0,key).setAlpha(alpha)); a.y=b.y=y-780; sc.fogs.push({a,b,v,off:R()*780}); };
+      fog('fog1',1000,10,.5);
+      gl(390,1060,0x4a8cff,8,.38);
+      if(sc.textures.exists('castle')){ A(sc.add.image(...C(390,1043),'castle').setScale(.896)); }
+      const door=gl(390,1195,0x58a8ff,2.2,.8);
+      sc.tweens.add({targets:door,alpha:{from:.5,to:.95},duration:1700,yoyo:true,repeat:-1,ease:'Sine.easeInOut'});
+      fog('fog2',1110,-16,.55); fog('fog3',1210,24,.6);
+      const cols=[0xffa050,0xffc070,0xb078ff,0xa0c8ff];
+      sc.embers=[]; for(let i=0;i<56;i++){ const img=A(sc.add.image(0,0,'glow').setBlendMode(ADD).setTint(cols[(R()*4)|0]));
+        const e={img,x:(R()-.5)*820,y:-840+R()*1700,vy:14+R()*34,dx:6+R()*16,f:.6+R()*1.2,p:R()*6.28,tw:1.4+R()*2.2,al:.35+R()*.6}; img.setScale(.14+R()*.34); sc.embers.push(e); }
+      sc.vig=sc.add.image(0,0,'vig').setOrigin(0,0).setDepth(10);
+      sc.layout=null;
+      const layout=()=>{ const W=sc.scale.width,H=sc.scale.height; if(!W||!H)return; const s=Math.max(W/780,H/1560), fy=W>H*1.1?980:780;
+        root.setScale(s); root.setPosition(W/2,H/2-(fy-780)*s); sc.vig.setDisplaySize(W,H); sc.layout={s,W,H,cx:W/2,cy:H/2-(fy-780)*s}; };
+      layout(); sc.scale.on('resize',layout);
+      sc.t=0;
+      sc.zoomOut=()=>{ const L=sc.layout; if(!L)return; const cam=sc.cameras.main; cam.pan(L.cx,L.cy+(1043-780)*L.s,700,'Sine.easeIn'); cam.zoomTo(2.8,700,'Sine.easeIn'); };
+      scene=sc; sp.classList.add('ph');
+    }
+    update(time,dt){
+      try{
+        const d=Math.min(dt,50)/1000; this.t+=d; const t=this.t;
+        for(const f of this.fogs){ f.off=((f.off+f.v*d)%780+780)%780; f.a.x=f.off; f.b.x=f.off-780; }
+        for(const e of this.embers){ e.y-=e.vy*d; e.x+=Math.sin(t*e.f+e.p)*e.dx*d; if(e.y<-860){ e.y=860+Math.random()*160; e.x=(Math.random()-.5)*820; }
+          e.img.setPosition(e.x,e.y); e.img.setAlpha(e.al*(.55+.45*Math.sin(t*e.tw+e.p))); }
+      }catch(err){ bail(); }
+    }
+  }
+  try{
+    game=new P.Game({type:P.AUTO,parent:host,width:host.clientWidth||window.innerWidth,height:host.clientHeight||window.innerHeight,backgroundColor:'#07050f',banner:false,
+      scale:{mode:P.Scale.RESIZE},scene:[Splash],render:{antialias:false,powerPreference:'low-power'},fps:{target:30},audio:{noAudio:true},input:{keyboard:false,mouse:false,touch:false,gamepad:false}});
+  }catch(err){ bail(); }
+}
+loadPhaser(ok=>{ if(ok)start(); });
 })();
 </script>
 
