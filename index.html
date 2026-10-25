@@ -374,8 +374,6 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 #sTitle .pp{gap:10px}
 #sTitle .pp .modes{flex-wrap:nowrap}
 #bSolo .newb{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:9px;background:#e0483c;color:#fff;font-size:11px;font-weight:800;vertical-align:middle;letter-spacing:.5px;box-shadow:0 0 8px rgba(224,72,60,.7)}
-#bStory[aria-pressed="true"]{border-color:#e0b04a;color:#ffe08a;box-shadow:0 0 10px rgba(224,176,74,.5)}
-#bStory{flex:0 0 86px;align-self:stretch;min-height:0;padding:0 6px;font-size:13px;line-height:1.35;font-weight:600;border-radius:14px;white-space:normal}   /* 가로만 시작하기 버튼의 절반 · 세로는 시작하기와 같은 높이(stretch) */
 #bSolo{flex:1;min-height:66px;font-size:22px;border-radius:14px;box-shadow:0 6px 22px rgba(163,48,42,.35)}
 #stageInfo{padding:9px 12px;text-align:center;cursor:pointer;line-height:1.45}
 .ttabs{position:sticky;bottom:0;margin:auto -16px 0;width:calc(100% + 32px);box-sizing:border-box;display:flex;flex:none;border-top:1px solid var(--line);background:linear-gradient(#17110d,#0f0b09);padding-bottom:max(14px,env(safe-area-inset-bottom));z-index:3}
@@ -554,6 +552,15 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 #sTitle #bSolo::after{content:"";position:absolute;top:0;bottom:0;left:-40%;width:30%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.32),transparent);transform:skewX(-20deg);animation:btnSheen 3.4s ease-in-out infinite}
 @keyframes btnSheen{0%,55%{left:-40%}100%{left:130%}}
 @media (prefers-reduced-motion:reduce){#sTitle .cc .cpic::before,#sTitle #bSolo::after{animation:none!important}}
+/* ===== 타이틀: 왼쪽 스테이지 카드 · 오른쪽 시작하기 버튼을 한 줄에 (스토리 다시 보기 삭제) ===== */
+#sTitle .pp{flex-direction:row;align-items:stretch;gap:10px}
+#sTitle .pp .scard{flex:1.5 1 0;min-width:0;width:auto;padding:12px 12px;justify-content:center;gap:4px}
+#sTitle .pp .modes{flex:1 1 0;min-width:0;width:auto;max-width:none;flex-wrap:nowrap}
+#sTitle #bSolo{width:100%;min-height:84px;font-size:19px;border-radius:16px;white-space:nowrap;padding-inline:6px}
+#sTitle .scard .stbig{font-size:17px;text-align:left;line-height:1.25;letter-spacing:.02em;text-shadow:none}
+#sTitle .scard #stageInfo{font-size:11px;line-height:1.3;text-align:left}
+#sTitle .scard.dg{padding:26px 36px 36px 40px}
+@media (orientation:landscape) and (max-height:500px){#sTitle .pp{flex-direction:column}#sTitle .pp .scard,#sTitle .pp .modes{flex:none;width:100%}#sTitle .scard .stbig{text-align:center}#sTitle #bSolo{min-height:54px}}
 @media (orientation:landscape) and (max-height:500px){#sTitle .cc[aria-current="true"] .cpic::before{width:120px;height:120px;margin:-60px 0 0 -60px}}
 /* ===== 폰 가로 모드 타이틀: 좌(캐릭터) · 우(스테이지+시작) 2단, 하단 탭바는 얇은 한 줄 → 스테이지 선택·시작 버튼이 안 잘림 ===== */
 @media (orientation:landscape) and (max-height:500px){
@@ -901,7 +908,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.0.0289</div>
+    <div class="ver" id="verT">v0.6.0.0290</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -914,7 +921,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
         <div class="stbig" id="stageBig"></div>
         <div id="stageInfo"></div>
       </div>
-      <div class="modes"><button class="btn primary" id="bSolo">▶ 시작하기</button><button class="btn" id="bStory" aria-label="스토리 다시 보기" hidden>📖 스토리<br>다시 보기</button></div>
+      <div class="modes"><button class="btn primary" id="bSolo">▶ 시작하기</button></div>
     </div>
     <div hidden><button id="bHost" disabled></button><button id="bJoin" disabled></button><p class="note" id="netNote">온라인 연결 확인 중…</p></div>
     <nav class="ttabs" id="titleTabs" aria-label="메뉴">
@@ -3954,12 +3961,10 @@ function storySkip(){ if(stS){ sfx('ui'); storyEnd(); } }
 function storyClose(){ const S=stS; clearInterval(stTm); stS=null; const el=$('#sty'); if(el){ el.hidden=true; el.classList.remove('nar','nb','rt'); } if(S&&S.pz)G.paused=G.mode==='solo'&&!$('#sheet').hidden; return S; }
 /* 스토리 다시 보기: 버튼을 누르면 '시작하기'에 NEW가 붙고, 그 스테이지를 시작하면 처음처럼 모든 대화(시작·페이즈·끝)가 다시 나와요. 한 번 더 누르면 취소 */
 let storyRe=null;
-function storyReUi(){ const S=STAGES[selStage], on=!!(S&&storyRe===S.id); if(!on)storyRe=null; const b=$('#bSolo'); if(b)b.innerHTML='▶ 시작하기'+(on?' <span class="newb">NEW</span>':''); const st=$('#bStory'); if(st)st.setAttribute('aria-pressed',on); }
-function storyReToggle(){ const S=STAGES[selStage]; if(!S||!STORY[S.id])return; storyRe=storyRe===S.id?null:S.id; storyReUi(); toast(storyRe?'📖 이번 판은 스토리 대화가 처음처럼 모두 나와요':'📖 스토리 다시 보기를 취소했어요','#c9b48a'); }
+function storyReUi(){ const S=STAGES[selStage], on=!!(S&&storyRe===S.id); if(!on)storyRe=null; const b=$('#bSolo'); if(b)b.innerHTML='▶ 시작하기'+(on?' <span class="newb">NEW</span>':''); }
 function storyStop(){ storyClose(); storyWait=false; }
 function storyEnd(){ const S=storyClose(); if(S&&S.kind==='pre'){ storyWait=false;
   if(G.mode!=='guest'&&(me.clear|0)>selStage&&!STAGES[selStage].raid&&G.inGame&&!G.allMode&&G.phase==='prep'&&G.wave===0&&G.stageIdx===selStage)startAllOut(); } }   /* 이미 깬 스테이지는 대화 뒤 바로 총공세 */
-$('#bStory').addEventListener('click',()=>{ sfx('ui'); storyReToggle(); });
 $('#sty').addEventListener('click',e=>{ if(e.target.closest('#stSk')){ storySkip(); return; } storyNext(); });
 window.addEventListener('keydown',e=>{ if(!stS||!stS.solo)return; if(e.key==='Enter'||e.key===' '){ e.preventDefault(); e.stopPropagation(); storyNext(); } else if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); storySkip(); } },true);
 /* 궁극기 컷인: 내가 궁극기를 쓰면 직업 얼굴 + 스킬 이름 띠가 1.5초간 화면을 가로질러요 (게임은 멈추지 않음 · 메뉴 '화면 표시'에서 끌 수 있음) */
@@ -4748,7 +4753,6 @@ function renderStagePanel(){
   { const cur=chars.find(c=>c.id===selId), low=cur&&cur.lvl<S.rl, gp0=cur&&cur.eq?gearPenOf(cur.eq,S.icap):null, gw=!!gp0&&gp0.wm<.97; $('#stageInfo').innerHTML=`<span style="color:${gw?'#e07060':'#9fd18b'};font-weight:700">장비 Lv 합 ${Math.max(1,S.icap-12)*EQSL.length}↑${gp0?` (내 합 ${gp0.sum}${gw?' · 부족':''})`:''}</span>`; }
   { const cur=chars.find(c=>c.id===selId), nw=!!cur&&(cur.inv||[]).some(x=>x&&x.isNew), pt=cur?(cur.statPts|0)+(cur.skillPts|0):0;
     $('#tGearB').hidden=!nw; $('#menuB').hidden=!mailUnreadAll(chars); const pb=$('#tGearP'); pb.hidden=!pt; pb.textContent=pt; for(const id of ['tGear','tStore'])$('#'+id).disabled=!cur; }
-  { const cur=chars.find(c=>c.id===selId), sg=(cur&&cur.tut&&cur.tut.sg)||{}; $('#bStory').hidden=!(STORY[S.id]&&(sg[storyKey(S.id,'pre')]||sg[storyKey(S.id,'post')])); }   /* 이 스테이지의 대화를 하나라도 본 캐릭터만 */
   storyReUi(); $('#bSolo').disabled=!selId; if(room){ $('#bHost').disabled=!selId; $('#bJoin').disabled=!selId; }
 }
 function renderTitle(){
