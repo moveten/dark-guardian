@@ -974,7 +974,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.0.0310</div>
+    <div class="ver" id="verT">v0.6.0.0311</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -2283,7 +2283,7 @@ function castleTick(dt){ const c=G.castle; if(!c)return; c.fl=Math.max(0,c.fl-dt
 /* 플레이어는 성 건물 안으로 들어갈 수 없어요 (앞마당 = 중앙 회복 구역은 건물 둘레) */
 function castlePush(o){ if(!G.castle)return; const cx=VX, cy=VY+CAS_Y+4, rx=58, ry=26, dx=(o.x-cx)/rx, dy=(o.y-cy)/ry, q=dx*dx+dy*dy; if(q>=1)return; if(q<1e-6){ o.y=cy+ry; return; } const k=1/Math.sqrt(q); o.x=cx+dx*k*rx; o.y=cy+dy*k*ry; }
 function startStage(){
-  dmgReset(); G.stageIdx=selStage; G.stg=STAGES[selStage]; G.TW=G.stg.waves.length; preBoss(); setTheme(selStage); castleInit(); if(G.castle)later(3.2,()=>{ if(G.inGame&&G.castle&&G.phase!=='lose')toast('🏰 중앙의 성을 지켜요 · 체력이 0이 되면 패배 · 성 둘레에서는 생명력·마나가 회복돼요','#e0c080'); }); G.gts=[]; later(.5,()=>{ if(G.inGame)banner(`${G.stg.id} ${G.stg.n}`,`장비 Lv 합 ${Math.max(1,G.stg.icap-12)*EQSL.length}↑ · ${G.stg.tag||''}`); });
+  dmgReset(); G.firstClr=false; G.stageIdx=selStage; G.stg=STAGES[selStage]; G.TW=G.stg.waves.length; preBoss(); setTheme(selStage); castleInit(); if(G.castle)later(3.2,()=>{ if(G.inGame&&G.castle&&G.phase!=='lose')toast('🏰 중앙의 성을 지켜요 · 체력이 0이 되면 패배 · 성 둘레에서는 생명력·마나가 회복돼요','#e0c080'); }); G.gts=[]; later(.5,()=>{ if(G.inGame)banner(`${G.stg.id} ${G.stg.n}`,`장비 Lv 합 ${Math.max(1,G.stg.icap-12)*EQSL.length}↑ · ${G.stg.tag||''}`); });
   G.allMode=false; G.allQ=[]; G.fires=[]; G.freeRev=1; me.rvGiven=0; me.seenRg=0; me.out=false; me.rvT=0;
   G.wave=0;G.skipUsed=false;G.phase='prep';G.timer=2;G.mobs.length=0;G.ev=[];G.spawnQ=0;G.lastSq=-1;G.endShown=false;G.coop=!!guestPeer;
   G.waveSides=[0,1,3]; G.nextSides=sidesFor(1); G.laneShow=G.nextSides;
@@ -5100,14 +5100,14 @@ $('#bStart').onclick=()=>{ if(G.mode!=='host')return; ally=null; const gp=others
 $('#bLeave').onclick=()=>quitToTitle();
 function startGuestGame(pr){ dmgReset(); resetWorld(); G.phase=pr.ph; toast('게임이 시작됐어요'); }
 async function quitToTitle(){
-  storyStop(); if(autoMode)setAuto(0,true); setSpd(false); G.inGame=false; G.phase='title'; G.aim=null; saveChar(); ally=null; if(me){ selStage=Math.max(0,Math.min(STAGES.length-1,(me.clear|0)-1)); }
+  storyStop(); if(autoMode)setAuto(0,true); setSpd(false); G.inGame=false; G.phase='title'; G.aim=null; saveChar(); ally=null; if(me){ selStage=Math.max(0,Math.min(STAGES.length-1,(me.clear|0)-(G.firstClr?0:1))); G.firstClr=false; }   /* 방금 처음 깼다면 다음 스테이지, 아니면 가장 높이 깬 스테이지 */
   if(R){try{R.presence({role:null,pl:null,m:null,ev:null,h:null,bt:null}).catch(()=>{}); await R.leave();}catch(e){} R=null;}
   show('#sTitle'); renderClassCards(); rkSubmitAll();
 }
 const fmtCt=t=>{ t=Math.max(0,Math.round(t)); return (t/60|0)+':'+String(t%60).padStart(2,'0'); };
 /* 클리어 기록: 가장 높이 클리어한 스테이지의 최단 클리어 시간(초)을 ct에 저장 — 랭킹에서 클리어 수가 같으면 ct가 짧은 순 */
 function markClear(){ const n=(G.stageIdx|0)+1, t=Math.max(1,Math.round(G.runT||0)); let ch=false; G.lastCt=t; G.bestCt=false; const wasLk=!spdOk();
-  if(n>(me.clear|0)){ me.clear=Math.min(STAGES.length,n); stageClear=me.clear; me.ct=t; me.cat=Math.floor(Date.now()/1000); ch=true; G.bestCt=true; }
+  if(n>(me.clear|0)){ me.clear=Math.min(STAGES.length,n); stageClear=me.clear; me.ct=t; me.cat=Math.floor(Date.now()/1000); ch=true; G.bestCt=true; G.firstClr=true; selStage=Math.max(0,Math.min(STAGES.length-1,me.clear|0)); lsSet('dkdef2.stage',String(selStage)); }   /* 처음 깬 스테이지면 다음 스테이지를 자동 선택 */
   else if(n===(me.clear|0)&&!(me.ct>0&&t>=me.ct)){ me.ct=t; ch=true; G.bestCt=true; }
   { const cc=me.cc||(me.cc={}); cc[n]=Math.min(999999,(cc[n]|0)+1); G.ccThis=cc[n]; G.ccAll=Object.values(cc).reduce((a,b)=>a+b,0); ch=true; }   /* 누적 클리어 횟수: 스테이지별로, 클리어할 때마다 +1 (최고 기록과 상관없이) */
   if(ch){ saveChar(); rkSubmitAll(); }
