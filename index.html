@@ -581,6 +581,10 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 .ban i{display:block;font-style:normal;font-size:11.5px;color:#9fd18b;font-weight:700;margin-top:4px}
 .ban i.warn{color:#e07060}
 .ban em.go{display:inline-block;margin-top:9px;font-style:normal;font-size:12px;font-weight:700;color:#ffd36a;padding:3px 11px;border-radius:999px;border:1px solid rgba(214,170,78,.7);background:rgba(10,7,6,.72)}
+.ban.trio .t{padding-right:150px}
+.ban .tri{position:absolute;right:6px;bottom:4px;display:flex;align-items:flex-end;pointer-events:none}
+.ban .tri img{position:relative;height:68px;max-width:none;margin-left:-16px;filter:brightness(.6) saturate(.7) drop-shadow(0 6px 8px #000c)}
+.ban .tri img:nth-child(2){height:94px;z-index:1;filter:brightness(1.1) drop-shadow(0 0 8px rgba(150,90,220,.7)) drop-shadow(0 6px 8px #000c)}
 .ban img{position:absolute;right:10px;bottom:4px;height:100px;max-width:130px;object-fit:contain;filter:brightness(1.35) saturate(1.2) drop-shadow(0 6px 8px #000c);pointer-events:none}
 @media (orientation:portrait) and (min-height:700px){
   #sTitle .clist.car{flex:1 1 0;min-height:180px;max-height:292px;margin-top:6px}   /* 남는 높이를 캐릭터 카드가 받아 한 화면에 다 들어오게 */
@@ -959,7 +963,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.0.0299</div>
+    <div class="ver" id="verT">v0.6.0.0300</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -4757,7 +4761,8 @@ function carCenter2(box,el){ box.scrollTo({left:el.offsetLeft+el.offsetWidth/2-b
 /* ===== 스테이지 지도: 길을 따라 스테이지를 보고 고르는 화면 (연출은 아래 Phaser 스크립트가 위에 얹어줘요 — 없어도 지도는 그대로 동작) ===== */
 $('#stageBan').onclick=()=>{ sfx('ui'); openMap(); };
 $('#stageBan').onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); sfx('ui'); openMap(); } };
-const MAPBOSS={'1-1':'mob_grak','1-2':'mob_malek','1-3':'mob_morg','1-4':'mob_kargon','1-5':'mob_izra','4':'mn_papa','5':'boss_awake'};   /* 지도에 서 있는 보스 그림 (2·3장은 스테이지의 bs 그림) */
+const BANTRIO={'4':['hero_war','boss_shadow','hero_sorc']};   /* 삼남매(그림자 전사 · 검은 그림자 · 그림자 법사) 배너 그림 */
+const MAPBOSS={'1-1':'mob_grak','1-2':'mob_malek','1-3':'mob_morg','1-4':'mob_kargon','1-5':'mob_izra','4':'boss_shadow','5':'boss_awake'};   /* 지도에 서 있는 보스 그림 (2·3장은 스테이지의 bs 그림) */
 function openMap(){
   const ov=$('#mapOv'); if(!ov||!selId)return;
   const cur=charIds().map(loadChar).filter(Boolean).find(c=>c.id===selId), clr=cur?Math.min(STAGES.length,cur.clear|0):0;
@@ -4812,7 +4817,7 @@ function renderStagePanel(){
   { const mb=$('#stageBan'); if(mb)mb.classList.toggle('new',stageClear>(+lsGet('dkdef2.mapSeen')||0)&&stageClear<STAGES.length); }   /* 5스테이지: 비밀번호를 맞힌 기기는 4스테이지를 안 깼어도 테스트 입장 가능 */
   const S=STAGES[selStage]; { const t=$('#sTitle'); if(t)t.dataset.ch=selStage<5?'1':selStage<10?'2':selStage<15?'3':'4'; }
   { const cur=chars.find(c=>c.id===selId), low=cur&&cur.lvl<S.rl, gp0=cur&&cur.eq?gearPenOf(cur.eq,S.icap):null, gw=!!gp0&&gp0.wm<.97; 
-    { const ban=$('#stageBan'); if(ban){ if(!cur){ ban.innerHTML=''; } else { const bi2=S.bs||MAPBOSS[S.id]; ban.classList.toggle('noimg',!bi2); ban.innerHTML=`<div class="t"><small>이번 도전 · 우두머리</small><b>${esc(S.bn||'')}</b><span>${esc(S.id)} · ${esc(S.n)}</span><i class="${gw?'warn':''}">권장 장비 Lv 합 ${Math.max(1,S.icap-12)*EQSL.length}↑${gw?' · 부족':''}</i><em class="go">🗺️ 스테이지 선택 ›</em></div>${bi2?`<img src="img/${bi2}.png" alt="" onerror="this.remove()">`:''}`; } } }
+    { const ban=$('#stageBan'); if(ban){ if(!cur){ ban.innerHTML=''; } else { const bi2=S.bs||MAPBOSS[S.id], tri=BANTRIO[S.id]; ban.classList.toggle('noimg',!bi2&&!tri); ban.classList.toggle('trio',!!tri); ban.innerHTML=`<div class="t"><small>이번 도전 · 우두머리</small><b>${esc(S.bn||'')}</b><span>${esc(S.id)} · ${esc(S.n)}</span><i class="${gw?'warn':''}">권장 장비 Lv 합 ${Math.max(1,S.icap-12)*EQSL.length}↑${gw?' · 부족':''}</i><em class="go">🗺️ 스테이지 선택 ›</em></div>${tri?`<span class="tri">${tri.map(k=>`<img src="img/${k}.png" alt="" onerror="this.remove()">`).join('')}</span>`:bi2?`<img src="img/${bi2}.png" alt="" onerror="this.remove()">`:''}`; } } }
     const chp=$('#cChips'); if(chp){ if(!cur){ chp.hidden=true; } else { const pt2=(cur.statPts|0)+(cur.skillPts|0); chp.hidden=false; chp.innerHTML=`<span>보유 골드<b>💰 ${(cur.gold|0).toLocaleString()}</b></span><span class="${gw?'warn':''}">내 장비 Lv 합<b>${gp0?gp0.sum:'-'}</b></span><span class="${pt2?'hi':''}">분배할 포인트<b>${pt2}</b></span>`; } } }
   { const cur=chars.find(c=>c.id===selId), nw=!!cur&&(cur.inv||[]).some(x=>x&&x.isNew), pt=cur?(cur.statPts|0)+(cur.skillPts|0):0;
     $('#tGearB').hidden=!nw; $('#menuB').hidden=!mailUnreadAll(chars); const pb=$('#tGearP'); pb.hidden=!pt; pb.textContent=pt; for(const id of ['tGear','tStore'])$('#'+id).disabled=!cur; }
