@@ -763,9 +763,32 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 @media (prefers-reduced-motion:reduce){#sSplash .spTap{animation:none}}
 #sSplash.go .spTap{opacity:0;animation:none;transition:opacity .2s}
 /* 결과 화면 연출(Phaser) 레이어: 글자 뒤에 깔려요 */
-#sEnd,#sTitle{isolation:isolate}
-#sTitle>.efx{position:absolute;inset:0;z-index:-1;pointer-events:none;mix-blend-mode:screen;overflow:hidden}
+#sEnd,#sTitle,#sNew{isolation:isolate}
+#sTitle>.efx,#sNew>.efx{position:absolute;inset:0;z-index:-1;pointer-events:none;mix-blend-mode:screen;overflow:hidden}
 #sEnd .efx{position:absolute;inset:0;z-index:-1;pointer-events:none;mix-blend-mode:screen;overflow:hidden}
+/* 스테이지 지도 */
+.pp{position:relative}
+.pp .mapb{align-self:flex-end;margin-bottom:-40px;position:relative;z-index:1;min-height:34px;padding:0 12px;border-radius:999px;border:1px solid var(--line2);background:rgba(15,11,9,.72);font-size:12.5px;font-weight:700;color:#e9d9b4}
+.mapov{position:absolute;inset:0;z-index:26;background:#0b0810;display:flex;flex-direction:column}
+.mapsc{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y}
+.mapin{position:relative;margin:0 auto;width:min(100%,520px);isolation:isolate;overflow:hidden}
+.mapin>svg{position:absolute;left:0;top:0;z-index:1;pointer-events:none}
+.mapin>.mfx{position:absolute;inset:0;z-index:2;pointer-events:none;mix-blend-mode:screen;overflow:hidden}
+.mn{position:absolute;z-index:3;transform:translate(-50%,-50%);width:56px;height:56px;border-radius:50%;border:2px solid #5a5048;background:#1a1512;color:#cbbfae;font:800 13px var(--f-disp);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1;padding:0}
+.mn i{font-style:normal;font-size:12px;font-weight:700}
+.mn.clear{border-color:#d6aa4e;color:#ffe9a8;background:#2a2012}
+.mn.next{border-color:#ffd36a;color:#fff;background:#4a2a14;box-shadow:0 0 16px #ffb04a99}
+.mn.lock{opacity:.6}
+.mn.dg{border-color:#b98aff}.mn.dg.clear{background:#241a38;color:#e6d4ff}.mn.dg.next{background:#3a2060;box-shadow:0 0 16px #b98aff99}
+.mn.sel{outline:3px solid #fff3c4;outline-offset:3px}
+.ml{position:absolute;z-index:3;transform:translateY(-50%);max-width:30%;font-size:12px;line-height:1.3;color:#e0d4bc;text-shadow:0 1px 3px #000,0 0 6px #000;pointer-events:none}
+.mch{position:absolute;z-index:3;left:50%;transform:translate(-50%,-50%);padding:3px 14px;border-radius:999px;background:rgba(10,8,14,.78);border:1px solid #5a4634;font:800 12px var(--f-disp);letter-spacing:.1em;color:#d6aa4e;pointer-events:none;white-space:nowrap}
+.mapttl{position:absolute;left:14px;top:max(10px,env(safe-area-inset-top));z-index:4;font:800 15px var(--f-disp);color:#e9d9b4;text-shadow:0 1px 4px #000;pointer-events:none}
+.mapx{position:absolute;right:10px;top:max(8px,env(safe-area-inset-top));z-index:4;width:40px;height:40px;border-radius:50%;border:1px solid var(--line2);background:rgba(15,11,9,.75);font-size:16px}
+.mapbar{flex:none;box-sizing:border-box;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:linear-gradient(#150f0bf2,#0c0a09);border-top:1px solid var(--line2);display:flex;flex-direction:column;gap:6px;max-width:100%}
+.mapbar .mt{font:800 18px var(--f-disp);color:#ffd36a}.mapbar .mt small{font-size:11px;color:var(--mute);font-weight:500;margin-right:6px;letter-spacing:.1em}
+.mapbar .mb{font-size:13px;color:#e8dcc4}.mapbar .md{font-size:12px;line-height:1.5;color:var(--mute);max-height:56px;overflow:auto}
+.mapbar .row2{display:flex;gap:8px;margin-top:2px}.mapbar .row2 .btn{flex:1}.mapbar .row2 .btn:disabled{opacity:.5}
 /* 마을 연출(Phaser) 레이어: 건물 버튼 뒤, 화면 합성(screen)이라 검은 부분은 투명하게 보임 */
 .tmap .tfx{position:absolute;inset:0;z-index:0;pointer-events:none;mix-blend-mode:screen;overflow:hidden}
 .tmap .tfx canvas{display:block}
@@ -833,13 +856,14 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.0.0273</div>
+    <div class="ver" id="verT">v0.6.0.0274</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
     <div class="clist car" id="charList"></div>
     <button id="bNew" hidden></button>
     <div class="pp" id="playPanel" hidden>
+      <button class="mapb" id="mapBtn" type="button">🗺️ 지도</button>
       <div class="stbig" id="stageBig"></div>
       <div class="stagebar" id="stageBar"></div>
       <div id="stageInfo" role="button" tabindex="0" title="누르면 설명이 펼쳐져요"></div>
@@ -898,6 +922,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     </div>
     <div class="ipop" id="itemPop" hidden></div>
   </div>
+  <div class="mapov" id="mapOv" hidden></div>
   <div class="ipop" id="modal" hidden style="z-index:30"></div>
   <div id="ult" hidden><div class="udim"></div><div class="uwrap"><div class="uband"><div class="ulines"></div></div><div class="ucont"><div class="uface"><img alt=""></div><div class="utx"><small>ULTIMATE</small><b></b><em></em></div></div></div><div class="uflash"></div></div>
   <div id="sty" hidden><div class="sdim"></div><div class="sps"><div class="sp l"><img alt=""></div><div class="sp r"><img alt=""></div></div><div class="sbox" role="dialog" aria-label="이야기"><div class="snm"><b id="stN"></b><em id="stT"></em></div><p class="stx"><span id="stA"></span><span id="stB"></span></p><div class="sft"><span class="spg" id="stPg"></span><span class="sgo" id="stGo">▼</span><button id="stSk" type="button">건너뛰기</button></div></div></div>
@@ -4616,6 +4641,35 @@ function buildCarousel(chars){
 function carCenter2(box,el){ box.scrollTo({left:el.offsetLeft+el.offsetWidth/2-box.clientWidth/2,behavior:'smooth'}); }
 /* ===== 4스테이지 카드 테두리: 카드 둘레를 한 바퀴 감싼 용 (img/dragon_frame.png 흰색 실루엣을 마스크로 써서 카드 테두리 색으로 칠함 — CSS .drg) ===== */
 const dragonBadge=()=>'<i class="drg" aria-hidden="true"></i>';
+/* ===== 스테이지 지도: 길을 따라 스테이지를 보고 고르는 화면 (연출은 아래 Phaser 스크립트가 위에 얹어줘요 — 없어도 지도는 그대로 동작) ===== */
+function openMap(){
+  const ov=$('#mapOv'); if(!ov||!selId)return;
+  const cur=charIds().map(loadChar).filter(Boolean).find(c=>c.id===selId), clr=cur?Math.min(STAGES.length,cur.clear|0):0;
+  const N=STAGES.length, T=N+1, GAP=96, PB=120, PT=130, H=PT+(T-1)*GAP+PB;
+  ov.hidden=false; const Wd=Math.max(300,Math.min(ov.clientWidth||390,520));
+  const px=i=>Wd/2+Wd*.27*Math.sin(i*1.05+.4), py=i=>H-PB-i*GAP, P=[]; for(let i=0;i<T;i++)P.push([px(i),py(i)]);
+  let d=`M${P[0][0].toFixed(1)} ${P[0][1].toFixed(1)}`; for(let i=0;i<T-1;i++){ const p0=P[Math.max(0,i-1)], p1=P[i], p2=P[i+1], p3=P[Math.min(T-1,i+2)];
+    d+=` C${(p1[0]+(p2[0]-p0[0])/6).toFixed(1)} ${(p1[1]+(p2[1]-p0[1])/6).toFixed(1)} ${(p2[0]-(p3[0]-p1[0])/6).toFixed(1)} ${(p2[1]-(p3[1]-p1[1])/6).toFixed(1)} ${p2[0].toFixed(1)} ${p2[1].toFixed(1)}`; }
+  const f=i=>(py(i)/H*100).toFixed(1)+'%', bg=`linear-gradient(to bottom,#08060e 0%,#160d26 ${f(16.6)},#2a1530 ${f(14.6)},#3a1511 ${f(12)},#1f1a24 ${f(9.7)},#16273a ${f(7)},#1b222a ${f(3.5)},#101214 100%)`;
+  const zone=i=>i>=15?3:i>=10?2:i>=5?1:0;
+  let nodes='';
+  for(let i=0;i<N;i++){ const S=STAGES[i], st=i<clr?'clear':i===clr?'next':'lock', ic=st==='clear'?'✔':st==='lock'?'🔒':'▶', side=P[i][0]<Wd/2?'r':'l';
+    nodes+=`<button type="button" class="mn ${st}${S.raid?' dg':''}" data-i="${i}" style="left:${P[i][0].toFixed(1)}px;top:${P[i][1].toFixed(1)}px" aria-label="${esc(S.id)} ${esc(S.n)}"><b>${esc(S.id)}</b><i>${S.raid?'🐉':ic}</i></button><span class="ml" style="top:${P[i][1].toFixed(1)}px;${side==='r'?`left:${(P[i][0]+38).toFixed(1)}px;text-align:left`:`right:${(Wd-P[i][0]+38).toFixed(1)}px;text-align:right`}">${esc(S.n)}</span>`; }
+  nodes+=`<button type="button" class="mn lock soon" disabled style="left:${P[N][0].toFixed(1)}px;top:${P[N][1].toFixed(1)}px"><b>6</b><i>🔒</i></button><span class="ml" style="top:${P[N][1].toFixed(1)}px;${P[N][0]<Wd/2?`left:${(P[N][0]+38).toFixed(1)}px`:`right:${(Wd-P[N][0]+38).toFixed(1)}px;text-align:right`}">업데이트 예정</span>`;
+  for(const [i,t] of [[0,'1장'],[5,'2장'],[10,'3장'],[15,'🐉 레이드']])nodes+=`<div class="mch" style="top:${(py(i)+(i?GAP*.5:GAP*.62)).toFixed(1)}px">${t}</div>`;
+  ov.innerHTML=`<div class="mapsc" id="mapSc"><div class="mapin" id="mapIn" style="height:${H}px;background:${bg}"><svg width="${Wd}" height="${H}" viewBox="0 0 ${Wd} ${H}" aria-hidden="true"><path d="${d}" fill="none" stroke="#000" stroke-opacity=".55" stroke-width="18" stroke-linecap="round"/><path id="mapPath" d="${d}" fill="none" stroke="#4a4036" stroke-width="10" stroke-linecap="round"/><path d="${d}" fill="none" stroke="#7a6a54" stroke-width="2" stroke-dasharray="3 10" stroke-linecap="round"/><path id="mapDone" d="${d}" fill="none" stroke="#e0b64e" stroke-width="5" stroke-linecap="round" stroke-opacity=".85" stroke-dasharray="0 99999"/></svg>${nodes}</div></div><div class="mapttl">🗺️ 스테이지 지도</div><button class="mapx" id="mapX" type="button" aria-label="닫기">✕</button><div class="mapbar" id="mapBar"></div>`;
+  try{ const pe=$('#mapPath'), dn=$('#mapDone'), k=Math.min(clr,N-1); if(clr>0){ let best=0,bd=1e12,L=pe.getTotalLength(); for(let s=0;s<=L;s+=4){ const p=pe.getPointAtLength(s), dd=(p.x-P[k][0])**2+(p.y-P[k][1])**2; if(dd<bd){ bd=dd; best=s; } } dn.setAttribute('stroke-dasharray',`${best} 99999`); } }catch(e){}
+  let pick=Math.min(selStage,N-1);
+  const bar=$('#mapBar'), close=()=>{ ov.hidden=true; ov.innerHTML=''; };
+  const show=()=>{ const S=STAGES[pick], st=pick<clr?'clear':pick===clr?'next':'lock', can=pick<=clr;
+    ov.querySelectorAll('.mn[data-i]').forEach(b=>b.classList.toggle('sel',+b.dataset.i===pick));
+    bar.innerHTML=`<div class="mt"><small>STAGE</small>${esc(S.id)} · ${esc(S.n)}</div><div class="mb">우두머리 <b>${esc(S.bn||'')}</b> · 장비 Lv 합 ${Math.max(1,S.icap-12)*EQSL.length}↑${st==='clear'?' · <span style="color:#9fd18b">클리어 ✔</span>':''}</div><div class="md">${esc(S.tag||S.d||'')}</div><div class="row2"><button class="btn" id="mapC" type="button">닫기</button><button class="btn primary" id="mapGo" type="button"${can?'':' disabled'}>${can?'이 스테이지로 선택':'🔒 이전 스테이지를 먼저 클리어'}</button></div>`;
+    $('#mapC').onclick=close; $('#mapGo').onclick=()=>{ if(!can)return; selStage=pick; lsSet('dkdef2.stage',String(pick)); close(); renderStagePanel(); }; };
+  ov.querySelectorAll('.mn[data-i]').forEach(b=>b.onclick=()=>{ pick=+b.dataset.i; sfx('ui'); show(); });
+  $('#mapX').onclick=close; show();
+  const sc=$('#mapSc'); sc.scrollTop=Math.max(0,py(Math.min(pick,N-1))-sc.clientHeight*.45);
+}
+$('#mapBtn').onclick=()=>{ sfx('ui'); openMap(); };
 function renderStagePanel(){
   const chars=charIds().map(loadChar).filter(Boolean);
   $('#playPanel').hidden=!selId;
@@ -6103,19 +6157,21 @@ const bakeRays=()=>mk(1024,1024,g=>{ const r=g.createRadialGradient(512,512,0,51
 const bakeFog=(seed)=>{ const R=mulberry(seed); return mk(1024,300,g=>{ for(let i=0;i<8;i++){ const cx=R()*1024, cy=110+R()*80, rx=170+R()*170, ry=50+R()*50, a=.3+R()*.25;
   for(const o of [-1024,0,1024]){ g.save(); g.translate(cx+o,cy); g.scale(rx/ry,1); const r=g.createRadialGradient(0,0,0,0,0,ry); r.addColorStop(0,`rgba(255,255,255,${a})`); r.addColorStop(1,'rgba(255,255,255,0)'); g.fillStyle=r; g.beginPath(); g.arc(0,0,ry,0,TAU); g.fill(); g.restore(); } } }); };
 function curCls(){ const el=document.querySelector('#charList .cc[aria-current="true"] .cpic'); if(!el)return 'none'; for(const k of el.classList)if(CL[k]&&k!=='none')return k; return 'none'; }
-function destroy(){ try{ if(ro)ro.disconnect(); }catch(e){} ro=null; try{ if(game)game.destroy(true); }catch(e){} game=null; try{ if(host&&host.parentNode)host.parentNode.removeChild(host); }catch(e){} host=null; starting=false; sleeping=false; }
-function wanted(){ const t=$('sTitle'), s=$('sSplash'); return !!t&&!t.hidden&&(!s||s.hidden); }
+function destroy(){ try{ if(ro)ro.disconnect(); }catch(e){} ro=null; try{ if(game)game.destroy(true); }catch(e){} game=null; try{ if(host&&host.parentNode)host.parentNode.removeChild(host); }catch(e){} host=null; starting=false; sleeping=false; curMode=''; }
+let curMode='';
+function wanted(){ const t=$('sTitle'), n=$('sNew'), s=$('sSplash'); if(!s||s.hidden){ if(t&&!t.hidden)return 'title'; if(n&&!n.hidden)return 'new'; } return ''; }
 function sync(){
-  if(!wanted()){ destroy(); return; }
-  if(game){ const sh=$('sheet'), p=!!sh&&!sh.hidden; if(p!==sleeping){ sleeping=p; try{ p?game.loop.sleep():game.loop.wake(); }catch(e){} } return; }   /* 가방·보관함·마을이 열려 있는 동안은 멈춰요 */
+  const m=wanted(); if(!m){ destroy(); return; }
+  if(game&&m!==curMode)destroy();
+  if(game){ const sh=$('sheet'), mp=$('mapOv'), p=(!!sh&&!sh.hidden)||(!!mp&&!mp.hidden); if(p!==sleeping){ sleeping=p; try{ p?game.loop.sleep():game.loop.wake(); }catch(e){} } return; }   /* 가방·보관함·마을·지도가 열려 있는 동안은 멈춰요 */
   if(starting||!window.__loadPhaser)return;
   try{ if(matchMedia('(prefers-reduced-motion: reduce)').matches)return; }catch(e){}
-  starting=true; window.__loadPhaser(ok=>{ starting=false; if(ok&&wanted()&&!game)start(); });
+  starting=true; window.__loadPhaser(ok=>{ starting=false; if(ok&&wanted()===m&&!game)start(m); else if(ok)sync(); });
 }
-function start(){
-  const P=window.Phaser, t=$('sTitle'); if(!P||!t)return;
-  host=document.createElement('div'); host.className='efx'; host.setAttribute('aria-hidden','true'); t.insertBefore(host,t.firstChild);
-  const my=host;
+function start(mode){
+  const P=window.Phaser, t=$(mode==='new'?'sNew':'sTitle'); if(!P||!t)return;
+  host=document.createElement('div'); host.className='efx'; host.setAttribute('aria-hidden','true'); t.insertBefore(host,t.firstChild); curMode=mode;
+  const my=host, ALL=mode==='new';
   class Title extends P.Scene{
     constructor(){ super('title'); }
     create(){
@@ -6125,13 +6181,15 @@ function start(){
       sc.c=CL.none.c.slice(); sc.p={}; for(const k of ['vy','sw','star','tw','rays','gg'])sc.p[k]=CL.none[k]; sc.tg=CL.none; sc.poll=0; sc.t=0;
       sc.moon=img('glow'); sc.rays=img('rays'); sc.gg=img('glow');
       sc.fogs=[[.34,7,.13],[.8,-10,.17]].map(([y,v,al])=>({a:img('fog').setOrigin(0,.5).setAlpha(al),b:img('fog').setOrigin(0,.5).setAlpha(al),y,v,off:R()*600}));
-      sc.pt=[]; for(let i=0;i<66;i++){ const star=i>=46; sc.pt.push({img:img(star?'star':'glow'),star,x:R()*W,y:R()*H,sp:R(),f:.4+R()*1.1,p:R()*6.28,tw:.7+R()*1.6,sz:star?.14+R()*.22:.05+R()*.13}); }
+      sc.all=ALL; sc.pt=[];
+      if(ALL){ const KS=['war','pal','sorc','necro','druid']; for(let i=0;i<70;i++){ const k=KS[i%5], cl=CL[k], star=R()<cl.star*1.2, q={img:img(star?'star':'glow'),star,k:cl,x:R()*W,y:R()*H,sp:R(),f:.4+R()*1.1,p:R()*6.28,tw:.7+R()*1.6,sz:star?.14+R()*.22:.05+R()*.13}; q.img.setTint((cl.c[0]<<16)|(cl.c[1]<<8)|cl.c[2]); sc.pt.push(q); } sc.c=CL.none.c.slice(); }
+      else for(let i=0;i<66;i++){ const star=i>=46; sc.pt.push({img:img(star?'star':'glow'),star,x:R()*W,y:R()*H,sp:R(),f:.4+R()*1.1,p:R()*6.28,tw:.7+R()*1.6,sz:star?.14+R()*.22:.05+R()*.13}); }
     }
     update(time,dt){
       try{
         const W=this.scale.width, H=this.scale.height; if(!W||!H)return;
         const d=Math.min(dt,50)/1000; this.t+=d; const t=this.t, p=this.p, c=this.c;
-        this.poll-=d; if(this.poll<=0){ this.poll=.3; this.tg=CL[curCls()]||CL.none; }
+        this.poll-=d; if(this.poll<=0){ this.poll=.3; this.tg=this.all?CL.none:(CL[curCls()]||CL.none); }
         const tg=this.tg, k=Math.min(1,d*3.5); for(let i=0;i<3;i++)c[i]+=(tg.c[i]-c[i])*k; for(const key in p)p[key]+=(tg[key]-p[key])*k;
         const tint=((c[0]|0)<<16)|((c[1]|0)<<8)|(c[2]|0);
         this.moon.setPosition(W*.62,H*.06).setScale(W/128*1.3,W/128*.9).setTint(tint).setAlpha(.1+.03*Math.sin(t*.7));
@@ -6140,6 +6198,8 @@ function start(){
         const fs=Math.max(W,600)/1024, TW=1024*fs;
         for(const f of this.fogs){ f.off=((f.off+f.v*d)%TW+TW)%TW; f.a.setScale(fs).setTint(tint).setPosition(f.off,f.y*H); f.b.setScale(fs).setTint(tint).setPosition(f.off-TW,f.y*H); }
         const sm=Math.min(1,p.star/.5), gm=1-p.star*.6;
+        if(this.all){ for(const q of this.pt){ const cl=q.k; q.y+=cl.vy*(.6+q.sp)*d; if(q.y<-20){ q.y=H+20; q.x=Math.random()*W; } else if(q.y>H+20)q.y=-20;
+            q.img.setPosition(q.x+Math.sin(t*q.f+q.p)*cl.sw*(.5+q.sp*.5),q.y).setScale(q.sz).setAlpha(Math.max(0,.15+.85*Math.sin(t*q.tw*cl.tw*.6+q.p))*.8); if(q.star)q.img.setRotation(t*.3+q.p); } return; }
         for(const q of this.pt){ q.y+=p.vy*(.6+q.sp)*d; if(q.y<-20){ q.y=H+20; q.x=Math.random()*W; } else if(q.y>H+20)q.y=-20;
           const m=q.star?sm:gm, a=Math.max(0,.15+.85*Math.sin(t*q.tw*p.tw*.6+q.p))*m*.85;
           q.img.setPosition(q.x+Math.sin(t*q.f+q.p)*p.sw*(.5+q.sp*.5),q.y).setScale(q.sz).setTint(tint).setAlpha(a); if(q.star)q.img.setRotation(t*.3+q.p); }
@@ -6153,8 +6213,79 @@ function start(){
     sync();
   }catch(err){ destroy(); }
 }
-try{ const mo=new MutationObserver(sync); for(const id of ['sTitle','sSplash','sheet']){ const el=$(id); if(el)mo.observe(el,{attributes:true,attributeFilter:['hidden']}); } }catch(e){}
+try{ const mo=new MutationObserver(sync); for(const id of ['sTitle','sNew','sSplash','sheet','mapOv']){ const el=$(id); if(el)mo.observe(el,{attributes:true,attributeFilter:['hidden']}); } }catch(e){}
 sync(); setTimeout(sync,1500);
+})();
+</script>
+
+<script>
+/* ===== 스테이지 지도 연출: 길을 따라 흐르는 빛, 다음 스테이지 신호, 구간마다 다른 안개와 불씨 — 못 불러오면 지도만 보여요 ===== */
+(function(){
+'use strict';
+const TAU=6.2832, $=id=>document.getElementById(id);
+const ZC=[[170,178,190],[130,210,240],[255,118,62],[192,138,255]];   /* 1장 재 · 2장 서리 · 3장 불씨 · 레이드 보라 */
+const ZP=[{vy:14,sw:12},{vy:-8,sw:26},{vy:-48,sw:14},{vy:-22,sw:20}];
+let host=null, game=null, starting=false, ro=null;
+const mulberry=a=>()=>{ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return((t^t>>>14)>>>0)/4294967296; };
+const mk=(w,h,fn)=>{ const c=document.createElement('canvas'); c.width=w; c.height=h; fn(c.getContext('2d'),w,h); return c; };
+const bakeGlow=()=>mk(128,128,g=>{ const r=g.createRadialGradient(64,64,0,64,64,64); r.addColorStop(0,'rgba(255,255,255,1)'); r.addColorStop(.35,'rgba(255,255,255,.55)'); r.addColorStop(1,'rgba(255,255,255,0)'); g.fillStyle=r; g.fillRect(0,0,128,128); });
+const bakeRing=()=>mk(128,128,g=>{ const r=g.createRadialGradient(64,64,40,64,64,62); r.addColorStop(0,'rgba(255,255,255,0)'); r.addColorStop(.7,'rgba(255,255,255,.9)'); r.addColorStop(1,'rgba(255,255,255,0)'); g.fillStyle=r; g.fillRect(0,0,128,128); });
+const bakeFog=(seed)=>{ const R=mulberry(seed); return mk(1024,300,g=>{ for(let i=0;i<8;i++){ const cx=R()*1024, cy=110+R()*80, rx=170+R()*170, ry=50+R()*50, a=.3+R()*.25;
+  for(const o of [-1024,0,1024]){ g.save(); g.translate(cx+o,cy); g.scale(rx/ry,1); const r=g.createRadialGradient(0,0,0,0,0,ry); r.addColorStop(0,`rgba(255,255,255,${a})`); r.addColorStop(1,'rgba(255,255,255,0)'); g.fillStyle=r; g.beginPath(); g.arc(0,0,ry,0,TAU); g.fill(); g.restore(); } } }); };
+function destroy(){ try{ if(ro)ro.disconnect(); }catch(e){} ro=null; try{ if(game)game.destroy(true); }catch(e){} game=null; try{ if(host&&host.parentNode)host.parentNode.removeChild(host); }catch(e){} host=null; starting=false; }
+function sync(){
+  const ov=$('mapOv'), inn=$('mapIn'), on=!!ov&&!ov.hidden&&!!inn;
+  if(!on){ destroy(); return; }
+  if(game||starting||!window.__loadPhaser)return;
+  try{ if(matchMedia('(prefers-reduced-motion: reduce)').matches)return; }catch(e){}
+  starting=true; window.__loadPhaser(ok=>{ starting=false; const i2=$('mapIn'), o2=$('mapOv'); if(ok&&o2&&!o2.hidden&&i2&&!game)start(i2); });
+}
+function start(inn){
+  const P=window.Phaser; if(!P)return;
+  host=document.createElement('div'); host.className='mfx'; host.setAttribute('aria-hidden','true'); inn.appendChild(host); const my=host;
+  /* 지도에서 읽어오는 것: 스테이지 점 위치·상태, 길의 모양 */
+  const nodes=[...inn.querySelectorAll('.mn')].map(b=>({x:parseFloat(b.style.left),y:parseFloat(b.style.top),st:b.classList.contains('next')?'next':b.classList.contains('clear')?'clear':'lock',dg:b.classList.contains('dg'),i:b.dataset.i===undefined?99:+b.dataset.i}));
+  const pe=$('mapPath'); let pts=[]; try{ const L=pe.getTotalLength(); for(let s=0;s<=L;s+=5){ const p=pe.getPointAtLength(s); pts.push([p.x,p.y]); } }catch(e){}
+  const zoneAt=y=>{ let b=null,bd=1e9; for(const n of nodes){ const dd=Math.abs(n.y-y); if(dd<bd){ bd=dd; b=n; } } const i=b?b.i:0; return i>=15?3:i>=10?2:i>=5?1:0; };
+  const nearest=(x,y)=>{ let b=0,bd=1e12; for(let k=0;k<pts.length;k++){ const dd=(pts[k][0]-x)**2+(pts[k][1]-y)**2; if(dd<bd){ bd=dd; b=k; } } return b; };
+  class Map extends P.Scene{
+    constructor(){ super('map'); }
+    create(){
+      const sc=this, R=mulberry(404), tex=(k,c)=>{ if(sc.textures.exists(k))sc.textures.remove(k); sc.textures.addCanvas(k,c); };
+      const W=sc.scale.width||my.clientWidth||390, H=sc.scale.height||my.clientHeight||1800, img=k=>sc.add.image(0,0,k);
+      tex('glow',bakeGlow()); tex('ring',bakeRing()); tex('fog',bakeFog(21));
+      const tint=c=>(c[0]<<16)|(c[1]<<8)|c[2];
+      sc.t=0; sc.H=H; sc.W=W;
+      const nb=Math.max(3,Math.round(H/300)); sc.fogs=[]; for(let k=0;k<nb;k++){ const y=(k+.5)*H/nb, c=ZC[zoneAt(y)], al=.1+R()*.08; sc.fogs.push({a:img('fog').setOrigin(0,.5).setTint(tint(c)).setAlpha(al),b:img('fog').setOrigin(0,.5).setTint(tint(c)).setAlpha(al),y,v:(k%2?-1:1)*(6+R()*7),off:R()*600}); }
+      sc.pt=[]; for(let i=0;i<72;i++){ sc.pt.push({img:img('glow'),x:R()*W,y:R()*H,sp:R(),f:.4+R()*1.1,p:R()*6.28,tw:.7+R()*1.6,sz:.05+R()*.12}); }
+      sc.nd=nodes.filter(n=>n.i!==undefined).map(n=>({n,g:img('glow').setPosition(n.x,n.y),r1:n.st==='next'?img('ring').setPosition(n.x,n.y):null,r2:n.st==='next'?img('ring').setPosition(n.x,n.y):null}));
+      for(const o of sc.nd){ const n=o.n; o.g.setTint(n.st==='next'?0xfff0b8:n.dg?0xb98aff:n.st==='clear'?0xe0b64e:0x6a7a90); if(o.r1){ o.r1.setTint(n.dg?0xc9a0ff:0xffd36a); o.r2.setTint(n.dg?0xc9a0ff:0xffd36a); } }
+      sc.end=0; for(const n of nodes){ if(n.st==='next'||n.st==='clear'){ const k=nearest(n.x,n.y); if(k>sc.end)sc.end=k; } }
+      sc.dots=[]; if(pts.length&&sc.end>3){ const nd=Math.min(14,Math.max(3,Math.round(sc.end/12))); for(let k=0;k<nd;k++)sc.dots.push({img:img('glow').setTint(0xffe2a0),s:k*sc.end/nd}); }
+    }
+    update(time,dt){
+      try{
+        const W=this.scale.width, H=this.scale.height; if(!W||!H)return;
+        const d=Math.min(dt,50)/1000; this.t+=d; const t=this.t;
+        const fs=Math.max(W,600)/1024, TW=1024*fs;
+        for(const f of this.fogs){ f.off=((f.off+f.v*d)%TW+TW)%TW; f.a.setScale(fs).setPosition(f.off,f.y); f.b.setScale(fs).setPosition(f.off-TW,f.y); }
+        for(const q of this.pt){ const z=zoneAt(q.y), pr=ZP[z]; q.y+=pr.vy*(.6+q.sp)*d; if(q.y<-20){ q.y=H+20; q.x=Math.random()*W; } else if(q.y>H+20){ q.y=-20; q.x=Math.random()*W; }
+          const c=ZC[z]; q.img.setPosition(q.x+Math.sin(t*q.f+q.p)*pr.sw*(.5+q.sp*.5),q.y).setScale(q.sz).setTint((c[0]<<16)|(c[1]<<8)|c[2]).setAlpha(Math.max(0,.15+.85*Math.sin(t*q.tw+q.p))*.8); }
+        for(const o of this.nd){ const n=o.n, p=Math.sin(t*2.2+n.x);
+          if(n.st==='next'){ o.g.setScale(1.7+.25*p).setAlpha(.55+.15*p); for(const [r,ph] of [[o.r1,0],[o.r2,.5]]){ const u=((t*.55+ph)%1); r.setScale(.35+1.1*u).setAlpha(.8*(1-u)); } }
+          else if(n.st==='clear')o.g.setScale(1.1+.1*p).setAlpha(.26+.06*p);
+          else o.g.setScale(.9).setAlpha(.07); }
+        for(const o of this.dots){ o.s=(o.s+16*d)%this.end; const k=Math.min(pts.length-1,o.s|0); o.img.setPosition(pts[k][0],pts[k][1]).setScale(.14+.05*Math.sin(t*5+o.s)).setAlpha(.85*Math.min(1,o.s/12,(this.end-o.s)/12)); }
+      }catch(err){ destroy(); }
+    }
+  }
+  try{
+    game=new P.Game({type:P.AUTO,parent:my,width:my.clientWidth||390,height:my.clientHeight||1800,transparent:true,banner:false,
+      scale:{mode:P.Scale.RESIZE},scene:[Map],render:{antialias:true},fps:{target:60,smoothStep:true},audio:{noAudio:true},input:{keyboard:false,mouse:false,touch:false,gamepad:false}});
+    if(window.ResizeObserver){ ro=new ResizeObserver(()=>{ try{ if(game)game.scale.refresh(); }catch(e){} }); ro.observe(my); }
+  }catch(err){ destroy(); }
+}
+try{ const el=$('mapOv'); if(el)new MutationObserver(sync).observe(el,{attributes:true,attributeFilter:['hidden']}); }catch(e){}
 })();
 </script>
 
