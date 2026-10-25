@@ -777,6 +777,11 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 .scard .mapb{font-size:13px}
 .mpin{position:absolute;z-index:4;transform:translate(-50%,-100%);padding:3px 10px;border-radius:999px;background:linear-gradient(#ffd36a,#e0a63a);color:#2a1a08;font:800 12px var(--f-body);white-space:nowrap;pointer-events:none;box-shadow:0 2px 8px #000a}
 .mpin::after{content:"";position:absolute;left:50%;bottom:-5px;transform:translateX(-50%);border:6px solid transparent;border-top-color:#e0a63a;border-bottom:0}
+.mhero{position:absolute;z-index:4;width:54px;height:66px;transform:translate(-50%,-100%);display:flex;align-items:flex-end;justify-content:center;pointer-events:none;transition:left .45s ease,top .45s ease}
+.mhero::before{content:"";position:absolute;left:50%;bottom:-3px;width:40px;height:10px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(#000c,#0000 70%)}
+.mhero img{position:relative;max-width:100%;max-height:100%;object-fit:contain;filter:drop-shadow(0 3px 3px #000a);transform-origin:50% 100%;animation:idleB 3.2s ease-in-out infinite}
+.mhero .cem{position:relative;font-size:34px;line-height:1}
+@media (prefers-reduced-motion:reduce){.mhero img{animation:none}.mhero{transition:none}}
 .mn.chosen{box-shadow:0 0 0 4px #ffd36a66,0 0 18px #ffd36a99}
 .mapov{position:absolute;inset:0;z-index:26;background:#0b0810;display:flex;flex-direction:column}
 .mapsc{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y}
@@ -866,7 +871,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.0.0282</div>
+    <div class="ver" id="verT">v0.6.0.0283</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -4683,7 +4688,11 @@ function openMap(){
     $('#mapC').onclick=close; $('#mapGo').onclick=go; };
   let going=false;
   const mark=()=>{ ov.querySelectorAll('.mpin').forEach(e=>e.remove()); ov.querySelectorAll('.mn.chosen').forEach(e=>e.classList.remove('chosen')); const nb=ov.querySelector(`.mn[data-i="${selStage}"]`); if(!nb)return; nb.classList.add('chosen');
-    nb.parentNode.insertAdjacentHTML('beforeend',`<div class="mpin" style="left:${nb.style.left};top:calc(${nb.style.top} - 36px)">📍 선택</div>`); };
+    nb.parentNode.insertAdjacentHTML('beforeend',`<div class="mpin" style="left:${nb.style.left};top:calc(${nb.style.top} - 36px)">📍 선택</div>`);
+    /* 선택한 스테이지 옆에 내 캐릭터가 서 있어요(이름표가 있는 반대쪽). 다른 곳을 고르면 그쪽으로 걸어가요 */
+    if(cur){ const i=+nb.dataset.i, hx=P[i][0]+(P[i][0]<Wd/2?-52:52), hy=P[i][1]+24; let h=ov.querySelector('.mhero');
+      if(!h){ nb.parentNode.insertAdjacentHTML('beforeend',`<div class="mhero" style="left:${hx.toFixed(1)}px;top:${hy.toFixed(1)}px"><span class="cem">${clsIc(cur.cls,34)}</span><img src="img/hero_${cur.cls}.png" alt="" onload="this.previousElementSibling.style.display='none'" onerror="this.remove()"></div>`); }
+      else{ h.style.left=hx.toFixed(1)+'px'; h.style.top=hy.toFixed(1)+'px'; } } };
   const go=()=>{ if(pick>clr||going)return; going=true; selStage=pick; lsSet('dkdef2.stage',String(pick)); renderStagePanel(); mark(); show(); sfx('pick');
     setTimeout(()=>{ close(); const sb=$('#stageCard'); if(sb){ sb.classList.remove('pick'); void sb.offsetWidth; sb.classList.add('pick'); } try{ toast(`✔ ${STAGES[pick].id} · ${STAGES[pick].n} 선택`); }catch(e){} },420); };
   mark();
