@@ -762,6 +762,9 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 #sSplash .spVer{position:absolute;left:14px;bottom:max(10px,env(safe-area-inset-bottom));font-size:11px;color:#bfaed0aa;letter-spacing:.08em;pointer-events:none}
 @media (prefers-reduced-motion:reduce){#sSplash .spTap{animation:none}}
 #sSplash.go .spTap{opacity:0;animation:none;transition:opacity .2s}
+/* 결과 화면 연출(Phaser) 레이어: 글자 뒤에 깔려요 */
+#sEnd{isolation:isolate}
+#sEnd .efx{position:absolute;inset:0;z-index:-1;pointer-events:none;mix-blend-mode:screen;overflow:hidden}
 /* 마을 연출(Phaser) 레이어: 건물 버튼 뒤, 화면 합성(screen)이라 검은 부분은 투명하게 보임 */
 .tmap .tfx{position:absolute;inset:0;z-index:0;pointer-events:none;mix-blend-mode:screen;overflow:hidden}
 .tmap .tfx canvas{display:block}
@@ -829,7 +832,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.0.0271</div>
+    <div class="ver" id="verT">v0.6.0.0272</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
@@ -4863,7 +4866,7 @@ function showEnd(msg){
     const missLn=miss>0?`<div class="meta" style="margin-top:6px">못 주운 아이템 ${miss}개 — ${[left?`바닥에 남음 ${left}`:'',lost?`바닥에 90개가 넘어 사라짐 ${lost}`:'',oth?`기타 ${oth}`:''].filter(Boolean).join(' · ')}</div>`:'';
     $('#endBox').innerHTML=`<div class="etabs" role="tablist"><button type="button" data-t="l" role="tab">📦 전리품</button><button type="button" data-t="r" role="tab">⚔️ 데미지 순위</button></div><div class="epg" id="epR"><div><div style="margin-bottom:6px">데미지 순위</div>${top3}</div><div class="tp"><span>⚔️ 총 데미지</span><b>${f(tot)}</b></div><div class="tp"><span>🩸 내가 받은 피해</span><b>${f(G.stTaken||0)}</b></div></div><div class="epg" id="epL">${gd!==null?`<div class="tp"><span>💰 골드 변화</span><b style="color:${gd>0?'#9fd18b':gd<0?'#ff8a7a':'var(--ink)'}">${gd>0?'+':gd<0?'−':''}${f(Math.abs(gd))}G</b></div>`:''}${(G.stRev|0)>0?`<div class="tp"><span>✨ 부활한 횟수</span><b>${G.stRev|0}회</b></div>`:''}${win&&!msg&&G.ccThis?`<div class="tp"><span>🏆 누적 클리어</span><b>${G.ccThis}회 <small>전체 ${G.ccAll}회</small></b></div>`:''}<div><div style="margin-bottom:6px">📦 획득한 아이템 <b style="display:inline;font-size:14px;color:var(--ink)">${gs}</b>개</div><div class="rr">${[0,1,2,3].concat(got[4]?[4]:[]).map(r=>`<div style="color:${RARC[r]}">${RARN[r]}<b>${got[r]|0}</b></div>`).join('')}</div>${missLn}</div></div>`;
     endTab('l'); }
-  show('#sEnd');
+  show('#sEnd'); try{ window.__endFx&&window.__endFx.show(win&&!msg); }catch(e){}
 }
 function confirmExit(cb){ modal(`<h3>🚪 나갈까요?</h3><p style="margin:0 0 12px;font-size:14px">타이틀 화면으로 돌아갑니다.</p><div class="row2"><button class="btn" id="exN">취소</button><button class="btn primary" id="exY">나가기</button></div>`,m=>{ m.querySelector('#exN').onclick=closeModal; m.querySelector('#exY').onclick=()=>{ closeModal(); cb(); }; }); }
 $('#bToTitle').onclick=()=>quitToTitle();
@@ -5996,6 +5999,86 @@ function start(){
     game=new P.Game({type:P.AUTO,parent:host,width:host.clientWidth||340,height:host.clientHeight||507,transparent:true,banner:false,
       scale:{mode:P.Scale.RESIZE},scene:[Town],render:{antialias:true},fps:{target:60,smoothStep:true},audio:{noAudio:true},input:{keyboard:false,mouse:false,touch:false,gamepad:false}});
     if(window.ResizeObserver){ ro=new ResizeObserver(()=>{ try{ if(game)game.scale.refresh(); }catch(e){} }); ro.observe(host); }
+  }catch(err){ destroy(); }
+}
+})();
+</script>
+
+<script>
+/* ===== 결과 화면 연출: 클리어는 금빛 빛줄기·가루, 패배는 붉은 안개·재 — 못 불러오면 기존 화면 그대로 ===== */
+(function(){
+'use strict';
+const TAU=6.2832;
+let host=null, game=null, watch=0, ro=null;
+const mulberry=a=>()=>{ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return((t^t>>>14)>>>0)/4294967296; };
+const mk=(w,h,fn)=>{ const c=document.createElement('canvas'); c.width=w; c.height=h; fn(c.getContext('2d'),w,h); return c; };
+const bakeGlow=()=>mk(128,128,g=>{ const r=g.createRadialGradient(64,64,0,64,64,64); r.addColorStop(0,'rgba(255,255,255,1)'); r.addColorStop(.35,'rgba(255,255,255,.55)'); r.addColorStop(1,'rgba(255,255,255,0)'); g.fillStyle=r; g.fillRect(0,0,128,128); });
+const bakeStar=()=>mk(64,64,g=>{ g.translate(32,32); for(const [sx,sy] of [[1,.12],[.12,1]]){ g.save(); g.scale(sx,sy); const r=g.createRadialGradient(0,0,0,0,0,30); r.addColorStop(0,'rgba(255,255,255,1)'); r.addColorStop(1,'rgba(255,255,255,0)'); g.fillStyle=r; g.beginPath(); g.arc(0,0,30,0,TAU); g.fill(); g.restore(); }
+  const c=g.createRadialGradient(0,0,0,0,0,9); c.addColorStop(0,'rgba(255,255,255,1)'); c.addColorStop(1,'rgba(255,255,255,0)'); g.fillStyle=c; g.beginPath(); g.arc(0,0,9,0,TAU); g.fill(); });
+const bakeRays=()=>mk(1024,1024,g=>{ const r=g.createRadialGradient(512,512,0,512,512,512); r.addColorStop(0,'rgba(255,255,255,.75)'); r.addColorStop(.55,'rgba(255,255,255,.28)'); r.addColorStop(1,'rgba(255,255,255,0)'); g.fillStyle=r;
+  const n=14; for(let i=0;i<n;i++){ const a=i*TAU/n, w=TAU/n*.32; g.beginPath(); g.moveTo(512,512); g.arc(512,512,512,a,a+w); g.closePath(); g.fill(); } });
+const bakeFog=(seed,rgb)=>{ const R=mulberry(seed); return mk(1024,300,g=>{ for(let i=0;i<8;i++){ const cx=R()*1024, cy=110+R()*80, rx=170+R()*170, ry=50+R()*50, a=.3+R()*.25;
+  for(const o of [-1024,0,1024]){ g.save(); g.translate(cx+o,cy); g.scale(rx/ry,1); const r=g.createRadialGradient(0,0,0,0,0,ry); r.addColorStop(0,`rgba(${rgb},${a})`); r.addColorStop(1,`rgba(${rgb},0)`); g.fillStyle=r; g.beginPath(); g.arc(0,0,ry,0,TAU); g.fill(); g.restore(); } } }); };
+
+function destroy(){ clearInterval(watch); watch=0; try{ if(ro)ro.disconnect(); }catch(e){} ro=null; try{ if(game)game.destroy(true); }catch(e){} game=null; try{ if(host&&host.parentNode)host.parentNode.removeChild(host); }catch(e){} host=null; }
+function check(){ const e=document.getElementById('sEnd'); if(!host||!e||e.hidden||!host.isConnected)destroy(); }
+function show(win){
+  destroy();
+  const e=document.getElementById('sEnd'); if(!e||!window.__loadPhaser)return;
+  try{ if(matchMedia('(prefers-reduced-motion: reduce)').matches)return; }catch(x){}
+  const my=document.createElement('div'); my.className='efx'; my.setAttribute('aria-hidden','true'); e.insertBefore(my,e.firstChild); host=my;
+  watch=setInterval(check,700);
+  window.__loadPhaser(ok=>{ if(ok&&host===my&&my.isConnected&&!game)start(my,!!win); });
+}
+window.__endFx={show,destroy};
+
+function start(my,win){
+  const P=window.Phaser;
+  class End extends P.Scene{
+    constructor(){ super('end'); }
+    create(){
+      const sc=this, R=mulberry(win?31:57), tex=(k,c)=>{ if(sc.textures.exists(k))sc.textures.remove(k); sc.textures.addCanvas(k,c); };
+      const W=sc.scale.width||my.clientWidth||390, H=sc.scale.height||my.clientHeight||780;
+      tex('glow',bakeGlow()); tex('star',bakeStar());
+      const img=(k)=>sc.add.image(0,0,k);
+      sc.fogs=[]; sc.t=0; sc.RR=R; sc.win=win;
+      if(win){
+        tex('rays',bakeRays()); tex('fog',bakeFog(6,'255,214,130'));
+        sc.top=img('glow').setTint(0xffc860).setAlpha(.34);
+        sc.rays=img('rays').setTint(0xffd878).setAlpha(.24);
+        for(const [y,v,al] of [[.28,8,.16],[.78,-10,.2]])sc.fogs.push({a:img('fog').setOrigin(0,.5).setAlpha(al),b:img('fog').setOrigin(0,.5).setAlpha(al),y,v,off:R()*600});
+        sc.dust=[]; for(let i=0;i<55;i++){ const gl=R()<.65; sc.dust.push({img:img(gl?'glow':'star').setTint([0xffd86a,0xffe9a8,0xffb84a][(R()*3)|0]),gl,x:R()*W,y:R()*H,vy:22+R()*60,f:.5+R()*1.1,p:R()*6.28,sw:8+R()*22,sz:gl?.06+R()*.12:.12+R()*.2,tw:1.4+R()*2.6}); }
+        sc.burst=[]; for(let i=0;i<30;i++){ const a=-Math.PI/2+(R()-.5)*2.3, sp=260+R()*520; sc.burst.push({img:img('star').setTint([0xffd24a,0xffa83a,0xfff0b0,0xffffff][(R()*4)|0]),x:W/2,y:H*.3,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,sp:(R()-.5)*8,rot:R()*6.28,sz:.35+R()*.5}); }
+        sc.bt=0;
+      }else{
+        tex('fog',bakeFog(8,'200,60,60'));
+        sc.low=img('glow').setTint(0xc82a22).setAlpha(.3);
+        for(const [y,v,al] of [[.42,-7,.2],[.7,10,.26],[.92,-13,.3]])sc.fogs.push({a:img('fog').setOrigin(0,.5).setAlpha(al),b:img('fog').setOrigin(0,.5).setAlpha(al),y,v,off:R()*600});
+        sc.dust=[]; for(let i=0;i<40;i++){ sc.dust.push({img:img('glow').setTint([0xd08070,0xb06050,0xe8a090][(R()*3)|0]),gl:true,x:R()*W,y:R()*H,vy:14+R()*34,f:.4+R()*.9,p:R()*6.28,sw:10+R()*26,sz:.04+R()*.08,tw:1.2+R()*2}); }
+      }
+    }
+    update(time,dt){
+      try{
+        const W=this.scale.width, H=this.scale.height; if(!W||!H)return;
+        const d=Math.min(dt,50)/1000; this.t+=d; const t=this.t;
+        const fs=Math.max(W,600)/1024, TW=1024*fs;
+        for(const f of this.fogs){ f.off=((f.off+f.v*d)%TW+TW)%TW; for(const o of [f.a,f.b])o.setScale(fs); f.a.setPosition(f.off,f.y*H); f.b.setPosition(f.off-TW,f.y*H); }
+        if(this.win){
+          this.top.setPosition(W/2,0).setScale(W/128*1.7,H/128*.9).setAlpha(.3+.06*Math.sin(t*1.1));
+          this.rays.setPosition(W/2,-H*.04).setScale(Math.max(W,H)*2.2/1024).setRotation(Math.sin(t*.12)*.28).setAlpha(.2+.05*Math.sin(t*.9));
+          this.bt+=d; for(const b of this.burst){ if(this.bt>2.8){ b.img.setAlpha(0); continue; } b.vy+=560*d; b.vx*=1-.9*d; b.x+=b.vx*d; b.y+=b.vy*d; b.rot+=b.sp*d; b.img.setPosition(b.x,b.y).setRotation(b.rot).setScale(b.sz*(.8+.2*Math.sin(t*14+b.rot))).setAlpha(Math.max(0,1-this.bt/2.8)); }
+        }else{
+          this.low.setPosition(W/2,H).setScale(W/128*1.7,H/128*.55).setAlpha(.26+.08*Math.sin(t*1.3));
+        }
+        for(const p of this.dust){ p.y+=p.vy*d; if(p.y>H+20){ p.y=-20; p.x=Math.random()*W; } p.img.setPosition(p.x+Math.sin(t*p.f+p.p)*p.sw,p.y).setScale(p.sz).setAlpha(Math.max(0,.2+.8*Math.sin(t*p.tw+p.p)));
+          if(!p.gl)p.img.setRotation(t*.5+p.p); }
+      }catch(err){ destroy(); }
+    }
+  }
+  try{
+    game=new P.Game({type:P.AUTO,parent:my,width:my.clientWidth||390,height:my.clientHeight||780,transparent:true,banner:false,
+      scale:{mode:P.Scale.RESIZE},scene:[End],render:{antialias:true},fps:{target:60,smoothStep:true},audio:{noAudio:true},input:{keyboard:false,mouse:false,touch:false,gamepad:false}});
+    if(window.ResizeObserver){ ro=new ResizeObserver(()=>{ try{ if(game)game.scale.refresh(); }catch(e){} }); ro.observe(my); }
   }catch(err){ destroy(); }
 }
 })();
