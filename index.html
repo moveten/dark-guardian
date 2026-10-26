@@ -973,13 +973,17 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 @keyframes scPick{0%{box-shadow:0 0 0 rgba(255,211,106,0)}30%{box-shadow:0 0 22px rgba(255,211,106,.9)}100%{box-shadow:0 0 0 rgba(255,211,106,0)}}
 .mpin{position:absolute;z-index:4;transform:translate(-50%,-100%);padding:3px 10px;border-radius:999px;background:linear-gradient(#ffd36a,#e0a63a);color:#2a1a08;font:800 12px var(--f-body);white-space:nowrap;pointer-events:none;box-shadow:0 2px 8px #000a}
 .mpin::after{content:"";position:absolute;left:50%;bottom:-5px;transform:translateX(-50%);border:6px solid transparent;border-top-color:#e0a63a;border-bottom:0}
-.mboss{position:absolute;z-index:3;width:66px;height:62px;transform:translate(-50%,-100%);display:flex;align-items:flex-end;justify-content:center;pointer-events:none}
-.mboss::before{content:"";position:absolute;left:50%;bottom:-3px;width:46px;height:9px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(#000c,#0000 70%)}
-.mboss img{position:relative;max-width:100%;max-height:100%;object-fit:contain;filter:drop-shadow(0 3px 3px #000a)}
-.mboss.clear img{filter:grayscale(.85) brightness(.7) drop-shadow(0 3px 3px #000a)}
-.mboss.lock img{filter:brightness(.5) sepia(1) hue-rotate(235deg) saturate(3.5) drop-shadow(0 0 7px rgba(205,155,255,1));opacity:.95}
-.mboss.next img{filter:drop-shadow(0 0 10px rgba(255,120,60,.9)) drop-shadow(0 3px 3px #000a);transform-origin:50% 100%;animation:idleB 3.2s ease-in-out infinite}
-.mboss b{position:absolute;right:11px;font-size:11px;border-radius:50%;width:18px;height:18px;display:grid;place-items:center;color:maroon}
+.mboss{position:absolute;z-index:3;width:80px;height:74px;transform:translate(-50%,-100%);display:flex;align-items:flex-end;justify-content:center;pointer-events:none}
+.mboss::before{content:"";position:absolute;left:50%;bottom:-6px;width:92px;height:88px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(closest-side,rgba(150,132,188,.62) 0 52%,rgba(70,52,100,.42) 78%,rgba(40,28,60,0) 100%)}   /* 어두운 보스도 배경에서 떠 보이게 밝은 후광 */
+.mboss img{position:relative;max-width:100%;max-height:100%;object-fit:contain;filter:drop-shadow(0 0 1.5px #fff) drop-shadow(0 0 1px #fff) drop-shadow(0 3px 3px #000a)}
+.mboss.clear img{filter:grayscale(.9) brightness(.7) drop-shadow(0 0 1.5px #ddd) drop-shadow(0 3px 3px #000a)}
+.mboss.lock img{filter:brightness(.6) sepia(1) hue-rotate(235deg) saturate(3.5) drop-shadow(0 0 7px rgba(205,155,255,1)) drop-shadow(0 0 1.5px #fff);opacity:.95}
+.mboss.next img{filter:drop-shadow(0 0 10px rgba(255,120,60,.95)) drop-shadow(0 0 1.5px #fff);transform-origin:50% 100%;animation:idleB 3.2s ease-in-out infinite}
+.mbn{position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:4px;width:max-content;max-width:76px;text-align:center;white-space:normal;word-break:keep-all;line-height:1.2;padding:2px 8px;font:800 11px var(--f-body);letter-spacing:-.01em;color:#f3e7cc;background:rgba(10,7,16,.92);border:1px solid #8a7752;border-radius:7px;box-shadow:0 2px 7px #000c}
+.mboss.next .mbn{color:#ffd9b8;border-color:#ff8a4a;box-shadow:0 0 10px rgba(255,120,60,.55),0 2px 7px #000c}
+.mboss.lock .mbn{color:#d9c4f5;border-color:#8a63c4}
+.mboss.clear .mbn{color:#a89c88;border-color:#4a4036}
+.mboss b{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%) rotate(-6deg);font:900 52px/1 var(--f-body);color:#e11d1d;-webkit-text-stroke:2px #3b0303;text-shadow:0 0 6px #000,0 3px 6px #000c;z-index:2}   /* 깬 보스: 큰 빨간 X */
 @media (prefers-reduced-motion:reduce){.mboss.next img{animation:none}}
 .mhero{position:absolute;z-index:4;width:54px;height:66px;transform:translate(-50%,-100%);display:flex;align-items:flex-end;justify-content:center;pointer-events:none;transition:left .45s ease,top .45s ease}
 .mhero::before{content:"";position:absolute;left:50%;bottom:-3px;width:40px;height:10px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(#000c,#0000 70%)}
@@ -1080,7 +1084,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.0.0323</div>
+    <div class="ver" id="verT">v0.6.0.0324</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -4998,8 +5002,8 @@ function openMap(){
   let nodes='';
   for(let i=0;i<N;i++){ const S=STAGES[i], st=i<clr?'clear':i===clr?'next':'lock', ic=st==='clear'?'✔':st==='lock'?'🔒':'▶', side=P[i][0]<Wd/2?'r':'l';
     { const bi=S.bs||MAPBOSS[S.id]; if(bi){ const bx=Math.max(40,Math.min(Wd-40,P[i][0]+(side==="r"?-64:64)));   /* 이름표 반대쪽에 보스가 작게 서 있어요: 깬 곳은 흑백+✔, 도전할 곳은 붉은 빛, 못 가는 곳은 보라 실루엣 */
-      nodes+=`<div class="mboss ${st}" style="left:${bx.toFixed(1)}px;top:${(P[i][1]+16).toFixed(1)}px" aria-hidden="true"><img src="img/${bi}.png" alt="" onerror="this.parentNode.remove()">${st==='clear'?'<b>✘</b>':''}</div>`; } }
-    nodes+=`<button type="button" class="mn ${st}${S.raid?' dg':''}" data-i="${i}" style="left:${P[i][0].toFixed(1)}px;top:${P[i][1].toFixed(1)}px" aria-label="${esc(S.id)} ${esc(S.n)}"><b>${esc(S.id)}</b><i>${S.raid?'🐉':ic}</i></button><span class="ml" style="top:${P[i][1].toFixed(1)}px;${side==='r'?`left:${(P[i][0]+38).toFixed(1)}px;text-align:left`:`right:${(Wd-P[i][0]+38).toFixed(1)}px;text-align:right`}">${esc(S.n)}</span>`; }
+      nodes+=`<div class="mboss ${st}" style="left:${bx.toFixed(1)}px;top:${(P[i][1]+16).toFixed(1)}px" aria-hidden="true"><img src="img/${bi}.png" alt="" onerror="this.parentNode.remove()">${st==='clear'?'<b>✘</b>':''}<span class="mbn">${esc(S.bn||'')}</span></div>`; } }
+    nodes+=`<button type="button" class="mn ${st}${S.raid?' dg':''}" data-i="${i}" style="left:${P[i][0].toFixed(1)}px;top:${P[i][1].toFixed(1)}px" aria-label="${esc(S.id)} ${esc(S.n)}"><b>${esc(S.id)}</b><i>${S.raid?'🐉':ic}</i></button>`; }
   nodes+=`<button type="button" class="mn lock soon" disabled style="left:${P[N][0].toFixed(1)}px;top:${P[N][1].toFixed(1)}px"><b>6</b><i>🔒</i></button><span class="ml" style="top:${P[N][1].toFixed(1)}px;${P[N][0]<Wd/2?`left:${(P[N][0]+38).toFixed(1)}px`:`right:${(Wd-P[N][0]+38).toFixed(1)}px;text-align:right`}">업데이트 예정</span>`;
   for(const [i,t] of [[0,'1장'],[5,'2장'],[10,'3장'],[15,'🐉 레이드']])nodes+=`<div class="mch" style="top:${(py(i)+(i?GAP*.5:GAP*.62)).toFixed(1)}px">${t}</div>`;
   let bgs=''; const FD=40;   /* 장별 배경 그림(img/map_ch1~3, map_raid): 이어 붙이고 가장자리를 안개처럼 섞어요. 파일이 없으면 그라데이션만 보여요 */
@@ -5007,6 +5011,7 @@ function openMap(){
     const mk=k===0?'linear-gradient(to bottom,transparent,#000 14%)':k===3?'linear-gradient(to bottom,#000 86%,transparent)':'linear-gradient(to bottom,transparent,#000 12%,#000 88%,transparent)';
     bgs+=`<div class="mbg" style="top:${t0.toFixed(1)}px;height:${h.toFixed(1)}px;background-image:url(img/map_${key}.webp);-webkit-mask-image:${mk};mask-image:${mk}"></div>`; });
   ov.innerHTML=`<div class="mapwin"><div class="mapsc" id="mapSc"><div class="mapin" id="mapIn" style="height:${H}px;background:${bg}">${bgs}<svg width="${Wd}" height="${H}" viewBox="0 0 ${Wd} ${H}" aria-hidden="true"><path d="${d}" fill="none" stroke="#000" stroke-opacity=".55" stroke-width="18" stroke-linecap="round"/><path id="mapPath" d="${d}" fill="none" stroke="#4a4036" stroke-width="10" stroke-linecap="round"/><path d="${d}" fill="none" stroke="#7a6a54" stroke-width="2" stroke-dasharray="3 10" stroke-linecap="round"/><path id="mapDone" d="${d}" fill="none" stroke="#e0b64e" stroke-width="5" stroke-linecap="round" stroke-opacity=".85" stroke-dasharray="0 99999"/></svg>${nodes}</div></div><button class="mapx" id="mapX" type="button" aria-label="닫기">✕</button><div class="mapbar" id="mapBar"></div></div>`;
+  try{ const mi=$('#mapIn').getBoundingClientRect(); ov.querySelectorAll('.mbn').forEach(pl=>{ const r=pl.getBoundingClientRect(); let dx=0; if(r.right>mi.right-5)dx=mi.right-5-r.right; if(r.left<mi.left+5)dx=mi.left+5-r.left; if(dx)pl.style.transform=`translateX(calc(-50% + ${dx.toFixed(1)}px))`; }); }catch(e){}   /* 보스 이름표가 화면 끝에서 잘리지 않게 */
   try{ const pe=$('#mapPath'), dn=$('#mapDone'), k=Math.min(clr,N-1); if(clr>0){ let best=0,bd=1e12,L=pe.getTotalLength(); for(let s=0;s<=L;s+=4){ const p=pe.getPointAtLength(s), dd=(p.x-P[k][0])**2+(p.y-P[k][1])**2; if(dd<bd){ bd=dd; best=s; } } dn.setAttribute('stroke-dasharray',`${best} 99999`); } }catch(e){}
   let pick=Math.min(selStage,N-1);
   const bar=$('#mapBar'), close=()=>{ ov.hidden=true; ov.innerHTML=''; ov.onpointerdown=null; };
@@ -5020,7 +5025,6 @@ function openMap(){
     nb.parentNode.insertAdjacentHTML('beforeend',`<div class="mpin" style="left:${nb.style.left};top:calc(${nb.style.top} - 36px)">📍 선택</div>`); };   /* 📍는 '이 스테이지로 선택'을 눌러 정한 곳 */
   /* 내 캐릭터는 누른 스테이지 바로 옆(이름표 쪽, 보스 반대편)으로 걸어가요. 이름표는 캐릭터가 설 자리만큼 바깥으로 비켜요 */
   const place=i=>{ if(!cur)return; const nb=ov.querySelector(`.mn[data-i="${i}"]`); if(!nb)return;
-    ov.querySelectorAll('.ml').forEach(l=>l.style.removeProperty('--lx')); { const lb=nb.nextElementSibling; if(lb&&lb.classList.contains('ml'))lb.style.setProperty('--lx',(P[i][0]<Wd/2?'56px':'-56px')); }
     const hx=P[i][0]+(P[i][0]<Wd/2?64:-64), hy=P[i][1]+24; let h=ov.querySelector('.mhero');
     if(!h){ nb.parentNode.insertAdjacentHTML('beforeend',`<div class="mhero" style="left:${hx.toFixed(1)}px;top:${hy.toFixed(1)}px"><span class="cem">${clsIc(cur.cls,34)}</span><img src="img/hero_${cur.cls}.png" alt="" onload="this.previousElementSibling.style.display='none'" onerror="this.remove()"></div>`); }
     else{ h.style.left=hx.toFixed(1)+'px'; h.style.top=hy.toFixed(1)+'px'; } };
