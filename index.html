@@ -1055,7 +1055,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.0.0316</div>
+    <div class="ver" id="verT">v0.6.0.0317</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -5140,7 +5140,7 @@ function townSlot(k,pos){ pos=pos||''; const B=getTown()[k], D=TOWN_B[k], lv=B.l
   const b=townBub(k);
   return `<div class="tsl" style="${pos}"><button class="tbub ${b.cls}" data-tbub="${k}">${b.tx}</button><button class="tbd" data-tbld="${k}" aria-label="${D.n}"><svg viewBox="0 0 100 120" preserveAspectRatio="xMidYMax meet"><use href="#${D.sy}" width="100" height="120"/></svg></button><div class="tlb">${tag}${D.n} Lv.${lv}</div></div>`; }
 /* ===== 달빛 도박장 (슬롯머신): 한 판 100,000G(공유보관함 골드) → 결과를 먼저 정해 저장하고, 화면은 연출만 보여줘요 =====
-   일반(99%): 조각(그림자/각성 반반, 1~20개) — 일반 골드 보상은 없음
+   일반(99%): 절반은 조각(그림자/각성 반반, 1~20개) · 절반은 꽝(보상 없음)
    대박 조각 0.5%: 조각 100개 (7 7 7 + 폭죽) · 대박 골드 0.5%: 500,000G (💎 💎 💎 + 금화 비) */
 const CAS_COST=100000, CAS_JP_SHARD=100, CAS_JP_GOLD=500000, CAS_JP_P=.005;
 const CAS_SYM={sh:'🌑',aw:'✦',gd:'💰',j7:'7',dm:'💎'}, CAS_FILL=['sh','aw','gd','j7','dm','gd','sh','aw','gd'];
@@ -5149,6 +5149,7 @@ const CAS_SAY={
   go:['자, 간다…!','어디 보자, 오늘의 운은…','두근두근…'],
   win:['오, 꽤 건졌군!','나쁘지 않아. 한 번 더?','거 봐, 돌리면 나온다니까~'],
   low:['흠, 이번엔 좀 짜군. 다시 한 번?','아슬아슬했는데! 또 해 보게.','다음엔 나올 거야, 아마도…'],
+  miss:['아이쿠, 꽝이네! 다음엔 나올 거야.','이런… 동전만 삼켰군. 한 번 더?','운이 없었구먼. 그래도 계속 돌리면 나온다니까~'],
   poor:['돈부터 가져오게, 손님~','주머니가 가볍구먼. 공유보관함에 골드를 모아 오게.'],
   full:['창고가 꽉 찼네. 자리부터 비우고 오게.'],
   tense:['이…이 소리는…?!','설마… 설마…!'],
@@ -5158,12 +5159,14 @@ const casPick=a=>a[Math.floor(Math.random()*a.length)];
 function casRoll(){ const r=Math.random(), ri2=(a,b)=>a+Math.floor(Math.random()*(b-a+1)), mat=()=>Math.random()<.5?'shard':'ashard';
   if(r<CAS_JP_P)return {k:'jps',mat:mat(),n:CAS_JP_SHARD};
   if(r<CAS_JP_P*2)return {k:'jpg',gold:CAS_JP_GOLD};
+  if(Math.random()<.5)return {k:'no'};
   return {k:'sh',mat:mat(),n:ri2(1,20)}; }
+const casMiss=()=>{ const a=['sh','aw','gd','j7','dm'].sort(()=>Math.random()-.5).slice(0,3); return a; };   /* 꽝: 서로 다른 그림 3개 */
 const casSym=o=>o.k==='jps'?'j7':o.k==='jpg'?'dm':o.k==='gd'?'gd':o.mat==='ashard'?'aw':'sh';
 function casCharge(){ const S=getStore();
   if((S.gold|0)<CAS_COST)return {err:'poor'};
   if(!shardRoom(S,CAS_JP_SHARD,'shard')||!shardRoom(S,CAS_JP_SHARD,'ashard'))return {err:'full'};   /* 어떤 결과든 보관함에 들어갈 자리가 있을 때만 */
-  const o=casRoll(); S.gold=(S.gold|0)-CAS_COST; if(o.gold)S.gold+=o.gold; else shardAdd(S,o.n,o.mat); saveStore(); return {o}; }
+  const o=casRoll(); S.gold=(S.gold|0)-CAS_COST; if(o.gold)S.gold+=o.gold; else if(o.n)shardAdd(S,o.n,o.mat); saveStore(); return {o}; }
 const casOwnerSvg=()=>`<svg viewBox="0 0 100 110" aria-hidden="true"><path d="M10 110Q14 78 50 74Q86 78 90 110Z" fill="#1b1426" stroke="#07040a" stroke-width="3"/><path d="M42 76H58L54 98H46Z" fill="#ddd5c2"/><path d="M50 82L38 76V90ZM50 82L62 76V90Z" fill="#b3202f" stroke="#2a0a10" stroke-width="1.5"/><circle cx="50" cy="82" r="3" fill="#7a1420"/>
  <g class="cs-jaw"><path d="M31 56Q31 76 50 76Q69 76 69 56Z" fill="#e9e2cf" stroke="#1a1410" stroke-width="3" stroke-linejoin="round"/><path d="M38 68H62M44 63V73M50 63V74M56 63V73" stroke="#1a1410" stroke-width="2" stroke-linecap="round" fill="none"/></g>
  <ellipse cx="50" cy="46" rx="22" ry="22" fill="#e9e2cf" stroke="#1a1410" stroke-width="3"/><ellipse cx="41" cy="46" rx="6.5" ry="7.5" fill="#120d18"/><ellipse cx="59" cy="46" rx="6.5" ry="7.5" fill="#120d18"/><circle class="cs-eyeg" cx="41" cy="47" r="2.4" fill="#7dffd6"/><circle class="cs-eyeg" cx="59" cy="47" r="2.4" fill="#7dffd6"/><path d="M50 52L47 59H53Z" fill="#1a1410"/>
@@ -5199,10 +5202,10 @@ function casinoModal(){
     <div class="cs-mach"><div class="cs-mq"><u></u><u></u><u></u><b>MOONLIGHT SLOTS</b><u></u><u></u><u></u></div>
       <div class="cs-row"><div class="cs-reels" id="casR">${init()}<div class="cs-pl"></div></div><div class="cs-lever" id="casL"><div class="cs-lv"><i></i><b></b></div><div class="cs-lbase"></div></div></div>
       <div class="cs-slot"><em>동전 투입구</em><div class="cs-coin" id="casC"></div></div></div>
-    <div class="cs-res" id="casS"><b>${CAS_COST.toLocaleString('ko-KR')}G를 넣고 당겨 보세요</b><small>조각 · 대박 0.5%</small></div>
+    <div class="cs-res" id="casS"><b>${CAS_COST.toLocaleString('ko-KR')}G를 넣고 당겨 보세요</b><small>조각 · 꽝 · 대박 0.5%</small></div>
     <div class="cs-hist" id="casH"></div>
     <div class="cs-act"><button class="btn primary go" id="casGo" type="button">💰 ${CAS_COST.toLocaleString('ko-KR')}G 넣고 당기기</button><button class="btn" id="casX" type="button">나가기</button></div>
-    <details class="cs-odds"><summary>ⓘ 확률 · 보상 보기</summary>한 판 ${CAS_COST.toLocaleString('ko-KR')}G (공유보관함 골드 사용, 보상도 공유보관함으로)<br>· 조각 <b>99%</b>: 그림자/각성 조각 중 하나 1~20개 (고르게)<br>· 🔥 대박 조각 <b>0.5%</b>: 그림자/각성 조각 중 하나 ${CAS_JP_SHARD}개<br>· 💎 대박 골드 <b>0.5%</b>: ${CAS_JP_GOLD.toLocaleString('ko-KR')}G<br>· 결과는 당기는 순간 정해지고 바로 저장돼요. 조각이 들어갈 보관함 빈 칸이 필요해요.</details>`,
+    <details class="cs-odds"><summary>ⓘ 확률 · 보상 보기</summary>한 판 ${CAS_COST.toLocaleString('ko-KR')}G (공유보관함 골드 사용, 보상도 공유보관함으로)<br>· 조각 <b>49.5%</b>: 그림자/각성 조각 중 하나 1~20개 (고르게)<br>· 꽝 <b>49.5%</b>: 보상 없음<br>· 🔥 대박 조각 <b>0.5%</b>: 그림자/각성 조각 중 하나 ${CAS_JP_SHARD}개<br>· 💎 대박 골드 <b>0.5%</b>: ${CAS_JP_GOLD.toLocaleString('ko-KR')}G<br>· 결과는 당기는 순간 정해지고 바로 저장돼요. 조각이 들어갈 보관함 빈 칸이 필요해요.</details>`,
   m=>{ const $q=s=>m.querySelector(s), card=m.querySelector('.card'), bub=$q('#casB'), own=$q('#casO'), reels=$q('#casR'), lever=$q('#casL'), coin=$q('#casC'), res=$q('#casS'), hist=$q('#casH'), btn=$q('#casGo');
     const say=k=>{ bub.textContent=casPick(CAS_SAY[k]); bub.classList.remove('pop'); void bub.offsetWidth; bub.classList.add('pop'); own.classList.add('talk'); clearTimeout(hold); hold=setTimeout(()=>own.classList.remove('talk'),900); };
     const leave=()=>{ closeModal(); if(sheetMode==='town')renderTown(); };
@@ -5214,7 +5217,8 @@ function casinoModal(){
       const step=now=>{ if(!rs.isConnected)return; const t=Math.min(1,(now-t0)/ms), pos=tgt*(1-Math.pow(1-t,pow)), ci=Math.floor(pos); rs.style.transform=`translateY(${-pos*CH}px)`; if(ci!==last){ last=ci; tick(); } if(t<1)requestAnimationFrame(step); else{ rs.style.transform=`translateY(${-tgt*CH}px)`; el.classList.add('stop'); sfx('pick'); vib(12); done(); } };
       requestAnimationFrame(step); };
     const countUp=(el,to,fmt)=>{ const t0=performance.now(); const st=now=>{ if(!el.isConnected)return; const t=Math.min(1,(now-t0)/700); el.textContent=fmt(Math.round(to*(1-Math.pow(1-t,3)))); if(t<1)requestAnimationFrame(st); }; requestAnimationFrame(st); };
-    const reveal=o=>{ const jp=o.k==='jps'||o.k==='jpg', big=jp, SHK=o.mat&&SHDK[o.mat];
+    const reveal=o=>{ if(o.k==='no'){ res.className='cs-res'; res.innerHTML='<b>꽝…</b><small>이번엔 아무것도 안 나왔어요</small>'; void res.offsetWidth; res.classList.add('pop'); card.classList.remove('shake'); m.classList.remove('spin'); sfx('lose'); say('miss'); casRecent.unshift({t:'꽝',jp:false}); casRecent.length=Math.min(casRecent.length,6); drawHist(); $q('#casG').textContent=gtx(); busy=false; btn.disabled=false; return; }
+      const jp=o.k==='jps'||o.k==='jpg', big=jp, SHK=o.mat&&SHDK[o.mat];
       const fmt=o.gold?(v=>`💰 ${v.toLocaleString('ko-KR')}G`):(v=>`${SHK.e} ${SHK.n} +${v}개`);
       res.className='cs-res'+(big?' big':''); res.innerHTML=`<b>${fmt(0)}</b><small>${jp?'🎉 대박! ':''}공유보관함에 들어갔어요</small>`; void res.offsetWidth; res.classList.add('pop'); countUp(res.querySelector('b'),o.gold||o.n,fmt);
       reels.classList.add('hit'); card.classList.remove('shake'); m.classList.remove('spin');
@@ -5225,13 +5229,13 @@ function casinoModal(){
       $q('#casG').textContent=gtx(); busy=false; btn.disabled=false; };
     const go=()=>{ if(busy)return; const r=casCharge();
       if(r.err){ say(r.err); sfx('lose'); res.className='cs-res'; res.innerHTML=r.err==='poor'?`<b>골드가 부족해요</b><small>공유보관함 골드 ${(getStore().gold|0).toLocaleString('ko-KR')}G · 필요 ${CAS_COST.toLocaleString('ko-KR')}G</small>`:`<b>보관함 자리가 부족해요</b><small>공유보관함에 조각 ${CAS_JP_SHARD}개가 들어갈 자리가 필요해요 (정렬하거나 비워 주세요)</small>`; return; }
-      const o=r.o, sym=casSym(o), jp=o.k==='jps'||o.k==='jpg'; busy=true; btn.disabled=true; reels.classList.remove('hit'); for(const e of reels.querySelectorAll('.cs-reel'))e.classList.remove('stop');
+      const o=r.o, sym=o.k==='no'?casMiss():casSym(o), jp=o.k==='jps'||o.k==='jpg'; busy=true; btn.disabled=true; reels.classList.remove('hit'); for(const e of reels.querySelectorAll('.cs-reel'))e.classList.remove('stop');
       $q('#casG').textContent=gtx(); res.className='cs-res'; res.innerHTML='<b>…</b><small>돌아가는 중</small>'; say('go'); m.classList.add('spin');
       coin.classList.remove('go'); void coin.offsetWidth; coin.classList.add('go'); sfx('coin');
       setTimeout(()=>{ lever.classList.add('pull'); sfx('ui'); vib(20); setTimeout(()=>lever.classList.remove('pull'),380); },430);
       setTimeout(()=>{ reels.classList.add('blur'); const els=reels.querySelectorAll('.cs-reel'); let n=0;
         const stop=()=>{ n++; if(n===2&&jp){ card.classList.add('shake'); say('tense'); vib([40,70,40,70],true); } if(n===3){ reels.classList.remove('blur'); setTimeout(()=>reveal(o),jp?450:220); } };
-        spinReel(els[0],sym,1250,3,()=>{ stop(); }); spinReel(els[1],sym,1850,3,()=>{ stop(); }); spinReel(els[2],sym,jp?4200:2500,jp?5:3,()=>{ stop(); }); },700); };
+        spinReel(els[0],(Array.isArray(sym)?sym[0]:sym),1250,3,()=>{ stop(); }); spinReel(els[1],(Array.isArray(sym)?sym[1]:sym),1850,3,()=>{ stop(); }); spinReel(els[2],(Array.isArray(sym)?sym[2]:sym),jp?4200:2500,jp?5:3,()=>{ stop(); }); },700); };
     btn.onclick=go; lever.onclick=go; });
   $('#modal').classList.add('cas'); }
 function renderTown(){ const S=getStore(), now=Date.now(); let ch=false; for(const k of ['tw','al','mill'])if(townTick(k,now))ch=true; if(ch)saveTown();
