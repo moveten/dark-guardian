@@ -658,6 +658,18 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 /* ===== 타이틀 세로 통일안 A: 캐릭터 위쪽 고정 + '이번 도전' 보스 배너(누르면 지도) + 시작·상점 줄 높이 고정 (일반/레이드 스테이지, 캐릭터가 바뀌어도 위치 동일) ===== */
 .ban{display:block;width:100%;max-width:440px;box-sizing:border-box;min-height:144px;border-radius:16px;position:relative;overflow:hidden;border:1px solid var(--gold);background:linear-gradient(90deg,rgba(10,7,6,.92),rgba(10,7,6,.3) 70%),var(--tbg,#1d1511) center 55%/cover;flex:none;cursor:pointer;-webkit-tap-highlight-color:transparent;box-shadow:0 0 0 3px #0f0b09,0 0 0 4px rgba(214,170,78,.5)}
 .ban:empty{display:none!important}
+/* 스테이지 카드 묶음: 가운데 현재 카드 + 양옆에 겹쳐 보이는 앞·뒤 스테이지 카드 (스와이프하면 같이 움직여요) */
+.bstk{display:block;width:100%;max-width:440px;position:relative;flex:none;box-sizing:border-box;touch-action:pan-y}
+.bstk:empty{display:none!important}
+.bstk .ban{max-width:none}
+.bstk .ban.cu{width:84%;margin:0 auto;z-index:3;box-shadow:0 0 0 3px #0f0b09,0 0 0 4px rgba(214,170,78,.5),0 8px 22px rgba(0,0,0,.7)}
+.bstk .ban.bk{position:absolute;top:0;bottom:0;left:8%;width:84%;z-index:1;min-height:0;cursor:default;pointer-events:none;transform-origin:50% 50%;
+  filter:brightness(calc(.55 + .45*var(--k,0)));transform:perspective(600px) translateX(calc(var(--s,1)*13%*(1 - var(--k,0)))) scale(calc(.9 + .1*var(--k,0))) rotateY(calc(var(--s,1)*-10deg*(1 - var(--k,0))));
+  transition:transform .22s cubic-bezier(.22,.8,.24,1),filter .22s}
+.bstk.dg .ban.bk{transition:none}
+.bstk .ban.bk.pv{--s:-1;--k:var(--kp,0)}.bstk .ban.bk.nx{--s:1;--k:var(--kn,0)}
+.bstk .ban.bk.nx.lk::after{content:"🔒";position:absolute;top:50%;right:8px;margin-top:-12px;font-size:20px;filter:drop-shadow(0 1px 3px #000)}
+@media (prefers-reduced-motion:reduce){.bstk .ban.bk{transition:none}}
 .ban{touch-action:pan-y;will-change:transform}
 .ban.pick{animation:scPick .9s ease-out}
 .cchips .new::after{content:"NEW";position:absolute;top:-6px;right:-3px;padding:1px 6px;border-radius:8px;background:var(--blood);color:#fff;font-size:10px}
@@ -710,7 +722,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   #bigHero .bn{position:absolute;left:0;right:0;bottom:16px;text-align:center}
   #bigHero .bn b{display:block;font:800 30px var(--f-disp);color:#f3e6c4}
   #bigHero .bn span{font-size:16px;color:var(--mute)}
-  #sTitle .ban{grid-column:2;grid-row:4;max-width:none;min-height:150px;margin-top:6px}
+  #sTitle .bstk{grid-column:2;grid-row:4;max-width:none;margin-top:6px}#sTitle .bstk .ban{min-height:150px}
   #sTitle .pp{grid-column:2;grid-row:5;margin:0;max-width:none;height:84px;min-height:84px;flex:none}
   #sTitle .pp #bSolo{font-size:26px}
   #sTitle #bShop{width:96px}
@@ -725,7 +737,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   #sTitle h1{grid-column:1;grid-row:2;font-size:26px;margin:0 0 2px}
   #sTitle .clist.car{grid-column:1;grid-row:3;width:100%;margin:0;padding:4px calc(50% - 72px);align-self:center}
   #sTitle .pp{grid-column:2;grid-row:1/4;align-self:center;margin-top:110px;max-width:none;gap:8px}
-  #sTitle .ban{display:block;grid-column:2;grid-row:1/4;align-self:center;margin-bottom:110px;max-width:none}
+  #sTitle .bstk{display:block;grid-column:2;grid-row:1/4;align-self:center;margin-bottom:110px;max-width:none}
   #sTitle .cc{flex:0 0 144px;padding:8px 6px;gap:1px}
   #sTitle .cc .cpic{width:112px;height:104px}
   #sTitle .cc b{font-size:17px}#sTitle .cc .cl{font-size:13px}#sTitle .cc .cpt{font-size:12px}
@@ -1067,7 +1079,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.0.0320</div>
+    <div class="ver" id="verT">v0.6.0.0321</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1076,7 +1088,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="cdots" id="cDots" aria-hidden="true"></div>
     <div class="cchips" id="cChips" hidden></div>
     <div id="bigHero" hidden aria-hidden="true"><div class="bgl"></div><img id="bhImg" alt=""><div class="bn"><b id="bhName"></b><span id="bhSub"></span></div></div>
-    <div class="ban" id="stageBan" role="group" aria-label="스테이지 카드 · 좌우로 밀어서 이동"></div>
+    <div class="bstk" id="stageBan" role="group" aria-label="스테이지 카드 · 좌우로 밀어서 이동"></div>
     <button id="bNew" hidden></button>
     <div class="pp" id="playPanel" hidden>
       <div class="modes"><button class="btn primary" id="bSolo">▶ 시작하기</button></div>
@@ -4940,21 +4952,23 @@ let swipeLock=0;
 $('#cChips').onclick=e=>{ if(!e.target.closest('#cMap'))return; sfx('ui'); openMap(); };   /* 스테이지 카드는 스와이프 전용 · 전체맵은 칩에서 열어요 */
 /* 스테이지 배너 좌우 스와이프: 손가락을 따라 움직이다가 놓으면 부드럽게 다음/이전 스테이지로 (깬 스테이지 + 바로 다음 스테이지까지) */
 (()=>{ const ban=$('#stageBan'); let x0=0,y0=0,st=0,busy=false,pid=-1;
+  const cu=()=>ban.querySelector('.ban.cu');
   const can=d=>{ const i=selStage+d; return !!selId&&i>=0&&i<STAGES.length&&i<=stageClear; };
   const ease='cubic-bezier(.22,.8,.24,1)';
-  const settle=()=>{ ban.style.transition='transform .22s '+ease+',opacity .22s'; ban.style.transform=''; ban.style.opacity=''; setTimeout(()=>{ ban.style.transition=''; },240); };
-  ban.addEventListener('pointerdown',e=>{ if(busy||(e.pointerType==='mouse'&&e.button!==0))return; x0=e.clientX; y0=e.clientY; st=1; pid=e.pointerId; ban.style.transition='none'; });
-  ban.addEventListener('pointermove',e=>{ if(!st||e.pointerId!==pid)return; const mx=e.clientX-x0, my=e.clientY-y0;
-    if(st===1){ if(Math.abs(mx)>10&&Math.abs(mx)>Math.abs(my)*1.3){ st=2; try{ ban.setPointerCapture(e.pointerId); }catch(_){} } else if(Math.abs(my)>12){ st=0; settle(); return; } }
-    if(st===2){ const d=mx<0?1:-1, k=can(d)?1:.22, w=ban.clientWidth||340; ban.style.transform='translateX('+(mx*k).toFixed(1)+'px)'; ban.style.opacity=String(1-Math.min(.55,Math.abs(mx*k)/w)); } });
+  const kk=(p,n)=>{ ban.style.setProperty('--kp',p); ban.style.setProperty('--kn',n); };   /* 앞·뒤 카드가 가운데로 다가오는 정도(0~1) */
+  const settle=()=>{ const c=cu(); ban.classList.remove('dg'); kk(0,0); if(!c)return; c.style.transition='transform .22s '+ease+',opacity .22s'; c.style.transform=''; c.style.opacity=''; setTimeout(()=>{ c.style.transition=''; },240); };
+  ban.addEventListener('pointerdown',e=>{ const c=cu(); if(!c||busy||(e.pointerType==='mouse'&&e.button!==0))return; x0=e.clientX; y0=e.clientY; st=1; pid=e.pointerId; c.style.transition='none'; });
+  ban.addEventListener('pointermove',e=>{ if(!st||e.pointerId!==pid)return; const c=cu(); if(!c)return; const mx=e.clientX-x0, my=e.clientY-y0;
+    if(st===1){ if(Math.abs(mx)>10&&Math.abs(mx)>Math.abs(my)*1.3){ st=2; ban.classList.add('dg'); try{ ban.setPointerCapture(e.pointerId); }catch(_){} } else if(Math.abs(my)>12){ st=0; settle(); return; } }
+    if(st===2){ const d=mx<0?1:-1, k=can(d)?1:.22, w=c.clientWidth||300, pr=can(d)?Math.min(1,Math.abs(mx)/w):0; c.style.transform='translateX('+(mx*k).toFixed(1)+'px)'; c.style.opacity=String(1-Math.min(.55,Math.abs(mx*k)/w)); if(d>0)kk(0,pr); else kk(pr,0); } });
   const end=e=>{ if(!st||e.pointerId!==pid)return; const was=st; st=0; if(was!==2)return; swipeLock=Date.now()+450; try{ ban.releasePointerCapture(e.pointerId); }catch(_){}
-    const mx=e.clientX-x0, d=mx<0?1:-1, w=ban.clientWidth||340;
-    if(e.type==='pointercancel'||Math.abs(mx)<Math.max(44,w*.14)||!can(d)){ if(Math.abs(mx)>=44&&!can(d)){ try{ toast(d>0?'🔒 이 스테이지를 먼저 깨야 해요':'첫 스테이지예요','#e0a060'); }catch(_){} } settle(); return; }
-    busy=true; ban.style.transition='transform .14s ease-in,opacity .14s'; ban.style.transform='translateX('+(-d*70)+'px)'; ban.style.opacity='0';
-    setTimeout(()=>{ selStage+=d; lsSet('dkdef2.stage',String(selStage)); sfx('ui'); renderStagePanel();
-      ban.style.transition='none'; ban.style.transform='translateX('+(d*70)+'px)'; ban.style.opacity='0'; void ban.offsetWidth;
-      ban.style.transition='transform .26s '+ease+',opacity .26s'; ban.style.transform=''; ban.style.opacity='';
-      setTimeout(()=>{ ban.style.transition=''; busy=false; },280); },150); };
+    const c=cu(), mx=e.clientX-x0, d=mx<0?1:-1, w=(c&&c.clientWidth)||300;
+    if(!c||e.type==='pointercancel'||Math.abs(mx)<Math.max(44,w*.14)||!can(d)){ if(Math.abs(mx)>=44&&!can(d)){ try{ toast(d>0?'🔒 이 스테이지를 먼저 깨야 해요':'첫 스테이지예요','#e0a060'); }catch(_){} } settle(); return; }
+    busy=true; ban.classList.remove('dg'); if(d>0)kk(0,1); else kk(1,0); c.style.transition='transform .14s ease-in,opacity .14s'; c.style.transform='translateX('+(-d*70)+'px)'; c.style.opacity='0';
+    setTimeout(()=>{ selStage+=d; lsSet('dkdef2.stage',String(selStage)); sfx('ui'); kk(0,0); renderStagePanel(); const c2=cu(); if(!c2){ busy=false; return; }
+      c2.style.transition='none'; c2.style.transform='translateX('+(d*70)+'px)'; c2.style.opacity='0'; void c2.offsetWidth;
+      c2.style.transition='transform .26s '+ease+',opacity .26s'; c2.style.transform=''; c2.style.opacity='';
+      setTimeout(()=>{ c2.style.transition=''; busy=false; },280); },150); };
   ban.addEventListener('pointerup',end); ban.addEventListener('pointercancel',end); })();
 const BANTRIO={'4':['hero_war','boss_shadow','hero_sorc']};   /* 삼남매(그림자 전사 · 검은 그림자 · 그림자 법사) 배너 그림 */
 const MAPBOSS={'1-1':'mob_grak','1-2':'mob_malek','1-3':'mob_morg','1-4':'mob_kargon','1-5':'mob_izra','4':'boss_shadow','5':'boss_awake'};   /* 지도에 서 있는 보스 그림 (2·3장은 스테이지의 bs 그림) */
@@ -4999,7 +5013,7 @@ function openMap(){
     if(!h){ nb.parentNode.insertAdjacentHTML('beforeend',`<div class="mhero" style="left:${hx.toFixed(1)}px;top:${hy.toFixed(1)}px"><span class="cem">${clsIc(cur.cls,34)}</span><img src="img/hero_${cur.cls}.png" alt="" onload="this.previousElementSibling.style.display='none'" onerror="this.remove()"></div>`); }
     else{ h.style.left=hx.toFixed(1)+'px'; h.style.top=hy.toFixed(1)+'px'; } };
   const go=()=>{ if(pick>clr||going)return; going=true; selStage=pick; lsSet('dkdef2.stage',String(pick)); renderStagePanel(); mark(); place(pick); show(); sfx('pick');
-    setTimeout(()=>{ close(); const sb=$('#stageBan'); if(sb){ sb.classList.remove('pick'); void sb.offsetWidth; sb.classList.add('pick'); } try{ toast(`✔ ${STAGES[pick].id} · ${STAGES[pick].n} 선택`); }catch(e){} },420); };
+    setTimeout(()=>{ close(); const sb=document.querySelector('#stageBan .ban.cu'); if(sb){ sb.classList.remove('pick'); void sb.offsetWidth; sb.classList.add('pick'); } try{ toast(`✔ ${STAGES[pick].id} · ${STAGES[pick].n} 선택`); }catch(e){} },420); };
   mark(); place(pick);
   ov.querySelectorAll('.mn[data-i]').forEach(b=>b.onclick=()=>{ pick=+b.dataset.i; sfx('ui'); if(pick<=clr)place(pick); show(); });   /* 스테이지를 누르면 캐릭터가 그곳으로 이동하고 아래 카드만 바뀌어요 — '이 스테이지로 선택'을 눌러야 정해져요 */
   $('#mapX').onclick=close; show();
@@ -5013,7 +5027,10 @@ function renderStagePanel(){
   { const mb=$('#cMap'); if(mb)mb.classList.toggle('new',stageClear>(+lsGet('dkdef2.mapSeen')||0)&&stageClear<STAGES.length); }   /* 5스테이지: 비밀번호를 맞힌 기기는 4스테이지를 안 깼어도 테스트 입장 가능 */
   const S=STAGES[selStage]; { const t=$('#sTitle'); if(t)t.dataset.ch=selStage<5?'1':selStage<10?'2':selStage<15?'3':'4'; }
   { const cur=chars.find(c=>c.id===selId), low=cur&&cur.lvl<S.rl, gp0=cur&&cur.eq?gearPenOf(cur.eq,S.icap):null, gw=!!gp0&&gp0.wm<.97; 
-    { const ban=$('#stageBan'); if(ban){ if(!cur){ ban.innerHTML=''; } else { const bi2=S.bs||MAPBOSS[S.id], tri=BANTRIO[S.id]; ban.classList.toggle('noimg',!bi2&&!tri); ban.classList.toggle('trio',!!tri); ban.innerHTML=`<div class="t"><div class="sid">${esc(S.id)}</div><span class="sn">${esc(S.n)}</span><b>${esc(S.bn||'')}</b><i class="${gw?'warn':''}">권장 장비 Lv 합 ${Math.max(1,S.icap-12)*EQSL.length}↑${gw?' · 부족':''}</i></div>${selStage<stageClear?'<div class="st clr"><b>클리어</b></div>':'<div class="st nc"><b>미클리어</b></div>'}${tri?`<span class="tri">${tri.map(k=>`<img src="img/${k}.png" alt="" onerror="this.remove()">`).join('')}</span>`:bi2?`<img src="img/${bi2}.png" alt="" onerror="this.remove()">`:''}`; } } }
+    { const ban=$('#stageBan'); if(ban){ if(!cur){ ban.innerHTML=''; } else {
+      const card=(i,role)=>{ const T=STAGES[i], bi=T.bs||MAPBOSS[T.id], tr=BANTRIO[T.id], gq=cur.eq?gearPenOf(cur.eq,T.icap):null, gv=!!gq&&gq.wm<.97, cl=i<stageClear;
+        return `<div class="ban ${role}${!bi&&!tr?' noimg':''}${tr?' trio':''}${role==='bk nx'&&i>stageClear?' lk':''}"${role==='cu'?'':' aria-hidden="true"'}><div class="t"><div class="sid">${esc(T.id)}</div><span class="sn">${esc(T.n)}</span><b>${esc(T.bn||'')}</b><i class="${gv?'warn':''}">권장 장비 Lv 합 ${Math.max(1,T.icap-12)*EQSL.length}↑${gv?' · 부족':''}</i></div>${cl?'<div class="st clr"><b>클리어</b></div>':'<div class="st nc"><b>미클리어</b></div>'}${tr?`<span class="tri">${tr.map(k=>`<img src="img/${k}.png" alt="" onerror="this.remove()">`).join('')}</span>`:bi?`<img src="img/${bi}.png" alt="" onerror="this.remove()">`:''}</div>`; };
+      ban.innerHTML=(selStage>0?card(selStage-1,'bk pv'):'')+(selStage+1<STAGES.length?card(selStage+1,'bk nx'):'')+card(selStage,'cu'); } } }
     const chp=$('#cChips'); if(chp){ if(!cur){ chp.hidden=true; } else { const pt2=(cur.statPts|0)+(cur.skillPts|0); chp.hidden=false; chp.innerHTML=`<span>보유 골드<b>💰 ${(cur.gold|0).toLocaleString()}</b></span><span class="${gw?'warn':''}">내 장비 Lv 합<b>${gp0?gp0.sum:'-'}</b></span><button type="button" id="cMap" class="${stageClear>(+lsGet('dkdef2.mapSeen')||0)&&stageClear<STAGES.length?'new':''}">전체맵<b>🗺️ 보기</b></button>`; } } }
   { const cur=chars.find(c=>c.id===selId), nw=!!cur&&(cur.inv||[]).some(x=>x&&x.isNew), pt=cur?(cur.statPts|0)+(cur.skillPts|0):0;
     $('#tGearB').hidden=!nw; $('#menuB').hidden=!mailUnreadAll(chars); const pb=$('#tGearP'); pb.hidden=!pt; pb.textContent=pt; for(const id of ['tGear','tStore'])$('#'+id).disabled=!cur; }
