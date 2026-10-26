@@ -1084,7 +1084,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.0.0325</div>
+    <div class="ver" id="verT">v0.6.0.0326</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1600,6 +1600,10 @@ const SPFX={
  aignis:{n:'이그니스의 목걸이',slot:'amulet',base:'목걸이',il:34,fx:['str','vit','life','dmgPct','def'],d:'용암의 심장: 생명력 +80, 받는 피해 -4%',ap:d=>{d.life+=80;d.dr+=.04;}},
  asekr:{n:'세케르의 목걸이',slot:'amulet',base:'목걸이',il:46,fx:['dex','ms','mf','life','def'],d:'모래 폭풍: 이동 속도 +8%, 획득범위 +15',ap:d=>{d.ms+=8;d.pr+=15;}},
  adeath:{n:'데스락의 목걸이',slot:'amulet',base:'목걸이',il:70,fx:['all','crit','dmgPct','ias','ls'],d:'죽음의 징조: 치명타 확률 +5%, 생명력 흡수 +3%',ap:d=>{d.crit+=5;d.ls+=3;}},
+ /* ===== 달빛 도박장 전용 '행운의 도박꾼 세트' — 아이템 레벨 56 · 착용 Lv 30 · 능력치 요구 없음 · 도박장에서만 나와요(il:999 = 일반 드랍 제외) ===== */
+ cas_wpn:{n:'운명의 주사위 단검',slot:'weapon',base:'낡은 단검',il:999,cas:1,d:'치명타 피해 +50%',ap:()=>{}},
+ cas_armor:{n:'딜러의 조끼',slot:'armor',base:'가죽 갑옷',il:999,cas:1,d:'포커페이스: 받는 피해 -8%',ap:d=>{d.dr+=.08;}},
+ cas_amu:{n:'황금 칩 목걸이',slot:'amulet',base:'목걸이',il:999,cas:1,d:'행운의 금화: 드롭률 +30%',ap:d=>{d.mf+=30;}},
  /* ===== 영웅 아이템 특수 효과 (4스테이지 삼남매) ===== */
  hdag:{n:'그림자 단검',slot:'weapon',base:'낡은 단검',il:999,hero:1,d:'그림자 일격: 치명타 피해 +40%',ap:()=>{}},
  hhelm:{n:'그림자 투구',slot:'helm',base:'뿔 달린 투구',il:999,hero:1,d:'생명 붕괴로 잃는 생명력 70% → 50%',ap:()=>{}},
@@ -1681,6 +1685,16 @@ function heroFix(it){ const H=it&&it.rar===4&&it.sp&&HEROI[it.sp]; if(!H||it.hv=
   if(H.mx){ const m=(1+IL*.16)*HERO_M; it.mn=Math.round(H.mn*m); it.mx=Math.round(H.mx*m); }
   if(H.df)it.df=Math.round(H.df*(1+IL*.2)*HERO_M); if(H.dm)it.dm=Math.round(H.dm*(1+IL*.1)*HERO_M); if(H.om)it.om=Math.round(H.om*(1+IL*.1)*HERO_M);
   if(it.b0)it.b0={mn:it.mn,mx:it.mx,df:it.df,dm:it.dm,om:it.om}; if((it.enh|0)>0)enhApply(it); it.hv=2; }
+/* 달빛 도박장 '행운의 도박꾼 세트': 옵션 종류 고정, 수치만 범위 안에서 변동 (영웅 장비의 약 55~60% 수준) */
+const CAS_IL=56, CAS_REQ=30, CAS_KEYS=['cas_wpn','cas_armor','cas_amu'];
+const CASI={
+ cas_wpn:[['dmgPct',85,120],['crit',4,7],['ias',8,12],['dex',4,8]],
+ cas_armor:[['life',95,130],['def',40,60],['vit',3,6],['dmgPct',15,28]],
+ cas_amu:[['dmgPct',25,35],['crit',3,5],['life',95,130],['pr',6,10]]};
+function genCas(key){ const S=SPFX[key], F=CASI[key]; if(!S||!F)return null;
+  const it=genItem(3,CAS_IL,S.slot,S.base,key); it.aff=[]; it.req=CAS_REQ; it.nof=1; it.sf=1;   /* 기본 수치(공격력·방어력)는 유니크 식 그대로 · 옵션은 아래 표로 */
+  for(const [t,lo,hi] of F)it.aff.push({t,v:ri(lo,hi)});
+  return it; }
 function genHero(key){ const H=HEROI[key], S=SPFX[key]; if(!H||!S)return null;
   const IL=S.aw?AW_IL:HERO_IL, it={id:++ITEMID,slot:S.slot,rar:4,ilvl:IL,base:S.base,aff:[],sp:key,name:S.n,req:S.aw?AW_REQ:HERO_REQ,hv:2,nof:1,nfa:1};
   if(S.fcls)it.oc=S.fcls;
@@ -1714,7 +1728,7 @@ const capV=(v,max,hit)=>hit?`${max}% <b style="color:#ffd84a">MAX</b>`:`${v}% <s
 const UIL_MAX=100; /* 유니크 이하 아이템 레벨 상한 */
 const SPCH=.15; /* 유니크 중 이름 고정 유니크 비율 (특수 효과 포함) */
 const STN={str:'힘',dex:'민첩',vit:'체력',ene:'에너지'};
-function reqStats(it){ const b=BREQ[it.base]; if(!b||it.rar===4)return {}; const o={}, k=it.rar===3?1.1:1, L=it.ilvl||1, e=L>30?30+(L-30)*1.25:L; /* 아이템 레벨 30 위부터는 요구 능력치가 더 가파르게 올라요 */ for(const s in b){ const v=Math.round((b[s][0]+b[s][1]*e)*k); if(v>0)o[s]=v; } return o; }
+function reqStats(it){ const b=BREQ[it.base]; if(!b||it.rar===4||(it.sp&&SPFX[it.sp]&&SPFX[it.sp].cas))return {}; const o={}, k=it.rar===3?1.1:1, L=it.ilvl||1, e=L>30?30+(L-30)*1.25:L; /* 아이템 레벨 30 위부터는 요구 능력치가 더 가파르게 올라요 */ for(const s in b){ const v=Math.round((b[s][0]+b[s][1]*e)*k); if(v>0)o[s]=v; } return o; }
 const curStat=s=>me?((me.D&&me.D[s]!=null)?Math.floor(me.D[s]):(me.stats[s]|0)):0;
 function statLack(it){ const r=reqStats(it), out=[]; if(!me||!me.stats)return out; for(const s in r){ const c=curStat(s); if(c<r[s]) out.push([s,r[s],c]); } return out; }
 function reqHtml(it){ const r=reqStats(it); const lv=me&&me.lvl<reqLv(it); let h=`<span style="color:${lv?'#e07060':'#9fd18b'}">필요 레벨 ${reqLv(it)}${lv?` (현재 ${me.lvl})`:''}</span>`;
@@ -1852,7 +1866,7 @@ const TUT_BODY=[
   '강화는 모험의 핵심이에요. 재료와 확률을 잘 살펴서 소중한 장비를 키워 보세요.',
   '아이템을 다른 캐릭터에게 보내고 우편함으로 보상을 받는 법까지 모두 익히셨어요.'];
 /* 모험 안내 전 과정 보상: 특수 유니크(이름 고정) 무기 1개 + 갑옷·투구 중 1개를 무작위로, 아이템 레벨 50 · +6강화 */
-const tutUniq=(kinds,p)=>{ const cls=p&&p.cls, ks=Object.keys(SPFX).filter(k=>{ const o=SPFX[k]; return !o.hero&&kinds.includes(o.slot)&&(!o.fcls||o.fcls===cls); }), k=pick(ks), it=genItem(3,50,SPFX[k].slot,null,k); it.enh=6; enhApply(it); return it; };
+const tutUniq=(kinds,p)=>{ const cls=p&&p.cls, ks=Object.keys(SPFX).filter(k=>{ const o=SPFX[k]; return !o.hero&&!o.cas&&kinds.includes(o.slot)&&(!o.fcls||o.fcls===cls); }), k=pick(ks), it=genItem(3,50,SPFX[k].slot,null,k); it.enh=6; enhApply(it); return it; };
 TUT_GOLD.forEach((g,k)=>{ MAILS['tut'+(k+1)]={f:'수호자 길드',t:`모험 안내 ${STAGES[k].id} 완료 보상`,att:[{k:'gold',n:g},{k:'item',ic:'🎁',tx:'랜덤 레어 장비',mk:()=>genItem(2,STAGES[k].icap,pick(['weapon','helm','armor','amulet','ring']))}],
   b:p=>`${dispName(p)}님, 수고하셨어요.\n\n${TUT_BODY[k]}\n\n약속드린 보상이에요. 아래 선물을 눌러 받아 가세요.\n- 수호자 길드 -`}; });
 MAILS.tutall={f:'수호자 길드',t:'모험 안내 전 과정 완료 — 특별 보상',att:[{k:'item',ic:'⚔️',tx:'특수 유니크 무기 (Lv50 · +6)',mk:p=>tutUniq(['weapon'],p)},{k:'item',ic:'🛡️',tx:'특수 유니크 갑옷·투구 (Lv50 · +6)',mk:p=>tutUniq(['armor','helm'],p)}],
@@ -1929,7 +1943,7 @@ function derive(p){
   const d={rng:0,blk:0,mf:0,pr:0,mr:0,str:p.stats.str,dex:p.stats.dex,vit:p.stats.vit,ene:p.stats.ene,dmg:0,dmgPct:0,def:0,life:0,mana:0,ias:0,ms:0,ls:0,crit:5,cls:0,sk:{},wmn:1,wmx:3,dr:0,regen:0,cdr:0,sm:0,smhp:0,sp:{},hc:0,rbd:0};
   for(const k in p.eq){const it=p.eq[k]; if(!it)continue; if(it.sp&&SPFX[it.sp]&&SPFX[it.sp].fcls&&SPFX[it.sp].fcls!==p.cls)continue; /* 전용 장비는 다른 직업이 끼고 있어도 효과 없음 */
     if(it.slot==='weapon'){d.wmn=it.mn;d.wmx=it.mx; const bf=BASEFX[it.base]; if(bf){ for(const q in bf) if(q!=='t')d[q]+=bf[q]; }}
-    if(it.sp&&SPFX[it.sp]){ SPFX[it.sp].ap(d); d.sp[it.sp]=((it.sp==='hring'||it.sp==='aw_ring')?(d.sp[it.sp]|0)+1:1);   /* 그림자·각성 반지는 2개 끼면 효과도 2번 */ if(SPFX[it.sp].hero&&it.rar===4){ if(SPFX[it.sp].aw)d.ac=(d.ac|0)+1; else d.hc++; } }   /* 그림자(영웅) 장비 개수 */
+    if(it.sp&&SPFX[it.sp]){ SPFX[it.sp].ap(d); d.sp[it.sp]=((it.sp==='hring'||it.sp==='aw_ring')?(d.sp[it.sp]|0)+1:1);   /* 그림자·각성 반지는 2개 끼면 효과도 2번 */ if(SPFX[it.sp].hero&&it.rar===4){ if(SPFX[it.sp].aw)d.ac=(d.ac|0)+1; else d.hc++; } if(SPFX[it.sp].cas)d.cs=(d.cs|0)+1; }   /* 그림자(영웅) 장비 개수 */
     if(it.enh>0){ if(it.slot==='amulet'){ const e=it.enh|0; d.str+=e; d.dex+=e; d.vit+=e; d.ene+=e; } else if(it.slot==='ring'&&it.enh>=10)d.cls+=1; }
     if(it.df)d.def+=it.df; if(it.blk)d.blk+=it.blk; if(it.dm)d.dmg+=it.dm; if(it.om)d.mana+=it.om;
     for(const a of it.aff){
@@ -1940,6 +1954,7 @@ function derive(p){
     }}
   if(d.hc>=2) d.mana+=200;   /* 그림자 세트 2개: 최대 마나 +200 */
   if((d.ac|0)>=2){ d._hpm=(d._hpm||1)*1.1; d.mana+=250; } if((d.ac|0)>=4){ d.abd=20; d.aobj=25; } if((d.ac|0)>=7){ d.cls+=3; d.dmgPct+=15; d.awk7=1; }   /* 각성 세트: 2개 최대 생명력 +10%·마나 +250 / 4개 보스 피해 +20%·파괴 오브젝트 피해 +25% / 7개 모든 스킬 +3·피해 +15%·'각성' */
+  if((d.cs|0)>=2){ d.mf+=20; d.crit+=5; } if((d.cs|0)>=3){ d.cls+=3; d.ms+=30; }   /* 행운의 도박꾼 세트: 2개 드롭률 +20%·치명타 +5% / 3개 모든 스킬 +3·이동 속도 +30%·잭팟 타격(기본 공격 7% 피해 3배) */
   if(d.hc>=3) d.rbd=15; if(d.hc>=7){ d.rbd+=15; d.cls+=3; }   /* 그림자 세트: 3개 레이드 보스 피해 +15% · 7개 추가 +15%(합계 30%) & 모든 스킬 +3 */
   { const ts=townStatBonus(); if(ts){ d.str+=ts; d.dex+=ts; d.vit+=ts; d.ene+=ts; } }   /* 마을 그림자 연구소: 모든 캐릭터 올스탯 */
   if(p.buffs&&p.buffs.bless&&p.buffs.bless.t>0){ const v=p.buffs.bless.v|0; d.str+=v; d.dex+=v; d.vit+=v; d.ene+=v; }   /* 세크리파이스 축복: 올스탯 */
@@ -2754,7 +2769,7 @@ function spiritBuff(){ if(!me||me.cls===undefined)return null; let l=0; if(me.sp
 function drMul(){ const b=me.buffs; let m=1; if(b.rage&&b.rage.t>0)m*=1+b.rage.pen; if(b.fury&&b.fury.t>0&&b.fury.dr)m*=1-b.fury.dr; if(b.roar&&b.roar.t>0)m*=1-b.roar.v; if(b.hunt&&b.hunt.t>0)m*=1-b.hunt.dr; return m; }
 /* 형태 바꾸기: 생명력 비율은 그대로, 0.3초 동안 움직임 잠금 */
 function setForm(f){ const hr=me.hp/me.D.maxHp; me.form=f||''; me.D=derive(me); me.hp=Math.min(me.D.maxHp,me.D.maxHp*hr); me.mp=Math.min(me.mp,me.D.maxMp); me.formLock=.3; me.vx=me.vy=0; uiDirty=true; }
-function critRoll(v){const c=Math.random()*100<me.D.crit; return {v:c?v*1.5*(me.D.sp&&me.D.sp.hdag?1.4:1)*(me.D.sp&&me.D.sp.aw_amu?1.3:1):v,crit:c};}
+function critRoll(v){const c=Math.random()*100<me.D.crit; return {v:c?v*1.5*(me.D.sp&&me.D.sp.hdag?1.4:1)*(me.D.sp&&me.D.sp.aw_amu?1.3:1)*(me.D.sp&&me.D.sp.cas_wpn?1.5:1):v,crit:c};}
 function physDmg(mult){const D=me.D; const w=ri(D.wmn,D.wmx)+D.dmg; return critRoll(w*(1+D.str/100+D.dmgPct/100+buffDmg())*mult*(D.sp.rage&&me.hp<D.maxHp*.5?1.3:1));}
 const ENEM=.003; /* 에너지 1당 마법 피해 +0.3% */
 function spellDmg(base,noPct){const D=me.D; return critRoll(base*(1+D.ene*ENEM+(noPct?0:D.dmgPct/100)+buffDmg())*(1+((D.wmn+D.wmx)/2)/35)*(D.sp.tome?1.2:1));}
@@ -3034,6 +3049,7 @@ function hitMob(m,r,slow,tn,fx){
   if(!raw&&m.mark&&m.mark.t>0){ r={v:r.v*(1+m.mark.v),crit:r.crit}; } /* 처형 명령 표식: 받는 모든 피해 증가 */
   if(!raw&&me.D){ const D=me.D; if(m.boss&&D.abd)r={v:r.v*(1+D.abd/100),crit:r.crit}; if(m.obj){ const k=(D.sp&&D.sp.aw_helm?1.5:1)*(1+(D.aobj||0)/100); if(k!==1)r={v:r.v*k,crit:r.crit}; } }   /* 각성 세트 4개: 보스 피해 · 갈라진 왕관/세트: 파괴 오브젝트 피해 */
   if(!raw&&fx&&fx.basic&&!G.inProc&&me.D&&me.D.sp&&me.D.sp.aw_wpn&&Math.random()<.12){ const v2=r.v*.5, c2=r.crit; later(.12,()=>{ if(m.dead||!G.inGame)return; G.inProc=true; try{ hitMob(m,{v:v2,crit:c2},0,false,{basic:1}); spark(m.x,m.y,'#a68bff',8); }finally{ G.inProc=false; } }); }   /* 각성의 칼날: 분열 베기 */
+  if(!raw&&fx&&fx.basic&&!G.inProc&&me.D&&(me.D.cs|0)>=3&&Math.random()<.07){ r={v:r.v*3,crit:r.crit}; addNum(m.x,m.y-m.r-22,'🎰 잭팟!','#ffd34d',true); burst(m.x,m.y,'#ffd34d',16,240); }   /* 행운의 도박꾼 세트 3개: 잭팟 타격 */
   let shk=false; if(!raw&&fx&&(fx.el==='fire'||fx.el==='ice')&&m.shockT>0){ r={v:r.v*SHOCKB,crit:r.crit}; shk=true; } /* 감전된 적에게 화염/냉기 피해 +33% */
   if(!raw&&m.boss&&m.counter>0&&!(fx&&fx.basic)&&!G.inProc){ counterHit(m,r.v); } /* 스킬 피해는 보스에게도 그대로 들어가고, 나는 반사 피해를 받음(무적 아님) */
   const dmg=Math.max(1,Math.round(r.v)); if(r.v>0)dmgTally(fx,m.hp>0?Math.min(dmg,m.hp):dmg); const sp=me.D&&me.D.sp; if(sp&&sp.frost&&Math.random()<.2&&!G.inProc) slow=Math.max(slow||0,2);
@@ -4581,6 +4597,7 @@ function itemLines(it,opt){
   if(BASEFX[it.base]&&it.slot==='weapon') s+=`<div class="meta" style="color:#9fd0ff">▪ ${BASEFX[it.base].t}</div>`; s+=wpPenLine(it);
   if(it.sp&&SPFX[it.sp]) s+=`<div style="margin:4px 0;color:#ffb14a;font-weight:700">★ 특수 효과: ${SPFX[it.sp].d}</div>`;
   if(it.rar===4&&it.sp&&SPFX[it.sp]&&SPFX[it.sp].aw){ const n=(me.D&&me.D.ac)|0, on=c=>c?'#d9c6ff':'#8a8a8a'; s+=`<div style="margin:4px 0;font-size:12px;line-height:1.55"><b style="color:#c8a8ff">✦ 각성 세트 (${n}/7)</b> <span style="color:#8a8a8a">그림자 세트와 따로 세요</span><br><span style="color:${on(n>=2)}">2개: 최대 생명력 +10%, 최대 마나 +250</span><br><span style="color:${on(n>=4)}">4개: 보스에게 주는 피해 +20%, 파괴 오브젝트에 주는 피해 +25%</span><br><span style="color:${on(n>=7)}">7개: 모든 스킬 +3, 피해 +15%, 생명력 50% 이하가 되면 8초간 피해 +30% · 공격 속도 +20% (재사용 45초)</span></div>`; }
+  else if(it.sp&&SPFX[it.sp]&&SPFX[it.sp].cas){ const n=(me&&me.D&&me.D.cs)|0, on=c=>c?'#d9c6ff':'#8a8a8a'; s+=`<div style="margin:4px 0;font-size:12px;line-height:1.55"><b style="color:#c8a8ff">🎲 행운의 도박꾼 세트 (${n}/3)</b> <span style="color:#8a8a8a">🎰 달빛 도박장 전용</span><br><span style="color:${on(n>=2)}">2개: 드롭률 +20%, 치명타 확률 +5%</span><br><span style="color:${on(n>=3)}">3개: 잭팟 타격(기본 공격이 7% 확률로 피해 3배) · 모든 스킬 +3 · 이동 속도 +30%</span></div>`; }
   else if(it.rar===4&&it.sp&&SPFX[it.sp]&&SPFX[it.sp].hero){ const n=(me.D&&me.D.hc)|0, on=(c,a)=>c?'#d9c6ff':'#8a8a8a'; s+=`<div style="margin:4px 0;font-size:12px;line-height:1.55"><b style="color:#b98cff">🌑 그림자 세트 (${n}/7)</b><br><span style="color:${on(n>=2)}">2개: 최대 마나 +200</span><br><span style="color:${on(n>=3)}">3개: 레이드 보스에게 주는 피해 +15%</span><br><span style="color:${on(n>=7)}">7개: 레이드 보스에게 주는 피해 추가 +15% (합계 +30%) · 모든 스킬 +3</span></div>`; }
   const ex=enhOptText(it);
   if(it.aff.length||ex) s+='<ul>'+affSorted(it).map(a=>`<li>${esc(affText(a))}${(a.cls&&a.cls!==me.cls)?' <span class="meta">(효과 없음)</span>':''}</li>`).join('')+(ex?`<li style="color:#ffe27a">${ex}</li>`:'')+'</ul>';
@@ -5198,7 +5215,8 @@ function townSlot(k,pos){ pos=pos||''; const B=getTown()[k], D=TOWN_B[k], lv=B.l
    일반(99%): 절반은 조각(그림자/각성 반반, 1~20개) · 절반은 꽝(보상 없음)
    대박 조각 0.5%: 조각 100개 (7 7 7 + 폭죽) · 대박 골드 0.5%: 500,000G (💎 💎 💎 + 금화 비) */
 const CAS_COST=100000, CAS_JP_SHARD=100, CAS_JP_GOLD=500000, CAS_JP_P=.005;
-const CAS_SYM={sh:'🌑',aw:'✦',gd:'💰',j7:'7',dm:'💎'}, CAS_FILL=['sh','aw','gd','j7','dm','gd','sh','aw','gd'];
+const CAS_SYM={sh:'🌑',aw:'✦',gd:'💰',j7:'7',dm:'💎',it:'🎲'}, CAS_FILL=['sh','aw','gd','j7','dm','gd','sh','aw','gd','it'];
+const CAS_PN={cas_wpn:'무기',cas_armor:'갑옷',cas_amu:'목걸이'};
 const CAS_SAY={
   idle:['어서 와~ 달빛 도박장이야. 한 판 어때?','오늘은 운이 좋아 보이는데?','짤랑짤랑… 동전 소리 좋지?'],
   go:['자, 간다…!','어디 보자, 오늘의 운은…','두근두근…'],
@@ -5208,20 +5226,22 @@ const CAS_SAY={
   poor:['돈부터 가져오게, 손님~','주머니가 가볍구먼. 공유보관함에 골드를 모아 오게.'],
   full:['창고가 꽉 찼네. 자리부터 비우고 오게.'],
   tense:['이…이 소리는…?!','설마… 설마…!'],
+  item:['오! 도박꾼 세트 한 점 건졌군!','그 장비, 임자가 따로 있었구먼!','세 개 다 모으면 대박이라네~'],
   jp:['말도 안 돼!!! 대박이야!!!','내 가게가 망한다아아!!','이럴 수가…! 축하하네!!']};
 let casRecent=[], casP=[], casRun=false;
 const casPick=a=>a[Math.floor(Math.random()*a.length)];
 function casRoll(){ const r=Math.random(), ri2=(a,b)=>a+Math.floor(Math.random()*(b-a+1)), mat=()=>Math.random()<.5?'shard':'ashard';
   if(r<CAS_JP_P)return {k:'jps',mat:mat(),n:CAS_JP_SHARD};
   if(r<CAS_JP_P*2)return {k:'jpg',gold:CAS_JP_GOLD};
-  if(Math.random()<.5)return {k:'no'};
+  if(Math.random()<.5)return {k:'it',key:casPick(CAS_KEYS)};   /* 예전 '꽝' 자리: 행운의 도박꾼 세트 장비 (부위별 16.5%) */
   return {k:'sh',mat:mat(),n:ri2(1,20)}; }
 const casMiss=()=>{ const a=['sh','aw','gd','j7','dm'].sort(()=>Math.random()-.5).slice(0,3); return a; };   /* 꽝: 서로 다른 그림 3개 */
-const casSym=o=>o.k==='jps'?'j7':o.k==='jpg'?'dm':o.k==='gd'?'gd':o.mat==='ashard'?'aw':'sh';
+const casSym=o=>o.k==='jps'?'j7':o.k==='jpg'?'dm':o.k==='gd'?'gd':o.k==='it'?'it':o.mat==='ashard'?'aw':'sh';
 function casCharge(){ const S=getStore();
   if((S.gold|0)<CAS_COST)return {err:'poor'};
   if(!shardRoom(S,CAS_JP_SHARD,'shard')||!shardRoom(S,CAS_JP_SHARD,'ashard'))return {err:'full'};   /* 어떤 결과든 보관함에 들어갈 자리가 있을 때만 */
-  const o=casRoll(); S.gold=(S.gold|0)-CAS_COST; if(o.gold)S.gold+=o.gold; else if(o.n)shardAdd(S,o.n,o.mat); saveStore(); return {o}; }
+  if(S.inv.indexOf(null)<0)return {err:'full'};   /* 장비가 나올 수 있어서 빈 칸 1개는 꼭 필요 */
+  const o=casRoll(); S.gold=(S.gold|0)-CAS_COST; if(o.gold)S.gold+=o.gold; else if(o.k==='it'){ o.it=genCas(o.key); S.inv[S.inv.indexOf(null)]=o.it; } else if(o.n)shardAdd(S,o.n,o.mat); saveStore(); return {o}; }
 const casOwnerSvg=()=>`<svg viewBox="0 0 100 110" aria-hidden="true"><path d="M10 110Q14 78 50 74Q86 78 90 110Z" fill="#1b1426" stroke="#07040a" stroke-width="3"/><path d="M42 76H58L54 98H46Z" fill="#ddd5c2"/><path d="M50 82L38 76V90ZM50 82L62 76V90Z" fill="#b3202f" stroke="#2a0a10" stroke-width="1.5"/><circle cx="50" cy="82" r="3" fill="#7a1420"/>
  <g class="cs-jaw"><path d="M31 56Q31 76 50 76Q69 76 69 56Z" fill="#e9e2cf" stroke="#1a1410" stroke-width="3" stroke-linejoin="round"/><path d="M38 68H62M44 63V73M50 63V74M56 63V73" stroke="#1a1410" stroke-width="2" stroke-linecap="round" fill="none"/></g>
  <ellipse cx="50" cy="46" rx="22" ry="22" fill="#e9e2cf" stroke="#1a1410" stroke-width="3"/><ellipse cx="41" cy="46" rx="6.5" ry="7.5" fill="#120d18"/><ellipse cx="59" cy="46" rx="6.5" ry="7.5" fill="#120d18"/><circle class="cs-eyeg" cx="41" cy="47" r="2.4" fill="#7dffd6"/><circle class="cs-eyeg" cx="59" cy="47" r="2.4" fill="#7dffd6"/><path d="M50 52L47 59H53Z" fill="#1a1410"/>
@@ -5257,10 +5277,10 @@ function casinoModal(){
     <div class="cs-mach"><div class="cs-mq"><u></u><u></u><u></u><b>MOONLIGHT SLOTS</b><u></u><u></u><u></u></div>
       <div class="cs-row"><div class="cs-reels" id="casR">${init()}<div class="cs-pl"></div></div><div class="cs-lever" id="casL"><div class="cs-lv"><i></i><b></b></div><div class="cs-lbase"></div></div></div>
       <div class="cs-slot"><em>동전 투입구</em><div class="cs-coin" id="casC"></div></div></div>
-    <div class="cs-res" id="casS"><b>${CAS_COST.toLocaleString('ko-KR')}G를 넣고 당겨 보세요</b><small>조각 · 꽝 · 대박 0.5%</small></div>
+    <div class="cs-res" id="casS"><b>${CAS_COST.toLocaleString('ko-KR')}G를 넣고 당겨 보세요</b><small>조각 · 세트 장비 · 대박 0.5%</small></div>
     <div class="cs-hist" id="casH"></div>
     <div class="cs-act"><button class="btn primary go" id="casGo" type="button">💰 ${CAS_COST.toLocaleString('ko-KR')}G 넣고 당기기</button><button class="btn" id="casX" type="button">나가기</button></div>
-    <details class="cs-odds"><summary>ⓘ 확률 · 보상 보기</summary>한 판 ${CAS_COST.toLocaleString('ko-KR')}G (공유보관함 골드 사용, 보상도 공유보관함으로)<br>· 조각 <b>49.5%</b>: 그림자/각성 조각 중 하나 1~20개 (고르게)<br>· 꽝 <b>49.5%</b>: 보상 없음<br>· 🔥 대박 조각 <b>0.5%</b>: 그림자/각성 조각 중 하나 ${CAS_JP_SHARD}개<br>· 💎 대박 골드 <b>0.5%</b>: ${CAS_JP_GOLD.toLocaleString('ko-KR')}G<br>· 결과는 당기는 순간 정해지고 바로 저장돼요. 조각이 들어갈 보관함 빈 칸이 필요해요.</details>`,
+    <details class="cs-odds"><summary>ⓘ 확률 · 보상 보기</summary>한 판 ${CAS_COST.toLocaleString('ko-KR')}G (공유보관함 골드 사용, 보상도 공유보관함으로)<br>· 조각 <b>49.5%</b>: 그림자/각성 조각 중 하나 1~20개 (고르게)<br>· 🎲 세트 장비 <b>49.5%</b>: 행운의 도박꾼 세트(착용 Lv 30)의 무기 · 갑옷 · 목걸이 중 하나 (각 16.5%) · 도박장에서만 나와요<br>· 🔥 대박 조각 <b>0.5%</b>: 그림자/각성 조각 중 하나 ${CAS_JP_SHARD}개<br>· 💎 대박 골드 <b>0.5%</b>: ${CAS_JP_GOLD.toLocaleString('ko-KR')}G<br>· 결과는 당기는 순간 정해지고 바로 저장돼요. 조각·장비가 들어갈 보관함 빈 칸이 필요해요.</details>`,
   m=>{ const $q=s=>m.querySelector(s), card=m.querySelector('.card'), bub=$q('#casB'), own=$q('#casO'), reels=$q('#casR'), lever=$q('#casL'), coin=$q('#casC'), res=$q('#casS'), hist=$q('#casH'), btn=$q('#casGo');
     const say=k=>{ bub.textContent=casPick(CAS_SAY[k]); bub.classList.remove('pop'); void bub.offsetWidth; bub.classList.add('pop'); own.classList.add('talk'); clearTimeout(hold); hold=setTimeout(()=>own.classList.remove('talk'),900); };
     const leave=()=>{ closeModal(); if(sheetMode==='town')renderTown(); };
@@ -5272,7 +5292,8 @@ function casinoModal(){
       const step=now=>{ if(!rs.isConnected)return; const t=Math.min(1,(now-t0)/ms), pos=tgt*(1-Math.pow(1-t,pow)), ci=Math.floor(pos); rs.style.transform=`translateY(${-pos*CH}px)`; if(ci!==last){ last=ci; tick(); } if(t<1)requestAnimationFrame(step); else{ rs.style.transform=`translateY(${-tgt*CH}px)`; el.classList.add('stop'); sfx('pick'); vib(12); done(); } };
       requestAnimationFrame(step); };
     const countUp=(el,to,fmt)=>{ const t0=performance.now(); const st=now=>{ if(!el.isConnected)return; const t=Math.min(1,(now-t0)/700); el.textContent=fmt(Math.round(to*(1-Math.pow(1-t,3)))); if(t<1)requestAnimationFrame(st); }; requestAnimationFrame(st); };
-    const reveal=o=>{ if(o.k==='no'){ res.className='cs-res'; res.innerHTML='<b>꽝…</b><small>이번엔 아무것도 안 나왔어요</small>'; void res.offsetWidth; res.classList.add('pop'); card.classList.remove('shake'); m.classList.remove('spin'); sfx('lose'); say('miss'); casRecent.unshift({t:'꽝',jp:false}); casRecent.length=Math.min(casRecent.length,6); drawHist(); $q('#casG').textContent=gtx(); busy=false; btn.disabled=false; return; }
+    const reveal=o=>{ if(o.k==='it'){ const it=o.it, ic=itemIcon(it).url; res.className='cs-res big'; res.innerHTML=`<b style="display:flex;align-items:center;justify-content:center;gap:8px"><img src="${ic}" alt="" style="width:34px;height:34px;border-radius:6px;background:#0a0807;border:1px solid ${RARC[3]}"><span style="color:${RARC[3]}">${esc(it.name)}</span></b><small>🎲 행운의 도박꾼 세트 · ${CAS_PN[o.key]} · 공유보관함에 들어갔어요</small>`; void res.offsetWidth; res.classList.add('pop'); reels.classList.add('hit'); card.classList.remove('shake'); m.classList.remove('spin'); casFx('gold'); sfx('rare'); say('item'); vib([60,40,60],true); casRecent.unshift({t:'🎲'+CAS_PN[o.key],jp:false}); casRecent.length=Math.min(casRecent.length,6); drawHist(); $q('#casG').textContent=gtx(); busy=false; btn.disabled=false; return; }
+      if(o.k==='no'){ res.className='cs-res'; res.innerHTML='<b>꽝…</b><small>이번엔 아무것도 안 나왔어요</small>'; void res.offsetWidth; res.classList.add('pop'); card.classList.remove('shake'); m.classList.remove('spin'); sfx('lose'); say('miss'); casRecent.unshift({t:'꽝',jp:false}); casRecent.length=Math.min(casRecent.length,6); drawHist(); $q('#casG').textContent=gtx(); busy=false; btn.disabled=false; return; }
       const jp=o.k==='jps'||o.k==='jpg', big=jp, SHK=o.mat&&SHDK[o.mat];
       const fmt=o.gold?(v=>`💰 ${v.toLocaleString('ko-KR')}G`):(v=>`${SHK.e} ${SHK.n} +${v}개`);
       res.className='cs-res'+(big?' big':''); res.innerHTML=`<b>${fmt(0)}</b><small>${jp?'🎉 대박! ':''}공유보관함에 들어갔어요</small>`; void res.offsetWidth; res.classList.add('pop'); countUp(res.querySelector('b'),o.gold||o.n,fmt);
