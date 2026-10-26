@@ -1055,7 +1055,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.0.0315</div>
+    <div class="ver" id="verT">v0.6.0.0316</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -5140,7 +5140,7 @@ function townSlot(k,pos){ pos=pos||''; const B=getTown()[k], D=TOWN_B[k], lv=B.l
   const b=townBub(k);
   return `<div class="tsl" style="${pos}"><button class="tbub ${b.cls}" data-tbub="${k}">${b.tx}</button><button class="tbd" data-tbld="${k}" aria-label="${D.n}"><svg viewBox="0 0 100 120" preserveAspectRatio="xMidYMax meet"><use href="#${D.sy}" width="100" height="120"/></svg></button><div class="tlb">${tag}${D.n} Lv.${lv}</div></div>`; }
 /* ===== 달빛 도박장 (슬롯머신): 한 판 100,000G(공유보관함 골드) → 결과를 먼저 정해 저장하고, 화면은 연출만 보여줘요 =====
-   일반(99%): 절반은 조각(그림자/각성 반반, 1~20개) · 절반은 골드(10,000~50,000G, 1,000G 단위)
+   일반(99%): 조각(그림자/각성 반반, 1~20개) — 일반 골드 보상은 없음
    대박 조각 0.5%: 조각 100개 (7 7 7 + 폭죽) · 대박 골드 0.5%: 500,000G (💎 💎 💎 + 금화 비) */
 const CAS_COST=100000, CAS_JP_SHARD=100, CAS_JP_GOLD=500000, CAS_JP_P=.005;
 const CAS_SYM={sh:'🌑',aw:'✦',gd:'💰',j7:'7',dm:'💎'}, CAS_FILL=['sh','aw','gd','j7','dm','gd','sh','aw','gd'];
@@ -5158,8 +5158,7 @@ const casPick=a=>a[Math.floor(Math.random()*a.length)];
 function casRoll(){ const r=Math.random(), ri2=(a,b)=>a+Math.floor(Math.random()*(b-a+1)), mat=()=>Math.random()<.5?'shard':'ashard';
   if(r<CAS_JP_P)return {k:'jps',mat:mat(),n:CAS_JP_SHARD};
   if(r<CAS_JP_P*2)return {k:'jpg',gold:CAS_JP_GOLD};
-  if(Math.random()<.5)return {k:'sh',mat:mat(),n:ri2(1,20)};
-  return {k:'gd',gold:ri2(10,50)*1000}; }
+  return {k:'sh',mat:mat(),n:ri2(1,20)}; }
 const casSym=o=>o.k==='jps'?'j7':o.k==='jpg'?'dm':o.k==='gd'?'gd':o.mat==='ashard'?'aw':'sh';
 function casCharge(){ const S=getStore();
   if((S.gold|0)<CAS_COST)return {err:'poor'};
@@ -5200,10 +5199,10 @@ function casinoModal(){
     <div class="cs-mach"><div class="cs-mq"><u></u><u></u><u></u><b>MOONLIGHT SLOTS</b><u></u><u></u><u></u></div>
       <div class="cs-row"><div class="cs-reels" id="casR">${init()}<div class="cs-pl"></div></div><div class="cs-lever" id="casL"><div class="cs-lv"><i></i><b></b></div><div class="cs-lbase"></div></div></div>
       <div class="cs-slot"><em>동전 투입구</em><div class="cs-coin" id="casC"></div></div></div>
-    <div class="cs-res" id="casS"><b>${CAS_COST.toLocaleString('ko-KR')}G를 넣고 당겨 보세요</b><small>조각 · 골드 · 대박 0.5%</small></div>
+    <div class="cs-res" id="casS"><b>${CAS_COST.toLocaleString('ko-KR')}G를 넣고 당겨 보세요</b><small>조각 · 대박 0.5%</small></div>
     <div class="cs-hist" id="casH"></div>
     <div class="cs-act"><button class="btn primary go" id="casGo" type="button">💰 ${CAS_COST.toLocaleString('ko-KR')}G 넣고 당기기</button><button class="btn" id="casX" type="button">나가기</button></div>
-    <details class="cs-odds"><summary>ⓘ 확률 · 보상 보기</summary>한 판 ${CAS_COST.toLocaleString('ko-KR')}G (공유보관함 골드 사용, 보상도 공유보관함으로)<br>· 조각 <b>49.5%</b>: 그림자/각성 조각 중 하나 1~20개 (고르게)<br>· 골드 <b>49.5%</b>: 10,000~50,000G (1,000G 단위, 고르게)<br>· 🔥 대박 조각 <b>0.5%</b>: 그림자/각성 조각 중 하나 ${CAS_JP_SHARD}개<br>· 💎 대박 골드 <b>0.5%</b>: ${CAS_JP_GOLD.toLocaleString('ko-KR')}G<br>· 결과는 당기는 순간 정해지고 바로 저장돼요. 조각이 들어갈 보관함 빈 칸이 필요해요.</details>`,
+    <details class="cs-odds"><summary>ⓘ 확률 · 보상 보기</summary>한 판 ${CAS_COST.toLocaleString('ko-KR')}G (공유보관함 골드 사용, 보상도 공유보관함으로)<br>· 조각 <b>99%</b>: 그림자/각성 조각 중 하나 1~20개 (고르게)<br>· 🔥 대박 조각 <b>0.5%</b>: 그림자/각성 조각 중 하나 ${CAS_JP_SHARD}개<br>· 💎 대박 골드 <b>0.5%</b>: ${CAS_JP_GOLD.toLocaleString('ko-KR')}G<br>· 결과는 당기는 순간 정해지고 바로 저장돼요. 조각이 들어갈 보관함 빈 칸이 필요해요.</details>`,
   m=>{ const $q=s=>m.querySelector(s), card=m.querySelector('.card'), bub=$q('#casB'), own=$q('#casO'), reels=$q('#casR'), lever=$q('#casL'), coin=$q('#casC'), res=$q('#casS'), hist=$q('#casH'), btn=$q('#casGo');
     const say=k=>{ bub.textContent=casPick(CAS_SAY[k]); bub.classList.remove('pop'); void bub.offsetWidth; bub.classList.add('pop'); own.classList.add('talk'); clearTimeout(hold); hold=setTimeout(()=>own.classList.remove('talk'),900); };
     const leave=()=>{ closeModal(); if(sheetMode==='town')renderTown(); };
