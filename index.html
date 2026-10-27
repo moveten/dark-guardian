@@ -1097,7 +1097,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.1.0346</div>
+    <div class="ver" id="verT">v0.6.1.0347</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -6636,7 +6636,7 @@ const mk=(w,h,fn)=>{ const c=document.createElement('canvas'); c.width=w; c.heig
 const bakeGlow=()=>mk(128,128,g=>{ const r=g.createRadialGradient(64,64,0,64,64,64); r.addColorStop(0,'rgba(255,255,255,1)'); r.addColorStop(.35,'rgba(255,255,255,.55)'); r.addColorStop(1,'rgba(255,255,255,0)'); g.fillStyle=r; g.fillRect(0,0,128,128); });
 const bakeStar=()=>mk(64,64,g=>{ g.translate(32,32); for(const [sx,sy] of [[1,.1],[.1,1]]){ g.save(); g.scale(sx,sy); const r=g.createRadialGradient(0,0,0,0,0,30); r.addColorStop(0,'rgba(255,255,255,1)'); r.addColorStop(1,'rgba(255,255,255,0)'); g.fillStyle=r; g.beginPath(); g.arc(0,0,30,0,TAU); g.fill(); g.restore(); }
   const c=g.createRadialGradient(0,0,0,0,0,9); c.addColorStop(0,'rgba(255,255,255,1)'); c.addColorStop(1,'rgba(255,255,255,0)'); g.fillStyle=c; g.beginPath(); g.arc(0,0,9,0,TAU); g.fill(); });
-const bakeBeam=()=>mk(64,256,g=>{ const r=g.createLinearGradient(0,256,0,0); r.addColorStop(0,'rgba(255,255,255,.9)'); r.addColorStop(1,'rgba(255,255,255,0)'); g.fillStyle=r; g.beginPath(); g.moveTo(26,256); g.lineTo(38,256); g.lineTo(64,0); g.lineTo(0,0); g.closePath(); g.fill(); });
+const bakeBeam=()=>mk(64,256,g=>{ const im=g.createImageData(64,256), D=im.data; for(let y=0;y<256;y++){ const f=y/255, wd=3+14*(1-f), fall=Math.pow(f,1.4); for(let x=0;x<64;x++){ const d=(x-31.5)/wd, a=Math.exp(-2*d*d)*fall, o=(y*64+x)*4; D[o]=D[o+1]=D[o+2]=255; D[o+3]=Math.round(a*255); } } g.putImageData(im,0,0); });   /* 서치라이트: 가장자리가 부드러운 빛줄기 (아래=광원, 위로 갈수록 넓고 흐려짐) */
 const bakeTrail=()=>mk(128,8,g=>{ const r=g.createLinearGradient(0,0,128,0); r.addColorStop(0,'rgba(255,255,255,0)'); r.addColorStop(1,'rgba(255,255,255,1)'); g.fillStyle=r; g.beginPath(); g.ellipse(64,4,64,2.2,0,0,TAU); g.fill(); });
 const bakeFog=(seed,rgb)=>{ const R=mulberry(seed); return mk(DW,260,g=>{ for(let i=0;i<8;i++){ const cx=R()*DW, cy=90+R()*80, rx=150+R()*150, ry=44+R()*40, a=.3+R()*.25;
   for(const o of [-DW,0,DW]){ g.save(); g.translate(cx+o,cy); g.scale(rx/ry,1); const r=g.createRadialGradient(0,0,0,0,0,ry); r.addColorStop(0,`rgba(${rgb},${a})`); r.addColorStop(1,`rgba(${rgb},0)`); g.fillStyle=r; g.beginPath(); g.arc(0,0,ry,0,TAU); g.fill(); g.restore(); } } }); };
@@ -6673,21 +6673,22 @@ function start(){
       sc.fl=[]; for(let i=0;i<16;i++){ sc.fl.push({img:img(0,0,'glow').setTint(0xd8ff7a).setScale(.1+R()*.08),bx:40+R()*770,by:120+R()*1080,ax:20+R()*50,ay:14+R()*34,f1:.25+R()*.4,f2:.3+R()*.4,p:R()*6.28,q:R()*6.28,tw:1.6+R()*2.4}); }
       sc.ss={img:A(sc.add.image(0,0,'trail').setOrigin(1,.5).setAlpha(0).setTint(0xeef2ff)),next:5+R()*5,age:-1,x:0,y:0,vx:0,vy:0};
       /* 달빛 도박장: 네온 간판 깜빡임 · 전구 쫓기 · 서치라이트 · 문 틈 불빛 · 반짝이는 금화 (건물 위치는 화면에서 읽어와요) */
-      const ADD=P.BlendModes.ADD, CB=[[36,8],[48,5],[60,4],[72,4],[84,4],[96,5],[106,8],[106,26],[88,29],[70,30],[52,29],[36,26]];
-      const cas={sign:img(0,0,'glow').setTint(0xff3fa0).setBlendMode(ADD),door:img(0,0,'glow').setTint(0xffc24a).setBlendMode(ADD),
+      const ADD=P.BlendModes.ADD, CB=[[102,49],[135,47],[181,37],[229,46],[262,48],[281,73],[266,107],[227,108],[182,106],[140,108],[97,106],[84,77]];   /* 도박장 그림(img/town_casino.png, 360×328) 위 간판 전구 위치 — 간판 둘레를 시계 방향으로 한 바퀴 */
+      const cas={sign:img(0,0,'glow').setTint(0xff3fa0).setBlendMode(ADD),sign2:img(0,0,'glow').setTint(0xff4fb8).setBlendMode(ADD),door:img(0,0,'glow').setTint(0xffc24a).setBlendMode(ADD),
         bulbs:CB.map(()=>img(0,0,'glow').setTint(0xffe08a).setBlendMode(ADD)),
         beams:[0,1].map(i=>({s:A(sc.add.image(0,0,'beam').setOrigin(.5,1).setTint(i?0xffb8f0:0xb8e8ff).setBlendMode(ADD)),p:i*3.1})),
         coins:[],on:false,k:1,ox:0,oy:0,burst:6+R()*4};
-      for(let i=0;i<10;i++)cas.coins.push({img:img(0,0,'star').setTint(0xffd34d).setBlendMode(ADD),age:R()*2,life:1.4+R()*.8,dx:(R()-.5)*34,p:R()*6});
+      for(let i=0;i<10;i++)cas.coins.push({img:img(0,0,'star').setTint(0xffd34d).setBlendMode(ADD),age:R()*2,life:1.4+R()*.8,dx:(R()-.5)*92,p:R()*6});
       cas.sp=[]; for(let i=0;i<10;i++)cas.sp.push({img:img(0,0,'star').setTint(0xffa8e0).setBlendMode(ADD).setAlpha(0),vx:0,vy:0,age:9});
-      cas.place=()=>{ try{ const m=host&&host.parentNode, b=m&&m.querySelector('#tCas .tbd svg'); if(!m||!b){ cas.on=false; return; }
+      cas.place=()=>{ try{ const m=host&&host.parentNode, b=m&&m.querySelector('#tCas .tbd img'); if(!m||!b){ cas.on=false; return; }
         const mr=m.getBoundingClientRect(), br=b.getBoundingClientRect(); if(!mr.width||!br.width){ cas.on=false; return; }
-        cas.ox=(br.left-mr.left)/mr.width*DW; cas.oy=(br.top-mr.top)/mr.height*DH; cas.k=br.width/mr.width*DW/140; cas.on=true;
+        cas.ox=(br.left-mr.left)/mr.width*DW; cas.oy=(br.top-mr.top)/mr.height*DH; cas.k=br.width/mr.width*DW/360; cas.on=true;   /* 좌표는 그림 원본 픽셀(360×328) 기준 */
         const X=v=>cas.ox+v*cas.k, Y=v=>cas.oy+v*cas.k;
-        cas.sign.setPosition(X(70),Y(17)).setScale(cas.k*1.5,cas.k*.75);
-        cas.door.setPosition(X(70),Y(104)).setScale(cas.k*.8,cas.k*.9);
-        CB.forEach(([x,y],i)=>cas.bulbs[i].setPosition(X(x),Y(y)).setScale(cas.k*.2));
-        cas.beams.forEach((b,i)=>b.s.setPosition(X(i?100:40),Y(36)).setScale(cas.k*.9,cas.k*1.5));
+        cas.sign.setPosition(X(181),Y(76)).setScale(cas.k*3.6,cas.k*1.7);   /* 간판 둘레 은은한 번짐 */
+        cas.sign2.setPosition(X(185),Y(75)).setScale(cas.k*1.9,cas.k*.6);   /* 글자 줄 네온 */
+        cas.door.setPosition(X(175),Y(268)).setScale(cas.k*2.0,cas.k*2.3);
+        CB.forEach(([x,y],i)=>cas.bulbs[i].setPosition(X(x),Y(y)).setScale(cas.k*.45));
+        cas.beams.forEach((b,i)=>b.s.setPosition(X(i?293:71),Y(63)).setScale(cas.k*6.4,cas.k*3.5));   /* 서치라이트: 지붕 좌우 끝에서 위로 */
       }catch(e){ cas.on=false; } };
       sc.cas=cas;
       const layout=()=>{ const W=sc.scale.width, H=sc.scale.height; if(!W||!H)return; root.setScale(W/DW,H/DH); cas.place(); };
@@ -6697,15 +6698,15 @@ function start(){
       try{
         const d=Math.min(dt,50)/1000; this.t+=d; const t=this.t, R=this.RR;
         const C=this.cas; this.cp-=d; if(this.cp<=0){ this.cp=1; C.place(); }
-        for(const o of [C.sign,C.door,...C.bulbs,...C.beams.map(b=>b.s),...C.coins.map(c=>c.img)])o.setVisible(C.on);
+        for(const o of [C.sign,C.sign2,C.door,...C.bulbs,...C.beams.map(b=>b.s),...C.coins.map(c=>c.img)])o.setVisible(C.on);
         if(C.on){ const k=C.k, fl=Math.sin(t*23)>.93?.45:1;
-          C.sign.setAlpha((.55+.18*Math.sin(t*3.1))*fl); C.door.setAlpha(.5+.12*Math.sin(t*9)+.06*Math.sin(t*23));
-          C.bulbs.forEach((b,i)=>{ const u=((t*5-i*.5)%6+6)%6; b.setAlpha(u<1.6?.95:.18); });
-          C.beams.forEach(b=>{ b.s.setRotation(Math.sin(t*.7+b.p)*.55+(b.p?.25:-.25)); b.s.setAlpha(.1+.04*Math.sin(t*1.9+b.p)); });
-          for(const c of C.coins){ c.age+=d; if(c.age>c.life)c.age=0; const u=c.age/c.life; c.img.setPosition(C.ox+(70+c.dx+Math.sin(t*3+c.p)*4)*k,C.oy+(96-u*58)*k).setAlpha(Math.sin(u*Math.PI)*.85).setScale(k*.2*(.6+.5*Math.sin(t*6+c.p)));  }
-          C.burst-=d; if(C.burst<=0){ C.burst=7+R()*6; for(const q of C.sp){ const a=R()*6.283, v=40+R()*70; q.age=0; q.vx=Math.cos(a)*v; q.vy=Math.sin(a)*v-30; q.img.setPosition(C.ox+70*k,C.oy+17*k); } }
+          C.sign.setAlpha((.42+.14*Math.sin(t*3.1))*fl); C.sign2.setAlpha((.62+.2*Math.sin(t*3.1+.6))*fl); C.door.setAlpha(.5+.12*Math.sin(t*9)+.06*Math.sin(t*23));
+          C.bulbs.forEach((b,i)=>{ const u=((t*4-i*.5)%6+6)%6; b.setAlpha(u<1.6?.95:.3); });
+          C.beams.forEach(b=>{ b.s.setRotation((b.p?.42:-.42)+Math.sin(t*.7+b.p)*.2); b.s.setAlpha(.5+.12*Math.sin(t*1.9+b.p)); });   /* 서치라이트가 바깥쪽 위로 천천히 좌우로 흔들려요 */
+          for(const c of C.coins){ c.age+=d; if(c.age>c.life)c.age=0; const u=c.age/c.life; c.img.setPosition(C.ox+(175+c.dx+Math.sin(t*3+c.p)*8)*k,C.oy+(262-u*120)*k).setAlpha(Math.sin(u*Math.PI)*.85).setScale(k*.5*(.6+.5*Math.sin(t*6+c.p)));  }
+          C.burst-=d; if(C.burst<=0){ C.burst=7+R()*6; for(const q of C.sp){ const a=R()*6.283, v=40+R()*70; q.age=0; q.vx=Math.cos(a)*v; q.vy=Math.sin(a)*v-30; q.img.setPosition(C.ox+185*k,C.oy+76*k); } }
         }
-        for(const q of C.sp){ if(q.age<1){ q.age+=d*1.1; q.vy+=90*d; q.img.x+=q.vx*d; q.img.y+=q.vy*d; q.img.setAlpha(Math.max(0,1-q.age)).setScale(C.k*.2*(1-q.age*.5)); } else q.img.setAlpha(0); }
+        for(const q of C.sp){ if(q.age<1){ q.age+=d*1.1; q.vy+=90*d; q.img.x+=q.vx*d; q.img.y+=q.vy*d; q.img.setAlpha(Math.max(0,1-q.age)).setScale(C.k*.5*(1-q.age*.5)); } else q.img.setAlpha(0); }
         this.moon.setAlpha(.2+.07*Math.sin(t*.6));
         for(const f of this.fogs){ f.off=((f.off+f.v*d)%DW+DW)%DW; f.a.x=f.off; f.b.x=f.off-DW; }
         for(const l of this.lan){ const k=.78+.14*Math.sin(t*7+l.p)+.08*Math.sin(t*19+l.p*2.3); l.g.setAlpha(.5*k); l.c.setAlpha(.8*k); }
