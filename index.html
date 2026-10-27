@@ -622,7 +622,8 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 .htip{position:fixed;z-index:70;width:min(320px,92vw);box-sizing:border-box;background:var(--panel);border:1px solid var(--gold);border-radius:12px;padding:12px;font-size:13px;line-height:1.6;box-shadow:0 10px 40px rgba(0,0,0,.8);pointer-events:none}
 .htip[hidden]{display:none}
 .htip ul{margin:6px 0;padding-left:16px;color:#a9b8ff}.htip .in{font-family:var(--f-disp);font-weight:800;font-size:17px}.htip .meta{color:var(--mute);font-size:12px}
-.ipop .in{font-family:var(--f-disp);font-weight:800;font-size:17px}.ipop .meta{color:var(--mute);font-size:12px}
+.ipop .in{font-family:var(--f-disp);font-weight:800;font-size:17px}
+.rtg{display:inline-block;vertical-align:middle;margin-left:6px;padding:0 6px;border-radius:9px;border:1.5px solid currentColor;background:#1a1230ee;font:800 10.5px/1.45 var(--f-body,inherit);white-space:nowrap;box-shadow:0 0 6px currentColor}.ipop .meta{color:var(--mute);font-size:12px}
 .ipop .acts{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}.ipop .acts .btn{padding:8px 14px;min-height:40px;font-size:13px}
 .ipop .cx{position:absolute;right:8px;top:8px;width:34px;height:34px;border:1px solid var(--line2);border-radius:6px;background:none;font-size:16px}
 /* 아이템 상세 버튼: 패드·PC는 예전 모양 그대로, 폰(560px 이하)만 새 배치 */
@@ -1122,7 +1123,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.1.0350</div>
+    <div class="ver" id="verT">v0.6.1.0351</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1277,6 +1278,8 @@ const STAGES=[
   th:{g:'#0c0812',gd:'rgba(60,30,110,.5)',gl:'rgba(4,2,8,.8)',tuft:'rgba(140,110,255,.3)',road:['#1a1426','#221a32'],tint:'rgba(60,40,140,.18)',amb:'ember',pc:'150,120,255',crack:1,dec:[['lrock',.3],['crack',.3],['bones',.14],['pillar',.16],['torch',.1]]}}];
 const RARN=['일반','매직','레어','유니크','영웅'], RARC=['#e9e2d4','#7d96ff','#ffe24d','#e4b65a','#ff4f7a'];
 const dn=it=>it.rar>=2?`[${RARN[it.rar]}] ${it.name}`:it.name;
+/* 아이템 설명 이름 줄: 이름 바로 뒤에 작은 등급 말풍선(유니크·레어 등) */
+const dnTag=it=>it.rar>=2?`<span class="rtg">${RARN[it.rar]}</span>`:'';
 const SLOTN={weapon:'무기',helm:'헬멧',armor:'갑옷',amulet:'목걸이',ring:'반지',shield:'방패'};
 const EQN={weapon:'무기',helm:'헬멧',amulet:'목걸이',ring1:'반지',armor:'갑옷',ring2:'반지',shield:'방패'};
 const OFFN={pal:'방패',war:'보조무기',sorc:'오브',necro:'영혼 등불',druid:'토템'}; /* 직업별 보조(왼손) 장비 이름 */
@@ -4695,7 +4698,7 @@ function lockSvg(on){ return on
   :'<svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><g transform="rotate(-42 8 11)"><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="#b9b2a4" stroke-width="2.4" stroke-linecap="round" transform="translate(0 -1.5)"/></g><rect x="5" y="11" width="14" height="10" rx="2.2" fill="#8a8478" stroke="#3a362e" stroke-width="1"/><circle cx="12" cy="15.2" r="1.6" fill="#2a2620"/><rect x="11.2" y="15.5" width="1.6" height="3.2" rx=".8" fill="#2a2620"/></svg>'; }
 function itemLines(it,opt){
   if(isShard(it)) return `<div style="display:flex;gap:10px;align-items:center"><div style="width:56px;height:56px;flex:none;display:grid;place-items:center;background:#0a0807;border:1px solid ${RARC[4]};border-radius:8px">${shardOrb(it.n,32,shMat(it))}</div><div><div class="in" style="color:${RARC[4]}">${SHDK[shMat(it)].n}</div><div class="meta">수량 <b style="color:#fff">${it.n}</b> / ${SHARD_MAX} (한 칸 최대)</div></div></div><div class="meta" style="margin:6px 0">${SHDK[shMat(it)].src} 얻는 재료예요. ${SHDK[shMat(it)].N()}개로 ${SHDK[shMat(it)].to} 하나를 교환할 수 있어요. 개당 ${SHARD_SELL.toLocaleString()}G에 판매할 수도 있어요.</div>`;
-  let s=`<div style="display:flex;gap:10px;align-items:center"><span style="position:relative;flex:none;display:flex"><img src="${itemIcon(it).url}" alt="" style="width:56px;height:56px;flex:none;background:#0a0807;border:1px solid ${RARC[it.rar]};border-radius:8px">${opt&&opt.lk?`<button class="lkb${it.lock?' on':''}" data-lk="1" aria-label="${it.lock?'잠금 해제':'잠금'}">${lockSvg(!!it.lock)}</button>`:''}</span><div><div class="in" style="color:${RARC[it.rar]}">${it.enh>0?'+'+it.enh+' ':''}${esc(dn(it))}</div><div class="meta" style="color:#fff">아이템 레벨 ${ilvOf(it)}${it.enh>0?` <span style="color:#ffd84a">(기본 ${it.ilvl} + 강화 ${it.enh})</span>`:''}</div>${ownTag(it)}<div class="meta">${reqHtml(it)}</div></div></div>`+lvCmp(it);
+  let s=`<div style="display:flex;gap:10px;align-items:center"><span style="position:relative;flex:none;display:flex"><img src="${itemIcon(it).url}" alt="" style="width:56px;height:56px;flex:none;background:#0a0807;border:1px solid ${RARC[it.rar]};border-radius:8px">${opt&&opt.lk?`<button class="lkb${it.lock?' on':''}" data-lk="1" aria-label="${it.lock?'잠금 해제':'잠금'}">${lockSvg(!!it.lock)}</button>`:''}</span><div><div class="in" style="color:${RARC[it.rar]}">${it.enh>0?'+'+it.enh+' ':''}${esc(it.name)}${dnTag(it)}</div><div class="meta" style="color:#fff">아이템 레벨 ${ilvOf(it)}${it.enh>0?` <span style="color:#ffd84a">(기본 ${it.ilvl} + 강화 ${it.enh})</span>`:''}</div>${ownTag(it)}<div class="meta">${reqHtml(it)}</div></div></div>`+lvCmp(it);
   const bt=baseText(it); if(bt)s+=`<div>${bt}</div>`;
   if(BASEFX[it.base]&&it.slot==='weapon') s+=`<div class="meta" style="color:#9fd0ff">▪ ${BASEFX[it.base].t}</div>`; s+=wpPenLine(it);
   if(it.sp&&SPFX[it.sp]) s+=`<div style="margin:4px 0;color:#ffb14a;font-weight:700">★ 특수 효과: ${SPFX[it.sp].d}</div>`;
