@@ -1091,7 +1091,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.0.0337</div>
+    <div class="ver" id="verT">v0.6.0.0338</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1821,7 +1821,7 @@ const TOWN_B={tw:{n:'그림자 타워',sy:'tw-tower',mat:'shard',main:1,e:'🌑'
 const TOWN_FAM=[{e:'🌑',nm:'그림자',mat:'shard',main:'tw',aux:'lab'},{e:'✦',nm:'각성',mat:'ashard',main:'al',aux:'mill'}];
 var TOWNC=null;
 function townLoad(){ let o=null; try{ o=JSON.parse(lsGet(TOWN_KEY)||'null'); }catch(e){} if(!o||typeof o!=='object')o={};
-  const t={}, save=[]; for(const k in TOWN_B){ const q=o[k]||{}, D=TOWN_B[k]; t[k]={lv:Math.max(0,Math.min(D.main?TOWN_MAIN_MAXLV:TOWN_MAXLV,q.lv|0)),n:Math.max(0,q.n|0),t:+q.t>0?+q.t:0};
+  const t={}, save=[]; for(const k in TOWN_B){ const q=o[k]||{}, D=TOWN_B[k]; t[k]={lv:Math.max(0,Math.min(D.main?TOWN_MAIN_MAXLV:TOWN_MAXLV,q.lv|0)),n:Math.max(0,q.n|0),t:+q.t>0?+q.t:0,u:+q.u>0?+q.u:0};
     if(D.lab){ const rs=x=>({l:Math.max(0,Math.min(LAB_MAX,(x&&x.l)|0)),e:x&&+x.e>0?+x.e:0}), B=t[k]; B.a=rs(q.a); B.b=rs(q.b); B.rf=Math.max(0,q.rf|0); B.mig=1;
       if(!q.mig){ const N=B.lv|0; if(N>=1){ let sp=TOWN_BUILD; for(let L=1;L<N;L++)sp+=100+50*L; try{ const S=getStore(); shardAdd(S,sp,'shard'); saveStore(); B.rf=sp; }catch(e){} } save.push(1); }   /* 예전 연구소(올스탯)는 없어졌어요: 쓴 그림자 조각은 돌려주고 지은 상태는 유지 */
       B.lv=Math.min(1,B.lv); }
@@ -1842,7 +1842,11 @@ function getTown(){ return TOWNC||(TOWNC=townLoad()); }
 function saveTown(){ if(TOWNC)lsSet(TOWN_KEY,JSON.stringify(TOWNC)); }
 /* 생산: 메인 건물은 1시간마다 조각 1개(Lv.1 최대 24개, 레벨마다 +6 → Lv.5 48개) · 풍차는 60분(레벨당 -5분)마다 물약 1개(최대 20개). 가득 차면 멈추고, 비우면 그때부터 다시 만듦 */
 function townProd(k){ const D=TOWN_B[k], lv=getTown()[k].lv|0; if(D.main)return {iv:TOWN_HOUR,cap:townMainCap(lv)}; if(D.pot)return {iv:Infinity,cap:TOWN_POT_CAP}; return null; }   /* 풍차는 더 이상 물약을 만들지 않아요(iv 무한). 예전에 쌓인 물약만 받을 수 있어요 */
-function townStatBonus(){ return (getTown().mill.lv|0)*TOWN_STAT; }   /* 각성 풍차: 레벨당 모든 캐릭터 올스탯 +5 */
+/* 건물 업그레이드 시간: Lv.1(건설)은 즉시, Lv.2는 30분부터 레벨마다 2배 (Lv.3 1시간 · Lv.4 2시간 · Lv.5 4시간 · Lv.6 8시간 …). 비용은 시작할 때 내고, 올리는 동안에도 지금 레벨 효과는 그대로예요. 그림자 연구소는 연구마다 따로 시간이 걸려요 */
+const TOWN_UPM=n=>n<=1?0:30*Math.pow(2,n-2);
+function townUpTick(){ const T=getTown(), now=Date.now(), done=[]; for(const k in TOWN_B){ const B=T[k], D=TOWN_B[k]; if(D.lab||!(B.u>0)||now<B.u)continue; B.lv=Math.min(D.main?TOWN_MAIN_MAXLV:TOWN_MAXLV,(B.lv|0)+1); B.u=0; done.push(k); }
+  if(done.length){ saveTown(); if(done.includes('mill')&&me&&me.stats){ try{ me.D=derive(me); }catch(e){} } } return done; }
+function townStatBonus(){ townUpTick(); return (getTown().mill.lv|0)*TOWN_STAT; }   /* 각성 풍차: 레벨당 모든 캐릭터 올스탯 +5 */
 function townTick(k,now){ const B=getTown()[k], P=townProd(k); if(!P||(B.lv|0)<1)return false; now=now||Date.now();
   if((B.n|0)>=P.cap){ if(B.n>P.cap){ B.n=P.cap; return true; } return false; }
   if(!(B.t>0)||B.t>now){ B.t=now; return true; }   /* 시계가 뒤로 가도 생산이 망가지지 않게 */
@@ -1851,9 +1855,11 @@ function townTick(k,now){ const B=getTown()[k], P=townProd(k); if(!P||(B.lv|0)<1
 const townGold=k=>!!TOWN_B[k].gold&&((getTown()[k].lv|0)<TOWN_GLV);   /* 각성 풍차: Lv.1~5까지는 골드(건설 50,000G · 올릴 때 3만G부터 +1만G씩), Lv.6으로 올릴 때부터는 ✦ 각성 그림자 조각 */
 const townCost=k=>{ const lv=getTown()[k].lv|0; if(townGold(k))return lv<1?TOWN_GBUILD:20000+10000*lv; return lv<1?TOWN_BUILD:TOWN_B[k].gold?100+50*(lv-TOWN_GLV):100+50*lv; };
 /* 건설/업그레이드: 공유보관함 조각으로만 결제. 'ok' 성공 · 'lack' 조각 부족 · 'max' 더 못 올림 */
-function townUp(k){ const B=getTown()[k], D=TOWN_B[k], lv=B.lv|0; if(lv>=(D.main?TOWN_MAIN_MAXLV:TOWN_MAXLV))return 'max';
+function townUp(k){ townUpTick(); const B=getTown()[k], D=TOWN_B[k], lv=B.lv|0; if(lv>=(D.main?TOWN_MAIN_MAXLV:TOWN_MAXLV))return 'max'; if(B.u>0)return 'busy';
   const cost=townCost(k), S=getStore();
   if(townGold(k)){ if((S.gold|0)<cost)return 'lack'; S.gold-=cost; saveStore(); } else { if(shardCount(S,D.mat)<cost||!shardTake(S,cost,D.mat))return 'lack'; saveStore(); }
+  const um=TOWN_UPM(lv+1);
+  if(um>0){ B.u=Date.now()+um*60000; saveTown(); return 'ok'; }   /* 시간이 걸리는 업그레이드: 끝나면 townUpTick이 레벨을 올려요 */
   B.lv=lv+1; if(lv<1&&townProd(k)&&!D.stat){ B.t=Date.now(); B.n=0; } saveTown();
   if(D.stat&&me&&me.stats){ try{ me.D=derive(me); }catch(e){} }
   return 'ok'; }
@@ -5240,7 +5246,7 @@ function millArt(lv){ const st=Math.max(1,Math.min(5,Math.ceil(lv/2))), [w,h,hx,
 function townSlot(k,pos){ pos=pos||''; const B=getTown()[k], D=TOWN_B[k], lv=B.lv|0, tag=D.main?'<span class="tmn">메인</span>':'<span class="tsb">보조</span>';
   if(lv<1)return `<div class="tsl e" style="${pos}"><button class="tplot" data-tbld="${k}"><b>＋</b>건설<br><span style="color:#ffd34d">${D.lab?'💰 '+LAB_BUILD.toLocaleString('ko-KR'):D.gold?'💰 '+TOWN_GBUILD.toLocaleString('ko-KR'):D.e+' '+TOWN_BUILD}</span></button><div class="tlb">${tag}${D.n}</div></div>`;
   const b=townBub(k);
-  return `<div class="tsl" style="${pos}">${b?`<button class="tbub ${b.cls}" data-tbub="${k}">${b.tx}</button>`:''}<button class="tbd" data-tbld="${k}" aria-label="${D.n}">${D.mill?millArt(lv):''}<svg${D.mill?' class="mfb"':''} viewBox="0 0 100 120" preserveAspectRatio="xMidYMax meet"><use href="#${D.sy}" width="100" height="120"/></svg></button><div class="tlb">${tag}${D.n} Lv.${lv}</div></div>`; }
+  return `<div class="tsl" style="${pos}">${b?`<button class="tbub ${b.cls}" data-tbub="${k}">${b.tx}</button>`:''}<button class="tbd" data-tbld="${k}" aria-label="${D.n}">${D.mill?millArt(lv):''}<svg${D.mill?' class="mfb"':''} viewBox="0 0 100 120" preserveAspectRatio="xMidYMax meet"><use href="#${D.sy}" width="100" height="120"/></svg></button><div class="tlb">${tag}${D.n} Lv.${lv}${B.u>0?` <span data-tul="${k}" style="color:#ffd34d">⏳ ${labLeft(B.u-Date.now())}</span>`:''}</div></div>`; }
 /* ===== 달빛 도박장 (슬롯머신): 한 판 100,000G(공유보관함 골드) → 결과를 먼저 정해 저장하고, 화면은 연출만 보여줘요 =====
    일반(99%): 절반은 조각(그림자/각성 반반, 1~20개) · 절반은 꽝(보상 없음)
    대박 조각 0.5%: 조각 100개 (7 7 7 + 폭죽) · 대박 골드 0.5%: 500,000G (💎 💎 💎 + 금화 비) */
@@ -5344,7 +5350,7 @@ function casinoModal(){
         spinReel(els[0],(Array.isArray(sym)?sym[0]:sym),1250,3,()=>{ stop(); }); spinReel(els[1],(Array.isArray(sym)?sym[1]:sym),1850,3,()=>{ stop(); }); spinReel(els[2],(Array.isArray(sym)?sym[2]:sym),jp?4200:2500,jp?5:3,()=>{ stop(); }); },700); };
     btn.onclick=go; lever.onclick=go; });
   $('#modal').classList.add('cas'); }
-function renderTown(){ const S=getStore(), now=Date.now(); let ch=false; { const L=getTown().lab; if((L.rf|0)>0){ townMsg=`🧪 그림자 연구소가 성벽 연구소로 바뀌었어요. 쓰셨던 🌑 그림자 조각 ${L.rf}개를 공유보관함으로 돌려드렸어요`; L.rf=0; saveTown(); } const M=getTown().mill; if((M.rf|0)>0){ townMsg=`✦ 각성 풍차의 건설·업그레이드가 골드로 바뀌었어요. 쓰셨던 ✦ 각성 그림자 조각 ${M.rf}개를 공유보관함으로 돌려드렸어요`; M.rf=0; saveTown(); } } for(const k of ['tw','al','mill'])if(townTick(k,now))ch=true; if(ch)saveTown();
+function renderTown(){ townUpTick(); const S=getStore(), now=Date.now(); let ch=false; { const L=getTown().lab; if((L.rf|0)>0){ townMsg=`🧪 그림자 연구소가 성벽 연구소로 바뀌었어요. 쓰셨던 🌑 그림자 조각 ${L.rf}개를 공유보관함으로 돌려드렸어요`; L.rf=0; saveTown(); } const M=getTown().mill; if((M.rf|0)>0){ townMsg=`✦ 각성 풍차의 건설·업그레이드가 골드로 바뀌었어요. 쓰셨던 ✦ 각성 그림자 조각 ${M.rf}개를 공유보관함으로 돌려드렸어요`; M.rf=0; saveTown(); } } for(const k of ['tw','al','mill'])if(townTick(k,now))ch=true; if(ch)saveTown();
   $('#itemPop').hidden=true; $('#ptsBar').hidden=true; $('#sheetTabs').hidden=true; $('#sheetT').innerHTML='🏘️ 마을';
   const b=$('#sheetB'); b.className='sbody town';
   b.innerHTML=`<div class="tcur"><span>공유보관함</span><span>💰 ${(S.gold|0).toLocaleString('ko-KR')}</span><span>🌑 ${shardCount(S,'shard')}</span><span>✦ ${shardCount(S,'ashard')}</span></div>${townMsg?`<div class="tqnote">${esc(townMsg)}</div>`:''}<div class="tmap"><button class="tcsb" id="tCas" type="button" style="--x:45%;--y:62%" aria-label="달빛 도박장"><span class="tbd"><img class="cimg" src="img/town_casino.png" alt="" draggable="false" onerror="this.closest('.tcsb').classList.add('cbad')"><svg viewBox="0 0 140 130" preserveAspectRatio="xMidYMax meet"><use href="#tw-casino" width="140" height="130"/></svg></span><span class="tlb"><span class="tsb" style="background:#ff4fa8;color:#2a0a1c">🎰</span>달빛 도박장</span></button>${TOWN_FAM.map((f,i)=>{ const y=i?[69,72]:[26,25.5], ty=i?55:13; return `${townSlot(f.main,`--x:${i?29:30}%;--y:${y[0]}%`)}${townSlot(f.aux,`--x:${i?77:71}%;--y:${y[1]}%`)}`; }).join('')}</div><p class="meta" style="margin:0;font-size:12px;line-height:1.5">건물을 누르면 자세히 볼 수 있어요. 건설과 업그레이드에는 <b>공유보관함</b>의 조각을 써요 (그림자 연구소는 <b>골드</b>, 각성 풍차는 건설과 Lv.5까지 <b>골드</b>로 해요). 말풍선을 누르면 만든 것을 캐릭터 우편으로 받아요.</p>`;
@@ -5354,6 +5360,8 @@ function renderTown(){ const S=getStore(), now=Date.now(); let ch=false; { const
   b.querySelectorAll('[data-tbld]').forEach(e=>e.onclick=()=>{ if(TOWN_B[e.dataset.tbld].lab)labInfo(); else townInfo(e.dataset.tbld); });
   clearInterval(townTimer); townTimer=setInterval(townLive,1000); }
 function townLive(){ if(sheetMode!=='town'||$('#sheet').hidden){ clearInterval(townTimer); townTimer=0; return; }
+  { const fin=townUpTick(); if(fin.length){ for(const k of fin){ toast(`✅ ${TOWN_B[k].n} Lv.${getTown()[k].lv} 업그레이드 완료!`,'#9fe08a'); } try{ sfx('rare'); }catch(e){} renderTown(); return; }
+    for(const e of document.querySelectorAll('#sheetB [data-tul]'))e.textContent='⏳ '+labLeft(getTown()[e.dataset.tul].u-Date.now()); }
   const now=Date.now(); let ch=false; for(const k of ['tw','al','mill','lab']){ if(k==='lab'){ for(const q of labTick()){ toast(`✅ ${LAB_R[q].n} Lv.${getTown().lab[q].l} 연구 완료!`,'#9fe08a'); try{ sfx('rare'); }catch(e){} } } else if(townTick(k,now))ch=true; const e=document.querySelector(`#sheetB [data-tbub="${k}"]`), bb=townBub(k); if(e&&bb){ e.textContent=bb.tx; e.className='tbub '+bb.cls; } } if(ch)saveTown(); }
 const labLeft=ms=>{ const t=Math.max(0,Math.ceil(ms/1000)), h=Math.floor(t/3600), m=Math.floor(t%3600/60), q=t%60, p=n=>String(n).padStart(2,'0'); return h?`${h}:${p(m)}:${p(q)}`:`${m}:${p(q)}`; };
 const labTm=m=>m<=0?'즉시':m>=60?(m%60?`${Math.floor(m/60)}시간 ${m%60}분`:`${m/60}시간`):`${m}분`;
@@ -5370,13 +5378,16 @@ function labInfo(){ clearInterval(labTimer); labTick(); const L=getTown().lab, S
     m.querySelectorAll('[data-rs]').forEach(b=>b.onclick=()=>{ const k=b.dataset.rs, r=labStart(k); if(r==='ok'){ sfx('rare'); toast(`🔬 ${LAB_R[k].n} ${getTown().lab[k].e>0?'연구를 시작했어요':`Lv.${getTown().lab[k].l} 완료!`}`,'#c9a0ff'); } else toast(r==='lack'?'골드가 부족해요':'지금은 할 수 없어요','#ff8a7a'); labInfo(); renderTown(); });
     labTimer=setInterval(()=>{ if(!m.querySelector('#labM')){ clearInterval(labTimer); return; } const done=labTick(); if(done.length){ for(const q of done)toast(`✅ ${LAB_R[q].n} Lv.${getTown().lab[q].l} 연구 완료!`,'#9fe08a'); labInfo(); renderTown(); return; } for(const e of m.querySelectorAll('[data-lt]'))e.textContent=labLeft(getTown().lab[e.dataset.lt].e-Date.now()); },1000); }); }
 function townInfo(k){ const B=getTown()[k], D=TOWN_B[k], lv=B.lv|0, S=getStore(), SH=SHDK[D.mat], GL=townGold(k), have=GL?(S.gold|0):shardCount(S,D.mat), cost=townCost(k), maxed=lv>=(D.main?TOWN_MAIN_MAXLV:TOWN_MAXLV);
+  townUpTick(); const up=(B.u|0)>0, um=TOWN_UPM(lv+1);
   const ivTx=l=>Math.max(15,60-5*(l-1))+'분';
   const eff=D.main?`1시간마다 ${SH.e} ${SH.n} 1개를 만들어요. 최대 <b style="color:#ffd34d">${townMainCap(lv)}개</b>까지 쌓여요${lv>=1&&lv<TOWN_MAIN_MAXLV?` (Lv.${lv+1}이 되면 <b>${townMainCap(lv+1)}개</b>)`:lv>=TOWN_MAIN_MAXLV?' (최고 레벨)':''}. 가득 차면 멈췄다가, 받으면 다시 만들어요${lv<1?` (건설하면 최대 ${townMainCap(1)}개)`:''}`
     :`모든 캐릭터의 올스탯 <b style="color:#ffd34d">+${lv*TOWN_STAT}</b>${lv<TOWN_MAXLV?` → Lv.${lv+1} <b>+${(lv+1)*TOWN_STAT}</b>`:' (최고 레벨)'}${lv<1?' · 건설하면 +'+TOWN_STAT:''}${lv>=1&&lv<=TOWN_GLV?`<br><span class="meta">Lv.${TOWN_GLV+1}부터는 ✦ 각성 그림자 조각으로 업그레이드해요</span>`:''}${(B.n|0)>0?`<br><span class="meta">전에 만들어 둔 🧪 물약 ${B.n}개는 말풍선을 눌러 받을 수 있어요</span>`:''}`;
-  const act=maxed?(D.main?'<p class="meta" style="margin:0 0 8px;font-size:12px">최고 레벨이에요</p>':'<p class="meta" style="margin:0 0 8px;font-size:12px">최고 레벨이에요</p>'):`<p class="meta" style="margin:0 0 8px;font-size:13px">${lv<1?'건설':'Lv.'+(lv+1)+' 업그레이드'} 비용 <b style="color:#ffd34d">${GL?'💰 '+cost.toLocaleString('ko-KR')+'G':SH.e+' '+cost+'개'}</b> · 공유보관함 보유 <b style="color:${have>=cost?'#9fe08a':'#ff8a7a'}">${GL?have.toLocaleString('ko-KR')+'G':have+'개'}</b></p>`;
-  modal(`<h3>${lv<1?'🏗️':'🏘️'} ${D.n}${lv>=1?` <span style="color:#c9a0ff">Lv.${lv}</span>`:''}</h3><p style="margin:0 0 8px;font-size:13px;line-height:1.55">${eff}</p>${act}<div class="row2"><button class="btn" id="tiX">닫기</button>${maxed?'':`<button class="btn primary" id="tiGo"${have>=cost?'':' disabled style="opacity:.5"'}>${have>=cost?(lv<1?'🏗️ 건설':'⬆ 업그레이드'):GL?'골드 부족':'조각 부족'}</button>`}</div>`,m=>{
-    m.querySelector('#tiX').onclick=closeModal; const go=m.querySelector('#tiGo');
-    if(go)go.onclick=()=>{ const r=townUp(k); closeModal(); if(r==='ok'){ sfx('rare'); townMsg=lv<1?`🏗️ ${D.n}${(c=>c>=0&&c<=11171&&c%28?'을':'를')(D.n.charCodeAt(D.n.length-1)-44032)} 지었어요!`:`⬆ ${D.n} Lv.${lv+1} 업그레이드 완료!`; } else townMsg=r==='lack'?(GL?'공유보관함의 골드가 부족해요':'공유보관함의 조각이 부족해요'):'더 올릴 수 없어요'; renderTown(); }; }); }
+  const act=maxed?(D.main?'<p class="meta" style="margin:0 0 8px;font-size:12px">최고 레벨이에요</p>':'<p class="meta" style="margin:0 0 8px;font-size:12px">최고 레벨이에요</p>'):up?`<p class="meta" style="margin:0 0 8px;font-size:13px">⏳ Lv.${lv+1} 업그레이드 중 · 남은 시간 <b style="color:#ffd34d" data-ut>${labLeft(B.u-Date.now())}</b></p>`:`<p class="meta" style="margin:0 0 8px;font-size:13px">${lv<1?'건설':'Lv.'+(lv+1)+' 업그레이드'} 비용 <b style="color:#ffd34d">${GL?'💰 '+cost.toLocaleString('ko-KR')+'G':SH.e+' '+cost+'개'}</b> · 공유보관함 보유 <b style="color:${have>=cost?'#9fe08a':'#ff8a7a'}">${GL?have.toLocaleString('ko-KR')+'G':have+'개'}</b>${lv>=1?` · 걸리는 시간 <b style="color:#ffd34d">⏱ ${labTm(um)}</b>`:''}</p>`;
+  modal(`<h3>${lv<1?'🏗️':'🏘️'} ${D.n}${lv>=1?` <span style="color:#c9a0ff">Lv.${lv}</span>`:''}</h3><p style="margin:0 0 8px;font-size:13px;line-height:1.55">${eff}</p>${act}<div class="row2"><button class="btn" id="tiX">닫기</button>${maxed?'':up?`<button class="btn" disabled style="opacity:.85">⏳ 업그레이드 중</button>`:`<button class="btn primary" id="tiGo"${have>=cost?'':' disabled style="opacity:.5"'}>${have>=cost?(lv<1?'🏗️ 건설':'⬆ 업그레이드'):GL?'골드 부족':'조각 부족'}</button>`}</div>`,m=>{
+    m.querySelector('#tiX').onclick=closeModal; const go=m.querySelector('#tiGo'); clearInterval(townUTimer);
+    if(up)townUTimer=setInterval(()=>{ const e=m.querySelector('[data-ut]'); if(!e){ clearInterval(townUTimer); return; } if(townUpTick().length){ clearInterval(townUTimer); toast(`✅ ${D.n} Lv.${getTown()[k].lv} 업그레이드 완료!`,'#9fe08a'); try{ sfx('rare'); }catch(e2){} townInfo(k); renderTown(); return; } e.textContent=labLeft(B.u-Date.now()); },1000);
+    if(go)go.onclick=()=>{ const r=townUp(k); closeModal(); if(r==='ok'){ sfx('rare'); townMsg=lv>=1&&um>0?`⏳ ${D.n} Lv.${lv+1} 업그레이드를 시작했어요 (${labTm(um)})`:lv<1?`🏗️ ${D.n}${(c=>c>=0&&c<=11171&&c%28?'을':'를')(D.n.charCodeAt(D.n.length-1)-44032)} 지었어요!`:`⬆ ${D.n} Lv.${lv+1} 업그레이드 완료!`; } else townMsg=r==='lack'?(GL?'공유보관함의 골드가 부족해요':'공유보관함의 조각이 부족해요'):r==='busy'?'이미 업그레이드 중이에요':'더 올릴 수 없어요'; renderTown(); }; }); }
+let townUTimer=0;
 function townPick(k){ townTick(k); const B=getTown()[k], D=TOWN_B[k], n=B.n|0; if(n<1){ townMsg=`아직 ${D.pot?'만들어진 물약이':'만들어진 조각이'} 없어요`; renderTown(); return; }
   const chars=charIds().map(id=>(me&&me.id===id)?me:loadChar(id)).filter(Boolean), what=D.pot?`🧪 물약 ${n}개`:`${D.e} ${SHDK[D.mat].n} ${n}개`;
   const rows=chars.map(c=>`<button class="btn" data-to="${c.id}" style="text-align:left">${tgLabel({k:'c',o:c},'')}</button>`).join('');
