@@ -683,6 +683,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 .ban.pick{animation:scPick .9s ease-out}
 .cchips .new::after{content:"NEW";position:absolute;top:-6px;right:-3px;padding:1px 6px;border-radius:8px;background:var(--blood);color:#fff;font-size:10px}
 .ban .t{position:relative;padding:8px 130px 12px 14px}
+.ban .t b,.ban .t .sn,.ban .t i{white-space:nowrap;overflow:hidden}   /* 이름이 길어도 한 줄 — 칸이 늘어나지 않게 글자를 줄여 맞춰요(fitBan) */
 .ban .sid{font-family:var(--f-disp);font-size:46px;line-height:1.02;font-weight:900;letter-spacing:.02em;color:#ffe08a;text-shadow:0 0 14px rgba(255,200,70,.75),0 2px 0 #7a4c08,0 3px 6px #000}
 .ban .sn{font-size:13px;color:#e8dcc4;margin-top:1px}
 .ban.noimg .t{padding-right:14px}
@@ -1092,7 +1093,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.0.0339</div>
+    <div class="ver" id="verT">v0.6.0.0340</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -5084,6 +5085,9 @@ function openMap(){
   $('#mapX').onclick=close; show();
   const sc=$('#mapSc'); sc.scrollTop=Math.max(0,py(Math.min(pick,N-1))-sc.clientHeight*.45);
 }
+function fitBan(root){ try{ (root||document).querySelectorAll('.ban .t b,.ban .t .sn,.ban .t i').forEach(e=>{ e.style.fontSize=''; if(!e.clientWidth)return; let f=parseFloat(getComputedStyle(e).fontSize); while(e.scrollWidth>e.clientWidth+.5&&f>9){ f-=.5; e.style.fontSize=f+'px'; } }); }catch(err){} }
+try{ document.fonts&&document.fonts.ready.then(()=>fitBan($('#stageBan'))); }catch(e){}
+window.addEventListener('resize',()=>fitBan($('#stageBan')));
 function banCard(cur,i,role){ const T=STAGES[i], bi=T.bs||MAPBOSS[T.id], tr=BANTRIO[T.id], gq=cur.eq?gearPenOf(cur.eq,T.icap):null, gv=!!gq&&gq.wm<.97, cl=i<stageClear;
         return `<div class="ban ${role}${!bi&&!tr?' noimg':''}${tr?' trio':''}${role==='bk nx'&&i>stageClear?' lk':''}"${role==='cu'?'':' aria-hidden="true"'}><div class="t"><div class="sid">${esc(T.id)}</div><span class="sn">${esc(T.n)}</span><b>${esc(T.bn||'')}</b><i class="${gv?'warn':''}">권장 장비 Lv 합 ${Math.max(1,T.icap-12)*EQSL.length}↑${gv?' · 부족':''}</i></div>${cl?'<div class="st clr"><b>클리어</b></div>':'<div class="st nc"><b>미클리어</b></div>'}${tr?`<span class="tri">${tr.map(k=>`<img src="img/${k}.png" alt="" onerror="this.remove()">`).join('')}</span>`:bi?`<img src="img/${bi}.png" alt="" onerror="this.remove()">`:''}</div>`; }
 function renderStagePanel(){
@@ -5096,7 +5100,7 @@ function renderStagePanel(){
   { const cur=chars.find(c=>c.id===selId), low=cur&&cur.lvl<S.rl, gp0=cur&&cur.eq?gearPenOf(cur.eq,S.icap):null, gw=!!gp0&&gp0.wm<.97; 
     { const ban=$('#stageBan'); if(ban){ if(!cur){ ban.innerHTML=''; } else {
       const key=selId+'|'+selStage+'|'+stageClear+'|'+(cur.eq?Object.values(cur.eq).map(x=>x?x.id+':'+(x.ilvl|0):'').join(','):'');
-      if(ban.dataset.k!==key||!ban.querySelector('.ban.cu')){ ban.dataset.k=key; ban.innerHTML=(selStage>0?banCard(cur,selStage-1,'bk pv'):'')+(selStage+1<STAGES.length?banCard(cur,selStage+1,'bk nx'):'')+banCard(cur,selStage,'cu'); } } } }
+      if(ban.dataset.k!==key||!ban.querySelector('.ban.cu')){ ban.dataset.k=key; ban.innerHTML=(selStage>0?banCard(cur,selStage-1,'bk pv'):'')+(selStage+1<STAGES.length?banCard(cur,selStage+1,'bk nx'):'')+banCard(cur,selStage,'cu'); fitBan(ban); } } } }
     const chp=$('#cChips'); if(chp){ if(!cur){ chp.hidden=true; } else { const pt2=(cur.statPts|0)+(cur.skillPts|0); chp.hidden=false; chp.innerHTML=`<span>보유 골드<b>💰 ${(cur.gold|0).toLocaleString()}</b></span><span class="${gw?'warn':''}">내 장비 Lv 합<b>${gp0?gp0.sum:'-'}</b></span><button type="button" id="cMap" class="${stageClear>(+lsGet('dkdef2.mapSeen')||0)&&stageClear<STAGES.length?'new':''}">전체맵<b>🗺️ 보기</b></button>`; } } }
   { const cur=chars.find(c=>c.id===selId), nw=!!cur&&(cur.inv||[]).some(x=>x&&x.isNew), pt=cur?(cur.statPts|0)+(cur.skillPts|0):0;
     $('#tGearB').hidden=!nw; $('#menuB').hidden=!mailUnreadAll(chars); const pb=$('#tGearP'); pb.hidden=!pt; pb.textContent=pt; for(const id of ['tGear','tStore'])$('#'+id).disabled=!cur; }
