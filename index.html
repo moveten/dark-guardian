@@ -1097,7 +1097,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.1.0344</div>
+    <div class="ver" id="verT">v0.6.1.0345</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1342,7 +1342,7 @@ const SK={
   {k:'fury',lb:['받는피해','주는피해','반경','무기피해'],e:'💢',n:'광란',s:'광란',req:22,mp:14,cd:30,el:'#ff5a3a',freq:1,d:l=>`[곰 변신 필요] 8초간 받는 피해 -${V(Math.min(50,Math.round(25+1.2*l)))}%, 주는 피해 +${V(10+2*l)}%, 1초마다 반경 ${RR(110,l)} 충격파 무기 피해 ${V(120+15*l)}%`},
   {k:'spirit',lb:['지속시간','주는피해','공격속도','마나회복'],e:'👻',n:'영혼 정령',s:'정령',req:24,mp:22,cd:36,el:'#b8f0ff',d:l=>`[소환수·시한] ${V((14+.4*l).toFixed(1))}초간 정령이 곁에 떠올라요. 반경 260 안의 나와 동료: 주는 피해 +${V(Math.round(10+1.5*l))}%, 공격 속도 +${V(8+l)}%, 마나 회복 +${V(30+3*l)}%`},
   {k:'hunt',lb:['까마귀피해','곰무기피해'],e:'🌕',n:'야생의 대사냥',s:'대사냥',req:30,mp:24,cd:12,el:'#ffd24a',rg:420,d:l=>`[필살기] 🧑 까마귀 떼가 적을 16번 급습, 반경 75 범위 피해 ${V(110+36*l)} / 🐻 반경 320 충격파 3연타 무기 피해 ${V(500+90*l)}% + 2초 기절, 6초간 받는 피해 -50%`},
-  {k:'bears',e:'🐻',n:'곰세마리',s:'곰세마리',req:90,mp:60,cd:80,el:'#d9a46a',d:l=>`[궁극기·소환수] 강력한 곰 가족을 소환해요. 엄마곰, 아빠곰, 아기곰`}]
+  {k:'bears',e:'🐻',n:'곰세마리',s:'곰세마리',req:90,mp:60,cd:80,el:'#d9a46a',d:l=>`[궁극기·소환수] ${V(BEAR_T(l))}초간 곰 가족 3마리 소환. 생명력은 내 최대 생명력의 아빠 ${V(220+10*l)}% · 엄마 ${V(130+6*l)}% · 아기 ${V(90+4*l)}%. 아빠곰: 범위 평타 ${V(100+40*l)}, 바위 ${V(240+90*l)}(기절), 돌진 ${V(160+60*l)}. 엄마곰: 평타 ${V(24+16*l)}, 포효로 14초마다 적 받는 피해 +${V(Math.round(BRV(l)*100))}%(우두머리는 절반). 아기곰: 평타 ${V(10+7*l)}, 꿀단지 ${V(40+15*l)}(둔화), 구르기 ${V(70+28*l)}, 12초마다 나와 소환수 생명력 ${V((4+.25*l).toFixed(1))}% 회복`}]
 };
 /* 드루이드 형태 수치 (derive와 설명이 같이 씀) */
 const BRB=l=>.9+.01*(l-1), BRS=.8; /* 곰 변신 평타 피해 배율(무기 피해 대비): 주 대상 = 곰 변신 레벨당 +1% · 주변 적 = 주 대상의 80% */
@@ -1790,8 +1790,13 @@ function genItem(rar,ilvl,slot,baseName,forceSp){
   return it;
 }
 const NOUN_FULL={'영혼 등불':'영혼 등불','망령의 등불':'망령 등불'};   /* 강령술사 보조무기는 '…의 등불'로만 나오면 혼등과 헷갈려서 단계 이름을 살려 부름 */
+/* 이름 끝말: 투구·갑옷(전 직업)과 드루이드 토템은 종류를 붙여서 '○○의 가죽투구' · '○○의 뿔토템'처럼, 나머지는 마지막 낱말만 */
+function itemNoun(it){ if(it.slot==='helm'||it.slot==='armor'||(it.slot==='shield'&&it.oc==='druid'))return it.base.replace(/\s+/g,''); return NOUN_FULL[it.base]||it.base.split(' ').pop(); }
+/* 예전에 얻은 투구·갑옷·토템 이름도 새 규칙으로 (특수 유니크·영웅 장비는 그대로, 옵션 정렬 개편 전 옛 유니크는 개편이 끝난 뒤에) */
+function nameFix(it){ if(!it||it.sp||it.rar>=4||typeof it.name!=='string'||!it.base)return false; if(it.rar===3&&!it.uv&&!it.sf)return false;
+  const nn=itemNoun(it), on=NOUN_FULL[it.base]||it.base.split(' ').pop(); if(nn===on||!it.name.endsWith(on)||it.name.endsWith(nn))return false; it.name=it.name.slice(0,-on.length)+nn; return true; }
 function nameItem(it,rar){
-  const noun=NOUN_FULL[it.base]||it.base.split(' ').pop();
+  const noun=itemNoun(it);
   if(rar===3) return pick(BOSSNAMES)+'의 '+noun;          /* 유니크: 보스 이름 */
   if(rar===2){ const ca=(it.aff||[]).find(a=>a.cls&&CLASSES[a.cls]); /* 레어: 직업 스킬 옵션이 있으면 그 직업 이름, 없으면 중립 이름 */
     return ca?CLASSES[ca.cls].n+'의 '+noun:pick(RAREA)+' '+noun; }
@@ -1955,7 +1960,7 @@ function loadChar(id){
     if(cls==='druid'){ const tm=it=>{ if(!it||it.slot!=='shield'||it.oc!=='druid'||it.rar===4)return; const b=OFFB.druid.find(x=>x.n===it.base); if(!b)return; const k=(it.rar===3?1.3:1)*(1+(it.ilvl||1)*.1), e=1+.1*(it.enh|0), d0=Math.round(b.dm*k), o0=Math.round(b.om*k); if(it.b0){ it.b0.dm=d0; it.b0.om=o0; } it.dm=Math.round(d0*e); it.om=Math.round(o0*e); }; /* 토템 수치 조정(공격력 3/5/8→2/3/4, 마나 12/20/30→6/10/15)을 이미 가진 토템에도 같은 식으로 다시 적용(등급·아이템 레벨·강화 반영) */
       p.inv.forEach(tm); for(const k in p.eq)tm(p.eq[k]); }
     for(const k of Object.keys(p.eq)){ const it=p.eq[k]; if(it&&it.sp&&SPFX[it.sp]&&SPFX[it.sp].fcls&&SPFX[it.sp].fcls!==cls){ const e=p.inv.indexOf(null); if(e>=0){ p.inv[e]=it; p.eq[k]=null; } } } /* 다른 직업 전용 장비가 장착돼 있으면 가방으로 */
-    p.inv.forEach(baseFix); for(const k in p.eq)baseFix(p.eq[k]);   /* 무기·보조장비 기본 수치 개편 보정 */
+    p.inv.forEach(baseFix); for(const k in p.eq)baseFix(p.eq[k]); p.inv.forEach(nameFix); for(const k in p.eq)nameFix(p.eq[k]);   /* 무기·보조장비 기본 수치 개편 보정 */
     p.mail=Array.isArray(p.mail)?p.mail.filter(x=>x&&MAILS[x.id]):[mailNew('welcome',MAIL0_D)]; /* 우편함 도입 전 캐릭터는 환영 편지를 한 번 받음(지우면 다시 안 옴) */ p.name=String(p.name||'').slice(0,8); p.gold=Number.isFinite(p.gold)?p.gold:500; p.potBuy=p.potBuy|0; p.rev=p.rev|0; tutFix(p); smMigrate(p); return p;
   }catch(e){ console.error('loadChar',id,e); return null; }
 }
@@ -4462,7 +4467,7 @@ const STORE_N=100, STORE_KEY='dkdef2.store', STORE_IC=`<svg viewBox="0 0 24 24" 
 let STORE=null, satSeq=0;
 function loadStore(){ let o=null; try{ o=JSON.parse(lsGet(STORE_KEY)||'null'); }catch(e){} if(!o||typeof o!=='object')o={};
   const inv=Array.isArray(o.inv)?o.inv.slice(0,STORE_N):[]; while(inv.length<STORE_N)inv.push(null);
-  let ch=false; for(const it of inv){ if(it){ if(!Array.isArray(it.aff))it.aff=[]; try{ if(ilCapFix(it))ch=true; heroFix(it); newOptFix(it); lanternFix(it); if(sumFix(it))ch=true; if(baseFix(it))ch=true; }catch(e){} } }
+  let ch=false; for(const it of inv){ if(it){ if(!Array.isArray(it.aff))it.aff=[]; try{ if(ilCapFix(it))ch=true; heroFix(it); newOptFix(it); lanternFix(it); if(sumFix(it))ch=true; if(baseFix(it))ch=true; if(nameFix(it))ch=true; }catch(e){} } }
   if(ch){ try{ lsSet(STORE_KEY,JSON.stringify({inv,gold:Math.max(0,o.gold|0)})); }catch(e){} }
   return {inv,gold:Math.max(0,o.gold|0),shard:0}; }
 function getStore(){ if(!STORE)STORE=loadStore(); return STORE; }
@@ -4767,7 +4772,7 @@ if(SKM){
       h+=`<div class="tier ${unl?'':'lock'}"><div class="thd"><span class="tdot"></span><b>레벨 ${rq}</b>${unl?'':'<span class="k"> 🔒</span>'}${gv.length?`<span class="k syn" style="font-size:11px;color:#8fb6a0"> ${gv.map(g=>'🔗'+esc(g)).join(' ')}</span>`:''}</div>`;
       for(const s of list.filter(s=>s.req===rq)){
         const b=me.skills[s.k]||0, eff=skLv(me,s.k), bonus=eff-b, can=me.skillPts>0&&me.lvl>=s.req&&b<20;
-        h+=`<div class="skrow ${me.lvl<s.req?'lock':''}"><div class="skic" style="--c:${s.el};color:${s.el};font-size:19px">${s.e}</div><div><div class="skn">${esc(s.n)} <span class="k" style="font-weight:400;font-size:12px;color:var(--mute)">${b?`Lv ${b}${bonus?` (+${bonus})`:''}`:'미습득'}${s.aura?' · 오라':''}${s.cd>=1?` · 쿨 ${s.cd}초`:''}${s.mp?` · 마나 ${mpCost(s,eff||1)}`:''}</span></div><div class="skd">${skdHtml(s.d(Math.max(1,eff||1)))}</div>${(()=>{ const pn=wpPen(me); return pn&&pn.sk.includes(s.k)?`<div class="k" style="font-size:11.5px;color:#ff8a7a">⚠ 대검·전투 도끼를 끼고 있어서 효과가 없어요</div>`:''; })()}${s.k==='bulwark'?`<div class="k" style="font-size:11.5px;color:${me.D.blk>=(me.D.blkMax||BLKMAX)?'#ffd84a':'#9fd0ff'}">현재 막기 확률 ${me.D.blk}% / ${me.D.blkMax||BLKMAX}%${me.D.blk>=(me.D.blkMax||BLKMAX)?' · MAX (더 올려도 효과 없음)':''}</div>`:''}${(()=>{ const rc=s.passive?0:synBonus(me,s.k), nx=nxHtml(s,b,eff); if(!rc&&!nx)return ''; const l1=rc?`받는 시너지 +${rc}`:''; return `<div class="k syn" style="font-size:11px;color:#8fb6a0">${l1}${l1&&nx?' | ':''}${nx}</div>`; })()}</div><button class="plus" data-sk="${s.k}" ${can?'':'data-off'} aria-label="${esc(s.n)} 올리기">+</button></div>`;
+        h+=`<div class="skrow ${me.lvl<s.req?'lock':''}"><div class="skic" style="--c:${s.el};color:${s.el};font-size:19px">${s.e}</div><div><div class="skn">${esc(s.n)} <span class="k" style="font-weight:400;font-size:12px;color:var(--mute)">${b?`Lv ${b}${bonus?` (${bonus>0?'+':''}${bonus})`:''}`:'미습득'}${s.aura?' · 오라':''}${s.cd>=1?` · 쿨 ${s.cd}초`:''}${s.mp?` · 마나 ${mpCost(s,eff||1)}`:''}</span></div><div class="skd">${skdHtml(s.d(Math.max(1,eff||1)))}</div>${(()=>{ const pn=wpPen(me); return pn&&pn.sk.includes(s.k)?`<div class="k" style="font-size:11.5px;color:#ff8a7a">⚠ 대검·전투 도끼를 끼고 있어서 효과가 없어요</div>`:''; })()}${s.k==='bulwark'?`<div class="k" style="font-size:11.5px;color:${me.D.blk>=(me.D.blkMax||BLKMAX)?'#ffd84a':'#9fd0ff'}">현재 막기 확률 ${me.D.blk}% / ${me.D.blkMax||BLKMAX}%${me.D.blk>=(me.D.blkMax||BLKMAX)?' · MAX (더 올려도 효과 없음)':''}</div>`:''}${(()=>{ const rc=s.passive?0:synBonus(me,s.k), nx=nxHtml(s,b,eff); if(!rc&&!nx)return ''; const l1=rc?`받는 시너지 +${rc}`:''; return `<div class="k syn" style="font-size:11px;color:#8fb6a0">${l1}${l1&&nx?' | ':''}${nx}</div>`; })()}</div><button class="plus" data-sk="${s.k}" ${can?'':'data-off'} aria-label="${esc(s.n)} 올리기">+</button></div>`;
       }
       h+='</div>'; } }
   h+='</div>';
@@ -5296,10 +5301,17 @@ function mailRead(cid,i,note,bad){
       const q=loadChar(cid); if(q){ q.mail.splice(i,1); mailSave(q); renderStagePanel(); } mailModal(); }; }); }
 $('#verT').onclick=()=>patchModal(); $('#verT').style.cursor='pointer';
 /* 패치노트: 저장소의 patchnotes.txt를 불러와서 보여줌 (원본 파일 링크 포함) */
+const PN_MAX=32767; /* 패치노트 창에는 최신(맨 위)부터 이만큼(바이트)만 보여줘요 */
 function patchModal(){
   modal(`<h3>📜 패치노트</h3><pre id="pnT" style="white-space:pre-wrap;word-break:break-word;font:12px/1.55 ui-monospace,Menlo,monospace;max-height:58vh;overflow:auto;margin:0 0 8px;padding:8px;background:#0a0807;border:1px solid var(--line2);border-radius:8px;touch-action:pan-y">불러오는 중…</pre><div class="row2"><a class="btn" href="patchnotes.txt" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;text-align:center;text-decoration:none;box-sizing:border-box">원본 파일 열기</a><button class="btn primary" id="pnX">닫기</button></div>`,m=>{
     m.querySelector('#pnX').onclick=closeModal;
-    fetch('patchnotes.txt?'+Date.now(),{cache:'no-store'}).then(r=>{ if(!r.ok)throw 0; return r.text(); }).then(t=>{ m.querySelector('#pnT').textContent=t; }).catch(()=>{ m.querySelector('#pnT').textContent='패치노트를 불러오지 못했어요. (오프라인이거나 서버 점검 중)'; }); }); }
+    fetch('patchnotes.txt?'+Date.now(),{cache:'no-store'}).then(r=>{ if(!r.ok)throw 0; return r.text(); }).then(t=>{ const el=m.querySelector('#pnT'); const bytes=new TextEncoder().encode(t);
+      if(bytes.length<=PN_MAX){ el.textContent=t; return; }
+      let h=new TextDecoder().decode(bytes.slice(0,PN_MAX)).replace(/\uFFFD+$/,''); const nl=h.lastIndexOf('\n'); if(nl>0)h=h.slice(0,nl);   /* 최신(맨 위)부터 32767바이트만, 줄 중간에서 끊기지 않게 */
+      const lines=h.split('\n'), k=Math.max(0,lines.length-9);
+      el.textContent=''; el.append(lines.slice(0,k).join('\n')+'\n');
+      const fd=document.createElement('div'); fd.textContent=lines.slice(k).join('\n'); fd.style.cssText='background:linear-gradient(to bottom,#ece3d3 0%,rgba(236,227,211,0) 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent'; el.append(fd);   /* 끝 아홉 줄은 점점 흐려져요 */
+      const nt=document.createElement('div'); nt.textContent='원본 파일에서 상세 내역을 조회하실 수 있습니다.'; nt.style.cssText='margin-top:1.6em;text-align:center;color:var(--mute);font-family:inherit'; el.append(nt); }).catch(()=>{ m.querySelector('#pnT').textContent='패치노트를 불러오지 못했어요. (오프라인이거나 서버 점검 중)'; }); }); }
 function prepMe(){ me=loadChar(selId); me.D=derive(me); spawnMe(); }
 function resetWorld(){
   storyStop(); G.stZ=0; G.aim=null; G.lostBoss=false; G.castle=null; G.lostCastle=false; G.awz=null; G.awc=null; { const ac=$('#awCut'); if(ac)ac.classList.remove('on'); for(const q of ['#casAl','#casMs']){ const z=$(q); if(z)z.classList.remove('on'); } const hc=$('#hCastle'); if(hc)hc.classList.remove('atk'); } if(me){ me.erode=me.hblk=me.mblk=me.hbStrict=me.bleed=me.bleedN=0; me.hpLk=me.mpLk=null; }
