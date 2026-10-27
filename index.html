@@ -1097,7 +1097,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.1.0345</div>
+    <div class="ver" id="verT">v0.6.1.0346</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -5051,7 +5051,7 @@ function carCenter2(box,el){ box.scrollTo({left:el.offsetLeft+el.offsetWidth/2-b
 let swipeLock=0;
 $('#cChips').onclick=e=>{ if(!e.target.closest('#cMap'))return; sfx('ui'); openMap(); };   /* 스테이지 카드는 스와이프 전용 · 전체맵은 칩에서 열어요 */
 /* 스테이지 배너 좌우 스와이프: 손가락을 따라 움직이다가 놓으면 부드럽게 다음/이전 스테이지로 (깬 스테이지 + 바로 다음 스테이지까지) */
-(()=>{ const ban=$('#stageBan'); let x0=0,y0=0,st=0,busy=false,pid=-1,raf=0,px=0; const stageClearNow=()=>stageClear;
+(()=>{ const ban=$('#stageBan'); let x0=0,y0=0,t0=0,st=0,busy=false,pid=-1,raf=0,px=0,tm=0,pend=null; const stageClearNow=()=>stageClear;
   const cu=()=>ban.querySelector('.ban.cu');
   const can=d=>{ const i=selStage+d; return !!selId&&i>=0&&i<STAGES.length&&i<=stageClear; };
   const ease='cubic-bezier(.22,.8,.24,1)', DUR=280;
@@ -5062,24 +5062,24 @@ $('#cChips').onclick=e=>{ if(!e.target.closest('#cMap'))return; sfx('ui'); openM
     const nEl=ok?ban.querySelector('.ban.bk.'+(d>0?'nx':'pv')):null; ban.querySelectorAll('.ban.bk').forEach(e=>{ if(e!==nEl)e.style.removeProperty('--tx'); });
     if(nEl){ const sg=d>0?1:-1, slot=w+10, x=(1-pr)*sg*.13*w+pr*(px+sg*slot); nEl.style.setProperty('--tx',x.toFixed(1)+'px'); } };
   const settle=()=>{ const c=cu(); ban.classList.remove('dg','to-n','to-p'); kk(0,0); ban.querySelectorAll('.ban.bk').forEach(e=>e.style.removeProperty('--tx')); if(!c)return; c.style.transition='transform .24s '+ease+',opacity .24s'; c.style.transform=''; c.style.opacity=''; setTimeout(()=>{ c.style.transition=''; },260); };
-  ban.addEventListener('pointerdown',e=>{ const c=cu(); if(!c||busy||(e.pointerType==='mouse'&&e.button!==0))return; x0=e.clientX; y0=e.clientY; px=0; st=1; pid=e.pointerId; c.style.transition='none'; });
+  ban.addEventListener('pointerdown',e=>{ if(busy&&pend)pend();   /* 넘어가는 중에 바로 또 밀면 지금 이동을 즉시 끝내고 다음 스와이프를 받아요(연속 넘기기) */ const c=cu(); if(!c||busy||(e.pointerType==='mouse'&&e.button!==0))return; x0=e.clientX; y0=e.clientY; t0=Date.now(); px=0; st=1; pid=e.pointerId; c.style.transition='none'; });
   ban.addEventListener('pointermove',e=>{ if(!st||e.pointerId!==pid)return; const mx=e.clientX-x0, my=e.clientY-y0;
     if(st===1){ if(Math.abs(mx)>10&&Math.abs(mx)>Math.abs(my)*1.3){ st=2; ban.classList.add('dg'); try{ ban.setPointerCapture(e.pointerId); }catch(_){} } else if(Math.abs(my)>12){ st=0; settle(); return; } }
     if(st===2){ px=mx; if(!raf)raf=requestAnimationFrame(draw); } });
   /* 끝까지 넘기기: 현재 카드는 밀려 나가고 옆 카드가 그 자리로 부드럽게 들어와요. 끝난 뒤 카드를 새로 그리지 않고 옆 카드를 그대로 '현재 카드'로 승격해서 끊김이 없어요 */
   const end=e=>{ if(!st||e.pointerId!==pid)return; const was=st; st=0; if(raf){ cancelAnimationFrame(raf); raf=0; } if(was!==2)return; swipeLock=Date.now()+450; try{ ban.releasePointerCapture(e.pointerId); }catch(_){}
     const c=cu(), mx=e.clientX-x0, d=mx<0?1:-1, w=(c&&c.clientWidth)||300, n=ban.querySelector('.ban.bk.'+(d>0?'nx':'pv'));
-    if(!c||!n||e.type==='pointercancel'||Math.abs(mx)<Math.max(44,w*.14)||!can(d)){ if(Math.abs(mx)>=44&&!can(d)){ try{ toast(d>0?'🔒 이 스테이지를 먼저 깨야 해요':'첫 스테이지예요','#e0a060'); }catch(_){} } settle(); return; }
+    if(!c||!n||e.type==='pointercancel'||(Math.abs(mx)<Math.max(44,w*.14)&&!(Math.abs(mx)>=26&&Math.abs(mx)/Math.max(1,Date.now()-t0)>.5))||!can(d)){ if(Math.abs(mx)>=44&&!can(d)){ try{ toast(d>0?'🔒 이 스테이지를 먼저 깨야 해요':'첫 스테이지예요','#e0a060'); }catch(_){} } settle(); return; }
     busy=true; ban.classList.remove('dg'); if(d>0)kk(0,1); else kk(1,0); n.style.setProperty('--tx','0px');
     c.style.transition='transform '+DUR+'ms '+ease+',opacity '+DUR+'ms'; c.style.transform='translate3d('+(-d*w*.6).toFixed(0)+'px,0,0)'; c.style.opacity='0';
-    setTimeout(()=>{ selStage+=d; lsSet('dkdef2.stage',String(selStage)); sfx('ui');
+    pend=()=>{ pend=null; clearTimeout(tm); selStage+=d; lsSet('dkdef2.stage',String(selStage)); sfx('ui');
       const o=ban.querySelector('.ban.bk.'+(d>0?'pv':'nx')); if(o)o.remove();   /* 두 칸 떨어진 반대쪽 카드는 치우고, 방금 나간 카드는 반대쪽 이웃 카드로 재사용 */
       n.classList.remove('bk','pv','nx','lk'); n.classList.add('cu'); n.removeAttribute('aria-hidden'); n.removeAttribute('style');
       c.classList.remove('cu'); c.classList.add('bk',d>0?'pv':'nx'); if(d<0&&selStage-d>stageClearNow())c.classList.add('lk'); c.setAttribute('aria-hidden','true'); c.removeAttribute('style');
       const far=selStage+d, ch=charIds().map(loadChar).filter(Boolean).find(q=>q.id===selId);
       if(ch&&far>=0&&far<STAGES.length)ban.insertAdjacentHTML('beforeend',banCard(ch,far,d>0?'bk nx':'bk pv'));
       if(ch){ ban.dataset.k=selId+'|'+selStage+'|'+Math.min(STAGES.length,ch.clear|0)+'|'+(ch.eq?Object.values(ch.eq).map(x=>x?x.id+':'+(x.ilvl|0):'').join(','):''); }
-      kk(0,0); ban.classList.remove('to-n','to-p'); renderStagePanel(); busy=false; },DUR+20); };
+      kk(0,0); ban.classList.remove('to-n','to-p'); renderStagePanel(); busy=false; }; tm=setTimeout(pend,DUR+20); };
   ban.addEventListener('pointerup',end); ban.addEventListener('pointercancel',end); })();
 const BANTRIO={'4':['hero_war','boss_shadow','hero_sorc']};   /* 삼남매(그림자 전사 · 검은 그림자 · 그림자 법사) 배너 그림 */
 const MAPBOSS={'1-1':'mob_grak','1-2':'mob_malek','1-3':'mob_morg','1-4':'mob_kargon','1-5':'mob_izra','4':'boss_shadow','5':'boss_awake'};   /* 지도에 서 있는 보스 그림 (2·3장은 스테이지의 bs 그림) */
