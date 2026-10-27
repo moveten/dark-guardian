@@ -1097,7 +1097,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.1.0342</div>
+    <div class="ver" id="verT">v0.6.1.0343</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1838,7 +1838,7 @@ function townLoad(){ let o=null; try{ o=JSON.parse(lsGet(TOWN_KEY)||'null'); }ca
    Lv.1은 1만G 즉시, Lv.2부터는 비용과 함께 연구 시간이 걸려요(30분 → 24시간). 두 연구는 따로 진행돼요 */
 const LAB_MAX=10, LAB_BUILD=50000, LAB_G=[10000,20000,30000,50000,70000,100000,140000,190000,250000,330000], LAB_MIN=[0,30,60,120,240,360,480,720,1080,1440];
 const LAB_R={a:{n:'성벽 강화',e:'🧱',im:'img/lab_wall_up.png'},b:{n:'성벽 수리',e:'🔧',im:'img/lab_wall_fix.png'}};
-const LAB_UI='A'; /* 연구 카드 배치 시안: A 가로 카드 / B 2열 타일 */
+const LAB_UI='B'; /* 연구 카드 배치: B 2열 타일(확정) — A는 가로 카드 */
 function labTick(){ const L=getTown().lab, now=Date.now(), done=[]; for(const k of ['a','b']){ const r=L[k]; if(r.e>0&&now>=r.e){ r.l=Math.min(LAB_MAX,r.l+1); r.e=0; done.push(k); } } if(done.length)saveTown(); return done; }
 const labDefPct=()=>{ const L=getTown().lab; if((L.lv|0)<1)return 0; labTick(); return L.a.l*2; };
 const labFixPct=()=>{ const L=getTown().lab; labTick(); return (L.lv|0)>=1?10+2*L.b.l:10; };
