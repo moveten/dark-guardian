@@ -329,6 +329,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 .tbd .tmill .ml{position:absolute;max-width:none;max-height:none;transform:translate(-50%,-50%);pointer-events:none;animation:millspin 18s linear infinite}
 @keyframes millspin{to{transform:translate(-50%,-50%) rotate(360deg)}}
 .tbd .mfb{display:none}.tbd.mbad .tmill{display:none}.tbd.mbad .mfb{display:block}
+.tmap .tbd .labimg{display:block;width:104px;height:auto;max-width:none}.tbd.lbad .labimg{display:none}.tbd.lbad .mfb{display:block}
 @media(prefers-reduced-motion:reduce){.tbd .tmill .ml{animation:none}}
 .tplot{width:104px;height:84px;margin-top:20px;border:2px dashed #6a5a8a;border-radius:50%;background:#ffffff08;color:#a89cc8;font-size:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.25}.tplot b{font-size:20px;line-height:1}
 .tlb{font-size:11.5px;font-weight:700;background:#000a;border:1px solid #4a3a2a;border-radius:6px;padding:1px 7px;white-space:nowrap}
@@ -1091,7 +1092,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.0.0338</div>
+    <div class="ver" id="verT">v0.6.0.0339</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -5246,7 +5247,7 @@ function millArt(lv){ const st=Math.max(1,Math.min(5,Math.ceil(lv/2))), [w,h,hx,
 function townSlot(k,pos){ pos=pos||''; const B=getTown()[k], D=TOWN_B[k], lv=B.lv|0, tag=D.main?'<span class="tmn">메인</span>':'<span class="tsb">보조</span>';
   if(lv<1)return `<div class="tsl e" style="${pos}"><button class="tplot" data-tbld="${k}"><b>＋</b>건설<br><span style="color:#ffd34d">${D.lab?'💰 '+LAB_BUILD.toLocaleString('ko-KR'):D.gold?'💰 '+TOWN_GBUILD.toLocaleString('ko-KR'):D.e+' '+TOWN_BUILD}</span></button><div class="tlb">${tag}${D.n}</div></div>`;
   const b=townBub(k);
-  return `<div class="tsl" style="${pos}">${b?`<button class="tbub ${b.cls}" data-tbub="${k}">${b.tx}</button>`:''}<button class="tbd" data-tbld="${k}" aria-label="${D.n}">${D.mill?millArt(lv):''}<svg${D.mill?' class="mfb"':''} viewBox="0 0 100 120" preserveAspectRatio="xMidYMax meet"><use href="#${D.sy}" width="100" height="120"/></svg></button><div class="tlb">${tag}${D.n} Lv.${lv}${B.u>0?` <span data-tul="${k}" style="color:#ffd34d">⏳ ${labLeft(B.u-Date.now())}</span>`:''}</div></div>`; }
+  return `<div class="tsl" style="${pos}">${b?`<button class="tbub ${b.cls}" data-tbub="${k}">${b.tx}</button>`:''}<button class="tbd" data-tbld="${k}" aria-label="${D.n}">${D.mill?millArt(lv):D.lab?`<img class="labimg" src="img/town_lab.png" alt="" onerror="this.closest('.tbd').classList.add('lbad')">`:''}<svg${D.mill||D.lab?' class="mfb"':''} viewBox="0 0 100 120" preserveAspectRatio="xMidYMax meet"><use href="#${D.sy}" width="100" height="120"/></svg></button><div class="tlb">${tag}${D.n} Lv.${lv}${B.u>0?` <span data-tul="${k}" style="color:#ffd34d">⏳ ${labLeft(B.u-Date.now())}</span>`:''}</div></div>`; }
 /* ===== 달빛 도박장 (슬롯머신): 한 판 100,000G(공유보관함 골드) → 결과를 먼저 정해 저장하고, 화면은 연출만 보여줘요 =====
    일반(99%): 절반은 조각(그림자/각성 반반, 1~20개) · 절반은 꽝(보상 없음)
    대박 조각 0.5%: 조각 100개 (7 7 7 + 폭죽) · 대박 골드 0.5%: 500,000G (💎 💎 💎 + 금화 비) */
