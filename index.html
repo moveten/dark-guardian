@@ -331,6 +331,30 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 .tbd .mfb{display:none}.tbd.mbad .tmill{display:none}.tbd.mbad .mfb{display:block}
 .tmap .tbd .labimg{display:block;width:104px;height:auto;max-width:none}.tbd.lbad .labimg{display:none}.tbd.lbad .mfb{display:block}
 @media(prefers-reduced-motion:reduce){.tbd .tmill .ml{animation:none}}
+.tbd .labw{display:block;position:relative;width:104px}.tbd.lbad .labw{display:none}
+/* 그림자 연구소 연출(A안): 연기·플라스크 불빛·룬 마법진은 늘 잔잔하게, 연구 중(.busy)이면 거품·반짝임이 더해지고 불빛이 세져요. 좌표는 그림 크기(360×407) 대비 % */
+.lfx i{position:absolute;display:block;pointer-events:none;border-radius:50%;mix-blend-mode:screen}
+.lf-fl{left:50.8%;top:39.3%;width:42%;aspect-ratio:1;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(190,255,190,.85) 0%,rgba(110,255,120,.55) 30%,rgba(90,255,110,0) 70%);opacity:.5;animation:lfpulse 2.6s ease-in-out infinite}
+.busy .lf-fl{opacity:.95}
+.lf-bb{display:none;left:50.8%;top:33%;width:5.5%;aspect-ratio:1;margin-left:calc(var(--dx)*1%);background:radial-gradient(circle,#efffef 0%,#96ff96 45%,rgba(150,255,150,0) 75%);opacity:0;animation:lfrise 2.8s ease-in infinite}
+.busy .lf-bb{display:block}
+.lf-bb.b1{--dx:-4;animation-delay:0s}.lf-bb.b2{--dx:3;animation-delay:.7s}.lf-bb.b3{--dx:-1;animation-delay:1.4s}.lf-bb.b4{--dx:5;animation-delay:2.1s}
+.lf-sm{left:75.3%;top:11.5%;width:11%;aspect-ratio:1;transform:translate(-50%,-50%) scale(.4);background:radial-gradient(circle,rgba(235,215,255,.75) 0%,rgba(185,130,255,.5) 45%,rgba(190,130,255,0) 72%);opacity:0;animation:lfsmoke 4.4s ease-out infinite}
+.lf-sm.s2{animation-delay:1.1s}.lf-sm.s3{animation-delay:2.2s}.lf-sm.s4{animation-delay:3.3s}
+.busy .lf-sm{width:13%}
+.lf-rn{left:13%;top:69.3%;width:15.5%;aspect-ratio:1;transform:translate(-50%,-50%);border:1.5px dashed #e1b8ff;box-shadow:0 0 6px #b070ff,inset 0 0 6px #b070ff88;opacity:.4;animation:lfspin 9s linear infinite}
+.busy .lf-rn{opacity:1;animation-duration:4.5s}
+.lf-bk{left:75.6%;top:50.4%;width:30%;aspect-ratio:1;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(200,150,255,.7) 0%,rgba(170,110,255,.35) 40%,rgba(170,110,255,0) 70%);opacity:.3;animation:lfpulse 3.2s ease-in-out infinite .6s}
+.busy .lf-bk{opacity:.85}
+.lf-sp{display:none;width:6%;aspect-ratio:1;transform:translate(-50%,-50%);background:radial-gradient(circle,#fff 0%,rgba(255,230,255,.85) 35%,rgba(255,230,255,0) 70%);opacity:0;animation:lftw 2.2s ease-in-out infinite}
+.busy .lf-sp{display:block}
+.lf-sp.p1{left:66%;top:58.5%}.lf-sp.p2{left:91%;top:41%;animation-delay:.8s}.lf-sp.p3{left:27%;top:57.7%;animation-delay:1.5s}
+@keyframes lfpulse{0%,100%{transform:translate(-50%,-50%) scale(.92)}50%{transform:translate(-50%,-50%) scale(1.1)}}
+@keyframes lfrise{0%{transform:translateY(0) scale(.6);opacity:0}15%{opacity:.95}100%{transform:translateY(-190%) scale(1.1);opacity:0}}
+@keyframes lfsmoke{0%{transform:translate(-50%,-50%) scale(.4);opacity:0}15%{opacity:.8}100%{transform:translate(-10%,-340%) scale(2.1);opacity:0}}
+@keyframes lfspin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+@keyframes lftw{0%,100%{transform:translate(-50%,-50%) scale(.3);opacity:0}50%{transform:translate(-50%,-50%) scale(1.3);opacity:1}}
+@media(prefers-reduced-motion:reduce){.lfx i{animation:none}.lf-sm,.lf-sp,.lf-bb{display:none!important}}
 .tplot{width:104px;height:84px;margin-top:20px;border:2px dashed #6a5a8a;border-radius:50%;background:#ffffff08;color:#a89cc8;font-size:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.25}.tplot b{font-size:20px;line-height:1}
 .tlb{font-size:11.5px;font-weight:700;background:#000a;border:1px solid #4a3a2a;border-radius:6px;padding:1px 7px;white-space:nowrap}
 .tmn,.tsb{display:inline-block;font-size:10px;font-weight:800;border-radius:5px;padding:0 5px;margin-right:4px;color:#1a1208}.tmn{background:#d6aa4e}.tsb{background:#5a4aa8;color:#fff}
@@ -1097,7 +1121,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.1.0347</div>
+    <div class="ver" id="verT">v0.6.1.0348</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -5335,7 +5359,7 @@ function millArt(lv){ const st=Math.max(1,Math.min(5,Math.ceil(lv/2))), [w,h,hx,
 function townSlot(k,pos){ pos=pos||''; const B=getTown()[k], D=TOWN_B[k], lv=B.lv|0, tag=D.main?'<span class="tmn">메인</span>':'<span class="tsb">보조</span>';
   if(lv<1)return `<div class="tsl e" style="${pos}"><button class="tplot" data-tbld="${k}"><b>＋</b>건설<br><span style="color:#ffd34d">${D.lab?'💰 '+LAB_BUILD.toLocaleString('ko-KR'):D.gold?'💰 '+TOWN_GBUILD.toLocaleString('ko-KR'):D.e+' '+TOWN_BUILD}</span></button><div class="tlb">${tag}${D.n}</div></div>`;
   const b=townBub(k);
-  return `<div class="tsl" style="${pos}">${b?`<button class="tbub ${b.cls}" data-tbub="${k}">${b.tx}</button>`:''}<button class="tbd" data-tbld="${k}" aria-label="${D.n}">${D.mill?millArt(lv):D.lab?`<img class="labimg" src="img/town_lab.png" alt="" onerror="this.closest('.tbd').classList.add('lbad')">`:''}<svg${D.mill||D.lab?' class="mfb"':''} viewBox="0 0 100 120" preserveAspectRatio="xMidYMax meet"><use href="#${D.sy}" width="100" height="120"/></svg></button><div class="tlb">${tag}${D.n} Lv.${lv}${B.u>0?` <span data-tul="${k}" style="color:#ffd34d">⏳ ${labLeft(B.u-Date.now())}</span>`:''}</div></div>`; }
+  return `<div class="tsl" style="${pos}">${b?`<button class="tbub ${b.cls}" data-tbub="${k}">${b.tx}</button>`:''}<button class="tbd" data-tbld="${k}" aria-label="${D.n}">${D.mill?millArt(lv):D.lab?`<span class="labw${['a','b'].some(q=>((B[q]||{}).e||0)>0)?' busy':''}"><img class="labimg" src="img/town_lab.png" alt="" onerror="this.closest('.tbd').classList.add('lbad')"><span class="lfx" aria-hidden="true"><i class="lf-fl"></i><i class="lf-bb b1"></i><i class="lf-bb b2"></i><i class="lf-bb b3"></i><i class="lf-bb b4"></i><i class="lf-sm s1"></i><i class="lf-sm s2"></i><i class="lf-sm s3"></i><i class="lf-sm s4"></i><i class="lf-rn"></i><i class="lf-bk"></i><i class="lf-sp p1"></i><i class="lf-sp p2"></i><i class="lf-sp p3"></i></span></span>`:''}<svg${D.mill||D.lab?' class="mfb"':''} viewBox="0 0 100 120" preserveAspectRatio="xMidYMax meet"><use href="#${D.sy}" width="100" height="120"/></svg></button><div class="tlb">${tag}${D.n} Lv.${lv}${B.u>0?` <span data-tul="${k}" style="color:#ffd34d">⏳ ${labLeft(B.u-Date.now())}</span>`:''}</div></div>`; }
 /* ===== 달빛 도박장 (슬롯머신): 한 판 100,000G(공유보관함 골드) → 결과를 먼저 정해 저장하고, 화면은 연출만 보여줘요 =====
    일반(99%): 절반은 조각(그림자/각성 반반, 1~20개) · 절반은 꽝(보상 없음)
    대박 조각 0.5%: 조각 100개 (7 7 7 + 폭죽) · 대박 골드 0.5%: 500,000G (💎 💎 💎 + 금화 비) */
