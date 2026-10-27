@@ -1084,7 +1084,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.0.0332</div>
+    <div class="ver" id="verT">v0.6.0.0333</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -5360,7 +5360,7 @@ function townInfo(k){ const B=getTown()[k], D=TOWN_B[k], lv=B.lv|0, S=getStore()
   const act=maxed?(D.main?'<p class="meta" style="margin:0 0 8px;font-size:12px">최고 레벨이에요</p>':'<p class="meta" style="margin:0 0 8px;font-size:12px">최고 레벨이에요</p>'):`<p class="meta" style="margin:0 0 8px;font-size:13px">${lv<1?'건설':'Lv.'+(lv+1)+' 업그레이드'} 비용 <b style="color:#ffd34d">${D.gold?'💰 '+cost.toLocaleString('ko-KR')+'G':SH.e+' '+cost+'개'}</b> · 공유보관함 보유 <b style="color:${have>=cost?'#9fe08a':'#ff8a7a'}">${D.gold?have.toLocaleString('ko-KR')+'G':have+'개'}</b></p>`;
   modal(`<h3>${lv<1?'🏗️':'🏘️'} ${D.n}${lv>=1?` <span style="color:#c9a0ff">Lv.${lv}</span>`:''}</h3><p style="margin:0 0 8px;font-size:13px;line-height:1.55">${eff}</p>${act}<div class="row2"><button class="btn" id="tiX">닫기</button>${maxed?'':`<button class="btn primary" id="tiGo"${have>=cost?'':' disabled style="opacity:.5"'}>${have>=cost?(lv<1?'🏗️ 건설':'⬆ 업그레이드'):D.gold?'골드 부족':'조각 부족'}</button>`}</div>`,m=>{
     m.querySelector('#tiX').onclick=closeModal; const go=m.querySelector('#tiGo');
-    if(go)go.onclick=()=>{ const r=townUp(k); closeModal(); if(r==='ok'){ sfx('rare'); townMsg=lv<1?`🏗️ ${D.n}을(를) 지었어요!`:`⬆ ${D.n} Lv.${lv+1} 업그레이드 완료!`; } else townMsg=r==='lack'?(D.gold?'공유보관함의 골드가 부족해요':'공유보관함의 조각이 부족해요'):'더 올릴 수 없어요'; renderTown(); }; }); }
+    if(go)go.onclick=()=>{ const r=townUp(k); closeModal(); if(r==='ok'){ sfx('rare'); townMsg=lv<1?`🏗️ ${D.n}${(c=>c>=0&&c<=11171&&c%28?'을':'를')(D.n.charCodeAt(D.n.length-1)-44032)} 지었어요!`:`⬆ ${D.n} Lv.${lv+1} 업그레이드 완료!`; } else townMsg=r==='lack'?(D.gold?'공유보관함의 골드가 부족해요':'공유보관함의 조각이 부족해요'):'더 올릴 수 없어요'; renderTown(); }; }); }
 function townPick(k){ townTick(k); const B=getTown()[k], D=TOWN_B[k], n=B.n|0; if(n<1){ townMsg=`아직 ${D.pot?'만들어진 물약이':'만들어진 조각이'} 없어요`; renderTown(); return; }
   const chars=charIds().map(id=>(me&&me.id===id)?me:loadChar(id)).filter(Boolean), what=D.pot?`🧪 물약 ${n}개`:`${D.e} ${SHDK[D.mat].n} ${n}개`;
   const rows=chars.map(c=>`<button class="btn" data-to="${c.id}" style="text-align:left">${tgLabel({k:'c',o:c},'')}</button>`).join('');
