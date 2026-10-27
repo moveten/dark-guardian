@@ -1093,7 +1093,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.0.0340</div>
+    <div class="ver" id="verT">v0.6.1.0341</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1337,7 +1337,7 @@ const SK={
   {k:'roar',lb:['도발','지속시간','받는피해'],e:'📢',n:'포효',s:'포효',req:18,mp:12,cd:18,el:'#e0a050',freq:1,d:l=>`[곰 변신 필요] 반경 320 적 ${V(3+Math.floor(l/3))}명을 도발하고, ${V(6+Math.floor(l/4))}초간 반경 320 안의 나와 동료가 받는 피해 -${V(Math.min(45,Math.round(20+1.5*l)))}%`},
   {k:'fury',lb:['받는피해','주는피해','반경','무기피해'],e:'💢',n:'광란',s:'광란',req:22,mp:14,cd:30,el:'#ff5a3a',freq:1,d:l=>`[곰 변신 필요] 8초간 받는 피해 -${V(Math.min(50,Math.round(25+1.2*l)))}%, 주는 피해 +${V(10+2*l)}%, 1초마다 반경 ${RR(110,l)} 충격파 무기 피해 ${V(120+15*l)}%`},
   {k:'spirit',lb:['지속시간','주는피해','공격속도','마나회복'],e:'👻',n:'영혼 정령',s:'정령',req:24,mp:22,cd:36,el:'#b8f0ff',d:l=>`[소환수·시한] ${V((14+.4*l).toFixed(1))}초간 정령이 곁에 떠올라요. 반경 260 안의 나와 동료: 주는 피해 +${V(Math.round(10+1.5*l))}%, 공격 속도 +${V(8+l)}%, 마나 회복 +${V(30+3*l)}%`},
-  {k:'hunt',lb:['까마귀피해','곰무기피해'],e:'🌕',n:'야생의 대사냥',s:'대사냥',req:30,mp:60,cd:15,el:'#ffd24a',rg:420,d:l=>`[필살기] 🧑 까마귀 떼가 적을 16번 급습, 반경 75 범위 피해 ${V(110+36*l)} / 🐻 반경 320 충격파 3연타 무기 피해 ${V(500+90*l)}% + 2초 기절, 6초간 받는 피해 -50%`},
+  {k:'hunt',lb:['까마귀피해','곰무기피해'],e:'🌕',n:'야생의 대사냥',s:'대사냥',req:30,mp:24,cd:12,el:'#ffd24a',rg:420,d:l=>`[필살기] 🧑 까마귀 떼가 적을 16번 급습, 반경 75 범위 피해 ${V(110+36*l)} / 🐻 반경 320 충격파 3연타 무기 피해 ${V(500+90*l)}% + 2초 기절, 6초간 받는 피해 -50%`},
   {k:'bears',e:'🐻',n:'곰세마리',s:'곰세마리',req:90,mp:60,cd:80,el:'#d9a46a',d:l=>`[궁극기·소환수] 강력한 곰 가족을 소환해요. 엄마곰, 아빠곰, 아기곰`}]
 };
 /* 드루이드 형태 수치 (derive와 설명이 같이 씀) */
@@ -1918,9 +1918,9 @@ const mailIc=open=>open
 const mailDate=t=>{ const d=new Date(t); return (d.getMonth()+1)+'/'+d.getDate(); };
 const genId=()=>'c'+Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36);
 const charKey=id=>'dkdef2.c.'+id;
-function newChar(cls,name){
+function newChar(cls,name,nid){
   const c=CLASSES[cls], sk={}; SK[cls].forEach((s,i)=>sk[s.k]=i===0?1:0);
-  const p={id:genId(),cls,lvl:1,xp:0,stats:{...c.base},statPts:0,skillPts:0,skills:sk,inv:Array(INVN).fill(null),eq:{helm:null,armor:null,weapon:null,amulet:null,ring1:null,ring2:null,shield:null},kills:0,name:String(name||'').slice(0,8),gold:500,potBuy:0,rev:0,clear:0,as:-1,sy:-1,dv4:1,mail:[mailNew('welcome')],tut:Object.assign(tutDef(),{on:1})};   /* 새 캐릭터마다 환영 편지 1통 */
+  const p={id:nid||genId(),cls,lvl:1,xp:0,stats:{...c.base},statPts:0,skillPts:0,skills:sk,inv:Array(INVN).fill(null),eq:{helm:null,armor:null,weapon:null,amulet:null,ring1:null,ring2:null,shield:null},kills:0,name:String(name||'').slice(0,8),gold:500,potBuy:0,rev:0,clear:0,as:-1,sy:-1,dv4:1,mail:[mailNew('welcome')],tut:Object.assign(tutDef(),{on:1})};   /* 새 캐릭터마다 환영 편지 1통 */
   p.eq.weapon=genItem(-1,1,'weapon',c.start); p.eq.weapon.name='낡은 '+c.start.replace('낡은 ','');
   return p;
 }
@@ -1963,8 +1963,8 @@ function migrateChars(){
     try{ const p=JSON.parse(raw); if(p&&p.cls===cls){ p.id=genId(); lsSet(charKey(p.id),JSON.stringify(p)); ids.push(p.id); } }catch(e){} }
   setIds(ids);
 }
-function createChar(cls,name){ const ids=charIds(); if(ids.length>=MAXCHAR||!CLASSES[cls])return null; if(nameTaken(name))return null; const p=newChar(cls,name); p.ms=MAILQ.map(q=>q.id); lsSet(charKey(p.id),JSON.stringify(packChar(p))); ids.push(p.id); setIds(ids); selId=p.id; lsSet('dkdef2.sel',selId); return p; }
-function deleteChar(id){ setIds(charIds().filter(x=>x!==id)); lsDel(charKey(id)); lsDel('dkdef2.rk.'+id); if(selId===id){selId='';lsSet('dkdef2.sel','');} rkQueueDel(id); }
+function createChar(cls,name,nid){ const ids=charIds(); if(ids.length>=MAXCHAR||!CLASSES[cls])return null; if(nameTaken(name))return null; const p=newChar(cls,name,nid); p.ms=MAILQ.map(q=>q.id); lsSet(charKey(p.id),JSON.stringify(packChar(p))); ids.push(p.id); setIds(ids); selId=p.id; lsSet('dkdef2.sel',selId); return p; }
+function deleteChar(id){ setIds(charIds().filter(x=>x!==id)); lsDel(charKey(id)); lsDel('dkdef2.rk.'+id); lsDel('dkdef2.nmv.'+id); if(selId===id){selId='';lsSet('dkdef2.sel','');} rkQueueDel(id); nameQueueRel(id); }
 function packChar(p){ const {id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear,as,sy,au,sp,ct,cat,dv4,shard,ashard,mail,ms,tut,cc}=p; return {id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear:clear|0,au:Math.max(0,Math.min(2,au|0)),sp:sp?1:0,ct:ct>0?ct|0:0,cat:cat>0?cat|0:0,as:as===undefined?-1:as,sy:sy===undefined?-1:sy,dv4:dv4?1:0,shard:shard|0,ashard:(ashard|0)||undefined,mail:Array.isArray(mail)?mail:undefined,ms:Array.isArray(ms)?ms:undefined,tut:tut||undefined,cc:cc&&Object.keys(cc).length?cc:undefined}; }
 function saveChar(){ if(!me||!me.id)return; lsSet(charKey(me.id),JSON.stringify(packChar(me))); }
 const dispName=p=>(p&&p.name)||CLASSES[p.cls].n;
@@ -3023,7 +3023,7 @@ function druidCan(key,hold){ const s=SKBY[key];
   if(key==='bite'&&!nearestMob(me.x,me.y,130)){ if(!hold)toast('물어뜯을 적이 없어요','#e07060'); return false; }
   return true; }
 function doCast(key,range,lv){
-  const t=key==='quake'?(execTarget(me.x,me.y,range)||nearestMob(me.x,me.y,range)):nearestMob(me.x,me.y,range);   /* 대지 분쇄: 범위 안에서 우두머리 > 정예 > 일반 순으로 겨냥 */
+  const t=key==='quake'?(execTarget(me.x,me.y,range)||nearestMob(me.x,me.y,range)):((autoMode>0&&autoFocus(range))||nearestMob(me.x,me.y,range));   /* 대지 분쇄: 범위 안에서 우두머리 > 정예 > 일반 순으로 겨냥 */
   let tx,ty;
   if(t){tx=t.x;ty=t.y;}
   else{const a=me.face||0; tx=me.x+Math.cos(a)*150; ty=me.y+Math.sin(a)*150;}
@@ -3765,9 +3765,10 @@ addEventListener('blur',()=>{for(const k in keys)keys[k]=false; for(const k in h
    이동: 조이스틱·키보드를 잡으면 그 입력이 우선이에요. 스킬: 클래스별 우선순위 규칙(AUTO_RULES)을 0.25초마다 위에서부터 훑어 첫 번째로 쓸 수 있는 하나만 써요.
    물약은 자동으로 쓰지 않아요. 순간이동·세크리파이스(희생)·수호 폭발(수호 영혼 소멸)은 자동에서 제외. */
 let autoMode=0, autoGap=0, autoRet=false, autoBo={}, autoHintT=0;
+let autoTgt=null, autoTgtT=0, autoBan=new Map(), autoPs={x:0,y:0,t:0}, autoStk=0, autoSide={t:0,s:1}, autoHoldT=0;   /* AUTO AI: 주타겟 유지·막힘 감지 */
 const AUTO_LB=[['AUTO','OFF'],['AUTO','이동'],['AUTO','+스킬']], AUTO_TX=['자동 사냥 꺼짐','⚔ 자동 이동 · 일반공격','⚔ 자동 이동 · 스킬까지 자동'];
 const AUTOSK_NEED=5, autoSkOk=()=>!!(me&&(me.clear|0)>=AUTOSK_NEED);   /* '스킬까지 자동'(2단계)은 1-5 스테이지를 클리어한 캐릭터부터. 1단계(자동 이동·일반공격)는 처음부터 */
-function setAuto(n,quiet){ if(n>=2&&!autoSkOk())n=1; autoMode=n; autoRet=false; autoGap=0; autoBo={}; if(me&&!quiet&&(me.au|0)!==n){ me.au=n; saveChar(); }   /* quiet=true: 저장된 설정을 화면에만 반영(저장값은 안 바꿈) */
+function setAuto(n,quiet){ if(n>=2&&!autoSkOk())n=1; autoMode=n; autoRet=false; autoGap=0; autoBo={}; autoTgt=null; autoBan.clear(); autoStk=0; autoHoldT=0; if(me&&!quiet&&(me.au|0)!==n){ me.au=n; saveChar(); }   /* quiet=true: 저장된 설정을 화면에만 반영(저장값은 안 바꿈) */
   const b=$('#bAuto'); if(!b)return; b.className='s'+n; b.querySelector('b').textContent=AUTO_LB[n][0]; b.querySelector('small').textContent=AUTO_LB[n][1]; b.setAttribute('aria-label','자동 사냥: '+AUTO_TX[n].replace('⚔ ',''));
   const t=$('#autoT'); if(quiet&&!n){ t.classList.remove('show'); return; } t.className='s'+n+' show'; t.textContent=AUTO_TX[n]; clearTimeout(autoHintT); autoHintT=setTimeout(()=>t.classList.remove('show'),2600); }
 function cycleAuto(){ if(!G.inGame)return; let n=(autoMode+1)%3;
@@ -3785,24 +3786,58 @@ function cycleSpd(){ if(!G.inGame)return; if(G.mode==='guest'){ toast('배속은
   if(!spdOk()){ toast('🔒 1.3배속은 1-5 스테이지를 클리어하면 열려요','#ffb259'); sfx('ui'); return; } setSpd(!(G.spd>1),{save:true,hint:true}); sfx(G.spd>1?'aura':'auraoff'); }
 $('#bSpd').addEventListener('pointerdown',e=>{ e.preventDefault(); cycleSpd(); });
 const autoBlocked=()=>!G.inGame||G.paused||me.dead||document.body.classList.contains('shopen');
-/* 자동 이동 방향(단위 벡터) — 없으면 null: 위험지대 탈출 > 체력이 낮으면 마을(치유 구역)로 후퇴 > 가까운 전리품 > 마을 근처의 적 추격(근접은 붙고, 원거리는 거리를 유지) > 마을로 복귀 */
+/* 자동 이동 방향(단위 벡터) — 없으면 null: 용암 탈출 > 체력이 낮으면 마을(치유 구역)로 후퇴 > 가까운 전리품 > 주타겟 추격(근접은 붙고, 원거리는 거리를 유지) > 마을로 복귀
+   AI 규칙: ① 주타겟은 한 번 정하면 유지해요(훨씬 가까운 적이 생기거나 보스가 사거리에 들어올 때만 바꿔요) ② 느려지기만 하는 늪·얼음·모래는 피하지 않고 그대로 싸우고, 피해를 주는 용암만 피해서 돌아가요
+   ③ 용암 위에 있는 적·전리품은 쫓지 않아요 ④ 0.8초 동안 거의 못 움직이면 막힌 것으로 보고 타겟을 잠시 제외·옆으로 비켜요 */
+const inLava=(x,y,pad)=>{ for(const h of hazards){ if(h.k==='lava'&&hyp(x-h.x,y-h.y)<h.r*.9+(pad||0))return true; } return false; };
+function lavaSteer(d){ if(!d)return d; let dx=d[0],dy=d[1];   /* 용암 웅덩이 중심으로 향하는 성분을 빼서 가장자리를 따라 돌아가요 */
+  for(const h of hazards){ if(h.k!=='lava')continue; const cx=h.x-me.x, cy=h.y-me.y, c=hyp(cx,cy), lim=h.r*.9+46; if(c>=lim||c<1)continue; const nx=cx/c, ny=cy/c, dot=dx*nx+dy*ny; if(dot<=.15)continue;
+    let tx=dx-nx*dot, ty=dy-ny*dot; const tl=hyp(tx,ty); if(tl<.25){ const sg=(dx*-ny+dy*nx)>=0?1:-1; tx=-ny*sg; ty=nx*sg; } else { tx/=tl; ty/=tl; } dx=tx; dy=ty; }
+  const l=hyp(dx,dy)||1; return [dx/l,dy/l]; }
+function autoPickTgt(rg){
+  const now=performance.now()/1000;
+  for(const [m,t] of autoBan){ if(t<now||m.dead)autoBan.delete(m); }
+  const cand=m=>!m.dead&&(m.boss||hyp(m.x-VX,m.y-VY)<=480)&&!autoBan.has(m);
+  let best=null,bd=1e9,bl=null,bld=1e9;
+  for(const m of G.mobs){ if(!cand(m))continue; const d=hyp(m.x-me.x,m.y-me.y)-m.r; if(inLava(m.x,m.y,0)){ if(d<bld){bld=d;bl=m;} } else if(d<bd){bd=d;best=m;} }
+  if(!best){ best=bl; bd=bld; }
+  const cur=autoTgt, curOk=!!cur&&cand(cur)&&(!inLava(cur.x,cur.y,0)||!best||inLava(best.x,best.y,0));
+  let tgt=curOk?cur:best;
+  if(curOk&&best&&best!==cur){ const dc=hyp(cur.x-me.x,cur.y-me.y)-cur.r, held=now-autoTgtT;
+    if(dc>rg+460||(held>1&&bd<dc*.55&&dc-bd>50)||(held>.5&&best.boss&&!cur.boss&&bd<rg+120))tgt=best; }
+  if(tgt!==autoTgt){ autoTgt=tgt; autoTgtT=now; autoHoldT=0; }
+  return autoTgt;
+}
+const autoFocus=range=>{ const m=autoTgt; return m&&!m.dead&&hyp(m.x-me.x,m.y-me.y)-m.r<range?m:null; };
 function autoDir(){
+  const d=autoDir0(), now=performance.now()/1000;
+  if(!d){ autoStk=0; autoPs={x:me.x,y:me.y,t:now}; return d; }
+  if(autoSide.t>now)return [-d[1]*autoSide.s,d[0]*autoSide.s];
+  if(now-autoPs.t>=.8){ const mv=hyp(me.x-autoPs.x,me.y-autoPs.y); autoPs={x:me.x,y:me.y,t:now};
+    if(mv<14){ autoStk++; if(autoStk>=2){ autoStk=0; if(autoTgt)autoBan.set(autoTgt,now+4); autoSide={t:now+.7,s:Math.random()<.5?1:-1}; } } else autoStk=0; }
+  return d;
+}
+function autoDir0(){
   const ph=G.phase; if(ph==='win'||ph==='lose'||ph==='title'||ph==='lobby')return null;
   const toward=(x,y)=>{ const dx=x-me.x,dy=y-me.y,d=hyp(dx,dy); return d>1?[dx/d,dy/d]:null; };
-  for(const h of hazards){ const dx=me.x-h.x,dy=me.y-h.y,d=hyp(dx,dy); if(d<h.r*.95+6)return d>1?[dx/d,dy/d]:[1,0]; }
+  for(const h of hazards){ if(h.k!=='lava')continue; const dx=me.x-h.x,dy=me.y-h.y,d=hyp(dx,dy); if(d<h.r*.95+6)return d>1?[dx/d,dy/d]:[1,0]; }   /* 피해를 주는 용암만 급히 벗어나요 (늪·얼음·모래는 느려질 뿐이라 그대로 싸워요) */
   const hr=me.hp/me.D.maxHp, vd=hyp(me.x-hzX(),me.y-hzY()), fy=G.castle?VY+72:VY;   /* 성이 있으면 성 앞마당으로 돌아가요 */
   if(hr<.28)autoRet=true; else if(hr>=.7)autoRet=false;
-  if(autoRet)return vd<(G.castle?CAS_HR*.8:VR*.55)?null:toward(VX,fy);
-  const rg=atkRg(me), melee=meleeOf(me); let near=null,nd=1e9;
-  for(const m of G.mobs){ if(m.dead||(!m.boss&&hyp(m.x-VX,m.y-VY)>480))continue; const d=hyp(m.x-me.x,m.y-me.y)-m.r; if(d<nd){nd=d;near=m;} }
+  if(autoRet)return vd<(G.castle?CAS_HR*.8:VR*.55)?null:lavaSteer(toward(VX,fy));
+  const rg=atkRg(me), melee=meleeOf(me);
+  const near=autoPickTgt(rg), nd=near?hyp(near.x-me.x,near.y-me.y)-near.r:1e9;
   const full=me.inv.indexOf(null)<0; let loot=null,ld=650;
-  for(const g of ground){ if(g.carry||(full&&!autoSellOk(g.it)))continue; const d=hyp(g.x-me.x,g.y-me.y); if(d<ld){ld=d;loot=g;} }
+  for(const g of ground){ if(g.carry||(full&&!autoSellOk(g.it))||inLava(g.x,g.y,10))continue; const d=hyp(g.x-me.x,g.y-me.y); if(d<ld){ld=d;loot=g;} }
   const engaged=near&&nd<=rg+140;
-  if(loot&&(!engaged||ld<80)&&ld>24)return toward(loot.x,loot.y);
+  if(loot&&(!engaged||ld<80)&&ld>24)return lavaSteer(toward(loot.x,loot.y));
   if(near){ const want=melee?Math.max(18,rg*.55):rg*.82;
-    if(!melee&&nd<rg*.3){ const dx=me.x-near.x,dy=me.y-near.y,d=hyp(dx,dy); if(d>1)return [dx/d,dy/d]; }
-    if(nd>want)return toward(near.x,near.y); return null; }
-  return vd>(G.castle?CAS_HR*.85:90)?toward(VX,fy):null;
+    if(!melee&&nd<rg*.3){ const dx=me.x-near.x,dy=me.y-near.y,d=hyp(dx,dy); if(d>1)return lavaSteer([dx/d,dy/d]); }
+    if(nd>want){
+      if(melee&&inLava(near.x,near.y,0)){ const lh=hazards.find(h=>h.k==='lava'&&hyp(near.x-h.x,near.y-h.y)<h.r*.9);   /* 용암 위의 적: 근접은 가장자리에서 기다려요 (3초 지나도 안 나오면 다른 적으로) */
+        if(lh&&hyp(me.x-lh.x,me.y-lh.y)<lh.r*.9+50){ const nw=performance.now()/1000; if(!autoHoldT)autoHoldT=nw; if(nw-autoHoldT>3){ autoBan.set(near,nw+5); autoHoldT=0; } return null; } }
+      return lavaSteer(toward(near.x,near.y)); }
+    return null; }
+  return vd>(G.castle?CAS_HR*.85:90)?lavaSteer(toward(VX,fy)):null;
 }
 /* 자동 스킬 규칙: [스킬, 시전 뒤 남겨 둘 마나 비율, 조건(c)] — 위에서부터 첫 번째로 쓸 수 있는 하나만. 유지(소환·오라) > 약화/표식 > 광역·단일 딜 > 궁극기 > 필러 순 */
 function autoCtx(){ const x=me.x,y=me.y, ms=G.mobs.filter(m=>!m.dead), ed=m=>hyp(m.x-x,m.y-y)-m.r;
@@ -4646,7 +4681,7 @@ const CPSK={
   ['chain',l=>(22+16*l)*HMN(l)*HMF(HMN(l))*(1-Math.pow(.9,Math.min(3,3+Math.floor(l/4))))/.1,4,'s'],
   ['meteor',l=>((80+40*l)+4*(12+8*l))*HMN(l)*HMF(HMN(l)),10,'s'],['blizzard',l=>(22+13*l)*8,17,'s'],['armageddon',l=>14*(150+45*l)*.5,75,'s']],
  necro:[['soulbolt',l=>(14+10*l)*HMN(l)*HMF(HMN(l)),.8,'s'],['guardian',l=>(14+10*l)/1.2*(1+.04*l),1,'m'],['spiritcaster',l=>(18+12*l)*HMN(l)*HMF(HMN(l))/1.8*(1+.04*l),1,'m'],['soulburst',l=>(100+40*l)*1.6,12,'s'],['execute',l=>0,18,'s'],['colossus',l=>(120+45*l)/1.5*(18+.5*l)*(1+.04*l),45,'m'],['lord',l=>(100+30*l)*2*15*(1+.04*l),90,'m'],['fusion',l=>((6+4*l)/.5+(16+10*l)*FZB(l)/2+(50+22*l)/4)*(10+.3*l)*(1+.04*l),40,'m']],
- druid:[['raven',l=>(12+9*l)*RVN(l)*RVF(RVN(l))/1.1,1,'m'],['bite',l=>3.5+.55*l,3,'p'],['hunt',l=>(18+3*l)*.5,15,'p'],['bears',l=>(110+55*l)*BEAR_T(l)/3,80,'m']],
+ druid:[['raven',l=>(12+9*l)*RVN(l)*RVF(RVN(l))/1.1,1,'m'],['bite',l=>3.5+.55*l,3,'p'],['hunt',l=>(18+3*l)*.5,12,'p'],['bears',l=>(110+55*l)*BEAR_T(l)/3,80,'m']],
  war:[['bash',l=>3+.5*l,2,'p'],['rend',l=>4.5+.7*l+Math.floor((1.5+.12*l)/.5)*(.5+.05*l),5,'p'],['whirl',l=>1.8+.3*l,5,'p'],['leap',l=>2.8+.45*l,8,'p'],['quake',l=>4+.65*l,13,'p'],['ragnarok',l=>(14+l)*.6+8,90,'p']],
  pal:[['smite',l=>2.6+.4*l,2,'p'],['hammer',l=>(16+13*l)*HMN(l)*HMF(HMN(l))*3,4.5,'s'],['judgment',l=>(110+50*l)+4*(18+10*l),15,'s']]};
 function cpSkillDps(p,D){ const list=CPSK[p.cls]; if(!list||!p.skills)return 0; const pp={...p,D}, wav=(D.wmn+D.wmx)/2;
@@ -5113,7 +5148,7 @@ function renderTitle(){
   if(!chars.find(c=>c.id===selId)){ selId=chars[0]?chars[0].id:''; lsSet('dkdef2.sel',selId); }
   buildCarousel(chars); renderStagePanel(); try{ getStore(); }catch(e){}   /* 공유보관함 아이템 보정을 시작할 때 한 번 적용 */
   if(!chars.length) showNew(false);
-  rkSubmit(chars,false); setTimeout(rkPrefetch,1200);
+  rkSubmit(chars,false); setTimeout(rkPrefetch,1200); setTimeout(nameSweep,900);
 }
 function renderClassCards(){ renderTitle(); }
 function modal(html,bind){ const m=$('#modal'); m.className='ipop mdl'; m.innerHTML=`<div class="card">${html}</div>`; m.hidden=false; m.onclick=e=>{ if(e.target===m)closeModal(); }; if(bind)bind(m); }
@@ -5128,17 +5163,49 @@ function askCode(cb){
     const go=()=>{ const v=inp.value.replace(/\D/g,''); if(v.length!==4){ m.querySelector('#cdErr').textContent='4자리 숫자를 입력해 주세요'; return; } closeModal(); cb(v); };
     m.querySelector('#cdOk').onclick=go; m.querySelector('#cdNo').onclick=closeModal; inp.onkeydown=e=>{ if(e.key==='Enter')go(); }; });
 }
-function askName(title,init,okTxt,cb,exceptId,cheat){
-  modal(`<h3>${title}</h3><div class="col"><input type="text" id="nmIn" maxlength="8" placeholder="닉네임 (한글만, 2~8자)" autocomplete="off" value="${esc(init||'')}"><div class="err" id="nmErr"></div><div class="row2"><button class="btn" id="nmNo">취소</button><button class="btn primary" id="nmOk">${okTxt}</button></div></div>`,m=>{
-    const inp=m.querySelector('#nmIn'); inp.focus(); inp.select(); setTimeout(()=>inp.focus(),80);
-    const go=()=>{ const v=cleanName(inp.value); if(!v){ m.querySelector('#nmErr').textContent='닉네임을 입력해 주세요'; return; } if(v.length<2){ m.querySelector('#nmErr').textContent='닉네임은 최소 2글자 이상이어야 해요'; inp.focus(); return; } if(!HANGUL.test(v)){ m.querySelector('#nmErr').textContent='닉네임은 한글만 사용할 수 있어요. 영문·숫자·공백·특수기호는 쓸 수 없어요. 다시 입력해 주세요'; inp.focus(); return; } if(cheat){ const cr=cheat(v); if(cr!=null){ m.querySelector('#nmErr').textContent=cr; return; } } if(nameTaken(v,exceptId)){ m.querySelector('#nmErr').textContent='이미 있는 닉네임이에요. 다른 이름을 입력해 주세요'; return; } closeModal(); cb(v); };
+/* ===== 닉네임 전체 중복 방지: 서버(dd_name)에 이름을 예약해요. 다른 기기에서 만든 캐릭터와도 겹치지 않아요 =====
+   claim_name(id,이름) → 'ok'(내 이름) / 'taken'(이미 다른 캐릭터가 씀). 이름 변경은 예전 이름을 풀고 새 이름을 잡고, 삭제하면 풀어 줘요 */
+const NAME_SRV=false;   /* 서버(dd_name)가 준비되면 true — supabase_name.sql 을 먼저 실행해야 해요 */
+async function nameClaim(id,name){ if(!NAME_SRV)return 'ok'; try{ const ac=new AbortController(), tm=setTimeout(()=>ac.abort(),8000);
+    try{ const r=await fetch(SB_URL+'/rest/v1/rpc/claim_name',{method:'POST',headers:rkHead(),body:JSON.stringify({p_id:String(id).slice(0,40),p_name:name}),signal:ac.signal}); if(!r.ok)return 'net'; const v=await r.json(); return v==='ok'?'ok':v==='taken'?'taken':'bad'; }finally{ clearTimeout(tm); } }catch(e){ return 'net'; } }
+const nameRelList=()=>{ try{ return JSON.parse(lsGet('dkdef2.nmdel')||'[]'); }catch(e){ return []; } };
+function nameQueueRel(id){ if(!id)return; const a=nameRelList(); if(!a.includes(id))a.push(String(id).slice(0,40)); lsSet('dkdef2.nmdel',JSON.stringify(a)); nameFlushRel(); }
+let nameRelBusy=false;
+async function nameFlushRel(){ if(!NAME_SRV||nameRelBusy)return; const a=nameRelList(); if(!a.length)return; nameRelBusy=true;
+  try{ const left=[]; for(const id of a){ if(charIds().includes(id))continue; /* 다시 살아난(복원된) 캐릭터는 건드리지 않음 */
+      try{ const r=await fetch(SB_URL+'/rest/v1/rpc/release_name',{method:'POST',headers:rkHead(),body:JSON.stringify({p_id:id})}); if(!r.ok)left.push(id); }catch(e){ left.push(id); } }
+    lsSet('dkdef2.nmdel',JSON.stringify(left)); }finally{ nameRelBusy=false; } }
+/* 앱을 켤 때: 내 캐릭터의 이름을 서버에 한 번씩 예약해요. 이미 다른(먼저 만든) 캐릭터가 쓰고 있으면 새 이름을 정해야 해요 */
+const NMV='dkdef2.nmv.';
+let nmSweepBusy=false, nmForcing=false;
+async function nameSweep(){ if(!NAME_SRV||nmSweepBusy||nmForcing)return; nmSweepBusy=true;
+  try{ nameFlushRel(); const bad=[]; for(const id of charIds()){ const c=loadChar(id); if(!c)continue; const nm=dispName(c), key=nameKey(nm); if(lsGet(NMV+id)===key)continue;
+      const r=await nameClaim(id,nm); if(r==='ok')lsSet(NMV+id,key); else if(r==='taken')bad.push(id); else if(r==='net')break; }
+    if(bad.length)nameForce(bad); }finally{ nmSweepBusy=false; } }
+function nameForce(ids){ nmForcing=true; const id=ids.shift(); if(!id){ nmForcing=false; return; }
+  const c=loadChar(id); if(!c){ nameForce(ids); return; }
+  if(G.inGame||!$('#modal').hidden){ nmForcing=false; return; }   /* 게임 중이거나 다른 창이 떠 있으면 다음에 타이틀로 돌아왔을 때 다시 물어요 */
+  askName(`⚠️ ${clsIc(c.cls,24)} ${esc(dispName(c))} · 닉네임 변경`,'','✔ 변경',v=>{ const q=loadChar(id); if(q){ q.name=v; lsSet(charKey(id),JSON.stringify(packChar(q))); lsSet(NMV+id,nameKey(v)); try{ rkSubmit([q],true); }catch(e){} toast(`닉네임을 '${v}'(으)로 정했어요`,'#9fe08a'); } renderTitle(); nameForce(ids); },id,null,{claim:id,force:true,note:`'${esc(dispName(c))}' 닉네임을 이미 먼저 만든 캐릭터가 쓰고 있어요. 새 닉네임을 정해 주세요 (무료)`}); }
+/* opt: {claim:캐릭터 id(서버에 이름 예약), force:true(취소 불가·치트키 없음), note:안내 글} */
+function askName(title,init,okTxt,cb,exceptId,cheat,opt){ opt=opt||{};
+  modal(`<h3>${title}</h3>${opt.note?`<p class="meta" style="margin:0 0 8px;font-size:13px;line-height:1.55">${opt.note}</p>`:''}<div class="col"><input type="text" id="nmIn" maxlength="8" placeholder="닉네임 (한글만, 2~8자)" autocomplete="off" value="${esc(init||'')}"><div class="err" id="nmErr"></div><div class="row2">${opt.force?'':'<button class="btn" id="nmNo">취소</button>'}<button class="btn primary" id="nmOk">${okTxt}</button></div></div>`,m=>{
+    const inp=m.querySelector('#nmIn'); inp.focus(); inp.select(); setTimeout(()=>inp.focus(),80); let busy=false;
+    if(opt.force)m.onclick=null;   /* 바깥을 눌러도 닫히지 않아요 */
+    const go=async()=>{ if(busy)return; const v=cleanName(inp.value); if(!v){ m.querySelector('#nmErr').textContent='닉네임을 입력해 주세요'; return; } if(v.length<2){ m.querySelector('#nmErr').textContent='닉네임은 최소 2글자 이상이어야 해요'; inp.focus(); return; } if(!HANGUL.test(v)){ m.querySelector('#nmErr').textContent='닉네임은 한글만 사용할 수 있어요. 영문·숫자·공백·특수기호는 쓸 수 없어요. 다시 입력해 주세요'; inp.focus(); return; } if(cheat&&!opt.force){ const cr=cheat(v); if(cr!=null){ m.querySelector('#nmErr').textContent=cr; return; } } if(nameTaken(v,exceptId)){ m.querySelector('#nmErr').textContent='이미 있는 닉네임이에요. 다른 이름을 입력해 주세요'; return; }
+      if(opt.claim){ busy=true; const ok=m.querySelector('#nmOk'); ok.disabled=true; ok.textContent='확인 중…'; const r=await nameClaim(opt.claim,v); busy=false;
+        if(!m.isConnected||!m.querySelector('#nmIn')){ if(r==='ok'&&!charIds().includes(opt.claim))nameQueueRel(opt.claim); return; }   /* 확인하는 사이 창을 닫았으면 잡아 둔 이름을 풀어요 */
+        ok.disabled=false; ok.textContent=okTxt;
+        if(r==='taken'){ m.querySelector('#nmErr').textContent='이미 다른 캐릭터가 쓰고 있는 닉네임이에요. 다른 이름을 입력해 주세요'; inp.focus(); return; }
+        if(r!=='ok'){ m.querySelector('#nmErr').textContent='서버에 연결할 수 없어 닉네임을 확인하지 못했어요. 잠시 후 다시 시도해 주세요'; return; }
+        lsSet(NMV+opt.claim,nameKey(v)); }
+      closeModal(); cb(v); };
     inp.addEventListener('input',()=>{ m.querySelector('#nmErr').textContent=''; });
-    m.querySelector('#nmOk').onclick=go; m.querySelector('#nmNo').onclick=closeModal; inp.onkeydown=e=>{ if(e.key==='Enter')go(); }; });
+    m.querySelector('#nmOk').onclick=go; const no=m.querySelector('#nmNo'); if(no)no.onclick=closeModal; inp.onkeydown=e=>{ if(e.key==='Enter')go(); }; });
 }
 function showNew(canBack){ $('#bNewBack').hidden=canBack===false; const box=$('#newCards'); box.innerHTML='';
   for(const k of ['war','pal','sorc','necro','druid']){ const c=CLASSES[k]; const b=document.createElement('button'); b.className='ccard';
     b.innerHTML=`<div class="cn">${clsIc(k,34)}${c.n}</div><div class="cd">${c.d}</div>`;
-    b.onclick=()=>askName(`${clsIc(k,26)} ${c.n} · 닉네임 정하기`,'','✔ 만들기',v=>{ const p=createChar(k,v); if(p){ show('#sTitle'); renderTitle(); } });
+    b.onclick=()=>{ const nid=genId(); askName(`${clsIc(k,26)} ${c.n} · 닉네임 정하기`,'','✔ 만들기',v=>{ const p=createChar(k,v,nid); if(p){ show('#sTitle'); renderTitle(); } else nameQueueRel(nid); },undefined,null,{claim:nid}); };
     box.appendChild(b); }
   show('#sNew'); }
 $('#bNew').onclick=()=>showNew(true);
@@ -5164,7 +5231,7 @@ function charMenu(id){
     m.querySelector('#cmShop').onclick=()=>{ closeModal(); openTitleSheet('shop'); };
     m.querySelector('#cmTut').onclick=()=>{ closeModal(); tutModal(id); };
     m.querySelector('#cmRen').onclick=()=>{ if((p.gold|0)<RENCOST){ warn(`골드가 부족해요. 이름 변경은 ${RENCOST.toLocaleString()}G가 필요해요 (보유 ${(p.gold|0).toLocaleString()}G)`); return; }
-      askName(`✏️ 이름 변경 · ${RENCOST.toLocaleString()}G`,'','✔ 변경',v=>{ const q=loadChar(id); if(!q)return; if((q.gold|0)<RENCOST)return; q.gold-=RENCOST; q.name=v; lsSet(charKey(q.id),JSON.stringify(packChar(q))); renderTitle(); toast(`이름을 '${v}'(으)로 바꿨어요 (-${RENCOST.toLocaleString()}G)`,'#ffd84a'); },id,v=>nameCheat(id,v)||(v===dispName(p)?'현재 이름과 같아요. 다른 이름을 입력해 주세요':null)); };
+      askName(`✏️ 이름 변경 · ${RENCOST.toLocaleString()}G`,'','✔ 변경',v=>{ const q=loadChar(id); if(!q)return; if((q.gold|0)<RENCOST)return; q.gold-=RENCOST; q.name=v; lsSet(charKey(q.id),JSON.stringify(packChar(q))); renderTitle(); toast(`이름을 '${v}'(으)로 바꿨어요 (-${RENCOST.toLocaleString()}G)`,'#ffd84a'); },id,v=>nameCheat(id,v)||(v===dispName(p)?'현재 이름과 같아요. 다른 이름을 입력해 주세요':null),{claim:id}); };
     m.querySelector('#cmDel').onclick=()=>modal(`<h3>🗑️ 삭제</h3><p style="margin:0 0 12px;font-size:14px">'${esc(dispName(p))}' (Lv ${p.lvl}) 캐릭터를 삭제할까요?<br>장비와 아이템도 함께 사라지며 되돌릴 수 없어요.</p><div class="row2"><button class="btn" id="dNo">취소</button><button class="btn primary" id="dYes">삭제</button></div>`,m2=>{ m2.querySelector('#dNo').onclick=closeModal; let dAsk=false; m2.querySelector('#dYes').onclick=()=>{ if(!dAsk){ dAsk=true; const y=m2.querySelector('#dYes'); y.textContent='⚠️ 정말 삭제 · 한 번 더 누르면 삭제'; y.style.background='#a62a22'; y.style.borderColor='#ff6a5a'; return; } deleteChar(id); closeModal(); renderTitle(); }; });
     m.querySelector('#cmX').onclick=closeModal; });
 }
