@@ -1097,7 +1097,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.1.0343</div>
+    <div class="ver" id="verT">v0.6.1.0344</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -5170,7 +5170,7 @@ function askCode(cb){
 }
 /* ===== 닉네임 전체 중복 방지: 서버(dd_name)에 이름을 예약해요. 다른 기기에서 만든 캐릭터와도 겹치지 않아요 =====
    claim_name(id,이름) → 'ok'(내 이름) / 'taken'(이미 다른 캐릭터가 씀). 이름 변경은 예전 이름을 풀고 새 이름을 잡고, 삭제하면 풀어 줘요 */
-const NAME_SRV=false;   /* 서버(dd_name)가 준비되면 true — supabase_name.sql 을 먼저 실행해야 해요 */
+const NAME_SRV=true;    /* 서버(dd_name)가 준비되면 true — supabase_name.sql 을 먼저 실행해야 해요 */
 async function nameClaim(id,name){ if(!NAME_SRV)return 'ok'; try{ const ac=new AbortController(), tm=setTimeout(()=>ac.abort(),8000);
     try{ const r=await fetch(SB_URL+'/rest/v1/rpc/claim_name',{method:'POST',headers:rkHead(),body:JSON.stringify({p_id:String(id).slice(0,40),p_name:name}),signal:ac.signal}); if(!r.ok)return 'net'; const v=await r.json(); return v==='ok'?'ok':v==='taken'?'taken':'bad'; }finally{ clearTimeout(tm); } }catch(e){ return 'net'; } }
 const nameRelList=()=>{ try{ return JSON.parse(lsGet('dkdef2.nmdel')||'[]'); }catch(e){ return []; } };
