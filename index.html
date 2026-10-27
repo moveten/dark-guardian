@@ -311,6 +311,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 @media(prefers-reduced-motion:reduce){.tcsb .cb{animation:none;opacity:.9}}
 .tmap .tsl{position:absolute;left:var(--x);top:var(--y);transform:translate(-50%,calc(-100% + 26px));padding:0;width:max-content;max-width:48%}
 .tmap .tbub{margin-bottom:-8px;z-index:1}
+.tmap .tbd,.tmap .tplot{zoom:.85}   /* 마을 건물 그림은 85%로 줄여 서로 겹치지 않게 해요 */
 .tmap .tbd svg{width:92px;height:112px}
 .tmap .tsl.e{transform:translate(-50%,-42%)}
 .tmap .tplot{margin-top:0;width:100px;height:74px;background:#0006}
@@ -1121,7 +1122,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.1.0348</div>
+    <div class="ver" id="verT">v0.6.1.0349</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -5466,7 +5467,7 @@ function casinoModal(){
 function renderTown(){ townUpTick(); const S=getStore(), now=Date.now(); let ch=false; { const L=getTown().lab; if((L.rf|0)>0){ townMsg=`🧪 그림자 연구소가 성벽 연구소로 바뀌었어요. 쓰셨던 🌑 그림자 조각 ${L.rf}개를 공유보관함으로 돌려드렸어요`; L.rf=0; saveTown(); } const M=getTown().mill; if((M.rf|0)>0){ townMsg=`✦ 각성 풍차의 건설·업그레이드가 골드로 바뀌었어요. 쓰셨던 ✦ 각성 그림자 조각 ${M.rf}개를 공유보관함으로 돌려드렸어요`; M.rf=0; saveTown(); } } for(const k of ['tw','al','mill'])if(townTick(k,now))ch=true; if(ch)saveTown();
   $('#itemPop').hidden=true; $('#ptsBar').hidden=true; $('#sheetTabs').hidden=true; $('#sheetT').innerHTML='🏘️ 마을';
   const b=$('#sheetB'); b.className='sbody town';
-  b.innerHTML=`<div class="tcur"><span>공유보관함</span><span>💰 ${(S.gold|0).toLocaleString('ko-KR')}</span><span>🌑 ${shardCount(S,'shard')}</span><span>✦ ${shardCount(S,'ashard')}</span></div>${townMsg?`<div class="tqnote">${esc(townMsg)}</div>`:''}<div class="tmap"><button class="tcsb" id="tCas" type="button" style="--x:45%;--y:62%" aria-label="달빛 도박장"><span class="tbd"><img class="cimg" src="img/town_casino.png" alt="" draggable="false" onerror="this.closest('.tcsb').classList.add('cbad')"><svg viewBox="0 0 140 130" preserveAspectRatio="xMidYMax meet"><use href="#tw-casino" width="140" height="130"/></svg></span><span class="tlb"><span class="tsb" style="background:#ff4fa8;color:#2a0a1c">🎰</span>달빛 도박장</span></button>${TOWN_FAM.map((f,i)=>{ const y=i?[69,72]:[26,25.5], ty=i?55:13; return `${townSlot(f.main,`--x:${i?29:30}%;--y:${y[0]}%`)}${townSlot(f.aux,`--x:${i?77:71}%;--y:${y[1]}%`)}`; }).join('')}</div><p class="meta" style="margin:0;font-size:12px;line-height:1.5">건물을 누르면 자세히 볼 수 있어요. 건설과 업그레이드에는 <b>공유보관함</b>의 조각을 써요 (그림자 연구소는 <b>골드</b>, 각성 풍차는 건설과 Lv.5까지 <b>골드</b>로 해요). 말풍선을 누르면 만든 것을 캐릭터 우편으로 받아요.</p>`;
+  b.innerHTML=`<div class="tcur"><span>공유보관함</span><span>💰 ${(S.gold|0).toLocaleString('ko-KR')}</span><span>🌑 ${shardCount(S,'shard')}</span><span>✦ ${shardCount(S,'ashard')}</span></div>${townMsg?`<div class="tqnote">${esc(townMsg)}</div>`:''}<div class="tmap"><button class="tcsb" id="tCas" type="button" style="--x:50%;--y:57%" aria-label="달빛 도박장"><span class="tbd"><img class="cimg" src="img/town_casino.png" alt="" draggable="false" onerror="this.closest('.tcsb').classList.add('cbad')"><svg viewBox="0 0 140 130" preserveAspectRatio="xMidYMax meet"><use href="#tw-casino" width="140" height="130"/></svg></span><span class="tlb"><span class="tsb" style="background:#ff4fa8;color:#2a0a1c">🎰</span>달빛 도박장</span></button>${TOWN_FAM.map((f,i)=>{ const y=i?[81,82]:[25,24]; return `${townSlot(f.main,`--x:${i?25:30}%;--y:${y[0]}%`)}${townSlot(f.aux,`--x:${i?76:72}%;--y:${y[1]}%`)}`; }).join('')}</div><p class="meta" style="margin:0;font-size:12px;line-height:1.5">건물을 누르면 자세히 볼 수 있어요. 건설과 업그레이드에는 <b>공유보관함</b>의 조각을 써요 (그림자 연구소는 <b>골드</b>, 각성 풍차는 건설과 Lv.5까지 <b>골드</b>로 해요). 말풍선을 누르면 만든 것을 캐릭터 우편으로 받아요.</p>`;
   townMsg=''; try{ window.__townFx&&window.__townFx.mount(b.querySelector('.tmap')); }catch(e){}
   { const tc=b.querySelector('#tCas'); if(tc)tc.onclick=()=>{ sfx('ui'); casinoModal(); }; }
   b.querySelectorAll('[data-tbub]').forEach(e=>e.onclick=()=>{ const k=e.dataset.tbub; if(TOWN_B[k].lab)labInfo(); else if(TOWN_B[k].stat&&!(getTown()[k].n|0))townInfo(k); else townPick(k); });
