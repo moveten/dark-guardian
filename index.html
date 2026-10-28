@@ -1137,7 +1137,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.1.0369</div>
+    <div class="ver" id="verT">v0.6.1.0370</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1874,7 +1874,7 @@ const lsDel=k=>{try{localStorage.removeItem(k)}catch(e){} if(clHook&&k.indexOf('
 /* ===== 마을: 계정 하나에 하나(모든 캐릭터 공용). 조각 계열마다 메인 건물(조각 생산) + 보조 건물(올스탯 / 물약). 건설·업그레이드 비용은 공유보관함의 조각으로만 냄 ===== */
 const townMainCap=lv=>TOWN_MAIN_CAP0+TOWN_MAIN_CAPUP*(Math.max(1,lv|0)-1);   /* 메인 건물: Lv.1 24개 → 레벨마다 +6 → Lv.5 48개 */
 const TOWN_KEY='dkdef2.town', TOWN_MAXLV=10, TOWN_BUILD=100, TOWN_GBUILD=50000, TOWN_GLV=5, TOWN_STAT=1, TOWN_MAIN_MAXLV=5, TOWN_MAIN_CAP0=24, TOWN_MAIN_CAPUP=6, TOWN_POT_CAP=20, TOWN_HOUR=3600000;
-const TOWN_B={tw:{n:'그림자 타워',sy:'tw-tower',mat:'shard',main:1,tower:1,e:'🌑'},lab:{n:'그림자 연구소',sy:'tw-lab',mat:'shard',lab:1,e:'🧪'},al:{n:'각성 제단',sy:'tw-altar',mat:'ashard',main:1,e:'✦'},mill:{n:'각성 풍차',sy:'tw-mill',mat:'ashard',pot:1,gold:1,stat:1,mill:1,e:'✦'}};
+const TOWN_B={tw:{n:'그림자 타워',sy:'tw-tower',mat:'shard',main:1,tower:1,e:'🌑'},lab:{n:'그림자 연구소',sy:'tw-lab',mat:'shard',lab:1,e:'🧪'},al:{n:'각성 제단',sy:'tw-altar',mat:'ashard',main:1,altar:1,e:'✦'},mill:{n:'각성 풍차',sy:'tw-mill',mat:'ashard',pot:1,gold:1,stat:1,mill:1,e:'✦'}};
 const TOWN_FAM=[{e:'🌑',nm:'그림자',mat:'shard',main:'tw',aux:'lab'},{e:'✦',nm:'각성',mat:'ashard',main:'al',aux:'mill'}];
 var TOWNC=null;
 function townLoad(){ let o=null; try{ o=JSON.parse(lsGet(TOWN_KEY)||'null'); }catch(e){} if(!o||typeof o!=='object')o={};
@@ -5404,10 +5404,13 @@ function millArt(lv){ const st=Math.max(1,Math.min(5,Math.ceil(lv/2))), [w,h,hx,
 const TW_ST=[[130,257],[164,309],[176,349],[216,393],[245,440]];
 function twArt(lv){ const st=Math.max(1,Math.min(5,lv|0)), [w,h]=TW_ST[st-1], f=n=>(n/3).toFixed(1);
   return `<img class="twimg" src="img/town_tower_${st}.png" alt="" draggable="false" style="width:${f(w)}px;height:${f(h)}px" onerror="this.closest('.tbd').classList.add('tbad')">`; }
+const AL_ST=[[124,118],[156,149],[175,180],[184,231],[199,296]];
+function alArt(lv){ const st=Math.max(1,Math.min(5,lv|0)), [w,h]=AL_ST[st-1], f=n=>(n/2).toFixed(1);
+  return `<img class="twimg" src="img/town_altar_${st}.png" alt="" draggable="false" style="width:${f(w)}px;height:${f(h)}px" onerror="this.closest('.tbd').classList.add('tbad')">`; }   /* 각성 제단 그림(img/town_altar_1~5.png), 없으면 기본 SVG */
 function townSlot(k,pos){ pos=pos||''; const B=getTown()[k], D=TOWN_B[k], lv=B.lv|0, tag=D.main?'<span class="tmn">메인</span>':'<span class="tsb">보조</span>';
   if(lv<1)return `<div class="tsl e" style="${pos}"><button class="tplot" data-tbld="${k}"><b>＋</b>건설<br><span style="color:#ffd34d">${D.lab?'💰 '+LAB_BUILD.toLocaleString('ko-KR'):D.gold?'💰 '+TOWN_GBUILD.toLocaleString('ko-KR'):D.e+' '+TOWN_BUILD}</span></button><div class="tlb">${tag}${D.n}</div></div>`;
   const b=townBub(k);
-  return `<div class="tsl" style="${pos}">${b?`<button class="tbub ${b.cls}" data-tbub="${k}">${b.tx}</button>`:''}<button class="tbd" data-tbld="${k}" aria-label="${D.n}">${D.mill?millArt(lv):D.tower?twArt(lv):D.lab?`<span class="labw${['a','b'].some(q=>((B[q]||{}).e||0)>0)?' busy':''}"><img class="labimg" src="img/town_lab.png" alt="" onerror="this.closest('.tbd').classList.add('lbad')"><span class="lfx" aria-hidden="true"><i class="lf-fl"></i><i class="lf-bb b1"></i><i class="lf-bb b2"></i><i class="lf-bb b3"></i><i class="lf-bb b4"></i><i class="lf-sm s1"></i><i class="lf-sm s2"></i><i class="lf-sm s3"></i><i class="lf-sm s4"></i><i class="lf-rn"></i><i class="lf-bk"></i><i class="lf-sp p1"></i><i class="lf-sp p2"></i><i class="lf-sp p3"></i></span></span>`:''}<svg${D.mill||D.lab||D.tower?' class="mfb"':''} viewBox="0 0 100 120" preserveAspectRatio="xMidYMax meet"><use href="#${D.sy}" width="100" height="120"/></svg></button><div class="tlb">${tag}${D.n} Lv.${lv}${B.u>0?` <span data-tul="${k}" style="color:#ffd34d">⏳ ${labLeft(B.u-Date.now())}</span>`:''}</div></div>`; }
+  return `<div class="tsl" style="${pos}">${b?`<button class="tbub ${b.cls}" data-tbub="${k}">${b.tx}</button>`:''}<button class="tbd" data-tbld="${k}" aria-label="${D.n}">${D.mill?millArt(lv):D.tower?twArt(lv):D.altar?alArt(lv):D.lab?`<span class="labw${['a','b'].some(q=>((B[q]||{}).e||0)>0)?' busy':''}"><img class="labimg" src="img/town_lab.png" alt="" onerror="this.closest('.tbd').classList.add('lbad')"><span class="lfx" aria-hidden="true"><i class="lf-fl"></i><i class="lf-bb b1"></i><i class="lf-bb b2"></i><i class="lf-bb b3"></i><i class="lf-bb b4"></i><i class="lf-sm s1"></i><i class="lf-sm s2"></i><i class="lf-sm s3"></i><i class="lf-sm s4"></i><i class="lf-rn"></i><i class="lf-bk"></i><i class="lf-sp p1"></i><i class="lf-sp p2"></i><i class="lf-sp p3"></i></span></span>`:''}<svg${D.mill||D.lab||D.tower||D.altar?' class="mfb"':''} viewBox="0 0 100 120" preserveAspectRatio="xMidYMax meet"><use href="#${D.sy}" width="100" height="120"/></svg></button><div class="tlb">${tag}${D.n} Lv.${lv}${B.u>0?` <span data-tul="${k}" style="color:#ffd34d">⏳ ${labLeft(B.u-Date.now())}</span>`:''}</div></div>`; }
 /* ===== 달빛 도박장 (슬롯머신): 한 판 100,000G(공유보관함 골드) → 결과를 먼저 정해 저장하고, 화면은 연출만 보여줘요 =====
    일반(99%): 절반은 조각(그림자/각성 반반, 1~20개) · 절반은 꽝(보상 없음)
    대박 조각 0.5%: 조각 100개 (7 7 7 + 폭죽) · 대박 골드 0.5%: 500,000G (💎 💎 💎 + 금화 비) */
