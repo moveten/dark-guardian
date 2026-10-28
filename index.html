@@ -1124,7 +1124,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.1.0357</div>
+    <div class="ver" id="verT">v0.6.1.0358</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3861,16 +3861,17 @@ function autoDir(){
 function autoDir0(){
   const ph=G.phase; if(ph==='win'||ph==='lose'||ph==='title'||ph==='lobby')return null;
   const toward=(x,y)=>{ const dx=x-me.x,dy=y-me.y,d=hyp(dx,dy); return d>1?[dx/d,dy/d]:null; };
-  for(const h of hazards){ if(h.k!=='lava')continue; const dx=me.x-h.x,dy=me.y-h.y,d=hyp(dx,dy); if(d<h.r*.95+6)return d>1?[dx/d,dy/d]:[1,0]; }   /* 피해를 주는 용암만 급히 벗어나요 (늪·얼음·모래는 느려질 뿐이라 그대로 싸워요) */
+  const clr=ph==='clear';   /* 우두머리 처치 뒤 전리품 줍기 단계: 무적이라 용암·체력 걱정 없이 전리품을 최대한 주워요 */
+  if(!clr)for(const h of hazards){ if(h.k!=='lava')continue; const dx=me.x-h.x,dy=me.y-h.y,d=hyp(dx,dy); if(d<h.r*.95+6)return d>1?[dx/d,dy/d]:[1,0]; }   /* 피해를 주는 용암만 급히 벗어나요 (늪·얼음·모래는 느려질 뿐이라 그대로 싸워요) */
   const hr=me.hp/me.D.maxHp, vd=hyp(me.x-hzX(),me.y-hzY()), fy=G.castle?VY+72:VY;   /* 성이 있으면 성 앞마당으로 돌아가요 */
-  if(hr<.28)autoRet=true; else if(hr>=.7)autoRet=false;
+  if(clr)autoRet=false; else if(hr<.28)autoRet=true; else if(hr>=.7)autoRet=false;
   if(autoRet)return vd<(G.castle?CAS_HR*.8:VR*.55)?null:lavaSteer(toward(VX,fy));
   const rg=atkRg(me), melee=meleeOf(me);
   const near=autoPickTgt(rg), nd=near?hyp(near.x-me.x,near.y-me.y)-near.r:1e9;
-  const full=me.inv.indexOf(null)<0; let loot=null,ld=650;
-  for(const g of ground){ if(g.carry||(full&&!autoSellOk(g.it))||inLava(g.x,g.y,10))continue; const d=hyp(g.x-me.x,g.y-me.y); if(d<ld){ld=d;loot=g;} }
+  const full=me.inv.indexOf(null)<0; let loot=null,ld=clr?1e9:650,ls=1e9;
+  for(const g of ground){ if(g.carry||(full&&!autoSellOk(g.it))||(!clr&&inLava(g.x,g.y,10)))continue; const d=hyp(g.x-me.x,g.y-me.y), sc=clr?d-(g.it.rar>=3?240:g.it.rar===2?120:0):d; if(clr?sc<ls:d<ld){ld=d;ls=sc;loot=g;} }   /* 줍기 단계엔 거리 제한 없이 전부 · 레어 이상을 조금 먼저 */
   const engaged=near&&nd<=rg+140;
-  if(loot&&(!engaged||ld<80)&&ld>24)return lavaSteer(toward(loot.x,loot.y));
+  if(loot&&(!engaged||ld<80)&&ld>24)return clr?toward(loot.x,loot.y):lavaSteer(toward(loot.x,loot.y));
   if(near){ const want=melee?Math.max(18,rg*.55):rg*.82;
     if(!melee&&nd<rg*.3){ const dx=me.x-near.x,dy=me.y-near.y,d=hyp(dx,dy); if(d>1)return lavaSteer([dx/d,dy/d]); }
     if(nd>want){
@@ -4879,9 +4880,9 @@ function enhModal(){
   const elig=me.inv.map((x,i)=>({x,i})).filter(o=>o.x&&!isShard(o.x)&&o.x!==it&&o.x.rar===it.rar&&!o.x.lock).sort((a,b)=>(a.x.ilvl|0)-(b.x.ilvl|0)||sellInfo(a.x).total-sellInfo(b.x).total||a.i-b.i); /* 레벨 오름차순 — 낮은 레벨부터 자동 선택 (잠그지 않은 강화 아이템도 똑같이 재료) */
   const sel=new Set(elig.slice(0,need).map(o=>o.i)); const matObj=new Map(elig.map(o=>[o.i,o.x]));
   const k2=1+.1*L, k1=1+.1*(L-1), b0=it.b0||{mn:it.mn,mx:it.mx,df:it.df,dm:it.dm,om:it.om};
-  const eff=it.slot==='amulet'?`올스탯 +${L-1} → <b style="color:#9fd18b">+${L}</b>`:it.slot==='ring'?(L>=10?`<b style="color:#9fd18b">모든 스킬 +1 달성!</b>`:`+10강 달성 시 모든 스킬 +1 (현재 +${L-1} → +${L})`):it.dm?`공격력 +${it.dm} → <b style="color:#9fd18b">+${Math.round(b0.dm*k2)}</b>`:(it.om&&it.df)?`방어력 ${it.df} → <b style="color:#9fd18b">${Math.round(b0.df*k2)}</b> · 마나 +${it.om} → <b style="color:#9fd18b">+${Math.round(b0.om*k2)}</b>`:it.om?`마나 +${it.om} → <b style="color:#9fd18b">+${Math.round(b0.om*k2)}</b>`:it.b0&&it.b0.mx||it.mx?`공격력 ${it.mn}–${it.mx} → <b style="color:#9fd18b">${Math.max(1,Math.round(b0.mn*k2))}–${Math.max(Math.max(1,Math.round(b0.mn*k2))+1,Math.round(b0.mx*k2))}</b>`:`방어력 ${it.df} → <b style="color:#9fd18b">${Math.round(b0.df*k2)}</b>`;
+  const eff=it.slot==='amulet'?`올스탯 +${L-1} → <b style="color:#9fd18b">+${L}</b>`:it.slot==='ring'?'':it.dm?`공격력 +${it.dm} → <b style="color:#9fd18b">+${Math.round(b0.dm*k2)}</b>`:(it.om&&it.df)?`방어력 ${it.df} → <b style="color:#9fd18b">${Math.round(b0.df*k2)}</b> · 마나 +${it.om} → <b style="color:#9fd18b">+${Math.round(b0.om*k2)}</b>`:it.om?`마나 +${it.om} → <b style="color:#9fd18b">+${Math.round(b0.om*k2)}</b>`:it.b0&&it.b0.mx||it.mx?`공격력 ${it.mn}–${it.mx} → <b style="color:#9fd18b">${Math.max(1,Math.round(b0.mn*k2))}–${Math.max(Math.max(1,Math.round(b0.mn*k2))+1,Math.round(b0.mx*k2))}</b>`:`방어력 ${it.df} → <b style="color:#9fd18b">${Math.round(b0.df*k2)}</b>`;
   const rows=elig.map(o=>`<label style="display:flex;gap:8px;align-items:center;padding:0 6px;height:36px;box-sizing:border-box;flex:none;border:1px solid var(--line2);border-radius:7px;font-size:12.5px"><input type="checkbox" data-m="${o.i}" ${sel.has(o.i)?'checked':''}><span style="color:${RARC[o.x.rar]};flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${o.x.enh>0?`<b style="color:#ffb259">+${o.x.enh}</b> `:''}${esc(o.x.name)}</span><span class="meta">${slotLbl(o.x)} · Lv ${o.x.ilvl}</span></label>`).join('');
-  modal(`<h3>⚒ 강화 +${L-1} → +${L}</h3><div class="meta" style="margin:0 0 6px"><span style="color:${RARC[it.rar]};font-weight:700">${esc(dn(it))}</span> · ${eff}<br>${it.slot==='amulet'?'강화 1회마다 힘·민첩·체력·에너지가 +1씩 올라요.':it.slot==='ring'?'+10강을 달성하면 모든 스킬 레벨이 +1 돼요.':'기본 능력(공격력/방어력)이 강화 1회마다 원래 값의 10%씩 오르고, 다른 옵션은 그대로예요.'}</div>
+  modal(`<h3>⚒ 강화 +${L-1} → +${L}</h3><div class="meta" style="margin:0 0 6px"><span style="color:${RARC[it.rar]};font-weight:700">${esc(dn(it))}</span>${eff?` · ${eff}`:''}<br>${it.slot==='amulet'?'강화 1회마다 힘·민첩·체력·에너지가 +1씩 올라요.':it.slot==='ring'?(L>=10?'이번 강화에 성공하면 <b style="color:#9fd18b">+10강 달성!</b> 모든 스킬 레벨이 +1 돼요.':`+10강을 달성하면 모든 스킬 레벨이 +1 돼요. (현재 +${L-1}강)`):'강화 1회마다 공격력/방어력이 10%씩 올라요.'}</div>
    <div style="font-size:13px;line-height:1.7">성공 확률 <b style="color:${rate>=80?'#9fd18b':rate>=50?'#ffd84a':'#ff8a7a'}">${rate}%</b> · 필요 골드 <b id="enC" style="color:#ffd84a">${cost.toLocaleString()}G</b> <span class="meta">(보유 ${me.gold.toLocaleString()}G)</span>${(it.ef|0)>=2?` <b style="color:#ff8a7a;white-space:nowrap">· 연속 실패 ${it.ef}회</b>`:''}<br>재료 : 같은 <b style="color:${RARC[it.rar]}">${RARN[it.rar]}</b> 등급 아이템 <b>${need}개</b> <span id="enSel" class="meta"></span></div>
    <div class="enlist" style="display:grid;grid-auto-rows:36px;align-content:start;gap:4px;max-height:200px;overflow:auto;margin:8px 0;touch-action:pan-y">${rows||'<div class="meta">재료로 쓸 수 있는 아이템이 없어요 (🔒잠근 아이템 제외)</div>'}</div>
    <div class="meta enn" style="margin-bottom:8px">실패하면 재료와 골드만 사라지고 강화 단계는 그대로예요.</div>
@@ -5052,12 +5053,17 @@ function carFx(box){ const mid=box.scrollLeft+box.clientWidth/2; let best=null,b
   return best; }
 function carDots(){ const box=$('#charList'), d=$('#cDots'); if(!box||!d)return; const cs=[...box.querySelectorAll('.cc')]; if(d.children.length!==cs.length)d.innerHTML=cs.map(()=>'<i></i>').join(''); cs.forEach((e,i)=>d.children[i].classList.toggle('on',e.getAttribute('aria-current')==='true')); }
 function buildCarousel(chars){
-  const box=$('#charList'); box.innerHTML='';
-  for(const c of chars){ const el=document.createElement('div'); el.className='cc'; el.dataset.id=c.id; el.setAttribute('role','button');
-    el.innerHTML=`<div class="cpic ${c.cls}"><span class="cem">${clsIc(c.cls,56)}</span><img src="img/hero_${c.cls}.png" alt="" onload="this.previousElementSibling.style.display='none'" onerror="this.remove()"></div><b>${esc(dispName(c))}</b><span class="cl">${CLASSES[c.cls].n} · <em>Lv ${c.lvl}</em></span><span class="cl">💰 ${(c.gold|0).toLocaleString()}</span><span class="cpt">${c.statPts+c.skillPts?`포인트 ${c.statPts+c.skillPts}`:'&nbsp;'}</span>`;
+  const box=$('#charList');
+  const tail=c=>`<b>${esc(dispName(c))}</b><span class="cl">${CLASSES[c.cls].n} · <em>Lv ${c.lvl}</em></span><span class="cl">💰 ${(c.gold|0).toLocaleString()}</span><span class="cpt">${c.statPts+c.skillPts?`포인트 ${c.statPts+c.skillPts}`:'&nbsp;'}</span>`;
+  /* 캐릭터 구성이 그대로면(마을·가방·보관함을 닫을 때 등) 카드를 다시 만들지 않고 글자만 바꿔요 → 그림이 다시 로드되며 아이콘·자세가 번쩍이는 현상 방지 */
+  const old=[...box.querySelectorAll('.cc:not(.add)')], same=old.length>0&&old.length===chars.length&&old.every((e,i)=>e.dataset.id===chars[i].id&&e.querySelector('.cpic')&&e.querySelector('.cpic').classList.contains(chars[i].cls))&&box.querySelectorAll('.cc.add').length===(chars.length<MAXCHAR?1:0);
+  if(same){ old.forEach((e,i)=>{ const pic=e.querySelector('.cpic'); while(pic.nextSibling)pic.nextSibling.remove(); pic.insertAdjacentHTML('afterend',tail(chars[i])); }); }
+  else box.innerHTML='';
+  if(!same)for(const c of chars){ const el=document.createElement('div'); el.className='cc'; el.dataset.id=c.id; el.setAttribute('role','button');
+    el.innerHTML=`<div class="cpic ${c.cls}"><span class="cem">${clsIc(c.cls,56)}</span><img src="img/hero_${c.cls}.png" alt="" onload="this.previousElementSibling.style.display='none'" onerror="this.remove()"></div>`+tail(c);
     el.onclick=()=>{ if(el.getAttribute('aria-current')==='true'&&c.id===selId) charMenu(c.id); else if(carWide()) carPick(box,el); else carCenter2(box,el); };
     box.appendChild(el); }
-  if(chars.length<MAXCHAR){ const el=document.createElement('div'); el.className='cc add'; el.dataset.id=''; el.setAttribute('role','button'); el.innerHTML='<span class="plus2">＋</span><b>새 캐릭터</b><small>'+chars.length+' / '+MAXCHAR+'</small>'; el.onclick=()=>{ if(el.getAttribute('aria-current')==='true'||carWide()) showNew(true); else carCenter2(box,el); }; box.appendChild(el); }
+  if(!same&&chars.length<MAXCHAR){ const el=document.createElement('div'); el.className='cc add'; el.dataset.id=''; el.setAttribute('role','button'); el.innerHTML='<span class="plus2">＋</span><b>새 캐릭터</b><small>'+chars.length+' / '+MAXCHAR+'</small>'; el.onclick=()=>{ if(el.getAttribute('aria-current')==='true'||carWide()) showNew(true); else carCenter2(box,el); }; box.appendChild(el); }
   carLock=Date.now()+400;
   const ctr=()=>{ carCenter(box,false); const b=carWide()?(box.querySelector(`.cc[data-id="${selId}"]`)||carFx(box)):carFx(box); box.querySelectorAll('.cc').forEach(e=>e.setAttribute('aria-current',e===b?'true':'false')); carDots(); };
   ctr(); requestAnimationFrame(ctr); setTimeout(ctr,120);
