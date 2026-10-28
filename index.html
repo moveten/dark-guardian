@@ -1124,7 +1124,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.1.0358</div>
+    <div class="ver" id="verT">v0.6.1.0359</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3637,6 +3637,8 @@ $('#toasts').addEventListener('scroll',()=>{ if(alOpen){ clearTimeout(alCl); alC
 function toast(t,col,kind,keep){ if(kind&&!hudOn(kind))return; alPush(t,col,keep); }
 
 /* ================= AUDIO ================= */
+/* mp3 파일 사용 스위치: false면 audio/ 폴더의 mp3(효과음 30개·배경음 3개)를 아예 요청하지 않고 자동 생성 소리만 써요 → 콘솔 404 오류 없음. 파일을 넣을 땐 true로 */
+const AUDIO_FILES=false;
 const AUD=(()=>{
   let ac=null,master=null,sfxG=null,musG=null,noiseBuf=null;
   const SFXKEYS=['swing','bolt','hit','crit','kill','boss','hurt','skill','boom','slam','pick','coin','potion','lvl','revive','ui','win','lose','vmagic','block','cast','fire','ice','zap','holy','aura','auraoff','shout','tele','rare'], samples={}; let mood='calm';
@@ -3650,7 +3652,7 @@ const AUD=(()=>{
       musG=ac.createGain(); musG.gain.value=.22; musG.connect(master);
       const len=ac.sampleRate*1.8, ir=ac.createBuffer(2,len,ac.sampleRate); for(let c=0;c<2;c++){const d=ir.getChannelData(c); for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.6);}
       const cv=ac.createConvolver(); cv.buffer=ir; const rg=ac.createGain(); rg.gain.value=.32; cv.connect(rg); rg.connect(master); sfxG.connect(cv); musG.connect(cv);
-      SFXKEYS.forEach(k=>{ fetch('audio/sfx/'+k+'.mp3').then(r=>{ if(!r.ok)throw 0; return r.arrayBuffer(); }).then(b=>ac.decodeAudioData(b)).then(buf=>{samples[k]=buf;}).catch(()=>{}); });
+      if(AUDIO_FILES)SFXKEYS.forEach(k=>{ fetch('audio/sfx/'+k+'.mp3').then(r=>{ if(!r.ok)throw 0; return r.arrayBuffer(); }).then(b=>ac.decodeAudioData(b)).then(buf=>{samples[k]=buf;}).catch(()=>{}); });
       noiseBuf=ac.createBuffer(1,ac.sampleRate*.5,ac.sampleRate); const d=noiseBuf.getChannelData(0); for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
       if(st.mus)musicStart();
     }catch(e){ac=null;}
@@ -3731,7 +3733,7 @@ const AUD=(()=>{
       procT+=sd; sIdx++;
     }
   }
-  function pickFile(){ for(const m of ORDER[mood]){ if(files[m]===false)continue; if(!files[m]){ const a=new Audio(SRC[m]); a.loop=true; a.volume=.5; a.preload='auto'; files[m]=a; a.addEventListener('error',()=>{ files[m]=false; musicApply(); }); } return files[m]; } return null; }
+  function pickFile(){ if(!AUDIO_FILES)return null; for(const m of ORDER[mood]){ if(files[m]===false)continue; if(!files[m]){ const a=new Audio(SRC[m]); a.loop=true; a.volume=.5; a.preload='auto'; files[m]=a; a.addEventListener('error',()=>{ files[m]=false; musicApply(); }); } return files[m]; } return null; }
   function musicApply(){
     if(!ac)return; const f=st.mus?pickFile():null;
     if(curFile&&curFile!==f){ try{curFile.pause();}catch(e){} }
