@@ -1072,6 +1072,15 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 /* 마을 연출(Phaser) 레이어: 건물 버튼 뒤, 화면 합성(screen)이라 검은 부분은 투명하게 보임 */
 .tmap .tfx{position:absolute;inset:0;z-index:0;pointer-events:none;mix-blend-mode:screen;overflow:hidden}
 .tmap .tfx canvas{display:block}
+/* 소리 설정: 효과음·음성·음악 볼륨 슬라이더 */
+.vol{width:100%;display:flex;flex-direction:column;gap:8px;margin:2px 0 4px}
+.vol .vr{display:flex;align-items:center;gap:10px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:6px 10px 6px 6px}
+.vol .vb{flex:none;width:38px;height:38px;border-radius:10px;border:1px solid var(--line2);background:#120d0a;color:var(--ink);font-size:18px;cursor:pointer;padding:0}
+.vol .vb.off{opacity:.5}
+.vol .vn{flex:none;width:44px;font-size:13px;color:var(--ink);font-weight:700}
+.vol input[type=range]{flex:1;min-width:0;height:28px;accent-color:var(--gold);background:transparent;margin:0}
+.vol .vp{flex:none;width:40px;text-align:right;font-size:12.5px;color:var(--mute);font-variant-numeric:tabular-nums}
+.vol .vr.off input,.vol .vr.off .vn,.vol .vr.off .vp{opacity:.45}
 </style>
 
 <nav id="dock" hidden>
@@ -1137,7 +1146,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.1.0377</div>
+    <div class="ver" id="verT">v0.6.1.0378</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3662,15 +3671,16 @@ const AUDIO_FILES=false;
 const AUD=(()=>{
   let ac=null,master=null,sfxG=null,musG=null,noiseBuf=null,voxG=null;
   const SFXKEYS=['swing','bolt','hit','crit','kill','boss','hurt','skill','boom','slam','pick','coin','potion','lvl','revive','ui','win','lose','vmagic','block','cast','fire','ice','zap','holy','aura','auraoff','shout','tele','rare'], samples={}; let mood='calm';
-  const st={sfx:lsGet('dkdef2.sfx')!=='0',mus:lsGet('dkdef2.mus')!=='0',vib:lsGet('dkdef2.vib')!=='0'};
+  const vget=k=>{ const v=parseInt(lsGet(k)); return isNaN(v)?100:Math.max(0,Math.min(100,v)); };
+  const st={sfx:lsGet('dkdef2.sfx')!=='0',mus:lsGet('dkdef2.mus')!=='0',vib:lsGet('dkdef2.vib')!=='0',vo:lsGet('dkdef2.vo')!=='0',vs:vget('dkdef2.vs'),vm:vget('dkdef2.vm'),vv:vget('dkdef2.vv')};   /* 효과음·음악·음성 볼륨(0~100%) · 음성 켜짐 */
   function init(){
     if(ac){ if(ac.state==='suspended')ac.resume(); return; }
     try{
       ac=new (window.AudioContext||window.webkitAudioContext)();
       master=ac.createGain(); master.gain.value=.9; master.connect(ac.destination);
-      sfxG=ac.createGain(); sfxG.gain.value=.7; sfxG.connect(master);
-      musG=ac.createGain(); musG.gain.value=.22; musG.connect(master);
-      voxG=ac.createGain(); voxG.gain.value=1; voxG.connect(master);   /* 주인공 음성: 잔향 없이 그대로 */
+      sfxG=ac.createGain(); sfxG.gain.value=.7*st.vs/100; sfxG.connect(master);
+      musG=ac.createGain(); musG.gain.value=.22*st.vm/100; musG.connect(master);
+      voxG=ac.createGain(); voxG.gain.value=st.vv/100; voxG.connect(master);   /* 주인공 음성: 잔향 없이 그대로 */
       const len=ac.sampleRate*1.8, ir=ac.createBuffer(2,len,ac.sampleRate); for(let c=0;c<2;c++){const d=ir.getChannelData(c); for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.6);}
       const cv=ac.createConvolver(); cv.buffer=ir; const rg=ac.createGain(); rg.gain.value=.32; cv.connect(rg); rg.connect(master); sfxG.connect(cv); musG.connect(cv);
       if(AUDIO_FILES)SFXKEYS.forEach(k=>{ fetch('audio/sfx/'+k+'.mp3').then(r=>{ if(!r.ok)throw 0; return r.arrayBuffer(); }).then(b=>ac.decodeAudioData(b)).then(buf=>{samples[k]=buf;}).catch(()=>{}); });
@@ -3768,18 +3778,20 @@ const AUD=(()=>{
   function setMood(m){ if(m===mood)return; mood=m; if(ac&&st.mus)musicApply(); }
   function setSfx(v){st.sfx=v; lsSet('dkdef2.sfx',v?'1':'0'); if(v){init(); sfx('ui');}}
   function setMus(v){st.mus=v; lsSet('dkdef2.mus',v?'1':'0'); if(v){init(); musicStart();} else musicStop();}
+  function setVol(k,v){ v=Math.max(0,Math.min(100,v|0)); st[k]=v; lsSet({vs:'dkdef2.vs',vm:'dkdef2.vm',vv:'dkdef2.vv'}[k],String(v)); if(ac){ if(k==='vs')sfxG.gain.value=.7*v/100; else if(k==='vm')musG.gain.value=.22*v/100; else voxG.gain.value=v/100; } }
+  function setVoice(v){ st.vo=v; lsSet('dkdef2.vo',v?'1':'0'); if(!v&&voxSrc){ try{ voxSrc.stop(); }catch(e){} } }
   function setVib(v){st.vib=v; lsSet('dkdef2.vib',v?'1':'0'); if(v)vib(30,1);}
   /* 주인공 음성(audio/voice/<직업>_<순간>_<번호>.mp3): 파일이 있는 직업(VOXC)만 나오고, 없는 파일은 조용히 건너뜀. 겹쳐 말하지 않고(궁극기·사망·부활은 끊고 말함) 순간마다 재사용 대기가 있음 */
   const VOXC=['war','necro'], VOXN=['ult_1','ult_2','skill_1','skill_2','hurt_1','low_1','die_1','revive_1','lvl_1','start_1','win_1'], vox={}, voxLoad={}, voxCd={}; let voxEnd=0, voxSrc=null, voxLast='';
   function voicePre(cls){ if(!ac||!VOXC.includes(cls)||voxLoad[cls])return; voxLoad[cls]=1;
     VOXN.forEach(n=>{ fetch('audio/voice/'+cls+'_'+n+'.mp3').then(r=>{ if(!r.ok)throw 0; return r.arrayBuffer(); }).then(b=>ac.decodeAudioData(b)).then(buf=>{ vox[cls+'_'+n]=buf; }).catch(()=>{}); }); }
   function voice(cls,name,cd,force){
-    if(!st.sfx||!ac||!VOXC.includes(cls))return; voicePre(cls); const now=ac.currentTime;
+    if(!st.sfx||!st.vo||!st.vv||!ac||!VOXC.includes(cls))return; voicePre(cls); const now=ac.currentTime;
     if(!force&&now<voxEnd)return; if(voxCd[name]&&now<voxCd[name])return;
     let key=cls+'_'+name+(/_\d$/.test(name)?'':'_1'); if(name==='ult'){ const c=[1,2].map(i=>cls+'_ult_'+i).filter(k=>vox[k]); if(!c.length)return; key=c.length>1&&c[0]===voxLast?c[1]:c[Math.random()<.5?0:c.length-1]; }
     const buf=vox[key]; if(!buf)return; voxLast=key; if(voxSrc){ try{ voxSrc.stop(); }catch(e){} }
     const n=ac.createBufferSource(); n.buffer=buf; n.connect(voxG); n.start(); voxSrc=n; voxEnd=now+buf.duration+.12; voxCd[name]=cd?now+cd:0; }
-  return {init,sfx,st,setSfx,setMus,setVib,setMood,voice,voicePre};
+  return {init,sfx,st,setSfx,setMus,setVib,setVol,setVoice,setMood,voice,voicePre};
 })();
 const sfx=(k,pm,cl)=>AUD.sfx(k,pm,cl);
 const voice=(n,cd,f)=>{ if(me&&me.cls)AUD.voice(me.cls,n,cd,f); };
@@ -3789,8 +3801,10 @@ function voiceSkill(key){ const e=me&&VSK[me.cls]&&VSK[me.cls][key]; if(!e)retur
 function voiceHurt(d){ if(!me||me.dead||!(me.hp>0))return; const mx=me.D.maxHp; if(me.hp/mx<.25)voice('low',30); else if(d>=mx*.12)voice('hurt',7); }
 /* 진동(안드로이드 등 지원 기기만): 치명타·정예·보스 처치 때 짧게. 0.25초에 한 번만 */
 let vibT=0; function vib(ms,force){ if(!AUD.st.vib||!navigator.vibrate)return; const n=performance.now(); if(!force&&n-vibT<250)return; vibT=n; try{ navigator.vibrate(ms); }catch(e){} }
-function sndBtns(){ return `<button class="btn sm" data-snd="sfx">${AUD.st.sfx?'🔊 효과음 켜짐':'🔇 효과음 꺼짐'}</button><button class="btn sm" data-snd="mus">${AUD.st.mus?'🎵 음악 켜짐':'🎵 음악 꺼짐'}</button>${navigator.vibrate?`<button class="btn sm" data-snd="vib">${AUD.st.vib?'📳 진동 켜짐':'📳 진동 꺼짐'}</button>`:''}`; }
-function bindSnd(root){ root.querySelectorAll('[data-snd]').forEach(b=>b.onclick=()=>{ if(b.dataset.snd==='sfx')AUD.setSfx(!AUD.st.sfx); else if(b.dataset.snd==='vib')AUD.setVib(!AUD.st.vib); else AUD.setMus(!AUD.st.mus); root.innerHTML=sndBtns(); bindSnd(root); }); }
+function sndBtns(){ const S=AUD.st, row=(t,k,n,i0,i1)=>{ const on=t==='voice'?S.vo:S[t]; return `<div class="vr${on?'':' off'}"><button class="vb${on?'':' off'}" data-snd="${t}" aria-label="${n} 켜기/끄기">${on?i0:i1}</button><span class="vn">${n}</span><input type="range" min="0" max="100" step="5" value="${S[k]}" data-vol="${k}" aria-label="${n} 볼륨"><span class="vp">${S[k]}%</span></div>`; };
+  return `<div class="vol">${row('sfx','vs','효과음','🔊','🔇')}${row('voice','vv','음성','🗣️','🤐')}${row('mus','vm','음악','🎵','🎵')}${navigator.vibrate?`<button class="btn sm" data-snd="vib">${S.vib?'📳 진동 켜짐':'📳 진동 꺼짐'}</button>`:''}</div>`; }
+function bindSnd(root){ root.querySelectorAll('[data-snd]').forEach(b=>b.onclick=()=>{ const t=b.dataset.snd; if(t==='sfx')AUD.setSfx(!AUD.st.sfx); else if(t==='voice')AUD.setVoice(!AUD.st.vo); else if(t==='vib')AUD.setVib(!AUD.st.vib); else AUD.setMus(!AUD.st.mus); root.innerHTML=sndBtns(); bindSnd(root); });
+  root.querySelectorAll('[data-vol]').forEach(r=>{ r.oninput=()=>{ AUD.setVol(r.dataset.vol,+r.value); const p=r.parentNode.querySelector('.vp'); if(p)p.textContent=r.value+'%'; }; r.onchange=()=>{ if(r.dataset.vol==='vs')AUD.sfx('ui'); }; }); }
 document.addEventListener('pointerdown',()=>AUD.init(),{passive:true});
 
 /* ================= INPUT ================= */
