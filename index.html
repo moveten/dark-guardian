@@ -1076,7 +1076,9 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 .vol{width:100%;display:flex;flex-direction:column;gap:8px;margin:2px 0 4px}
 .vol .vr{display:flex;align-items:center;gap:10px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:6px 10px 6px 6px}
 .vol .vb{flex:none;width:38px;height:38px;border-radius:10px;border:1px solid var(--line2);background:#120d0a;color:var(--ink);font-size:18px;cursor:pointer;padding:0}
-.vol .vb.off{opacity:.5}
+.vol .vb.off{position:relative;color:#7d6f60}
+.vol .vb.off::after{content:'';position:absolute;inset:5px;border-radius:50%;border:3px solid #e0463a;box-sizing:border-box;background:linear-gradient(to top right,transparent calc(50% - 1.7px),#e0463a calc(50% - 1.7px),#e0463a calc(50% + 1.7px),transparent calc(50% + 1.7px));box-shadow:0 0 6px rgba(224,70,58,.45)}   /* 꺼짐: 빨간 원+사선 */
+.vol input[type=range]:disabled{cursor:not-allowed}
 .vol .vn{flex:none;width:44px;font-size:13px;color:var(--ink);font-weight:700}
 .vol input[type=range]{flex:1;min-width:0;height:28px;accent-color:var(--gold);background:transparent;margin:0}
 .vol .vp{flex:none;width:40px;text-align:right;font-size:12.5px;color:var(--mute);font-variant-numeric:tabular-nums}
@@ -1146,7 +1148,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.1.0382</div>
+    <div class="ver" id="verT">v0.6.1.0383</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3801,7 +3803,7 @@ function voiceSkill(key,cd){ if(key==='bearform'&&me&&me.form)return; /* 곰에�
 function voiceHurt(d){ if(!me||me.dead||!(me.hp>0))return; const mx=me.D.maxHp; if(me.hp/mx<.25)voice('low',30); else if(d>=mx*.12)voice('hurt',7); }
 /* 진동(안드로이드 등 지원 기기만): 치명타·정예·보스 처치 때 짧게. 0.25초에 한 번만 */
 let vibT=0; function vib(ms,force){ if(!AUD.st.vib||!navigator.vibrate)return; const n=performance.now(); if(!force&&n-vibT<250)return; vibT=n; try{ navigator.vibrate(ms); }catch(e){} }
-function sndBtns(){ const S=AUD.st, row=(t,k,n,i0,i1)=>{ const on=t==='voice'?S.vo:S[t]; return `<div class="vr${on?'':' off'}"><button class="vb${on?'':' off'}" data-snd="${t}" aria-label="${n} 켜기/끄기">${on?i0:i1}</button><span class="vn">${n}</span><input type="range" min="0" max="100" step="5" value="${S[k]}" data-vol="${k}" aria-label="${n} 볼륨"><span class="vp">${S[k]}%</span></div>`; };
+function sndBtns(){ const S=AUD.st, row=(t,k,n,i0,i1)=>{ const on=t==='voice'?S.vo:S[t]; return `<div class="vr${on?'':' off'}"><button class="vb${on?'':' off'}" data-snd="${t}" aria-label="${n} 켜기/끄기">${on?i0:i1}</button><span class="vn">${n}</span><input type="range" min="0" max="100" step="5" value="${S[k]}" data-vol="${k}"${on?'':' disabled'} aria-label="${n} 볼륨"><span class="vp">${S[k]}%</span></div>`; };
   return `<div class="vol">${row('sfx','vs','효과음','🔊','🔇')}${row('voice','vv','음성','🗣️','🤐')}${row('mus','vm','음악','🎵','🎵')}${navigator.vibrate?`<button class="btn sm" data-snd="vib">${S.vib?'📳 진동 켜짐':'📳 진동 꺼짐'}</button>`:''}</div>`; }
 function bindSnd(root){ root.querySelectorAll('[data-snd]').forEach(b=>b.onclick=()=>{ const t=b.dataset.snd; if(t==='sfx')AUD.setSfx(!AUD.st.sfx); else if(t==='voice')AUD.setVoice(!AUD.st.vo); else if(t==='vib')AUD.setVib(!AUD.st.vib); else AUD.setMus(!AUD.st.mus); root.innerHTML=sndBtns(); bindSnd(root); });
   root.querySelectorAll('[data-vol]').forEach(r=>{ r.oninput=()=>{ AUD.setVol(r.dataset.vol,+r.value); const p=r.parentNode.querySelector('.vp'); if(p)p.textContent=r.value+'%'; }; r.onchange=()=>{ if(r.dataset.vol==='vs')AUD.sfx('ui'); }; }); }
