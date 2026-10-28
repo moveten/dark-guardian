@@ -1137,7 +1137,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.1.0373</div>
+    <div class="ver" id="verT">v0.6.1.0374</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -4757,7 +4757,21 @@ function cpSkillDps(p,D){ const list=CPSK[p.cls]; if(!list||!p.skills)return 0; 
   const zl=p.cls==='pal'?skLv(pp,'zeal'):0, zm=zl?1+(15+5*zl)/100:1; let sum=0;
   for(const [k,f,cd,t] of list){ const l=skLv(pp,k); if(l<1)continue; let v=f(l); if(t==='p')v=v*pMul+(p.cls==='pal'&&k==='smite'?8+7*l:0); else if(t==='m')v=v*sMul/(1+D.ene*ENEM+D.dmgPct/100)*(1+D.ene*ENEM)*(1+(D.sm||0)/100); else v*=sMul; sum+=v*zm/Math.max(1,cd*(1-(D.cdr||0))); }
   return sum*CPSKW*(CPCW[p.cls]||1); }
-function calcCP(p){ const D=derive(p); let dps=((D.wmn+D.wmx)/2+D.dmg)*(1+(D.str+D.dmgPct)/100)/D.atkInt; if(p.cls==='sorc'||p.cls==='necro')dps*=1+D.ene/150; dps+=cpSkillDps(p,D); return Math.round(dps*8+D.maxHp*.6+D.maxMp*.2+D.def*3+D.blk*8+D.crit*5+D.ms*6+D.ls*10+(D.dr||0)*300+(D.cdr||0)*150); }
+/* 전투력 버프 반영(A안): 광란·영혼 정령·광폭화의 '피해·공격속도'를 (지속시간÷쿨타임)만큼 평균내서 CPBW(50%)만 반영, 광란·포효의 받는 피해 감소는 생명력 항목에 반영.
+   광란 충격파·포효 타격은 스킬 항목으로 더함. 드루이드는 비전투(가방·랭킹)에서도 곰 변신 기준으로 계산 */
+const CPBW=.5, cpUp=(dur,cd,D)=>Math.min(1,dur/Math.max(1,cd*(1-(D.cdr||0))));
+function calcCP(p0){ let p=p0; if(p.cls==='druid'&&(p.skills&&p.skills.bearform|0)>0&&p.form!=='bear')p={...p0,form:'bear'};
+  const D=derive(p), pp={...p,D}, wav=(D.wmn+D.wmx)/2, pool=1+(D.str+D.dmgPct)/100, bear=p.form==='bear', cdr=D.cdr||0;
+  let basic=((wav+D.dmg)*pool)/D.atkInt; if(p.cls==='sorc'||p.cls==='necro')basic*=1+D.ene/150;
+  let sk=cpSkillDps(p,D), extra=0, offAdd=0, iasAdd=0, drAdd=0;
+  if(p.cls==='druid'){ const pMul=(wav+D.dmg)*pool, lf=bear?skLv(pp,'fury'):0, lr=bear?skLv(pp,'roar'):0, ls=skLv(pp,'spirit');
+    if(lf){ extra+=8*(1.2+.15*lf)*pMul/Math.max(1,30*(1-cdr)); const u=cpUp(8,30,D); offAdd+=u*(10+2*lf)/100; drAdd+=u*Math.min(.5,(25+1.2*lf)/100); }
+    if(lr){ extra+=(3+Math.floor(lr/3))*(.6+.08*lr)*pMul/Math.max(1,18*(1-cdr)); drAdd+=cpUp(6+Math.floor(lr/4),18,D)*Math.min(.45,(20+1.5*lr)/100); }
+    extra*=CPSKW*(CPCW.druid);
+    if(ls){ const u=cpUp((14+.4*ls)*(1+.02*skLv(pp,'communion')),36,D); offAdd+=u*(10+1.5*ls)/100; iasAdd+=u*(8+ls)/100; } }
+  else if(p.cls==='war'){ const lb=skLv(pp,'berserk'); if(lb){ const u=cpUp(8,32,D); offAdd+=u*(30+5*lb)/100; iasAdd+=u*.4; } }
+  const dps=(basic*(1+CPBW*iasAdd)+sk)*(1+CPBW*offAdd/pool)+extra;
+  return Math.round(dps*8+D.maxHp*.6*(1+CPBW*drAdd)+D.maxMp*.2+D.def*3+D.blk*8+D.crit*5+D.ms*6+D.ls*10+(D.dr||0)*300+(D.cdr||0)*150); }
 let stT=null;
 function sheetToast(msg,col){ const e=$('#stoast'); e.textContent=msg; e.style.color=col||'#eadfcc'; e.classList.add('on'); clearTimeout(stT); stT=setTimeout(()=>e.classList.remove('on'),2600); }
 function cpMsg(a,b){ const d=b-a; sheetToast(`전투력 ${a.toLocaleString()} → ${b.toLocaleString()} (${d>0?'▲ +':d<0?'▼ ':'± '}${d})`,d>0?'#9fd18b':d<0?'#ff8a7a':'#eadfcc'); }
