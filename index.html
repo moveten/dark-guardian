@@ -1146,7 +1146,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.1.0378</div>
+    <div class="ver" id="verT">v0.6.1.0379</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3070,7 +3070,7 @@ function tryUse(key,hold){
   if(s.form){ formToggle(s,lv,hold); return; }
   if(me.cls==='druid'&&!druidCan(key,hold))return;
   if(key==='fusion'&&me.cls==='necro'&&fusionOn()){ if(!hold)splitFusion(fusionOn(),'manual'); return; }
-  if(s.aura){ if(hold)return; if((me.cds[key]||0)>0)return; me.cds[key]=.3; me.aura=me.aura===key?0:key; sfx(me.aura?'aura':'auraoff'); toast(me.aura?`${s.n} 켜짐`:`${s.n} 꺼짐`); uiDirty=true; return; }
+  if(s.aura){ if(hold)return; if((me.cds[key]||0)>0)return; me.cds[key]=.3; me.aura=me.aura===key?0:key; sfx(me.aura?'aura':'auraoff'); if(me.aura)voiceSkill(key,10); toast(me.aura?`${s.n} 켜짐`:`${s.n} 꺼짐`); uiDirty=true; return; }
   if((me.cds[key]||0)>0)return;
   if(me.cls==='necro'&&!necroCan(key))return;
   if(key==='colossus'&&minions.some(q=>q.k==='dragon')){ if(!hold)toast('🐉 영혼 군주가 강림 중이라 고대 거인을 소환할 수 없어요','#ff8a7a'); return; }   /* 영혼 군주는 그대로 두고, 마나·재사용 대기시간도 쓰지 않아요 (반대로 영혼 군주를 쓰면 거인은 사라지고 용령이 나와요) */
@@ -3782,7 +3782,7 @@ const AUD=(()=>{
   function setVoice(v){ st.vo=v; lsSet('dkdef2.vo',v?'1':'0'); if(!v&&voxSrc){ try{ voxSrc.stop(); }catch(e){} } }
   function setVib(v){st.vib=v; lsSet('dkdef2.vib',v?'1':'0'); if(v)vib(30,1);}
   /* 주인공 음성(audio/voice/<직업>_<순간>_<번호>.mp3): 파일이 있는 직업(VOXC)만 나오고, 없는 파일은 조용히 건너뜀. 겹쳐 말하지 않고(궁극기·사망·부활은 끊고 말함) 순간마다 재사용 대기가 있음 */
-  const VOXC=['war','necro'], VOXN=['ult_1','ult_2','skill_1','skill_2','hurt_1','low_1','die_1','revive_1','lvl_1','start_1','win_1'], vox={}, voxLoad={}, voxCd={}; let voxEnd=0, voxSrc=null, voxLast='';
+  const VOXC=['war','necro','pal'], VOXN=['ult_1','ult_2','skill_1','skill_2','hurt_1','low_1','die_1','revive_1','lvl_1','start_1','win_1'], vox={}, voxLoad={}, voxCd={}; let voxEnd=0, voxSrc=null, voxLast='';
   function voicePre(cls){ if(!ac||!VOXC.includes(cls)||voxLoad[cls])return; voxLoad[cls]=1;
     VOXN.forEach(n=>{ fetch('audio/voice/'+cls+'_'+n+'.mp3').then(r=>{ if(!r.ok)throw 0; return r.arrayBuffer(); }).then(b=>ac.decodeAudioData(b)).then(buf=>{ vox[cls+'_'+n]=buf; }).catch(()=>{}); }); }
   function voice(cls,name,cd,force){
@@ -3796,8 +3796,8 @@ const AUD=(()=>{
 const sfx=(k,pm,cl)=>AUD.sfx(k,pm,cl);
 const voice=(n,cd,f)=>{ if(me&&me.cls)AUD.voice(me.cls,n,cd,f); };
 /* 음성이 나오는 스킬: 궁극기는 'ult'(1·2번 번갈아), 나머지는 'skill_1' · 'skill_2' */
-const VSK={war:{ragnarok:'ult',berserk:'skill_1',leap:'skill_2'},pal:{divine:'ult',hammer:'skill_1',judgment:'skill_2'},sorc:{armageddon:'ult',teleport:'skill_1',frostnova:'skill_2'},necro:{lord:'ult',guardian:'skill_1',colossus:'skill_2'},druid:{bears:'ult',bearform:'skill_1',roar:'skill_2'}};
-function voiceSkill(key){ const e=me&&VSK[me.cls]&&VSK[me.cls][key]; if(!e)return; if(e==='ult')voice('ult',0,true); else voice(e,0,false); }
+const VSK={war:{ragnarok:'ult',berserk:'skill_1',leap:'skill_2'},pal:{divine:'ult',hammer:'skill_1',healaura:'skill_2',might:'skill_2',guard:'skill_2'},sorc:{armageddon:'ult',teleport:'skill_1',frostnova:'skill_2'},necro:{lord:'ult',guardian:'skill_1',colossus:'skill_2'},druid:{bears:'ult',bearform:'skill_1',roar:'skill_2'}};
+function voiceSkill(key,cd){ const e=me&&VSK[me.cls]&&VSK[me.cls][key]; if(!e)return; if(e==='ult')voice('ult',0,true); else voice(e,cd||0,false); }
 function voiceHurt(d){ if(!me||me.dead||!(me.hp>0))return; const mx=me.D.maxHp; if(me.hp/mx<.25)voice('low',30); else if(d>=mx*.12)voice('hurt',7); }
 /* 진동(안드로이드 등 지원 기기만): 치명타·정예·보스 처치 때 짧게. 0.25초에 한 번만 */
 let vibT=0; function vib(ms,force){ if(!AUD.st.vib||!navigator.vibrate)return; const n=performance.now(); if(!force&&n-vibT<250)return; vibT=n; try{ navigator.vibrate(ms); }catch(e){} }
