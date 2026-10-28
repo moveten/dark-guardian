@@ -1137,7 +1137,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.1.0372</div>
+    <div class="ver" id="verT">v0.6.1.0373</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1927,6 +1927,10 @@ function townSend(k,cid){ townTick(k); const B=getTown()[k], D=TOWN_B[k], P=town
   p.mail.push({id:'townmail',d:Date.now(),r:0,at:[D.pot?{k:'pot',n}:{k:'shard',mat:D.mat,n}]});
   if(p===me)saveChar(); else mailSave(p);
   if(n>=P.cap)B.t=Date.now(); B.n=0; saveTown(); return n; }
+/* 만든 조각을 공유보관함으로 바로 옮김: 보관함에 자리가 모자라면 들어간 만큼만 옮기고 나머지는 건물에 남겨요 */
+function townToStore(k){ townTick(k); const B=getTown()[k], D=TOWN_B[k], P=townProd(k), n=B.n|0; if(n<1||!P||D.pot)return {put:0,left:0};
+  const S=getStore(), put=shardAdd(S,n,D.mat); S[D.mat]=0; if(put<=0)return {put:0,left:n};
+  if(n>=P.cap)B.t=Date.now(); B.n=n-put; saveStore(); saveTown(); return {put,left:B.n}; }
 /* ===== 우편함 (캐릭터별) — 편지 내용은 여기 MAILS 에 있고 캐릭터에는 {id,d(받은 시각),r(읽음)}만 저장. 편지 보내기 기능은 없음 ===== */
 const MAILS={
   welcome:{f:'수호자 길드',t:'어둠의 수호자가 된 것을 환영해요',
@@ -5517,7 +5521,7 @@ function casinoModal(){
 function renderTown(){ townUpTick(); const S=getStore(), now=Date.now(); let ch=false; { const L=getTown().lab; if((L.rf|0)>0){ townMsg=`🧪 그림자 연구소가 성벽 연구소로 바뀌었어요. 쓰셨던 🌑 그림자 조각 ${L.rf}개를 공유보관함으로 돌려드렸어요`; L.rf=0; saveTown(); } const M=getTown().mill; if((M.rf|0)>0){ townMsg=`✦ 각성 풍차의 건설·업그레이드가 골드로 바뀌었어요. 쓰셨던 ✦ 각성 그림자 조각 ${M.rf}개를 공유보관함으로 돌려드렸어요`; M.rf=0; saveTown(); } } for(const k of ['tw','al','mill'])if(townTick(k,now))ch=true; if(ch)saveTown();
   $('#itemPop').hidden=true; $('#ptsBar').hidden=true; $('#sheetTabs').hidden=true; $('#sheetT').innerHTML='🏘️ 마을';
   const b=$('#sheetB'); b.className='sbody town';
-  b.innerHTML=`<div class="tcur"><span>공유보관함</span><span>💰 ${(S.gold|0).toLocaleString('ko-KR')}</span><span>🌑 ${shardCount(S,'shard')}</span><span>✦ ${shardCount(S,'ashard')}</span></div>${townMsg?`<div class="tqnote">${esc(townMsg)}</div>`:''}<div class="tmap"><button class="tcsb" id="tCas" type="button" style="--x:50%;--y:57%" aria-label="달빛 도박장"><span class="tbd"><img class="cimg" src="img/town_casino.png" alt="" draggable="false" onerror="this.closest('.tcsb').classList.add('cbad')"><svg viewBox="0 0 140 130" preserveAspectRatio="xMidYMax meet"><use href="#tw-casino" width="140" height="130"/></svg></span><span class="tlb"><span class="tsb" style="background:#ff4fa8;color:#2a0a1c">🎰</span>달빛 도박장</span></button>${TOWN_FAM.map((f,i)=>{ const y=i?[81,82]:[29,24]; return `${townSlot(f.main,`--x:${i?25:30}%;--y:${y[0]}%`)}${townSlot(f.aux,`--x:${i?76:72}%;--y:${y[1]}%`)}`; }).join('')}</div><p class="meta" style="margin:0;font-size:12px;line-height:1.5">건물을 누르면 자세히 볼 수 있어요. 건설과 업그레이드에는 <b>공유보관함</b>의 조각을 써요 (그림자 연구소는 <b>골드</b>, 각성 풍차는 건설과 Lv.5까지 <b>골드</b>로 해요). 말풍선을 누르면 만든 것을 캐릭터 우편으로 받아요.</p>`;
+  b.innerHTML=`<div class="tcur"><span>공유보관함</span><span>💰 ${(S.gold|0).toLocaleString('ko-KR')}</span><span>🌑 ${shardCount(S,'shard')}</span><span>✦ ${shardCount(S,'ashard')}</span></div>${townMsg?`<div class="tqnote">${esc(townMsg)}</div>`:''}<div class="tmap"><button class="tcsb" id="tCas" type="button" style="--x:50%;--y:57%" aria-label="달빛 도박장"><span class="tbd"><img class="cimg" src="img/town_casino.png" alt="" draggable="false" onerror="this.closest('.tcsb').classList.add('cbad')"><svg viewBox="0 0 140 130" preserveAspectRatio="xMidYMax meet"><use href="#tw-casino" width="140" height="130"/></svg></span><span class="tlb"><span class="tsb" style="background:#ff4fa8;color:#2a0a1c">🎰</span>달빛 도박장</span></button>${TOWN_FAM.map((f,i)=>{ const y=i?[81,82]:[29,24]; return `${townSlot(f.main,`--x:${i?25:30}%;--y:${y[0]}%`)}${townSlot(f.aux,`--x:${i?76:72}%;--y:${y[1]}%`)}`; }).join('')}</div><p class="meta" style="margin:0;font-size:12px;line-height:1.5">건물을 누르면 자세히 볼 수 있어요. 건설과 업그레이드에는 <b>공유보관함</b>의 조각을 써요 (그림자 연구소는 <b>골드</b>, 각성 풍차는 건설과 Lv.5까지 <b>골드</b>로 해요). 말풍선을 누르면 만든 조각이 바로 <b>공유보관함</b>으로 들어가요.</p>`;
   townMsg=''; try{ window.__townFx&&window.__townFx.mount(b.querySelector('.tmap')); }catch(e){}
   { const tc=b.querySelector('#tCas'); if(tc)tc.onclick=()=>{ sfx('ui'); casinoModal(); }; }
   b.querySelectorAll('[data-tbub]').forEach(e=>e.onclick=()=>{ const k=e.dataset.tbub; if(TOWN_B[k].lab)labInfo(); else if(TOWN_B[k].stat&&!(getTown()[k].n|0))townInfo(k); else townPick(k); });
@@ -5556,6 +5560,7 @@ function townInfo(k){ const B=getTown()[k], D=TOWN_B[k], lv=B.lv|0, S=getStore()
     if(go)go.onclick=()=>{ const r=townUp(k); closeModal(); if(r==='ok'){ sfx('rare'); townMsg=lv>=1&&um>0?`⏳ ${D.n} Lv.${lv+1} 업그레이드를 시작했어요 (${labTm(um)})`:lv<1?`🏗️ ${D.n}${(c=>c>=0&&c<=11171&&c%28?'을':'를')(D.n.charCodeAt(D.n.length-1)-44032)} 지었어요!`:`⬆ ${D.n} Lv.${lv+1} 업그레이드 완료!`; } else townMsg=r==='lack'?(GL?'공유보관함의 골드가 부족해요':'공유보관함의 조각이 부족해요'):r==='busy'?'이미 업그레이드 중이에요':'더 올릴 수 없어요'; renderTown(); }; }); }
 let townUTimer=0;
 function townPick(k){ townTick(k); const B=getTown()[k], D=TOWN_B[k], n=B.n|0; if(n<1){ townMsg=`아직 ${D.pot?'만들어진 물약이':'만들어진 조각이'} 없어요`; renderTown(); return; }
+  if(!D.pot){ const got=townToStore(k); sfx('pick'); townMsg=got.put>0?`📦 ${D.e} ${SHDK[D.mat].n} ${got.put}개를 공유보관함으로 보냈어요${got.left>0?` (보관함이 가득 차서 ${got.left}개는 건물에 남아 있어요)`:''}`:'공유보관함이 가득 차서 보낼 수 없어요. 자리를 비워 주세요'; if(got.put>0)toast(`📦 공유보관함으로 ${SHDK[D.mat].n} ${got.put}개 이동!`,'#c9a0ff'); renderTown(); return; }   /* 조각은 캐릭터를 고르지 않고 바로 공유보관함으로 */
   const chars=charIds().map(id=>(me&&me.id===id)?me:loadChar(id)).filter(Boolean), what=D.pot?`🧪 물약 ${n}개`:`${D.e} ${SHDK[D.mat].n} ${n}개`;
   const rows=chars.map(c=>`<button class="btn" data-to="${c.id}" style="text-align:left">${tgLabel({k:'c',o:c},'')}</button>`).join('');
   modal(`<h3>✉️ 우편으로 받기</h3><p style="margin:0 0 10px;font-size:13px;color:${RARC[4]}">${what}를 받을 캐릭터를 고르세요</p><div class="col">${rows||'<p class="meta">캐릭터가 없어요</p>'}<button class="btn" id="tpX">취소</button></div>`,m=>{
