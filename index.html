@@ -1146,7 +1146,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.1.0379</div>
+    <div class="ver" id="verT">v0.6.1.0380</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3680,7 +3680,7 @@ const AUD=(()=>{
       master=ac.createGain(); master.gain.value=.9; master.connect(ac.destination);
       sfxG=ac.createGain(); sfxG.gain.value=.7*st.vs/100; sfxG.connect(master);
       musG=ac.createGain(); musG.gain.value=.22*st.vm/100; musG.connect(master);
-      voxG=ac.createGain(); voxG.gain.value=st.vv/100; voxG.connect(master);   /* 주인공 음성: 잔향 없이 그대로 */
+      voxG=ac.createGain(); voxG.gain.value=.7*st.vv/100; voxG.connect(master);   /* 주인공 음성: 잔향 없이 그대로 */
       const len=ac.sampleRate*1.8, ir=ac.createBuffer(2,len,ac.sampleRate); for(let c=0;c<2;c++){const d=ir.getChannelData(c); for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.6);}
       const cv=ac.createConvolver(); cv.buffer=ir; const rg=ac.createGain(); rg.gain.value=.32; cv.connect(rg); rg.connect(master); sfxG.connect(cv); musG.connect(cv);
       if(AUDIO_FILES)SFXKEYS.forEach(k=>{ fetch('audio/sfx/'+k+'.mp3').then(r=>{ if(!r.ok)throw 0; return r.arrayBuffer(); }).then(b=>ac.decodeAudioData(b)).then(buf=>{samples[k]=buf;}).catch(()=>{}); });
@@ -3778,7 +3778,7 @@ const AUD=(()=>{
   function setMood(m){ if(m===mood)return; mood=m; if(ac&&st.mus)musicApply(); }
   function setSfx(v){st.sfx=v; lsSet('dkdef2.sfx',v?'1':'0'); if(v){init(); sfx('ui');}}
   function setMus(v){st.mus=v; lsSet('dkdef2.mus',v?'1':'0'); if(v){init(); musicStart();} else musicStop();}
-  function setVol(k,v){ v=Math.max(0,Math.min(100,v|0)); st[k]=v; lsSet({vs:'dkdef2.vs',vm:'dkdef2.vm',vv:'dkdef2.vv'}[k],String(v)); if(ac){ if(k==='vs')sfxG.gain.value=.7*v/100; else if(k==='vm')musG.gain.value=.22*v/100; else voxG.gain.value=v/100; } }
+  function setVol(k,v){ v=Math.max(0,Math.min(100,v|0)); st[k]=v; lsSet({vs:'dkdef2.vs',vm:'dkdef2.vm',vv:'dkdef2.vv'}[k],String(v)); if(ac){ if(k==='vs')sfxG.gain.value=.7*v/100; else if(k==='vm')musG.gain.value=.22*v/100; else voxG.gain.value=.7*v/100; } }
   function setVoice(v){ st.vo=v; lsSet('dkdef2.vo',v?'1':'0'); if(!v&&voxSrc){ try{ voxSrc.stop(); }catch(e){} } }
   function setVib(v){st.vib=v; lsSet('dkdef2.vib',v?'1':'0'); if(v)vib(30,1);}
   /* 주인공 음성(audio/voice/<직업>_<순간>_<번호>.mp3): 파일이 있는 직업(VOXC)만 나오고, 없는 파일은 조용히 건너뜀. 겹쳐 말하지 않고(궁극기·사망·부활은 끊고 말함) 순간마다 재사용 대기가 있음 */
