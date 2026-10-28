@@ -552,6 +552,12 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 .sb .nm{position:absolute;left:0;right:0;top:5px;font-size:22px;line-height:1}
 .sb .sn{position:absolute;left:0;right:0;bottom:5px;font-size:9.5px;color:#e8dccb;text-shadow:0 1px 2px #000}
 .sb .lvn{top:2px;bottom:auto;left:auto;right:7px;font-size:9px;color:#ffe9b0;text-align:right}
+.sb.img .cdv{z-index:1}.sb.img .cdt{z-index:2}
+.sb.img .nm{inset:0;top:0;font-size:0}
+.sb .skimg,.skic .skimg{display:block;width:100%;height:100%;object-fit:cover;border-radius:50%;pointer-events:none;-webkit-user-drag:none}
+.sb.img .sn{display:none}
+.sb.img .lvn{z-index:2;top:auto;bottom:1px;left:50%;right:auto;transform:translateX(-50%);min-width:18px;padding:0 4px;border-radius:8px;background:rgba(10,7,5,.78);color:#ffe9b0;font-size:9.5px;line-height:13px;text-align:center}
+.skic.img{overflow:hidden;width:40px;height:40px;padding:0;box-shadow:0 0 6px var(--c)}
 .mnew{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:9px;background:var(--blood);color:#fff;font-size:10px;font-weight:800;font-style:normal;line-height:14px;vertical-align:middle;letter-spacing:.02em}.mnew[hidden]{display:none}
 .gearT{display:flex;align-items:center;justify-content:center;color:var(--ink)}.gearT .mnew{position:absolute;top:-7px;right:-6px;margin:0;box-shadow:0 0 6px rgba(255,90,50,.7)}
 .mic{width:1.15em;height:1.15em;vertical-align:-.2em;flex:none}
@@ -1125,7 +1131,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.1.0363</div>
+    <div class="ver" id="verT">v0.6.1.0364</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -4404,11 +4410,15 @@ let uiDirty=true, hudT=0;
 function skillAtKey(n){ const vis=[...$('#skills').children].filter(b=>!b.hidden); const rows=Math.ceil(vis.length/3); /* 맨 아랫줄이 1 2 3 기준 — 줄이 덜 찬 쪽은 오른쪽(3)부터 채움: 5개=4 5 6/2 3, 1개=3 */ const rb=Math.floor((n-1)/3), col=2-(n-1)%3, idx=(rows-1-rb)*3+col; const b=(rb<rows&&idx>=0)?vis[idx]:null; return b?b.dataset.k:null; }
 let skSig='';
 function layoutSkills(){ const all=[...$('#skills').children], vis=all.filter(b=>!b.hidden), sig=vis.map(b=>b.dataset.k).join(','); if(sig===skSig)return; skSig=sig; { const CL=[0,0,0,1,2,0,1,2,3,3,4,4]; let sc=0; for(let i=2;i<vis.length&&i<12;i++)sc=Math.max(sc,CL[i]+1); document.body.style.setProperty('--sc',sc); }   /* 가로 모드: AUTO 버튼이 스킬 묶음 왼쪽에 붙도록 스킬 열 수 */ all.forEach(b=>{ delete b.dataset.sl; }); vis.forEach((b,i)=>{ b.dataset.sl=i; }); }   /* 가로 모드: 보이는 스킬을 칸 번호(data-sl)로 배치 — 칸 위치는 CSS */
+/* 스킬 아이콘 그림: img/skill_<직업>_<스킬키>.png — 그림이 있는 직업·스킬만 여기에 적고, 파일이 없으면 이모지로 대신 보임 */
+const SKIMG={necro:['soulbolt','soullink','guardian','spiritcaster','resonance','execute','fusion','colossus','soulburst','lord']};
+function hasSkImg(s,cls){ cls=cls||me.cls; return !!(SKIMG[cls]&&SKIMG[cls].includes(s.k)); }
+function skIco(s,cls){ cls=cls||me.cls; return hasSkImg(s,cls)?`<img class="skimg" src="img/skill_${cls}_${s.k}.png" alt="" draggable="false" onerror="var h=this.closest('.sb,.skic');if(h)h.classList.remove('img');this.replaceWith(document.createTextNode('${s.e}'))">`:s.e; }
 function buildSkills(){
   const box=$('#skills'); box.innerHTML=''; skSig='';
   for(const s of SK[me.cls]){ if(!(me.skills[s.k]>0)||s.passive)continue;
-    const b=document.createElement('button'); b.className='sb'; b.dataset.k=s.k; b.style.setProperty('--c',s.el); b.setAttribute('aria-label',s.n); if(s.k==='fusion')b.hidden=true;
-    b.innerHTML=`<span class="cdv"></span><span class="nm">${s.e}</span><span class="sn">${esc(s.s)}</span><span class="cdt"></span><span class="lvn"></span>`;
+    const b=document.createElement('button'); b.className='sb'+(hasSkImg(s)?' img':''); b.dataset.k=s.k; b.style.setProperty('--c',s.el); b.setAttribute('aria-label',s.n); if(s.k==='fusion')b.hidden=true;
+    b.innerHTML=`<span class="cdv"></span><span class="nm">${skIco(s)}</span><span class="sn">${esc(s.s)}</span><span class="cdt"></span><span class="lvn"></span>`;
     bindHold(b,s.k); box.appendChild(b);}
   layoutSkills();
 }
@@ -4808,7 +4818,7 @@ if(SKM){
       h+=`<div class="tier ${unl?'':'lock'}"><div class="thd"><span class="tdot"></span><b>레벨 ${rq}</b>${unl?'':'<span class="k"> 🔒</span>'}${gv.length?`<span class="k syn" style="font-size:11px;color:#8fb6a0"> ${gv.map(g=>'🔗'+esc(g)).join(' ')}</span>`:''}</div>`;
       for(const s of list.filter(s=>s.req===rq)){
         const b=me.skills[s.k]||0, eff=skLv(me,s.k), bonus=eff-b, can=me.skillPts>0&&me.lvl>=s.req&&b<20;
-        h+=`<div class="skrow ${me.lvl<s.req?'lock':''}"><div class="skic" style="--c:${s.el};color:${s.el};font-size:19px">${s.e}</div><div><div class="skn">${esc(s.n)} <span class="k" style="font-weight:400;font-size:12px;color:var(--mute)">${b?`Lv ${b}${bonus?` (${bonus>0?'+':''}${bonus})`:''}`:'미습득'}${s.aura?' · 오라':''}${s.cd>=1?` · 쿨 ${s.cd}초`:''}${s.mp?` · 마나 ${mpCost(s,eff||1)}`:''}</span></div><div class="skd">${skdHtml(s.d(Math.max(1,eff||1)))}</div>${(()=>{ const pn=wpPen(me); return pn&&pn.sk.includes(s.k)?`<div class="k" style="font-size:11.5px;color:#ff8a7a">⚠ 대검·전투 도끼를 끼고 있어서 효과가 없어요</div>`:''; })()}${s.k==='bulwark'?`<div class="k" style="font-size:11.5px;color:${me.D.blk>=(me.D.blkMax||BLKMAX)?'#ffd84a':'#9fd0ff'}">현재 막기 확률 ${me.D.blk}% / ${me.D.blkMax||BLKMAX}%${me.D.blk>=(me.D.blkMax||BLKMAX)?' · MAX (더 올려도 효과 없음)':''}</div>`:''}${(()=>{ const rc=s.passive?0:synBonus(me,s.k), nx=nxHtml(s,b,eff); if(!rc&&!nx)return ''; const l1=rc?`받는 시너지 +${rc}`:''; return `<div class="k syn" style="font-size:11px;color:#8fb6a0">${l1}${l1&&nx?' | ':''}${nx}</div>`; })()}</div><button class="plus" data-sk="${s.k}" ${can?'':'data-off'} aria-label="${esc(s.n)} 올리기">+</button></div>`;
+        h+=`<div class="skrow ${me.lvl<s.req?'lock':''}"><div class="skic${hasSkImg(s)?' img':''}" style="--c:${s.el};color:${s.el};font-size:19px">${skIco(s)}</div><div><div class="skn">${esc(s.n)} <span class="k" style="font-weight:400;font-size:12px;color:var(--mute)">${b?`Lv ${b}${bonus?` (${bonus>0?'+':''}${bonus})`:''}`:'미습득'}${s.aura?' · 오라':''}${s.cd>=1?` · 쿨 ${s.cd}초`:''}${s.mp?` · 마나 ${mpCost(s,eff||1)}`:''}</span></div><div class="skd">${skdHtml(s.d(Math.max(1,eff||1)))}</div>${(()=>{ const pn=wpPen(me); return pn&&pn.sk.includes(s.k)?`<div class="k" style="font-size:11.5px;color:#ff8a7a">⚠ 대검·전투 도끼를 끼고 있어서 효과가 없어요</div>`:''; })()}${s.k==='bulwark'?`<div class="k" style="font-size:11.5px;color:${me.D.blk>=(me.D.blkMax||BLKMAX)?'#ffd84a':'#9fd0ff'}">현재 막기 확률 ${me.D.blk}% / ${me.D.blkMax||BLKMAX}%${me.D.blk>=(me.D.blkMax||BLKMAX)?' · MAX (더 올려도 효과 없음)':''}</div>`:''}${(()=>{ const rc=s.passive?0:synBonus(me,s.k), nx=nxHtml(s,b,eff); if(!rc&&!nx)return ''; const l1=rc?`받는 시너지 +${rc}`:''; return `<div class="k syn" style="font-size:11px;color:#8fb6a0">${l1}${l1&&nx?' | ':''}${nx}</div>`; })()}</div><button class="plus" data-sk="${s.k}" ${can?'':'data-off'} aria-label="${esc(s.n)} 올리기">+</button></div>`;
       }
       h+='</div>'; } }
   h+='</div>';
