@@ -301,7 +301,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 .tmap .tcsb{position:absolute;left:var(--x);top:var(--y);transform:translate(-50%,calc(-100% + 12px));display:flex;flex-direction:column;align-items:center;gap:3px;padding:0;background:none;border:0;color:inherit;cursor:pointer;z-index:2}
 .tmap .tcsb .tbd{pointer-events:none;filter:drop-shadow(0 0 9px #ff4fa8aa)}
 .tmap .tcsb .tbd{display:block}.tmap .tcsb .tbd svg{width:112px;height:104px}
-.tmap .tcsb .tbd img{display:block;width:118px;height:auto;max-width:none}.tmap .tcsb .tbd svg{display:none}   /* 도박장 그림(img/town_casino.png)이 있으면 그림, 없으면 기본 SVG (그림이 있으면 SVG가 숨겨져 위의 빛 효과도 꺼져요) */
+.tmap .tcsb .tbd img{display:block;width:118px;height:auto;max-width:none}.tmap .tcsb .tbd svg{display:none}   /* 도박장 그림(img/town_casino.webp)이 있으면 그림, 없으면 기본 SVG (그림이 있으면 SVG가 숨겨져 위의 빛 효과도 꺼져요) */
 .tmap .tcsb.cbad .tbd img{display:none}.tmap .tcsb.cbad .tbd svg{display:block}
 .tcsb:active svg{filter:brightness(1.25)}
 .tcsb .cb{opacity:.35;animation:cbk 1.2s steps(1) infinite}
@@ -333,7 +333,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 .tmap .tbd .labimg{display:block;width:104px;height:auto;max-width:none}.tbd.lbad .labimg{display:none}.tbd.lbad .mfb{display:block}
 @media(prefers-reduced-motion:reduce){.tbd .tmill .ml{animation:none}}
 .tbd .labw{display:block;position:relative;width:104px}.tbd.lbad .labw{display:none}
-.tbd .twimg{display:block;max-width:none;max-height:none}.tbd.tbad .twimg{display:none}.tbd.tbad .mfb{display:block}   /* 그림자 타워 그림(img/town_tower_1~5.png), 없으면 기본 SVG */
+.tbd .twimg{display:block;max-width:none;max-height:none}.tbd.tbad .twimg{display:none}.tbd.tbad .mfb{display:block}   /* 그림자 타워 그림(img/town_tower_1~5.webp), 없으면 기본 SVG */
 /* 그림자 연구소 연출(A안): 연기·플라스크 불빛·룬 마법진은 늘 잔잔하게, 연구 중(.busy)이면 거품·반짝임이 더해지고 불빛이 세져요. 좌표는 그림 크기(360×407) 대비 % */
 .lfx i{position:absolute;display:block;pointer-events:none;border-radius:50%;mix-blend-mode:screen}
 .lf-fl{left:50.8%;top:39.3%;width:42%;aspect-ratio:1;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(190,255,190,.85) 0%,rgba(110,255,120,.55) 30%,rgba(90,255,110,0) 70%);opacity:.5;animation:lfpulse 2.6s ease-in-out infinite}
@@ -1148,7 +1148,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.1.0385</div>
+    <div class="ver" id="verT">v0.6.1.0386</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -5445,6 +5445,15 @@ function resetWorld(){
 /* ===== 마을 화면 (A안: 지도 위에 계열별로 메인·보조 건물) ===== */
 let townMsg='', townTimer=0;
 function openTown(){ G.titleSheet=true; STORE=loadStore(); openSheet('town'); }
+/* 마을 그림 미리 받기: 게임이 열리고 잠시 뒤 한가할 때 내 마을 건물 그림을 받아 둬서, 마을을 처음 열어도 바로 뜨게 해요 */
+const TPRE=[];
+function townPreload(){ try{ const T=getTown(), u=['img/town_bg.webp','img/town_casino.webp'], lv=k=>(T[k]&&T[k].lv)|0;
+    if(lv('lab')>=1)u.push('img/town_lab.webp');
+    if(lv('tw')>=1)u.push('img/town_tower_'+Math.min(5,lv('tw'))+'.webp');
+    if(lv('al')>=1)u.push('img/town_altar_'+Math.min(5,lv('al'))+'.webp');
+    if(lv('mill')>=1){ const s=Math.max(1,Math.min(5,Math.ceil(lv('mill')/2))); u.push('img/town_mill_body_'+s+'.webp','img/town_mill_blades_'+s+'.webp'); }
+    u.forEach(s=>{ const im=new Image(); im.src=s; TPRE.push(im); }); }catch(e){} }
+setTimeout(()=>{ (window.requestIdleCallback||setTimeout)(townPreload); },4000);
 function townBub(k){ const B=getTown()[k], D=TOWN_B[k], lv=B.lv|0; if(lv<1)return null;
   if(D.lab){ labTick(); const busy=['a','b'].find(q=>B[q].e>0); if(busy)return {tx:`⏳ ${LAB_R[busy].n} ${labLeft(B[busy].e-Date.now())}`,cls:'g'}; return (B.a.l+B.b.l)?{tx:`🧱 Lv.${B.a.l} · 🔧 Lv.${B.b.l}`,cls:''}:{tx:'🔬 연구하기',cls:'g'}; }
   if(D.stat){ townTick(k); const n=B.n|0; return n>0?{tx:`🧪 ${n}개 ▸ 받기`,cls:'g'}:null; }   /* 풍차는 올스탯 말풍선을 따로 띄우지 않아요(건물을 눌러 확인) · 예전 물약이 남아 있을 때만 받기 말풍선 */
@@ -5452,18 +5461,18 @@ function townBub(k){ const B=getTown()[k], D=TOWN_B[k], lv=B.lv|0; if(lv<1)retur
 /* 각성 풍차 그림: 레벨 단계(Lv.1~2·3~4·5~6·7~8·9~10)마다 몸체가 발전하고, 날개 그림이 축을 중심으로 천천히 돌아요. [몸체 가로·세로, 축 x·y, 날개 한 변] (그림 픽셀, 화면에는 1/3로 보여줘요) · 그림이 없으면 기본 SVG */
 const MILL_ST=[[165,281,82,85,269],[167,352,83,132,268],[182,404,94,142,295],[209,427,105,140,316],[200,436,100,147,391]];
 function millArt(lv){ const st=Math.max(1,Math.min(5,Math.ceil(lv/2))), [w,h,hx,hy,cw]=MILL_ST[st-1], f=n=>(n/3).toFixed(1), oh=Math.max(0,Math.round((cw/2-hy)/3)), bad=`this.closest('.tbd').classList.add('mbad')`;
-  return `<span class="tmill" style="width:${f(w)}px;height:${f(h)}px;margin-top:${oh}px"><img class="mb" src="img/town_mill_body_${st}.png" alt="" draggable="false" onerror="${bad}"><img class="ml" src="img/town_mill_blades_${st}.png" alt="" draggable="false" style="left:${f(hx)}px;top:${f(hy)}px;width:${f(cw)}px;height:${f(cw)}px;animation-duration:${22-2*st}s" onerror="${bad}"></span>`; }
+  return `<span class="tmill" style="width:${f(w)}px;height:${f(h)}px;margin-top:${oh}px"><img class="mb" src="img/town_mill_body_${st}.webp" alt="" draggable="false" onerror="${bad}"><img class="ml" src="img/town_mill_blades_${st}.webp" alt="" draggable="false" style="left:${f(hx)}px;top:${f(hy)}px;width:${f(cw)}px;height:${f(cw)}px;animation-duration:${22-2*st}s" onerror="${bad}"></span>`; }
 /* 그림자 타워 그림: 레벨(1~5)마다 모양이 발전하고 크기도 조금씩 커져요. [그림 가로·세로] (그림 픽셀, 화면에는 1/3로 보여줘요) · 그림이 없으면 기본 SVG */
 const TW_ST=[[130,257],[164,309],[176,349],[216,393],[245,440]];
 function twArt(lv){ const st=Math.max(1,Math.min(5,lv|0)), [w,h]=TW_ST[st-1], f=n=>(n/3).toFixed(1);
-  return `<img class="twimg" src="img/town_tower_${st}.png" alt="" draggable="false" style="width:${f(w)}px;height:${f(h)}px" onerror="this.closest('.tbd').classList.add('tbad')">`; }
+  return `<img class="twimg" src="img/town_tower_${st}.webp" alt="" draggable="false" style="width:${f(w)}px;height:${f(h)}px" onerror="this.closest('.tbd').classList.add('tbad')">`; }
 const AL_ST=[[124,118],[156,149],[175,180],[184,231],[199,296]];
 function alArt(lv){ const st=Math.max(1,Math.min(5,lv|0)), [w,h]=AL_ST[st-1], f=n=>(n/2).toFixed(1);
-  return `<img class="twimg" src="img/town_altar_${st}.png" alt="" draggable="false" style="width:${f(w)}px;height:${f(h)}px" onerror="this.closest('.tbd').classList.add('tbad')">`; }   /* 각성 제단 그림(img/town_altar_1~5.png), 없으면 기본 SVG */
+  return `<img class="twimg" src="img/town_altar_${st}.webp" alt="" draggable="false" style="width:${f(w)}px;height:${f(h)}px" onerror="this.closest('.tbd').classList.add('tbad')">`; }   /* 각성 제단 그림(img/town_altar_1~5.webp), 없으면 기본 SVG */
 function townSlot(k,pos){ pos=pos||''; const B=getTown()[k], D=TOWN_B[k], lv=B.lv|0, tag=D.main?'<span class="tmn">메인</span>':'<span class="tsb">보조</span>';
   if(lv<1)return `<div class="tsl e" style="${pos}"><button class="tplot" data-tbld="${k}"><b>＋</b>건설<br><span style="color:#ffd34d">${D.lab?'💰 '+LAB_BUILD.toLocaleString('ko-KR'):D.gold?'💰 '+TOWN_GBUILD.toLocaleString('ko-KR'):D.e+' '+TOWN_BUILD}</span></button><div class="tlb">${tag}${D.n}</div></div>`;
   const b=townBub(k);
-  return `<div class="tsl" style="${pos}">${b?`<button class="tbub ${b.cls}" data-tbub="${k}">${b.tx}</button>`:''}<button class="tbd" data-tbld="${k}" aria-label="${D.n}">${D.mill?millArt(lv):D.tower?twArt(lv):D.altar?alArt(lv):D.lab?`<span class="labw${['a','b'].some(q=>((B[q]||{}).e||0)>0)?' busy':''}"><img class="labimg" src="img/town_lab.png" alt="" onerror="this.closest('.tbd').classList.add('lbad')"><span class="lfx" aria-hidden="true"><i class="lf-fl"></i><i class="lf-bb b1"></i><i class="lf-bb b2"></i><i class="lf-bb b3"></i><i class="lf-bb b4"></i><i class="lf-sm s1"></i><i class="lf-sm s2"></i><i class="lf-sm s3"></i><i class="lf-sm s4"></i><i class="lf-rn"></i><i class="lf-bk"></i><i class="lf-sp p1"></i><i class="lf-sp p2"></i><i class="lf-sp p3"></i></span></span>`:''}<svg${D.mill||D.lab||D.tower||D.altar?' class="mfb"':''} viewBox="0 0 100 120" preserveAspectRatio="xMidYMax meet"><use href="#${D.sy}" width="100" height="120"/></svg></button><div class="tlb">${tag}${D.n} Lv.${lv}${B.u>0?` <span data-tul="${k}" style="color:#ffd34d">⏳ ${labLeft(B.u-Date.now())}</span>`:''}</div></div>`; }
+  return `<div class="tsl" style="${pos}">${b?`<button class="tbub ${b.cls}" data-tbub="${k}">${b.tx}</button>`:''}<button class="tbd" data-tbld="${k}" aria-label="${D.n}">${D.mill?millArt(lv):D.tower?twArt(lv):D.altar?alArt(lv):D.lab?`<span class="labw${['a','b'].some(q=>((B[q]||{}).e||0)>0)?' busy':''}"><img class="labimg" src="img/town_lab.webp" alt="" onerror="this.closest('.tbd').classList.add('lbad')"><span class="lfx" aria-hidden="true"><i class="lf-fl"></i><i class="lf-bb b1"></i><i class="lf-bb b2"></i><i class="lf-bb b3"></i><i class="lf-bb b4"></i><i class="lf-sm s1"></i><i class="lf-sm s2"></i><i class="lf-sm s3"></i><i class="lf-sm s4"></i><i class="lf-rn"></i><i class="lf-bk"></i><i class="lf-sp p1"></i><i class="lf-sp p2"></i><i class="lf-sp p3"></i></span></span>`:''}<svg${D.mill||D.lab||D.tower||D.altar?' class="mfb"':''} viewBox="0 0 100 120" preserveAspectRatio="xMidYMax meet"><use href="#${D.sy}" width="100" height="120"/></svg></button><div class="tlb">${tag}${D.n} Lv.${lv}${B.u>0?` <span data-tul="${k}" style="color:#ffd34d">⏳ ${labLeft(B.u-Date.now())}</span>`:''}</div></div>`; }
 /* ===== 달빛 도박장 (슬롯머신): 한 판 100,000G(공유보관함 골드) → 결과를 먼저 정해 저장하고, 화면은 연출만 보여줘요 =====
    일반(99%): 절반은 조각(그림자/각성 반반, 1~20개) · 절반은 꽝(보상 없음)
    대박 조각 0.5%: 조각 100개 (7 7 7 + 폭죽) · 대박 골드 0.5%: 500,000G (💎 💎 💎 + 금화 비) */
@@ -5570,7 +5579,7 @@ function casinoModal(){
 function renderTown(){ townUpTick(); const S=getStore(), now=Date.now(); let ch=false; { const L=getTown().lab; if((L.rf|0)>0){ townMsg=`🧪 그림자 연구소가 성벽 연구소로 바뀌었어요. 쓰셨던 🌑 그림자 조각 ${L.rf}개를 공유보관함으로 돌려드렸어요`; L.rf=0; saveTown(); } const M=getTown().mill; if((M.rf|0)>0){ townMsg=`✦ 각성 풍차의 건설·업그레이드가 골드로 바뀌었어요. 쓰셨던 ✦ 각성 그림자 조각 ${M.rf}개를 공유보관함으로 돌려드렸어요`; M.rf=0; saveTown(); } } for(const k of ['tw','al','mill'])if(townTick(k,now))ch=true; if(ch)saveTown();
   $('#itemPop').hidden=true; $('#ptsBar').hidden=true; $('#sheetTabs').hidden=true; $('#sheetT').innerHTML='🏘️ 마을';
   const b=$('#sheetB'); b.className='sbody town';
-  b.innerHTML=`<div class="tcur"><span>공유보관함</span><span>💰 ${(S.gold|0).toLocaleString('ko-KR')}</span><span>🌑 ${shardCount(S,'shard')}</span><span>✦ ${shardCount(S,'ashard')}</span></div>${townMsg?`<div class="tqnote">${esc(townMsg)}</div>`:''}<div class="tmap"><button class="tcsb" id="tCas" type="button" style="--x:50%;--y:57%" aria-label="달빛 도박장"><span class="tbd"><img class="cimg" src="img/town_casino.png" alt="" draggable="false" onerror="this.closest('.tcsb').classList.add('cbad')"><svg viewBox="0 0 140 130" preserveAspectRatio="xMidYMax meet"><use href="#tw-casino" width="140" height="130"/></svg></span><span class="tlb"><span class="tsb" style="background:#ff4fa8;color:#2a0a1c">🎰</span>달빛 도박장</span></button>${TOWN_FAM.map((f,i)=>{ const y=i?[81,82]:[29,24]; return `${townSlot(f.main,`--x:${i?25:30}%;--y:${y[0]}%`)}${townSlot(f.aux,`--x:${i?76:72}%;--y:${y[1]}%`)}`; }).join('')}</div><p class="meta" style="margin:0;font-size:12px;line-height:1.5">건물을 누르면 자세히 볼 수 있어요. 건설과 업그레이드에는 <b>공유보관함</b>의 조각을 써요 (그림자 연구소는 <b>골드</b>, 각성 풍차는 건설과 Lv.5까지 <b>골드</b>로 해요). 말풍선을 누르면 만든 조각이 바로 <b>공유보관함</b>으로 들어가요.</p>`;
+  b.innerHTML=`<div class="tcur"><span>공유보관함</span><span>💰 ${(S.gold|0).toLocaleString('ko-KR')}</span><span>🌑 ${shardCount(S,'shard')}</span><span>✦ ${shardCount(S,'ashard')}</span></div>${townMsg?`<div class="tqnote">${esc(townMsg)}</div>`:''}<div class="tmap"><button class="tcsb" id="tCas" type="button" style="--x:50%;--y:57%" aria-label="달빛 도박장"><span class="tbd"><img class="cimg" src="img/town_casino.webp" alt="" draggable="false" onerror="this.closest('.tcsb').classList.add('cbad')"><svg viewBox="0 0 140 130" preserveAspectRatio="xMidYMax meet"><use href="#tw-casino" width="140" height="130"/></svg></span><span class="tlb"><span class="tsb" style="background:#ff4fa8;color:#2a0a1c">🎰</span>달빛 도박장</span></button>${TOWN_FAM.map((f,i)=>{ const y=i?[81,82]:[29,24]; return `${townSlot(f.main,`--x:${i?25:30}%;--y:${y[0]}%`)}${townSlot(f.aux,`--x:${i?76:72}%;--y:${y[1]}%`)}`; }).join('')}</div><p class="meta" style="margin:0;font-size:12px;line-height:1.5">건물을 누르면 자세히 볼 수 있어요. 건설과 업그레이드에는 <b>공유보관함</b>의 조각을 써요 (그림자 연구소는 <b>골드</b>, 각성 풍차는 건설과 Lv.5까지 <b>골드</b>로 해요). 말풍선을 누르면 만든 조각이 바로 <b>공유보관함</b>으로 들어가요.</p>`;
   townMsg=''; try{ window.__townFx&&window.__townFx.mount(b.querySelector('.tmap')); }catch(e){}
   { const tc=b.querySelector('#tCas'); if(tc)tc.onclick=()=>{ sfx('ui'); casinoModal(); }; }
   b.querySelectorAll('[data-tbub]').forEach(e=>e.onclick=()=>{ const k=e.dataset.tbub; if(TOWN_B[k].lab)labInfo(); else if(TOWN_B[k].stat&&!(getTown()[k].n|0))townInfo(k); else townPick(k); });
@@ -6760,7 +6769,7 @@ loadPhaser(ok=>{ if(ok)start(); });
 (function(){
 'use strict';
 const TAU=6.2832, DW=848, DH=1264;
-let host=null, game=null, starting=false, watch=0, gone=0, ro=null;
+let host=null, game=null, starting=false, watch=0, gone=0, ro=null, idleT=0;
 const mulberry=a=>()=>{ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return((t^t>>>14)>>>0)/4294967296; };
 const mk=(w,h,fn)=>{ const c=document.createElement('canvas'); c.width=w; c.height=h; fn(c.getContext('2d'),w,h); return c; };
 const bakeGlow=()=>mk(128,128,g=>{ const r=g.createRadialGradient(64,64,0,64,64,64); r.addColorStop(0,'rgba(255,255,255,1)'); r.addColorStop(.35,'rgba(255,255,255,.55)'); r.addColorStop(1,'rgba(255,255,255,0)'); g.fillStyle=r; g.fillRect(0,0,128,128); });
@@ -6771,15 +6780,17 @@ const bakeTrail=()=>mk(128,8,g=>{ const r=g.createLinearGradient(0,0,128,0); r.a
 const bakeFog=(seed,rgb)=>{ const R=mulberry(seed); return mk(DW,260,g=>{ for(let i=0;i<8;i++){ const cx=R()*DW, cy=90+R()*80, rx=150+R()*150, ry=44+R()*40, a=.3+R()*.25;
   for(const o of [-DW,0,DW]){ g.save(); g.translate(cx+o,cy); g.scale(rx/ry,1); const r=g.createRadialGradient(0,0,0,0,0,ry); r.addColorStop(0,`rgba(${rgb},${a})`); r.addColorStop(1,`rgba(${rgb},0)`); g.fillStyle=r; g.beginPath(); g.arc(0,0,ry,0,TAU); g.fill(); g.restore(); } } }); };
 
-function destroy(){ clearInterval(watch); watch=0; try{ if(ro)ro.disconnect(); }catch(e){} ro=null; try{ if(game)game.destroy(true); }catch(e){} game=null; try{ if(host&&host.parentNode)host.parentNode.removeChild(host); }catch(e){} host=null; starting=false; gone=0; }
-function check(){ const s=document.getElementById('sheet'); if(!host||!s||s.hidden){ destroy(); return; } if(!host.isConnected){ if(++gone>=2)destroy(); } else gone=0; }
+function destroy(){ clearInterval(watch); watch=0; clearTimeout(idleT); idleT=0; try{ if(ro)ro.disconnect(); }catch(e){} ro=null; try{ if(game)game.destroy(true); }catch(e){} game=null; try{ if(host&&host.parentNode)host.parentNode.removeChild(host); }catch(e){} host=null; starting=false; gone=0; }
+/* 마을을 닫으면 연출을 없애지 않고 재워 둬요(그리기 멈춤) → 다시 열 때 처음부터 만들지 않고 바로 깨워요. 2분 동안 안 열면 그때 없애요 */
+function sleep(){ clearInterval(watch); watch=0; try{ if(game)game.loop.sleep(); }catch(e){} clearTimeout(idleT); idleT=setTimeout(destroy,120000); }
+function check(){ const s=document.getElementById('sheet'); if(!host||!s||s.hidden||!host.isConnected)sleep(); }
 function mount(tmap){
   if(!tmap||!window.__loadPhaser)return;
   try{ if(matchMedia('(prefers-reduced-motion: reduce)').matches)return; }catch(e){}
   if(!host){ host=document.createElement('div'); host.className='tfx'; host.setAttribute('aria-hidden','true'); }
-  tmap.insertBefore(host,tmap.firstChild); gone=0;     /* 마을이 다시 그려져도 같은 연출 레이어를 새 지도에 옮겨 붙여요 */
+  tmap.insertBefore(host,tmap.firstChild); gone=0; clearTimeout(idleT); idleT=0;     /* 마을이 다시 그려져도 같은 연출 레이어를 새 지도에 옮겨 붙여요 */
   if(!watch)watch=setInterval(check,1500);
-  if(game){ try{ game.scale.refresh(); }catch(e){} return; }
+  if(game){ try{ game.loop.wake(); game.scale.refresh(); if(!game.loop.running)throw 0; }catch(e){ destroy(); mount(tmap); } return; }
   if(starting)return; starting=true;
   window.__loadPhaser(ok=>{ starting=false; if(ok&&host&&host.isConnected&&!game)start(); });
 }
@@ -6803,7 +6814,7 @@ function start(){
       sc.fl=[]; for(let i=0;i<16;i++){ sc.fl.push({img:img(0,0,'glow').setTint(0xd8ff7a).setScale(.1+R()*.08),bx:40+R()*770,by:120+R()*1080,ax:20+R()*50,ay:14+R()*34,f1:.25+R()*.4,f2:.3+R()*.4,p:R()*6.28,q:R()*6.28,tw:1.6+R()*2.4}); }
       sc.ss={img:A(sc.add.image(0,0,'trail').setOrigin(1,.5).setAlpha(0).setTint(0xeef2ff)),next:5+R()*5,age:-1,x:0,y:0,vx:0,vy:0};
       /* 달빛 도박장: 네온 간판 깜빡임 · 전구 쫓기 · 서치라이트 · 문 틈 불빛 · 반짝이는 금화 (건물 위치는 화면에서 읽어와요) */
-      const ADD=P.BlendModes.ADD, CB=[[102,49],[135,47],[181,37],[229,46],[262,48],[281,73],[266,107],[227,108],[182,106],[140,108],[97,106],[84,77]];   /* 도박장 그림(img/town_casino.png, 360×328) 위 간판 전구 위치 — 간판 둘레를 시계 방향으로 한 바퀴 */
+      const ADD=P.BlendModes.ADD, CB=[[102,49],[135,47],[181,37],[229,46],[262,48],[281,73],[266,107],[227,108],[182,106],[140,108],[97,106],[84,77]];   /* 도박장 그림(img/town_casino.webp, 360×328) 위 간판 전구 위치 — 간판 둘레를 시계 방향으로 한 바퀴 */
       const cas={sign:img(0,0,'glow').setTint(0xff3fa0).setBlendMode(ADD),sign2:img(0,0,'glow').setTint(0xff4fb8).setBlendMode(ADD),door:img(0,0,'glow').setTint(0xffc24a).setBlendMode(ADD),
         bulbs:CB.map(()=>img(0,0,'glow').setTint(0xffe08a).setBlendMode(ADD)),
         beams:[0,1].map(i=>({s:A(sc.add.image(0,0,'beam').setOrigin(.5,1).setTint(i?0xffb8f0:0xb8e8ff).setBlendMode(ADD)),p:i*3.1})),
