@@ -1125,7 +1125,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.1.0362</div>
+    <div class="ver" id="verT">v0.6.1.0363</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -2511,7 +2511,7 @@ function canSkip(){ return (G.phase==='prep'&&G.wave===0)||(G.phase==='wave'&&!G
 function skipWave(who,quiet){
   if(!canSkip())return;
   if(G.phase==='wave')G.skipUsed=true;
-  const left=G.phase==='wave'?G.spawnQ:0; if(G.phase==='wave'){ G.nextSides=sidesFor(G.wave+1); }
+  const left=G.phase==='wave'?G.spawnQ:0; if(G.phase==='wave'){ G.nextSides=sidesFor(G.wave+1); castleRepair(); }   /* 이번 습격이 끝나서 다음 습격을 부를 때도, 남은 적과 상관없이 성 체력을 연구소 '성벽 수리' 만큼 회복 */
   G.timer=0; nextWave(); if(left>0&&G.phase==='wave')G.spawnQ+=left; if(!quiet)toast(who?`${who}가 다음 습격을 불렀어요`:'다음 습격을 불렀어요','#e07060');
 }
 function allSpawn(){ const w0=G.wave, ph=G.phase; let n0=ph==='wave'?G.spawnQ:0; G.waveSides=[0,1,3]; G.laneShow=G.waveSides;
@@ -3948,7 +3948,7 @@ const TUTS=[
  ],
  [ /* 1-3 */
   {t:'가방 열기',b:'아래 🎒 가방 버튼을 눌러 가방을 열어 보세요. 열려 있는 동안 게임은 잠시 멈춰요.',...tutOpenTab('bBag','bag')},
-  {t:'장비 착용',b:'가방 칸의 아이템을 누르면 비교 창이 열려요. 초록 ▲가 붙은 아이템이 지금 장비보다 좋아요. [장착]을 눌러 입어 보세요.',can:()=>me.inv.some(it=>it&&!isShard(it)&&canWear(it)),b2:'가방 칸의 아이템을 누르면 비교 창이 열려요. 초록 ▲가 붙은 아이템이 지금 장비보다 좋고, [장착]으로 입어요. 레벨·능력치가 모자라면 입을 수 없어요.',pre:S=>{S.sg=tutEqSig();},tg:()=>tutQ('#aEquip')||(tutBag(it=>canWear(it)&&!!document.querySelector('#sheetB [data-inv="'+me.inv.indexOf(it)+'"] .up'))||tutBag(canWear))||tutQ('#bBag'),ck:S=>tutEqSig()!==S.sg},
+  {t:'장비 착용',b:'가방 칸의 아이템을 누르면 비교 창이 열려요. 초록 ▲가 붙은 아이템이 지금 장비보다 좋아요. [장착]을 눌러 입어 보세요.',can:()=>me.inv.some(it=>it&&!isShard(it)&&canWear(it)),b2:'가방 칸의 아이템을 누르면 비교 창이 열려요. 초록 ▲가 붙은 아이템이 지금 장비보다 좋고, [장착]으로 입어요. 레벨·능력치가 모자라면 입을 수 없어요.',pre:S=>{S.sg=tutEqSig();},tg:()=>tutQ('#modal [data-rk]')||tutQ('#aEquip')||(tutBag(it=>canWear(it)&&!!document.querySelector('#sheetB [data-inv="'+me.inv.indexOf(it)+'"] .up'))||tutBag(canWear))||tutQ('#bBag'),tgs:()=>[...document.querySelectorAll('#modal [data-rk]')],nt:()=>tutQ('#modal [data-rk]')?'반지가 두 개라서, 바꿀 반지를 골라 주세요.':'',ck:S=>tutEqSig()!==S.sg},
   {t:'한꺼번에 팔기',b:'필요 없는 아이템은 [일괄 판매]로 한 번에 팔 수 있어요. 잠근 🔒 아이템과 장착 중인 장비는 팔리지 않아요.',tg:()=>tutQ('#aBulk')||tutQ('#bBag'),ok:1},
   {t:'자동 판매 · 자동 합성',b:'[자동 판매]는 고른 등급 이하를 줍는 즉시 팔고, [자동 합성]은 같은 등급 아이템을 모아 더 좋은 등급으로 합쳐 줘요. 가방이 가득 차는 걸 막아 줘요.',tg:()=>tutQ('#aAuto'),ok:1}
  ],
@@ -4317,6 +4317,7 @@ function tutMulti(els,R){ const M=$('#tqM'); if(!M)return; if(!els){ M.hidden=tr
   rs.forEach((o,i)=>{ const g=M.children[i+1]; g.style.left=o.x+'px'; g.style.top=o.y+'px'; g.style.width=o.w+'px'; g.style.height=o.h+'px'; }); }
 function tutPlace(){ const T=tutS; if(!T)return; const st=TUTS[T.k][T.i]; if(!st)return; const q=$('#tq'), R=q.getBoundingClientRect(), bub=$('#tqB'), hole=$('#tqH');
   let el=null, note=''; if(st.tg){ if(st.hud&&tutShut()){ el=tutVis($('#sheetX')); note='먼저 창을 닫아 주세요 (오른쪽 위 ✕).'; } else el=tutVis(st.tg(T.S,T.fl)); }
+  if(st.nt&&!note)note=st.nt()||'';   /* 단계마다 상황에 맞는 한 줄 안내 (예: 반지 고르기 창이 떠 있을 때) */
   let els=null; if(el&&st.tgs&&!(st.hud&&tutShut())){ const a=st.tgs(T.S,T.fl).map(tutVis).filter(Boolean); if(a.length>=2){ els=a; el=a[0]; } }   /* 여러 개를 한꺼번에 강조 (예: 모든 ＋ 버튼) */
   const key=T.k+'.'+T.i+'.'+(T.alt?1:0)+'.'+note;
   if(T.key!==key){ T.key=key; const n=TUTS[T.k].length; $('#tqS').textContent=STAGES[T.k].id+' 튜토리얼'; $('#tqDots').innerHTML=TUTS[T.k].map((_,j)=>`<i class="${j<T.i?'dn':j===T.i?'cur':''}"></i>`).join(''); $('#tqT').textContent=st.t; $('#tqP').innerHTML=esc(T.alt&&st.b2?st.b2:st.b)+(note?`<br><b class="tqn">${esc(note)}</b>`:''); }
