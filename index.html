@@ -1146,7 +1146,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.1.0380</div>
+    <div class="ver" id="verT">v0.6.1.0381</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3782,7 +3782,7 @@ const AUD=(()=>{
   function setVoice(v){ st.vo=v; lsSet('dkdef2.vo',v?'1':'0'); if(!v&&voxSrc){ try{ voxSrc.stop(); }catch(e){} } }
   function setVib(v){st.vib=v; lsSet('dkdef2.vib',v?'1':'0'); if(v)vib(30,1);}
   /* 주인공 음성(audio/voice/<직업>_<순간>_<번호>.mp3): 파일이 있는 직업(VOXC)만 나오고, 없는 파일은 조용히 건너뜀. 겹쳐 말하지 않고(궁극기·사망·부활은 끊고 말함) 순간마다 재사용 대기가 있음 */
-  const VOXC=['war','necro','pal'], VOXN=['ult_1','ult_2','skill_1','skill_2','hurt_1','low_1','die_1','revive_1','lvl_1','start_1','win_1'], vox={}, voxLoad={}, voxCd={}; let voxEnd=0, voxSrc=null, voxLast='';
+  const VOXC=['war','necro','pal','sorc'], VOXN=['ult_1','ult_2','skill_1','skill_2','hurt_1','low_1','die_1','revive_1','lvl_1','start_1','win_1'], vox={}, voxLoad={}, voxCd={}; let voxEnd=0, voxSrc=null, voxLast='';
   function voicePre(cls){ if(!ac||!VOXC.includes(cls)||voxLoad[cls])return; voxLoad[cls]=1;
     VOXN.forEach(n=>{ fetch('audio/voice/'+cls+'_'+n+'.mp3').then(r=>{ if(!r.ok)throw 0; return r.arrayBuffer(); }).then(b=>ac.decodeAudioData(b)).then(buf=>{ vox[cls+'_'+n]=buf; }).catch(()=>{}); }); }
   function voice(cls,name,cd,force){
@@ -3827,7 +3827,7 @@ function itemAt(sx,sy){
 cv.addEventListener('pointerdown',e=>{
   if(!G.inGame||G.paused)return;
   e.preventDefault();
-  if(G.aim){ const a=G.aim, s=SKBY[a.key], cost=mpCost(s,a.lv); G.aim=null; if(me.dead||me.mp<cost||(me.cds[a.key]||0)>0)return; const w=worldAt(e.clientX,e.clientY), dx=w.x-me.x, dy=w.y-me.y, d=hyp(dx,dy)||1, mx=240+4*a.lv, k=Math.min(d,mx)/d, tx=clamp(me.x+dx*k,20,WW-20), ty=clamp(me.y+dy*k,20,WH-20); me.mp-=cost; me.cds[a.key]=s.cd; sfx('tele'); castSkill(me,'teleport',true,tx,ty,a.lv,null); fxQ.push([++fxSeq,'teleport',Math.round(tx),Math.round(ty),a.lv]); if(fxQ.length>6)fxQ.shift(); return; }
+  if(G.aim){ const a=G.aim, s=SKBY[a.key], cost=mpCost(s,a.lv); G.aim=null; if(me.dead||me.mp<cost||(me.cds[a.key]||0)>0)return; const w=worldAt(e.clientX,e.clientY), dx=w.x-me.x, dy=w.y-me.y, d=hyp(dx,dy)||1, mx=240+4*a.lv, k=Math.min(d,mx)/d, tx=clamp(me.x+dx*k,20,WW-20), ty=clamp(me.y+dy*k,20,WH-20); me.mp-=cost; me.cds[a.key]=s.cd; sfx('tele'); voiceSkill('teleport'); castSkill(me,'teleport',true,tx,ty,a.lv,null); fxQ.push([++fxSeq,'teleport',Math.round(tx),Math.round(ty),a.lv]); if(fxQ.length>6)fxQ.shift(); return; }
   if(e.clientX>VW*.5){ const g=itemAt(e.clientX,e.clientY); if(g&&!me.dead){me.pickT=g; return;} }
   if(!joy.active){joy.active=true;joy.id=e.pointerId;joy.ox=joy.x=e.clientX;joy.oy=joy.y=e.clientY;joy.dx=joy.dy=0; try{cv.setPointerCapture(e.pointerId)}catch(_){}}
 });
