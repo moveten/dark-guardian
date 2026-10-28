@@ -1137,7 +1137,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.1.0375</div>
+    <div class="ver" id="verT">v0.6.1.0376</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -2503,6 +2503,7 @@ function castleTick(dt){ const c=G.castle; if(!c)return; c.fl=Math.max(0,c.fl-dt
 /* 플레이어는 성 건물 안으로 들어갈 수 없어요 (앞마당 = 중앙 회복 구역은 건물 둘레) */
 function castlePush(o){ if(!G.castle)return; const cx=VX, cy=VY+CAS_Y+4, rx=58, ry=26, dx=(o.x-cx)/rx, dy=(o.y-cy)/ry, q=dx*dx+dy*dy; if(q>=1)return; if(q<1e-6){ o.y=cy+ry; return; } const k=1/Math.sqrt(q); o.x=cx+dx*k*rx; o.y=cy+dy*k*ry; }
 function startStage(){
+  AUD.voicePre(me.cls); setTimeout(()=>{ if(G.inGame&&!me.dead)voice('start'); },1500);
   dmgReset(); G.firstClr=false; G.stageIdx=selStage; G.stg=STAGES[selStage]; G.TW=G.stg.waves.length; preBoss(); setTheme(selStage); castleInit(); if(G.castle)later(3.2,()=>{ if(G.inGame&&G.castle&&G.phase!=='lose')toast('🏰 중앙의 성을 지켜요 · 체력이 0이 되면 패배 · 성 둘레에서는 생명력·마나가 회복돼요','#e0c080'); }); G.gts=[]; later(.5,()=>{ if(G.inGame)banner(`${G.stg.id} ${G.stg.n}`,`장비 Lv 합 ${Math.max(1,G.stg.icap-12)*EQSL.length}↑ · ${G.stg.tag||''}`); });
   G.allMode=false; G.allQ=[]; G.fires=[]; G.freeRev=1; me.rvGiven=0; me.seenRg=0; me.out=false; me.rvT=0;
   G.wave=0;G.skipUsed=false;G.phase='prep';G.timer=2;G.mobs.length=0;G.ev=[];G.spawnQ=0;G.lastSq=-1;G.endShown=false;G.coop=!!guestPeer;
@@ -2796,7 +2797,7 @@ function killMob(m){
   onKill(Math.round(m.x),Math.round(m.y),m.xp,tier,ilvl,m.type,m.lf||1);
   if(m.boss&&m.rk){ const alive=G.mobs.filter(o=>o.rk&&!o.dead); if(alive.length){ G.sib=(G.sib||0)+1; for(const o of alive){ o.dmg=o.dmg0*(1+.1*G.sib); spark(o.x,o.y,'#ff3a2a',40); }
       announce(`💢 ${MT[m.type].n} 쓰러짐! 남은 형제의 피해 +${10*G.sib}%`,'#ff6a5a'); banner('💢 형제의 분노',`남은 형제의 피해 +${10*G.sib}%`); pushEv(['sib',G.sib]); sfx('boss'); return; } }
-  if(m.boss){ G.phase='clear'; G.clearT=CLEAR_T; me.god=Math.max(me.god||0,CLEAR_T+5); me.poison=0; if(!me.dead)addNum(me.x,me.y-50,'🛡️ 무적','#9fd0ff',true); for(const o of G.mobs) if(o!==m)o.dead=true; banner('우두머리 처치!',`${CLEAR_T}초 안에 전리품을 주워 보세요`); }
+  if(m.boss){ G.phase='clear'; if(!me.dead)voice('win'); G.clearT=CLEAR_T; me.god=Math.max(me.god||0,CLEAR_T+5); me.poison=0; if(!me.dead)addNum(me.x,me.y-50,'🛡️ 무적','#9fd0ff',true); for(const o of G.mobs) if(o!==m)o.dead=true; banner('우두머리 처치!',`${CLEAR_T}초 안에 전리품을 주워 보세요`); }
 }
 
 /* ================= KILL / LOOT / XP ================= */
@@ -2892,7 +2893,7 @@ function takeDmg(raw,fire,rh){
   const def=me.D.def*guardMul(), red=Math.min(rh&&!fire?RAID_RED:.8,def/(def+50+G.wave*8));
   let d=raw*lvPen().tk*gearPen().tk*(1-red)*(1-(me.D.dr||0))*(me.buffs.barrier&&me.buffs.barrier.t>0?1-me.buffs.barrier.v:1)*drMul(); if(me.D.sp&&me.D.sp.martyr&&me.hp<me.D.maxHp*.35) d*=.6; if(me.erode>0)d*=1.5; if(me.D.sp&&me.D.sp.hoff_druid&&me.form) d*=.9; if(me.D.sp&&me.D.sp.awoff_druid&&me.form) d*=.88;
   { const ms=skLv(me,'mshield'); if(ms&&me.mp>0&&d>0){ const sh=Math.min(.65,.2+.02*ms), cost=Math.max(.5,1.6-.04*ms), ab=Math.min(d*sh,me.mp/cost); me.mp-=ab*cost; d-=ab; if(ab>=1){ addNum(me.x+10,me.y-38,Math.round(ab),'#6fb0ff',false); efx.push({k:'ring',x:me.x,y:me.y,r0:10,r1:30,t:0,life:.25,col:'#7fb4ff',w:4}); } } }
-  tkAdd(d); me.hp-=d; me.hurt=.15; sfx('hurt'); G.shake=Math.max(G.shake,.2);
+  tkAdd(d); me.hp-=d; me.hurt=.15; sfx('hurt'); voiceHurt(d); G.shake=Math.max(G.shake,.2);
   addNum(me.x,me.y-24,Math.round(d),'#ff5a4a',false);
   { const sp=me.D.sp||{}; const mx=me.D.maxHp;
     if(sp.aw_armor&&me.hp>0&&me.hp<mx*.3&&!(me.awArmCd>0)){ me.god=2; me.awArmCd=60; addNum(me.x,me.y-50,'🌑 그림자 회피 · 무적','#c0a8ff',true); efx.push({k:'ring',x:me.x,y:me.y,r0:10,r1:60,t:0,life:.5,col:'#a68bff',w:8}); }   /* 공허의 망토 */
@@ -2900,12 +2901,12 @@ function takeDmg(raw,fire,rh){
   if(me.hp<=0){ goDown(); }
 }
 function revItems(){ return (G.freeRev|0)+(me.rev|0); }
-function goDown(){ me.hp=0; me.dead=true; me.leap=null; me.rvT=0; if((me.cls==='necro'||me.cls==='druid')&&minions.length){ for(const mn of minions){ const K=MNK[mn.k]; if(mn.fe&&typeof rvDrop==='function')rvDrop(mn); burst(mn.x,mn.y,(K&&K.col)||'#8fe6d0',14,200); } minions.length=0; } /* 강령술사·드루이드가 쓰러지면 소환수(까마귀 포함)도 함께 사라짐 */ if(me.form||me.spirit){ me.form=''; me.spirit=null; me.D=derive(me); me.hp=0; } spark(me.x,me.y,'#7a1010',20);
+function goDown(){ if(!me.dead)voice('die',0,true); me.hp=0; me.dead=true; me.leap=null; me.rvT=0; if((me.cls==='necro'||me.cls==='druid')&&minions.length){ for(const mn of minions){ const K=MNK[mn.k]; if(mn.fe&&typeof rvDrop==='function')rvDrop(mn); burst(mn.x,mn.y,(K&&K.col)||'#8fe6d0',14,200); } minions.length=0; } /* 강령술사·드루이드가 쓰러지면 소환수(까마귀 포함)도 함께 사라짐 */ if(me.form||me.spirit){ me.form=''; me.spirit=null; me.D=derive(me); me.hp=0; } spark(me.x,me.y,'#7a1010',20);
   { const lost=Math.floor((me.gold|0)*.05); if(lost>0){ me.gold-=lost; saveChar(); uiDirty=true; later(.6,()=>toast(`💸 쓰러져서 ${lost}G를 잃었어요 (보유금의 5%)`,'#e0a070')); } }
   const coopAlive=ally&&!ally.lobby&&!ally.dead;
   me.respawn=revItems()>0?12:coopAlive?30:1.6;
   toast(revItems()>0?'쓰러졌습니다! 부활 버튼으로 일어나세요':coopAlive?'쓰러졌습니다! 동료가 구해주길 기다려요':'쓰러졌습니다…','#e07060'); }
-function reviveMe(pct,free){ G.stRev=(G.stRev|0)+1; me.vx=me.vy=0; const a=me.aura,pot=me.pot,bx=me.x,by=me.y; me.dead=false; me.out=false; me.stun=me.slowP=me.poison=0; me.respawn=0; me.leap=null; me.cds={}; me.buffs={}; me.aura=a; me.pot=pot; me.D=derive(me); me.hp=me.D.maxHp*pct; me.mp=me.D.maxMp*.5; me.god=3; me.x=bx; me.y=by;   /* 부활 후 3초 무적 */
+function reviveMe(pct,free){ voice('revive',0,true); G.stRev=(G.stRev|0)+1; me.vx=me.vy=0; const a=me.aura,pot=me.pot,bx=me.x,by=me.y; me.dead=false; me.out=false; me.stun=me.slowP=me.poison=0; me.respawn=0; me.leap=null; me.cds={}; me.buffs={}; me.aura=a; me.pot=pot; me.D=derive(me); me.hp=me.D.maxHp*pct; me.mp=me.D.maxMp*.5; me.god=3; me.x=bx; me.y=by;   /* 부활 후 3초 무적 */
   efx.push({k:'rvfx',x:me.x,y:me.y,t:0,life:1.3}); efx.push({k:'ring',x:me.x,y:me.y,r0:10,r1:190,t:0,life:.8,col:'#ffd84a',w:10}); later(.12,()=>efx.push({k:'ring',x:me.x,y:me.y,r0:10,r1:260,t:0,life:.9,col:'#fff6cc',w:7})); later(.26,()=>efx.push({k:'ring',x:me.x,y:me.y,r0:10,r1:330,t:0,life:1,col:'#ffb04a',w:5})); impact(me.x,me.y,'255,235,160',260); spark(me.x,me.y,'#ffd84a',50); burst(me.x,me.y,'#ffe08a',50,340); burst(me.x,me.y-30,'#ffffff',24,200); G.flash=.9; G.shake=Math.max(G.shake,.5); sfx('revive');
   for(const m of G.mobs){ if(m.dead||m.boss)continue; const dx=m.x-me.x,dy=m.y-me.y,d=hyp(dx,dy); if(d<170){ m.kx=(m.kx||0)+dx/(d||1)*420; m.ky=(m.ky||0)+dy/(d||1)*420; } } if(me.cls==='necro'&&!minions.length)autoSummon(); uiDirty=true; }   /* 부활하면 기본 소환수(수호 영혼·포격 영혼)는 다시 불러옴 */
 function mightLevel(){ let l=0; if(me.aura==='might')l=skLv(me,'might');
@@ -3067,7 +3068,7 @@ function tryUse(key,hold){
   if(key==='teleport'&&!hold){ if(G.aim){G.aim=null;toast('순간이동 취소');return;} if(me.mp<mpCost(s,lv)){toast('마나가 부족해요','#7d96ff');return;} G.aim={key,lv}; toast('이동할 곳을 눌러 주세요 (다시 누르면 취소)','#b98bff'); return; }
   const cost=mpCost(s,lv);
   if(me.mp<cost){ if(!hold)toast('마나가 부족해요','#7d96ff'); return; }
-  me.mp-=cost; { const cdb=key==='shout'?SHC(lv):s.cd; me.cds[key]=cdb*(1-(me.D.cdr||0)); (me.cdm||(me.cdm={}))[key]=cdb; } sfx(SKS[key]||'skill');
+  voiceSkill(key); me.mp-=cost; { const cdb=key==='shout'?SHC(lv):s.cd; me.cds[key]=cdb*(1-(me.D.cdr||0)); (me.cdm||(me.cdm={}))[key]=cdb; } sfx(SKS[key]||'skill');
   doCast(key,s.rg||200,lv); if(ULTK[key])ultCut(key);
 }
 /* 드루이드: 변신 버튼(토글) — 같은 형태를 다시 누르면 인간, 다른 형태를 누르면 바로 전환. 마나는 변신할 때만 들어요 */
@@ -3619,7 +3620,7 @@ function castSkill(o,key,real,tx,ty,lv,tgt){
 
 /* ================= FX HELPERS ================= */
 function levelFx(o,mine){
-  sfx('lvl');
+  sfx('lvl'); if(mine)voice('lvl');
   efx.push({k:'lvl',o,t:0,life:2.2});
   for(let i=0;i<60;i++){const a=Math.random()*6.283,r=rand(4,34); parts.push({x:o.x+Math.cos(a)*r,y:o.y+Math.sin(a)*r*.5,vx:Math.cos(a)*rand(10,40),vy:-rand(70,280),t:0,life:rand(.9,1.9),col:pick(['#ffe9a8','#ffd36a','#f6b93b','#fff7dd']),r:rand(1.5,3.5),dm:.97});}
   if(mine){G.flash=.7; G.shake=Math.max(G.shake,.25);}
@@ -3659,7 +3660,7 @@ function toast(t,col,kind,keep){ if(kind&&!hudOn(kind))return; alPush(t,col,keep
 /* mp3 파일 사용 스위치: false면 audio/ 폴더의 mp3(효과음 30개·배경음 3개)를 아예 요청하지 않고 자동 생성 소리만 써요 → 콘솔 404 오류 없음. 파일을 넣을 땐 true로 */
 const AUDIO_FILES=false;
 const AUD=(()=>{
-  let ac=null,master=null,sfxG=null,musG=null,noiseBuf=null;
+  let ac=null,master=null,sfxG=null,musG=null,noiseBuf=null,voxG=null;
   const SFXKEYS=['swing','bolt','hit','crit','kill','boss','hurt','skill','boom','slam','pick','coin','potion','lvl','revive','ui','win','lose','vmagic','block','cast','fire','ice','zap','holy','aura','auraoff','shout','tele','rare'], samples={}; let mood='calm';
   const st={sfx:lsGet('dkdef2.sfx')!=='0',mus:lsGet('dkdef2.mus')!=='0',vib:lsGet('dkdef2.vib')!=='0'};
   function init(){
@@ -3669,6 +3670,7 @@ const AUD=(()=>{
       master=ac.createGain(); master.gain.value=.9; master.connect(ac.destination);
       sfxG=ac.createGain(); sfxG.gain.value=.7; sfxG.connect(master);
       musG=ac.createGain(); musG.gain.value=.22; musG.connect(master);
+      voxG=ac.createGain(); voxG.gain.value=1; voxG.connect(master);   /* 주인공 음성: 잔향 없이 그대로 */
       const len=ac.sampleRate*1.8, ir=ac.createBuffer(2,len,ac.sampleRate); for(let c=0;c<2;c++){const d=ir.getChannelData(c); for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.6);}
       const cv=ac.createConvolver(); cv.buffer=ir; const rg=ac.createGain(); rg.gain.value=.32; cv.connect(rg); rg.connect(master); sfxG.connect(cv); musG.connect(cv);
       if(AUDIO_FILES)SFXKEYS.forEach(k=>{ fetch('audio/sfx/'+k+'.mp3').then(r=>{ if(!r.ok)throw 0; return r.arrayBuffer(); }).then(b=>ac.decodeAudioData(b)).then(buf=>{samples[k]=buf;}).catch(()=>{}); });
@@ -3767,9 +3769,24 @@ const AUD=(()=>{
   function setSfx(v){st.sfx=v; lsSet('dkdef2.sfx',v?'1':'0'); if(v){init(); sfx('ui');}}
   function setMus(v){st.mus=v; lsSet('dkdef2.mus',v?'1':'0'); if(v){init(); musicStart();} else musicStop();}
   function setVib(v){st.vib=v; lsSet('dkdef2.vib',v?'1':'0'); if(v)vib(30,1);}
-  return {init,sfx,st,setSfx,setMus,setVib,setMood};
+  /* 주인공 음성(audio/voice/<직업>_<순간>_<번호>.mp3): 파일이 있는 직업(VOXC)만 나오고, 없는 파일은 조용히 건너뜀. 겹쳐 말하지 않고(궁극기·사망·부활은 끊고 말함) 순간마다 재사용 대기가 있음 */
+  const VOXC=['war'], VOXN=['ult_1','ult_2','skill_1','skill_2','hurt_1','low_1','die_1','revive_1','lvl_1','start_1','win_1'], vox={}, voxLoad={}, voxCd={}; let voxEnd=0, voxSrc=null, voxLast='';
+  function voicePre(cls){ if(!ac||!VOXC.includes(cls)||voxLoad[cls])return; voxLoad[cls]=1;
+    VOXN.forEach(n=>{ fetch('audio/voice/'+cls+'_'+n+'.mp3').then(r=>{ if(!r.ok)throw 0; return r.arrayBuffer(); }).then(b=>ac.decodeAudioData(b)).then(buf=>{ vox[cls+'_'+n]=buf; }).catch(()=>{}); }); }
+  function voice(cls,name,cd,force){
+    if(!st.sfx||!ac||!VOXC.includes(cls))return; voicePre(cls); const now=ac.currentTime;
+    if(!force&&now<voxEnd)return; if(voxCd[name]&&now<voxCd[name])return;
+    let key=cls+'_'+name+(/_\d$/.test(name)?'':'_1'); if(name==='ult'){ const c=[1,2].map(i=>cls+'_ult_'+i).filter(k=>vox[k]); if(!c.length)return; key=c.length>1&&c[0]===voxLast?c[1]:c[Math.random()<.5?0:c.length-1]; }
+    const buf=vox[key]; if(!buf)return; voxLast=key; if(voxSrc){ try{ voxSrc.stop(); }catch(e){} }
+    const n=ac.createBufferSource(); n.buffer=buf; n.connect(voxG); n.start(); voxSrc=n; voxEnd=now+buf.duration+.12; voxCd[name]=cd?now+cd:0; }
+  return {init,sfx,st,setSfx,setMus,setVib,setMood,voice,voicePre};
 })();
 const sfx=(k,pm,cl)=>AUD.sfx(k,pm,cl);
+const voice=(n,cd,f)=>{ if(me&&me.cls)AUD.voice(me.cls,n,cd,f); };
+/* 음성이 나오는 스킬: 궁극기는 'ult'(1·2번 번갈아), 나머지는 'skill_1' · 'skill_2' */
+const VSK={war:{ragnarok:'ult',berserk:'skill_1',leap:'skill_2'},pal:{divine:'ult',hammer:'skill_1',judgment:'skill_2'},sorc:{armageddon:'ult',teleport:'skill_1',frostnova:'skill_2'},necro:{lord:'ult',guardian:'skill_1',colossus:'skill_2'},druid:{bears:'ult',bearform:'skill_1',roar:'skill_2'}};
+function voiceSkill(key){ const e=me&&VSK[me.cls]&&VSK[me.cls][key]; if(!e)return; if(e==='ult')voice('ult',0,true); else voice(e,0,false); }
+function voiceHurt(d){ if(!me||me.dead||!(me.hp>0))return; const mx=me.D.maxHp; if(me.hp/mx<.25)voice('low',30); else if(d>=mx*.12)voice('hurt',7); }
 /* 진동(안드로이드 등 지원 기기만): 치명타·정예·보스 처치 때 짧게. 0.25초에 한 번만 */
 let vibT=0; function vib(ms,force){ if(!AUD.st.vib||!navigator.vibrate)return; const n=performance.now(); if(!force&&n-vibT<250)return; vibT=n; try{ navigator.vibrate(ms); }catch(e){} }
 function sndBtns(){ return `<button class="btn sm" data-snd="sfx">${AUD.st.sfx?'🔊 효과음 켜짐':'🔇 효과음 꺼짐'}</button><button class="btn sm" data-snd="mus">${AUD.st.mus?'🎵 음악 켜짐':'🎵 음악 꺼짐'}</button>${navigator.vibrate?`<button class="btn sm" data-snd="vib">${AUD.st.vib?'📳 진동 켜짐':'📳 진동 꺼짐'}</button>`:''}`; }
