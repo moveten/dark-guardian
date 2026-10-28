@@ -484,6 +484,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 
 /* 타이틀 화면 (E안): 위=캐러셀, 가운데=스테이지·시작, 아래=탭 바 */
 #sTitle{gap:10px;padding-bottom:0}
+#sTitle .lcol{display:contents}   /* 넓은 화면에서만 상자가 됨 (아래 와이드 규칙) */
 #sTitle .ver{position:absolute;left:18px;top:calc(max(22px,env(safe-area-inset-top)) + 14px);margin:0}
 #sTitle h1{margin:0}
 #sTitle .pp{gap:10px}
@@ -699,8 +700,8 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 #sTitle #bShop:disabled{opacity:.45}
 #sTitle .pp .modes{flex:1 1 0;min-width:0;width:auto;max-width:none;flex-wrap:nowrap}
 #sTitle #bSolo{width:100%;min-height:72px;font-size:19px;border-radius:16px;white-space:nowrap;padding-inline:6px}
-@media (orientation:landscape) and (max-height:500px){#sTitle .cdots,#sTitle .cchips{display:none}#sTitle #bSolo{min-height:54px}#sTitle #bShop{width:60px}}
-@media (orientation:landscape) and (max-height:500px){#sTitle .cc[aria-current="true"] .cpic::before{width:120px;height:120px;margin:-60px 0 0 -60px}}
+@media (orientation:landscape) and (max-height:500px),(orientation:landscape) and (min-width:520px) and (max-width:999px) and (min-height:501px) and (max-height:820px){#sTitle .cdots,#sTitle .cchips{display:none}#sTitle #bSolo{min-height:54px}#sTitle #bShop{width:60px}}
+@media (orientation:landscape) and (max-height:500px),(orientation:landscape) and (min-width:520px) and (max-width:999px) and (min-height:501px) and (max-height:820px){#sTitle .cc[aria-current="true"] .cpic::before{width:120px;height:120px;margin:-60px 0 0 -60px}}
 /* ===== 타이틀 세로 통일안 A: 캐릭터 위쪽 고정 + '이번 도전' 보스 배너(누르면 지도) + 시작·상점 줄 높이 고정 (일반/레이드 스테이지, 캐릭터가 바뀌어도 위치 동일) ===== */
 .ban{display:block;width:100%;max-width:440px;box-sizing:border-box;min-height:144px;border-radius:16px;position:relative;overflow:hidden;border:1px solid var(--gold);background:linear-gradient(90deg,rgba(10,7,6,.92),rgba(10,7,6,.3) 70%),var(--tbg,#1d1511) center 55%/cover;flex:none;cursor:pointer;-webkit-tap-highlight-color:transparent;box-shadow:0 0 0 3px #0f0b09,0 0 0 4px rgba(214,170,78,.5)}
 .ban:empty{display:none!important}
@@ -752,26 +753,30 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 #bigHero{display:none}
 #bFull{display:none}
 @media (orientation:landscape) and (min-width:1000px) and (min-height:501px){
-  #sTitle{display:grid;grid-template-columns:minmax(0,1fr) clamp(400px,30vw,540px);grid-template-rows:auto auto auto auto 1fr;column-gap:48px;row-gap:14px;align-content:start;align-items:start;justify-items:stretch;padding:8px max(48px,calc((100vw - 1640px)/2)) 0}
+  /* 넓은 화면 타이틀: 화면 높이에 딱 맞게 구성 → 스크롤바 없음. 왼쪽 카드 격자는 JS(fitWideCards)가 남는 칸에 맞춰 크기·열 수를 정해요 */
+  #sTitle{display:grid;grid-template-columns:minmax(0,1fr) clamp(400px,30vw,540px);grid-template-rows:auto auto minmax(0,1fr) auto auto auto;column-gap:48px;row-gap:14px;align-content:stretch;align-items:start;justify-items:stretch;padding:8px max(48px,calc((100vw - 1640px)/2)) 0;overflow:hidden}
   #sTitle .eyebrow{grid-column:1;grid-row:1;justify-content:flex-start;margin-top:20px}
-  #sTitle h1{grid-column:1;grid-row:2;text-align:left;font-size:52px;margin:0}
-  #sTitle .clist.car{grid-column:1;grid-row:3;width:100%;max-width:none;margin:0;padding:10px 4px;display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:16px;overflow:visible;scroll-snap-type:none}
-  #sTitle .cc{flex:none;transform:none!important;opacity:.78!important;padding:0 0 10px;min-width:0;cursor:pointer}
+  #sTitle h1{grid-column:1;grid-row:2;text-align:left;font-size:clamp(38px,6.2vh,52px);margin:0}
+  #sTitle .lcol{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;grid-column:1;grid-row:3/6;align-self:stretch;min-height:0;min-width:0;contain:size}
+  #sTitle .clist.car{flex:none;width:auto;max-width:100%;margin:0;padding:6px 4px;display:flex;flex-wrap:wrap;justify-content:center;align-content:flex-start;gap:var(--cg,14px);width:var(--cwd,auto);overflow:visible;scroll-snap-type:none}
+  #sTitle .cc{flex:none;width:var(--cw,190px);height:var(--ch,250px);transform:none!important;opacity:.78!important;padding:0 0 calc(10px*var(--cs,1));min-width:0;min-height:0;cursor:pointer;box-sizing:border-box}
   #sTitle .cc[aria-current="true"]{opacity:1!important}
-  #sTitle .cc .cpic{width:100%;height:140px;margin-top:14px}
-  #sTitle .cc b{font-size:19px}
-  #sTitle .cc .cl{font-size:13px}
+  #sTitle .cc .cpic{flex:1 1 0;min-height:0;width:100%;height:auto;margin-top:calc(14px*var(--cs,1))}
+  #sTitle .cc b{font-size:max(13px,calc(19px*var(--cs,1)))}
+  #sTitle .cc .cl{font-size:max(10.5px,calc(13px*var(--cs,1)))}
+  #sTitle .cc .cpt{font-size:max(10px,calc(12px*var(--cs,1)))}
+  #sTitle .cc.add{min-height:0}
   #sTitle .cdots{display:none}
-  #sTitle .cchips{grid-column:1;grid-row:4;max-width:none;width:100%;justify-content:flex-start}
+  #sTitle .cchips{flex:none;max-width:none;width:100%;justify-content:center}
   #sTitle .cchips span,#sTitle .cchips button{flex:0 1 220px}
-  #bigHero{display:block;grid-column:2;grid-row:1/4;align-self:stretch;position:relative;min-height:560px;margin-top:22px;border-radius:22px;overflow:hidden;border:1px solid var(--gold);box-shadow:0 0 0 3px #0f0b09,0 0 0 4px rgba(214,170,78,.5),0 0 60px rgba(214,170,78,.1)}
+  #bigHero{display:block;grid-column:2;grid-row:1/4;align-self:stretch;position:relative;min-height:0;margin-top:22px;border-radius:22px;overflow:hidden;border:1px solid var(--gold);box-shadow:0 0 0 3px #0f0b09,0 0 0 4px rgba(214,170,78,.5),0 0 60px rgba(214,170,78,.1)}
   #bigHero .bgl{position:absolute;inset:0;background:linear-gradient(rgba(10,7,6,.05),rgba(10,7,6,.9) 80%),var(--tbg,linear-gradient(#1d1511,#120d0b)) center/cover}
   #bigHero img{position:absolute;left:0;right:0;margin-inline:auto;bottom:92px;height:68%;max-height:430px;filter:drop-shadow(0 12px 18px #000c);animation:idleB 3.2s ease-in-out infinite;transform-origin:50% 100%}
   #bigHero .bn{position:absolute;left:0;right:0;bottom:16px;text-align:center}
   #bigHero .bn b{display:block;font:800 30px var(--f-disp);color:#f3e6c4}
   #bigHero .bn span{font-size:16px;color:var(--mute)}
-  #sTitle .bstk{grid-column:2;grid-row:4;max-width:none;margin-top:6px}#sTitle .bstk .ban{min-height:150px}
-  #sTitle .pp{grid-column:2;grid-row:5;margin:0;max-width:none;height:84px;min-height:84px;flex:none}
+  #sTitle .bstk{grid-column:2;grid-row:4;max-width:none;margin-top:0}#sTitle .bstk .ban{min-height:clamp(110px,16vh,150px)}
+  #sTitle .pp{grid-column:2;grid-row:5;margin:0;max-width:none;height:clamp(64px,9vh,84px);min-height:0;flex:none}
   #sTitle .pp #bSolo{font-size:26px}
   #sTitle #bShop{width:96px}
   #sTitle .ttabs{grid-column:1/3;grid-row:6;align-self:end;margin:0 calc(-1*max(48px,(100vw - 1640px)/2));width:auto}
@@ -779,7 +784,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 }
 @media (orientation:landscape) and (min-width:1000px) and (min-height:501px) and (max-width:1759px){#bigHero{margin-top:66px}}   /* 좁은 PC 창: 전체화면·메뉴 버튼과 겹치지 않게 */
 /* ===== 폰 가로 모드 타이틀: 좌(캐릭터) · 우(스테이지+시작) 2단, 하단 탭바는 얇은 한 줄 → 스테이지 선택·시작 버튼이 안 잘림 ===== */
-@media (orientation:landscape) and (max-height:500px){
+@media (orientation:landscape) and (max-height:500px),(orientation:landscape) and (min-width:520px) and (max-width:999px) and (min-height:501px) and (max-height:820px){
   #sTitle{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,330px);grid-template-rows:auto auto 1fr auto;gap:0 14px;align-items:center;justify-items:stretch;padding:6px max(14px,env(safe-area-inset-right)) 0 max(14px,env(safe-area-inset-left));overflow:hidden}
   #sTitle .eyebrow{grid-column:1;grid-row:1;text-align:center;font-size:10px;margin-top:2px}
   #sTitle h1{grid-column:1;grid-row:2;font-size:26px;margin:0 0 2px}
@@ -800,6 +805,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   #sTitle .gearT{top:8px;right:max(8px,env(safe-area-inset-right));width:38px;height:38px}
   #sTitle .ver{top:8px;left:max(12px,env(safe-area-inset-left))}
 }
+@media (orientation:landscape) and (min-width:520px) and (max-width:999px) and (min-height:501px) and (max-height:820px){#sTitle .cchips{display:none}}
 @media (orientation:landscape) and (max-height:380px){
   #sTitle h1{font-size:22px}
   #sTitle .cc{flex-basis:128px}#sTitle .cc .cpic{width:96px;height:80px}
@@ -1131,14 +1137,16 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.1.0364</div>
+    <div class="ver" id="verT">v0.6.1.0365</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
     <h1>어둠의 수호자</h1>
+    <div class="lcol" id="lcol">
     <div class="clist car" id="charList"></div>
     <div class="cdots" id="cDots" aria-hidden="true"></div>
     <div class="cchips" id="cChips" hidden></div>
+    </div>
     <div id="bigHero" hidden aria-hidden="true"><div class="bgl"></div><img id="bhImg" alt=""><div class="bn"><b id="bhName"></b><span id="bhSub"></span></div></div>
     <div class="bstk" id="stageBan" role="group" aria-label="스테이지 카드 · 좌우로 밀어서 이동"></div>
     <button id="bNew" hidden></button>
@@ -5065,6 +5073,15 @@ function carCenter(box,smooth){ const el=box.querySelector(`.cc[data-id="${selId
 function carFx(box){ const mid=box.scrollLeft+box.clientWidth/2; let best=null,bd=1e9;
   box.querySelectorAll('.cc').forEach(el=>{ const d=Math.abs(el.offsetLeft+el.offsetWidth/2-mid), k=Math.min(1,d/(el.offsetWidth+10)); el.style.transform=`scale(${(1-.2*k).toFixed(3)})`; el.style.opacity=(1-.5*k).toFixed(2); if(d<bd){bd=d;best=el;} });
   return best; }
+/* 넓은 화면: 캐릭터 카드 격자를 '남는 칸'에 딱 맞게 — 모든 카드가 한 화면에 보이는 가장 큰 크기와 열 수를 골라요 (스크롤바 없음) */
+function fitWideCards(){ const box=$('#charList'), col=$('#lcol'); if(!box||!col)return;
+  if(!carWide()){ for(const p of ['--cwd','--cw','--ch','--cs','--cg'])box.style.removeProperty(p); return; }
+  const n=box.children.length, chp=$('#cChips'); if(!n||!col.clientWidth)return;
+  const g=14, R=.78, MAX=200, W=col.clientWidth-8, H=col.clientHeight-12-((chp&&!chp.hidden&&chp.offsetHeight)?chp.offsetHeight+14:0);
+  const cand=[]; for(let c=1;c<=n;c++){ const r=Math.ceil(n/c), w=(W-(c-1)*g)/c, h=(H-(r-1)*g)/r; cand.push({c,r,s:Math.min(w,h*R,MAX),f:(n-(r-1)*c)/c}); }
+  const top=Math.max(...cand.map(x=>x.s)); let best=null; for(const x of cand){ if(x.s>=top*.97&&(!best||x.f>best.f+.01))best=x; }   /* 거의 가장 큰 크기 중에서, 마지막 줄이 가장 꽉 찬 배치를 골라요 */
+  const s=Math.max(64,Math.floor(best.s)); box.style.setProperty('--cw',s+'px'); box.style.setProperty('--ch',Math.round(s/R)+'px'); box.style.setProperty('--cg',g+'px'); box.style.setProperty('--cwd',(best.c*s+(best.c-1)*g+8)+'px'); box.style.setProperty('--cs',Math.min(1.15,s/190).toFixed(3)); }
+try{ const ro=new ResizeObserver(()=>fitWideCards()); ro.observe($('#lcol')); ro.observe($('#cChips')); }catch(e){ addEventListener('resize',fitWideCards); }
 function carDots(){ const box=$('#charList'), d=$('#cDots'); if(!box||!d)return; const cs=[...box.querySelectorAll('.cc')]; if(d.children.length!==cs.length)d.innerHTML=cs.map(()=>'<i></i>').join(''); cs.forEach((e,i)=>d.children[i].classList.toggle('on',e.getAttribute('aria-current')==='true')); }
 function buildCarousel(chars){
   const box=$('#charList');
@@ -5078,7 +5095,7 @@ function buildCarousel(chars){
     el.onclick=()=>{ if(el.getAttribute('aria-current')==='true'&&c.id===selId) charMenu(c.id); else if(carWide()) carPick(box,el); else carCenter2(box,el); };
     box.appendChild(el); }
   if(!same&&chars.length<MAXCHAR){ const el=document.createElement('div'); el.className='cc add'; el.dataset.id=''; el.setAttribute('role','button'); el.innerHTML='<span class="plus2">＋</span><b>새 캐릭터</b><small>'+chars.length+' / '+MAXCHAR+'</small>'; el.onclick=()=>{ if(el.getAttribute('aria-current')==='true'||carWide()) showNew(true); else carCenter2(box,el); }; box.appendChild(el); }
-  carLock=Date.now()+400;
+  carLock=Date.now()+400; fitWideCards();
   const ctr=()=>{ carCenter(box,false); const b=carWide()?(box.querySelector(`.cc[data-id="${selId}"]`)||carFx(box)):carFx(box); box.querySelectorAll('.cc').forEach(e=>e.setAttribute('aria-current',e===b?'true':'false')); carDots(); };
   ctr(); requestAnimationFrame(ctr); setTimeout(ctr,120);
   box.onscroll=()=>{ carFx(box); clearTimeout(carTm); carTm=setTimeout(()=>{ if(!box.clientWidth||Date.now()<carLock)return; const b=carFx(box); if(!b)return; box.querySelectorAll('.cc').forEach(e=>e.setAttribute('aria-current',e===b?'true':'false')); const id=b.dataset.id; carDots();
