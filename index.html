@@ -1148,7 +1148,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.1.0391</div>
+    <div class="ver" id="verT">v0.6.1.0392</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -2867,7 +2867,7 @@ function recalc(){me.D=derive(me); me.hp=Math.min(me.hp??me.D.maxHp,me.D.maxHp);
 function spawnMe(){
   me.x=VX+rand(-30,30); me.y=VY+VR+30; me.dead=false; me.stun=me.slowP=me.poison=0; me.respawn=0; me.cds={}; me.buffs={}; me.aura=me.aura&&SKBY[me.aura]&&SKBY[me.aura].aura&&skLv(me,me.aura)?me.aura:0;
   me.face=-Math.PI/2; me.swing=0; me.atkCd=0; me.pot=3; me.leap=null; me.pickT=null;
-  me.form=''; me.spirit=null; me.formLock=0; me.D=derive(me); me.hp=me.D.maxHp; me.mp=me.D.maxMp; autoSummon(); if(me.cls==='necro')for(const k of MNIDX){ sprGet('mn_'+k); sprGet('mn_'+k+'_atk'); } if(me.cls==='druid')for(const k of ['papa','mama','baby']){ sprGet('mn_'+k); sprGet('mn_'+k+'_atk'); }
+  me.form=''; me.spirit=null; me.formLock=0; me.D=derive(me); me.hp=me.D.maxHp; me.mp=me.D.maxMp; autoSummon(); if(me.cls==='necro')for(const k of MNIDX){ sprGet('mn_'+k); sprGet('mn_'+k+'_atk'); } if(me.cls==='druid'){ for(const k of ['papa','mama','baby']){ sprGet('mn_'+k); sprGet('mn_'+k+'_atk'); } sprGet('spirit_druid'); }
 }
 function zealMul(){const l=me.cls==='pal'?skLv(me,'zeal'):0; return l?{d:1+(15+5*l)/100,t:1+(10+4*l)/100}:{d:1,t:1};}
 function buffDmg(){let v=0; const b=me.buffs; if(b.vil&&b.vil.t>0)v+=b.vil.v; if(b.shout&&b.shout.t>0)v+=b.shout.v; if(b.berserk&&b.berserk.t>0)v+=b.berserk.v; if(b.rage&&b.rage.t>0)v+=b.rage.v; if(b.fury&&b.fury.t>0)v+=b.fury.v; if(b.awk&&b.awk.t>0)v+=b.awk.v; const sb=spiritBuff(); if(sb)v+=sb.dmg; return v;}
@@ -6094,7 +6094,9 @@ function drawSpirit(o,t,left,max){ const a=t*1.6+(o===me?0:2), x=o.x+Math.cos(a)
   const g=ctx.createRadialGradient(x,y,2,x,y,30); g.addColorStop(0,'rgba(200,250,255,.7)'); g.addColorStop(1,'rgba(150,230,255,0)'); ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,30,0,6.283); ctx.fill();
   ctx.strokeStyle='rgba(170,240,255,.14)'; ctx.lineWidth=1.2; ctx.setLineDash([6,8]); ctx.beginPath(); ctx.ellipse(o.x,o.y+10,260,260*.62,0,0,6.283); ctx.stroke(); ctx.setLineDash([]);
   ctx.globalCompositeOperation='source-over'; for(let i=3;i>=1;i--){ const aa=a-i*.25; cball(o.x+Math.cos(aa)*34,o.y-34+Math.sin(aa*1.3)*8,6-i,`rgba(190,245,255,${.25-i*.05})`,0); }
-  cball(x,y-2,9,'#e8fbff',2); ctx.fillStyle='#1b4a5a'; ctx.fillRect(x-3.6,y-4,2.2,3); ctx.fillRect(x+1.4,y-4,2.2,3); cpoly([[x-6,y+3],[x,y+17],[x+6,y+3]],'rgba(220,250,255,.75)',1.4);
+  const SI=sprGet('spirit_druid');   /* 영혼 정령 그림(3칸 대기 시트, 오른쪽을 봄): 도는 방향으로 좌우 반전. 그림이 없으면 예전 도형 */
+  if(SI){ const cw=SI.width/3, fi=Math.floor((((t*1.4+(o===me?0:1))%1)+1)%1*3)%3, h=46, w=h*cw/SI.height; ctx.save(); ctx.translate(x,y); if(Math.sin(a)>0)ctx.scale(-1,1); ctx.drawImage(SI,fi*cw,0,cw,SI.height,-w/2,-h/2,w,h); ctx.restore(); }
+  else { cball(x,y-2,9,'#e8fbff',2); ctx.fillStyle='#1b4a5a'; ctx.fillRect(x-3.6,y-4,2.2,3); ctx.fillRect(x+1.4,y-4,2.2,3); cpoly([[x-6,y+3],[x,y+17],[x+6,y+3]],'rgba(220,250,255,.75)',1.4); }
   ctx.restore(); }
 function drawPlayer(o,isMe,t){
   if(o.x===undefined)return;
