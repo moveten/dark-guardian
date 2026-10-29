@@ -116,7 +116,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
 .sb .cdv{position:absolute;inset:0;background:conic-gradient(rgba(0,0,0,.7) calc(var(--p,0)*1turn),transparent 0)}
 .sb .lvn{position:absolute;bottom:3px;left:0;right:0;font-size:9px;color:var(--mute);font-variant-numeric:tabular-nums}
 .sb .nm{position:relative;font-size:26px;line-height:1}
-.sb.on{background:rgba(70,60,20,.85);box-shadow:0 0 12px var(--c)}
+.sb.on{background:rgba(70,60,20,.85);box-shadow:0 0 25px var(--c)}
 .sb.nomana{opacity:.45}
 .sb.nofm{opacity:.4;filter:grayscale(.8)}
 /* AUTO 버튼 (0 끔 · 1 이동+일반공격 · 2 +스킬 자동) */
@@ -1148,7 +1148,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.1.0388</div>
+    <div class="ver" id="verT">v0.6.1.0389</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1170,7 +1170,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
       <button id="tGear"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8h12l1 12H5L6 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>정비<i class="tbd new" id="tGearB" hidden>NEW</i><i class="tbd pt pt2" id="tGearP" hidden></i></button>
       <button id="tStore"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="5" rx="1.2"/><path d="M4.5 9v10.5h15V9"/><path d="M10 13h4"/></svg>공유보관함</button>
       <button id="bRank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 4h8v5a4 4 0 0 1-8 0V4z"/><path d="M8 6H5v2a3 3 0 0 0 3 3M16 6h3v2a3 3 0 0 1-3 3"/><path d="M12 13v4M8 20h8M10 17h4"/></svg>랭킹</button>
-      <button id="tTown"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5.5 10v10h13V10"/><path d="M10 20v-5.5h4V20"/></svg>마을</button>
+      <button id="tTown"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5.5 10v10h13V10"/><path d="M10 20v-5.5h4V20"/></svg>마을<i class="tbd new" id="tTownB" hidden>NEW</i></button>
     </nav>
   </section>
 
@@ -1306,7 +1306,7 @@ const STAGES=[
 const RARN=['일반','매직','레어','유니크','영웅'], RARC=['#e9e2d4','#7d96ff','#ffe24d','#e4b65a','#ff4f7a'];
 const dn=it=>it.rar>=2?`[${RARN[it.rar]}] ${it.name}`:it.name;
 /* 아이템 설명 이름 줄: 이름 바로 뒤에 등급 별(★1 일반 · ★2 매직 · ★3 레어 · ★4 유니크 · ★5 영웅), 색은 등급색 (★6은 아직 없음) */
-const dnTag=it=>`<span class="rtg">★${Math.min(5,(it.rar|0)+1)}</span>`;
+const dnTag=it=>`<span class="rtg">★${Math.min(5,(it.rar|0)+1)}${it.rar===3&&it.sp?'+':''}</span>`;   /* 특수 유니크(it.sp)는 ★4+ */
 /* 이름 + 등급 별: 마지막 글자와 별을 한 덩어리로 묶어, 이름이 두 줄로 꺾여도 별이 마지막 글자 바로 옆에 붙어요 */
 const nameTag=(pre,name,it)=>{ const c=Array.from(String(name)), l=c.pop()||''; return `${esc(pre+c.join(''))}<span class="nmw">${esc(l)}${dnTag(it)}</span>`; };
 const SLOTN={weapon:'무기',helm:'헬멧',armor:'갑옷',amulet:'목걸이',ring:'반지',shield:'방패'};
@@ -1922,6 +1922,7 @@ function townTick(k,now){ const B=getTown()[k], P=townProd(k); if(!P||(B.lv|0)<1
   if(!(B.t>0)||B.t>now){ B.t=now; return true; }   /* 시계가 뒤로 가도 생산이 망가지지 않게 */
   const c=Math.floor((now-B.t)/P.iv); if(c<=0)return false;
   B.n=Math.min(P.cap,(B.n|0)+c); B.t+=c*P.iv; return true; }
+function townFull(){ try{ const T=getTown(), now=Date.now(); for(const k in TOWN_B){ if(!TOWN_B[k].main)continue; const B=T[k]; if((B.lv|0)<1)continue; const P=townProd(k); if(!P)continue; let n=B.n|0; if(n<P.cap&&B.t>0&&B.t<=now)n+=Math.floor((now-B.t)/P.iv); if(n>=P.cap)return true; } }catch(e){} return false; }   /* 메인 건물 조각이 가득 찬 곳이 있으면 마을 버튼에 NEW */
 const townGold=k=>!!TOWN_B[k].gold&&((getTown()[k].lv|0)<TOWN_GLV);   /* 각성 풍차: Lv.1~5까지는 골드(건설 50,000G · 올릴 때 3만G부터 +1만G씩), Lv.6으로 올릴 때부터는 ✦ 각성 그림자 조각 */
 const townCost=k=>{ const lv=getTown()[k].lv|0; if(townGold(k))return lv<1?TOWN_GBUILD:20000+10000*lv; return lv<1?TOWN_BUILD:TOWN_B[k].gold?100+50*(lv-TOWN_GLV):100+50*lv; };
 /* 건설/업그레이드: 공유보관함 조각으로만 결제. 'ok' 성공 · 'lack' 조각 부족 · 'max' 더 못 올림 */
@@ -4627,7 +4628,7 @@ function renderBag(){
   shardAdd(me,0); shardAdd(me,0,'ashard'); markTabs(); sheetHead();
   const eqOrder=['weapon','armor','helm','amulet','ring1','ring2'].concat(['shield']);
   let h='<div class="bagtop" style="display:flex;flex-direction:column;gap:10px;min-width:0"><div class="eq">'+eqOrder.map(k=>{const it=me.eq[k]; return `<div style="position:relative">${cellHtml(it,'slot',`data-eq="${k}"`)}<div class="sl" style="position:absolute;bottom:2px;left:0;right:0;font-size:9.5px;color:var(--mute);text-align:center;pointer-events:none">${eqLbl(k)}</div></div>`;}).join('')+'</div>';
-  h+=`<div class="meta" style="font-size:12px;color:var(--mute)">⚔️ 전투력 <b style="color:#ffd84a">${calcCP(me).toLocaleString()}</b></div><div class="bagbtns" style="display:flex;flex-wrap:nowrap;gap:4px"><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap" data-sort="${SORTM[(sortCur()+1)%3]}">정렬(${SORTN[sortCur()]})</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap" id="aBulk">일괄 판매</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap;${asLv>=0?`border-color:${RARC[asLv]};color:${RARC[asLv]};background:${['rgba(233,226,212,.14)','rgba(90,120,255,.28)','rgba(255,214,60,.24)'][asLv]};box-shadow:0 0 8px ${['rgba(233,226,212,.3)','rgba(110,140,255,.6)','rgba(255,214,60,.55)'][asLv]};font-weight:800`:''}" id="aAuto">자동판매 ${ASN[asLv+1]}</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap;${syLv>=0?`border-color:#c9a0ff;color:#d9b8ff;background:rgba(150,90,255,.22);box-shadow:0 0 8px rgba(150,90,255,.5);font-weight:800`:''}" id="aSyn" aria-pressed="${syLv>=0}">자동합성 ${syLv>=0?'ON':'OFF'}</button></div>`;
+  h+=`<div class="meta" style="font-size:12px;color:var(--mute)">⚔️ 전투력 <b style="color:#ffd84a">${calcCP(me).toLocaleString()}</b> <span style="color:#6b5f50">·</span> 🛡️ 장비 Lv 합 <b style="color:#ffd84a">${eqSum(me.eq)}</b></div><div class="bagbtns" style="display:flex;flex-wrap:nowrap;gap:4px"><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap" data-sort="${SORTM[(sortCur()+1)%3]}">정렬(${SORTN[sortCur()]})</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap" id="aBulk">일괄 판매</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap;${asLv>=0?`border-color:${RARC[asLv]};color:${RARC[asLv]};background:${['rgba(233,226,212,.14)','rgba(90,120,255,.28)','rgba(255,214,60,.24)'][asLv]};box-shadow:0 0 8px ${['rgba(233,226,212,.3)','rgba(110,140,255,.6)','rgba(255,214,60,.55)'][asLv]};font-weight:800`:''}" id="aAuto">자동판매 ${ASN[asLv+1]}</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap;${syLv>=0?`border-color:#c9a0ff;color:#d9b8ff;background:rgba(150,90,255,.22);box-shadow:0 0 8px rgba(150,90,255,.5);font-weight:800`:''}" id="aSyn" aria-pressed="${syLv>=0}">자동합성 ${syLv>=0?'ON':'OFF'}</button></div>`;
   h+='<div class="inv">'+me.inv.map((it,i)=>cellHtml(it,'cell',`data-inv="${i}"`)).join('')+'</div>';
   const b=$('#sheetB'); b.className='sbody bag'; b.innerHTML=h; fitInv(); try{ showPop(detailHtml(),curCmpHtml()); }catch(e){ console.error(e); selItem=null; showPop(''); }
   b.querySelectorAll('[data-eq]').forEach(el=>el.onclick=()=>{const k=el.dataset.eq; if(me.eq[k]){selItem={it:me.eq[k],eq:k};renderBag();}});
@@ -5270,7 +5271,7 @@ function renderStagePanel(){
       if(ban.dataset.k!==key||!ban.querySelector('.ban.cu')){ ban.dataset.k=key; ban.innerHTML=(selStage>0?banCard(cur,selStage-1,'bk pv'):'')+(selStage+1<STAGES.length?banCard(cur,selStage+1,'bk nx'):'')+banCard(cur,selStage,'cu'); fitBan(ban); } } } }
     const chp=$('#cChips'); if(chp){ if(!cur){ chp.hidden=true; } else { const pt2=(cur.statPts|0)+(cur.skillPts|0); chp.hidden=false; chp.innerHTML=`<span>보유 골드<b>💰 ${(cur.gold|0).toLocaleString()}</b></span><span class="${gw?'warn':''}">내 장비 Lv 합<b>${gp0?gp0.sum:'-'}</b></span><button type="button" id="cMap" class="${stageClear>(+lsGet('dkdef2.mapSeen')||0)&&stageClear<STAGES.length?'new':''}">전체맵<b>🗺️ 보기</b></button>`; } } }
   { const cur=chars.find(c=>c.id===selId), nw=!!cur&&(cur.inv||[]).some(x=>x&&x.isNew), pt=cur?(cur.statPts|0)+(cur.skillPts|0):0;
-    $('#tGearB').hidden=!nw; $('#menuB').hidden=!mailUnreadAll(chars); const pb=$('#tGearP'); pb.hidden=!pt; pb.textContent=pt; for(const id of ['tGear','tStore'])$('#'+id).disabled=!cur; }
+    $('#tGearB').hidden=!nw; { const tb=$('#tTownB'); if(tb)tb.hidden=!townFull(); } $('#menuB').hidden=!mailUnreadAll(chars); const pb=$('#tGearP'); pb.hidden=!pt; pb.textContent=pt; for(const id of ['tGear','tStore'])$('#'+id).disabled=!cur; }
   { const hp=$('#bigHero'); if(hp){ const cur=chars.find(c=>c.id===selId); hp.hidden=!cur; if(cur){ const im=$('#bhImg'), u=`img/hero_${cur.cls}.png`; if(im.getAttribute('src')!==u){ im.style.display=''; im.onerror=()=>{ im.style.display='none'; }; im.src=u; } $('#bhName').textContent=dispName(cur); $('#bhSub').textContent=`${CLASSES[cur.cls].n} · Lv ${cur.lvl}`; } } }
   storyReUi(); $('#bSolo').disabled=!selId; $('#bShop').disabled=!selId; if(room){ $('#bHost').disabled=!selId; $('#bJoin').disabled=!selId; }
 }
@@ -5283,6 +5284,7 @@ function renderTitle(){
   rkSubmit(chars,false); setTimeout(rkPrefetch,1200); setTimeout(nameSweep,900);
 }
 function renderClassCards(){ renderTitle(); }
+setInterval(()=>{ try{ const tb=$('#tTownB'); if(tb&&!document.hidden)tb.hidden=!townFull(); }catch(e){} },30000);   /* 마을 NEW 표시: 타이틀을 켜 둔 채로 조각이 차도 따라가게 */
 function modal(html,bind){ const m=$('#modal'); m.className='ipop mdl'; m.innerHTML=`<div class="card">${html}</div>`; m.hidden=false; m.onclick=e=>{ if(e.target===m)closeModal(); }; if(bind)bind(m); }
 function closeModal(){ const m=$('#modal'); m.hidden=true; m.innerHTML=''; }
 const cleanName=v=>String(v||'').replace(/[<>&"]/g,'').trim().slice(0,8);
