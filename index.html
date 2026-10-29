@@ -1148,7 +1148,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.1.0392</div>
+    <div class="ver" id="verT">v0.6.1.0393</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1464,8 +1464,8 @@ const AFX=[
  {t:'dex',n:'민첩 +{v}',sl:'*',r:()=>[1,10]},
  {t:'vit',n:'체력 +{v}',sl:'*',r:()=>[1,10]},
  {t:'ene',n:'에너지 +{v}',sl:'*',r:()=>[1,10]},
- {t:'life',n:'생명력 +{v}',sl:'*',r:i=>[4,10+2*i]},
- {t:'mana',n:'마나 +{v}',sl:'*',r:i=>[4,10+2*i]},
+ {t:'life',n:'생명력 +{v}',sl:'*',r:i=>[25,Math.max(50,30+2*i)]},
+ {t:'mana',n:'마나 +{v}',sl:'*',r:i=>[25,Math.max(50,30+2*i)]},
  {t:'def',n:'방어력 +{v}',sl:'helm armor ring amulet',r:i=>[2,5+i]},
  {t:'ias',n:'공격 속도 +{v}%',sl:'weapon ring amulet helm',r:()=>[5,15]},
  {t:'ms',n:'이동 속도 +{v}%',sl:'amulet ring',r:()=>[3,10]},
@@ -1664,12 +1664,12 @@ const SPFX={
  rage:{n:'광전사의 훈장',slot:'amulet',base:'목걸이',il:12,fx:['str','vit','dmgPct','life','crit'],d:'공격 속도 +15%, 생명력 흡수 +5%',ap:d=>{d.ias+=15;d.ls+=5;}},
  eye:{n:'영겁의 눈',slot:'amulet',base:'목걸이',il:10,d:'공격력 +99, 치명타 확률 +5%',ap:d=>{d.dmg+=99;d.crit+=5;}},
  /* ===== 보스 이름 유니크 (이름·옵션 종류 고정, 수치만 변동 · 개별 스킬 옵션 없음) ===== */
- rfrost:{n:'프로스티아의 반지',slot:'ring',base:'반지',il:29,fx:['ene','mana','mr','def','vit'],d:'서리의 가호: 스킬 재사용 대기시간 -6%, 받는 피해 -3%',ap:d=>{d.cdr+=.06;d.dr+=.03;}},
- rblood:{n:'사나리아의 반지',slot:'ring',base:'반지',il:64,fx:['all','life','dmgPct','crit','vit'],d:'핏빛 갈증: 생명력 흡수 +4%, 초당 생명력 회복 +0.3%',ap:d=>{d.ls+=4;d.regen+=.003;}},
- rvoid:{n:'니아의 반지',slot:'ring',base:'반지',il:76,fx:['all','dmgPct','ias','crit','ene'],d:'공허의 허기: 적을 처치할 때마다 마나 8 회복, 마나 +40',ap:d=>{d.mana+=40;}},
- aignis:{n:'이그니스의 목걸이',slot:'amulet',base:'목걸이',il:34,fx:['str','vit','life','dmgPct','def'],d:'용암의 심장: 생명력 +80, 받는 피해 -4%',ap:d=>{d.life+=80;d.dr+=.04;}},
- asekr:{n:'세케르의 목걸이',slot:'amulet',base:'목걸이',il:46,fx:['dex','ms','mf','life','def'],d:'모래 폭풍: 이동 속도 +8%, 획득범위 +15',ap:d=>{d.ms+=8;d.pr+=15;}},
- adeath:{n:'데스락의 목걸이',slot:'amulet',base:'목걸이',il:70,fx:['all','crit','dmgPct','ias','ls'],d:'죽음의 징조: 치명타 확률 +5%, 생명력 흡수 +3%',ap:d=>{d.crit+=5;d.ls+=3;}},
+ rfrost:{n:'프로스티아의 반지',slot:'ring',base:'반지',il:29,fx:['ene','mana','mr','def','vit'],d:'서리의 가호: 스킬 재사용 대기시간 -10%, 받는 피해 -6%',ap:d=>{d.cdr+=.1;d.dr+=.06;}},
+ rblood:{n:'사나리아의 반지',slot:'ring',base:'반지',il:64,fx:['all','life','dmgPct','crit','vit'],d:'핏빛 갈증: 생명력 흡수 +5%, 공격력 +50',ap:d=>{d.ls+=5;d.dmg+=50;}},
+ rvoid:{n:'니아의 반지',slot:'ring',base:'반지',il:76,fx:['all','dmgPct','ias','crit','ene'],d:'공허의 허기: 적을 처치할 때마다 마나 15 회복, 마나 소모 -10%',ap:d=>{}},
+ aignis:{n:'이그니스의 목걸이',slot:'amulet',base:'목걸이',il:34,fx:['str','vit','life','dmgPct','def'],d:'용암의 심장: 모든 스킬 +2, 받는 피해 -5%',ap:d=>{d.cls+=2;d.dr+=.05;}},
+ asekr:{n:'세케르의 목걸이',slot:'amulet',base:'목걸이',il:46,fx:['dex','ms','mf','life','def'],d:'모래 폭풍: 이동 속도 +8%, 획득범위 +20',ap:d=>{d.ms+=8;d.pr+=20;}},
+ adeath:{n:'데스락의 목걸이',slot:'amulet',base:'목걸이',il:70,fx:['all','crit','dmgPct','ias','ls'],d:'죽음의 징조: 치명타 확률 +5%, 적을 처치할 때마다 마나 8 회복',ap:d=>{d.crit+=5;}},
  /* ===== 달빛 도박장 전용 '행운의 도박꾼 세트' — 아이템 레벨 56 · 착용 Lv 30 · 능력치 요구 없음 · 도박장에서만 나와요(il:999 = 일반 드랍 제외) ===== */
  cas_wpn:{n:'운명의 주사위 단검',slot:'weapon',base:'낡은 단검',il:999,cas:1,d:'치명타 피해 +50%',ap:()=>{}},
  cas_armor:{n:'딜러의 조끼',slot:'armor',base:'가죽 갑옷',il:999,cas:1,d:'포커페이스: 받는 피해 -8%',ap:d=>{d.dr+=.08;}},
@@ -1748,7 +1748,14 @@ function sumFix(it){ if(!it||it.rar!==3||it.sf||it.uv||it.sp||!SM_SL.has(it.slot
   const ord=smOrder(it);
   for(let i=0;i<it.aff.length;i++){ const a=it.aff[i]; if(!a||(a.t!=='sm'&&a.t!=='smhp'))continue; const have=new Set(it.aff.map(x=>x&&x.t)), n=ord.find(o=>!have.has(o.t)); if(n)it.aff[i]=rollAff(n,3,it.ilvl||1,1.3,undefined,null,it.slot); }
   it.aff=it.aff.filter(a=>a&&a.t!=='sm'&&a.t!=='smhp'); it.sf=1; return true; }
-function smMigrate(p){ let ch=false; const f=it=>{ if(sumFix(it))ch=true; }; p.inv.forEach(f); for(const k in p.eq)f(p.eq[k]); if(mailDeliver(p))ch=true; if(ch){ try{ lsSet(charKey(p.id),JSON.stringify(packChar(p))); }catch(e){} } }   /* 바뀌었으면 바로 저장(굴린 수치가 로드 때마다 달라지지 않게) */
+/* 옵션 개편 보정(v0.6.1.0393): ① 특수 유니크의 모든/직업 스킬 → +2 ② 일반 유니크 갑옷·투구·목걸이·반지의 모든/직업 스킬 → +1 ③ 생명력·마나 옵션 범위가 [4, 10+2i] → [25, max(50, 30+2i)]로 바뀌어, 예전 수치는 같은 '운' 위치로 새 범위에 다시 굴림. 가방·장착·공유보관함 공통, 한 번만(it.of2) */
+function optFix2(it){ if(!it||it.of2||!Array.isArray(it.aff))return false; it.of2=1; if(it.rar===4||it.mat||it.rar>3||it.rar<0)return true;
+  const S=it.sp&&SPFX[it.sp], spc=!!S&&!S.hero&&!S.cas, i=it.ilvl||1, hiO=10+2*i, hiN=Math.max(50,30+2*i);
+  for(const a of it.aff){ if(!a)continue;
+    if(a.t==='all'||a.t==='cls'){ if(spc)a.v=2; else if(it.rar===3&&!it.sp&&UQ1.has(it.slot))a.v=1; }
+    else if(a.t==='life'||a.t==='mana'){ const q=Math.max(0,Math.min(1,((a.v|0)-4)/Math.max(1,hiO-4))); a.v=Math.round(25+q*(hiN-25)); } }
+  return true; }
+function smMigrate(p){ let ch=false; const f=it=>{ if(sumFix(it))ch=true; if(optFix2(it))ch=true; }; p.inv.forEach(f); for(const k in p.eq)f(p.eq[k]); if(mailDeliver(p))ch=true; if(ch){ try{ lsSet(charKey(p.id),JSON.stringify(packChar(p))); }catch(e){} } }   /* 바뀌었으면 바로 저장(굴린 수치가 로드 때마다 달라지지 않게) */
 /* 유니크 이하 아이템 레벨 상한(100) 이전에 얻은 101~102 아이템은 100으로 맞추고 기본 수치를 다시 계산 */
 function ilCapFix(it){ if(!it||it.mat||!(it.rar>=0&&it.rar<=3)||(it.ilvl|0)<=100)return false; it.ilvl=100; try{ baseFix(it); }catch(e){} return true; }
 function heroFix(it){ const H=it&&it.rar===4&&it.sp&&HEROI[it.sp]; if(!H||it.hv===2)return; const IL=it.ilvl||HERO_IL;
@@ -1804,6 +1811,7 @@ function statLack(it){ const r=reqStats(it), out=[]; if(!me||!me.stats)return ou
 function reqHtml(it){ const r=reqStats(it); const lv=me&&me.lvl<reqLv(it); let h=`<span style="color:${lv?'#e07060':'#9fd18b'}">필요 레벨 ${reqLv(it)}${lv?` (현재 ${me.lvl})`:''}</span>`;
   for(const s in r){ const c=curStat(s), bad=c<r[s]; h+=` · <span style="color:${bad?'#e07060':'#9fd18b'}">${STN[s]} ${r[s]}${bad?` (현재 ${c})`:''}</span>`; } return h; }
 const reqLv=it=>it.req||Math.max(1,Math.round((it.ilvl||1)*.6)+[0,0,1,2][Math.max(0,it.rar|0)]);
+const UQ1=new Set(['armor','helm','amulet','ring']);
 function genItem(rar,ilvl,slot,baseName,forceSp){
   if(rar<=3)ilvl=Math.min(ilvl|0||1,UIL_MAX);   /* 일반~유니크는 아이템 레벨 최대 100 (5스테이지 icap 102여도) */
   slot=slot||pick(['weapon','weapon','helm','armor','amulet','ring','ring','shield','random']); if(slot==='random')slot=pick(['weapon','helm','armor','amulet','ring','shield']);   /* random: 6부위 균등 */
@@ -1829,7 +1837,8 @@ function genItem(rar,ilvl,slot,baseName,forceSp){
       const sa=skillPick(slot,rar,rng), gp=(slot==='shield'&&(fc==='necro'||fc==='druid'))?[AFXBY[rng()<.5?'sm':'smhp']]:[];   /* 강령술사·드루이드 유니크 보조장비(등불·토템): 소환수 피해 / 소환수 생명력 중 하나는 반드시 */
       pool=sa.concat(gp,pool.slice(0,5-sa.length-gp.length)); }
     if(spk&&SPFX[spk].fx){ const pk=[]; let hasAll=false,hasSk=false; for(const a of pool){ if(pk.length>=5)break; if(a.t==='all'&&hasSk)continue; if(a.t==='sk'&&hasAll)continue; if(a.t==='all')hasAll=true; if(a.t==='sk')hasSk=true; pk.push(a); } pool=pk; }
-    for(const a of pool.slice(0,5)){ const o=rollAff(a,rar,ilvl,q,rng,fc,slot); if(o.t==='cls'&&spk&&SPFX[spk].fcls)o.cls=SPFX[spk].fcls; it.aff.push(o); qs.push(rollAff.lq); }
+    for(const a of pool.slice(0,5)){ const o=rollAff(a,rar,ilvl,q,rng,fc,slot); if(o.t==='cls'&&spk&&SPFX[spk].fcls)o.cls=SPFX[spk].fcls; if(o.t==='all'||o.t==='cls'){ if(spk)o.v=2; else if(UQ1.has(slot))o.v=1; }   /* 특수 유니크: 모든/직업 스킬 항상 +2 · 일반 유니크 갑옷·투구·목걸이·반지: 항상 +1 (무기·보조장비는 1~2) */
+      it.aff.push(o); qs.push(rollAff.lq); }
   } else {
     const n=rar<0?0:rar===1?1:rar+1, used=new Set(); let g=0;
     if(rar>=1) for(const a of skillPick(slot,rar,Math.random)){ used.add(a.t); it.aff.push(rollAff(a,rar,ilvl,q,undefined,fc,slot)); qs.push(rollAff.lq); }
@@ -1844,6 +1853,7 @@ function genItem(rar,ilvl,slot,baseName,forceSp){
   it.req=base+(rar===2?(qual<.5?0:qual<.8?1:2):rar===3?(qual<.6?1:2):0);
   if(rar<0) it.rar=0;
   if(rar!==3) it.name=nameItem(it,rar);
+  it.of2=1;   /* 새 규칙으로 만든 아이템 표시(옵션 보정 대상 아님) */
   return it;
 }
 const NOUN_FULL={'영혼 등불':'영혼 등불','망령의 등불':'망령 등불'};   /* 강령술사 보조무기는 '…의 등불'로만 나오면 혼등과 헷갈려서 단계 이름을 살려 부름 */
@@ -2824,7 +2834,7 @@ function onKill(x,y,xp,tier,ilvl,type,lf){
   spark(x,y,col,bs?60:14); spark(x,y,'#5a0f0c',bs?40:8); if(tier>=1)burst(x,y,col,bs?36:16,bs?380:280);   /* 정예·보스는 조각이 튀어요 */
   if(bs){G.shake=1;sfx('boss');} else sfx('kill');
   me.kills=(me.kills||0)+1; G.stKills=(G.stKills||0)+1; bumpCombo();
-  { const sp=me.D&&me.D.sp; if(sp&&!me.dead){ if(sp.bloodoath)me.mp=Math.min(me.D.maxMp,me.mp+10); if(sp.hring)me.hp=Math.min(me.D.maxHp,me.hp+me.D.maxHp*.02*sp.hring); if(sp.necro)me.mp=Math.min(me.D.maxMp,me.mp+15); if(sp.rvoid)me.mp=Math.min(me.D.maxMp,me.mp+8); } }
+  { const sp=me.D&&me.D.sp; if(sp&&!me.dead){ if(sp.bloodoath)me.mp=Math.min(me.D.maxMp,me.mp+10); if(sp.hring)me.hp=Math.min(me.D.maxHp,me.hp+me.D.maxHp*.02*sp.hring); if(sp.necro)me.mp=Math.min(me.D.maxMp,me.mp+15); if(sp.rvoid)me.mp=Math.min(me.D.maxMp,me.mp+15); if(sp.adeath)me.mp=Math.min(me.D.maxMp,me.mp+8); } }
   gainXp(Math.round(xp*comboMul()));
   { const RK=MT[type].raid; if(RK==='awk'){ const n=ri(3,7); shardAdd(me,n,'ashard'); later(.4,()=>toast(`✦ 각성 그림자 조각 +${n} (보유 ${shardCount(me,'ashard')})${(me.ashard|0)>0?' · 가방이 가득 차서 일부는 보관 중':''}`,'#d8b0ff')); if(Math.random()<AW_P){ const hit=genHero(awKey(pick(['weapon','helm','armor','amulet','ring','shield']))); if(hit)dropItem(hit,x+rand(-20,20),y+rand(-20,20)); } saveChar(); }
     if(RK&&RK!=='awk'){ const n=ri(1,3); shardAdd(me,n); later(.4,()=>toast(`🌑 그림자 조각 +${n} (보유 ${shardCount(me)})${(me.shard|0)>0?' · 가방이 가득 차서 일부는 보관 중':''}`,'#c9a0ff'));
@@ -3060,7 +3070,7 @@ const mobHpP=m=>m.hpp!==undefined?m.hpp/100:m.hp/Math.max(1,m.max);   /* 남은 
 function execTarget(x,y,range,lowHp){ let best=null,bk=-1,bd=1e9,bp=2; for(const m of G.mobs){ if(m.dead)continue; const d=hyp(m.x-x,m.y-y)-m.r; if(d>=range)continue; const k=m.boss?2:m.elite?1:0, p=lowHp?Math.round(mobHpP(m)*1000):0;
     if(k>bk||(k===bk&&(p<bp||(p===bp&&d<bd)))){ best=m; bk=k; bd=d; bp=p; } } return best; }   /* 우두머리>정예>일반, 같은 등급이면(lowHp) 남은 체력%가 가장 낮은 적, 비슷하면 가까운 적 */
 function mobsIn(x,y,r){return G.mobs.filter(m=>!m.dead&&hyp(m.x-x,m.y-y)<r+m.r);}
-function mpCost(s,lv){ return s.mp?Math.round(s.mp*(1+.15*(Math.max(1,lv)-1))*(me&&me.D&&me.D.sp&&(me.D.sp.tome||me.D.sp.hoff_sorc)?.85:1)*(me&&me.D&&me.D.sp&&me.D.sp.awoff_sorc?.8:1)):0; }
+function mpCost(s,lv){ return s.mp?Math.round(s.mp*(1+.15*(Math.max(1,lv)-1))*(me&&me.D&&me.D.sp&&(me.D.sp.tome||me.D.sp.hoff_sorc)?.85:1)*(me&&me.D&&me.D.sp&&me.D.sp.rvoid?.9:1)*(me&&me.D&&me.D.sp&&me.D.sp.awoff_sorc?.8:1)):0; }
 const SKS={raven:'aura',hunt:'boss',bearform:'shout',bite:'slam',roar:'shout',spirit:'holy',fury:'shout',bears:'boss',bash:'slam',smite:'holy',rend:'swing',shout:'shout',whirl:'swing',leap:'slam',berserk:'shout',quake:'boom',hammer:'holy',judgment:'holy',fireball:'fire',frostnova:'ice',chain:'zap',barrier:'holy',meteor:'fire',blizzard:'ice',ragnarok:'boom',divine:'holy',armageddon:'fire',soulbolt:'bolt',guardian:'aura',spiritcaster:'cast',soulburst:'boom',execute:'shout',colossus:'boom',pact:'holy',lord:'boss'};
 function tryUse(key,hold){
   if(me.dead||me.leap||!G.inGame||G.paused)return;
@@ -4562,7 +4572,7 @@ const STORE_N=100, STORE_KEY='dkdef2.store', STORE_IC=`<svg viewBox="0 0 24 24" 
 let STORE=null, satSeq=0;
 function loadStore(){ let o=null; try{ o=JSON.parse(lsGet(STORE_KEY)||'null'); }catch(e){} if(!o||typeof o!=='object')o={};
   const inv=Array.isArray(o.inv)?o.inv.slice(0,STORE_N):[]; while(inv.length<STORE_N)inv.push(null);
-  let ch=false; for(const it of inv){ if(it){ if(!Array.isArray(it.aff))it.aff=[]; try{ if(ilCapFix(it))ch=true; heroFix(it); newOptFix(it); lanternFix(it); if(sumFix(it))ch=true; if(baseFix(it))ch=true; if(nameFix(it))ch=true; }catch(e){} } }
+  let ch=false; for(const it of inv){ if(it){ if(!Array.isArray(it.aff))it.aff=[]; try{ if(ilCapFix(it))ch=true; heroFix(it); newOptFix(it); lanternFix(it); if(sumFix(it))ch=true; if(optFix2(it))ch=true; if(baseFix(it))ch=true; if(nameFix(it))ch=true; }catch(e){} } }
   if(ch){ try{ lsSet(STORE_KEY,JSON.stringify({inv,gold:Math.max(0,o.gold|0)})); }catch(e){} }
   return {inv,gold:Math.max(0,o.gold|0),shard:0}; }
 function getStore(){ if(!STORE)STORE=loadStore(); return STORE; }
