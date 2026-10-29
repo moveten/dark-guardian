@@ -5343,18 +5343,7 @@ $('#bNew').onclick=()=>showNew(true);
 $('#bNewBack').onclick=()=>{ show('#sTitle'); renderTitle(); };
 $('#bNewCl').onclick=()=>cloudModal();
 const RENCOST=1000000;
-/* 이름 변경창에 특정 이름을 넣으면 이름은 바뀌지 않고(골드도 안 듦) 아래 효과만 적용돼요. 반환값=창에 띄울 글(치트키가 아니면 null) */
-const CHEATS=['쇼미더머니','달빛조각사','구십구강화몽둥이','나혼자만레벨업','수호자의어둠'];
-function nameCheat(id,v){
-  if(!CHEATS.includes(v))return null;
-  const q=(me&&me.id===id)?me:loadChar(id); if(!q)return '캐릭터를 찾지 못했어요';
-  let msg=v+' 치트키 적용됨.';
-  if(v==='쇼미더머니'){ q.gold=(q.gold|0)+5000000; }
-  else if(v==='달빛조각사'){ const cp={inv:JSON.parse(JSON.stringify(q.inv)),shard:0,ashard:0}; shardAdd(cp,999); shardAdd(cp,999,'ashard'); if(cp.shard||cp.ashard)return '가방에 빈 칸이 없어서 적용되지 않았어요'; shardAdd(q,999); shardAdd(q,999,'ashard'); }   /* 그림자 조각 + 각성 그림자 조각 */
-  else if(v==='구십구강화몽둥이'){ for(let i=50;i<60&&i<q.inv.length;i++){ const it=q.inv[i]; if(it&&!isShard(it)&&canEnh(it)){ it.enh=MAXENH; enhApply(it); } } }   /* 가방 51~60번째 칸 */
-  else if(v==='나혼자만레벨업'){ const L=q.lvl|0, T=Math.min(99,L+20); if(L>=99)return '이미 최대 레벨이라 적용되지 않았어요'; let sum=-(q.xp|0); for(let l=L;l<T;l++)sum+=need(l); q.xp=(q.xp|0)+Math.max(0,sum); }   /* 현재 Lv+20(최대 99)이 되는 데 필요한 경험치만큼 추가 — 다음 전투에서 경험치를 얻을 때 gainXp 가 연속 레벨업 처리 */
-  else if(v==='수호자의어둠'){ if((q.clear|0)>=15)return '이미 3-5 이상 진행한 캐릭터라 적용되지 않았어요'; q.clear=15; msg='어둠의수호자 치트키 적용됨.'; }   /* 3-5(15번째 스테이지)까지 클리어 */
-  lsSet(charKey(q.id),JSON.stringify(packChar(q))); renderTitle(); return msg; }
+function nameCheat(){ return null; }   /* 비활성화됨 */
 function charMenu(id){
   const p=loadChar(id); if(!p)return;
   modal(`<h3>${clsIc(p.cls,26)} ${esc(dispName(p))} <small style="color:var(--mute);font-weight:400">Lv ${p.lvl} · ${CLASSES[p.cls].n}</small></h3><div class="col"><button class="btn primary" id="cmGear">🎒 장비 · 능력치 정비</button><button class="btn" id="cmShop">🛒 상점</button><button class="btn" id="cmTut">📖 모험 안내</button><button class="btn" id="cmRen">✏️ 이름 변경 (${RENCOST.toLocaleString()}G)</button><button class="btn" id="cmDel">🗑️ 삭제</button><button class="btn" id="cmX">닫기</button></div>`,m=>{
