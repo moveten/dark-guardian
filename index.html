@@ -1148,7 +1148,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.2.0393</div>
+    <div class="ver" id="verT">v0.6.2.0394</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -5586,10 +5586,12 @@ function renderTown(){ townUpTick(); const S=getStore(), now=Date.now(); let ch=
   { const tc=b.querySelector('#tCas'); if(tc)tc.onclick=()=>{ sfx('ui'); casinoModal(); }; }
   b.querySelectorAll('[data-tbub]').forEach(e=>e.onclick=()=>{ const k=e.dataset.tbub; if(TOWN_B[k].lab)labInfo(); else if(TOWN_B[k].stat&&!(getTown()[k].n|0))townInfo(k); else townPick(k); });
   b.querySelectorAll('[data-tbld]').forEach(e=>e.onclick=()=>{ if(TOWN_B[e.dataset.tbld].lab)labInfo(); else townInfo(e.dataset.tbld); });
-  clearInterval(townTimer); townTimer=setInterval(townLive,1000); }
+  townClamp(); clearInterval(townTimer); townTimer=setInterval(townLive,1000); }
+/* 건물 이름표(레벨·업그레이드 남은 시간)가 마을 지도 밖으로 잘리지 않게, 넘치면 이름표만 안쪽으로 밀어 줘요 */
+function townClamp(){ try{ const mp=document.querySelector('#sheetB .tmap'); if(!mp)return; const M=mp.getBoundingClientRect(); mp.querySelectorAll('.tlb').forEach(e=>{ e.style.transform=''; const r=e.getBoundingClientRect(); if(!r.width)return; let dx=0; if(r.right>M.right-4)dx=M.right-4-r.right; if(r.left+dx<M.left+4)dx=M.left+4-r.left; if(dx)e.style.transform='translateX('+Math.round(dx)+'px)'; }); }catch(e){} }
 function townLive(){ if(sheetMode!=='town'||$('#sheet').hidden){ clearInterval(townTimer); townTimer=0; return; }
   { const fin=townUpTick(); if(fin.length){ for(const k of fin){ toast(`✅ ${TOWN_B[k].n} Lv.${getTown()[k].lv} 업그레이드 완료!`,'#9fe08a'); } try{ sfx('rare'); }catch(e){} renderTown(); return; }
-    for(const e of document.querySelectorAll('#sheetB [data-tul]'))e.textContent='⏳ '+labLeft(getTown()[e.dataset.tul].u-Date.now()); }
+    for(const e of document.querySelectorAll('#sheetB [data-tul]'))e.textContent='⏳ '+labLeft(getTown()[e.dataset.tul].u-Date.now()); townClamp(); }
   const now=Date.now(); let ch=false; for(const k of ['tw','al','mill','lab']){ if(k==='lab'){ for(const q of labTick()){ toast(`✅ ${LAB_R[q].n} Lv.${getTown().lab[q].l} 연구 완료!`,'#9fe08a'); try{ sfx('rare'); }catch(e){} } } else if(townTick(k,now))ch=true; const e=document.querySelector(`#sheetB [data-tbub="${k}"]`), bb=townBub(k); if(e&&bb){ e.textContent=bb.tx; e.className='tbub '+bb.cls; } } if(ch)saveTown(); }
 const labLeft=ms=>{ const t=Math.max(0,Math.ceil(ms/1000)), h=Math.floor(t/3600), m=Math.floor(t%3600/60), q=t%60, p=n=>String(n).padStart(2,'0'); return h?`${h}:${p(m)}:${p(q)}`:`${m}:${p(q)}`; };
 const labTm=m=>m<=0?'즉시':m>=60?(m%60?`${Math.floor(m/60)}시간 ${m%60}분`:`${m/60}시간`):`${m}분`;
