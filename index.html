@@ -1148,7 +1148,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.2.0394</div>
+    <div class="ver" id="verT">v0.6.2.0395</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -6013,7 +6013,17 @@ function drawMob(m,t){
 function lvTier(l){ return l>=20?4:l>=15?3:l>=10?2:l>=5?1:0; }
 /* 오라 마법진: 시전자는 큰 진, 버프를 받는 동료는 작은 진 */
 const AURC={healaura:'155,227,138',might:'255,170,80',holyfire:'255,190,70',guard:'143,182,255'}, AURS={healaura:[6,2],might:[5,2],holyfire:[7,3],guard:[8,3]};
+/* 오라 그림(img/aura_sheet.webp, 4칸×2줄 · 검은 바탕): 윗줄 = 바깥 링, 아랫줄 = 안쪽 문양 (신념·치유·수호·성화 순, 각 칸의 정중앙이 링 중심). 겹쳐 더하기(lighter)로 그리고, 바깥 링은 시계 방향·안쪽 문양은 반대로 천천히 돌려요. 그림이 없으면 아래 기존 선 그리기로 */
+const AUR_IDX={might:0,healaura:1,guard:2,holyfire:3}; let AUR_IMG=null;
+function auraImg(){ if(AUR_IMG===null){ AUR_IMG=new Image(); AUR_IMG.onload=()=>{ AUR_IMG.ok=true; }; AUR_IMG.onerror=()=>{ AUR_IMG.bad=true; }; AUR_IMG.src='img/aura_sheet.webp'; } return AUR_IMG.ok?AUR_IMG:null; }
+function auraArt(x,y,r,t,type,al){ const im=auraImg(), c=AUR_IDX[type]; if(!im||c===undefined)return false;
+  const tw=im.naturalWidth/4, th=im.naturalHeight/2, D1=r*2.7, D2=r*1.8, pul=.9+.1*Math.sin(t*2.4);
+  ctx.save(); ctx.translate(x,y+10); ctx.scale(1,.62); ctx.globalCompositeOperation='lighter'; ctx.globalAlpha=Math.min(1,al*pul);
+  ctx.save(); ctx.rotate(t*.35); ctx.drawImage(im,c*tw,0,tw,th,-D1/2,-D1/2,D1,D1); ctx.restore();
+  ctx.save(); ctx.rotate(-t*.6); ctx.drawImage(im,c*tw,th,tw,th,-D2/2,-D2/2,D2,D2); ctx.restore();
+  ctx.restore(); return true; }
 function runeCircle(x,y,r,col,t,type,al){
+  if(auraArt(x,y,r,t,type,al))return;
   const [n,st]=AURS[type]||[6,2], sp=type==='holyfire'?1.1:.6;
   ctx.save(); ctx.translate(x,y+10); ctx.scale(1,.62);
   const g=ctx.createRadialGradient(0,0,r*.1,0,0,r); g.addColorStop(0,`rgba(${col},${.16*al})`); g.addColorStop(.8,`rgba(${col},${.07*al})`); g.addColorStop(1,`rgba(${col},0)`); ctx.fillStyle=g; ctx.beginPath(); ctx.arc(0,0,r,0,6.283); ctx.fill();
