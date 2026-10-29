@@ -1148,7 +1148,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.1.0390</div>
+    <div class="ver" id="verT">v0.6.1.0391</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1661,7 +1661,7 @@ const SPFX={
  skullcrown:{n:'해골 왕관',slot:'helm',base:'철 투구',il:10,d:'스킬 재사용 대기시간 -15%, 생명력 흡수 +6%',ap:d=>{d.cdr+=.15;d.ls+=6;}},
  frostlord:{n:'서리 군주의 투구',slot:'helm',base:'뿔 달린 투구',il:16,d:'모든 스킬 +2, 마나 회복 +25%',ap:d=>{d.cls+=2;d.mr+=25;}},
  tome:{n:'금지된 마법서',slot:'weapon',base:'마법서',il:10,fx:['ene','mana','mr','all'],fcls:'sorc',d:'마법사 스킬 피해 +30%, 스킬 재사용 대기시간 -12%, 마나 소모 -15%',ap:d=>{d.cdr+=.12;}},
- rage:{n:'광전사의 훈장',slot:'amulet',base:'목걸이',il:12,fx:['str','vit','dmgPct','life','crit'],d:'생명력 50% 이하에서 공격 속도 +15%, 생명력 흡수 +5%',ap:d=>{d.ls+=5;}},
+ rage:{n:'광전사의 훈장',slot:'amulet',base:'목걸이',il:12,fx:['str','vit','dmgPct','life','crit'],d:'공격 속도 +15%, 생명력 흡수 +5%',ap:d=>{d.ias+=15;d.ls+=5;}},
  eye:{n:'영겁의 눈',slot:'amulet',base:'목걸이',il:10,d:'공격력 +99, 치명타 확률 +5%',ap:d=>{d.dmg+=99;d.crit+=5;}},
  /* ===== 보스 이름 유니크 (이름·옵션 종류 고정, 수치만 변동 · 개별 스킬 옵션 없음) ===== */
  rfrost:{n:'프로스티아의 반지',slot:'ring',base:'반지',il:29,fx:['ene','mana','mr','def','vit'],d:'서리의 가호: 스킬 재사용 대기시간 -6%, 받는 피해 -3%',ap:d=>{d.cdr+=.06;d.dr+=.03;}},
@@ -3067,7 +3067,7 @@ function tryUse(key,hold){
   if(me.stun>0){ if(!hold)toast('기절 중!','#ffd84a'); return; }
   if(key==='atk'){
     if(me.atkCd>0)return;
-    const sb=spiritBuff(), fb=me.buffs.fury&&me.buffs.fury.t>0&&me.buffs.fury.ias?1+me.buffs.fury.ias:1, b=(me.buffs.awk&&me.buffs.awk.t>0?1.2:1)*(me.buffs.berserk?1.4:1)*(me.buffs.rage&&me.buffs.rage.t>0?1+me.buffs.rage.ias:1)*fb*(sb?1+sb.ias:1); me.atkCd=me.D.atkInt/(b*(me.D.sp&&me.D.sp.rage&&me.hp<me.D.maxHp*.5?(1+(me.D.ias+me.D.dex*.25+15)/100)/(1+(me.D.ias+me.D.dex*.25)/100):1));   /* 광전사의 훈장: 생명력 50% 이하에서 공격 속도 +15% */
+    const sb=spiritBuff(), fb=me.buffs.fury&&me.buffs.fury.t>0&&me.buffs.fury.ias?1+me.buffs.fury.ias:1, b=(me.buffs.awk&&me.buffs.awk.t>0?1.2:1)*(me.buffs.berserk?1.4:1)*(me.buffs.rage&&me.buffs.rage.t>0?1+me.buffs.rage.ias:1)*fb*(sb?1+sb.ias:1); me.atkCd=me.D.atkInt/b;
     sfx(meleeOf(me)?'swing':'cast'); doCast('atk',atkRg(me),1); me.mp=Math.min(me.D.maxMp,me.mp+1.6+me.D.maxMp*.02); return;
   }
   const s=SKBY[key]; if(!s||s.passive)return; const lv=skLv(me,key); if(!lv)return;
