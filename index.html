@@ -1148,7 +1148,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.1.0386</div>
+    <div class="ver" id="verT">v0.6.1.0387</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1848,7 +1848,8 @@ function genItem(rar,ilvl,slot,baseName,forceSp){
 }
 const NOUN_FULL={'영혼 등불':'영혼 등불','망령의 등불':'망령 등불'};   /* 강령술사 보조무기는 '…의 등불'로만 나오면 혼등과 헷갈려서 단계 이름을 살려 부름 */
 /* 이름 끝말: 투구·갑옷(전 직업)과 드루이드 토템은 종류를 붙여서 '○○의 가죽투구' · '○○의 뿔토템'처럼, 나머지는 마지막 낱말만 */
-function itemNoun(it){ if(it.slot==='helm'||it.slot==='armor'||(it.slot==='shield'&&it.oc==='druid'))return it.base.replace(/\s+/g,''); return NOUN_FULL[it.base]||it.base.split(' ').pop(); }
+const SHIELD_NOUN={'성스러운 방패':'성광','나무 방패':'버클러','철 방패':'철방패'};   /* 팔라딘 방패: '○○의 성광' · '○○의 버클러' · '○○의 철방패' */
+function itemNoun(it){ if(it.slot==='helm'||it.slot==='armor'||(it.slot==='shield'&&it.oc==='druid'))return it.base.replace(/\s+/g,''); if(it.slot==='shield'&&SHIELD_NOUN[it.base])return SHIELD_NOUN[it.base]; return NOUN_FULL[it.base]||it.base.split(' ').pop(); }
 /* 예전에 얻은 투구·갑옷·토템 이름도 새 규칙으로 (특수 유니크·영웅 장비는 그대로, 옵션 정렬 개편 전 옛 유니크는 개편이 끝난 뒤에) */
 function nameFix(it){ if(!it||it.sp||it.rar>=4||typeof it.name!=='string'||!it.base)return false; if(it.rar===3&&!it.uv&&!it.sf)return false;
   const nn=itemNoun(it), on=NOUN_FULL[it.base]||it.base.split(' ').pop(); if(nn===on||!it.name.endsWith(on)||it.name.endsWith(nn))return false; it.name=it.name.slice(0,-on.length)+nn; return true; }
