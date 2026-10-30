@@ -1159,7 +1159,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.2.0411</div>
+    <div class="ver" id="verT">v0.6.2.0412</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -5928,7 +5928,7 @@ function sprGet(k){ let e=SPR[k]; if(!e){ e=SPR[k]={ok:false,im:new Image()}; e.
 const BWALKS={boss_shadow:{n:6,k:.75,cyc:2.6},hero_war:{n:6,k:.75,cyc:2.6},hero_sorc:{n:6,k:.75,cyc:2.6},mob_grak:{n:6,k:.75,cyc:2.6},mob_malek:{n:6,k:.75,cyc:2.6},mob_morg:{n:6,k:.75,cyc:2.6},mob_kargon:{n:6,k:.75,cyc:2.6}};
 /* 보스 준비 자세: <보스 그림 이름>_wu.png (스킬 예고 앞 70% 동안 몸을 낮추고 힘을 모은 자세, 뒤 30%와 돌진 중엔 _sk). 그림이 있는 보스만 등록 */
 const BWU={mob_morg:1,mob_kargon:1};
-const HATK={druid:{n:5,k:1.024,t:[.10,.30,.66,.84]},druid_bear:{n:4,k:.75,t:[.12,.45,.75]},pal:{n:6,k:1,t:[.06,.14,.24,.50,.76],dy:19.5,src:'_atk2'},war:{n:5,k:1,t:[.08,.26,.38,.70],dy:0,src:'_atk2'},sorc:{n:5,k:1,t:[.06,.16,.50,.78],dy:0,src:'_atk2'}}; /* 영웅 공격 시트 hero_<키>_atk.png (가로 n칸: 준비→타격→follow→복귀). t=칸 넘어가는 진행도(0~1, 공격 0.36초). src=파일 이름 꼬리(바꾸면 캐시된 옛 그림과 안 섞임) · dy=그림 아래 여백(시트 px, 발 높이 맞춤). 파일이 없으면 기존 동작.
+const HATK={druid:{n:5,k:1.024,t:[.10,.30,.66,.84]},druid_bear:{n:4,k:.75,t:[.12,.45,.75]},pal:{n:6,k:1,t:[.06,.14,.24,.50,.76],dy:19.5,src:'_atk2'},war:{n:5,k:1,t:[.08,.26,.38,.70],dy:0,src:'_atk2',sc:[1.29,1.26,1.22,1.18,1.25],fx:[-1.4,-4.3,-4.1,-6,-1.2]},sorc:{n:5,k:1,t:[.06,.16,.50,.78],dy:0,src:'_atk2'}}; /* 영웅 공격 시트 hero_<키>_atk.png (가로 n칸: 준비→타격→follow→복귀). t=칸 넘어가는 진행도(0~1, 공격 0.36초). src=파일 이름 꼬리(바꾸면 캐시된 옛 그림과 안 섞임) · dy=그림 아래 여백(시트 px, 발 높이 맞춤). 파일이 없으면 기존 동작.
    팔라딘: 6칸 = 젖힘→치켜듦→내려침 가속→타격(초승달 궤적·불꽃, 가장 오래 보임)→휘둘러 지나감→복귀
    전사: 5칸 = 젖힘→치켜듦→내려침→타격(가장 오래 보임)→복귀 (hero_war_atk2.png, 이펙트는 그림에 없음)
    드루이드(인간): 5칸 = 당김→내지르기 시작→타격(지팡이 끝 연두 빛줄기, 가장 오래 보임)→후속→복귀 (hero_druid_atk.png) */
@@ -6255,7 +6255,7 @@ function drawPlayer(o,isMe,t){
   if(HS){ const A=heroAnim(o,t,meleeOf(o),WK?.4:1); if(RG){ ctx.save(); ctx.shadowColor='rgba(255,45,25,.95)'; ctx.shadowBlur=11+4*Math.sin(t*9); }   /* 폭주: 몸 테두리에 붉은 기운 */
     if(WK){ if(A.wa>.35)o._wkOn=true; else if(A.wa<.15)o._wkOn=false; }   /* 걷기 시트 ↔ 대기 그림 전환 (깜빡임 방지용 히스테리시스) */
     const HA=HATK[hk], AK=(HA&&HS)?sprGet('hero_'+hk+(HA.src||'_atk')):null;
-    if(AK&&A.ap<1){ const cw=AK.width/HA.n; let fi=0; while(fi<HA.t.length&&A.ap>=HA.t[fi])fi++; sprDraw(AK,x,y+16+(HA.dy||0)*hh/(HA.k*HS.height),hh*(AK.height/HA.k)/HS.height,o.face,{flip:A.flip,tint:RG,fr:[fi*cw,cw,AK.height]}); }   /* 공격 시트: 그림 자체에 동작이 있어서 코드 흔들림은 끔 */
+    if(AK&&A.ap<1){ const cw=AK.width/HA.n; let fi=0; while(fi<HA.t.length&&A.ap>=HA.t[fi])fi++; const asc=HA.sc?HA.sc[fi]:1; sprDraw(AK,x,y+16+(HA.dy||0)*hh/(HA.k*HS.height),hh*asc*(AK.height/HA.k)/HS.height,o.face,{flip:A.flip,tint:RG,fx:HA.fx?HA.fx[fi]*hh/78:0,fr:[fi*cw,cw,AK.height]}); }   /* sc/fx: 공격 그림 속 캐릭터가 대기·걷기보다 작게 그려져 있어 칸마다 키우고(얼굴 크기 기준) 가로 위치를 맞춤 */   /* 공격 시트: 그림 자체에 동작이 있어서 코드 흔들림은 끔 */
     else if(WK&&o._wkOn){ const cw=WK.width/WC.n, fi=Math.floor((((o._wp||0)/.2/WC.cyc)%1+1)%1*WC.n); sprDraw(WK,x,y+16,hh*(WK.height/WC.k)/HS.height,o.face,{...A,tint:RG,eye:RG&&o.cls==='war'?RGW[fi]:null,fr:[fi*cw,cw,WK.height]}); }
     else if(IK){ const cw=IK.width/ID.n, ph=o._ip===undefined?(o._ip=Math.random()*ID.cyc):o._ip, fi=ID.seq[Math.floor(((t+ph)/ID.cyc%1+1)%1*ID.seq.length)]; sprDraw(IK,x,y+16,hh*(IK.height/ID.k)/HS.height,o.face,{...A,sy:1,tint:RG,eye:RG&&ID.eye?ID.eye[fi]:null,fr:[fi*cw,cw,IK.height]}); }   /* 대기 시트: 숨쉬기 칸을 왕복 재생 (그림 자체에 동작이 있어서 코드 숨쉬기는 끔) */
     else sprDraw(HS,x,y+16,hh,o.face,RG?{...A,tint:1}:A);
