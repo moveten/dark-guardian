@@ -304,6 +304,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 .tmap .tcsb .tbd img{display:block;width:118px;height:auto;max-width:none}.tmap .tcsb .tbd svg{display:none}   /* 도박장 그림(img/town_casino.webp)이 있으면 그림, 없으면 기본 SVG (그림이 있으면 SVG가 숨겨져 위의 빛 효과도 꺼져요) */
 .tmap .tcsb.cbad .tbd img{display:none}.tmap .tcsb.cbad .tbd svg{display:block}
 .tcsb:active svg{filter:brightness(1.25)}
+.tmap .tcsb.smi .tbd{filter:drop-shadow(0 0 8px #ffb25999)}.tmap .tcsb.smi .tlb{background:#2a1a0acc;border-color:#ffb259}
 .tcsb .cb{opacity:.35;animation:cbk 1.2s steps(1) infinite}
 @keyframes cbk{0%{opacity:1}50%{opacity:.25}}
 .tcsb .tbub{margin-bottom:-6px;border-color:#ffd34d;box-shadow:0 0 10px #ffd34d66}.tcsb .tbub:after{border-top-color:#ffd34d}
@@ -1163,7 +1164,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.3.0419</div>
+    <div class="ver" id="verT">v0.6.3.0420</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3062,7 +3063,7 @@ function autoSellModal(){
 Object.defineProperty(window,'syLv',{get(){ try{ return me&&me.sy!==undefined?me.sy:-1; }catch(e){ return -1; } },set(v){ try{ if(me)me.sy=v; }catch(e){} }});
 const SYN_N=10;
 function synCap(){ let c=1; for(const k of EQSL){ const it=me.eq[k]; if(it)c=Math.max(c,it.ilvl|0); } return c; }
-function synPool(r){ const o=[]; me.inv.forEach((x,i)=>{ if(x&&(x.rar|0)===r&&!x.lock&&!(x.enh>0))o.push({x,i}); }); return o; }
+function synPool(r){ const o=[]; me.inv.forEach((x,i)=>{ if(x&&(x.rar|0)===r&&!x.lock&&!(x.enh>0)&&!x.sk)o.push({x,i}); }); return o; }
 function doSynth(r,quiet){
   const pool=synPool(r); if(r<0||r>2||pool.length<SYN_N)return null;
   pool.sort((a,b)=>(a.x.ilvl|0)-(b.x.ilvl|0)||a.i-b.i); const use=pool.slice(0,SYN_N), cap=synCap();
@@ -4656,11 +4657,11 @@ let STORE=null, satSeq=0;
 function loadStore(){ let o=null; try{ o=JSON.parse(lsGet(STORE_KEY)||'null'); }catch(e){} if(!o||typeof o!=='object')o={};
   const inv=Array.isArray(o.inv)?o.inv.slice(0,STORE_N):[]; while(inv.length<STORE_N)inv.push(null);
   let ch=false; for(const it of inv){ if(it){ if(!Array.isArray(it.aff))it.aff=[]; try{ if(ilCapFix(it))ch=true; heroFix(it); newOptFix(it); lanternFix(it); if(sumFix(it))ch=true; if(optFix2(it))ch=true; if(itemMig(it,me&&me.cls))ch=true; if(baseFix(it))ch=true; if(nameFix(it))ch=true; }catch(e){} } }
-  const S={inv,gold:Math.max(0,o.gold|0),shard:0,st:1,misc:Array.isArray(o.misc)?o.misc.slice(0,MISC_NS):[]}; const had=inv.some(x=>x&&isShard(x)); miscFix(S);
-  if(ch||had){ try{ lsSet(STORE_KEY,JSON.stringify({inv:S.inv,misc:S.misc,gold:S.gold})); }catch(e){} }
+  const S={inv,gold:Math.max(0,o.gold|0),shard:0,st:1,smith:o.smith?1:0,misc:Array.isArray(o.misc)?o.misc.slice(0,MISC_NS):[]}; const had=inv.some(x=>x&&isShard(x)); miscFix(S);
+  if(ch||had){ try{ lsSet(STORE_KEY,JSON.stringify({inv:S.inv,misc:S.misc,gold:S.gold,smith:S.smith})); }catch(e){} }
   return S; }
 function getStore(){ if(!STORE)STORE=loadStore(); return STORE; }
-function saveStore(){ if(!STORE)return; lsSet(STORE_KEY,JSON.stringify({inv:STORE.inv,misc:STORE.misc,gold:STORE.gold|0})); }
+function saveStore(){ if(!STORE)return; lsSet(STORE_KEY,JSON.stringify({inv:STORE.inv,misc:STORE.misc,gold:STORE.gold|0,smith:STORE.smith?1:0})); }
 const stamp=it=>{ if(it)it.sat=Date.now()+((satSeq=(satSeq+1)%1000)/1000); return it; };   /* 입고 시각(입고순 정렬용) */
 /* 보내기 대상: 캐릭터들 + 공유보관함. src(보내는 쪽)와 같은 곳은 제외 — 보관함에서 보낼 땐 지금 캐릭터도 포함 */
 function targetsFor(src){ const L=[];
@@ -4900,7 +4901,7 @@ function shExModal(){ const it=selItem&&selItem.it, ix=selItem&&selItem.inv; if(
     go.onclick=()=>{ if(!pick||!SHDK[pick]||me.inv[ix]!==it||it.lock||!canShEx(it))return; me.inv[ix]=null; shardAdd(me,SHEX_N,pick); const K=SHDK[pick]; selItem=null; saveSrc(me); closeModal(); sfx('pick'); shopMsg=''; rerender(); toast(`${K.e} ${K.n} ${SHEX_N}개로 교환했어요`,'#c9a0ff'); };
   }); }
 function sellBtn(btn){ const it=selItem&&selItem.it; if(!it||selItem.inv===undefined)return; if(it.lock){ sheetToast('🔒 잠긴 아이템이에요. 잠금을 먼저 풀어 주세요','#ff8a7a'); return; }
-  if(it.enh>0&&sellAskIt!==it){ sellAskIt=it; if(btn){ const tx=btn.querySelector('.tx'); if(tx)tx.textContent='⚠️ 판매 '+sellInfo(it).total+'G'; else btn.textContent='⚠️ 판매 '+sellInfo(it).total+'G'; btn.style.background='#a62a22'; btn.style.borderColor='#ff6a5a'; btn.style.color='#fff'; btn.style.opacity='1'; } sheetToast&&sheetToast(`⚠️ +${it.enh} 강화 아이템이에요. 한 번 더 누르면 판매돼요`,'#ffb259'); return; }   /* 강화한 아이템은 두 번 눌러야 판매 */
+  if((it.enh>0||it.sk)&&sellAskIt!==it){ sellAskIt=it; if(btn){ const tx=btn.querySelector('.tx'); if(tx)tx.textContent='⚠️ 판매 '+sellInfo(it).total+'G'; else btn.textContent='⚠️ 판매 '+sellInfo(it).total+'G'; btn.style.background='#a62a22'; btn.style.borderColor='#ff6a5a'; btn.style.color='#fff'; btn.style.opacity='1'; } sheetToast&&sheetToast(it.enh>0?`⚠️ +${it.enh} 강화 아이템이에요. 한 번 더 누르면 판매돼요`:'⚠️ 소켓이 있는 장비예요. 한 번 더 누르면 판매돼요','#ffb259'); return; }   /* 강화한 아이템은 두 번 눌러야 판매 */
   sellAskIt=null; sellItem(selItem.inv); }
 function sellItem(i){ const P=selItem&&selItem.store?getStore():me; const it=P.inv[i]; if(!it)return; if(isShard(it)){ sellShard(); return; } sfx('coin'); const v=sellInfo(it).total; P.gold=(P.gold|0)+v; P.inv[i]=null; selItem=null; shopMsg=`${it.name} 판매 +${v}G`; saveSrc(P); uiDirty=true; rerender(); }
 /* PC: 가방·공유보관함 칸에 마우스를 올리면 클릭하지 않아도 아이템 정보가 옆에 떠요 (터치는 그대로 누르면 열림) */
@@ -4955,7 +4956,8 @@ function itemLines(it,opt){
   else if(it.sp&&SPFX[it.sp]&&SPFX[it.sp].cas){ const n=(me&&me.D&&me.D.cs)|0, on=c=>c?'#d9c6ff':'#8a8a8a'; s+=`<div style="margin:4px 0;font-size:12px;line-height:1.55"><b style="color:#c8a8ff">🎲 행운의 도박꾼 세트 (${n}/3)</b> <span style="color:#8a8a8a">🎰 달빛 도박장 전용</span><br><span style="color:${on(n>=2)}">2개: 드롭률 +20%, 치명타 확률 +5%</span><br><span style="color:${on(n>=3)}">3개: 잭팟 타격(기본 공격이 7% 확률로 피해 3배) · 모든 스킬 +3 · 이동 속도 +30%</span></div>`; }
   else if(it.rar===4&&it.sp&&SPFX[it.sp]&&SPFX[it.sp].hero){ const n=(me.D&&me.D.hc)|0, on=(c,a)=>c?'#d9c6ff':'#8a8a8a'; s+=`<div style="margin:4px 0;font-size:12px;line-height:1.55"><b style="color:#b98cff">🌑 그림자 세트 (${n}/7)</b><br><span style="color:${on(n>=2)}">2개: 최대 마나 +200</span><br><span style="color:${on(n>=3)}">3개: 레이드 보스에게 주는 피해 +15%</span><br><span style="color:${on(n>=7)}">7개: 레이드 보스에게 주는 피해 추가 +15% (합계 +30%) · 모든 스킬 +3</span></div>`; }
   const ex=enhOptText(it);
-  if(it.aff.length||ex) s+='<ul>'+affSorted(it).map(a=>`<li>${esc(affText(a))}${(a.cls&&a.cls!==me.cls)?' <span class="meta">(효과 없음)</span>':''}</li>`).join('')+(ex?`<li style="color:#ffe27a">${ex}</li>`:'')+'</ul>';
+  const skL=it.sk?`<li style="color:${it.gm?'#afeeee':'#707070'}">${it.gm?esc(gemOptText(it.gm)):'비어 있음'} <span class="meta">(${it.gm?GEM_N[it.gm.gk]:'소켓'})</span>${opt&&opt.skTag||''}</li>`:(opt&&opt.skNew?'<li style="color:#707070;list-style:none">＋ 비어 있음 <span class="meta">(소켓)</span> <b style="color:#ffd84a;font-size:11px">NEW</b></li>':'');
+  if(it.aff.length||ex||skL) s+='<ul>'+affSorted(it).map(a=>`<li>${esc(affText(a))}${(a.cls&&a.cls!==me.cls)?' <span class="meta">(효과 없음)</span>':''}</li>`).join('')+(ex?`<li style="color:#ffe27a">${ex}</li>`:'')+skL+'</ul>';
   return s;
 }
 function warn(msg){ if(G.titleSheet||!G.inGame) modal(`<h3>⚠️ 알림</h3><p style="margin:0 0 12px;font-size:14px">${esc(msg)}</p><div class="row2"><button class="btn primary" id="wOk">확인</button></div>`,m=>{m.querySelector('#wOk').onclick=closeModal;}); else toast(msg,'#e07060'); }
@@ -5752,9 +5754,9 @@ function casinoModal(){
 function renderTown(){ townUpTick(); const S=getStore(), now=Date.now(); let ch=false; { const L=getTown().lab; if((L.rf|0)>0){ townMsg=`🧪 그림자 연구소가 성벽 연구소로 바뀌었어요. 쓰셨던 🌑 그림자 조각 ${L.rf}개를 공유보관함으로 돌려드렸어요`; L.rf=0; saveTown(); } const M=getTown().mill; if((M.rf|0)>0){ townMsg=`✦ 각성 풍차의 건설·업그레이드가 골드로 바뀌었어요. 쓰셨던 ✦ 각성 그림자 조각 ${M.rf}개를 공유보관함으로 돌려드렸어요`; M.rf=0; saveTown(); } } for(const k of ['tw','al','mill'])if(townTick(k,now))ch=true; if(ch)saveTown();
   $('#itemPop').hidden=true; $('#ptsBar').hidden=true; $('#sheetTabs').hidden=true; $('#sheetT').innerHTML='🏘️ 마을';
   const b=$('#sheetB'); b.className='sbody town';
-  b.innerHTML=`<div class="tcur"><span>공유보관함</span><span>💰 ${(S.gold|0).toLocaleString('ko-KR')}</span><span>🌑 ${shardCount(S,'shard')}</span><span>✦ ${shardCount(S,'ashard')}</span></div>${townMsg?`<div class="tqnote">${esc(townMsg)}</div>`:''}<div class="tmap"><button class="tcsb" id="tCas" type="button" style="--x:50%;--y:57%" aria-label="달빛 도박장"><span class="tbd"><img class="cimg" src="img/town_casino.webp" alt="" draggable="false" onerror="this.closest('.tcsb').classList.add('cbad')"><svg viewBox="0 0 140 130" preserveAspectRatio="xMidYMax meet"><use href="#tw-casino" width="140" height="130"/></svg></span><span class="tlb"><span class="tsb" style="background:#ff4fa8;color:#2a0a1c">🎰</span>달빛 도박장</span></button>${TOWN_FAM.map((f,i)=>{ const y=i?[81,82]:[29,24]; return `${townSlot(f.main,`--x:${i?25:30}%;--y:${y[0]}%`)}${townSlot(f.aux,`--x:${i?76:72}%;--y:${y[1]}%`)}`; }).join('')}</div><p class="meta" style="margin:0;font-size:12px;line-height:1.5">건물을 누르면 자세히 볼 수 있어요. 건설과 업그레이드에는 <b>공유보관함</b>의 조각을 써요 (그림자 연구소는 <b>골드</b>, 각성 풍차는 건설과 Lv.5까지 <b>골드</b>로 해요). 말풍선을 누르면 만든 조각이 바로 <b>공유보관함</b>으로 들어가요.</p>`;
+  b.innerHTML=`<div class="tcur"><span>공유보관함</span><span>💰 ${(S.gold|0).toLocaleString('ko-KR')}</span><span>🌑 ${shardCount(S,'shard')}</span><span>✦ ${shardCount(S,'ashard')}</span></div>${townMsg?`<div class="tqnote">${esc(townMsg)}</div>`:''}<div class="tmap"><button class="tcsb" id="tCas" type="button" style="--x:50%;--y:57%" aria-label="달빛 도박장"><span class="tbd"><img class="cimg" src="img/town_casino.webp" alt="" draggable="false" onerror="this.closest('.tcsb').classList.add('cbad')"><svg viewBox="0 0 140 130" preserveAspectRatio="xMidYMax meet"><use href="#tw-casino" width="140" height="130"/></svg></span><span class="tlb"><span class="tsb" style="background:#ff4fa8;color:#2a0a1c">🎰</span>달빛 도박장</span></button>${S.smith?`<button class="tcsb smi" id="tSmi" type="button" style="--x:76%;--y:55%" aria-label="장인의 집"><span class="tbd"><img class="cimg" src="img/town_smith.webp" alt="" draggable="false" onerror="this.closest('.tcsb').classList.add('cbad')">${SMITH_SVG}</span><span class="tlb"><span class="tsb" style="background:#ffb259;color:#2a1a0a">🔨</span>장인의 집</span></button>`:`<div class="tsl e" style="--x:76%;--y:55%"><button class="tplot" id="tSmi"><b>＋</b>건설<br><span style="color:#ffd34d">💰 ${SMITH_BUILD.toLocaleString('ko-KR')}</span></button><div class="tlb">장인의 집</div></div>`}${TOWN_FAM.map((f,i)=>{ const y=i?[81,82]:[29,24]; return `${townSlot(f.main,`--x:${i?25:30}%;--y:${y[0]}%`)}${townSlot(f.aux,`--x:${i?76:72}%;--y:${y[1]}%`)}`; }).join('')}</div><p class="meta" style="margin:0;font-size:12px;line-height:1.5">건물을 누르면 자세히 볼 수 있어요. 건설과 업그레이드에는 <b>공유보관함</b>의 조각을 써요 (그림자 연구소는 <b>골드</b>, 각성 풍차는 건설과 Lv.5까지 <b>골드</b>로 해요). 말풍선을 누르면 만든 조각이 바로 <b>공유보관함</b>으로 들어가요.</p>`;
   townMsg=''; try{ window.__townFx&&window.__townFx.mount(b.querySelector('.tmap')); }catch(e){}
-  { const tc=b.querySelector('#tCas'); if(tc)tc.onclick=()=>{ sfx('ui'); casinoModal(); }; }
+  { const tc=b.querySelector('#tCas'); if(tc)tc.onclick=()=>{ sfx('ui'); casinoModal(); }; const ts=b.querySelector('#tSmi'); if(ts)ts.onclick=()=>{ sfx('ui'); smithModal(); }; }
   b.querySelectorAll('[data-tbub]').forEach(e=>e.onclick=()=>{ const k=e.dataset.tbub; if(TOWN_B[k].lab)labInfo(); else if(TOWN_B[k].stat&&!(getTown()[k].n|0))townInfo(k); else townPick(k); });
   b.querySelectorAll('[data-tbld]').forEach(e=>e.onclick=()=>{ if(TOWN_B[e.dataset.tbld].lab)labInfo(); else townInfo(e.dataset.tbld); });
   townClamp(); clearInterval(townTimer); townTimer=setInterval(townLive,1000); }
@@ -5791,6 +5793,40 @@ function townInfo(k){ const B=getTown()[k], D=TOWN_B[k], lv=B.lv|0, S=getStore()
     m.querySelector('#tiX').onclick=closeModal; const go=m.querySelector('#tiGo'); clearInterval(townUTimer);
     if(up)townUTimer=setInterval(()=>{ const e=m.querySelector('[data-ut]'); if(!e){ clearInterval(townUTimer); return; } if(townUpTick().length){ clearInterval(townUTimer); toast(`✅ ${D.n} Lv.${getTown()[k].lv} 업그레이드 완료!`,'#9fe08a'); try{ sfx('rare'); }catch(e2){} townInfo(k); renderTown(); return; } e.textContent=labLeft(B.u-Date.now()); },1000);
     if(go)go.onclick=()=>{ const r=townUp(k); closeModal(); if(r==='ok'){ sfx('rare'); townMsg=lv>=1&&um>0?`⏳ ${D.n} Lv.${lv+1} 업그레이드를 시작했어요 (${labTm(um)})`:lv<1?`🏗️ ${D.n}${(c=>c>=0&&c<=11171&&c%28?'을':'를')(D.n.charCodeAt(D.n.length-1)-44032)} 지었어요!`:`⬆ ${D.n} Lv.${lv+1} 업그레이드 완료!`; } else townMsg=r==='lack'?(GL?'공유보관함의 골드가 부족해요':'공유보관함의 조각이 부족해요'):r==='busy'?'이미 업그레이드 중이에요':'더 올릴 수 없어요'; renderTown(); }; }); }
+/* ===== 장인의 집(독립 건물, 도박장처럼 마을 가운데쪽): 30,000G로 건설(공유보관함 골드) → 소켓 뚫기 / 소켓 비우기. 장비(무기·갑옷·투구) 하나에 소켓은 1개까지.
+   소켓 데이터: it.sk=1(소켓 있음) · it.gm={gk,ilvl}(박힌 보석, 없으면 null). 비용 = ⌈아이템Lv/10⌉² × (뚫기 100 · 비우기 50) × (등급+1)² G ===== */
+const SMITH_BUILD=30000, SMITH_SLOTS=['weapon','armor','helm'];
+const smCost=(it,k)=>Math.pow(Math.max(1,Math.ceil((it.ilvl|0)/10)),2)*(k==='dig'?100:50)*Math.pow((it.rar|0)+1,2);
+const smOk=(it,k)=>!!(it&&SMITH_SLOTS.includes(it.slot)&&!it.mat&&(k==='dig'?!it.sk:!!it.sk));
+const SMITH_SVG='<svg viewBox="0 0 120 110"><ellipse cx="60" cy="102" rx="46" ry="6" fill="rgba(0,0,0,.4)"/><rect x="18" y="52" width="84" height="48" rx="3" fill="#4b4358"/><path d="M18 64H102M18 78H102M18 90H102M40 52V64M70 64V78M30 78V90M60 78V90M88 78V90" stroke="#35303f" stroke-width="1.2" fill="none"/><path d="M10 54L60 16L110 54Z" fill="#5a2f3a"/><path d="M10 54L60 16L110 54" fill="none" stroke="#8a4a56" stroke-width="2"/><rect x="82" y="14" width="12" height="26" fill="#3d3748"/><circle cx="90" cy="8" r="5" fill="rgba(200,190,220,.35)"/><circle cx="96" cy="2" r="4" fill="rgba(200,190,220,.22)"/><rect x="26" y="62" width="26" height="24" rx="2" fill="#1b1018"/><rect x="29" y="65" width="20" height="18" rx="1" fill="#ff8a2a"/><rect x="62" y="64" width="22" height="36" rx="11" fill="#2a1c14"/><path d="M90 88h20l4-4H94z" fill="#b7b1c4"/><path d="M92 88h16v6H92zM96 94h8v6H96z" fill="#8a8498"/></svg>';
+function smChar(){ if(!me||me.id!==selId)prepMe(); return me; }
+function smithBuild(){ const S=getStore(); if(S.smith)return 'max'; if((S.gold|0)<SMITH_BUILD)return 'lack'; S.gold-=SMITH_BUILD; S.smith=1; saveStore(); return 'ok'; }
+function smithModal(st){
+  const S=getStore(), f=n=>n.toLocaleString('ko-KR'), gold=S.gold|0;
+  if(!S.smith){ modal(`<h3>🏗️ 장인의 집</h3><p style="margin:0 0 8px;font-size:13px;line-height:1.6">장인의 집을 지으면 장비에 <b>소켓</b>을 만들 수 있어요.<br>🔨 <b>소켓 뚫기</b>: 무기·갑옷·투구에 빈 소켓 1개<br>♻ <b>소켓 비우기</b>: 소켓을 없애요 (박힌 보석은 사라져요)</p><p class="meta" style="margin:0 0 8px;font-size:13px">건설 비용 <b style="color:#ffd34d">💰 ${f(SMITH_BUILD)}G</b> · 공유보관함 <b style="color:${gold>=SMITH_BUILD?'#9fe08a':'#ff8a7a'}">${f(gold)}G</b></p><div class="row2"><button class="btn" id="smX">닫기</button><button class="btn primary" id="smGo"${gold>=SMITH_BUILD?'':' disabled style="opacity:.5"'}>${gold>=SMITH_BUILD?'🏗️ 건설':'골드 부족'}</button></div>`,m=>{
+      m.querySelector('#smX').onclick=closeModal; m.querySelector('#smGo').onclick=()=>{ const r=smithBuild(); closeModal(); if(r==='ok'){ sfx('rare'); townMsg='🏗️ 장인의 집을 지었어요! 눌러서 장비에 소켓을 만들어 보세요'; } else townMsg=r==='lack'?'공유보관함의 골드가 부족해요':'이미 지었어요'; renderTown(); }; }); return; }
+  const P=smChar(); st=st||{tab:'dig',sel:null,ask:false};
+  const worn=it=>Object.values(P.eq).includes(it);
+  const gear=[...Object.values(P.eq).filter(it=>it&&SMITH_SLOTS.includes(it.slot)),...P.inv.filter(it=>it&&SMITH_SLOTS.includes(it.slot)&&!it.mat).sort((a,b)=>(b.rar|0)-(a.rar|0)||(b.ilvl|0)-(a.ilvl|0))];
+  if(st.sel&&(!gear.includes(st.sel)||!smOk(st.sel,st.tab)))st.sel=null;
+  if(!st.sel)st.sel=gear.find(it=>smOk(it,st.tab))||null;
+  const sel=st.sel, tab=st.tab, cost=sel?smCost(sel,tab):0, can=sel&&gold>=cost;
+  let cells=''; cellPlain=true; try{ cells=gear.map((it,i)=>{ const ok=smOk(it,tab); return `<div data-gi="${i}" style="position:relative;${ok?'':'opacity:.28;filter:grayscale(.6);'}${it===sel?'outline:2px solid #ffd84a;outline-offset:1px;border-radius:9px;':''}">${cellHtml(it,'cell','style="width:100%"')}${worn(it)?'<i style="position:absolute;left:3px;top:2px;font-size:9px;font-style:normal;background:#2a5a8a;color:#fff;border-radius:3px;padding:0 3px;pointer-events:none">착용</i>':''}${it.sk?`<i style="position:absolute;right:3px;bottom:2px;font-size:11px;font-style:normal;pointer-events:none">${it.gm?'💎':'◇'}</i>`:''}</div>`; }).join(''); }finally{ cellPlain=false; }
+  const tb=(k,t)=>`<button class="btn sm" data-tab="${k}" style="flex:1;${tab===k?'border-color:#c9a24a;background:rgba(201,162,74,.18);font-weight:800':''}">${t}</button>`;
+  const ask=st.ask&&can&&tab==='clr';
+  modal(`<h3>🔨 장인의 집</h3><p class="meta" style="margin:0 0 6px;font-size:12px">공유보관함 골드 <b style="color:#ffd34d">💰 ${f(gold)}G</b> · ${esc(dispName(P))}의 가방·착용 장비</p><div style="display:flex;gap:4px;margin:0 0 8px">${tb('dig','소켓 뚫기')}${tb('clr','소켓 비우기')}</div>
+    ${gear.length?`<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin:0 0 8px;padding:3px;max-height:196px;overflow-y:auto;overscroll-behavior:contain">${cells}</div>`:'<p class="meta" style="margin:0 0 8px">무기·갑옷·투구가 없어요</p>'}
+    <div style="border:1px solid var(--line2);border-radius:9px;background:#14100d;padding:8px 10px;font-size:12.5px;min-height:48px">${sel?itemLines(sel,tab==='dig'?{skNew:1}:{skTag:' <b style="color:#ff8a7a;font-size:11px">'+(sel.gm?'보석 사라짐':'없어짐')+'</b>'}):`<span class="meta">${tab==='dig'?'소켓을 뚫을 장비가 없어요 (이미 소켓이 있거나 대상이 아니에요)':'소켓이 있는 장비가 없어요'}</span>`}</div>
+    <div class="row2" style="margin-top:10px"><button class="btn" id="smX">닫기</button><button class="btn primary" id="smGo"${can?'':' disabled style="opacity:.5"'}${ask?' style="background:#a62a22;border-color:#ff6a5a;color:#fff"':''}>${!sel?'대상 없음':!can?'골드 부족 💰 '+f(cost)+'G':ask?'⚠️ 한 번 더 누르면 비워요':(tab==='dig'?'🔨 소켓 뚫기':'♻ 소켓 비우기')+' 💰 '+f(cost)+'G'}</button></div>`,m=>{
+    m.querySelector('#smX').onclick=closeModal;
+    m.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{ smithModal({tab:b.dataset.tab,sel:null,ask:false}); });
+    m.querySelectorAll('[data-gi]').forEach(d=>d.onclick=()=>{ const it=gear[+d.dataset.gi]; if(!it)return; if(!smOk(it,tab)){ toast(it.sk?'이미 소켓이 있어요':'소켓이 없어요','#ffb259'); return; } smithModal({tab,sel:it,ask:false}); });
+    const go=m.querySelector('#smGo'); if(go)go.onclick=()=>{ if(!sel||!smOk(sel,tab)||(S.gold|0)<cost)return;
+      if(tab==='clr'&&!st.ask){ smithModal({tab,sel,ask:true}); return; }
+      S.gold-=cost; saveStore(); const had=sel.gm;
+      if(tab==='dig'){ sel.sk=1; sel.gm=null; } else { delete sel.sk; delete sel.gm; }
+      if(worn(sel)){ const hr=P.hp/P.D.maxHp, mr=P.mp/P.D.maxMp; P.D=derive(P); P.hp=P.D.maxHp*hr; P.mp=P.D.maxMp*mr; }
+      saveSrc(P); sfx('rare'); toast(tab==='dig'?`🔨 소켓을 뚫었어요: ${sel.name}`:`♻ 소켓을 비웠어요${had?' (보석이 사라졌어요)':''}: ${sel.name}`,'#ffd84a'); smithModal({tab,sel:null,ask:false}); renderTown(); }; }); }
 let townUTimer=0;
 function townPick(k){ townTick(k); const B=getTown()[k], D=TOWN_B[k], n=B.n|0; if(n<1){ townMsg=`아직 ${D.pot?'만들어진 물약이':'만들어진 조각이'} 없어요`; renderTown(); return; }
   if(!D.pot){ const got=townToStore(k); sfx('pick'); townMsg=got.put>0?`📦 ${D.e} ${SHDK[D.mat].n} ${got.put}개를 공유보관함으로 보냈어요${got.left>0?` (보관함이 가득 차서 ${got.left}개는 건물에 남아 있어요)`:''}`:'공유보관함이 가득 차서 보낼 수 없어요. 자리를 비워 주세요'; if(got.put>0)toast(`📦 공유보관함으로 ${SHDK[D.mat].n} ${got.put}개 이동!`,'#c9a0ff'); renderTown(); return; }   /* 조각은 캐릭터를 고르지 않고 바로 공유보관함으로 */
