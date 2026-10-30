@@ -374,6 +374,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 .slot .sl{position:absolute;bottom:2px;left:0;right:0;font-size:9.5px;color:var(--mute);text-align:center}
 .slot svg,.cell svg{width:58%;height:58%}
 .cell.lock::after{content:'';position:absolute;inset:0;border-radius:5px;background:rgba(190,30,20,.13);pointer-events:none}
+.tbs{display:flex;gap:6px}.tbs .tb{flex:1;position:relative;border:1px solid var(--line2);background:var(--panel2);color:var(--mute);border-radius:8px;padding:9px 4px;font-size:13px;font-weight:700;text-align:center;min-width:0}.tbs .tb.on{background:#3a2a1c;border-color:#d6aa4e;color:#ffe9b0}.tbs .tb i.n{position:absolute;top:-6px;right:6px;background:#d6382c;color:#fff;font-size:9px;font-style:normal;font-weight:900;border-radius:7px;padding:0 5px;line-height:14px}.tbs .tb small{font-weight:400;opacity:.8;margin-left:3px}
 .nw{position:absolute;left:1px;bottom:0;font-size:8.5px;font-style:normal;font-weight:900;color:#fff;background:#d6382c;border-radius:4px;padding:0 3px;line-height:12px;z-index:2;box-shadow:0 0 4px rgba(255,80,60,.7)}.lk{position:absolute;left:1px;top:0;font-size:11px;font-style:normal;z-index:1;filter:drop-shadow(0 0 2px #000)}.rq{position:absolute;right:1px;bottom:0;font-size:9.5px;font-style:normal;font-weight:800;color:#fff;background:#a33a30;border-radius:4px;padding:0 3px;line-height:13px;z-index:1}
 .slot.sel,.cell.sel{outline:2px solid var(--gold);outline-offset:1px}
 .sktabs{display:flex;gap:8px}.sktabs button{flex:1;min-height:46px;border:1px solid var(--line2);border-radius:10px;background:#0f0b09;font-size:15px;font-weight:800}.sktabs button[aria-pressed="true"]{border-color:var(--gold);color:var(--gold);background:var(--panel2)}
@@ -905,12 +906,13 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   #sheetTabs{padding:5px 12px;gap:6px}#sheetTabs button{min-height:34px;font-size:14px;border-radius:8px;display:flex;align-items:center;justify-content:center;gap:6px}
   #selBar{padding:5px 12px;gap:6px}#selBar button{min-height:34px;font-size:14px;border-radius:8px}
   #sheetB.bag{overflow:hidden;padding:8px 10px;grid-template-rows:minmax(0,1fr);align-content:stretch}
-  #sheetB.bag .bagtop{display:grid!important;grid-template-columns:232px minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr);column-gap:12px;row-gap:6px;height:100%;margin:0;padding:0;box-shadow:none;position:static}
+  #sheetB.bag .bagtop{display:grid!important;grid-template-columns:232px minmax(0,1fr);grid-template-rows:auto auto auto minmax(0,1fr);column-gap:12px;row-gap:6px;height:100%;margin:0;padding:0;box-shadow:none;position:static}
+  #sheetB.bag .bagtop .tbs{grid-column:1;grid-row:3}
   #sheetB.bag .bagtop .eq{grid-column:1;grid-row:1;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;justify-content:stretch}
   #sheetB.bag .bagtop .meta{grid-column:1;grid-row:2}
-  #sheetB.bag .bagtop .bagbtns{grid-column:1;grid-row:3;display:grid!important;grid-template-columns:1fr 1fr;gap:4px!important;align-content:start}
+  #sheetB.bag .bagtop .bagbtns{grid-column:1;grid-row:4;display:grid!important;grid-template-columns:1fr 1fr;gap:4px!important;align-content:start}
   #sheetB.bag .bagtop .bagbtns .btn{padding:8px 1px!important;min-height:34px;font-size:12px!important}
-  #sheetB.bag .bagtop .inv{grid-column:2;grid-row:1/4;overflow:auto;min-height:0;max-height:100%;align-content:start;padding-right:2px}
+  #sheetB.bag .bagtop .inv{grid-column:2;grid-row:1/5;overflow:auto;min-height:0;max-height:100%;align-content:start;padding-right:2px}
 }
 @media (orientation:landscape) and (max-height:340px){   /* 아주 낮은 화면: 장비를 한 줄로, 버튼을 더 납작하게 */
   #sheetB.bag .bagtop{grid-template-columns:216px minmax(0,1fr)}
@@ -1161,7 +1163,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.2.0417</div>
+    <div class="ver" id="verT">v0.6.2.0418</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -2060,7 +2062,7 @@ function loadChar(id){
     p.eq=p.eq||{}; if(p.eq.shield===undefined)p.eq.shield=null;
     for(const k in p.eq){ if(p.eq[k])delete p.eq[k].isNew; } /* 장착했던 아이템의 NEW 꼬리표 정리(1회) */ if(!lsGet('dkdef2.nwf.'+id)){ (p.inv||[]).forEach(x=>{ if(x)delete x.isNew; }); lsSet('dkdef2.nwf.'+id,'1'); }
     p.inv=p.inv||Array(INVN).fill(null); while(p.inv.length<INVN)p.inv.push(null);
-    p.shard=p.shard|0; shardAdd(p,0); p.ashard=p.ashard|0; shardAdd(p,0,'ashard'); /* 예전 조각 숫자 → 가방 아이템으로 (각성 조각 포함) */
+    miscFix(p); p.shard=p.shard|0; shardAdd(p,0); p.ashard=p.ashard|0; shardAdd(p,0,'ashard'); /* 예전 조각 숫자 → 가방 아이템으로 (각성 조각 포함) */
     const fx=it=>{ if(!it)return; ilCapFix(it); heroFix(it); newOptFix(it); lanternFix(it); if(!Array.isArray(it.aff))it.aff=[]; if(it.rar===3&&it.name==='그림자 망토')it.name='밤의 망토'; /* 영웅 '그림자' 장비와 헷갈리지 않게 개명 */ if(!p.dv4&&it.slot!=='weapon')for(const a of it.aff)if(a&&(a.t==='dmgPct'||a.t==='sm'||a.t==='smhp'))a.v=Math.min(50,Math.max(1,Math.round(a.v/4))); /* v0.3: 무기 외 피해%·소환수 피해%·소환수 생명력% 옵션은 예전 수치를 4로 나눈 값으로(캐릭터마다 1회, p.dv4) */ if(!(it.rar===3&&it.sp))for(const a of it.aff)if(a&&(a.t==='str'||a.t==='dex'||a.t==='vit'||a.t==='ene')&&a.v>10)a.v=10; /* 힘·민첩·체력·에너지 옵션 상한 10(이전에 얻은 더 높은 수치도 10으로) */ if(it.rar===3&&!it.sv){ it.sv=1; const sh=it.slot==='shield'; /* 유니크 스킬 옵션 개편: 직업 스킬→모든 스킬, 개별 스킬→그 직업 스킬, 보조장비→내(보조장비) 직업 스킬 (1회) */
       for(const a of it.aff){ if(!a)continue; const v=Math.min(2,Math.max(1,a.v|0)); if(a.t==='cls'){ if(sh){ a.cls=it.oc||cls; a.v=v; } else { a.t='all'; a.v=v; delete a.cls; } } else if(a.t==='sk'){ a.t='cls'; a.v=v; if(sh)a.cls=it.oc||cls; delete a.key; } }
       if(it.aff.some(a=>a&&a.t==='all'))it.aff=it.aff.filter(a=>!(a&&a.t==='cls')); }
@@ -2089,7 +2091,7 @@ function migrateChars(){
 }
 function createChar(cls,name,nid){ const ids=charIds(); if(ids.length>=MAXCHAR||!CLASSES[cls])return null; if(nameTaken(name))return null; const p=newChar(cls,name,nid); p.ms=MAILQ.map(q=>q.id); lsSet(charKey(p.id),JSON.stringify(packChar(p))); ids.push(p.id); setIds(ids); selId=p.id; lsSet('dkdef2.sel',selId); return p; }
 function deleteChar(id){ setIds(charIds().filter(x=>x!==id)); lsDel(charKey(id)); lsDel('dkdef2.rk.'+id); lsDel('dkdef2.nmv.'+id); if(selId===id){selId='';lsSet('dkdef2.sel','');} rkQueueDel(id); nameQueueRel(id); }
-function packChar(p){ const {id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear,as,sy,au,sp,ct,cat,dv4,shard,ashard,mail,ms,tut,cc}=p; return {id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear:clear|0,au:Math.max(0,Math.min(2,au|0)),sp:sp?1:0,ct:ct>0?ct|0:0,cat:cat>0?cat|0:0,as:as===undefined?-1:as,sy:sy===undefined?-1:sy,dv4:dv4?1:0,shard:shard|0,ashard:(ashard|0)||undefined,mail:Array.isArray(mail)?mail:undefined,ms:Array.isArray(ms)?ms:undefined,tut:tut||undefined,cc:cc&&Object.keys(cc).length?cc:undefined}; }
+function packChar(p){ const {id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear,as,sy,au,sp,ct,cat,dv4,shard,ashard,misc,mail,ms,tut,cc}=p; return {id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear:clear|0,au:Math.max(0,Math.min(2,au|0)),sp:sp?1:0,ct:ct>0?ct|0:0,cat:cat>0?cat|0:0,as:as===undefined?-1:as,sy:sy===undefined?-1:sy,dv4:dv4?1:0,shard:shard|0,ashard:(ashard|0)||undefined,misc:Array.isArray(misc)?misc:undefined,mail:Array.isArray(mail)?mail:undefined,ms:Array.isArray(ms)?ms:undefined,tut:tut||undefined,cc:cc&&Object.keys(cc).length?cc:undefined}; }
 function saveChar(){ if(!me||!me.id)return; lsSet(charKey(me.id),JSON.stringify(packChar(me))); }
 const dispName=p=>(p&&p.name)||CLASSES[p.cls].n;
 const SELLBASE=[100,200,400,800,3000], ADVAFX=['ls','crit','ias','ms','mf','pr','mr'];
@@ -2877,8 +2879,8 @@ function onKill(x,y,xp,tier,ilvl,type,lf){
   me.kills=(me.kills||0)+1; G.stKills=(G.stKills||0)+1; bumpCombo();
   { const sp=me.D&&me.D.sp; if(sp&&!me.dead){ if(sp.bloodoath)me.mp=Math.min(me.D.maxMp,me.mp+10); if(sp.hring)me.hp=Math.min(me.D.maxHp,me.hp+me.D.maxHp*.02*sp.hring); if(sp.necro)me.mp=Math.min(me.D.maxMp,me.mp+15); if(sp.rvoid)me.mp=Math.min(me.D.maxMp,me.mp+15); if(sp.adeath)me.mp=Math.min(me.D.maxMp,me.mp+8); } }
   gainXp(Math.round(xp*comboMul()));
-  { const RK=MT[type].raid; if(RK==='awk'){ const n=ri(3,7); shardAdd(me,n,'ashard'); later(.4,()=>toast(`✦ 각성 그림자 조각 +${n} (보유 ${shardCount(me,'ashard')})${(me.ashard|0)>0?' · 가방이 가득 차서 일부는 보관 중':''}`,'#d8b0ff')); if(Math.random()<AW_P){ const hit=genHero(awKey(pick(['weapon','helm','armor','amulet','ring','shield']))); if(hit)dropItem(hit,x+rand(-20,20),y+rand(-20,20)); } saveChar(); }
-    if(RK&&RK!=='awk'){ const n=ri(1,3); shardAdd(me,n); later(.4,()=>toast(`🌑 그림자 조각 +${n} (보유 ${shardCount(me)})${(me.shard|0)>0?' · 가방이 가득 차서 일부는 보관 중':''}`,'#c9a0ff'));
+  { const RK=MT[type].raid; if(RK==='awk'){ const n=ri(3,7); shardAdd(me,n,'ashard'); later(.4,()=>toast(`✦ 각성 그림자 조각 +${n} (보유 ${shardCount(me,'ashard')})${(me.ashard|0)>0?' · 기타 칸이 가득 차서 일부는 보관 중':''}`,'#d8b0ff')); if(Math.random()<AW_P){ const hit=genHero(awKey(pick(['weapon','helm','armor','amulet','ring','shield']))); if(hit)dropItem(hit,x+rand(-20,20),y+rand(-20,20)); } saveChar(); }
+    if(RK&&RK!=='awk'){ const n=ri(1,3); shardAdd(me,n); later(.4,()=>toast(`🌑 그림자 조각 +${n} (보유 ${shardCount(me)})${(me.shard|0)>0?' · 기타 칸이 가득 차서 일부는 보관 중':''}`,'#c9a0ff'));
       if(Math.random()<HERO_P){ const hit=genHero(heroKey(pick(HDROP[RK]))); if(hit)dropItem(hit,x+rand(-20,20),y+rand(-20,20)); } saveChar(); } }
   lf=lf>1?lf:1; const rolls=(tier>=2?4:tier>=1?2:1)+(tier<2?(Math.floor(lf-1)+(Math.random()<(lf-1)%1?1:0)):0);
   for(let i=0;i<rolls;i++){
@@ -3057,17 +3059,21 @@ const shMat=it=>(it&&it.mat==='ashard')?'ashard':'shard';
 const shardOrb=(n,sz,mat)=>{ const aw=mat==='ashard', hot=(n|0)>=SHDK[aw?'ashard':'shard'].N(), bg=aw?(hot?'radial-gradient(circle at 36% 30%,#fff4d0 0%,#c8a8ff 40%,#6a3ad0 75%,#24104a 100%)':'radial-gradient(circle at 36% 30%,#d8ccff 0%,#6a5aa8 50%,#1a1240 100%)'):hot?'radial-gradient(circle at 36% 30%,#ffb0f0 0%,#d24bff 38%,#7a18d6 72%,#3a0a78 100%)':'radial-gradient(circle at 36% 30%,#6b7aa0 0%,#2f3758 48%,#0f1328 100%)';
   return `<span class="sorb${hot?' hot':''}" style="width:${sz}px;height:${sz}px;background:${bg};${hot?'box-shadow:0 0 '+Math.round(sz*.45)+'px #c13cff,0 0 '+Math.round(sz*.2)+'px #ff7ae6 inset;':'box-shadow:0 0 4px #c9a0ff;'}"></span>`; };
 function mkShard(n,mat){ mat=mat||'shard'; return {id:++ITEMID,slot:'mat',mat,rar:4,name:SHDK[mat].n,base:'',ilvl:0,n:n|0,aff:[]}; }
-function shardCount(p,mat){ mat=mat||'shard'; return (p.inv||[]).reduce((t,x)=>t+(x&&x.mat===mat?(x.n|0):0),0)+(p[mat]|0); }
-function shardAdd(p,n,mat){ mat=mat||'shard'; let left=Math.max(0,n|0)+(p[mat]|0); p[mat]=0; if(left<=0)return 0; const put=left;
-  for(const x of p.inv){ if(left<=0)break; if(x&&x.mat===mat&&x.n<SHARD_MAX){ const a=Math.min(SHARD_MAX-x.n,left); x.n+=a; left-=a; } }
-  while(left>0){ const i=p.inv.indexOf(null); if(i<0)break; const a=Math.min(SHARD_MAX,left); p.inv[i]=mkShard(a,mat); left-=a; }
+const MISC_N=60, MISC_NS=100;   /* 기타 탭 칸 수: 가방 60 · 공유보관함 100 (보관함 객체는 st:1) */
+function miscFix(p){ const n=p.st?MISC_NS:MISC_N; if(!Array.isArray(p.misc))p.misc=[]; while(p.misc.length<n)p.misc.push(null);
+  if(Array.isArray(p.inv)){ const add={}; for(let i=0;i<p.inv.length;i++){ const x=p.inv[i]; if(x&&isShard(x)){ const m=shMat(x); add[m]=(add[m]|0)+(x.n|0); p.inv[i]=null; } } for(const m in add)shardAdd(p,add[m],m); }   /* 예전엔 장비 칸에 있던 조각 → 기타 칸으로 */
+  return p; }
+function shardCount(p,mat){ mat=mat||'shard'; return (p.misc||[]).reduce((t,x)=>t+(x&&x.mat===mat?(x.n|0):0),0)+(p.inv||[]).reduce((t,x)=>t+(x&&x.mat===mat?(x.n|0):0),0)+(p[mat]|0); }
+function shardAdd(p,n,mat){ mat=mat||'shard'; if(!Array.isArray(p.misc)||p.misc.length<(p.st?MISC_NS:MISC_N))miscFix(p); let left=Math.max(0,n|0)+(p[mat]|0); p[mat]=0; if(left<=0)return 0; const put=left;
+  for(const x of p.misc){ if(left<=0)break; if(x&&x.mat===mat&&x.n<SHARD_MAX){ const a=Math.min(SHARD_MAX-x.n,left); x.n+=a; left-=a; } }
+  while(left>0){ const i=p.misc.indexOf(null); if(i<0)break; const a=Math.min(SHARD_MAX,left); p.misc[i]=mkShard(a,mat); left-=a; }
   p[mat]=left; return put-left; }
-function shardRepack(p){ for(const mat of ['shard','ashard']){ let n=0; for(let i=0;i<p.inv.length;i++){ const x=p.inv[i]; if(x&&x.mat===mat){ n+=x.n|0; p.inv[i]=null; } } shardAdd(p,n,mat); } }
-function shardTake(p,n,mat){ mat=mat||'shard'; if(shardCount(p,mat)<n)return false; let need=n; const ov=Math.min(p[mat]|0,need); p[mat]=(p[mat]|0)-ov; need-=ov;
-  const st=p.inv.map((x,i)=>x&&x.mat===mat?i:-1).filter(i=>i>=0).sort((a,b)=>p.inv[a].n-p.inv[b].n);
-  for(const i of st){ if(need<=0)break; const a=Math.min(p.inv[i].n,need); p.inv[i].n-=a; need-=a; if(p.inv[i].n<=0)p.inv[i]=null; } return need<=0; }
-function shardRoom(p,n,mat){ /* p 가방에 조각 n개가 더 들어갈 자리가 있나 */ mat=mat||'shard'; let r=0; for(const x of p.inv){ if(!x)r+=SHARD_MAX; else if(x.mat===mat)r+=SHARD_MAX-(x.n|0); } return r>=n; }
-function shardCanSwap(mat){ mat=mat||'shard'; const cp={inv:JSON.parse(JSON.stringify(me.inv)),[mat]:me[mat]|0}; return shardTake(cp,SHDK[mat].N(),mat)&&cp.inv.indexOf(null)>=0; }
+function shardRepack(p){ if(!Array.isArray(p.misc))miscFix(p); for(const mat of ['shard','ashard']){ let n=0; for(let i=0;i<p.misc.length;i++){ const x=p.misc[i]; if(x&&x.mat===mat){ n+=x.n|0; p.misc[i]=null; } } shardAdd(p,n,mat); } }
+function shardTake(p,n,mat){ mat=mat||'shard'; if(shardCount(p,mat)<n)return false; if(!Array.isArray(p.misc))miscFix(p); let need=n; const ov=Math.min(p[mat]|0,need); p[mat]=(p[mat]|0)-ov; need-=ov;
+  const st=p.misc.map((x,i)=>x&&x.mat===mat?i:-1).filter(i=>i>=0).sort((a,b)=>p.misc[a].n-p.misc[b].n);
+  for(const i of st){ if(need<=0)break; const a=Math.min(p.misc[i].n,need); p.misc[i].n-=a; need-=a; if(p.misc[i].n<=0)p.misc[i]=null; } return need<=0; }
+function shardRoom(p,n,mat){ /* p 기타 칸에 조각 n개가 더 들어갈 자리가 있나 */ mat=mat||'shard'; if(!Array.isArray(p.misc))miscFix(p); let r=0; for(const x of p.misc){ if(!x)r+=SHARD_MAX; else if(x.mat===mat)r+=SHARD_MAX-(x.n|0); } return r>=n; }
+function shardCanSwap(mat){ mat=mat||'shard'; const cp={st:me.st,misc:JSON.parse(JSON.stringify(me.misc||[])),[mat]:me[mat]|0}; return shardTake(cp,SHDK[mat].N(),mat)&&me.inv.indexOf(null)>=0; }   /* 교환하려면 조각은 기타 칸에서 빼고, 받을 아이템 자리는 장비 칸에 필요 */
 /* 그림자 조각 SHARD_N개 → 원하는 영웅 아이템 1개 */
 function shardModal(){ shardAdd(me,0); const n=shardCount(me), ok=n>=SHARD_N, free=shardCanSwap();
   const parts=['weapon','helm','armor','amulet','ring','shield'];
@@ -3075,16 +3081,16 @@ function shardModal(){ shardAdd(me,0); const n=shardCount(me), ok=n>=SHARD_N, fr
     <div class="meta" style="margin:0 0 8px;font-size:14px">보유 <b style="color:${ok?'#ff4f7a':'#e9d9b4'}">${n}</b> / ${SHARD_N}${!ok?` · <span style="color:#e07060">${SHARD_N-n}개 더 필요해요</span>`:free?'':' · <span style="color:#e07060">가방에 빈 칸이 없어요</span>'}</div>
     <div class="col">${parts.map(pt=>{ const k=heroKey(pt), S=SPFX[k]; return `<button class="btn${ok&&free?' primary':''}" data-hp="${pt}" ${ok&&free?'':'disabled style="opacity:.45"'} style="text-align:left"><b style="color:#ff4f7a">${S.n}</b> <span style="font-weight:400;font-size:12px;opacity:.85">${HPARTN[pt]} · ${S.d}</span></button>`; }).join('')}<button class="btn" id="shX">닫기</button></div>`,m=>{
     m.querySelector('#shX').onclick=closeModal;
-    m.querySelectorAll('[data-hp]').forEach(b=>b.onclick=()=>{ if(shardCount(me)<SHARD_N)return; const snap=JSON.stringify([me.inv,me.shard|0]); shardTake(me,SHARD_N); const i=me.inv.indexOf(null); if(i<0){ [me.inv,me.shard]=JSON.parse(snap); toast('가방이 가득 찼어요','#e07060'); return; }
-      const it=genHero(heroKey(b.dataset.hp)); if(!it){ [me.inv,me.shard]=JSON.parse(snap); return; } it.isNew=1; me.inv[i]=it; selItem=null; saveChar(); uiDirty=true; closeModal(); sfx('rare'); toast(`🌑 교환 완료: ${dn(it)}`,RARC[4]); if(sheetMode==='bag')renderBag(); }); }); }
+    m.querySelectorAll('[data-hp]').forEach(b=>b.onclick=()=>{ if(shardCount(me)<SHARD_N)return; const snap=JSON.stringify([me.misc,me.shard|0]); shardTake(me,SHARD_N); const i=me.inv.indexOf(null); if(i<0){ [me.misc,me.shard]=JSON.parse(snap); toast('가방이 가득 찼어요','#e07060'); return; }
+      const it=genHero(heroKey(b.dataset.hp)); if(!it){ [me.misc,me.shard]=JSON.parse(snap); return; } it.isNew=1; me.inv[i]=it; selItem=null; saveChar(); uiDirty=true; closeModal(); sfx('rare'); toast(`🌑 교환 완료: ${dn(it)}`,RARC[4]); if(sheetMode==='bag')renderBag(); }); }); }
 function ashardModal(){ shardAdd(me,0,'ashard'); const n=shardCount(me,'ashard'), ok=n>=ASHARD_N, free=shardCanSwap('ashard');
   const parts=['weapon','helm','armor','amulet','ring','shield'];
   modal(`<h3>✦ 각성 그림자 조각 교환</h3><p class="meta" style="margin:0 0 8px">각성 그림자를 쓰러뜨릴 때마다 조각 4~8개를 얻어요. <b style="color:#d8b0ff">${ASHARD_N}개</b>로 원하는 각성 장비 하나를 골라 받을 수 있어요. (수치는 무작위)</p>
     <div class="meta" style="margin:0 0 8px;font-size:14px">보유 <b style="color:${ok?'#d8b0ff':'#e9d9b4'}">${n}</b> / ${ASHARD_N}${!ok?` · <span style="color:#e07060">${ASHARD_N-n}개 더 필요해요</span>`:free?'':' · <span style="color:#e07060">가방에 빈 칸이 없어요</span>'}</div>
     <div class="col">${parts.map(pt=>{ const k=awKey(pt), S=SPFX[k]; return `<button class="btn${ok&&free?' primary':''}" data-aw="${pt}" ${ok&&free?'':'disabled style="opacity:.45"'} style="text-align:left"><b style="color:#d8b0ff">✦ ${S.n}</b> <span style="font-weight:400;font-size:12px;opacity:.85">${pt==='weapon'?'장검':HPARTN[pt]} · ${S.d}</span></button>`; }).join('')}<button class="btn" id="ashX">닫기</button></div>`,m=>{
     m.querySelector('#ashX').onclick=closeModal;
-    m.querySelectorAll('[data-aw]').forEach(b=>b.onclick=()=>{ if(shardCount(me,'ashard')<ASHARD_N)return; const snap=JSON.stringify([me.inv,me.ashard|0]); shardTake(me,ASHARD_N,'ashard'); const i=me.inv.indexOf(null); if(i<0){ [me.inv,me.ashard]=JSON.parse(snap); toast('가방이 가득 찼어요','#e07060'); return; }
-      const it=genHero(awKey(b.dataset.aw)); if(!it){ [me.inv,me.ashard]=JSON.parse(snap); return; } it.isNew=1; me.inv[i]=it; selItem=null; saveChar(); uiDirty=true; closeModal(); sfx('rare'); toast(`✦ 교환 완료: ${dn(it)}`,RARC[4]); if(sheetMode==='bag')renderBag(); }); }); }
+    m.querySelectorAll('[data-aw]').forEach(b=>b.onclick=()=>{ if(shardCount(me,'ashard')<ASHARD_N)return; const snap=JSON.stringify([me.misc,me.ashard|0]); shardTake(me,ASHARD_N,'ashard'); const i=me.inv.indexOf(null); if(i<0){ [me.misc,me.ashard]=JSON.parse(snap); toast('가방이 가득 찼어요','#e07060'); return; }
+      const it=genHero(awKey(b.dataset.aw)); if(!it){ [me.misc,me.ashard]=JSON.parse(snap); return; } it.isNew=1; me.inv[i]=it; selItem=null; saveChar(); uiDirty=true; closeModal(); sfx('rare'); toast(`✦ 교환 완료: ${dn(it)}`,RARC[4]); if(sheetMode==='bag')renderBag(); }); }); }
 function synToggle(){ syLv=syLv>=0?-1:2; saveChar(); autoSynth(); if(sheetMode==='bag')renderBag(); const warn=syLv>=0&&asLv>=0&&asLv>=syLv; sheetToast&&sheetToast(syLv<0?'자동 합성을 껐어요':warn?`⚠️ 자동 판매(${RARN[asLv]} 이하)가 합성 등급을 먼저 팔아요`:`자동 합성 ON — 레어 이하 같은 등급 ${SYN_N}개가 모이면 합성돼요`,warn?'#ffb259':null); }
 function autoSellOk(it0){ if(!(asLv>=0&&it0.rar<=asLv&&!it0.lock))return false; const k0=it0.slot==='ring'?(!me.eq.ring1?'ring1':!me.eq.ring2?'ring2':null):(me.eq[it0.slot]?null:it0.slot); return !(k0&&canWear(it0)); }
 function pickUp(g){
@@ -4539,7 +4545,7 @@ function updateHud(){
   const al=$('#hAlly');
   if(ally&&!ally.lobby){al.hidden=false; $('#hAllyN').textContent=`${ally.name||CLASSES[ally.cls].n} ${ally.lvl}`; $('#hAllyHp').style.transform=`scaleX(${clamp((ally.hp||0)/(ally.mh||1),0,1)})`;} else al.hidden=true;
   { const pn=me.pot+me.potBuy, rn=revItems(); $('#potN').textContent=pn; $('#revN').textContent=rn; $('#potN').parentNode.classList.toggle('z',pn<=0); $('#bPot').classList.toggle('pblk',me.hbStrict>0); $('#revN').parentNode.classList.toggle('z',rn<=0); } $('#bRev').classList.toggle('rdy',!!me.dead&&revItems()>0); $('#hGold').textContent=`💰 ${(me.gold|0).toLocaleString()}G`;
-  { const nb=$('#bagNew'); if(nb){ const n=me.inv.reduce((t,x)=>t+(x&&x.isNew?1:0),0); nb.hidden=!n; nb.textContent=n>9?'9+':n; } }
+  { const nb=$('#bagNew'); if(nb){ const n=newCnt(me); nb.hidden=!n; nb.textContent=n>9?'9+':n; } }
   { const bd=$('#statBadge'), b2=$('#skillBadge'), a=me.statPts|0, k=me.skillPts|0; bd.hidden=a<=0; bd.textContent='+'+a; b2.hidden=k<=0; b2.textContent='+'+k; }
   for(const b of $('#skills').children){ const k=b.dataset.k, s=SKBY[k];
     const rem=me.cds[k]||0, cd=rem/((me.cdm&&me.cdm[k])||(k==='shout'?SHC(skLv(me,k)||1):s.cd))*(k==='shout'?1:1); b.querySelector('.cdv').style.setProperty('--p',s.aura?0:clamp(cd,0,1));
@@ -4550,17 +4556,18 @@ function updateHud(){
 }
 
 /* ================= SHEETS ================= */
-let sheetMode=null, selItem=null, bagSel=null;   /* bagSel: 가방 '📦 창고로' 선택 모드(고른 칸 번호 Set), 꺼져 있으면 null */
+let sheetMode=null, selItem=null, bagSel=null, bagSelM=null, bagTab='eq', storeTab='eq';
+const newCnt=p=>((p.inv||[]).concat(p.misc||[])).reduce((t,x)=>t+(x&&x.isNew?1:0),0);   /* bagSel: 가방 '📦 창고로' 선택 모드(고른 칸 번호 Set), 꺼져 있으면 null */
 let shopMsg='', buyMsg='', sellAskIt=null;
 let sortFresh=true;   /* 가방을 연 뒤 첫 정렬 누름: 저장된 방식 그대로 정렬 → 그다음부터 방식을 바꿔 가며 정렬 */
-function openSheet(m){ sortFresh=true; if(!G.inGame&&!G.titleSheet)return; document.body.classList.add('shopen'); sheetMode=m; selItem=null; shopMsg=''; buyMsg=''; $('#sheet').hidden=false; if(G.inGame&&G.mode==='solo')G.paused=true; for(const k in held)held[k]=false; joy.active=false;
+function openSheet(m){ sortFresh=true; bagTab='eq'; storeTab='eq'; if(!G.inGame&&!G.titleSheet)return; document.body.classList.add('shopen'); sheetMode=m; selItem=null; shopMsg=''; buyMsg=''; $('#sheet').hidden=false; if(G.inGame&&G.mode==='solo')G.paused=true; for(const k in held)held[k]=false; joy.active=false;
   rerender(); $('#sheetB').scrollTop=0; }
 function rerender(){ if(sheetMode!=='bag'){ bagSel=null; $('#sheetTabs').classList.remove('selhide'); $('#selBar').hidden=true; } $('#sheet').classList.toggle('isstore',sheetMode==='store'||sheetMode==='town'); if(sheetMode==='store')renderStore(); else if(sheetMode==='town')renderTown(); else if(sheetMode==='bag')renderBag(); else if(sheetMode==='stat'||sheetMode==='skill'||sheetMode==='passive')renderStat(); else if(sheetMode==='shop')renderShop(); else renderMenu(); }
-function markTabs(){ $('#itemPop').hidden=true; $('#ptsBar').hidden=true; const t=$('#sheetTabs'), cm=sheetMode==='passive'?'skill':sheetMode; t.hidden=sheetMode==='menu'||sheetMode==='store'||!!G.inGame; /* 게임 중에는 하단 독 하나만 사용 */ for(const [id,m] of [['bBag','bag'],['bStat','stat'],['bSkillT','skill'],['bMenu','menu']]){ const e=$('#'+id); if(e)e.setAttribute('aria-pressed',cm===m); } t.querySelectorAll('button').forEach(b=>{b.setAttribute('aria-pressed',b.dataset.m===cm); if(b.dataset.m==='shop')b.hidden=!!G.inGame&&sheetMode!=='shop'; const n=b.dataset.m==='bag'?me.inv.reduce((t,x)=>t+(x&&x.isNew?1:0),0):b.dataset.m==='stat'?(me.statPts|0):b.dataset.m==='skill'?(me.skillPts|0):0; let bd=b.querySelector('.pl'); if(!bd){bd=document.createElement('span');bd.className='pl';b.appendChild(bd);} bd.textContent=n>0?(b.dataset.m==='bag'?'NEW':'+'+n):''; bd.hidden=!(n>0); }); }
+function markTabs(){ $('#itemPop').hidden=true; $('#ptsBar').hidden=true; const t=$('#sheetTabs'), cm=sheetMode==='passive'?'skill':sheetMode; t.hidden=sheetMode==='menu'||sheetMode==='store'||!!G.inGame; /* 게임 중에는 하단 독 하나만 사용 */ for(const [id,m] of [['bBag','bag'],['bStat','stat'],['bSkillT','skill'],['bMenu','menu']]){ const e=$('#'+id); if(e)e.setAttribute('aria-pressed',cm===m); } t.querySelectorAll('button').forEach(b=>{b.setAttribute('aria-pressed',b.dataset.m===cm); if(b.dataset.m==='shop')b.hidden=!!G.inGame&&sheetMode!=='shop'; const n=b.dataset.m==='bag'?newCnt(me):b.dataset.m==='stat'?(me.statPts|0):b.dataset.m==='skill'?(me.skillPts|0):0; let bd=b.querySelector('.pl'); if(!bd){bd=document.createElement('span');bd.className='pl';b.appendChild(bd);} bd.textContent=n>0?(b.dataset.m==='bag'?'NEW':'+'+n):''; bd.hidden=!(n>0); }); }
 $('#ptsBar').onclick=()=>{ sheetMode='stat'; selItem=null; rerender(); };
-$('#sheetTabs').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; if(b.id==='tSend'){ sheetMode='bag'; selItem=null; bagSel=new Set(); rerender(); $('#sheetB').scrollTop=0; return; }   /* 📦 창고로: 가방을 열고 선택 모드로 */
-  if(b.dataset.m==='bag'&&sheetMode==='bag'&&me.inv.some(x=>x&&x.isNew)){ me.inv.forEach(x=>{ if(x)delete x.isNew; }); saveChar(); uiDirty=true; selItem=null; rerender(); sheetToast('✨ NEW 표시를 모두 지웠어요'); return; }   /* 가방 탭을 한 번 더 누르면 NEW 표시 전부 지움 */
-  bagSel=null; sheetMode=b.dataset.m; selItem=null; shopMsg=''; buyMsg=''; rerender(); $('#sheetB').scrollTop=0; });
+$('#sheetTabs').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; if(b.id==='tSend'){ sheetMode='bag'; selItem=null; bagSel=new Set(); bagSelM=new Set(); rerender(); $('#sheetB').scrollTop=0; return; }   /* 📦 창고로: 가방을 열고 선택 모드로 */
+  if(b.dataset.m==='bag'&&sheetMode==='bag'&&newCnt(me)>0){ me.inv.concat(me.misc||[]).forEach(x=>{ if(x)delete x.isNew; }); saveChar(); uiDirty=true; selItem=null; rerender(); sheetToast('✨ NEW 표시를 모두 지웠어요'); return; }   /* 가방 탭을 한 번 더 누르면 NEW 표시 전부 지움 */
+  bagSel=null; if(b.dataset.m!==sheetMode){ bagTab='eq'; storeTab='eq'; } sheetMode=b.dataset.m; selItem=null; shopMsg=''; buyMsg=''; rerender(); $('#sheetB').scrollTop=0; });
 function openTitleSheet(m){ prepMe(); G.titleSheet=true; if(m==='store')STORE=loadStore(); openSheet(m); }
 function closeSheet(){ try{ hoverHide(); }catch(e){} document.body.classList.remove('shopen'); for(const id of ['bBag','bStat','bSkillT','bMenu']){ const e=$('#'+id); if(e)e.setAttribute('aria-pressed','false'); } const was=G.titleSheet; if(me&&me.id&&sheetMode!=='town')saveChar(); sheetMode=null; bagSel=null; $('#sheetTabs').classList.remove('selhide'); $('#selBar').hidden=true; $('#sheet').hidden=true; G.paused=false; if(was){ G.titleSheet=false; renderClassCards(); } }
 $('#sheetX').onclick=closeSheet;
@@ -4587,10 +4594,10 @@ function cellHtml(it,cls,extra){
 let dragSup=0;
 function enableDrag(b){
   b.addEventListener('click',e=>{ if(Date.now()<dragSup){ e.stopPropagation(); e.preventDefault(); } },true);
-  b.querySelectorAll('[data-inv],[data-eq]').forEach(el=>{
+  b.querySelectorAll('[data-inv],[data-eq],[data-mi]').forEach(el=>{
     el.addEventListener('pointerdown',e=>{
-      const src=el.dataset.inv!==undefined?{t:'inv',i:+el.dataset.inv}:{t:'eq',k:el.dataset.eq};
-      const it=src.t==='inv'?me.inv[src.i]:me.eq[src.k]; if(!it)return;
+      const src=el.dataset.inv!==undefined?{t:'inv',i:+el.dataset.inv}:el.dataset.mi!==undefined?{t:'mi',i:+el.dataset.mi}:{t:'eq',k:el.dataset.eq};
+      const it=src.t==='inv'?me.inv[src.i]:src.t==='mi'?me.misc[src.i]:me.eq[src.k]; if(!it)return;
       const sx=e.clientX, sy=e.clientY; let ghost=null, id=e.pointerId;
       const touch=e.pointerType==='touch'; let armed=!touch, dead=false, tm=null;
       const mk=()=>{ ghost=el.cloneNode(true); ghost.style.cssText+=';position:fixed;z-index:99999;pointer-events:none;opacity:.85;width:'+el.offsetWidth+'px;height:'+el.offsetHeight+'px;transform:scale(1.1)'; document.body.appendChild(ghost); el.style.opacity='.35'; };
@@ -4603,14 +4610,15 @@ function enableDrag(b){
         ghost.style.left=(ev.clientX-el.offsetWidth/2)+'px'; ghost.style.top=(ev.clientY-el.offsetHeight/2)+'px'; if(ev.cancelable)ev.preventDefault(); };
       const up=ev=>{ if(ev.pointerId!==id)return; const wasG=ghost; clean();
         if(!ghost)return; ghost.remove(); el.style.opacity=''; dragSup=Date.now()+350;
-        const t=document.elementFromPoint(ev.clientX,ev.clientY), dst=t&&t.closest('[data-inv],[data-eq]'); if(!dst){ renderBag(); return; }
-        dragDrop(src,dst.dataset.inv!==undefined?{t:'inv',i:+dst.dataset.inv}:{t:'eq',k:dst.dataset.eq}); };
+        const t=document.elementFromPoint(ev.clientX,ev.clientY), dst=t&&t.closest('[data-inv],[data-eq],[data-mi]'); if(!dst){ renderBag(); return; }
+        dragDrop(src,dst.dataset.inv!==undefined?{t:'inv',i:+dst.dataset.inv}:dst.dataset.mi!==undefined?{t:'mi',i:+dst.dataset.mi}:{t:'eq',k:dst.dataset.eq}); };
       document.addEventListener('pointermove',mv,{passive:false}); document.addEventListener('pointerup',up); document.addEventListener('pointercancel',up); document.addEventListener('touchmove',tmv,{passive:false});
     });
   });
 }
 function dragDrop(a,b){
   selItem=null;
+  if(a.t==='mi'||b.t==='mi'){ if(a.t==='mi'&&b.t==='mi'&&a.i!==b.i){ const A=me.misc[a.i],B=me.misc[b.i]; if(A&&B&&isShard(A)&&isShard(B)&&A.mat===B.mat){ const mv=Math.min(SHARD_MAX-B.n,A.n); if(mv>0){ B.n+=mv; A.n-=mv; if(A.n<=0)me.misc[a.i]=null; saveChar(); } } else { me.misc[a.i]=B||null; me.misc[b.i]=A||null; saveChar(); } } renderBag(); return; }
   if(a.t==='inv'&&b.t==='inv'){ if(a.i!==b.i&&isShard(me.inv[a.i])&&isShard(me.inv[b.i])&&me.inv[a.i].mat===me.inv[b.i].mat){ const A=me.inv[a.i],B=me.inv[b.i],mv=Math.min(SHARD_MAX-B.n,A.n); if(mv>0){ B.n+=mv; A.n-=mv; if(A.n<=0)me.inv[a.i]=null; saveChar(); } renderBag(); return; } if(a.i!==b.i){ const t=me.inv[a.i]; me.inv[a.i]=me.inv[b.i]; me.inv[b.i]=t; saveChar(); } renderBag(); return; }
   if(a.t==='inv'&&b.t==='eq'){ const it=me.inv[a.i]; if(!it){renderBag();return;} const sl=it.slot==='ring'?(b.k.startsWith('ring')?b.k:null):it.slot; if(sl!==b.k&&!(it.slot==='ring'&&b.k.startsWith('ring'))){ toast('그 칸에는 착용할 수 없어요','#ff8a7a'); renderBag(); return; } equip(a.i,it.slot==='ring'?b.k:undefined); return; }
   if(a.t==='eq'&&b.t==='inv'){ if(me.inv[b.i]){ renderBag(); return; } unequip(a.k); return; }
@@ -4624,10 +4632,11 @@ let STORE=null, satSeq=0;
 function loadStore(){ let o=null; try{ o=JSON.parse(lsGet(STORE_KEY)||'null'); }catch(e){} if(!o||typeof o!=='object')o={};
   const inv=Array.isArray(o.inv)?o.inv.slice(0,STORE_N):[]; while(inv.length<STORE_N)inv.push(null);
   let ch=false; for(const it of inv){ if(it){ if(!Array.isArray(it.aff))it.aff=[]; try{ if(ilCapFix(it))ch=true; heroFix(it); newOptFix(it); lanternFix(it); if(sumFix(it))ch=true; if(optFix2(it))ch=true; if(itemMig(it,me&&me.cls))ch=true; if(baseFix(it))ch=true; if(nameFix(it))ch=true; }catch(e){} } }
-  if(ch){ try{ lsSet(STORE_KEY,JSON.stringify({inv,gold:Math.max(0,o.gold|0)})); }catch(e){} }
-  return {inv,gold:Math.max(0,o.gold|0),shard:0}; }
+  const S={inv,gold:Math.max(0,o.gold|0),shard:0,st:1,misc:Array.isArray(o.misc)?o.misc.slice(0,MISC_NS):[]}; const had=inv.some(x=>x&&isShard(x)); miscFix(S);
+  if(ch||had){ try{ lsSet(STORE_KEY,JSON.stringify({inv:S.inv,misc:S.misc,gold:S.gold})); }catch(e){} }
+  return S; }
 function getStore(){ if(!STORE)STORE=loadStore(); return STORE; }
-function saveStore(){ if(!STORE)return; lsSet(STORE_KEY,JSON.stringify({inv:STORE.inv,gold:STORE.gold|0})); }
+function saveStore(){ if(!STORE)return; lsSet(STORE_KEY,JSON.stringify({inv:STORE.inv,misc:STORE.misc,gold:STORE.gold|0})); }
 const stamp=it=>{ if(it)it.sat=Date.now()+((satSeq=(satSeq+1)%1000)/1000); return it; };   /* 입고 시각(입고순 정렬용) */
 /* 보내기 대상: 캐릭터들 + 공유보관함. src(보내는 쪽)와 같은 곳은 제외 — 보관함에서 보낼 땐 지금 캐릭터도 포함 */
 function targetsFor(src){ const L=[];
@@ -4650,16 +4659,18 @@ function storeDetail(){ sellAskIt=null; if(!selItem)return ''; const it=selItem.
   return s+`<div class="acts iact">${lk}<button class="btn tlb" id="aSell"${it.lock?' style="opacity:.45"':''}><span class="ti ph">💰</span><span class="tx">판매 ${sellInfo(it).total}G</span></button><button class="btn tlb" id="aSend"><span class="ti">📤</span> <span class="tx">보내기</span></button></div>`; }
 function renderStore(){ const S=getStore(); markTabs(); storeHead();
   const bt=(attrs,t)=>`<button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap" ${attrs}>${t}</button>`;
-  cellPlain=true; let cells=''; try{ cells=S.inv.map((it,i)=>cellHtml(it,'cell',`data-inv="${i}"`)).join(''); }finally{ cellPlain=false; }
+  cellPlain=true; let cells=''; try{ cells=storeTab==='misc'?S.misc.map((it,i)=>cellHtml(it,'cell',`data-mi="${i}"`)).join(''):S.inv.map((it,i)=>cellHtml(it,'cell',`data-inv="${i}"`)).join(''); }finally{ cellPlain=false; }
   const gp='font-size:13px;font-weight:700;width:76px;height:34px;padding:0;border-radius:9px;border:1px solid #c9a24a;background:rgba(201,162,74,.12);color:#ffd84a;cursor:pointer;white-space:nowrap';
   const gold=`<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;border:1px solid var(--line2);background:#14100d"><span style="flex:1;min-width:0;color:#ffd84a;font-size:18px;font-weight:700;white-space:nowrap">💰 ${(S.gold|0).toLocaleString('ko-KR')}G</span><button id="goldSend" style="${gp}">보내기</button><button id="goldTake" style="${gp}">받기</button></div>`;
-  const h=`<div class="bagtop" style="display:flex;flex-direction:column;gap:10px;min-width:0">${gold}<div style="display:flex;flex-wrap:nowrap;gap:4px">${bt('data-ssort="rar"','정렬(등급순)')}${bt('data-ssort="enh"','정렬(강화순)')}${bt('data-ssort="in"','정렬(입고순)')}${bt('id="aBulk"','일괄판매')}</div></div><div class="inv">${cells}</div>`;
+  const h=`<div class="bagtop" style="display:flex;flex-direction:column;gap:10px;min-width:0">${gold}${tabStrip(S.inv,S.misc,storeTab)}<div style="display:flex;flex-wrap:nowrap;gap:4px">${storeTab==='misc'?bt('data-msort="1"','정렬(등급순)')+bt('id="aMBulk"','일괄판매'):bt('data-ssort="rar"','정렬(등급순)')+bt('data-ssort="enh"','정렬(강화순)')+bt('data-ssort="in"','정렬(입고순)')+bt('id="aBulk"','일괄판매')}</div></div><div class="inv">${cells}</div>`;
   const b=$('#sheetB'); b.className='sbody bag'; b.innerHTML=h; fitInv();
   try{ showPop(storeDetail(),null); }catch(e){ console.error(e); selItem=null; showPop(''); }
   b.querySelectorAll('[data-inv]').forEach(el=>el.onclick=()=>{ const i=+el.dataset.inv; if(S.inv[i]){ selItem={it:S.inv[i],inv:i,store:1}; renderStore(); } });
   bindHover(b,S);
   b.querySelectorAll('[data-ssort]').forEach(e=>e.onclick=()=>sortStore(e.dataset.ssort));
-  b.querySelector('#aBulk').onclick=()=>bulkSell(S);
+  { const q=b.querySelector('#aBulk'); if(q)q.onclick=()=>bulkSell(S); const mb=b.querySelector('#aMBulk'); if(mb)mb.onclick=()=>bulkSellMisc(S); const ms=b.querySelector('[data-msort]'); if(ms)ms.onclick=()=>sortMisc(S); }
+  b.querySelectorAll('[data-bt]').forEach(e=>e.onclick=()=>{ storeTab=e.dataset.bt; selItem=null; renderStore(); $('#sheetB').scrollTop=0; });
+  b.querySelectorAll('[data-mi]').forEach(el=>el.onclick=()=>{ const i=+el.dataset.mi; if(S.misc[i]){ selItem={it:S.misc[i],misc:i,store:1}; renderStore(); } });
   $('#itemPop').querySelectorAll('[data-lk]').forEach(alk=>alk.onclick=()=>{ const it=selItem&&selItem.it; if(!it)return; it.lock=!it.lock; saveStore(); sheetToast(it.lock?'🔒 잠갔어요. 일괄 판매에서 제외돼요':'🔓 잠금을 풀었어요'); renderStore(); });
   const asn=pq('#aSend'); if(asn)asn.onclick=()=>sendPick();
   const asl=pq('#aSell'); if(asl)asl.onclick=()=>sellBtn(asl);
@@ -4707,12 +4718,30 @@ const INV_COLS_MIN=7, INV_COLS_MAX=10, INV_CELL=52;
 function fitInv(){ const b=$('#sheetB'); if(!b)return; const inv=b.querySelector('.inv'); if(!inv)return; const w=inv.clientWidth; if(!w)return;
   const n=Math.max(INV_COLS_MIN,Math.min(INV_COLS_MAX,Math.round((w+4)/(INV_CELL+4)))); inv.style.gridTemplateColumns=`repeat(${n},minmax(0,1fr))`; }
 try{ new ResizeObserver(()=>fitInv()).observe($('#sheetB')); }catch(e){}
+const cntNN=a=>a.reduce((t,x)=>t+(x?1:0),0);
+const tabStrip=(inv,misc,tab)=>`<div class="tbs"><button class="tb${tab==='eq'?' on':''}" data-bt="eq">🎒 장비품 <small>${cntNN(inv)}/${inv.length}</small></button><button class="tb${tab==='misc'?' on':''}" data-bt="misc">💎 기타 <small>${cntNN(misc)}/${misc.length}</small>${misc.some(x=>x&&x.isNew)?'<i class="n">NEW</i>':''}</button></div>`;
+const GEM_KINDS=['ruby','sapphire','topaz','emerald','amethyst','diamond'], GEM_TIER=[{il:25,n:'하급',g:300},{il:50,n:'중급',g:1000},{il:75,n:'상급',g:2000}];
+const isGem=it=>!!(it&&it.mat==='gem');
+/* 기타 탭 정렬(등급순): 조각(그림자→각성) 먼저, 그 다음 보석을 상급→중급→하급, 같은 등급이면 보석 종류 순서 */
+function sortMisc(P){ shardRepack(P); const its=P.misc.filter(Boolean); const key=it=>isShard(it)?[0,it.mat==='ashard'?1:0,0]:[1,-(it.ilvl|0),Math.max(0,GEM_KINDS.indexOf(it.gk))];
+  its.sort((a,b)=>{ const x=key(a),y=key(b); return x[0]-y[0]||x[1]-y[1]||x[2]-y[2]; });
+  P.misc=its.concat(Array(Math.max(0,(P.st?MISC_NS:MISC_N)-its.length)).fill(null)); selItem=null; saveSrc(P); rerender(); sheetToast('등급순으로 정리했어요'); }
+/* 기타 탭 일괄 판매: 보석만 (조각은 제외) — 하급/중급/상급을 고르면 잠그지 않은 보석이 한꺼번에 팔려요 */
+function bulkSellMisc(P){ const gl=()=>P.misc.filter(it=>isGem(it)&&!it.lock); if(!gl().length){ sheetToast('판매할 보석이 없어요','#ffb259'); return; }
+  const sel=new Set(), cnt=t=>gl().filter(x=>(x.ilvl|0)===t.il).length;
+  const draw=m=>{ let n=0,v=0; for(const k of sel){ const t=GEM_TIER[k], c=cnt(t); n+=c; v+=c*t.g; } m.querySelector('#bmSum').innerHTML=n?`선택한 <b>${n}개</b> · <b style="color:#ffd84a">${v.toLocaleString()}G</b>`:'<span class="meta">판매할 등급을 선택하세요</span>'; m.querySelector('#bmGo').disabled=!n; };
+  modal(`<h3>🧺 일괄 판매 · 기타</h3><p class="meta" style="margin:0 0 8px">${P===me?'가방':'공유보관함'}의 보석만 팔아요. 🔒잠근 보석은 제외돼요. 조각은 팔리지 않아요.</p><div class="col">${GEM_TIER.map((t,k)=>`<label class="toggle" style="display:flex;gap:8px;align-items:center;font-size:14px;padding:8px;border:1px solid var(--line2);border-radius:8px"><input type="checkbox" data-t="${k}" ${cnt(t)?'':'disabled'}> <span style="font-weight:700">${t.n}</span> <span style="margin-left:auto;color:var(--mute)">${cnt(t)}개 · 개당 ${t.g.toLocaleString()}G</span></label>`).join('')}<div id="bmSum" style="min-height:22px;font-size:14px"></div><div class="row2"><button class="btn" id="bmNo">취소</button><button class="btn primary" id="bmGo" disabled>일괄 판매하기</button></div></div>`,m=>{
+    m.querySelectorAll('[data-t]').forEach(c=>c.onchange=()=>{ const k=+c.dataset.t; if(c.checked)sel.add(k); else sel.delete(k); draw(m); });
+    m.querySelector('#bmNo').onclick=closeModal; draw(m);
+    m.querySelector('#bmGo').onclick=()=>{ let g=0,n=0; P.misc.forEach((it,i)=>{ if(isGem(it)&&!it.lock){ const k=GEM_TIER.findIndex(t=>t.il===(it.ilvl|0)); if(k>=0&&sel.has(k)){ g+=GEM_TIER[k].g; n++; P.misc[i]=null; } } }); if(!n)return; P.gold=(P.gold|0)+g; selItem=null; shopMsg=`${n}개 판매 +${g}G`; sfx('coin'); saveSrc(P); uiDirty=true; closeModal(); rerender(); sheetToast&&sheetToast(`${n}개 판매 +${g.toLocaleString()}G`); }; }); }
 function renderBag(){
   shardAdd(me,0); shardAdd(me,0,'ashard'); markTabs(); sheetHead();
   const eqOrder=['weapon','armor','helm','amulet','ring1','ring2'].concat(['shield']);
   let h='<div class="bagtop" style="display:flex;flex-direction:column;gap:10px;min-width:0"><div class="eq">'+eqOrder.map(k=>{const it=me.eq[k]; return `<div style="position:relative">${cellHtml(it,'slot',`data-eq="${k}"`)}<div class="sl" style="position:absolute;bottom:2px;left:0;right:0;font-size:9.5px;color:var(--mute);text-align:center;pointer-events:none">${eqLbl(k)}</div></div>`;}).join('')+'</div>';
   h+=`<div class="meta" style="font-size:12px;color:var(--mute)">⚔️ 전투력 <b style="color:#ffd84a">${calcCP(me).toLocaleString()}</b> <span style="color:#6b5f50">·</span> 🛡️ 장비 Lv 합 <b style="color:#ffd84a">${eqSum(me.eq)}</b></div><div class="bagbtns" style="display:flex;flex-wrap:nowrap;gap:4px"><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap" data-sort="${SORTM[(sortCur()+1)%3]}">정렬(${SORTN[sortCur()]})</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap" id="aBulk">일괄 판매</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap;${asLv>=0?`border-color:${RARC[asLv]};color:${RARC[asLv]};background:${['rgba(233,226,212,.14)','rgba(90,120,255,.28)','rgba(255,214,60,.24)'][asLv]};box-shadow:0 0 8px ${['rgba(233,226,212,.3)','rgba(110,140,255,.6)','rgba(255,214,60,.55)'][asLv]};font-weight:800`:''}" id="aAuto">자동판매 ${ASN[asLv+1]}</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap;${syLv>=0?`border-color:#c9a0ff;color:#d9b8ff;background:rgba(150,90,255,.22);box-shadow:0 0 8px rgba(150,90,255,.5);font-weight:800`:''}" id="aSyn" aria-pressed="${syLv>=0}">자동합성 ${syLv>=0?'ON':'OFF'}</button></div>`;
-  cellSel=!!bagSel; let invH=''; try{ invH=me.inv.map((it,i)=>cellHtml(it,'cell',`data-inv="${i}"`)).join(''); }finally{ cellSel=false; }
+  { const bi=h.indexOf('<div class="bagbtns"'), bs0='style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap"';
+    h=h.slice(0,bi)+tabStrip(me.inv,me.misc,bagTab)+(bagTab==='misc'?`<div class="bagbtns" style="display:flex;flex-wrap:nowrap;gap:4px"><button class="btn sm" ${bs0} data-msort="1">정렬(등급순)</button><button class="btn sm" ${bs0} id="aMBulk">일괄 판매</button></div>`:h.slice(bi)); }
+  cellSel=!!bagSel; let invH=''; try{ invH=bagTab==='misc'?me.misc.map((it,i)=>cellHtml(it,'cell',`data-mi="${i}"`)).join(''):me.inv.map((it,i)=>cellHtml(it,'cell',`data-inv="${i}"`)).join(''); }finally{ cellSel=false; }
   h+='<div class="inv">'+invH+'</div>';
   const b=$('#sheetB'); b.className='sbody bag'; b.innerHTML=h; fitInv(); try{ showPop(detailHtml(),curCmpHtml()); }catch(e){ console.error(e); selItem=null; showPop(''); }
   b.querySelectorAll('[data-eq]').forEach(el=>el.onclick=()=>{const k=el.dataset.eq; if(me.eq[k]){selItem={it:me.eq[k],eq:k};renderBag();}});
@@ -4722,8 +4751,11 @@ function renderBag(){
   const asl=pq('#aSell'); if(asl)asl.onclick=()=>sellBtn(asl);
   $('#itemPop').querySelectorAll('[data-lk]').forEach(alk=>alk.onclick=()=>{ const it=selItem&&selItem.it; if(!it)return; it.lock=!it.lock; saveChar(); sheetToast(it.lock?'🔒 잠갔어요. 일괄 판매에서 제외돼요':'🔓 잠금을 풀었어요'); renderBag(); });
   b.querySelectorAll('[data-sort]').forEach(e=>e.onclick=()=>{ if(sortFresh){ sortFresh=false; sortInv(SORTM[sortCur()]); } else sortInv(e.dataset.sort); });
-  b.querySelector('#aBulk').onclick=()=>bulkSell(); { const aa=b.querySelector('#aAsh'); if(aa)aa.onclick=()=>ashardModal(); }
-  b.querySelector('#aAuto').onclick=autoSellModal; b.querySelector('#aSyn').onclick=synToggle; 
+  { const q=b.querySelector('#aBulk'); if(q)q.onclick=()=>bulkSell(); const aa=b.querySelector('#aAsh'); if(aa)aa.onclick=()=>ashardModal(); const a1=b.querySelector('#aAuto'); if(a1)a1.onclick=autoSellModal; const a2=b.querySelector('#aSyn'); if(a2)a2.onclick=synToggle; }
+  b.querySelectorAll('[data-bt]').forEach(e=>e.onclick=()=>{ bagTab=e.dataset.bt; selItem=null; rerender(); $('#sheetB').scrollTop=0; });
+  b.querySelectorAll('[data-mi]').forEach(el=>el.onclick=()=>{ const i=+el.dataset.mi, it=me.misc[i]; if(it){ if(it.isNew){ delete it.isNew; saveChar(); } selItem={it,misc:i}; renderBag(); } });
+  { const ms=b.querySelector('[data-msort]'); if(ms)ms.onclick=()=>sortMisc(me); const mb=b.querySelector('#aMBulk'); if(mb)mb.onclick=()=>bulkSellMisc(me); }
+
   enableDrag(b);
   const asn=pq('#aSend'); if(asn)asn.onclick=()=>sendPick();
   const ase=pq('#aShardEx'); if(ase)ase.onclick=()=>(selItem&&shMat(selItem.it)==='ashard'?ashardModal():shardModal());
@@ -4733,31 +4765,35 @@ function renderBag(){
   const au=pq('#aUnequip'); if(au)au.onclick=()=>{unequip(selItem.eq);};
   bagSelUi(b);
 }
-/* ===== 가방 '📦 창고로' 선택 모드: 아이템을 여러 개 체크해서 공유보관함으로 한 번에 보내요 (조각 제외, 잠근 아이템은 보낼 수 있음) ===== */
-const selOk=it=>!!(it&&!isShard(it));   /* 잠근 아이템도 보낼 수 있어요(파는 게 아니라 옮기는 것) — 잠금 표시는 그대로 유지 */
+/* ===== 가방 '📦 창고로' 선택 모드: 아이템을 여러 개 체크해서 공유보관함으로 한 번에 보내요 (장비품·기타 탭 모두, 잠근 아이템도 보낼 수 있음) ===== */
+const selOk=it=>!!it;   /* 잠근 아이템·조각도 보낼 수 있어요(파는 게 아니라 옮기는 것) — 잠금 표시는 그대로 유지 */
 function bagSelUi(b){ const on=!!bagSel, tabs=$('#sheetTabs'), bar=$('#selBar'); tabs.classList.toggle('selhide',on); bar.hidden=!on; b.classList.toggle('selmode',on); if(!on)return;
-  for(const i of [...bagSel])if(!selOk(me.inv[i]))bagSel.delete(i);
-  const cnt=()=>bagSel.size, free=()=>getStore().inv.filter(x=>!x).length;
-  const meta=b.querySelector('.bagtop .meta'); if(meta)meta.innerHTML=`<b style="color:#e6bf6a" id="selN">선택 ${cnt()}</b> <span style="color:#6b5f50">·</span> 조각은 제외 <span style="color:#6b5f50">·</span> 보관함 빈 칸 ${free()}`;
-  const bb=b.querySelector('.bagbtns'); if(bb){ const st='flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap'; bb.innerHTML=`<button class="btn sm" style="${st}" id="selAll">전체 선택</button><button class="btn sm" style="${st}" id="selRar">등급별 선택 ▾</button><button class="btn sm" style="${st}" id="selClr">선택 해제</button>`; }
-  const upd=()=>{ b.querySelectorAll('[data-inv]').forEach(el=>{ const i=+el.dataset.inv, it=me.inv[i]; if(!it)return; const ok=selOk(it), p=bagSel.has(i); el.classList.toggle('pick',p); el.classList.toggle('nopick',!ok);
+  if(!bagSelM)bagSelM=new Set();
+  for(const i of [...bagSel])if(!selOk(me.inv[i]))bagSel.delete(i); for(const i of [...bagSelM])if(!selOk(me.misc[i]))bagSelM.delete(i);
+  const mt=bagTab==='misc', A=mt?me.misc:me.inv, SEL=mt?bagSelM:bagSel, at=mt?'data-mi':'data-inv', ds=mt?'mi':'inv';
+  const cnt=()=>bagSel.size+bagSelM.size, free=()=>{ const S=getStore(); return (mt?S.misc:S.inv).filter(x=>!x).length; };
+  const meta=b.querySelector('.bagtop .meta'); if(meta)meta.innerHTML=`<b style="color:#e6bf6a" id="selN">선택 ${cnt()}</b> <span style="color:#6b5f50">·</span> 보관함 ${mt?'기타':'장비품'} 빈 칸 ${free()}`;
+  const bb=b.querySelector('.bagbtns'); if(bb){ const st='flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap'; bb.innerHTML=`<button class="btn sm" style="${st}" id="selAll">전체 선택</button>${mt?'':`<button class="btn sm" style="${st}" id="selRar">등급별 선택 ▾</button>`}<button class="btn sm" style="${st}" id="selClr">선택 해제</button>`; }
+  const upd=()=>{ b.querySelectorAll('['+at+']').forEach(el=>{ const i=+el.dataset[ds], it=A[i]; if(!it)return; const ok=selOk(it), p=SEL.has(i); el.classList.toggle('pick',p); el.classList.toggle('nopick',!ok);
       let k=el.querySelector('.ck'); if(ok){ if(!k){ k=document.createElement('i'); k.className='ck'; el.appendChild(k); } k.textContent=p?'✓':''; } else if(k)k.remove(); });
     const n=b.querySelector('#selN'); if(n)n.textContent='선택 '+cnt(); const go=$('#selGo'); go.disabled=!cnt(); go.textContent=cnt()?`📦 ${cnt()}개 공유창고로 보내기`:'📦 공유창고로 보내기'; };
-  b.querySelectorAll('[data-inv]').forEach(el=>el.onclick=()=>{ const i=+el.dataset.inv, it=me.inv[i]; if(!it)return;
-    if(isShard(it)){ sheetToast('조각은 가방에서 아이템을 눌러 따로 보내 주세요','#ffb259'); return; }
-    if(bagSel.has(i))bagSel.delete(i); else bagSel.add(i); upd(); });
+  b.querySelectorAll('['+at+']').forEach(el=>el.onclick=()=>{ const i=+el.dataset[ds], it=A[i]; if(!it)return;
+    if(SEL.has(i))SEL.delete(i); else SEL.add(i); upd(); });
   b.querySelectorAll('[data-eq]').forEach(el=>el.onclick=null);
-  b.querySelector('#selAll').onclick=()=>{ me.inv.forEach((it,i)=>{ if(selOk(it))bagSel.add(i); }); upd(); };
-  b.querySelector('#selClr').onclick=()=>{ bagSel.clear(); upd(); };
-  b.querySelector('#selRar').onclick=()=>{ const c=r=>me.inv.filter(it=>selOk(it)&&it.rar===r).length;
+  b.querySelector('#selAll').onclick=()=>{ A.forEach((it,i)=>{ if(selOk(it))SEL.add(i); }); upd(); };
+  b.querySelector('#selClr').onclick=()=>{ bagSel.clear(); bagSelM.clear(); upd(); };
+  { const sr=b.querySelector('#selRar'); if(sr)sr.onclick=()=>{ const c=r=>me.inv.filter(it=>selOk(it)&&it.rar===r).length;
     modal(`<h3>등급별 선택</h3><p class="meta" style="margin:0 0 8px">등급을 누르면 그 등급 아이템이 모두 선택돼요. 이미 모두 선택돼 있으면 해제돼요.</p><div class="col">${[0,1,2,3].map(r=>`<button class="btn" data-r="${r}" ${c(r)?'':'disabled'} style="text-align:left;display:flex;justify-content:space-between"><span style="color:${RARC[r]};font-weight:700">${RARN[r]}</span><span style="color:var(--mute)">${c(r)}개</span></button>`).join('')}<button class="btn" id="srX">닫기</button></div>`,m=>{
       m.querySelector('#srX').onclick=closeModal;
-      m.querySelectorAll('[data-r]').forEach(x=>x.onclick=()=>{ const r=+x.dataset.r, ix=[]; me.inv.forEach((it,i)=>{ if(selOk(it)&&it.rar===r)ix.push(i); }); const all=ix.every(i=>bagSel.has(i)); ix.forEach(i=>all?bagSel.delete(i):bagSel.add(i)); closeModal(); upd(); }); }); };
-  $('#selNo').onclick=()=>{ bagSel=null; rerender(); };
+      m.querySelectorAll('[data-r]').forEach(x=>x.onclick=()=>{ const r=+x.dataset.r, ix=[]; me.inv.forEach((it,i)=>{ if(selOk(it)&&it.rar===r)ix.push(i); }); const all=ix.every(i=>bagSel.has(i)); ix.forEach(i=>all?bagSel.delete(i):bagSel.add(i)); closeModal(); upd(); }); }); }; }
+  $('#selNo').onclick=()=>{ bagSel=null; bagSelM=null; rerender(); };
   $('#selGo').onclick=()=>{ if(!cnt())return; const S=getStore(); let n=0, left=0;
     for(const i of [...bagSel].sort((a,c)=>a-c)){ const it=me.inv[i]; if(!selOk(it))continue; const j=S.inv.indexOf(null); if(j<0){ left++; continue; } me.inv[i]=null; delete it.isNew; S.inv[j]=stamp(it); n++; }
+    for(const i of [...bagSelM].sort((a,c)=>a-c)){ const it=me.misc[i]; if(!selOk(it))continue;
+      if(isShard(it)){ const mt2=shMat(it), q=it.n|0; if(!shardRoom(S,q,mt2)){ left++; continue; } shardAdd(S,q,mt2); me.misc[i]=null; n++; }
+      else { const j=S.misc.indexOf(null); if(j<0){ left++; continue; } me.misc[i]=null; delete it.isNew; S.misc[j]=stamp(it); n++; } }
     if(!n){ sheetToast('공유보관함이 가득 찼어요','#ff8a7a'); return; }
-    saveStore(); saveChar(); selItem=null; bagSel=null; sfx('pick'); rerender(); toast(left?`공유보관함에 ${n}개 보냈어요 (가득 차서 ${left}개는 남았어요)`:`공유보관함에 ${n}개 보냈어요`,'#9fd18b'); };
+    saveStore(); saveChar(); selItem=null; bagSel=null; bagSelM=null; sfx('pick'); rerender(); toast(left?`공유보관함에 ${n}개 보냈어요 (가득 차서 ${left}개는 남았어요)`:`공유보관함에 ${n}개 보냈어요`,'#9fd18b'); };
   upd(); }
 const SLOTO={weapon:0,shield:1,helm:2,armor:3,amulet:4,ring:5};
 const bk=(a,b)=>(a.base||'')<(b.base||'')?-1:(a.base||'')>(b.base||'')?1:0;
@@ -4779,7 +4815,7 @@ function qtyBind(m,max,onch){ const n=m.querySelector('#qtyN'), r=m.querySelecto
   n.oninput=()=>{ const v=Math.floor(+n.value||0); if(v>=1){ r.value=Math.min(max,v); if(onch)onch(get()); } }; n.onchange=()=>set(n.value); r.oninput=()=>set(r.value);
   m.querySelectorAll('[data-qd]').forEach(b=>b.onclick=()=>{ const d=b.dataset.qd; set(d==='all'?max:get()+(+d)); });
   if(onch)onch(get()); return get; }
-function sendShard(){ const P=selItem&&selItem.store?getStore():me; const it=selItem&&selItem.it, ix=selItem&&selItem.inv; if(!isShard(it)||ix===undefined)return; const max=it.n|0; if(max<1)return;
+function sendShard(){ const P=selItem&&selItem.store?getStore():me; const it=selItem&&selItem.it, ix=selItem&&selItem.misc; if(!isShard(it)||ix===undefined)return; const max=it.n|0; if(max<1)return;
   const tg=targetsFor(P); let q=max;
   const rows=tg.map(t=>`<button class="btn" data-to="${t.id}" style="text-align:left">${tgLabel(t,'<span class="st"></span>')}</button>`).join('');
   const mt=shMat(it), K=SHDK[mt];
@@ -4787,19 +4823,19 @@ function sendShard(){ const P=selItem&&selItem.store?getStore():me; const it=sel
     m.querySelector('#sX').onclick=closeModal;
     const refresh=v=>{ q=v; m.querySelectorAll('[data-to]').forEach(b=>{ const t=tg.find(o=>o.id===b.dataset.to), ok=t&&shardRoom(t.o,q,mt); b.disabled=!ok; b.style.opacity=ok?'':'.5'; b.querySelector('.st').textContent=ok?`(조각 ${shardCount(t.o,mt)}개 보유)`:'(자리 부족)'; }); };
     qtyBind(m,max,refresh);
-    m.querySelectorAll('[data-to]').forEach(b=>b.onclick=()=>{ const t=tg.find(o=>o.id===b.dataset.to); if(!t||P.inv[ix]!==it||q>(it.n|0)||!shardRoom(t.o,q,mt))return; shardAdd(t.o,q,mt); saveTarget(t); it.n-=q; if(it.n<=0)P.inv[ix]=null; selItem=null; saveSrc(P); closeModal(); sfx('pick'); shopMsg=''; rerender(); toast(`${tgName(t)}에게 조각 ${q}개를 보냈어요`,'#9fd18b'); });
+    m.querySelectorAll('[data-to]').forEach(b=>b.onclick=()=>{ const t=tg.find(o=>o.id===b.dataset.to); if(!t||P.misc[ix]!==it||q>(it.n|0)||!shardRoom(t.o,q,mt))return; shardAdd(t.o,q,mt); saveTarget(t); it.n-=q; if(it.n<=0)P.misc[ix]=null; selItem=null; saveSrc(P); closeModal(); sfx('pick'); shopMsg=''; rerender(); toast(`${tgName(t)}에게 조각 ${q}개를 보냈어요`,'#9fd18b'); });
   });
 }
-function sellShard(){ const P=selItem&&selItem.store?getStore():me; const it=selItem&&selItem.it, ix=selItem&&selItem.inv; if(!isShard(it)||ix===undefined)return; const max=it.n|0; if(max<1)return;
+function sellShard(){ const P=selItem&&selItem.store?getStore():me; const it=selItem&&selItem.it, ix=selItem&&selItem.misc; if(!isShard(it)||ix===undefined)return; const max=it.n|0; if(max<1)return;
   const K=SHDK[shMat(it)];
   modal(`<h3>💰 ${K.n} 판매</h3><p style="margin:0;font-size:13px;color:${RARC[4]}">${K.e} 이 칸 보유 ${max}개 · 개당 ${SHARD_SELL.toLocaleString()}G${P===me?'':' · 대금은 공유보관함 골드로'}</p>${qtyHtml(max)}<p class="meta" id="ssTot" style="margin:0 0 10px;font-size:15px;color:#ffd84a;text-align:center"></p><div class="row2"><button class="btn" id="ssNo">취소</button><button class="btn primary" id="ssGo">판매</button></div>`,m=>{
     m.querySelector('#ssNo').onclick=closeModal;
     const get=qtyBind(m,max,v=>{ m.querySelector('#ssTot').textContent=`${v}개 → +${(v*SHARD_SELL).toLocaleString()}G`; });
-    m.querySelector('#ssGo').onclick=()=>{ const q=get(); if(P.inv[ix]!==it||q>(it.n|0))return; const v=q*SHARD_SELL; it.n-=q; if(it.n<=0)P.inv[ix]=null; P.gold=(P.gold|0)+v; selItem=null; shopMsg=`${K.n} ${q}개 판매 +${v.toLocaleString()}G`; saveSrc(P); uiDirty=true; sfx('coin'); closeModal(); rerender(); };
+    m.querySelector('#ssGo').onclick=()=>{ const q=get(); if(P.misc[ix]!==it||q>(it.n|0))return; const v=q*SHARD_SELL; it.n-=q; if(it.n<=0)P.misc[ix]=null; P.gold=(P.gold|0)+v; selItem=null; shopMsg=`${K.n} ${q}개 판매 +${v.toLocaleString()}G`; saveSrc(P); uiDirty=true; sfx('coin'); closeModal(); rerender(); };
   });
 }
 function sendPick(){
-  const it=selItem&&selItem.it; if(!it||(selItem.inv===undefined&&selItem.eq===undefined))return;
+  const it=selItem&&selItem.it; if(!it||(selItem.inv===undefined&&selItem.eq===undefined&&selItem.misc===undefined))return;
   if(isShard(it)){ sendShard(); return; }
   const P=selItem.store?getStore():me, tg=targetsFor(P);
   const rows=tg.map(t=>{ const free=t.o.inv.filter(x=>!x).length; return `<button class="btn" data-to="${t.id}" ${free?'':'disabled'} style="text-align:left">${tgLabel(t,free?`(빈 칸 ${free})`:(t.k==='s'?'(가득 참)':'(가방 가득)'))}</button>`; }).join('');
@@ -4852,7 +4888,7 @@ function showPop(html,pre){ const p=$('#itemPop'); if(!selItem||!html){ p.hidden
   p.classList.toggle('two',!!pre);
   p.innerHTML=(pre?`<div class="card cur"><div class="meta" style="margin-bottom:4px;color:#9fd0ff">▼ 지금 착용 중</div>${pre}</div>`:'')+`<div class="card">${pre?'<div class="meta" style="margin-bottom:4px;color:#ffd84a">▼ 선택한 아이템</div>':''}<button class="cx" aria-label="닫기">✕</button>${html}</div>`; p.hidden=false;
   p.querySelector('.cx').onclick=()=>{ selItem=null; rerender(); }; p.onclick=e=>{ if(e.target!==p)return;
-    let sel=null; try{ const t=document.elementsFromPoint(e.clientX,e.clientY).find(x=>x!==p&&!p.contains(x)&&$('#sheetB').contains(x)&&x.closest('button')); const bt=t&&t.closest('button'); if(bt)sel=bt.dataset.inv!==undefined?`[data-inv="${bt.dataset.inv}"]`:bt.dataset.eq!==undefined?`[data-eq="${bt.dataset.eq}"]`:bt.dataset.sort?`[data-sort="${bt.dataset.sort}"]`:bt.id?'#'+bt.id:null; }catch(_){}
+    let sel=null; try{ const t=document.elementsFromPoint(e.clientX,e.clientY).find(x=>x!==p&&!p.contains(x)&&$('#sheetB').contains(x)&&x.closest('button')); const bt=t&&t.closest('button'); if(bt)sel=bt.dataset.inv!==undefined?`[data-inv="${bt.dataset.inv}"]`:bt.dataset.mi!==undefined?`[data-mi="${bt.dataset.mi}"]`:bt.dataset.eq!==undefined?`[data-eq="${bt.dataset.eq}"]`:bt.dataset.sort?`[data-sort="${bt.dataset.sort}"]`:bt.id?'#'+bt.id:null; }catch(_){}
     selItem=null; rerender(); if(sel) setTimeout(()=>{ const n=$('#sheetB').querySelector(sel); if(n)n.click(); },0); }; }
 /* 직업 전용 표기: 보조장비(방패·보조무기·오브)와 직업 전용 유니크 */
 const ownCls=it=>it.slot==='shield'?ocOf(it):((it.sp&&SPFX[it.sp]&&SPFX[it.sp].fcls)||null);
@@ -5382,7 +5418,7 @@ function renderStagePanel(){
       const key=selId+'|'+selStage+'|'+stageClear+'|'+(cur.eq?Object.values(cur.eq).map(x=>x?x.id+':'+(x.ilvl|0):'').join(','):'');
       if(ban.dataset.k!==key||!ban.querySelector('.ban.cu')){ ban.dataset.k=key; ban.innerHTML=(selStage>0?banCard(cur,selStage-1,'bk pv'):'')+(selStage+1<STAGES.length?banCard(cur,selStage+1,'bk nx'):'')+banCard(cur,selStage,'cu'); fitBan(ban); } } } }
     const chp=$('#cChips'); if(chp){ if(!cur){ chp.hidden=true; } else { const pt2=(cur.statPts|0)+(cur.skillPts|0); chp.hidden=false; chp.innerHTML=`<span>보유 골드<b>💰 ${(cur.gold|0).toLocaleString()}</b></span><span class="${gw?'warn':''}">내 장비 Lv 합<b>${gp0?gp0.sum:'-'}</b></span><button type="button" id="cMap" class="${stageClear>(+lsGet('dkdef2.mapSeen')||0)&&stageClear<STAGES.length?'new':''}">전체맵<b>🗺️ 보기</b></button>`; } } }
-  { const cur=chars.find(c=>c.id===selId), nw=!!cur&&(cur.inv||[]).some(x=>x&&x.isNew), pt=cur?(cur.statPts|0)+(cur.skillPts|0):0;
+  { const cur=chars.find(c=>c.id===selId), nw=!!cur&&(cur.inv||[]).concat(cur.misc||[]).some(x=>x&&x.isNew), pt=cur?(cur.statPts|0)+(cur.skillPts|0):0;
     $('#tGearB').hidden=!nw; { const tb=$('#tTownB'); if(tb)tb.hidden=!townFull(); } $('#menuB').hidden=!mailUnreadAll(chars); const pb=$('#tGearP'); pb.hidden=!pt; pb.textContent=pt; for(const id of ['tGear','tStore'])$('#'+id).disabled=!cur; }
   { const hp=$('#bigHero'); if(hp){ const cur=chars.find(c=>c.id===selId); hp.hidden=!cur; if(cur){ const im=$('#bhImg'), u=`img/hero_${cur.cls}.png`; if(im.getAttribute('src')!==u){ im.style.display=''; im.onerror=()=>{ im.style.display='none'; }; im.src=u; } $('#bhName').textContent=dispName(cur); $('#bhSub').textContent=`${CLASSES[cur.cls].n} · Lv ${cur.lvl}`; } } }
   storyReUi(); $('#bSolo').disabled=!selId; $('#bShop').disabled=!selId; if(room){ $('#bHost').disabled=!selId; $('#bJoin').disabled=!selId; }
