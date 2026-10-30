@@ -1159,7 +1159,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.2.0410</div>
+    <div class="ver" id="verT">v0.6.2.0411</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -4636,8 +4636,7 @@ const tgLabel=(t,extra)=>t.k==='s'?`${STORE_IC} 공유보관함 <span style="col
 const tgName=t=>t.k==='s'?'공유보관함':dispName(t.o);
 function saveTarget(t){ if(t.k==='s')saveStore(); else if(t.o===me)saveChar(); else lsSet(charKey(t.o.id),JSON.stringify(packChar(t.o))); }
 const saveSrc=P=>{ if(P===STORE)saveStore(); else saveChar(); };
-function storeHead(){ const S=getStore(); const pill='font-size:12px;font-weight:600;padding:4px 9px;border-radius:8px;border:1px solid #c9a24a;background:rgba(201,162,74,.12);color:#ffd84a;cursor:pointer;line-height:1.2;white-space:nowrap';
-  $('#sheetT').innerHTML=`${STORE_IC} 공유보관함 <span style="color:#ffd84a;margin-left:4px;font-size:15px">💰 ${(S.gold|0).toLocaleString('ko-KR')}G</span> <span style="display:inline-flex;gap:4px;margin-left:6px;vertical-align:2px"><button id="goldSend" style="${pill}">보내기</button><button id="goldTake" style="${pill}">받기</button></span>`; }
+function storeHead(){ $('#sheetT').innerHTML=`${STORE_IC} 공유보관함`; }
 function sortStore(mode){ const S=getStore(); shardRepack(S); let mx=0; for(const it of S.inv)if(it&&it.sat>mx)mx=it.sat; for(const it of S.inv)if(it&&!it.sat)it.sat=(mx+=.001);
   const byRar=(a,b)=>(b.rar|0)-(a.rar|0)||(SLOTO[a.slot]|0)-(SLOTO[b.slot]|0)||bk(a,b)||(b.ilvl|0)-(a.ilvl|0)||String(a.name).localeCompare(String(b.name));
   const its=S.inv.filter(Boolean);
@@ -4650,7 +4649,9 @@ function storeDetail(){ sellAskIt=null; if(!selItem)return ''; const it=selItem.
 function renderStore(){ const S=getStore(); markTabs(); storeHead();
   const bt=(attrs,t)=>`<button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap" ${attrs}>${t}</button>`;
   cellPlain=true; let cells=''; try{ cells=S.inv.map((it,i)=>cellHtml(it,'cell',`data-inv="${i}"`)).join(''); }finally{ cellPlain=false; }
-  const h=`<div class="bagtop" style="display:flex;flex-direction:column;gap:10px;min-width:0"><div style="display:flex;flex-wrap:nowrap;gap:4px">${bt('data-ssort="rar"','정렬(등급순)')}${bt('data-ssort="enh"','정렬(강화순)')}${bt('data-ssort="in"','정렬(입고순)')}${bt('id="aBulk"','일괄판매')}</div></div><div class="inv">${cells}</div>`;
+  const gp='font-size:13px;font-weight:700;width:76px;height:34px;padding:0;border-radius:9px;border:1px solid #c9a24a;background:rgba(201,162,74,.12);color:#ffd84a;cursor:pointer;white-space:nowrap';
+  const gold=`<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;border:1px solid var(--line2);background:#14100d"><span style="flex:1;min-width:0;color:#ffd84a;font-size:18px;font-weight:700;white-space:nowrap">💰 ${(S.gold|0).toLocaleString('ko-KR')}G</span><button id="goldSend" style="${gp}">보내기</button><button id="goldTake" style="${gp}">받기</button></div>`;
+  const h=`<div class="bagtop" style="display:flex;flex-direction:column;gap:10px;min-width:0">${gold}<div style="display:flex;flex-wrap:nowrap;gap:4px">${bt('data-ssort="rar"','정렬(등급순)')}${bt('data-ssort="enh"','정렬(강화순)')}${bt('data-ssort="in"','정렬(입고순)')}${bt('id="aBulk"','일괄판매')}</div></div><div class="inv">${cells}</div>`;
   const b=$('#sheetB'); b.className='sbody bag'; b.innerHTML=h; fitInv();
   try{ showPop(storeDetail(),null); }catch(e){ console.error(e); selItem=null; showPop(''); }
   b.querySelectorAll('[data-inv]').forEach(el=>el.onclick=()=>{ const i=+el.dataset.inv; if(S.inv[i]){ selItem={it:S.inv[i],inv:i,store:1}; renderStore(); } });
@@ -4730,19 +4731,18 @@ function renderBag(){
   const au=pq('#aUnequip'); if(au)au.onclick=()=>{unequip(selItem.eq);};
   bagSelUi(b);
 }
-/* ===== 가방 '📦 창고로' 선택 모드: 아이템을 여러 개 체크해서 공유보관함으로 한 번에 보내요 (잠근 아이템·조각 제외) ===== */
-const selOk=it=>!!(it&&!isShard(it)&&!it.lock);
+/* ===== 가방 '📦 창고로' 선택 모드: 아이템을 여러 개 체크해서 공유보관함으로 한 번에 보내요 (조각 제외, 잠근 아이템은 보낼 수 있음) ===== */
+const selOk=it=>!!(it&&!isShard(it));   /* 잠근 아이템도 보낼 수 있어요(파는 게 아니라 옮기는 것) — 잠금 표시는 그대로 유지 */
 function bagSelUi(b){ const on=!!bagSel, tabs=$('#sheetTabs'), bar=$('#selBar'); tabs.classList.toggle('selhide',on); bar.hidden=!on; b.classList.toggle('selmode',on); if(!on)return;
   for(const i of [...bagSel])if(!selOk(me.inv[i]))bagSel.delete(i);
   const cnt=()=>bagSel.size, free=()=>getStore().inv.filter(x=>!x).length;
-  const meta=b.querySelector('.bagtop .meta'); if(meta)meta.innerHTML=`<b style="color:#e6bf6a" id="selN">선택 ${cnt()}</b> <span style="color:#6b5f50">·</span> 잠근 아이템·조각은 제외 <span style="color:#6b5f50">·</span> 보관함 빈 칸 ${free()}`;
+  const meta=b.querySelector('.bagtop .meta'); if(meta)meta.innerHTML=`<b style="color:#e6bf6a" id="selN">선택 ${cnt()}</b> <span style="color:#6b5f50">·</span> 조각은 제외 <span style="color:#6b5f50">·</span> 보관함 빈 칸 ${free()}`;
   const bb=b.querySelector('.bagbtns'); if(bb){ const st='flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap'; bb.innerHTML=`<button class="btn sm" style="${st}" id="selAll">전체 선택</button><button class="btn sm" style="${st}" id="selRar">등급별 선택 ▾</button><button class="btn sm" style="${st}" id="selClr">선택 해제</button>`; }
   const upd=()=>{ b.querySelectorAll('[data-inv]').forEach(el=>{ const i=+el.dataset.inv, it=me.inv[i]; if(!it)return; const ok=selOk(it), p=bagSel.has(i); el.classList.toggle('pick',p); el.classList.toggle('nopick',!ok);
       let k=el.querySelector('.ck'); if(ok){ if(!k){ k=document.createElement('i'); k.className='ck'; el.appendChild(k); } k.textContent=p?'✓':''; } else if(k)k.remove(); });
     const n=b.querySelector('#selN'); if(n)n.textContent='선택 '+cnt(); const go=$('#selGo'); go.disabled=!cnt(); go.textContent=cnt()?`📦 ${cnt()}개 공유창고로 보내기`:'📦 공유창고로 보내기'; };
   b.querySelectorAll('[data-inv]').forEach(el=>el.onclick=()=>{ const i=+el.dataset.inv, it=me.inv[i]; if(!it)return;
     if(isShard(it)){ sheetToast('조각은 가방에서 아이템을 눌러 따로 보내 주세요','#ffb259'); return; }
-    if(it.lock){ sheetToast('🔒 잠긴 아이템이에요. 잠금을 먼저 풀어 주세요','#ff8a7a'); return; }
     if(bagSel.has(i))bagSel.delete(i); else bagSel.add(i); upd(); });
   b.querySelectorAll('[data-eq]').forEach(el=>el.onclick=null);
   b.querySelector('#selAll').onclick=()=>{ me.inv.forEach((it,i)=>{ if(selOk(it))bagSel.add(i); }); upd(); };
