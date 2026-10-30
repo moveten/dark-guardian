@@ -1159,7 +1159,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.2.0412</div>
+    <div class="ver" id="verT">v0.6.2.0413</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -4010,7 +4010,7 @@ function aReady(k,res){ const s=SKBY[k], lv=skLv(me,k); if(!s||s.passive||!lv||(
 function autoSkills(dt){
   if(autoMode!==2||autoBlocked()||me.stun>0||me.leap||G.aim)return;
   autoGap-=dt; if(autoGap>0)return;
-  const ph=G.phase; if(ph!=='wave'&&ph!=='boss'&&ph!=='prep')return;
+  const ph=G.phase; if(ph!=='wave'&&ph!=='boss'&&ph!=='prep'&&!(ph==='clear'&&G.mobs.some(m=>!m.dead)))return;   /* 우두머리를 잡은 뒤(전리품 줍기)에도 졸개·정예가 남아 있으면 스킬을 써요 */
   const rules=AUTO_RULES[me.cls]; if(!rules)return; const c=autoCtx();
   for(const [k,res,cond] of rules){ if((autoBo[k]||0)>T||!aReady(k,res)||!cond(c))continue;
     const mp0=me.mp, cd0=me.cds[k]||0, sk=SKBY[k]; tryUse(k,!(sk.aura||sk.form));   /* 오라·변신 토글은 hold=true 이면 무시되므로 눌러서 쓰는 것처럼 호출 */
