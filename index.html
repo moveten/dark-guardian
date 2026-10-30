@@ -1159,7 +1159,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.2.0409</div>
+    <div class="ver" id="verT">v0.6.2.0410</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3540,8 +3540,9 @@ function castSkill(o,key,real,tx,ty,lv,tgt){
       hit:m=>hitMob(m,physDmg((1+me.D.ene/150)*ATKM),0,false,BASICFX)});
     break;
   case 'bash': case 'smite':
-    efx.push({k:'swing',o,a:ang,t:0,life:.25,col:s.el,big:1});
-    efx.push({k:'ring',x:o.x+dx*50,y:o.y+dy*50,r0:20,r1:(key==='bash'?100:105)*RS(lv),t:0,life:.3,col:s.el,w:8});
+    if(key==='bash'&&warAtlas()){ const bx=o.x+dx*72, by=o.y+dy*58+8; wfx(1,0,7,bx,by,Math.min(200,150*RS(lv)),.45); wfx(0,0,7,bx,by-6,Math.min(190,135*RS(lv)),.42); burst(bx,by,'#9a7a56',G.lowFx?4:8,190); }
+    else { efx.push({k:'swing',o,a:ang,t:0,life:.25,col:s.el,big:1});
+    efx.push({k:'ring',x:o.x+dx*50,y:o.y+dy*50,r0:20,r1:(key==='bash'?100:105)*RS(lv),t:0,life:.3,col:s.el,w:8}); }
     if(real){const m=tgt&&hyp(tgt.x-o.x,tgt.y-o.y)<95+tgt.r?tgt:nearestMob(o.x,o.y,95);
       if(m){ const list=[m].concat(mobsIn(m.x,m.y,95*RS(lv)).filter(q=>q!==m));
         for(const q of list){ const f=q===m?1:.8;
@@ -3552,32 +3553,32 @@ function castSkill(o,key,real,tx,ty,lv,tgt){
         else { efx.push({k:'cross',x:m.x,y:m.y,t:0,life:.5}); impact(m.x,m.y,'255,225,140',100); burst(m.x,m.y,'#ffe9a0',24,240); } } }
     break;
   case 'rend':
-    efx.push({k:'ring',x:o.x,y:o.y,r0:30,r1:175*RS(lv),t:0,life:.45,col:s.el,w:14}); efx.push({k:'whirl',o,t:0,life:.45,col:s.el}); impact(o.x,o.y,'255,120,80',150); burst(o.x,o.y,'#ffb070',34,400); sfx('boom');
+    if(warAtlas()){ wfx(1,0,7,o.x,o.y+6,Math.min(200,175*RS(lv)*1.15),.5); wfx(4,0,7,o.x,o.y-4,200,.5); } else { efx.push({k:'ring',x:o.x,y:o.y,r0:30,r1:175*RS(lv),t:0,life:.45,col:s.el,w:14}); efx.push({k:'whirl',o,t:0,life:.45,col:s.el}); } impact(o.x,o.y,'255,120,80',150); burst(o.x,o.y,'#ffb070',34,400); sfx('boom');
     if(real){ for(const q of mobsIn(o.x,o.y,165*RS(lv))){ hitMob(q,physDmg(4.5+.7*lv)); knock(q,o.x,o.y,14); }
-      const nt=Math.floor((1.5+.12*lv)/.5); for(let i=1;i<=nt;i++) later(i*.5,()=>{ if(me.dead)return; efx.push({k:'whirl',o:me,t:0,life:.4,col:s.el}); efx.push({k:'ring',x:me.x,y:me.y,r0:30,r1:150*RS(lv),t:0,life:.4,col:s.el,w:8}); sfx('swing'); for(const q of mobsIn(me.x,me.y,150*RS(lv))) hitMob(q,physDmg(.5+.05*lv)); }); }
+      const nt=Math.floor((1.5+.12*lv)/.5); for(let i=1;i<=nt;i++) later(i*.5,()=>{ if(me.dead)return; if(!wfx(2,0,7,me.x,me.y+4,Math.min(200,150*RS(lv)*1.3),.4)){ efx.push({k:'whirl',o:me,t:0,life:.4,col:s.el}); efx.push({k:'ring',x:me.x,y:me.y,r0:30,r1:150*RS(lv),t:0,life:.4,col:s.el,w:8}); } sfx('swing'); for(const q of mobsIn(me.x,me.y,150*RS(lv))) hitMob(q,physDmg(.5+.05*lv)); }); }
     break;
   case 'shout':
-    efx.push({k:'ring',x:o.x,y:o.y,r0:20,r1:320,t:0,life:.6,col:'#ffb259',w:7}); impact(o.x,o.y,'255,180,90',100); burst(o.x,o.y,'#ffcf7a',20,180);
+    efx.push({k:'ring',x:o.x,y:o.y,r0:20,r1:320,t:0,life:.6,col:'#ffb259',w:7}); wfx(1,0,7,o.x,o.y+6,200,.6); impact(o.x,o.y,'255,180,90',100); burst(o.x,o.y,'#ffcf7a',20,180);
     if(real){ me.buffs.shout={v:(24+6*lv)/100,t:SHD(lv),m:SHD(lv)}; }
     else if(!me.dead&&hyp(me.x-o.x,me.y-o.y)<320){me.buffs.shout={v:(24+6*lv)/100,t:SHD(lv),m:SHD(lv)}; toast('동료의 전투 함성: 피해 증가','#ffb259');}
     if(G.mode!=='guest'){ let nn=0; for(const q of mobsIn(o.x,o.y,320)){ q.slowT=Math.max(q.slowT||0,3); q.slowMax=Math.max(q.slowMax||0,3); q.vuln={t:8,v:.1}; if(nn++<12)efx.push({k:'ring',x:q.x,y:q.y,r0:6,r1:34,t:0,life:.35,col:'#ffb259',w:5}); } }   /* 위압: 호스트(혼자 하기 포함)가 몬스터에 직접 걸어 줌 — 동료(게스트)가 외쳐도 호스트에서 적용 */
     break;
   case 'whirl':
-    efx.push({k:'whirl',o,t:0,life:.45,col:'#e8e0d0'});
+    if(!wfx(2,0,7,o.x,o.y+4,Math.min(200,150*RS(lv)*1.35),.45))efx.push({k:'whirl',o,t:0,life:.45,col:'#e8e0d0'});
     impact(o.x,o.y,'235,225,210',110); for(let i=0;i<24;i++){const a=i/24*6.283; parts.push({x:o.x+Math.cos(a)*70,y:o.y+Math.sin(a)*70,vx:-Math.sin(a)*260,vy:Math.cos(a)*260,t:0,life:.35,col:'#f4efe6',r:3,glow:1,dm:.9});}
     if(real) for(const m of mobsIn(o.x,o.y,100*RS(lv))){ const r=physDmg(1.8+.3*lv); hitMob(m,r,0,0,{burn:4,bd:r.v*.6,bl:1}); }   /* 강력한 출혈: 4초, 초당 타격 피해의 60% */
     break;
   case 'leap':
     if(real){me.leap={sx:me.x,sy:me.y,ex:tx,ey:ty,t:0,dur:.35};}
-    later(.35,()=>{ slamFx(tx,ty,110*RS(lv),'#c98b4a'); impact(tx,ty,'255,190,120',130); burst(tx,ty,'#c9a27a',30,300); G.shake=Math.max(G.shake,.4); if(real) for(const m of mobsIn(tx,ty,110*RS(lv))){hitMob(m,physDmg(2.8+.45*lv),.8);} });
+    later(.35,()=>{ wfx(1,0,7,tx,ty+6,Math.min(200,130*RS(lv)),.45); slamFx(tx,ty,110*RS(lv),'#c98b4a'); impact(tx,ty,'255,190,120',130); burst(tx,ty,'#c9a27a',30,300); G.shake=Math.max(G.shake,.4); if(real) for(const m of mobsIn(tx,ty,110*RS(lv))){hitMob(m,physDmg(2.8+.45*lv),.8);} });
     break;
   case 'berserk':
-    efx.push({k:'ring',x:o.x,y:o.y,r0:10,r1:90,t:0,life:.5,col:'#ff3b2f',w:8}); impact(o.x,o.y,'255,60,40',90); burst(o.x,o.y,'#ff5a3a',24,200);
+    if(!wfx(1,0,7,o.x,o.y+6,150,.5))efx.push({k:'ring',x:o.x,y:o.y,r0:10,r1:90,t:0,life:.5,col:'#ff3b2f',w:8}); impact(o.x,o.y,'255,60,40',90); burst(o.x,o.y,'#ff5a3a',24,200);
     if(real) me.buffs.berserk={v:(30+5*lv)/100,t:8};
     break;
   case 'quake':
     for(let i=1;i<=5;i++){const px=o.x+dx*60*i, py=o.y+dy*60*i;
-      later(i*.08,()=>{ efx.push({k:'crack',x:px,y:py,a:ang,t:0,life:.8}); spark(px,py,'#8a6a4a',10); impact(px,py,'255,150,70',70); burst(px,py,'#ffa860',8,160); G.shake=Math.max(G.shake,.25);
+      later(i*.08,()=>{ if(!wfx(3,0,7,px,py+6,150,.65))efx.push({k:'crack',x:px,y:py,a:ang,t:0,life:.8}); spark(px,py,'#8a6a4a',10); impact(px,py,'255,150,70',70); burst(px,py,'#ffa860',8,160); G.shake=Math.max(G.shake,.25);
         if(real) for(const m of mobsIn(px,py,75*RS(lv))) hitMob(m,physDmg(4+.65*lv),.4); });}
     break;
   case 'hammer':
@@ -3602,7 +3603,7 @@ function castSkill(o,key,real,tx,ty,lv,tgt){
     break;}
   case 'ragnarok':
     efx.push({k:'ring',x:o.x,y:o.y,r0:240,r1:20,t:0,life:.6,col:'#ff2a1a',w:10}); sfx('boss'); burst(o.x,o.y,'#ff5a3a',30,260);
-    later(.6,()=>{ slamFx(o.x,o.y,300,'#ff2a1a'); efx.push({k:'ring',x:o.x,y:o.y,r0:20,r1:380,t:0,life:.7,col:'#ff6a3a',w:16}); efx.push({k:'ring',x:o.x,y:o.y,r0:10,r1:260,t:0,life:.5,col:'#ffd08a',w:10}); impact(o.x,o.y,'255,90,50',300); burst(o.x,o.y,'#ffb04a',70,520); G.shake=Math.max(G.shake,1);
+    later(.6,()=>{ wfx(1,0,7,o.x,o.y+6,200,.7); wfx(3,0,7,o.x,o.y,200,.8); slamFx(o.x,o.y,300,'#ff2a1a'); efx.push({k:'ring',x:o.x,y:o.y,r0:20,r1:380,t:0,life:.7,col:'#ff6a3a',w:16}); efx.push({k:'ring',x:o.x,y:o.y,r0:10,r1:260,t:0,life:.5,col:'#ffd08a',w:10}); impact(o.x,o.y,'255,90,50',300); burst(o.x,o.y,'#ffb04a',70,520); G.shake=Math.max(G.shake,1);
       if(real){ me.buffs.rage={t:12,m:12,v:.6+.02*(Math.max(1,lv)-1),ias:.5,ms:.3,pen:.2}; toast('💢 광전사 폭주!','#ff3b2f'); }   /* 폭주 12초: 피해 +60%(레벨당 +2%) · 공속 +50% · 이속 +30% · 범위 +25% · 받는 피해 +20% */
       if(real) for(const m of mobsIn(o.x,o.y,380)){ hitMob(m,physDmg((14+1*lv)*.6),0,false,{stun:m.boss?1:2});   /* 우두머리 기절은 최대 1초 */ const dd=hyp(m.x-o.x,m.y-o.y)||1; m.kx=(m.kx||0)+(m.x-o.x)/dd*(m.boss?120:520); m.ky=(m.ky||0)+(m.y-o.y)/dd*(m.boss?120:520); } });
     break;
@@ -5964,8 +5965,12 @@ function sprDraw(im,x,y,h,face,o){ o=o||0; if(o.tint)im=rageTint(im); const fr=o
 const FXR={bolt:0,fire:1,frost:2,tele:3,chain:4,barrier:5,meteor:6,circle:7,blizz:8,cast:9};
 function fxAtlas(){ return sprGet('fx_sorc'); }
 const FXA=.72; /* 이펙트 전체 투명도(시야 확보) */
-function fxFrame(row,col,x,y,w,h,rot,al,flip){ const im=fxAtlas(); if(!im)return; ctx.save(); ctx.globalCompositeOperation='lighter'; ctx.globalAlpha=(al==null?1:al)*FXA; ctx.translate(x,y); if(rot)ctx.rotate(rot); if(flip)ctx.scale(-1,1); ctx.drawImage(im,col*140,row*140,140,140,-w/2,-(h||w)/2,w,h||w); ctx.restore(); }
+function fxFrame(row,col,x,y,w,h,rot,al,flip,at){ const im=at==='war'?warAtlas():fxAtlas(); if(!im)return; ctx.save(); ctx.globalCompositeOperation='lighter'; ctx.globalAlpha=(al==null?1:al)*FXA; ctx.translate(x,y); if(rot)ctx.rotate(rot); if(flip)ctx.scale(-1,1); ctx.drawImage(im,col*140,row*140,140,140,-w/2,-(h||w)/2,w,h||w); ctx.restore(); }
 function fxSpr(row,c0,c1,x,y,size,life,o){ if(!fxAtlas())return false; if(efx.length>60&&(!o||!o.must))return true; size=Math.min(size,200); /* 140px 원본이라 200px 넘게 키우면 깨져 보임 */ efx.push(Object.assign({k:'spr',row,c0,c1,x,y,sz:size,t:0,life},o||{})); return true; }
+/* 전사 스킬 이펙트 시트: img/fx_war.png (8열×5줄, 칸 140px, 검은 배경 · 가산 합성) — 0 강타 임팩트 · 1 충격 고리 · 2 소용돌이 · 3 대지 균열 · 4 십자 베기. 못 불러왔으면 false(예전 도형 이펙트로 대체) */
+function warAtlas(){ return sprGet('fx_war'); }
+function wfx(row,c0,c1,x,y,size,life){ if(!warAtlas())return false; if(efx.length>60)return true; efx.push({k:'spr',at:'war',row,c0,c1,x,y,sz:Math.min(size,200),t:0,life}); return true; }
+setTimeout(()=>{ try{ sprGet('fx_war'); }catch(e){} },2500);
 function fxChain(pts){ if(!fxAtlas())return false; efx.push({k:'chainspr',pts,t:0,life:.4}); return true; }
 function fxMeteor(mx,my,r,lv,fall){ /* 범위 표시(점선) → 유성 낙하 → 폭발 */
   if(!fxAtlas())return false; efx.push({k:'tele',x:mx,y:my,r:r,t:0,life:fall,col:'#ff5a1f'}); efx.push({k:'mfall',x:mx,y:my,t:0,life:fall}); return true; }
@@ -6368,7 +6373,7 @@ function drawEfx(t){
     if(e.k==='corpse'){ const m=e.m, q=1-(1-p)*(1-p); if(m.x0===undefined){ m.x0=m.x; m.y0=m.y; } m.x=m.x0+Math.cos(e.a)*q*22; m.y=m.y0+Math.sin(e.a)*q*22; m.flash=.12*(1-Math.min(1,p*2.5)); const s=1-.35*p;   /* 맞은 방향으로 밀리며 작아지고 사라짐 */
       ctx.save(); ctx.globalAlpha=1-p; ctx.translate(m.x,m.y); ctx.scale(s,s); ctx.translate(-m.x,-m.y); drawMob(m,t); ctx.restore(); continue; }
     if(e.k==='swing'){ const o=e.o; if(o.x===undefined)continue; ctx.strokeStyle=e.col; ctx.globalAlpha=1-p; ctx.lineWidth=e.big?7:4; ctx.beginPath(); ctx.arc(o.x,o.y,e.big?52:44,e.a-1.1+p*.3,e.a+1.1*(p*2-1)+.3); ctx.stroke(); ctx.globalAlpha=1; }
-    else if(e.k==='spr'){ const n=e.c1-e.c0+1, f=e.loop?e.c0+Math.floor(t*10)%n:e.c0+Math.min(n-1,Math.floor(p*n)), x=e.o&&e.o.x!==undefined?e.o.x:e.x, y=e.o&&e.o.y!==undefined?e.o.y+(e.dy||0):e.y; fxFrame(e.row,f,x,y,e.sz,e.sz,e.rot,e.fade?Math.min(1,p*6,(1-p)*4):1,e.flip); }
+    else if(e.k==='spr'){ const n=e.c1-e.c0+1, f=e.loop?e.c0+Math.floor(t*10)%n:e.c0+Math.min(n-1,Math.floor(p*n)), x=e.o&&e.o.x!==undefined?e.o.x:e.x, y=e.o&&e.o.y!==undefined?e.o.y+(e.dy||0):e.y; fxFrame(e.row,f,x,y,e.sz,e.sz,e.rot,e.fade?Math.min(1,p*6,(1-p)*4):1,e.flip,e.at); }
     else if(e.k==='mfall'){ const h=(1-p)*420, mx=e.x+h*.35, my=e.y-h; fxFrame(6,Math.floor(t*14)%3,mx,my,104,104,0,Math.min(1,p*8),true); }
     else if(e.k==='chainspr'){ for(let i=1;i<e.pts.length;i++){ const a=e.pts[i-1], b=e.pts[i], L=hyp(b.x-a.x,b.y-a.y)||1, ang=Math.atan2(b.y-a.y,b.x-a.x); fxFrame(4,(Math.floor(e.t*24)+i)%4,(a.x+b.x)/2,(a.y+b.y)/2,L*1.04,Math.min(64,Math.max(30,L*.3)),ang,Math.min(1,(1-p)*2.2)); } }
     else if(e.k==='btxt'){ const o=e.o, a=p<.15?p/.15:1-Math.pow((p-.15)/.85,2), yy=o.y-74-p*46, sc=1+.35*Math.max(0,1-p*6); ctx.save(); ctx.translate(o.x,yy); ctx.scale(sc,sc); ctx.globalAlpha=Math.max(0,a); ctx.font='900 34px "Noto Sans KR",sans-serif'; ctx.textAlign='center'; ctx.lineWidth=6; ctx.strokeStyle='#7a4a00'; ctx.shadowColor='#ffd24a'; ctx.shadowBlur=18; ctx.strokeText('축복',0,0); ctx.fillStyle='#fff0a0'; ctx.fillText('축복',0,0); ctx.restore(); }
