@@ -1159,7 +1159,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.2.0406</div>
+    <div class="ver" id="verT">v0.6.2.0407</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -2997,7 +2997,7 @@ function updateMe(dt){
   me.hp=Math.min(D.maxHp,me.hp+D.maxHp*(.008+(D.regen||0))*dt);
   if(me.aura==='healaura'){const l=skLv(me,'healaura'); me.hp=Math.min(D.maxHp,me.hp+(1+.6*l)*dt);}
   if(ally&&!ally.lobby&&!ally.dead&&ally.aura==='healaura'&&hyp(ally.x-me.x,ally.y-me.y)<320) me.hp=Math.min(D.maxHp,me.hp+(1+.6*ally.al)*dt);
-  if(hyp(me.x-hzX(),me.y-hzY())<hzR()){ me.hp=Math.min(D.maxHp,me.hp+D.maxHp*.1*dt); me.mp=Math.min(D.maxMp,me.mp+D.maxMp*.14*dt); if((me.hp<D.maxHp||me.mp<D.maxMp)&&Math.random()<dt*9) parts.push({x:me.x+rand(-14,14),y:me.y+rand(-8,10),vx:0,vy:-30,t:0,life:.7,col:Math.random()<.5?'#8be07a':'#8fb0ff',r:rand(2,3.4),glow:1,dm:.95}); }
+  if(hyp(me.x-hzX(),me.y-hzY())<hzR()){ me.hp=Math.min(D.maxHp,me.hp+D.maxHp*.1*dt); me.mp=Math.min(D.maxMp,me.mp+D.maxMp*.14*dt); }
   // movement
   if(me.leap){const L=me.leap; L.t+=dt; const p=Math.min(1,L.t/L.dur); me.x=L.sx+(L.ex-L.sx)*p; me.y=L.sy+(L.ey-L.sy)*p; me.z=Math.sin(p*Math.PI)*30; if(p>=1){me.leap=null;me.z=0;} return;}
   let mx=0,my=0;
@@ -4556,6 +4556,7 @@ function rerender(){ if(sheetMode!=='bag'){ bagSel=null; $('#sheetTabs').classLi
 function markTabs(){ $('#itemPop').hidden=true; $('#ptsBar').hidden=true; const t=$('#sheetTabs'), cm=sheetMode==='passive'?'skill':sheetMode; t.hidden=sheetMode==='menu'||sheetMode==='store'||!!G.inGame; /* 게임 중에는 하단 독 하나만 사용 */ for(const [id,m] of [['bBag','bag'],['bStat','stat'],['bSkillT','skill'],['bMenu','menu']]){ const e=$('#'+id); if(e)e.setAttribute('aria-pressed',cm===m); } t.querySelectorAll('button').forEach(b=>{b.setAttribute('aria-pressed',b.dataset.m===cm); if(b.dataset.m==='shop')b.hidden=!!G.inGame&&sheetMode!=='shop'; const n=b.dataset.m==='bag'?me.inv.reduce((t,x)=>t+(x&&x.isNew?1:0),0):b.dataset.m==='stat'?(me.statPts|0):b.dataset.m==='skill'?(me.skillPts|0):0; let bd=b.querySelector('.pl'); if(!bd){bd=document.createElement('span');bd.className='pl';b.appendChild(bd);} bd.textContent=n>0?(b.dataset.m==='bag'?'NEW':'+'+n):''; bd.hidden=!(n>0); }); }
 $('#ptsBar').onclick=()=>{ sheetMode='stat'; selItem=null; rerender(); };
 $('#sheetTabs').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; if(b.id==='tSend'){ sheetMode='bag'; selItem=null; bagSel=new Set(); rerender(); $('#sheetB').scrollTop=0; return; }   /* 📦 창고로: 가방을 열고 선택 모드로 */
+  if(b.dataset.m==='bag'&&sheetMode==='bag'&&me.inv.some(x=>x&&x.isNew)){ me.inv.forEach(x=>{ if(x)delete x.isNew; }); saveChar(); uiDirty=true; selItem=null; rerender(); sheetToast('✨ NEW 표시를 모두 지웠어요'); return; }   /* 가방 탭을 한 번 더 누르면 NEW 표시 전부 지움 */
   bagSel=null; sheetMode=b.dataset.m; selItem=null; shopMsg=''; buyMsg=''; rerender(); $('#sheetB').scrollTop=0; });
 function openTitleSheet(m){ prepMe(); G.titleSheet=true; if(m==='store')STORE=loadStore(); openSheet(m); }
 function closeSheet(){ try{ hoverHide(); }catch(e){} document.body.classList.remove('shopen'); for(const id of ['bBag','bStat','bSkillT','bMenu']){ const e=$('#'+id); if(e)e.setAttribute('aria-pressed','false'); } const was=G.titleSheet; if(me&&me.id&&sheetMode!=='town')saveChar(); sheetMode=null; bagSel=null; $('#sheetTabs').classList.remove('selhide'); $('#selBar').hidden=true; $('#sheet').hidden=true; G.paused=false; if(was){ G.titleSheet=false; renderClassCards(); } }
@@ -5862,6 +5863,21 @@ function drawCastle(t){ const c=G.castle; if(!c)return; const st=castleSt(c), im
   ctx.fillStyle='rgba(8,6,5,.85)'; ctx.fillRect(bx-2,by-2,bw+4,10); ctx.fillStyle='rgba(255,255,255,.35)'; ctx.fillRect(bx,by,bw*clamp(c.ph,0,1),6);
   ctx.fillStyle=r>.65?'#9ad87a':r>.3?'#f0b25a':'#e5503a'; ctx.fillRect(bx,by,bw*r,6); ctx.strokeStyle='#6b5432'; ctx.lineWidth=1; ctx.strokeRect(bx-1.5,by-1.5,bw+3,9);
 }
+/* ===== 성 회복 연출(v0.6.2.0407): 회복 구역 안에서 생명력·마나가 차는 동안만 — 발밑에 옅은 물결, 캐릭터 옆에서 +가 떠올라요(생명력 초록 · 마나 파랑). 밝은 빛 없이 반투명 색만, + 개수 상한(저사양 모드는 절반) ===== */
+const HEALFX={i:0,lt:0,ps:[],acc:0};
+function healPlus(x,y,s,col,al){ ctx.globalAlpha=al*.7; ctx.fillStyle='#1a0f0a'; const o=s+1.3,w=s*.36+1.3; ctx.fillRect(x-w,y-o,w*2,o*2); ctx.fillRect(x-o,y-w,o*2,w*2);
+  ctx.globalAlpha=al; ctx.fillStyle=col; const w2=s*.36; ctx.fillRect(x-w2,y-s,w2*2,s*2); ctx.fillRect(x-s,y-w2,s*2,w2*2); }
+function drawHealFx(t){ const H=HEALFX; if(!me||me.dead||!G.inGame){ H.i=0; H.ps.length=0; return; }
+  const dt=G.paused?0:Math.min(.1,Math.max(0,t-H.lt)); H.lt=t; const D=me.D;
+  const on=hyp(me.x-hzX(),me.y-hzY())<hzR()&&((me.hp<D.maxHp-.5&&!(me.hblk>0))||(me.mp<D.maxMp-.5&&!(me.mblk>0||me.erode>0)));
+  H.i+=((on?1:0)-H.i)*Math.min(1,dt*6); const a=H.i; if(a<.02){ if(!on)H.ps.length=0; return; }
+  const px=me.x, py=me.y+10, low=!!G.lowFx; ctx.save();
+  if(!low){ ctx.save(); ctx.translate(px,py); ctx.scale(1,.45); const g=ctx.createRadialGradient(0,0,2,0,0,34); g.addColorStop(0,`rgba(120,190,130,${.22*a})`); g.addColorStop(1,'rgba(120,190,130,0)'); ctx.fillStyle=g; ctx.beginPath(); ctx.arc(0,0,34,0,6.283); ctx.fill(); ctx.restore(); }
+  for(let k=0;k<2;k++){ const q=((t*.7)+k*.5)%1, rx=12+q*40; ctx.strokeStyle=k?`rgba(110,160,225,${(1-q)*.5*a})`:`rgba(110,200,125,${(1-q)*.5*a})`; ctx.lineWidth=2; ctx.beginPath(); ctx.ellipse(px,py,rx,rx*.45,0,0,6.283); ctx.stroke(); }
+  H.acc+=dt*(low?4.5:8)*a; const cap=low?10:20;
+  while(H.acc>=1){ H.acc--; if(H.ps.length<cap)H.ps.push({x:px+(Math.random()<.5?-1:1)*(14+Math.random()*20),y:py-4+(Math.random()-.5)*8,t:0,l:1.1+Math.random()*.5,k:Math.random()<.5?0:1,w:Math.random()*6.283,s:4.5+Math.random()*2.5}); }
+  for(let i=H.ps.length-1;i>=0;i--){ const p=H.ps[i]; p.t+=dt; if(p.t>=p.l){ H.ps.splice(i,1); continue; } const q=p.t/p.l, x=p.x+Math.sin(p.w+p.t*3.5)*5, y=p.y-q*74, al=Math.min(1,q*5)*(1-q*q)*.9; healPlus(x,y,p.s,p.k===0?'#79c97f':'#6ea2e6',al); }
+  ctx.globalAlpha=1; ctx.restore(); }
 function drawVillage(t){ // 중앙 포털
   const col=TH().pc||'110,180,255';
   if(G.castle){ ctx.globalCompositeOperation='lighter'; { const g=ctx.createRadialGradient(VX,CAS_HY,20,VX,CAS_HY,CAS_HR+14); g.addColorStop(0,`rgba(${col},.16)`); g.addColorStop(.8,`rgba(${col},.1)`); g.addColorStop(1,`rgba(${col},0)`); ctx.fillStyle=g; ctx.beginPath(); ctx.arc(VX,CAS_HY,CAS_HR+14,0,6.283); ctx.fill(); } ctx.globalCompositeOperation='source-over';
@@ -6593,6 +6609,7 @@ function render(t){
   actors.sort((a,b)=>a.y-b.y); { let past=false; const gh=[]; for(const a of actors){ if(a.cas){ past=true; a.f(); continue; } a.f(); if(!past&&G.castle&&a.o&&a.o.x!==undefined&&Math.abs(a.o.x-VX)<CAS_W*.5+8&&a.y>VY-128)gh.push(a); }
     if(gh.length){ ctx.save(); ctx.globalAlpha=.5; for(const a of gh)a.f(); ctx.restore(); } }   /* 성 뒤에 가려진 몹·플레이어는 반투명하게 한 번 더 그려서 보이게 */
   drawDark(t,2); drawProjs(); drawEfx(t); drawAmbient(t);
+  drawHealFx(t);
   for(const p of parts){ if(p.glow)continue; ctx.globalAlpha=1-p.t/p.life; ctx.fillStyle=p.col; ctx.fillRect(p.x-p.r/2,p.y-p.r/2,p.r,p.r);} ctx.globalAlpha=1;
   ctx.globalCompositeOperation='lighter';
   for(const p of parts){ if(!p.glow)continue; const a=1-p.t/p.life; ctx.globalAlpha=a; ctx.fillStyle=p.col; ctx.beginPath(); ctx.arc(p.x,p.y,p.r*(.6+a*.6),0,6.283); ctx.fill(); ctx.globalAlpha=a*.25; ctx.beginPath(); ctx.arc(p.x,p.y,p.r*2.6,0,6.283); ctx.fill(); }
