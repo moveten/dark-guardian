@@ -60,7 +60,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
 .rktabs button{font-size:13px!important;padding:0 2px}.rkrow.own{background:rgba(255,200,80,.13);border-radius:6px}.rkrow.own b{color:#ffd870}.rkn{width:26px;text-align:center;font-weight:800;color:#a89a86}.rkrow.top .rkn{font-size:18px}.rke{font-size:20px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;flex:none}.rke img,.rkh img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 1px 2px rgba(0,0,0,.7))}.rkh{display:inline-block;width:28px;height:28px;vertical-align:-7px}.rkm{flex:1;display:flex;flex-direction:column;line-height:1.2;min-width:0}.rkm small{color:#9a8d7a;font-size:11.5px}.rkv{font-weight:800;color:#e8d6b4;white-space:nowrap}
 .modes{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;width:100%;max-width:640px}
 .btn{background:var(--panel2);border:1px solid var(--line2);border-radius:8px;padding:12px 18px;font-size:15px;font-weight:700;min-height:46px}
-.btn.primary{background:var(--blood);border-color:#c5463d;color:#fff4ea}
+.btn.primary{background:#241c14;border-color:var(--gold);color:#f3d884;font-weight:800;box-shadow:inset 0 0 0 1px #d6aa4e55}   /* 주요 버튼: 어두운 바탕+금색 테두리 */
+.btn.primary.danger,.btn.primary.go{background:var(--blood);border-color:#c5463d;color:#fff4ea;box-shadow:none}   /* 빨강은 위험한 버튼(.danger)과 게임 시작 계열(.go)만 */
 .btn:disabled{opacity:.45;cursor:default}
 .join{display:flex;gap:8px}
 .join input{width:110px;background:#0f0b09;border:1px solid var(--line2);border-radius:8px;color:var(--ink);font-size:18px;letter-spacing:.3em;text-align:center;font-family:var(--f-body);padding:0 8px;min-height:46px}
@@ -1185,7 +1186,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.3.0426</div>
+    <div class="ver" id="verT">v0.6.3.0427</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1199,7 +1200,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="bstk" id="stageBan" role="group" aria-label="스테이지 카드 · 좌우로 밀어서 이동"></div>
     <button id="bNew" hidden></button>
     <div class="pp" id="playPanel" hidden>
-      <div class="modes"><button class="btn primary" id="bSolo">▶ 시작하기</button></div>
+      <div class="modes"><button class="btn primary go" id="bSolo">▶ 시작하기</button></div>
       <button class="btn" id="bShop" aria-label="상점"><span aria-hidden="true">🛒</span>상점</button>
     </div>
     <div hidden><button id="bHost" disabled></button><button id="bJoin" disabled></button><p class="note" id="netNote">온라인 연결 확인 중…</p></div>
@@ -1227,7 +1228,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
       <div class="sub" id="lobbyStage" style="font-weight:700;color:var(--gold)"></div>
       <div class="plist" id="lobbyList"></div>
       <div class="modes">
-        <button class="btn primary" id="bStart">시작</button>
+        <button class="btn primary go" id="bStart">시작</button>
         <button class="btn" id="bLeave">나가기</button>
       </div>
     </div>
@@ -1240,10 +1241,10 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="endstats" id="endStats"></div>
     <div class="endbox" id="endBox"></div>
     <div class="modes">
-      <button class="btn primary" id="bToTitle">🚪 나가기</button>
+      <button class="btn primary danger" id="bToTitle">🚪 나가기</button>
       <button class="btn" id="bRetry" hidden>🔁 다시하기<kbd class="kh">R</kbd></button>
     </div>
-    <button class="btn primary" id="bBack" hidden>🎮 게임화면으로 돌아가기</button>
+    <button class="btn primary go" id="bBack" hidden>🎮 게임화면으로 돌아가기</button>
   </section>
 
   <div class="sheetwrap" id="sheet" hidden>
@@ -4776,7 +4777,7 @@ function sortMisc(P){ shardRepack(P); const its=P.misc.filter(Boolean); const ke
 function bulkSellMisc(P){ const gl=()=>P.misc.filter(it=>isGem(it)&&!it.lock); if(!gl().length){ sheetToast('판매할 보석이 없어요','#ffb259'); return; }
   const sel=new Set(), cnt=t=>gl().filter(x=>(x.ilvl|0)===t.il).length;
   const draw=m=>{ let n=0,v=0; for(const k of sel){ const t=GEM_TIER[k], c=cnt(t); n+=c; v+=c*t.g; } m.querySelector('#bmSum').innerHTML=n?`선택한 <b>${n}개</b> · <b style="color:#ffd84a">${v.toLocaleString()}G</b>`:'<span class="meta">판매할 등급을 선택하세요</span>'; m.querySelector('#bmGo').disabled=!n; };
-  modal(`<h3>🧺 일괄 판매 · 기타</h3><p class="meta" style="margin:0 0 8px">${P===me?'가방':'공유보관함'}의 보석만 팔아요. 🔒잠근 보석은 제외돼요. 조각은 팔리지 않아요.</p><div class="col">${GEM_TIER.map((t,k)=>`<label class="toggle" style="display:flex;gap:8px;align-items:center;font-size:14px;padding:8px;border:1px solid var(--line2);border-radius:8px"><input type="checkbox" data-t="${k}" ${cnt(t)?'':'disabled'}> <span style="font-weight:700">${t.n}</span> <span style="margin-left:auto;color:var(--mute)">${cnt(t)}개 · 개당 ${t.g.toLocaleString()}G</span></label>`).join('')}<div id="bmSum" style="min-height:22px;font-size:14px"></div><div class="row2"><button class="btn" id="bmNo">취소</button><button class="btn primary" id="bmGo" disabled>일괄 판매하기</button></div></div>`,m=>{
+  modal(`<h3>🧺 일괄 판매 · 기타</h3><p class="meta" style="margin:0 0 8px">${P===me?'가방':'공유보관함'}의 보석만 팔아요. 🔒잠근 보석은 제외돼요. 조각은 팔리지 않아요.</p><div class="col">${GEM_TIER.map((t,k)=>`<label class="toggle" style="display:flex;gap:8px;align-items:center;font-size:14px;padding:8px;border:1px solid var(--line2);border-radius:8px"><input type="checkbox" data-t="${k}" ${cnt(t)?'':'disabled'}> <span style="font-weight:700">${t.n}</span> <span style="margin-left:auto;color:var(--mute)">${cnt(t)}개 · 개당 ${t.g.toLocaleString()}G</span></label>`).join('')}<div id="bmSum" style="min-height:22px;font-size:14px"></div><div class="row2"><button class="btn" id="bmNo">취소</button><button class="btn primary danger" id="bmGo" disabled>일괄 판매하기</button></div></div>`,m=>{
     m.querySelectorAll('[data-t]').forEach(c=>c.onchange=()=>{ const k=+c.dataset.t; if(c.checked)sel.add(k); else sel.delete(k); draw(m); });
     m.querySelector('#bmNo').onclick=closeModal; draw(m);
     m.querySelector('#bmGo').onclick=()=>{ let g=0,n=0; P.misc.forEach((it,i)=>{ if(isGem(it)&&!it.lock){ const k=GEM_TIER.findIndex(t=>t.il===(it.ilvl|0)); if(k>=0&&sel.has(k)){ g+=GEM_TIER[k].g; n++; P.misc[i]=null; } } }); if(!n)return; P.gold=(P.gold|0)+g; selItem=null; shopMsg=`${n}개 판매 +${g}G`; sfx('coin'); saveSrc(P); uiDirty=true; closeModal(); rerender(); sheetToast&&sheetToast(`${n}개 판매 +${g.toLocaleString()}G`); }; }); }
@@ -4875,7 +4876,7 @@ function sendShard(){ const P=selItem&&selItem.store?getStore():me; const it=sel
 }
 function sellShard(){ const P=selItem&&selItem.store?getStore():me; const it=selItem&&selItem.it, ix=selItem&&selItem.misc; if(!isShard(it)||ix===undefined)return; const max=it.n|0; if(max<1)return;
   const K=SHDK[shMat(it)];
-  modal(`<h3>💰 ${K.n} 판매</h3><p style="margin:0;font-size:13px;color:${RARC[4]}">${K.e} 이 칸 보유 ${max}개 · 개당 ${SHARD_SELL.toLocaleString()}G${P===me?'':' · 대금은 공유보관함 골드로'}</p>${qtyHtml(max)}<p class="meta" id="ssTot" style="margin:0 0 10px;font-size:15px;color:#ffd84a;text-align:center"></p><div class="row2"><button class="btn" id="ssNo">취소</button><button class="btn primary" id="ssGo">판매</button></div>`,m=>{
+  modal(`<h3>💰 ${K.n} 판매</h3><p style="margin:0;font-size:13px;color:${RARC[4]}">${K.e} 이 칸 보유 ${max}개 · 개당 ${SHARD_SELL.toLocaleString()}G${P===me?'':' · 대금은 공유보관함 골드로'}</p>${qtyHtml(max)}<p class="meta" id="ssTot" style="margin:0 0 10px;font-size:15px;color:#ffd84a;text-align:center"></p><div class="row2"><button class="btn" id="ssNo">취소</button><button class="btn primary danger" id="ssGo">판매</button></div>`,m=>{
     m.querySelector('#ssNo').onclick=closeModal;
     const get=qtyBind(m,max,v=>{ m.querySelector('#ssTot').textContent=`${v}개 → +${(v*SHARD_SELL).toLocaleString()}G`; });
     m.querySelector('#ssGo').onclick=()=>{ const q=get(); if(P.misc[ix]!==it||q>(it.n|0))return; const v=q*SHARD_SELL; it.n-=q; if(it.n<=0)P.misc[ix]=null; P.gold=(P.gold|0)+v; selItem=null; shopMsg=`${K.n} ${q}개 판매 +${v.toLocaleString()}G`; saveSrc(P); uiDirty=true; sfx('coin'); closeModal(); rerender(); };
@@ -5126,7 +5127,7 @@ function bulkSell(P){ P=P||me;
   const draw=m=>{ const f=info();
     m.querySelector('#bsSum').innerHTML=f.n?`선택한 <b>${f.n}개</b> · <b style="color:#ffd84a">${f.v}G</b>${f.e?` <span style="color:#ffb259">(강화 아이템 ${f.e}개 포함)</span>`:''}`:'<span class="meta">판매할 등급을 선택하세요</span>';
     m.querySelector('#bsGo').disabled=!f.n; uAsk=false; eAsk=false; m.querySelector('#bsGo').textContent='일괄 판매하기'; };
-  modal(`<h3>🧺 일괄 판매</h3><p class="meta" style="margin:0 0 8px">${P===me?'가방':'공유보관함'}의 아이템만 팔아요. ${P===me?'장착 중인 장비와 ':''}🔒잠근 아이템은 제외돼요. 강화한 아이템도 잠그지 않았으면 함께 팔려요. 유니크는 직접 체크해야 팔려요.</p><div class="col">${[0,1,2,3].map(r=>`<label class="toggle" style="display:flex;gap:8px;align-items:center;font-size:14px;padding:8px;border:1px solid var(--line2);border-radius:8px"><input type="checkbox" data-r="${r}" ${r<=1&&cnt(r)?'checked':''} ${cnt(r)?'':'disabled'}> <span style="color:${RARC[r]};font-weight:700">${RARN[r]}</span> <span style="margin-left:auto;color:var(--mute)">${cnt(r)}개${ecnt(r)?` <span style="color:#ffb259">(강화 ${ecnt(r)})</span>`:''} · ${val(r)}G</span></label>`).join('')}<div id="bsSum" style="min-height:22px;font-size:14px"></div><div class="row2"><button class="btn" id="bsNo">취소</button><button class="btn primary" id="bsGo">일괄 판매하기</button></div></div>`,m=>{
+  modal(`<h3>🧺 일괄 판매</h3><p class="meta" style="margin:0 0 8px">${P===me?'가방':'공유보관함'}의 아이템만 팔아요. ${P===me?'장착 중인 장비와 ':''}🔒잠근 아이템은 제외돼요. 강화한 아이템도 잠그지 않았으면 함께 팔려요. 유니크는 직접 체크해야 팔려요.</p><div class="col">${[0,1,2,3].map(r=>`<label class="toggle" style="display:flex;gap:8px;align-items:center;font-size:14px;padding:8px;border:1px solid var(--line2);border-radius:8px"><input type="checkbox" data-r="${r}" ${r<=1&&cnt(r)?'checked':''} ${cnt(r)?'':'disabled'}> <span style="color:${RARC[r]};font-weight:700">${RARN[r]}</span> <span style="margin-left:auto;color:var(--mute)">${cnt(r)}개${ecnt(r)?` <span style="color:#ffb259">(강화 ${ecnt(r)})</span>`:''} · ${val(r)}G</span></label>`).join('')}<div id="bsSum" style="min-height:22px;font-size:14px"></div><div class="row2"><button class="btn" id="bsNo">취소</button><button class="btn primary danger" id="bsGo">일괄 판매하기</button></div></div>`,m=>{
     m.querySelectorAll('[data-r]').forEach(c=>c.onchange=()=>{ const r=+c.dataset.r; if(c.checked)sel.add(r); else sel.delete(r); draw(m); });
     m.querySelector('#bsNo').onclick=closeModal;
     if(!cnt(0)) sel.delete(0); if(!cnt(1)) sel.delete(1); draw(m);
@@ -5194,7 +5195,7 @@ function enhModal(){
 function askReset(kind){
   const cost=kind==='stat'?20000:30000, name=kind==='stat'?'능력치':'스킬';
   if(me.gold<cost){ warn(`${name} 초기화에는 ${cost.toLocaleString()}G가 필요해요 (보유 ${me.gold.toLocaleString()}G)`); return; }
-  modal(`<h3>🔄 ${name} 초기화</h3><p style="margin:0 0 12px;font-size:14px">${cost.toLocaleString()}G를 내고 ${name} 포인트를 모두 돌려받을까요?</p><div class="row2"><button class="btn" id="rNo">취소</button><button class="btn primary" id="rYes">초기화</button></div>`,m=>{
+  modal(`<h3>🔄 ${name} 초기화</h3><p style="margin:0 0 12px;font-size:14px">${cost.toLocaleString()}G를 내고 ${name} 포인트를 모두 돌려받을까요?</p><div class="row2"><button class="btn" id="rNo">취소</button><button class="btn primary danger" id="rYes">초기화</button></div>`,m=>{
     m.querySelector('#rNo').onclick=closeModal;
     m.querySelector('#rYes').onclick=()=>{ me.gold-=cost;
       if(kind==='stat'){ const c=CLASSES[me.cls]; let sp=0; for(const k in c.base){ sp+=me.stats[k]-c.base[k]; me.stats[k]=c.base[k]; } me.statPts+=sp; }
@@ -5205,7 +5206,7 @@ function askReset(kind){
 function renderMenu(){
   markTabs(); sheetHead();
   const b=$('#sheetB'); b.className='sbody';
-  b.innerHTML=`<div class="menuL"><button class="btn primary" id="mResume">계속하기</button><button class="btn" id="mQuit">스테이지 포기하고 나가기</button><button class="btn" id="mCl">☁️ 클라우드 저장${clCode()?' · 켜짐':''}</button><button class="btn" id="mTut">📖 모험 안내</button><button class="btn" id="mPn">📜 패치노트</button><div class="modes" id="sndM"></div><div class="hudbox"><b>🖥️ 화면 표시 (HUD)</b>${HUDK.map(([k,n])=>`<label><input type="checkbox" data-hud="${k}"${hudOn(k)?' checked':''}>${n}</label>`).join('')}</div><p class="note">캐릭터와 아이템은 이 기기에 자동 저장돼요. (클라우드 저장을 켜면 서버에도 보관돼요)${G.mode!=='solo'?' 온라인 플레이 중에는 일시정지되지 않아요.':''}</p></div>`;
+  b.innerHTML=`<div class="menuL"><button class="btn primary go" id="mResume">계속하기</button><button class="btn" id="mQuit">스테이지 포기하고 나가기</button><button class="btn" id="mCl">☁️ 클라우드 저장${clCode()?' · 켜짐':''}</button><button class="btn" id="mTut">📖 모험 안내</button><button class="btn" id="mPn">📜 패치노트</button><div class="modes" id="sndM"></div><div class="hudbox"><b>🖥️ 화면 표시 (HUD)</b>${HUDK.map(([k,n])=>`<label><input type="checkbox" data-hud="${k}"${hudOn(k)?' checked':''}>${n}</label>`).join('')}</div><p class="note">캐릭터와 아이템은 이 기기에 자동 저장돼요. (클라우드 저장을 켜면 서버에도 보관돼요)${G.mode!=='solo'?' 온라인 플레이 중에는 일시정지되지 않아요.':''}</p></div>`;
   $('#mResume').onclick=closeSheet; $('#mCl').onclick=cloudModal; $('#mTut').onclick=()=>tutModal(me.id); $('#mPn').onclick=patchModal; {const r=$('#sndM'); r.innerHTML=sndBtns(); bindSnd(r);} b.querySelectorAll('[data-hud]').forEach(c=>c.onchange=()=>hudSet(c.dataset.hud,c.checked));
   $('#mQuit').onclick=()=>{closeSheet(); quitToTitle();};
 }
@@ -5445,7 +5446,7 @@ function openMap(){
   ov.onpointerdown=e=>{ if(e.target===ov)close(); };   /* PC에서는 지도가 창으로 뜨고, 창 바깥(어두운 곳)을 누르면 닫혀요 */
   const show=()=>{ const S=STAGES[pick], st=pick<clr?'clear':pick===clr?'next':'lock', can=pick<=clr;
     ov.querySelectorAll('.mn[data-i]').forEach(b=>b.classList.toggle('sel',+b.dataset.i===pick));
-    bar.innerHTML=`<div class="mt">${esc(S.id)} · ${esc(S.n)}</div><div class="mb">우두머리 <b>${esc(S.bn||'')}</b> · 장비 Lv 합 ${Math.max(1,S.icap-12)*EQSL.length}↑${st==='clear'?' · <span style="color:#9fd18b">클리어 ✔</span>':''}</div><div class="md">${esc(S.tag||S.d||'')}</div><div class="row2"><button class="btn" id="mapC" type="button">닫기</button><button class="btn primary" id="mapGo" type="button"${can?'':' disabled'}>${can?'이 스테이지로 선택':'🔒 이전 스테이지를 먼저 클리어'}</button></div>`;
+    bar.innerHTML=`<div class="mt">${esc(S.id)} · ${esc(S.n)}</div><div class="mb">우두머리 <b>${esc(S.bn||'')}</b> · 장비 Lv 합 ${Math.max(1,S.icap-12)*EQSL.length}↑${st==='clear'?' · <span style="color:#9fd18b">클리어 ✔</span>':''}</div><div class="md">${esc(S.tag||S.d||'')}</div><div class="row2"><button class="btn" id="mapC" type="button">닫기</button><button class="btn primary go" id="mapGo" type="button"${can?'':' disabled'}>${can?'이 스테이지로 선택':'🔒 이전 스테이지를 먼저 클리어'}</button></div>`;
     $('#mapC').onclick=close; $('#mapGo').onclick=go; };
   let going=false;
   const mark=()=>{ ov.querySelectorAll('.mpin').forEach(e=>e.remove()); ov.querySelectorAll('.mn.chosen').forEach(e=>e.classList.remove('chosen')); const nb=ov.querySelector(`.mn[data-i="${selStage}"]`); if(!nb)return; nb.classList.add('chosen');
@@ -5561,7 +5562,7 @@ function charMenu(id){
   modal(`<h3>${clsIc(p.cls,26)} ${esc(dispName(p))}<br><small style="color:var(--mute);font-weight:400">Lv ${p.lvl} · ${CLASSES[p.cls].n}</small></h3><div class="col" style="gap:6px"><button class="btn" id="cmRen" style="min-height:38px;padding:7px 14px;font-size:14px">✏️ 이름 변경 (${RENCOST.toLocaleString()}G)</button><button class="btn" id="cmDel" style="min-height:38px;padding:7px 14px;font-size:14px">🗑️ 삭제</button><button class="btn" id="cmX" style="min-height:38px;padding:7px 14px;font-size:14px">닫기</button></div>`,m=>{
     m.querySelector('#cmRen').onclick=()=>{ if((p.gold|0)<RENCOST){ warn(`골드가 부족해요. 이름 변경은 ${RENCOST.toLocaleString()}G가 필요해요 (보유 ${(p.gold|0).toLocaleString()}G)`); return; }
       askName(`✏️ 이름 변경 · ${RENCOST.toLocaleString()}G`,'','✔ 변경',v=>{ const q=loadChar(id); if(!q)return; if((q.gold|0)<RENCOST)return; q.gold-=RENCOST; q.name=v; lsSet(charKey(q.id),JSON.stringify(packChar(q))); renderTitle(); toast(`이름을 '${v}'(으)로 바꿨어요 (-${RENCOST.toLocaleString()}G)`,'#ffd84a'); },id,v=>nameCheat(id,v)||(v===dispName(p)?'현재 이름과 같아요. 다른 이름을 입력해 주세요':null),{claim:id}); };
-    m.querySelector('#cmDel').onclick=()=>modal(`<h3>🗑️ 삭제</h3><p style="margin:0 0 12px;font-size:14px">'${esc(dispName(p))}' (Lv ${p.lvl}) 캐릭터를 삭제할까요?<br>장비와 아이템도 함께 사라지며 되돌릴 수 없어요.</p><div class="row2"><button class="btn" id="dNo">취소</button><button class="btn primary" id="dYes">삭제</button></div>`,m2=>{ m2.querySelector('#dNo').onclick=closeModal; let dAsk=false; m2.querySelector('#dYes').onclick=()=>{ if(!dAsk){ dAsk=true; const y=m2.querySelector('#dYes'); y.textContent='⚠️ 정말 삭제 · 한 번 더 누르면 삭제'; y.style.background='#a62a22'; y.style.borderColor='#ff6a5a'; return; } deleteChar(id); closeModal(); renderTitle(); }; });
+    m.querySelector('#cmDel').onclick=()=>modal(`<h3>🗑️ 삭제</h3><p style="margin:0 0 12px;font-size:14px">'${esc(dispName(p))}' (Lv ${p.lvl}) 캐릭터를 삭제할까요?<br>장비와 아이템도 함께 사라지며 되돌릴 수 없어요.</p><div class="row2"><button class="btn" id="dNo">취소</button><button class="btn primary danger" id="dYes">삭제</button></div>`,m2=>{ m2.querySelector('#dNo').onclick=closeModal; let dAsk=false; m2.querySelector('#dYes').onclick=()=>{ if(!dAsk){ dAsk=true; const y=m2.querySelector('#dYes'); y.textContent='⚠️ 정말 삭제 · 한 번 더 누르면 삭제'; y.style.background='#a62a22'; y.style.borderColor='#ff6a5a'; return; } deleteChar(id); closeModal(); renderTitle(); }; });
     m.querySelector('#cmX').onclick=closeModal; { const cd=m.querySelector('.card'); cd.style.width='220px'; cd.style.position='relative'; cd.style.top='-70px'; } });
 }
 /* 타이틀 메뉴 (예전 '설정') — 소리 · 우편함 · 클라우드 저장 · 패치노트 */
@@ -5962,7 +5963,7 @@ function showEnd(msg){
     endTab('l'); }
   show('#sEnd'); try{ window.__endFx&&window.__endFx.show(win&&!msg); }catch(e){}
 }
-function confirmExit(cb){ modal(`<h3>🚪 나갈까요?</h3><p style="margin:0 0 12px;font-size:14px">타이틀 화면으로 돌아갑니다.</p><div class="row2"><button class="btn" id="exN">취소</button><button class="btn primary" id="exY">나가기</button></div>`,m=>{ m.querySelector('#exN').onclick=closeModal; m.querySelector('#exY').onclick=()=>{ closeModal(); cb(); }; }); }
+function confirmExit(cb){ modal(`<h3>🚪 나갈까요?</h3><p style="margin:0 0 12px;font-size:14px">타이틀 화면으로 돌아갑니다.</p><div class="row2"><button class="btn" id="exN">취소</button><button class="btn primary danger" id="exY">나가기</button></div>`,m=>{ m.querySelector('#exN').onclick=closeModal; m.querySelector('#exY').onclick=()=>{ closeModal(); cb(); }; }); }
 $('#bToTitle').onclick=()=>quitToTitle();
 $('#bBack').onclick=()=>{ if(G.phase!=='win'||G.mode!=='solo'||!(G.clearT>.5))return; G.phase='clear'; G.clearT=Math.max(G.clearT,10); G.endShown=false; G.inGame=true; show(null); };   /* 실수로 나가기를 눌렀을 때: 남은 전리품 시간(최소 10초)으로 복귀 */
 $('#bRetry').onclick=()=>{ if(G.mode!=='solo'||!selId)return; selStage=Math.max(0,Math.min(STAGES.length-1,G.stageIdx|0)); G.mode='solo'; prepMe(); ally=null; resetWorld(); startStage(); };   /* 같은 스테이지를 처음부터 다시 */
