@@ -304,6 +304,9 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 .tmap .tcsb .tbd img{display:block;width:118px;height:auto;max-width:none}.tmap .tcsb .tbd svg{display:none}   /* 도박장 그림(img/town_casino.webp)이 있으면 그림, 없으면 기본 SVG (그림이 있으면 SVG가 숨겨져 위의 빛 효과도 꺼져요) */
 .tmap .tcsb.cbad .tbd img{display:none}.tmap .tcsb.cbad .tbd svg{display:block}
 .tcsb:active svg{filter:brightness(1.25)}
+.gsb{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid #afeeee88;border-radius:10px;background:rgba(80,200,200,.08)}
+.cell.gtg,.slot.gtg{border-color:#afeeee!important;box-shadow:0 0 0 1px #afeeee,0 0 12px rgba(120,230,230,.55)!important}
+.cell.gdim,.slot.gdim{opacity:.28;filter:grayscale(.6)}
 .tmap .tcsb.smi .tbd{filter:drop-shadow(0 0 8px #ffb25999)}.tmap .tcsb.smi .tlb{background:#2a1a0acc;border-color:#ffb259}
 .tcsb .cb{opacity:.35;animation:cbk 1.2s steps(1) infinite}
 @keyframes cbk{0%{opacity:1}50%{opacity:.25}}
@@ -1164,7 +1167,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.3.0420</div>
+    <div class="ver" id="verT">v0.6.3.0421</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -2121,6 +2124,7 @@ function derive(p,nm){   /* nm=true: 마을 풍차 보너스를 빼고 계산 (�
     if(it.slot==='weapon'){d.wmn=it.mn;d.wmx=it.mx; const bf=BASEFX[it.base]; if(bf){ for(const q in bf) if(q!=='t')d[q]+=bf[q]; }}
     if(it.sp&&SPFX[it.sp]){ SPFX[it.sp].ap(d); d.sp[it.sp]=((it.sp==='hring'||it.sp==='aw_ring')?(d.sp[it.sp]|0)+1:1);   /* 그림자·각성 반지는 2개 끼면 효과도 2번 */ if(SPFX[it.sp].hero&&it.rar===4){ if(SPFX[it.sp].aw)d.ac=(d.ac|0)+1; else d.hc++; } if(SPFX[it.sp].cas)d.cs=(d.cs|0)+1; }   /* 그림자(영웅) 장비 개수 */
     if(it.enh>0){ if(it.slot==='amulet'){ const e=it.enh|0; d.str+=e; d.dex+=e; d.vit+=e; d.ene+=e; } else if(it.slot==='ring'&&it.enh>=10)d.cls+=1; }
+    if(it.gm&&it.sk)gemApply(d,it.gm);
     if(it.df)d.def+=it.df; if(it.blk)d.blk+=it.blk; if(it.dm)d.dmg+=it.dm; if(it.om)d.mana+=it.om;
     for(const a of it.aff){
       if(a.t==='all'){d.cls+=a.v;}
@@ -4580,20 +4584,20 @@ function updateHud(){
 }
 
 /* ================= SHEETS ================= */
-let sheetMode=null, selItem=null, bagSel=null, bagSelM=null, bagTab='eq', storeTab='eq';
+let sheetMode=null, selItem=null, gemSock=null, bagSel=null, bagSelM=null, bagTab='eq', storeTab='eq';
 const newCnt=p=>((p.inv||[]).concat(p.misc||[])).reduce((t,x)=>t+(x&&x.isNew?1:0),0);   /* bagSel: 가방 '📦 창고로' 선택 모드(고른 칸 번호 Set), 꺼져 있으면 null */
 let shopMsg='', buyMsg='', sellAskIt=null;
 let sortFresh=true;   /* 가방을 연 뒤 첫 정렬 누름: 저장된 방식 그대로 정렬 → 그다음부터 방식을 바꿔 가며 정렬 */
 function openSheet(m){ sortFresh=true; bagTab='eq'; storeTab='eq'; if(!G.inGame&&!G.titleSheet)return; document.body.classList.add('shopen'); sheetMode=m; selItem=null; shopMsg=''; buyMsg=''; $('#sheet').hidden=false; if(G.inGame&&G.mode==='solo')G.paused=true; for(const k in held)held[k]=false; joy.active=false;
   rerender(); $('#sheetB').scrollTop=0; }
-function rerender(){ if(sheetMode!=='bag'){ bagSel=null; $('#sheetTabs').classList.remove('selhide'); $('#selBar').hidden=true; } $('#sheet').classList.toggle('isstore',sheetMode==='store'||sheetMode==='town'); if(sheetMode==='store')renderStore(); else if(sheetMode==='town')renderTown(); else if(sheetMode==='bag')renderBag(); else if(sheetMode==='stat'||sheetMode==='skill'||sheetMode==='passive')renderStat(); else if(sheetMode==='shop')renderShop(); else renderMenu(); }
+function rerender(){ if(sheetMode!=='bag'){ gemSock=null; bagSel=null; $('#sheetTabs').classList.remove('selhide'); $('#selBar').hidden=true; } $('#sheet').classList.toggle('isstore',sheetMode==='store'||sheetMode==='town'); if(sheetMode==='store')renderStore(); else if(sheetMode==='town')renderTown(); else if(sheetMode==='bag')renderBag(); else if(sheetMode==='stat'||sheetMode==='skill'||sheetMode==='passive')renderStat(); else if(sheetMode==='shop')renderShop(); else renderMenu(); }
 function markTabs(){ $('#itemPop').hidden=true; $('#ptsBar').hidden=true; const t=$('#sheetTabs'), cm=sheetMode==='passive'?'skill':sheetMode; t.hidden=sheetMode==='menu'||sheetMode==='store'||!!G.inGame; /* 게임 중에는 하단 독 하나만 사용 */ for(const [id,m] of [['bBag','bag'],['bStat','stat'],['bSkillT','skill'],['bMenu','menu']]){ const e=$('#'+id); if(e)e.setAttribute('aria-pressed',cm===m); } t.querySelectorAll('button').forEach(b=>{b.setAttribute('aria-pressed',b.dataset.m===cm); if(b.dataset.m==='shop')b.hidden=!!G.inGame&&sheetMode!=='shop'; const n=b.dataset.m==='bag'?newCnt(me):b.dataset.m==='stat'?(me.statPts|0):b.dataset.m==='skill'?(me.skillPts|0):0; let bd=b.querySelector('.pl'); if(!bd){bd=document.createElement('span');bd.className='pl';b.appendChild(bd);} bd.textContent=n>0?(b.dataset.m==='bag'?'NEW':'+'+n):''; bd.hidden=!(n>0); }); }
 $('#ptsBar').onclick=()=>{ sheetMode='stat'; selItem=null; rerender(); };
 $('#sheetTabs').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; if(b.id==='tSend'){ sheetMode='bag'; selItem=null; bagSel=new Set(); bagSelM=new Set(); rerender(); $('#sheetB').scrollTop=0; return; }   /* 📦 창고로: 가방을 열고 선택 모드로 */
   if(b.dataset.m==='bag'&&sheetMode==='bag'&&newCnt(me)>0){ me.inv.concat(me.misc||[]).forEach(x=>{ if(x)delete x.isNew; }); saveChar(); uiDirty=true; selItem=null; rerender(); sheetToast('✨ NEW 표시를 모두 지웠어요'); return; }   /* 가방 탭을 한 번 더 누르면 NEW 표시 전부 지움 */
   bagSel=null; if(b.dataset.m!==sheetMode){ bagTab='eq'; storeTab='eq'; } sheetMode=b.dataset.m; selItem=null; shopMsg=''; buyMsg=''; rerender(); $('#sheetB').scrollTop=0; });
 function openTitleSheet(m){ prepMe(); G.titleSheet=true; if(m==='store')STORE=loadStore(); openSheet(m); }
-function closeSheet(){ try{ hoverHide(); }catch(e){} document.body.classList.remove('shopen'); for(const id of ['bBag','bStat','bSkillT','bMenu']){ const e=$('#'+id); if(e)e.setAttribute('aria-pressed','false'); } const was=G.titleSheet; if(me&&me.id&&sheetMode!=='town')saveChar(); sheetMode=null; bagSel=null; $('#sheetTabs').classList.remove('selhide'); $('#selBar').hidden=true; $('#sheet').hidden=true; G.paused=false; if(was){ G.titleSheet=false; renderClassCards(); } }
+function closeSheet(){ gemSock=null; try{ hoverHide(); }catch(e){} document.body.classList.remove('shopen'); for(const id of ['bBag','bStat','bSkillT','bMenu']){ const e=$('#'+id); if(e)e.setAttribute('aria-pressed','false'); } const was=G.titleSheet; if(me&&me.id&&sheetMode!=='town')saveChar(); sheetMode=null; bagSel=null; $('#sheetTabs').classList.remove('selhide'); $('#selBar').hidden=true; $('#sheet').hidden=true; G.paused=false; if(was){ G.titleSheet=false; renderClassCards(); } }
 $('#sheetX').onclick=closeSheet;
 /* 마을 창이 열려 있을 때 창 밖(어두운 배경·하단 탭 등)을 누르면 그 버튼은 실행하지 않고 마을 창만 닫음 */
 document.addEventListener('click',e=>{ if(sheetMode!=='town'||$('#sheet').hidden)return; if(e.target.closest&&e.target.closest('.sheet,#modal,#itemPop'))return; e.preventDefault(); e.stopPropagation(); closeSheet(); },true);
@@ -4678,8 +4682,8 @@ function sortStore(mode){ const S=getStore(); shardRepack(S); let mx=0; for(cons
   const its=S.inv.filter(Boolean);
   its.sort(mode==='enh'?((a,b)=>(b.enh|0)-(a.enh|0)||byRar(a,b)):mode==='in'?((a,b)=>a.sat-b.sat):byRar);   /* 강화순: 높은 강화 단계 먼저, 같은 단계 안에서는 등급순 · 입고순: 먼저 넣은 것부터 */
   S.inv=its.concat(Array(Math.max(0,STORE_N-its.length)).fill(null)); selItem=null; saveStore(); renderStore(); sheetToast(mode==='enh'?'강화순으로 정리했어요':mode==='in'?'입고순으로 정리했어요':'등급순으로 정리했어요'); }
-function storeDetail(){ sellAskIt=null; if(!selItem)return ''; const it=selItem.it; let s=itemLines(it,isShard(it)?null:{lk:1});
-  if(isGem(it)){ const lk=`<button class="btn lkx" id="aLock" data-lk="1">${it.lock?'🔓 잠금 해제':'🔒 잠금'}</button>`; return s+`<div class="acts iact">${lk}<button class="btn tlb" id="aGemSell"${it.lock?' style="opacity:.45"':''}><span class="ti ph">💰</span><span class="tx">판매 ${GEM_TIER[gemTier(it)-1].g}G</span></button><button class="btn tlb" id="aSend"><span class="ti">📤</span> <span class="tx">보내기</span></button></div>`; }
+function storeDetail(){ sellAskIt=null; if(!selItem)return ''; const it=selItem.it; let s=itemLines(it,isShard(it)?null:{lk:1,st:1});
+  if(isGem(it)){ const lk=`<button class="btn lkx" id="aLock" data-lk="1">${it.lock?'🔓 잠금 해제':'🔒 잠금'}</button>`; return s+`<div class="acts iact"><button class="btn primary" disabled style="opacity:.4">💎 소켓에 박기</button>${lk}<button class="btn tlb" id="aGemSell"${it.lock?' style="opacity:.45"':''}><span class="ti ph">💰</span><span class="tx">판매 ${GEM_TIER[gemTier(it)-1].g}G</span></button><button class="btn tlb" id="aSend"><span class="ti">📤</span> <span class="tx">보내기</span></button></div>`; }
   if(isShard(it))return s+`<div class="acts"><button class="btn" id="aShardSell">💰 판매</button><button class="btn" id="aSend">📤 보내기</button></div>`;
   const lk=`<button class="btn lkx" id="aLock" data-lk="1">${it.lock?'🔓 잠금 해제':'🔒 잠금'}</button>`;   /* 패드·PC에서도 잠글 수 있게 (폰은 아이콘 모서리 배지) */
   return s+`<div class="acts iact">${lk}<button class="btn tlb" id="aSell"${it.lock?' style="opacity:.45"':''}><span class="ti ph">💰</span><span class="tx">판매 ${sellInfo(it).total}G</span></button><button class="btn tlb" id="aSend"><span class="ti">📤</span> <span class="tx">보내기</span></button></div>`; }
@@ -4761,11 +4765,12 @@ function bulkSellMisc(P){ const gl=()=>P.misc.filter(it=>isGem(it)&&!it.lock); i
 function renderBag(){
   shardAdd(me,0); shardAdd(me,0,'ashard'); markTabs(); sheetHead();
   const eqOrder=['weapon','armor','helm','amulet','ring1','ring2'].concat(['shield']);
+  if(gemSock){ bagTab='eq'; cellSel=true; }
   let h='<div class="bagtop" style="display:flex;flex-direction:column;gap:10px;min-width:0"><div class="eq">'+eqOrder.map(k=>{const it=me.eq[k]; return `<div style="position:relative">${cellHtml(it,'slot',`data-eq="${k}"`)}<div class="sl" style="position:absolute;bottom:2px;left:0;right:0;font-size:9.5px;color:var(--mute);text-align:center;pointer-events:none">${eqLbl(k)}</div></div>`;}).join('')+'</div>';
   h+=`<div class="meta" style="font-size:12px;color:var(--mute)">⚔️ 전투력 <b style="color:#ffd84a">${calcCP(me).toLocaleString()}</b> <span style="color:#6b5f50">·</span> 🛡️ 장비 Lv 합 <b style="color:#ffd84a">${eqSum(me.eq)}</b></div><div class="bagbtns" style="display:flex;flex-wrap:nowrap;gap:4px"><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap" data-sort="${SORTM[(sortCur()+1)%3]}">정렬(${SORTN[sortCur()]})</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap" id="aBulk">일괄 판매</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap;${asLv>=0?`border-color:${RARC[asLv]};color:${RARC[asLv]};background:${['rgba(233,226,212,.14)','rgba(90,120,255,.28)','rgba(255,214,60,.24)'][asLv]};box-shadow:0 0 8px ${['rgba(233,226,212,.3)','rgba(110,140,255,.6)','rgba(255,214,60,.55)'][asLv]};font-weight:800`:''}" id="aAuto">자동판매 ${ASN[asLv+1]}</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap;${syLv>=0?`border-color:#c9a0ff;color:#d9b8ff;background:rgba(150,90,255,.22);box-shadow:0 0 8px rgba(150,90,255,.5);font-weight:800`:''}" id="aSyn" aria-pressed="${syLv>=0}">자동합성 ${syLv>=0?'ON':'OFF'}</button></div>`;
   { const bi=h.indexOf('<div class="bagbtns"'), bs0='style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap"';
-    h=h.slice(0,bi)+tabStrip(me.inv,me.misc,bagTab)+(bagTab==='misc'?`<div class="bagbtns" style="display:flex;flex-wrap:nowrap;gap:4px"><button class="btn sm" ${bs0} data-msort="1">정렬(등급순)</button><button class="btn sm" ${bs0} id="aMBulk">일괄 판매</button></div>`:h.slice(bi)); }
-  cellSel=!!bagSel; let invH=''; try{ invH=bagTab==='misc'?me.misc.map((it,i)=>cellHtml(it,'cell',`data-mi="${i}"`)).join(''):me.inv.map((it,i)=>cellHtml(it,'cell',`data-inv="${i}"`)).join(''); }finally{ cellSel=false; }
+    h=h.slice(0,bi)+(gemSock?gemSockBar():tabStrip(me.inv,me.misc,bagTab)+(bagTab==='misc'?`<div class="bagbtns" style="display:flex;flex-wrap:nowrap;gap:4px"><button class="btn sm" ${bs0} data-msort="1">정렬(등급순)</button><button class="btn sm" ${bs0} id="aMBulk">일괄 판매</button></div>`:h.slice(bi))); }
+  cellSel=!!(bagSel||gemSock); let invH=''; try{ invH=bagTab==='misc'?me.misc.map((it,i)=>cellHtml(it,'cell',`data-mi="${i}"`)).join(''):me.inv.map((it,i)=>cellHtml(it,'cell',`data-inv="${i}"`)).join(''); }finally{ cellSel=false; }
   h+='<div class="inv">'+invH+'</div>';
   const b=$('#sheetB'); b.className='sbody bag'; b.innerHTML=h; fitInv(); try{ showPop(detailHtml(),curCmpHtml()); }catch(e){ console.error(e); selItem=null; showPop(''); }
   b.querySelectorAll('[data-eq]').forEach(el=>el.onclick=()=>{const k=el.dataset.eq; if(me.eq[k]){selItem={it:me.eq[k],eq:k};renderBag();}});
@@ -4780,14 +4785,14 @@ function renderBag(){
   b.querySelectorAll('[data-mi]').forEach(el=>el.onclick=()=>{ const i=+el.dataset.mi, it=me.misc[i]; if(it){ if(it.isNew){ delete it.isNew; saveChar(); } selItem={it,misc:i}; renderBag(); } });
   { const ms=b.querySelector('[data-msort]'); if(ms)ms.onclick=()=>sortMisc(me); const mb=b.querySelector('#aMBulk'); if(mb)mb.onclick=()=>bulkSellMisc(me); }
 
-  enableDrag(b);
+  if(!gemSock)enableDrag(b);
   const asn=pq('#aSend'); if(asn)asn.onclick=()=>sendPick();
   const ase=pq('#aShardEx'); if(ase)ase.onclick=()=>(selItem&&shMat(selItem.it)==='ashard'?ashardModal():shardModal());
-  const ass=pq('#aShardSell'); if(ass)ass.onclick=()=>sellShard(); const ags=pq('#aGemSell'); if(ags)ags.onclick=()=>sellGem();
+  const ass=pq('#aShardSell'); if(ass)ass.onclick=()=>sellShard(); const ags=pq('#aGemSell'); if(ags)ags.onclick=()=>sellGem(); const agk=pq('#aGemSock'); if(agk)agk.onclick=()=>gemSockStart();
   const aen=pq('#aEnh'); if(aen)aen.onclick=()=>enhModal();
   const asx=pq('#aShEx'); if(asx)asx.onclick=()=>shExModal();
   const au=pq('#aUnequip'); if(au)au.onclick=()=>{unequip(selItem.eq);};
-  bagSelUi(b);
+  bagSelUi(b); gemSockUi(b);
 }
 /* ===== 가방 '📦 창고로' 선택 모드: 아이템을 여러 개 체크해서 공유보관함으로 한 번에 보내요 (장비품·기타 탭 모두, 잠근 아이템도 보낼 수 있음) ===== */
 const selOk=it=>!!it;   /* 잠근 아이템·조각도 보낼 수 있어요(파는 게 아니라 옮기는 것) — 잠금 표시는 그대로 유지 */
@@ -4946,7 +4951,7 @@ function lockSvg(on){ return on
   ?'<svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="#ffe27a" stroke-width="2.4" stroke-linecap="round"/><rect x="5" y="11" width="14" height="10" rx="2.2" fill="#ffd84a" stroke="#7a5a10" stroke-width="1"/><circle cx="12" cy="15.2" r="1.6" fill="#5a3f08"/><rect x="11.2" y="15.5" width="1.6" height="3.2" rx=".8" fill="#5a3f08"/></svg>'
   :'<svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><g transform="rotate(-42 8 11)"><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="#b9b2a4" stroke-width="2.4" stroke-linecap="round" transform="translate(0 -1.5)"/></g><rect x="5" y="11" width="14" height="10" rx="2.2" fill="#8a8478" stroke="#3a362e" stroke-width="1"/><circle cx="12" cy="15.2" r="1.6" fill="#2a2620"/><rect x="11.2" y="15.5" width="1.6" height="3.2" rx=".8" fill="#2a2620"/></svg>'; }
 function itemLines(it,opt){
-  if(isGem(it)){ const t=gemTier(it), gc=GEM_C[it.gk]||'#fff'; return `<div style="display:flex;gap:10px;align-items:center"><span style="position:relative;flex:none;display:flex"><img src="${itemIcon(it).url}" alt="" style="width:56px;height:56px;flex:none;background:#0a0807;border:1px solid ${gc};border-radius:8px">${opt&&opt.lk?`<button class="lkb${it.lock?' on':''}" data-lk="1" aria-label="${it.lock?'잠금 해제':'잠금'}">${lockSvg(!!it.lock)}</button>`:''}</span><div><div class="in" style="color:${gc}">${esc(it.name)}</div><div class="meta" style="color:#fff">아이템 레벨 ${it.ilvl|0} · ${GEM_TIER[t-1].n}</div></div></div><ul><li style="color:#afeeee">${esc(gemOptText(it))}</li></ul><div class="meta" style="margin:4px 0">장비의 빈 소켓에 박아서 쓰는 보석이에요. 판매가 ${GEM_TIER[t-1].g.toLocaleString()}G</div>`; }
+  if(isGem(it)){ const t=gemTier(it), gc=GEM_C[it.gk]||'#fff'; return `<div style="display:flex;gap:10px;align-items:center"><span style="position:relative;flex:none;display:flex"><img src="${itemIcon(it).url}" alt="" style="width:56px;height:56px;flex:none;background:#0a0807;border:1px solid ${gc};border-radius:8px">${opt&&opt.lk?`<button class="lkb${it.lock?' on':''}" data-lk="1" aria-label="${it.lock?'잠금 해제':'잠금'}">${lockSvg(!!it.lock)}</button>`:''}</span><div><div class="in" style="color:${gc}">${esc(it.name)}</div><div class="meta" style="color:#fff">아이템 레벨 ${it.ilvl|0} · ${GEM_TIER[t-1].n}</div></div></div><ul><li style="color:#afeeee">${esc(gemOptText(it))}</li>${opt&&opt.st?'<li style="color:#707070;list-style:none;font-size:12px">가방으로 옮긴 후 사용</li>':''}</ul><div class="meta" style="margin:4px 0">장비의 빈 소켓에 박아서 쓰는 보석이에요. 판매가 ${GEM_TIER[t-1].g.toLocaleString()}G</div>`; }
   if(isShard(it)) return `<div style="display:flex;gap:10px;align-items:center"><div style="width:56px;height:56px;flex:none;display:grid;place-items:center;background:#0a0807;border:1px solid ${RARC[4]};border-radius:8px">${shardOrb(it.n,32,shMat(it))}</div><div><div class="in" style="color:${RARC[4]}">${SHDK[shMat(it)].n}</div><div class="meta">수량 <b style="color:#fff">${it.n}</b> / ${SHARD_MAX} (한 칸 최대)</div></div></div><div class="meta" style="margin:6px 0">${SHDK[shMat(it)].src} 얻는 재료예요. ${SHDK[shMat(it)].N()}개로 ${SHDK[shMat(it)].to} 하나를 교환할 수 있어요. 개당 ${SHARD_SELL.toLocaleString()}G에 판매할 수도 있어요.</div>`;
   let s=`<div style="display:flex;gap:10px;align-items:center"><span style="position:relative;flex:none;display:flex"><img src="${itemIcon(it).url}" alt="" style="width:56px;height:56px;flex:none;background:#0a0807;border:1px solid ${RARC[it.rar]};border-radius:8px">${opt&&opt.lk?`<button class="lkb${it.lock?' on':''}" data-lk="1" aria-label="${it.lock?'잠금 해제':'잠금'}">${lockSvg(!!it.lock)}</button>`:''}</span><div><div class="in" style="color:${RARC[it.rar]}">${nameTag(it.enh>0?'+'+it.enh+' ':'',it.name,it)}</div><div class="meta" style="color:#fff">아이템 레벨 ${ilvOf(it)}${it.enh>0?` <span style="color:#ffd84a">(기본 ${it.ilvl} + 강화 ${it.enh})</span>`:''}</div>${ownTag(it)}<div class="meta">${reqHtml(it)}</div></div></div>`+lvCmp(it);
   const bt=baseText(it); if(bt)s+=`<div>${bt}</div>`;
@@ -5002,7 +5007,7 @@ function detailHtml(){
   sellAskIt=null;
   if(!selItem) return '';
   const it=selItem.it; let s=itemLines(it,isShard(it)?null:{lk:1});
-  if(isGem(it)){ const lk=`<button class="btn lkx" id="aLock" data-lk="1">${it.lock?'🔓 잠금 해제':'🔒 잠금'}</button>`, send=(G.titleSheet&&charIds().length>1)?'<button class="btn tlb" id="aSend"><span class="ti">📤</span> <span class="tx">보내기</span></button>':''; return s+`<div class="acts iact">${lk}<button class="btn tlb" id="aGemSell"${it.lock?' style="opacity:.45"':''}><span class="ti ph">💰</span><span class="tx">판매 ${GEM_TIER[gemTier(it)-1].g}G</span></button>${send}</div>`; }
+  if(isGem(it)){ const lk=`<button class="btn lkx" id="aLock" data-lk="1">${it.lock?'🔓 잠금 해제':'🔒 잠금'}</button>`, send=(G.titleSheet&&charIds().length>1)?'<button class="btn tlb" id="aSend"><span class="ti">📤</span> <span class="tx">보내기</span></button>':''; return s+`<div class="acts iact"><button class="btn primary" id="aGemSock">💎 소켓에 박기</button>${lk}<button class="btn tlb" id="aGemSell"${it.lock?' style="opacity:.45"':''}><span class="ti ph">💰</span><span class="tx">판매 ${GEM_TIER[gemTier(it)-1].g}G</span></button>${send}</div>`; }
   if(isShard(it)){ s+=`<div class="acts"><button class="btn primary" id="aShardEx">${SHDK[shMat(it)].e} ${SHDK[shMat(it)].to} 교환</button><button class="btn" id="aShardSell">💰 판매</button>${(G.titleSheet&&charIds().length>1)?'<button class="btn" id="aSend">📤 보내기</button>':''}</div>`; return s; }
   /* 폰 화면(560px 이하)에서는 장착/해제가 한 줄 전체, 강화·판매·보내기는 아이콘 타일 한 줄, 잠금은 아이콘 모서리 배지. 패드·PC는 예전 그대로 */
   const lk=`<button class="btn lkx" id="aLock" data-lk="1">${it.lock?'🔓 잠금 해제':'🔒 잠금'}</button>`,
@@ -5827,6 +5832,26 @@ function smithModal(st){
       if(tab==='dig'){ sel.sk=1; sel.gm=null; } else { delete sel.sk; delete sel.gm; }
       if(worn(sel)){ const hr=P.hp/P.D.maxHp, mr=P.mp/P.D.maxMp; P.D=derive(P); P.hp=P.D.maxHp*hr; P.mp=P.D.maxMp*mr; }
       saveSrc(P); sfx('rare'); toast(tab==='dig'?`🔨 소켓을 뚫었어요: ${sel.name}`:`♻ 소켓을 비웠어요${had?' (보석이 사라졌어요)':''}: ${sel.name}`,'#ffd84a'); smithModal({tab,sel:null,ask:false}); renderTown(); }; }); }
+/* ===== 소켓에 보석 박기: 가방 기타 탭에서 보석 → [소켓에 박기] → 장비품 화면에서 빈 소켓이 있는 장비를 고르면 확인 후 박혀요 (박은 보석은 되돌릴 수 없음, 소켓을 비우면 보석은 사라짐) ===== */
+const gemTgt=it=>!!(it&&it.sk&&!it.gm&&SMITH_SLOTS.includes(it.slot)&&!it.mat);
+const gemSockN=()=>me.inv.filter(gemTgt).length+Object.values(me.eq).filter(gemTgt).length;
+function gemApply(d,g){ const k=gemTier(g); switch(g.gk){ case 'ruby':d.ls+=k; break; case 'sapphire':d.mana+=40*k; break; case 'topaz':d.mf+=10*k; break; case 'emerald':d.ms+=3*k; break; case 'amethyst':d.crit+=k; break; case 'diamond':d.str+=k; d.dex+=k; d.vit+=k; d.ene+=k; break; } }
+function gemSockStart(){ const it=selItem&&selItem.it; if(!isGem(it)||selItem.store||selItem.misc===undefined||me.misc[selItem.misc]!==it)return;
+  if(!gemSockN()){ sheetToast('빈 소켓이 있는 장비가 없어요 · 마을의 장인의 집에서 소켓을 뚫어 주세요','#ffb259'); return; }
+  gemSock={it,ix:selItem.misc}; selItem=null; bagTab='eq'; rerender(); }
+const gemSockBar=()=>{ const g=gemSock.it; return `<div class="gsb"><span style="flex:1;min-width:0;font-size:12.5px;line-height:1.4">💎 <b style="color:${GEM_C[g.gk]}">${esc(g.name)}</b> <span style="color:#afeeee">${esc(gemOptText(g))}</span><br><span class="meta">박을 장비를 고르세요 (빈 소켓이 있는 장비만)</span></span><button class="btn sm" id="gsNo" style="flex:none;padding:8px 14px">취소</button></div>`; };
+function gemSockUi(b){ if(!gemSock)return; const g=gemSock.it;
+  if(me.misc[gemSock.ix]!==g){ gemSock=null; rerender(); return; }
+  b.querySelector('#gsNo').onclick=()=>{ gemSock=null; rerender(); };
+  b.querySelectorAll('[data-inv],[data-eq]').forEach(el=>{ const it=el.dataset.inv!==undefined?me.inv[+el.dataset.inv]:me.eq[el.dataset.eq], ok=gemTgt(it); el.classList.add(ok?'gtg':'gdim');
+    el.onclick=()=>{ if(!it)return; if(ok)gemSockConfirm(it); else toast(!SMITH_SLOTS.includes(it.slot)?'무기·갑옷·투구만 박을 수 있어요':it.sk?'이미 보석이 박혀 있어요':'소켓이 없는 장비예요','#ffb259'); }; }); }
+function gemSockConfirm(it){ const g=gemSock&&gemSock.it; if(!g||!gemTgt(it))return;
+  modal(`<h3>💎 소켓에 박기</h3><p style="margin:0 0 6px;font-size:13px"><b style="color:${GEM_C[g.gk]}">${esc(g.name)}</b> <span style="color:#afeeee">${esc(gemOptText(g))}</span></p><p style="margin:0 0 8px;font-size:13px">→ <b style="color:${RARC[it.rar]}">${esc(it.name)}</b>${Object.values(me.eq).includes(it)?' <span class="meta">(착용 중)</span>':''}</p><p class="meta" style="margin:0 0 10px;font-size:12px">박은 보석은 뺄 수 없어요. 장인의 집에서 소켓을 비우면 보석이 사라져요.</p><div class="row2"><button class="btn" id="gcNo">취소</button><button class="btn primary" id="gcGo">박기</button></div>`,m=>{
+    m.querySelector('#gcNo').onclick=closeModal;
+    m.querySelector('#gcGo').onclick=()=>{ if(!gemSock||me.misc[gemSock.ix]!==g||!gemTgt(it)){ closeModal(); return; }
+      const cp0=calcCP(me), worn=Object.values(me.eq).includes(it); it.gm={gk:g.gk,ilvl:g.ilvl}; me.misc[gemSock.ix]=null; gemSock=null; selItem=null;
+      if(worn){ const hr=me.hp/me.D.maxHp, mr=me.mp/me.D.maxMp; me.D=derive(me); me.hp=me.D.maxHp*hr; me.mp=me.D.maxMp*mr; buildSkills(); }
+      saveChar(); uiDirty=true; closeModal(); sfx('rare'); rerender(); if(worn)cpMsg(cp0,calcCP(me)); else sheetToast('💎 소켓에 박았어요'); }; }); }
 let townUTimer=0;
 function townPick(k){ townTick(k); const B=getTown()[k], D=TOWN_B[k], n=B.n|0; if(n<1){ townMsg=`아직 ${D.pot?'만들어진 물약이':'만들어진 조각이'} 없어요`; renderTown(); return; }
   if(!D.pot){ const got=townToStore(k); sfx('pick'); townMsg=got.put>0?`📦 ${D.e} ${SHDK[D.mat].n} ${got.put}개를 공유보관함으로 보냈어요${got.left>0?` (보관함이 가득 차서 ${got.left}개는 건물에 남아 있어요)`:''}`:'공유보관함이 가득 차서 보낼 수 없어요. 자리를 비워 주세요'; if(got.put>0)toast(`📦 공유보관함으로 ${SHDK[D.mat].n} ${got.put}개 이동!`,'#c9a0ff'); renderTown(); return; }   /* 조각은 캐릭터를 고르지 않고 바로 공유보관함으로 */
