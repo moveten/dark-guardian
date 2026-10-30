@@ -432,12 +432,13 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 #sheetTabs.selhide{display:none!important}
 #selBar{display:flex;gap:8px;padding:10px 12px calc(10px + env(safe-area-inset-bottom));border-top:1px solid var(--line2);background:var(--panel2)}
 #selBar[hidden]{display:none}
-#selBar button{flex:1;min-height:54px;padding:0 6px;border:1px solid var(--line2);border-radius:10px;background:#0f0b09;font-size:16px;font-weight:800;white-space:nowrap}
-#selBar button.go{flex:2.2;border-color:#7fe08a;color:#9ff0a8;background:rgba(40,110,60,.28)}
-#selBar button.go:disabled{opacity:.45;border-color:var(--line2);color:var(--mute);background:#0f0b09}
-.cell .ck{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:6px;border:2px solid #cfc3ad;background:rgba(0,0,0,.45);color:#fff;font:900 14px/16px sans-serif;text-align:center;z-index:3;pointer-events:none}
-.cell.pick{outline:3px solid #7fe08a;outline-offset:-3px;filter:brightness(1.15)}
-.cell.pick .ck{background:#2f9e4a;border-color:#2f9e4a}
+#selBar button{flex:1;min-height:54px;padding:0 6px;border:1px solid #4a3a28;border-radius:12px;background:#17110d;color:#e9dcc0;font-size:16px;font-weight:800;white-space:nowrap}
+#selBar button.go{flex:2.2;background:linear-gradient(#f0cf7a,#c08a28);border-color:#f6dd92;color:#2a1a05;box-shadow:0 0 14px rgba(230,191,106,.35)}
+#selBar button.go:disabled{opacity:.45;box-shadow:none}
+.cell .ck{display:none}
+.cell.pick .ck{display:block;position:absolute;top:-6px;right:-6px;width:19px;height:19px;border-radius:50%;background:linear-gradient(#f6dd92,#c8962f);color:#2a1a05;font:900 12px/19px sans-serif;text-align:center;z-index:3;pointer-events:none;box-shadow:0 1px 4px rgba(0,0,0,.65)}
+.sbody.selmode .cell:not(.pick):not(.nopick){filter:saturate(.8) brightness(.82)}
+.cell.pick{border-color:#e6bf6a!important;box-shadow:0 0 0 1px #e6bf6a,0 0 14px rgba(230,191,106,.6)!important}
 .cell.nopick{opacity:.5}
 #sheetTabs button[aria-pressed="true"]{border-color:var(--gold);color:var(--gold);background:var(--panel2)}
 .gold{font-size:12.5px;color:var(--gold);text-shadow:0 1px 3px #000;font-weight:700}
@@ -1159,7 +1160,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.2.0403</div>
+    <div class="ver" id="verT">v0.6.2.0404</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -4704,14 +4705,14 @@ function renderBag(){
 }
 /* ===== 가방 '📦 창고로' 선택 모드: 아이템을 여러 개 체크해서 공유보관함으로 한 번에 보내요 (잠근 아이템·조각 제외) ===== */
 const selOk=it=>!!(it&&!isShard(it)&&!it.lock);
-function bagSelUi(b){ const on=!!bagSel, tabs=$('#sheetTabs'), bar=$('#selBar'); tabs.classList.toggle('selhide',on); bar.hidden=!on; if(!on)return;
+function bagSelUi(b){ const on=!!bagSel, tabs=$('#sheetTabs'), bar=$('#selBar'); tabs.classList.toggle('selhide',on); bar.hidden=!on; b.classList.toggle('selmode',on); if(!on)return;
   for(const i of [...bagSel])if(!selOk(me.inv[i]))bagSel.delete(i);
   const cnt=()=>bagSel.size, free=()=>getStore().inv.filter(x=>!x).length;
-  const meta=b.querySelector('.bagtop .meta'); if(meta)meta.innerHTML=`✅ <b style="color:#7fe08a" id="selN">${cnt()}개 선택됨</b> <span style="color:#6b5f50">·</span> 🔒잠근 아이템·조각은 제외 <span style="color:#6b5f50">·</span> 보관함 빈 칸 ${free()}`;
+  const meta=b.querySelector('.bagtop .meta'); if(meta)meta.innerHTML=`<b style="color:#e6bf6a" id="selN">선택 ${cnt()}</b> <span style="color:#6b5f50">·</span> 잠근 아이템·조각은 제외 <span style="color:#6b5f50">·</span> 보관함 빈 칸 ${free()}`;
   const bb=b.querySelector('.bagbtns'); if(bb){ const st='flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap'; bb.innerHTML=`<button class="btn sm" style="${st}" id="selAll">전체 선택</button><button class="btn sm" style="${st}" id="selRar">등급별 선택 ▾</button><button class="btn sm" style="${st}" id="selClr">선택 해제</button>`; }
   const upd=()=>{ b.querySelectorAll('[data-inv]').forEach(el=>{ const i=+el.dataset.inv, it=me.inv[i]; if(!it)return; const ok=selOk(it), p=bagSel.has(i); el.classList.toggle('pick',p); el.classList.toggle('nopick',!ok);
       let k=el.querySelector('.ck'); if(ok){ if(!k){ k=document.createElement('i'); k.className='ck'; el.appendChild(k); } k.textContent=p?'✓':''; } else if(k)k.remove(); });
-    const n=b.querySelector('#selN'); if(n)n.textContent=cnt()+'개 선택됨'; const go=$('#selGo'); go.disabled=!cnt(); go.textContent=cnt()?`📦 ${cnt()}개 공유창고로 보내기`:'📦 공유창고로 보내기'; };
+    const n=b.querySelector('#selN'); if(n)n.textContent='선택 '+cnt(); const go=$('#selGo'); go.disabled=!cnt(); go.textContent=cnt()?`📦 ${cnt()}개 공유창고로 보내기`:'📦 공유창고로 보내기'; };
   b.querySelectorAll('[data-inv]').forEach(el=>el.onclick=()=>{ const i=+el.dataset.inv, it=me.inv[i]; if(!it)return;
     if(isShard(it)){ sheetToast('조각은 가방에서 아이템을 눌러 따로 보내 주세요','#ffb259'); return; }
     if(it.lock){ sheetToast('🔒 잠긴 아이템이에요. 잠금을 먼저 풀어 주세요','#ff8a7a'); return; }
