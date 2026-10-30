@@ -1161,7 +1161,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.2.0416</div>
+    <div class="ver" id="verT">v0.6.2.0417</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -5461,14 +5461,11 @@ const RENCOST=1000000;
 function nameCheat(){ return null; }   /* 비활성화됨 */
 function charMenu(id){
   const p=loadChar(id); if(!p)return;
-  modal(`<h3>${clsIc(p.cls,26)} ${esc(dispName(p))} <small style="color:var(--mute);font-weight:400">Lv ${p.lvl} · ${CLASSES[p.cls].n}</small></h3><div class="col"><button class="btn primary" id="cmGear">🎒 장비 · 능력치 정비</button><button class="btn" id="cmShop">🛒 상점</button><button class="btn" id="cmTut">📖 모험 안내</button><button class="btn" id="cmRen">✏️ 이름 변경 (${RENCOST.toLocaleString()}G)</button><button class="btn" id="cmDel">🗑️ 삭제</button><button class="btn" id="cmX">닫기</button></div>`,m=>{
-    m.querySelector('#cmGear').onclick=()=>{ closeModal(); openTitleSheet('bag'); };
-    m.querySelector('#cmShop').onclick=()=>{ closeModal(); openTitleSheet('shop'); };
-    m.querySelector('#cmTut').onclick=()=>{ closeModal(); tutModal(id); };
+  modal(`<h3>${clsIc(p.cls,26)} ${esc(dispName(p))}<br><small style="color:var(--mute);font-weight:400">Lv ${p.lvl} · ${CLASSES[p.cls].n}</small></h3><div class="col" style="gap:6px"><button class="btn" id="cmRen" style="min-height:38px;padding:7px 14px;font-size:14px">✏️ 이름 변경 (${RENCOST.toLocaleString()}G)</button><button class="btn" id="cmDel" style="min-height:38px;padding:7px 14px;font-size:14px">🗑️ 삭제</button><button class="btn" id="cmX" style="min-height:38px;padding:7px 14px;font-size:14px">닫기</button></div>`,m=>{
     m.querySelector('#cmRen').onclick=()=>{ if((p.gold|0)<RENCOST){ warn(`골드가 부족해요. 이름 변경은 ${RENCOST.toLocaleString()}G가 필요해요 (보유 ${(p.gold|0).toLocaleString()}G)`); return; }
       askName(`✏️ 이름 변경 · ${RENCOST.toLocaleString()}G`,'','✔ 변경',v=>{ const q=loadChar(id); if(!q)return; if((q.gold|0)<RENCOST)return; q.gold-=RENCOST; q.name=v; lsSet(charKey(q.id),JSON.stringify(packChar(q))); renderTitle(); toast(`이름을 '${v}'(으)로 바꿨어요 (-${RENCOST.toLocaleString()}G)`,'#ffd84a'); },id,v=>nameCheat(id,v)||(v===dispName(p)?'현재 이름과 같아요. 다른 이름을 입력해 주세요':null),{claim:id}); };
     m.querySelector('#cmDel').onclick=()=>modal(`<h3>🗑️ 삭제</h3><p style="margin:0 0 12px;font-size:14px">'${esc(dispName(p))}' (Lv ${p.lvl}) 캐릭터를 삭제할까요?<br>장비와 아이템도 함께 사라지며 되돌릴 수 없어요.</p><div class="row2"><button class="btn" id="dNo">취소</button><button class="btn primary" id="dYes">삭제</button></div>`,m2=>{ m2.querySelector('#dNo').onclick=closeModal; let dAsk=false; m2.querySelector('#dYes').onclick=()=>{ if(!dAsk){ dAsk=true; const y=m2.querySelector('#dYes'); y.textContent='⚠️ 정말 삭제 · 한 번 더 누르면 삭제'; y.style.background='#a62a22'; y.style.borderColor='#ff6a5a'; return; } deleteChar(id); closeModal(); renderTitle(); }; });
-    m.querySelector('#cmX').onclick=closeModal; });
+    m.querySelector('#cmX').onclick=closeModal; { const cd=m.querySelector('.card'); cd.style.width='220px'; cd.style.position='relative'; cd.style.top='-70px'; } });
 }
 /* 타이틀 메뉴 (예전 '설정') — 소리 · 우편함 · 클라우드 저장 · 패치노트 */
 function menuModal(){
