@@ -1159,7 +1159,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.2.0408</div>
+    <div class="ver" id="verT">v0.6.2.0409</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -4065,7 +4065,7 @@ const TUTS=[
  ],
  [ /* 1-5 */
   {t:'아이템 보내기',b:'장비는 내 계정의 다른 캐릭터에게 보낼 수 있어요. 타이틀 화면에서 캐릭터를 눌러 [장비 · 능력치 정비]를 열고, 아이템을 선택한 뒤 [📤 보내기]를 누르세요. (캐릭터가 둘 이상일 때) 여러 개는 아래 [📦 일괄보관]을 눌러 체크한 뒤 한 번에 공유보관함으로 보낼 수 있어요.',ok:1},
-  {t:'공유보관함 · 골드 보내기',b:'보낼 곳 목록에는 🗄 공유보관함도 있어요. 넣어 두면 어느 캐릭터로든 꺼낼 수 있어요. 가방 창 위쪽의 💰 골드를 누르면 골드도 다른 캐릭터에게 보낼 수 있어요.',ok:1},
+  {t:'공유보관함 · 골드 보내기',b:'보낼 곳 목록에는 🗄 공유보관함도 있어요. 넣어 두면 어느 캐릭터로든 꺼낼 수 있어요. 가방 창 위쪽의 💰 골드를 누르면 골드도 다른 캐릭터에게 보낼 수 있어요. 공유보관함 위쪽의 [보내기]는 보관함 골드를 캐릭터에게, [받기]는 캐릭터들의 골드를 보관함으로 가져와요 (일괄 받기 포함).',ok:1},
   {t:'우편함',b:'스테이지 클리어·이벤트 보상은 타이틀 메뉴의 ✉️ 우편함으로 와요. 편지 아래의 선물 아이콘을 눌러야 가방에 들어와요. 이 튜토리얼의 보상도 우편함으로 보내 드려요!',ok:1}
  ]
 ];
@@ -4635,7 +4635,8 @@ const tgLabel=(t,extra)=>t.k==='s'?`${STORE_IC} 공유보관함 <span style="col
 const tgName=t=>t.k==='s'?'공유보관함':dispName(t.o);
 function saveTarget(t){ if(t.k==='s')saveStore(); else if(t.o===me)saveChar(); else lsSet(charKey(t.o.id),JSON.stringify(packChar(t.o))); }
 const saveSrc=P=>{ if(P===STORE)saveStore(); else saveChar(); };
-function storeHead(){ const S=getStore(); $('#sheetT').innerHTML=`${STORE_IC} 공유보관함 <span id="goldSend" style="color:#ffd84a;margin-left:6px;cursor:pointer;border-bottom:1px dashed #ffd84a88">💰 ${(S.gold|0).toLocaleString('ko-KR')}G</span>`; }
+function storeHead(){ const S=getStore(); const pill='font-size:12px;font-weight:600;padding:4px 9px;border-radius:8px;border:1px solid #c9a24a;background:rgba(201,162,74,.12);color:#ffd84a;cursor:pointer;line-height:1.2;white-space:nowrap';
+  $('#sheetT').innerHTML=`${STORE_IC} 공유보관함 <span style="color:#ffd84a;margin-left:4px;font-size:15px">💰 ${(S.gold|0).toLocaleString('ko-KR')}G</span> <span style="display:inline-flex;gap:4px;margin-left:6px;vertical-align:2px"><button id="goldSend" style="${pill}">보내기</button><button id="goldTake" style="${pill}">받기</button></span>`; }
 function sortStore(mode){ const S=getStore(); shardRepack(S); let mx=0; for(const it of S.inv)if(it&&it.sat>mx)mx=it.sat; for(const it of S.inv)if(it&&!it.sat)it.sat=(mx+=.001);
   const byRar=(a,b)=>(b.rar|0)-(a.rar|0)||(SLOTO[a.slot]|0)-(SLOTO[b.slot]|0)||bk(a,b)||(b.ilvl|0)-(a.ilvl|0)||String(a.name).localeCompare(String(b.name));
   const its=S.inv.filter(Boolean);
@@ -4677,6 +4678,26 @@ function sendGold(){
       t.o.gold=(t.o.gold|0)+v; saveTarget(t); S.gold-=v; saveSrc(S); uiDirty=true; sfx('coin'); closeModal(); rerender(); toast(`${tgName(t)}에게 ${v.toLocaleString()}G를 보냈어요`,'#ffd84a'); }; });
 }
 document.addEventListener('click',e=>{ if(e.target.closest&&e.target.closest('#goldSend'))sendGold(); });
+
+/* 골드 받기: 캐릭터가 가진 골드를 공유보관함으로 가져와요 (캐릭터별 [받기] / 맨 위 [일괄 받기] → 확인 팝업). 온라인 플레이 중인 현재 캐릭터는 제외 */
+function takeGold(){
+  const S=getStore(), online=G.mode!=='solo'&&!G.titleSheet&&G.inGame;
+  const L=charIds().map(id=>{ const c=id===me.id?me:loadChar(id); return c?{k:'c',id,o:c,lock:c===me&&online}:null; }).filter(Boolean);
+  if(!L.length){ sheetToast('가져올 캐릭터가 없어요','#ff8a7a'); return; }
+  const rows=L.map(t=>{ const g=t.o.gold|0, off=t.lock||g<=0; return `<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;border:1px solid var(--line2);background:#14100d">${clsIc(t.o.cls,22)}<div style="flex:1;min-width:0"><div style="font-size:14px">${esc(dispName(t.o))} <span style="color:var(--mute);font-size:12px">Lv ${t.o.lvl}${t.lock?' · 플레이 중':''}</span></div><div style="color:#ffd84a;font-size:13px">💰 ${g.toLocaleString('ko-KR')}G</div></div><button class="btn sm gtOne" data-id="${t.id}" style="padding:6px 12px${off?';opacity:.4':''}"${off?' disabled':''}>받기</button></div>`; }).join('');
+  const tot=L.reduce((a,t)=>a+(t.lock?0:t.o.gold|0),0);
+  modal(`<h3>💰 골드 받기</h3><p class="meta" style="margin:0 0 8px">캐릭터가 가진 골드를 공유보관함으로 가져와요</p><button class="btn primary" id="gtAll" style="width:100%;margin-bottom:10px${tot<=0?';opacity:.5':''}"${tot<=0?' disabled':''}>⚡ 일괄 받기 (모든 캐릭터)</button><div class="col" style="gap:6px;margin-bottom:10px">${rows}</div><button class="btn" id="gtNo" style="width:100%">닫기</button>`,m=>{
+    m.querySelector('#gtNo').onclick=closeModal;
+    const done=(n,msg)=>{ saveStore(); uiDirty=true; sfx('coin'); rerender(); toast(msg,'#ffd84a'); };
+    m.querySelectorAll('.gtOne').forEach(b=>b.onclick=()=>{ const t=L.find(x=>x.id===b.dataset.id); if(!t||t.lock)return; const g=t.o.gold|0; if(g<=0)return;
+      t.o.gold=0; saveTarget(t); S.gold=(S.gold|0)+g; done(g,`${dispName(t.o)}에게서 ${g.toLocaleString('ko-KR')}G를 받았어요`); takeGold(); });
+    m.querySelector('#gtAll').onclick=()=>{ if(tot<=0)return;
+      modal(`<h3>💰 일괄 받기</h3><p style="margin:0 0 10px;font-size:14px;line-height:1.5">모든 캐릭터(${L.filter(t=>!t.lock).length}명)의 골드를 공유보관함으로 가져올까요?</p><div style="padding:10px;border-radius:8px;background:#0f0b09;border:1px solid var(--line2);text-align:center;margin-bottom:12px"><span style="color:var(--mute);font-size:12px">가져올 골드</span><br><b style="color:#ffd84a;font-size:20px">💰 ${tot.toLocaleString('ko-KR')}G</b></div><div class="row2"><button class="btn" id="gaNo">취소</button><button class="btn primary" id="gaGo">모두 받기</button></div>`,m2=>{
+        m2.querySelector('#gaNo').onclick=takeGold;
+        m2.querySelector('#gaGo').onclick=()=>{ let sum=0; for(const t of L){ if(t.lock)continue; const g=t.o.gold|0; if(g<=0)continue; t.o.gold=0; saveTarget(t); sum+=g; } S.gold=(S.gold|0)+sum; closeModal(); done(sum,`모든 캐릭터에게서 ${sum.toLocaleString('ko-KR')}G를 받았어요`); };
+      }); }; });
+}
+document.addEventListener('click',e=>{ if(e.target.closest&&e.target.closest('#goldTake'))takeGold(); });
 /* 인벤 한 줄 칸 수: 화면 너비에 맞춰 INV_COLS_MIN~INV_COLS_MAX 사이에서 자동 결정 (칸 크기 목표 INV_CELL px) */
 const INV_COLS_MIN=7, INV_COLS_MAX=10, INV_CELL=52;
 function fitInv(){ const b=$('#sheetB'); if(!b)return; const inv=b.querySelector('.inv'); if(!inv)return; const w=inv.clientWidth; if(!w)return;
