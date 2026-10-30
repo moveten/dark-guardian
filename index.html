@@ -1186,7 +1186,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.3.0427</div>
+    <div class="ver" id="verT">v0.6.3.0428</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1647,7 +1647,7 @@ Object.keys(UNQIMG).forEach(n=>unqImg({rar:/^그림자 /.test(n)?4:3,name:n}));
 function itemIcon(it){
   if(isGem(it)){ const ge=gemImg(it), key='G|'+it.gk+'|'+gemTier(it); let e=ge.ok?iconCache.get(key):null; if(e)return e;
     const cvs=document.createElement('canvas'); cvs.width=cvs.height=96; const c=cvs.getContext('2d');
-    if(ge.ok){ c.imageSmoothingQuality='high'; c.drawImage(ge.im,0,0,96,96); } else { c.fillStyle=GEM_C[it.gk]||'#ccc'; c.globalAlpha=.7; c.beginPath(); c.arc(48,48,20,0,6.283); c.fill(); }
+    if(ge.ok){ c.imageSmoothingQuality='high'; const gz=gemTier(it)===1?77:96, go=(96-gz)/2; c.drawImage(ge.im,go,go,gz,gz); }   /* 하급 보석은 20% 작게 */ else { c.fillStyle=GEM_C[it.gk]||'#ccc'; c.globalAlpha=.7; c.beginPath(); c.arc(48,48,20,0,6.283); c.fill(); }
     e={cv:cvs,url:cvs.toDataURL()}; if(ge.ok)iconCache.set(key,e); return e; }   /* 그림이 아직 안 왔으면 임시 구슬(저장 안 함) → 도착하면 다시 그려요 */
   const ue=unqImg(it), uk=ue&&ue.ok?'U|'+UNQIMG[it.name]:null;
   const key=uk||(it.slot+'|'+it.base+'|'+it.rar+(it.slot==='shield'?'|'+(it.oc||''):''));
@@ -2901,7 +2901,7 @@ function killMob(m){
   const tier=m.boss?2:m.elite?1:0, S=G.stg||STAGES[0], ilvl=m.boss?S.icap:Math.min(S.icap,Math.max(1,G.wave)+S.ilo);
   pushEv(['k',m.id,Math.round(m.x),Math.round(m.y),m.xp,tier,ilvl,m.type,m.lf||1]);
   onKill(Math.round(m.x),Math.round(m.y),m.xp,tier,ilvl,m.type,m.lf||1);
-  if(m.boss&&!MT[m.type].raid&&G.mode!=='guest'&&!G.gemDone&&/^\d-\d$/.test(S.id)){ G.gemDone=true; if(Math.random()<GEM_P){ const gt=Math.max(1,Math.min(3,Math.ceil((S.icap+1)/40))); pushEv(['gem',gt,Math.round(m.x),Math.round(m.y)]); gemDrop(gt,Math.round(m.x),Math.round(m.y)); } }   /* 스테이지 우두머리(1-1~3-5): 방장이 한 번만 30% 굴림 → 성공하면 모두에게 보석 하나씩 (종류는 각자 무작위) */
+  if(m.boss&&!MT[m.type].raid&&G.mode!=='guest'&&!G.gemDone&&/^\d-\d$/.test(S.id)){ G.gemDone=true; if(Math.random()<gemP(S)){ const gt=Math.max(1,Math.min(3,Math.ceil((S.icap+1)/40))); pushEv(['gem',gt,Math.round(m.x),Math.round(m.y)]); gemDrop(gt,Math.round(m.x),Math.round(m.y)); } }   /* 스테이지 우두머리(1-1~3-5): 방장이 한 번만 30% 굴림 → 성공하면 모두에게 보석 하나씩 (종류는 각자 무작위) */
   if(m.boss&&m.rk){ const alive=G.mobs.filter(o=>o.rk&&!o.dead); if(alive.length){ G.sib=(G.sib||0)+1; for(const o of alive){ o.dmg=o.dmg0*(1+.1*G.sib); spark(o.x,o.y,'#ff3a2a',40); }
       announce(`💢 ${MT[m.type].n} 쓰러짐! 남은 형제의 피해 +${10*G.sib}%`,'#ff6a5a'); banner('💢 형제의 분노',`남은 형제의 피해 +${10*G.sib}%`); pushEv(['sib',G.sib]); sfx('boss'); return; } }
   if(m.boss){ G.phase='clear'; if(!me.dead)voice('win'); G.clearT=CLEAR_T; me.god=Math.max(me.god||0,CLEAR_T+5); me.poison=0; if(!me.dead)addNum(me.x,me.y-50,'🛡️ 무적','#9fd0ff',true); for(const o of G.mobs) if(o!==m)o.dead=true; banner('우두머리 처치!',`${CLEAR_T}초 안에 전리품을 주워 보세요`); }
@@ -2946,7 +2946,7 @@ function dropItem(it,x,y){
   if(it.rar>=2&&G.inGame){ const gx=ground[ground.length-1].x, gy=ground[ground.length-1].y, col=RARC[it.rar]; efx.push({k:'ring',x:gx,y:gy+6,r0:6,r1:it.rar>=4?96:it.rar===3?70:46,t:0,life:it.rar>=3?.55:.4,col,w:it.rar>=3?7:4}); if(it.rar>=3){ efx.push({k:'ring',x:gx,y:gy+6,r0:4,r1:it.rar>=4?60:40,t:0,life:.4,col:'#fff4d0',w:3}); impact(gx,gy,it.rar>=4?'255,80,120':'255,190,80',it.rar>=4?150:110); } burst(gx,gy,col,it.rar>=4?26:it.rar===3?16:7,it.rar>=3?240:160); }   /* 레어 이상: 떨어질 때 충격파 고리와 빛 알갱이 */
   if(ground.length>90){const i=ground.findIndex(g=>g.it.rar===0&&!isGem(g.it)); ground.splice(i>=0?i:Math.max(0,ground.findIndex(g=>!isGem(g.it))),1); G.stCap=(G.stCap|0)+1;}
 }
-const GEM_P=.3;   /* 스테이지 우두머리 보석 드롭 확률 (고정) */
+const gemP=S=>{ const c=Math.max(1,(S&&S.icap)|0); return Math.min(30,Math.round(c/Math.ceil((c+1)/40)))/100; };   /* 스테이지 우두머리 보석 드롭 확률: min(30, round(아이템 레벨 상한 ÷ ceil((상한+1)÷40)))% */
 function gemDrop(tier,x,y){ const gk=pick(GEM_KINDS), it=mkGem(gk,tier); dropItem(it,x+rand(-26,26),y+rand(-26,26)); const g=ground[ground.length-1], col=GEM_C[gk];
   toast(`💎 ${it.name}이(가) 떨어졌어요!`,col,'drop'); sfx('rare'); if(G.inGame&&g){ efx.push({k:'ring',x:g.x,y:g.y+6,r0:6,r1:58,t:0,life:.5,col,w:5}); burst(g.x,g.y,col,10,200); } }
 function gainXp(xp){
@@ -3137,7 +3137,7 @@ function ashardModal(){ shardAdd(me,0,'ashard'); const n=shardCount(me,'ashard')
       const it=genHero(awKey(b.dataset.aw)); if(!it){ [me.misc,me.ashard]=JSON.parse(snap); return; } it.isNew=1; me.inv[i]=it; selItem=null; saveChar(); uiDirty=true; closeModal(); sfx('rare'); toast(`✦ 교환 완료: ${dn(it)}`,RARC[4]); if(sheetMode==='bag')renderBag(); }); }); }
 function synToggle(){ syLv=syLv>=0?-1:2; saveChar(); autoSynth(); if(sheetMode==='bag')renderBag(); const warn=syLv>=0&&asLv>=0&&asLv>=syLv; sheetToast&&sheetToast(syLv<0?'자동 합성을 껐어요':warn?`⚠️ 자동 판매(${RARN[asLv]} 이하)가 합성 등급을 먼저 팔아요`:`자동 합성 ON — 레어 이하 같은 등급 ${SYN_N}개가 모이면 합성돼요`,warn?'#ffb259':null); }
 const lootFull=it=>isGem(it)?me.misc.indexOf(null)<0:(me.inv.indexOf(null)<0&&!autoSellOk(it));   /* 줍기 불가(자리 없음): 보석은 기타 칸, 나머지는 장비 칸(자동 판매 대상은 예외) */
-function pickGem(g){ const it=g.it, i=me.misc.indexOf(null); if(i<0){ toast('기타 칸이 가득 찼어요','#e07060'); return; } it.isNew=1; me.misc[i]=it; ground.splice(ground.indexOf(g),1); sfx('pick'); toast(`💎 획득: ${it.name}`,GEM_C[it.gk]); saveChar(); uiDirty=true; if(sheetMode==='bag')renderBag(); }
+function pickGem(g){ const it=g.it, i=me.misc.indexOf(null); if(i<0){ toast('기타 칸이 가득 찼어요','#e07060'); return; } it.isNew=1; me.misc[i]=it; G.stGem=it; ground.splice(ground.indexOf(g),1); sfx('pick'); toast(`💎 획득: ${it.name}`,GEM_C[it.gk]); saveChar(); uiDirty=true; if(sheetMode==='bag')renderBag(); }
 function autoSellOk(it0){ if(isGem(it0))return false; if(!(asLv>=0&&it0.rar<=asLv&&!it0.lock))return false; const k0=it0.slot==='ring'?(!me.eq.ring1?'ring1':!me.eq.ring2?'ring2':null):(me.eq[it0.slot]?null:it0.slot); return !(k0&&canWear(it0)); }
 function pickUp(g){
   if(isGem(g.it)){ pickGem(g); return; }
@@ -4606,17 +4606,19 @@ function updateHud(){
 let sheetMode=null, selItem=null, gemSock=null, bagSel=null, bagSelM=null, bagTab='eq', storeTab='eq';
 const newCnt=p=>((p.inv||[]).concat(p.misc||[])).reduce((t,x)=>t+(x&&x.isNew?1:0),0);   /* bagSel: 가방 '📦 창고로' 선택 모드(고른 칸 번호 Set), 꺼져 있으면 null */
 let shopMsg='', buyMsg='', sellAskIt=null;
+const sortedNew=new Set();   /* 가방에서 정렬한 탭('eq'·'misc'): 가방을 닫거나 다른 탭으로 나갈 때 그 탭의 NEW 표시를 모두 지움 */
+function flushSortedNew(){ try{ if(!sortedNew.size||!me)return; if(sortedNew.has('eq'))(me.inv||[]).forEach(x=>{ if(x)delete x.isNew; }); if(sortedNew.has('misc'))(me.misc||[]).forEach(x=>{ if(x)delete x.isNew; }); sortedNew.clear(); if(me.id)saveChar(); uiDirty=true; }catch(e){ sortedNew.clear(); } }
 let sortFresh=true;   /* 가방을 연 뒤 첫 정렬 누름: 저장된 방식 그대로 정렬 → 그다음부터 방식을 바꿔 가며 정렬 */
-function openSheet(m){ sortFresh=true; bagTab='eq'; storeTab='eq'; if(!G.inGame&&!G.titleSheet)return; document.body.classList.add('shopen'); sheetMode=m; selItem=null; shopMsg=''; buyMsg=''; $('#sheet').hidden=false; if(G.inGame&&G.mode==='solo')G.paused=true; for(const k in held)held[k]=false; joy.active=false;
+function openSheet(m){ if(sheetMode==='bag'&&m!=='bag')flushSortedNew(); sortFresh=true; bagTab='eq'; storeTab='eq'; if(!G.inGame&&!G.titleSheet)return; document.body.classList.add('shopen'); sheetMode=m; selItem=null; shopMsg=''; buyMsg=''; $('#sheet').hidden=false; if(G.inGame&&G.mode==='solo')G.paused=true; for(const k in held)held[k]=false; joy.active=false;
   rerender(); $('#sheetB').scrollTop=0; }
 function rerender(){ if(sheetMode!=='bag'){ gemSock=null; bagSel=null; $('#sheetTabs').classList.remove('selhide'); $('#selBar').hidden=true; } $('#sheet').classList.toggle('isstore',sheetMode==='store'||sheetMode==='town'); if(sheetMode==='store')renderStore(); else if(sheetMode==='town')renderTown(); else if(sheetMode==='bag')renderBag(); else if(sheetMode==='stat'||sheetMode==='skill'||sheetMode==='passive')renderStat(); else if(sheetMode==='shop')renderShop(); else renderMenu(); }
 function markTabs(){ $('#itemPop').hidden=true; $('#ptsBar').hidden=true; const t=$('#sheetTabs'), cm=sheetMode==='passive'?'skill':sheetMode; t.hidden=sheetMode==='menu'||sheetMode==='store'||!!G.inGame; /* 게임 중에는 하단 독 하나만 사용 */ for(const [id,m] of [['bBag','bag'],['bStat','stat'],['bSkillT','skill'],['bMenu','menu']]){ const e=$('#'+id); if(e)e.setAttribute('aria-pressed',cm===m); } t.querySelectorAll('button').forEach(b=>{b.setAttribute('aria-pressed',b.dataset.m===cm); if(b.dataset.m==='shop')b.hidden=!!G.inGame&&sheetMode!=='shop'; const n=b.dataset.m==='bag'?newCnt(me):b.dataset.m==='stat'?(me.statPts|0):b.dataset.m==='skill'?(me.skillPts|0):0; let bd=b.querySelector('.pl'); if(!bd){bd=document.createElement('span');bd.className='pl';b.appendChild(bd);} bd.textContent=n>0?(b.dataset.m==='bag'?'NEW':'+'+n):''; bd.hidden=!(n>0); }); }
 $('#ptsBar').onclick=()=>{ sheetMode='stat'; selItem=null; rerender(); };
 $('#sheetTabs').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; if(b.id==='tSend'){ sheetMode='bag'; selItem=null; bagSel=new Set(); bagSelM=new Set(); rerender(); $('#sheetB').scrollTop=0; return; }   /* 📦 창고로: 가방을 열고 선택 모드로 */
-  if(b.dataset.m==='bag'&&sheetMode==='bag'&&newCnt(me)>0){ me.inv.concat(me.misc||[]).forEach(x=>{ if(x)delete x.isNew; }); saveChar(); uiDirty=true; selItem=null; rerender(); sheetToast('✨ NEW 표시를 모두 지웠어요'); return; }   /* 가방 탭을 한 번 더 누르면 NEW 표시 전부 지움 */
+  if(sheetMode==='bag'&&b.dataset.m!=='bag')flushSortedNew();   /* 가방에서 정렬한 탭의 NEW는 가방을 벗어날 때 지움 (가방 탭을 한 번 더 눌러도 아무 일 없음) */
   bagSel=null; if(b.dataset.m!==sheetMode){ bagTab='eq'; storeTab='eq'; } sheetMode=b.dataset.m; selItem=null; shopMsg=''; buyMsg=''; rerender(); $('#sheetB').scrollTop=0; });
 function openTitleSheet(m){ prepMe(); G.titleSheet=true; if(m==='store')STORE=loadStore(); openSheet(m); }
-function closeSheet(){ gemSock=null; try{ hoverHide(); }catch(e){} document.body.classList.remove('shopen'); for(const id of ['bBag','bStat','bSkillT','bMenu']){ const e=$('#'+id); if(e)e.setAttribute('aria-pressed','false'); } const was=G.titleSheet; if(me&&me.id&&sheetMode!=='town')saveChar(); sheetMode=null; bagSel=null; $('#sheetTabs').classList.remove('selhide'); $('#selBar').hidden=true; $('#sheet').hidden=true; G.paused=false; if(was){ G.titleSheet=false; renderClassCards(); } }
+function closeSheet(){ flushSortedNew(); gemSock=null; try{ hoverHide(); }catch(e){} document.body.classList.remove('shopen'); for(const id of ['bBag','bStat','bSkillT','bMenu']){ const e=$('#'+id); if(e)e.setAttribute('aria-pressed','false'); } const was=G.titleSheet; if(me&&me.id&&sheetMode!=='town')saveChar(); sheetMode=null; bagSel=null; $('#sheetTabs').classList.remove('selhide'); $('#selBar').hidden=true; $('#sheet').hidden=true; G.paused=false; if(was){ G.titleSheet=false; renderClassCards(); } }
 $('#sheetX').onclick=closeSheet;
 /* 마을 창이 열려 있을 때 창 밖(어두운 배경·하단 탭 등)을 누르면 그 버튼은 실행하지 않고 마을 창만 닫음 */
 document.addEventListener('click',e=>{ if(sheetMode!=='town'||$('#sheet').hidden)return; if(e.target.closest&&e.target.closest('.sheet,#modal,#itemPop'))return; e.preventDefault(); e.stopPropagation(); closeSheet(); },true);
@@ -4802,7 +4804,7 @@ function renderBag(){
   { const q=b.querySelector('#aBulk'); if(q)q.onclick=()=>bulkSell(); const aa=b.querySelector('#aAsh'); if(aa)aa.onclick=()=>ashardModal(); const a1=b.querySelector('#aAuto'); if(a1)a1.onclick=autoSellModal; const a2=b.querySelector('#aSyn'); if(a2)a2.onclick=synToggle; }
   b.querySelectorAll('[data-bt]').forEach(e=>e.onclick=()=>{ bagTab=e.dataset.bt; selItem=null; rerender(); $('#sheetB').scrollTop=0; });
   b.querySelectorAll('[data-mi]').forEach(el=>el.onclick=()=>{ const i=+el.dataset.mi, it=me.misc[i]; if(it){ if(it.isNew){ delete it.isNew; saveChar(); } selItem={it,misc:i}; renderBag(); } });
-  { const ms=b.querySelector('[data-msort]'); if(ms)ms.onclick=()=>sortMisc(me); const mb=b.querySelector('#aMBulk'); if(mb)mb.onclick=()=>bulkSellMisc(me); }
+  { const ms=b.querySelector('[data-msort]'); if(ms)ms.onclick=()=>{ sortedNew.add('misc'); sortMisc(me); }; const mb=b.querySelector('#aMBulk'); if(mb)mb.onclick=()=>bulkSellMisc(me); }
 
   if(!gemSock)enableDrag(b);
   const asn=pq('#aSend'); if(asn)asn.onclick=()=>sendPick();
@@ -4848,7 +4850,7 @@ const bk=(a,b)=>(a.base||'')<(b.base||'')?-1:(a.base||'')>(b.base||'')?1:0;
 /* 가방 정렬 버튼: 버튼 글자 = 지금 정렬 상태. 누르면 다음 방식(등급순 → Lv순 → 강화순 → 등급순…)으로 정렬하고 글자도 그 방식으로 (기기별 기억) */
 const SORTM=['rar','lv','enh'], SORTN=['등급순','Lv순','강화순'];
 const sortCur=()=>{ const v=+lsGet('dkdef2.sortC'); return (isNaN(v)?0:v)%3; };
-function sortInv(mode){ shardRepack(me); const its=me.inv.filter(Boolean);
+function sortInv(mode){ sortedNew.add('eq'); shardRepack(me); const its=me.inv.filter(Boolean);
   const rarC=(a,b)=>(b.rar|0)-(a.rar|0)||(SLOTO[a.slot]|0)-(SLOTO[b.slot]|0)||bk(a,b)||(b.ilvl|0)-(a.ilvl|0)||String(a.name).localeCompare(String(b.name));
   if(SORTM.includes(mode))lsSet('dkdef2.sortC',String(SORTM.indexOf(mode)));
   if(mode==='lv'||mode==='enh'){ its.sort(mode==='lv'?((a,b)=>(isShard(a)-isShard(b))||ilvOf(b)-ilvOf(a)||rarC(a,b)):((a,b)=>(isShard(a)-isShard(b))||((b.enh|0)-(a.enh|0))||rarC(a,b)));
@@ -5636,7 +5638,7 @@ function prepMe(){ me=loadChar(selId); me.D=derive(me); spawnMe(); }
 function resetWorld(){
   storyStop(); G.stZ=0; G.aim=null; G.lostBoss=false; G.castle=null; G.lostCastle=false; G.awz=null; G.awc=null; { const ac=$('#awCut'); if(ac)ac.classList.remove('on'); for(const q of ['#casAl','#casMs']){ const z=$(q); if(z)z.classList.remove('on'); } const hc=$('#hCastle'); if(hc)hc.classList.remove('atk'); } if(me){ me.erode=me.hblk=me.mblk=me.hbStrict=me.bleed=me.bleedN=0; me.hpLk=me.mpLk=null; }
   projs.length=zones.length=timers.length=parts.length=nums.length=ground.length=efx.length=0;
-  G.mobs=[]; G.mobMap=new Map(); G.gemDone=false; G.stKills=0; G.stDrops=0; G.stCap=0; G.runT=0; G.stGot=[0,0,0,0,0]; G.sib=0; G.endShown=false; G.clrDone=false; alClear(); G.stRev=0; G.stTaken=0; G.stGold0=me?(me.gold|0):0; G.paused=false; G.bt=null; G.shake=0;
+  G.mobs=[]; G.mobMap=new Map(); G.gemDone=false; G.stKills=0; G.stDrops=0; G.stCap=0; G.runT=0; G.stGot=[0,0,0,0,0]; G.stGem=null; G.sib=0; G.endShown=false; G.clrDone=false; alClear(); G.stRev=0; G.stTaken=0; G.stGold0=me?(me.gold|0):0; G.paused=false; G.bt=null; G.shake=0;
   hitQ=[]; fxQ=[]; lastAllyFx=-1; lastEv=-1; lastHit=0; G.guestDmg=0; G.fires=[]; G.freeRev=1; G.fireT=3; if(me){ me.rvGiven=0; me.seenRg=0; me.out=false; me.rvT=0; }
   spawnMe(); buildSkills(); show(null); G.inGame=true; closeSheet(); setAuto(me?me.au|0:0,true);   /* 이 캐릭터가 마지막으로 정한 AUTO 설정으로 시작 */
   { const sp=G.mode!=='guest'&&!!(me&&me.sp); setSpd(sp,{hint:sp}); }   /* 1.3배속도 마지막 설정으로 (협동 참가자는 방장 설정을 받을 때까지 1배) */
@@ -5817,17 +5819,17 @@ function townInfo(k){ const B=getTown()[k], D=TOWN_B[k], lv=B.lv|0, S=getStore()
     m.querySelector('#tiX').onclick=closeModal; const go=m.querySelector('#tiGo'); clearInterval(townUTimer);
     if(up)townUTimer=setInterval(()=>{ const e=m.querySelector('[data-ut]'); if(!e){ clearInterval(townUTimer); return; } if(townUpTick().length){ clearInterval(townUTimer); toast(`✅ ${D.n} Lv.${getTown()[k].lv} 업그레이드 완료!`,'#9fe08a'); try{ sfx('rare'); }catch(e2){} townInfo(k); renderTown(); return; } e.textContent=labLeft(B.u-Date.now()); },1000);
     if(go)go.onclick=()=>{ const r=townUp(k); closeModal(); if(r==='ok'){ sfx('rare'); townMsg=lv>=1&&um>0?`⏳ ${D.n} Lv.${lv+1} 업그레이드를 시작했어요 (${labTm(um)})`:lv<1?`🏗️ ${D.n}${(c=>c>=0&&c<=11171&&c%28?'을':'를')(D.n.charCodeAt(D.n.length-1)-44032)} 지었어요!`:`⬆ ${D.n} Lv.${lv+1} 업그레이드 완료!`; } else townMsg=r==='lack'?(GL?'공유보관함의 골드가 부족해요':'공유보관함의 조각이 부족해요'):r==='busy'?'이미 업그레이드 중이에요':'더 올릴 수 없어요'; renderTown(); }; }); }
-/* ===== 장인의 집(독립 건물, 도박장처럼 마을 가운데쪽): 30,000G로 건설(공유보관함 골드) → 소켓 뚫기 / 소켓 비우기. 장비(무기·갑옷·투구) 하나에 소켓은 1개까지.
+/* ===== 장인의 집(독립 건물, 도박장처럼 마을 가운데쪽): 30,000G로 건설(공유보관함 골드) → 소켓 뚫기 / 소켓 비우기(박힌 보석만 제거, 빈 소켓은 남음). 장비(무기·갑옷·투구) 하나에 소켓은 1개까지.
    소켓 데이터: it.sk=1(소켓 있음) · it.gm={gk,ilvl}(박힌 보석, 없으면 null). 비용 = ⌈아이템Lv/10⌉² × (뚫기 100 · 비우기 50) × (등급+1)² G ===== */
 const SMITH_BUILD=30000, SMITH_SLOTS=['weapon','armor','helm'];
 const smCost=(it,k)=>Math.pow(Math.max(1,Math.ceil((it.ilvl|0)/10)),2)*(k==='dig'?100:50)*Math.pow((it.rar|0)+1,2);
-const smOk=(it,k)=>!!(it&&SMITH_SLOTS.includes(it.slot)&&!it.mat&&(k==='dig'?!it.sk:!!it.sk));
+const smOk=(it,k)=>!!(it&&SMITH_SLOTS.includes(it.slot)&&!it.mat&&(k==='dig'?!it.sk:!!(it.sk&&it.gm)));   /* 비우기는 보석이 박힌 소켓에만 작동 */
 const SMITH_SVG='<svg viewBox="0 0 120 110"><ellipse cx="60" cy="102" rx="46" ry="6" fill="rgba(0,0,0,.4)"/><rect x="18" y="52" width="84" height="48" rx="3" fill="#4b4358"/><path d="M18 64H102M18 78H102M18 90H102M40 52V64M70 64V78M30 78V90M60 78V90M88 78V90" stroke="#35303f" stroke-width="1.2" fill="none"/><path d="M10 54L60 16L110 54Z" fill="#5a2f3a"/><path d="M10 54L60 16L110 54" fill="none" stroke="#8a4a56" stroke-width="2"/><rect x="82" y="14" width="12" height="26" fill="#3d3748"/><circle cx="90" cy="8" r="5" fill="rgba(200,190,220,.35)"/><circle cx="96" cy="2" r="4" fill="rgba(200,190,220,.22)"/><rect x="26" y="62" width="26" height="24" rx="2" fill="#1b1018"/><rect x="29" y="65" width="20" height="18" rx="1" fill="#ff8a2a"/><rect x="62" y="64" width="22" height="36" rx="11" fill="#2a1c14"/><path d="M90 88h20l4-4H94z" fill="#b7b1c4"/><path d="M92 88h16v6H92zM96 94h8v6H96z" fill="#8a8498"/></svg>';
 function smChar(){ if(!me||me.id!==selId)prepMe(); return me; }
 function smithBuild(){ const S=getStore(); if(S.smith)return 'max'; if((S.gold|0)<SMITH_BUILD)return 'lack'; S.gold-=SMITH_BUILD; S.smith=1; saveStore(); return 'ok'; }
 function smithModal(st){
   const S=getStore(), f=n=>n.toLocaleString('ko-KR'), gold=S.gold|0;
-  if(!S.smith){ modal(`<h3>🏗️ 장인의 집</h3><p style="margin:0 0 8px;font-size:13px;line-height:1.6">장인의 집을 지으면 장비에 <b>소켓</b>을 만들 수 있어요.<br>🔨 <b>소켓 뚫기</b>: 무기·갑옷·투구에 빈 소켓 1개<br>♻ <b>소켓 비우기</b>: 소켓을 없애요 (박힌 보석은 사라져요)</p><p class="meta" style="margin:0 0 8px;font-size:13px">건설 비용 <b style="color:#ffd34d">💰 ${f(SMITH_BUILD)}G</b> · 공유보관함 <b style="color:${gold>=SMITH_BUILD?'#9fe08a':'#ff8a7a'}">${f(gold)}G</b></p><div class="row2"><button class="btn" id="smX">닫기</button><button class="btn primary" id="smGo"${gold>=SMITH_BUILD?'':' disabled style="opacity:.5"'}>${gold>=SMITH_BUILD?'🏗️ 건설':'골드 부족'}</button></div>`,m=>{
+  if(!S.smith){ modal(`<h3>🏗️ 장인의 집</h3><p style="margin:0 0 8px;font-size:13px;line-height:1.6">장인의 집을 지으면 장비에 <b>소켓</b>을 만들 수 있어요.<br>🔨 <b>소켓 뚫기</b>: 무기·갑옷·투구에 빈 소켓 1개<br>♻ <b>소켓 비우기</b>: 박힌 보석을 빼요 (보석은 사라지고 빈 소켓이 남아요)</p><p class="meta" style="margin:0 0 8px;font-size:13px">건설 비용 <b style="color:#ffd34d">💰 ${f(SMITH_BUILD)}G</b> · 공유보관함 <b style="color:${gold>=SMITH_BUILD?'#9fe08a':'#ff8a7a'}">${f(gold)}G</b></p><div class="row2"><button class="btn" id="smX">닫기</button><button class="btn primary" id="smGo"${gold>=SMITH_BUILD?'':' disabled style="opacity:.5"'}>${gold>=SMITH_BUILD?'🏗️ 건설':'골드 부족'}</button></div>`,m=>{
       m.querySelector('#smX').onclick=closeModal; m.querySelector('#smGo').onclick=()=>{ const r=smithBuild(); closeModal(); if(r==='ok'){ sfx('rare'); townMsg='🏗️ 장인의 집을 지었어요! 눌러서 장비에 소켓을 만들어 보세요'; } else townMsg=r==='lack'?'공유보관함의 골드가 부족해요':'이미 지었어요'; renderTown(); }; }); return; }
   const P=smChar(); st=st||{tab:'dig',sel:null,ask:false};
   const worn=it=>Object.values(P.eq).includes(it);
@@ -5840,18 +5842,18 @@ function smithModal(st){
   const ask=st.ask&&can&&tab==='clr';
   modal(`<h3>🔨 장인의 집</h3><p class="meta" style="margin:0 0 6px;font-size:12px">공유보관함 골드 <b style="color:#ffd34d">💰 ${f(gold)}G</b> · ${esc(dispName(P))}의 가방·착용 장비</p><div style="display:flex;gap:4px;margin:0 0 8px">${tb('dig','소켓 뚫기')}${tb('clr','소켓 비우기')}</div>
     ${gear.length?`<div class="smg" style="display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin:0 0 8px;padding:3px;max-height:196px;overflow-y:auto;overscroll-behavior:contain">${cells}</div>`:'<p class="meta" style="margin:0 0 8px">무기·갑옷·투구가 없어요</p>'}
-    <div class="smd" style="border:1px solid var(--line2);border-radius:9px;background:#14100d;padding:8px 10px;font-size:12.5px;min-height:48px">${sel?itemLines(sel,tab==='dig'?{skNew:1}:{skTag:' <b style="color:#ff8a7a;font-size:11px">'+(sel.gm?'보석 사라짐':'없어짐')+'</b>'}):`<span class="meta">${tab==='dig'?'소켓을 뚫을 장비가 없어요 (이미 소켓이 있거나 대상이 아니에요)':'소켓이 있는 장비가 없어요'}</span>`}</div>
+    <div class="smd" style="border:1px solid var(--line2);border-radius:9px;background:#14100d;padding:8px 10px;font-size:12.5px;min-height:48px">${sel?itemLines(sel,tab==='dig'?{skNew:1}:{skTag:' <b style="color:#ff8a7a;font-size:11px">'+'보석 사라짐'+'</b>'}):`<span class="meta">${tab==='dig'?'소켓을 뚫을 장비가 없어요 (이미 소켓이 있거나 대상이 아니에요)':'보석이 박힌 장비가 없어요'}</span>`}</div>
     <div class="row2" style="margin-top:10px"><button class="btn" id="smX">닫기</button><button class="btn primary" id="smGo"${can?'':' disabled style="opacity:.5"'}${ask?' style="background:#a62a22;border-color:#ff6a5a;color:#fff"':''}>${!sel?'대상 없음':!can?'골드 부족 💰 '+f(cost)+'G':ask?'⚠️ 한 번 더 누르면 비워요':(tab==='dig'?'🔨 소켓 뚫기':'♻ 소켓 비우기')+' 💰 '+f(cost)+'G'}</button></div>`,m=>{
     m.classList.add('smm');
     m.querySelector('#smX').onclick=closeModal;
     m.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{ smithModal({tab:b.dataset.tab,sel:null,ask:false}); });
-    m.querySelectorAll('[data-gi]').forEach(d=>d.onclick=()=>{ const it=gear[+d.dataset.gi]; if(!it)return; if(!smOk(it,tab)){ toast(it.sk?'이미 소켓이 있어요':'소켓이 없어요','#ffb259'); return; } smithModal({tab,sel:it,ask:false}); });
+    m.querySelectorAll('[data-gi]').forEach(d=>d.onclick=()=>{ const it=gear[+d.dataset.gi]; if(!it)return; if(!smOk(it,tab)){ toast(tab==='dig'?'이미 소켓이 있어요':it.sk?'박힌 보석이 없어요 (빈 소켓)':'소켓이 없어요','#ffb259'); return; } smithModal({tab,sel:it,ask:false}); });
     const go=m.querySelector('#smGo'); if(go)go.onclick=()=>{ if(!sel||!smOk(sel,tab)||(S.gold|0)<cost)return;
       if(tab==='clr'&&!st.ask){ smithModal({tab,sel,ask:true}); return; }
       S.gold-=cost; saveStore(); const had=sel.gm;
-      if(tab==='dig'){ sel.sk=1; sel.gm=null; } else { delete sel.sk; delete sel.gm; }
+      if(tab==='dig'){ sel.sk=1; sel.gm=null; } else { sel.gm=null; }   /* 비우기: 보석만 제거, 빈 소켓은 남음 */
       if(worn(sel)){ const hr=P.hp/P.D.maxHp, mr=P.mp/P.D.maxMp; P.D=derive(P); P.hp=P.D.maxHp*hr; P.mp=P.D.maxMp*mr; }
-      saveSrc(P); sfx('rare'); toast(tab==='dig'?`🔨 소켓을 뚫었어요: ${sel.name}`:`♻ 소켓을 비웠어요${had?' (보석이 사라졌어요)':''}: ${sel.name}`,'#ffd84a'); smithModal({tab,sel:null,ask:false}); renderTown(); }; }); }
+      saveSrc(P); sfx('rare'); toast(tab==='dig'?`🔨 소켓을 뚫었어요: ${sel.name}`:`♻ 보석을 뺐어요 (보석은 사라지고 빈 소켓이 남았어요): ${sel.name}`,'#ffd84a'); smithModal({tab,sel:null,ask:false}); renderTown(); }; }); }
 /* ===== 소켓에 보석 박기: 가방 기타 탭에서 보석 → [소켓에 박기] → 장비품 화면에서 빈 소켓이 있는 장비를 고르면 확인 후 박혀요 (박은 보석은 되돌릴 수 없음, 소켓을 비우면 보석은 사라짐) ===== */
 const gemTgt=it=>!!(it&&it.sk&&!it.gm&&SMITH_SLOTS.includes(it.slot)&&!it.mat);
 const gemSockN=()=>me.inv.filter(gemTgt).length+Object.values(me.eq).filter(gemTgt).length;
@@ -5959,7 +5961,7 @@ function showEnd(msg){
     const top3=rows.slice(0,3).map((r,i)=>`<div class="dr"><span role="img" aria-label="${TRN[i]}트로피">${trophy(TRC[i])}</span><span class="nm">${esc(r.n)}</span><b>${f(r.v)}${tot>0?` <small>${Math.round(r.v/tot*100)}%</small>`:''}</b></div>`).join('')||'<div class="dr"><span class="nm">-</span></div>';
     const gd=G.stGold0===undefined?null:(me.gold|0)-(G.stGold0|0); const miss=Math.max(0,(G.stDrops|0)-gs), left=Math.min(miss,ground.length), lost=Math.min(miss-left,G.stCap|0), oth=miss-left-lost;
     const missLn=miss>0?`<div class="meta" style="margin-top:6px">못 주운 아이템 ${miss}개 — ${[left?`바닥에 남음 ${left}`:'',lost?`바닥에 90개가 넘어 사라짐 ${lost}`:'',oth?`기타 ${oth}`:''].filter(Boolean).join(' · ')}</div>`:'';
-    $('#endBox').innerHTML=`<div class="etabs" role="tablist"><button type="button" data-t="l" role="tab">📦 전리품</button><button type="button" data-t="r" role="tab">⚔️ 데미지 순위</button></div><div class="epg" id="epR"><div><div style="margin-bottom:6px">데미지 순위</div>${top3}</div><div class="tp"><span>⚔️ 총 데미지</span><b>${f(tot)}</b></div><div class="tp"><span>🩸 내가 받은 피해</span><b>${f(G.stTaken||0)}</b></div></div><div class="epg" id="epL">${gd!==null?`<div class="tp"><span>💰 골드 변화</span><b style="color:${gd>0?'#9fd18b':gd<0?'#ff8a7a':'var(--ink)'}">${gd>0?'+':gd<0?'−':''}${f(Math.abs(gd))}G</b></div>`:''}${(G.stRev|0)>0?`<div class="tp"><span>✨ 부활한 횟수</span><b>${G.stRev|0}회</b></div>`:''}${win&&!msg&&G.ccThis?`<div class="tp"><span>🏆 누적 클리어</span><b>${G.ccThis}회 <small>전체 ${G.ccAll}회</small></b></div>`:''}<div><div style="margin-bottom:6px">📦 획득한 아이템 <b style="display:inline;font-size:14px;color:var(--ink)">${gs}</b>개</div><div class="rr">${[0,1,2,3].concat(got[4]?[4]:[]).map(r=>`<div style="color:${RARC[r]}">${RARN[r]}<b>${got[r]|0}</b></div>`).join('')}</div>${missLn}</div></div>`;
+    $('#endBox').innerHTML=`<div class="etabs" role="tablist"><button type="button" data-t="l" role="tab">📦 전리품</button><button type="button" data-t="r" role="tab">⚔️ 데미지 순위</button></div><div class="epg" id="epR"><div><div style="margin-bottom:6px">데미지 순위</div>${top3}</div><div class="tp"><span>⚔️ 총 데미지</span><b>${f(tot)}</b></div><div class="tp"><span>🩸 내가 받은 피해</span><b>${f(G.stTaken||0)}</b></div></div><div class="epg" id="epL">${gd!==null?`<div class="tp"><span>💰 골드 변화</span><b style="color:${gd>0?'#9fd18b':gd<0?'#ff8a7a':'var(--ink)'}">${gd>0?'+':gd<0?'−':''}${f(Math.abs(gd))}G</b></div>`:''}${(G.stRev|0)>0?`<div class="tp"><span>✨ 부활한 횟수</span><b>${G.stRev|0}회</b></div>`:''}${win&&!msg&&G.ccThis?`<div class="tp"><span>🏆 누적 클리어</span><b>${G.ccThis}회 <small>전체 ${G.ccAll}회</small></b></div>`:''}<div><div style="margin-bottom:6px">📦 획득한 아이템 <b style="display:inline;font-size:14px;color:var(--ink)">${gs}</b>개${G.stGem?` <span style="font-size:13px">· <b style="display:inline;color:${GEM_C[G.stGem.gk]}">${esc(G.stGem.name)}</b> 획득</span>`:''}</div><div class="rr">${[0,1,2,3].concat(got[4]?[4]:[]).map(r=>`<div style="color:${RARC[r]}">${RARN[r]}<b>${got[r]|0}</b></div>`).join('')}</div>${missLn}</div></div>`;
     endTab('l'); }
   show('#sEnd'); try{ window.__endFx&&window.__endFx.show(win&&!msg); }catch(e){}
 }
