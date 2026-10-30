@@ -429,6 +429,16 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 #sheet .tier.lock .tdot{background:#4a4036}
 #sheetTabs .pl{position:absolute;top:-7px;right:6px;min-width:22px;height:20px;padding:0 5px;border-radius:10px;background:#d6401f;color:#fff;font-size:12px;font-weight:900;line-height:20px;box-shadow:0 0 8px rgba(255,90,50,.7)}
 #sheetTabs .pl[hidden]{display:none}
+#sheetTabs.selhide{display:none!important}
+#selBar{display:flex;gap:8px;padding:10px 12px calc(10px + env(safe-area-inset-bottom));border-top:1px solid var(--line2);background:var(--panel2)}
+#selBar[hidden]{display:none}
+#selBar button{flex:1;min-height:54px;padding:0 6px;border:1px solid var(--line2);border-radius:10px;background:#0f0b09;font-size:16px;font-weight:800;white-space:nowrap}
+#selBar button.go{flex:2.2;border-color:#7fe08a;color:#9ff0a8;background:rgba(40,110,60,.28)}
+#selBar button.go:disabled{opacity:.45;border-color:var(--line2);color:var(--mute);background:#0f0b09}
+.cell .ck{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:6px;border:2px solid #cfc3ad;background:rgba(0,0,0,.45);color:#fff;font:900 14px/16px sans-serif;text-align:center;z-index:3;pointer-events:none}
+.cell.pick{outline:3px solid #7fe08a;outline-offset:-3px;filter:brightness(1.15)}
+.cell.pick .ck{background:#2f9e4a;border-color:#2f9e4a}
+.cell.nopick{opacity:.5}
 #sheetTabs button[aria-pressed="true"]{border-color:var(--gold);color:var(--gold);background:var(--panel2)}
 .gold{font-size:12.5px;color:var(--gold);text-shadow:0 1px 3px #000;font-weight:700}
 .qb{position:absolute;left:50%;transform:translateX(-50%);bottom:max(14px,env(safe-area-inset-bottom));display:flex;gap:10px}
@@ -891,6 +901,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   .sheet{width:100%}
   .sheet header{padding:5px 12px}.sheet .x{width:32px;height:32px}
   #sheetTabs{padding:5px 12px;gap:6px}#sheetTabs button{min-height:34px;font-size:14px;border-radius:8px;display:flex;align-items:center;justify-content:center;gap:6px}
+  #selBar{padding:5px 12px;gap:6px}#selBar button{min-height:34px;font-size:14px;border-radius:8px}
   #sheetB.bag{overflow:hidden;padding:8px 10px;grid-template-rows:minmax(0,1fr);align-content:stretch}
   #sheetB.bag .bagtop{display:grid!important;grid-template-columns:232px minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr);column-gap:12px;row-gap:6px;height:100%;margin:0;padding:0;box-shadow:none;position:static}
   #sheetB.bag .bagtop .eq{grid-column:1;grid-row:1;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;justify-content:stretch}
@@ -1148,7 +1159,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.2.0401</div>
+    <div class="ver" id="verT">v0.6.2.0402</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1214,7 +1225,8 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
       <header><h2 id="sheetT">가방</h2><button class="x" id="sheetX" aria-label="닫기">×</button><i class="hxp" id="sheetXp" aria-hidden="true"><b></b></i></header>
       <button id="ptsBar" hidden></button>
       <div class="sbody" id="sheetB"></div>
-      <nav id="sheetTabs"><button data-m="bag">🎒 가방</button><button data-m="stat">📊 능력</button><button data-m="skill">✨ 스킬</button><button data-m="shop">🛒 상점</button></nav>
+      <nav id="sheetTabs"><button data-m="bag">🎒 가방</button><button data-m="stat">📊 능력</button><button data-m="skill">✨ 스킬</button><button id="tSend">📦 창고로</button></nav>
+      <div id="selBar" hidden><button id="selNo">취소</button><button id="selGo" class="go" disabled>📦 공유창고로 보내기</button></div>
     </div>
     <div class="ipop" id="itemPop" hidden></div>
   </div>
@@ -4051,7 +4063,7 @@ const TUTS=[
   {t:'상점',b:'물약·부활 아이템·장비는 타이틀 화면의 캐릭터 메뉴 → 🛒 상점에서 사고팔 수 있어요. 스테이지 안에서는 상점을 쓸 수 없고, 대신 마을 가운데에서 쉬어 가요.',ok:1}
  ],
  [ /* 1-5 */
-  {t:'아이템 보내기',b:'장비는 내 계정의 다른 캐릭터에게 보낼 수 있어요. 타이틀 화면에서 캐릭터를 눌러 [장비 · 능력치 정비]를 열고, 아이템을 선택한 뒤 [📤 보내기]를 누르세요. (캐릭터가 둘 이상일 때)',ok:1},
+  {t:'아이템 보내기',b:'장비는 내 계정의 다른 캐릭터에게 보낼 수 있어요. 타이틀 화면에서 캐릭터를 눌러 [장비 · 능력치 정비]를 열고, 아이템을 선택한 뒤 [📤 보내기]를 누르세요. (캐릭터가 둘 이상일 때) 여러 개는 아래 [📦 창고로]를 눌러 체크한 뒤 한 번에 공유보관함으로 보낼 수 있어요.',ok:1},
   {t:'공유보관함 · 골드 보내기',b:'보낼 곳 목록에는 🗄 공유보관함도 있어요. 넣어 두면 어느 캐릭터로든 꺼낼 수 있어요. 가방 창 위쪽의 💰 골드를 누르면 골드도 다른 캐릭터에게 보낼 수 있어요.',ok:1},
   {t:'우편함',b:'스테이지 클리어·이벤트 보상은 타이틀 메뉴의 ✉️ 우편함으로 와요. 편지 아래의 선물 아이콘을 눌러야 가방에 들어와요. 이 튜토리얼의 보상도 우편함으로 보내 드려요!',ok:1}
  ]
@@ -4534,17 +4546,18 @@ function updateHud(){
 }
 
 /* ================= SHEETS ================= */
-let sheetMode=null, selItem=null;
+let sheetMode=null, selItem=null, bagSel=null;   /* bagSel: 가방 '📦 창고로' 선택 모드(고른 칸 번호 Set), 꺼져 있으면 null */
 let shopMsg='', buyMsg='', sellAskIt=null;
 let sortFresh=true;   /* 가방을 연 뒤 첫 정렬 누름: 저장된 방식 그대로 정렬 → 그다음부터 방식을 바꿔 가며 정렬 */
 function openSheet(m){ sortFresh=true; if(!G.inGame&&!G.titleSheet)return; document.body.classList.add('shopen'); sheetMode=m; selItem=null; shopMsg=''; buyMsg=''; $('#sheet').hidden=false; if(G.inGame&&G.mode==='solo')G.paused=true; for(const k in held)held[k]=false; joy.active=false;
   rerender(); $('#sheetB').scrollTop=0; }
-function rerender(){ $('#sheet').classList.toggle('isstore',sheetMode==='store'||sheetMode==='town'); if(sheetMode==='store')renderStore(); else if(sheetMode==='town')renderTown(); else if(sheetMode==='bag')renderBag(); else if(sheetMode==='stat'||sheetMode==='skill'||sheetMode==='passive')renderStat(); else if(sheetMode==='shop')renderShop(); else renderMenu(); }
+function rerender(){ if(sheetMode!=='bag'){ bagSel=null; $('#sheetTabs').classList.remove('selhide'); $('#selBar').hidden=true; } $('#sheet').classList.toggle('isstore',sheetMode==='store'||sheetMode==='town'); if(sheetMode==='store')renderStore(); else if(sheetMode==='town')renderTown(); else if(sheetMode==='bag')renderBag(); else if(sheetMode==='stat'||sheetMode==='skill'||sheetMode==='passive')renderStat(); else if(sheetMode==='shop')renderShop(); else renderMenu(); }
 function markTabs(){ $('#itemPop').hidden=true; $('#ptsBar').hidden=true; const t=$('#sheetTabs'), cm=sheetMode==='passive'?'skill':sheetMode; t.hidden=sheetMode==='menu'||sheetMode==='store'||!!G.inGame; /* 게임 중에는 하단 독 하나만 사용 */ for(const [id,m] of [['bBag','bag'],['bStat','stat'],['bSkillT','skill'],['bMenu','menu']]){ const e=$('#'+id); if(e)e.setAttribute('aria-pressed',cm===m); } t.querySelectorAll('button').forEach(b=>{b.setAttribute('aria-pressed',b.dataset.m===cm); if(b.dataset.m==='shop')b.hidden=!!G.inGame&&sheetMode!=='shop'; const n=b.dataset.m==='bag'?me.inv.reduce((t,x)=>t+(x&&x.isNew?1:0),0):b.dataset.m==='stat'?(me.statPts|0):b.dataset.m==='skill'?(me.skillPts|0):0; let bd=b.querySelector('.pl'); if(!bd){bd=document.createElement('span');bd.className='pl';b.appendChild(bd);} bd.textContent=n>0?(b.dataset.m==='bag'?'NEW':'+'+n):''; bd.hidden=!(n>0); }); }
 $('#ptsBar').onclick=()=>{ sheetMode='stat'; selItem=null; rerender(); };
-$('#sheetTabs').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; sheetMode=b.dataset.m; selItem=null; shopMsg=''; buyMsg=''; rerender(); $('#sheetB').scrollTop=0; });
+$('#sheetTabs').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; if(b.id==='tSend'){ sheetMode='bag'; selItem=null; bagSel=new Set(); rerender(); $('#sheetB').scrollTop=0; return; }   /* 📦 창고로: 가방을 열고 선택 모드로 */
+  bagSel=null; sheetMode=b.dataset.m; selItem=null; shopMsg=''; buyMsg=''; rerender(); $('#sheetB').scrollTop=0; });
 function openTitleSheet(m){ prepMe(); G.titleSheet=true; if(m==='store')STORE=loadStore(); openSheet(m); }
-function closeSheet(){ try{ hoverHide(); }catch(e){} document.body.classList.remove('shopen'); for(const id of ['bBag','bStat','bSkillT','bMenu']){ const e=$('#'+id); if(e)e.setAttribute('aria-pressed','false'); } const was=G.titleSheet; if(me&&me.id&&sheetMode!=='town')saveChar(); sheetMode=null; $('#sheet').hidden=true; G.paused=false; if(was){ G.titleSheet=false; renderClassCards(); } }
+function closeSheet(){ try{ hoverHide(); }catch(e){} document.body.classList.remove('shopen'); for(const id of ['bBag','bStat','bSkillT','bMenu']){ const e=$('#'+id); if(e)e.setAttribute('aria-pressed','false'); } const was=G.titleSheet; if(me&&me.id&&sheetMode!=='town')saveChar(); sheetMode=null; bagSel=null; $('#sheetTabs').classList.remove('selhide'); $('#selBar').hidden=true; $('#sheet').hidden=true; G.paused=false; if(was){ G.titleSheet=false; renderClassCards(); } }
 $('#sheetX').onclick=closeSheet;
 /* 마을 창이 열려 있을 때 창 밖(어두운 배경·하단 탭 등)을 누르면 그 버튼은 실행하지 않고 마을 창만 닫음 */
 document.addEventListener('click',e=>{ if(sheetMode!=='town'||$('#sheet').hidden)return; if(e.target.closest&&e.target.closest('.sheet,#modal,#itemPop'))return; e.preventDefault(); e.stopPropagation(); closeSheet(); },true);
@@ -4686,7 +4699,35 @@ function renderBag(){
   const aen=pq('#aEnh'); if(aen)aen.onclick=()=>enhModal();
   const asx=pq('#aShEx'); if(asx)asx.onclick=()=>shExModal();
   const au=pq('#aUnequip'); if(au)au.onclick=()=>{unequip(selItem.eq);};
+  bagSelUi(b);
 }
+/* ===== 가방 '📦 창고로' 선택 모드: 아이템을 여러 개 체크해서 공유보관함으로 한 번에 보내요 (잠근 아이템·조각 제외) ===== */
+const selOk=it=>!!(it&&!isShard(it)&&!it.lock);
+function bagSelUi(b){ const on=!!bagSel, tabs=$('#sheetTabs'), bar=$('#selBar'); tabs.classList.toggle('selhide',on); bar.hidden=!on; if(!on)return;
+  for(const i of [...bagSel])if(!selOk(me.inv[i]))bagSel.delete(i);
+  const cnt=()=>bagSel.size, free=()=>getStore().inv.filter(x=>!x).length;
+  const meta=b.querySelector('.bagtop .meta'); if(meta)meta.innerHTML=`✅ <b style="color:#7fe08a" id="selN">${cnt()}개 선택됨</b> <span style="color:#6b5f50">·</span> 🔒잠근 아이템·조각은 제외 <span style="color:#6b5f50">·</span> 보관함 빈 칸 ${free()}`;
+  const bb=b.querySelector('.bagbtns'); if(bb){ const st='flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap'; bb.innerHTML=`<button class="btn sm" style="${st}" id="selAll">전체 선택</button><button class="btn sm" style="${st}" id="selRar">등급별 선택 ▾</button><button class="btn sm" style="${st}" id="selClr">선택 해제</button>`; }
+  const upd=()=>{ b.querySelectorAll('[data-inv]').forEach(el=>{ const i=+el.dataset.inv, it=me.inv[i]; if(!it)return; const ok=selOk(it), p=bagSel.has(i); el.classList.toggle('pick',p); el.classList.toggle('nopick',!ok);
+      let k=el.querySelector('.ck'); if(ok){ if(!k){ k=document.createElement('i'); k.className='ck'; el.appendChild(k); } k.textContent=p?'✓':''; } else if(k)k.remove(); });
+    const n=b.querySelector('#selN'); if(n)n.textContent=cnt()+'개 선택됨'; const go=$('#selGo'); go.disabled=!cnt(); go.textContent=cnt()?`📦 ${cnt()}개 공유창고로 보내기`:'📦 공유창고로 보내기'; };
+  b.querySelectorAll('[data-inv]').forEach(el=>el.onclick=()=>{ const i=+el.dataset.inv, it=me.inv[i]; if(!it)return;
+    if(isShard(it)){ sheetToast('조각은 가방에서 아이템을 눌러 따로 보내 주세요','#ffb259'); return; }
+    if(it.lock){ sheetToast('🔒 잠긴 아이템이에요. 잠금을 먼저 풀어 주세요','#ff8a7a'); return; }
+    if(bagSel.has(i))bagSel.delete(i); else bagSel.add(i); upd(); });
+  b.querySelectorAll('[data-eq]').forEach(el=>el.onclick=null);
+  b.querySelector('#selAll').onclick=()=>{ me.inv.forEach((it,i)=>{ if(selOk(it))bagSel.add(i); }); upd(); };
+  b.querySelector('#selClr').onclick=()=>{ bagSel.clear(); upd(); };
+  b.querySelector('#selRar').onclick=()=>{ const c=r=>me.inv.filter(it=>selOk(it)&&it.rar===r).length;
+    modal(`<h3>등급별 선택</h3><p class="meta" style="margin:0 0 8px">등급을 누르면 그 등급 아이템이 모두 선택돼요. 이미 모두 선택돼 있으면 해제돼요.</p><div class="col">${[0,1,2,3].map(r=>`<button class="btn" data-r="${r}" ${c(r)?'':'disabled'} style="text-align:left;display:flex;justify-content:space-between"><span style="color:${RARC[r]};font-weight:700">${RARN[r]}</span><span style="color:var(--mute)">${c(r)}개</span></button>`).join('')}<button class="btn" id="srX">닫기</button></div>`,m=>{
+      m.querySelector('#srX').onclick=closeModal;
+      m.querySelectorAll('[data-r]').forEach(x=>x.onclick=()=>{ const r=+x.dataset.r, ix=[]; me.inv.forEach((it,i)=>{ if(selOk(it)&&it.rar===r)ix.push(i); }); const all=ix.every(i=>bagSel.has(i)); ix.forEach(i=>all?bagSel.delete(i):bagSel.add(i)); closeModal(); upd(); }); }); };
+  $('#selNo').onclick=()=>{ bagSel=null; rerender(); };
+  $('#selGo').onclick=()=>{ if(!cnt())return; const S=getStore(); let n=0, left=0;
+    for(const i of [...bagSel].sort((a,c)=>a-c)){ const it=me.inv[i]; if(!selOk(it))continue; const j=S.inv.indexOf(null); if(j<0){ left++; continue; } me.inv[i]=null; delete it.isNew; S.inv[j]=stamp(it); n++; }
+    if(!n){ sheetToast('공유보관함이 가득 찼어요','#ff8a7a'); return; }
+    saveStore(); saveChar(); selItem=null; bagSel=null; sfx('pick'); rerender(); toast(left?`공유보관함에 ${n}개 보냈어요 (가득 차서 ${left}개는 남았어요)`:`공유보관함에 ${n}개 보냈어요`,'#9fd18b'); };
+  upd(); }
 const SLOTO={weapon:0,shield:1,helm:2,armor:3,amulet:4,ring:5};
 const bk=(a,b)=>(a.base||'')<(b.base||'')?-1:(a.base||'')>(b.base||'')?1:0;
 /* 가방 정렬 버튼: 버튼 글자 = 지금 정렬 상태. 누르면 다음 방식(등급순 → Lv순 → 강화순 → 등급순…)으로 정렬하고 글자도 그 방식으로 (기기별 기억) */
