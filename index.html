@@ -1184,7 +1184,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.3.0424</div>
+    <div class="ver" id="verT">v0.6.3.0425</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -5837,9 +5837,10 @@ function smithModal(st){
   const tb=(k,t)=>`<button class="btn sm" data-tab="${k}" style="flex:1;${tab===k?'border-color:#c9a24a;background:rgba(201,162,74,.18);font-weight:800':''}">${t}</button>`;
   const ask=st.ask&&can&&tab==='clr';
   modal(`<h3>🔨 장인의 집</h3><p class="meta" style="margin:0 0 6px;font-size:12px">공유보관함 골드 <b style="color:#ffd34d">💰 ${f(gold)}G</b> · ${esc(dispName(P))}의 가방·착용 장비</p><div style="display:flex;gap:4px;margin:0 0 8px">${tb('dig','소켓 뚫기')}${tb('clr','소켓 비우기')}</div>
-    ${gear.length?`<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin:0 0 8px;padding:3px;max-height:196px;overflow-y:auto;overscroll-behavior:contain">${cells}</div>`:'<p class="meta" style="margin:0 0 8px">무기·갑옷·투구가 없어요</p>'}
-    <div style="border:1px solid var(--line2);border-radius:9px;background:#14100d;padding:8px 10px;font-size:12.5px;min-height:48px">${sel?itemLines(sel,tab==='dig'?{skNew:1}:{skTag:' <b style="color:#ff8a7a;font-size:11px">'+(sel.gm?'보석 사라짐':'없어짐')+'</b>'}):`<span class="meta">${tab==='dig'?'소켓을 뚫을 장비가 없어요 (이미 소켓이 있거나 대상이 아니에요)':'소켓이 있는 장비가 없어요'}</span>`}</div>
+    ${gear.length?`<div class="smg" style="display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin:0 0 8px;padding:3px;max-height:196px;overflow-y:auto;overscroll-behavior:contain">${cells}</div>`:'<p class="meta" style="margin:0 0 8px">무기·갑옷·투구가 없어요</p>'}
+    <div class="smd" style="border:1px solid var(--line2);border-radius:9px;background:#14100d;padding:8px 10px;font-size:12.5px;min-height:48px">${sel?itemLines(sel,tab==='dig'?{skNew:1}:{skTag:' <b style="color:#ff8a7a;font-size:11px">'+(sel.gm?'보석 사라짐':'없어짐')+'</b>'}):`<span class="meta">${tab==='dig'?'소켓을 뚫을 장비가 없어요 (이미 소켓이 있거나 대상이 아니에요)':'소켓이 있는 장비가 없어요'}</span>`}</div>
     <div class="row2" style="margin-top:10px"><button class="btn" id="smX">닫기</button><button class="btn primary" id="smGo"${can?'':' disabled style="opacity:.5"'}${ask?' style="background:#a62a22;border-color:#ff6a5a;color:#fff"':''}>${!sel?'대상 없음':!can?'골드 부족 💰 '+f(cost)+'G':ask?'⚠️ 한 번 더 누르면 비워요':(tab==='dig'?'🔨 소켓 뚫기':'♻ 소켓 비우기')+' 💰 '+f(cost)+'G'}</button></div>`,m=>{
+    m.classList.add('smm');
     m.querySelector('#smX').onclick=closeModal;
     m.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{ smithModal({tab:b.dataset.tab,sel:null,ask:false}); });
     m.querySelectorAll('[data-gi]').forEach(d=>d.onclick=()=>{ const it=gear[+d.dataset.gi]; if(!it)return; if(!smOk(it,tab)){ toast(it.sk?'이미 소켓이 있어요':'소켓이 없어요','#ffb259'); return; } smithModal({tab,sel:it,ask:false}); });
