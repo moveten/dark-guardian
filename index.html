@@ -1159,7 +1159,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.2.0405</div>
+    <div class="ver" id="verT">v0.6.2.0406</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1225,7 +1225,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
       <header><h2 id="sheetT">가방</h2><button class="x" id="sheetX" aria-label="닫기">×</button><i class="hxp" id="sheetXp" aria-hidden="true"><b></b></i></header>
       <button id="ptsBar" hidden></button>
       <div class="sbody" id="sheetB"></div>
-      <nav id="sheetTabs"><button data-m="bag">🎒 가방</button><button data-m="stat">📊 능력</button><button data-m="skill">✨ 스킬</button><button id="tSend">📦 창고로</button></nav>
+      <nav id="sheetTabs"><button data-m="bag">🎒 가방</button><button data-m="stat">📊 능력</button><button data-m="skill">✨ 스킬</button><button id="tSend">📦 일괄보관</button></nav>
       <div id="selBar" hidden><button id="selNo">취소</button><button id="selGo" class="go" disabled>📦 공유창고로 보내기</button></div>
     </div>
     <div class="ipop" id="itemPop" hidden></div>
@@ -4064,7 +4064,7 @@ const TUTS=[
   {t:'상점',b:'물약·부활 아이템·장비는 타이틀 화면의 캐릭터 메뉴 → 🛒 상점에서 사고팔 수 있어요. 스테이지 안에서는 상점을 쓸 수 없고, 대신 마을 가운데에서 쉬어 가요.',ok:1}
  ],
  [ /* 1-5 */
-  {t:'아이템 보내기',b:'장비는 내 계정의 다른 캐릭터에게 보낼 수 있어요. 타이틀 화면에서 캐릭터를 눌러 [장비 · 능력치 정비]를 열고, 아이템을 선택한 뒤 [📤 보내기]를 누르세요. (캐릭터가 둘 이상일 때) 여러 개는 아래 [📦 창고로]를 눌러 체크한 뒤 한 번에 공유보관함으로 보낼 수 있어요.',ok:1},
+  {t:'아이템 보내기',b:'장비는 내 계정의 다른 캐릭터에게 보낼 수 있어요. 타이틀 화면에서 캐릭터를 눌러 [장비 · 능력치 정비]를 열고, 아이템을 선택한 뒤 [📤 보내기]를 누르세요. (캐릭터가 둘 이상일 때) 여러 개는 아래 [📦 일괄보관]을 눌러 체크한 뒤 한 번에 공유보관함으로 보낼 수 있어요.',ok:1},
   {t:'공유보관함 · 골드 보내기',b:'보낼 곳 목록에는 🗄 공유보관함도 있어요. 넣어 두면 어느 캐릭터로든 꺼낼 수 있어요. 가방 창 위쪽의 💰 골드를 누르면 골드도 다른 캐릭터에게 보낼 수 있어요.',ok:1},
   {t:'우편함',b:'스테이지 클리어·이벤트 보상은 타이틀 메뉴의 ✉️ 우편함으로 와요. 편지 아래의 선물 아이콘을 눌러야 가방에 들어와요. 이 튜토리얼의 보상도 우편함으로 보내 드려요!',ok:1}
  ]
@@ -4562,7 +4562,10 @@ function closeSheet(){ try{ hoverHide(); }catch(e){} document.body.classList.rem
 $('#sheetX').onclick=closeSheet;
 /* 마을 창이 열려 있을 때 창 밖(어두운 배경·하단 탭 등)을 누르면 그 버튼은 실행하지 않고 마을 창만 닫음 */
 document.addEventListener('click',e=>{ if(sheetMode!=='town'||$('#sheet').hidden)return; if(e.target.closest&&e.target.closest('.sheet,#modal,#itemPop'))return; e.preventDefault(); e.stopPropagation(); closeSheet(); },true);
-$('#sheet').addEventListener('pointerdown',e=>{ if(e.target.id==='sheet')closeSheet(); });
+/* 어두운 바깥을 누르면 창만 닫힘: 누르는 순간에 닫으면 손을 뗄 때 그 자리의 아래 메뉴(랭킹 등)가 눌려 버려서, 손을 뗀 뒤 click 에서 닫고 그 click 은 여기서 끝냄 */
+let sheetBdDown=false;
+$('#sheet').addEventListener('pointerdown',e=>{ sheetBdDown=e.target.id==='sheet'; });
+$('#sheet').addEventListener('click',e=>{ const go=sheetBdDown&&e.target.id==='sheet'; sheetBdDown=false; if(!go)return; e.preventDefault(); e.stopPropagation(); closeSheet(); });
 $('#bSkip').addEventListener('click',e=>{e.preventDefault(); if(G.inGame&&G.phase==='clear'){ G.phase='win'; showEnd(); /* 시간 종료와 동일하게 요약 화면 */ } else if(G.inGame&&me.dead){ confirmExit(()=>quitToTitle()); } });
 function startAllOut(){ G.allMode=true; G.fireT=1.5; G.shake=Math.max(G.shake,.5); sfx('boss'); allSpawn(); announce('🔥 총공세! 바닥에 불이 번집니다','#ff9a6a'); pushEv(['ann',1]); }
 $('#bBag').onclick=()=>openSheet('bag'); $('#bStat').onclick=()=>openSheet('stat'); $('#bSkillT').onclick=()=>openSheet('skill'); $('#bMenu').onclick=()=>openSheet('menu');
