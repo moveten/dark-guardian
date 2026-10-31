@@ -1186,7 +1186,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.3.0428</div>
+    <div class="ver" id="verT">v0.6.3.0429</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1650,7 +1650,7 @@ function itemIcon(it){
     if(ge.ok){ c.imageSmoothingQuality='high'; const gz=gemTier(it)===1?77:96, go=(96-gz)/2; c.drawImage(ge.im,go,go,gz,gz); }   /* 하급 보석은 20% 작게 */ else { c.fillStyle=GEM_C[it.gk]||'#ccc'; c.globalAlpha=.7; c.beginPath(); c.arc(48,48,20,0,6.283); c.fill(); }
     e={cv:cvs,url:cvs.toDataURL()}; if(ge.ok)iconCache.set(key,e); return e; }   /* 그림이 아직 안 왔으면 임시 구슬(저장 안 함) → 도착하면 다시 그려요 */
   const ue=unqImg(it), uk=ue&&ue.ok?'U|'+UNQIMG[it.name]:null;
-  const key=uk||(it.slot+'|'+it.base+'|'+it.rar+(it.slot==='shield'?'|'+(it.oc||''):''));
+  const sge=it.sk&&it.gm?gemImg(it.gm):null, key=(uk||(it.slot+'|'+it.base+'|'+it.rar+(it.slot==='shield'?'|'+(it.oc||''):'')))+(it.sk?'|k'+(it.gm?it.gm.gk+gemTier(it.gm):'0'):'');
   let e=iconCache.get(key); if(e)return e;
   const cvs=document.createElement('canvas'); cvs.width=cvs.height=96; const c=cvs.getContext('2d');
   c.translate(48,48); c.scale(2,2);
@@ -1659,8 +1659,14 @@ function itemIcon(it){
   else if(it.rar===4){ const tc=document.createElement('canvas'); tc.width=tc.height=96; const g2=tc.getContext('2d'); g2.translate(48,48); g2.scale(2,2); drawIconBody(g2,it);
     g2.setTransform(1,0,0,1,0,0); g2.globalCompositeOperation='source-atop'; g2.fillStyle='rgba(28,6,40,.5)'; g2.fillRect(0,0,96,96); c.save(); c.setTransform(1,0,0,1,0,0); c.drawImage(tc,0,0); c.restore(); }
   else drawIconBody(c,it);
-  e={cv:cvs,url:cvs.toDataURL()}; iconCache.set(key,e); return e;
+  if(it.sk){ c.save(); c.setTransform(1,0,0,1,0,0); drawSock(c,it.gm,sge); c.restore(); }   /* 소켓: 아이템 가운데 어둡고 투명한 원 + 어두운 금빛 테두리, 박힌 보석은 반투명(빛나지 않게) */
+  e={cv:cvs,url:cvs.toDataURL()}; if(!sge||sge.ok)iconCache.set(key,e); return e;   /* 보석 그림이 아직 안 왔으면 저장 안 함 → 도착하면 다시 그려요 */
 }
+function drawSock(c,gm,ge){ const R=20, g=c.createRadialGradient(44,43,2,48,48,R); g.addColorStop(0,'rgba(30,22,12,.45)'); g.addColorStop(1,'rgba(0,0,0,.8)');
+  c.beginPath(); c.arc(48,48,R,0,6.283); c.fillStyle=g; c.fill();
+  if(gm&&ge&&ge.ok){ c.save(); c.beginPath(); c.arc(48,48,R-2,0,6.283); c.clip(); c.globalAlpha=.55; c.imageSmoothingQuality='high'; c.drawImage(ge.im,48-16,48-16,32,32); c.restore(); c.beginPath(); c.arc(48,48,R-3.5,0,6.283); c.lineWidth=1.5; c.strokeStyle=GEM_C[gm.gk]||'#ccc'; c.globalAlpha=.3; c.stroke(); c.globalAlpha=1; }
+  c.beginPath(); c.arc(48,48,R-1,0,6.283); c.lineWidth=4; c.strokeStyle='#6e5420'; c.stroke();
+  c.beginPath(); c.arc(48,48,R-3,0,6.283); c.lineWidth=1; c.strokeStyle='rgba(214,170,78,.35)'; c.stroke(); }
 function drawIconBody(c,it){
   if(it.slot==='weapon'&&it.base==='마법서'){ c.translate(-13,0); drawWeapon(c,it.base,it.rar,1.1,0); }
   else if(it.slot==='weapon'){ const L=WLEN[it.base]||30, s=Math.min(1.1,40/L); c.rotate(-Math.PI/4); c.translate(-L*s/2+2,0); drawWeapon(c,it.base,it.rar,s,0); }
@@ -4982,7 +4988,7 @@ function itemLines(it,opt){
   else if(it.sp&&SPFX[it.sp]&&SPFX[it.sp].cas){ const n=(me&&me.D&&me.D.cs)|0, on=c=>c?'#d9c6ff':'#8a8a8a'; s+=`<div style="margin:4px 0;font-size:12px;line-height:1.55"><b style="color:#c8a8ff">🎲 행운의 도박꾼 세트 (${n}/3)</b> <span style="color:#8a8a8a">🎰 달빛 도박장 전용</span><br><span style="color:${on(n>=2)}">2개: 드롭률 +20%, 치명타 확률 +5%</span><br><span style="color:${on(n>=3)}">3개: 잭팟 타격(기본 공격이 7% 확률로 피해 3배) · 모든 스킬 +3 · 이동 속도 +30%</span></div>`; }
   else if(it.rar===4&&it.sp&&SPFX[it.sp]&&SPFX[it.sp].hero){ const n=(me.D&&me.D.hc)|0, on=(c,a)=>c?'#d9c6ff':'#8a8a8a'; s+=`<div style="margin:4px 0;font-size:12px;line-height:1.55"><b style="color:#b98cff">🌑 그림자 세트 (${n}/7)</b><br><span style="color:${on(n>=2)}">2개: 최대 마나 +200</span><br><span style="color:${on(n>=3)}">3개: 레이드 보스에게 주는 피해 +15%</span><br><span style="color:${on(n>=7)}">7개: 레이드 보스에게 주는 피해 추가 +15% (합계 +30%) · 모든 스킬 +3</span></div>`; }
   const ex=enhOptText(it);
-  const skL=it.sk?`<li style="color:${it.gm?'#afeeee':'#707070'}">${it.gm?esc(gemOptText(it.gm)):'비어 있음'} <span class="meta">(${it.gm?GEM_N[it.gm.gk]:'소켓'})</span>${opt&&opt.skTag||''}</li>`:(opt&&opt.skNew?'<li style="color:#707070;list-style:none">＋ 비어 있음 <span class="meta">(소켓)</span> <b style="color:#ffd84a;font-size:11px">NEW</b></li>':'');
+  const SK1='<b style="color:#c9a24a;font-size:11px;margin-right:5px">소켓1</b>', skL=it.sk?`<li style="color:${it.gm?'#afeeee':'#707070'}">${SK1}${it.gm?esc(gemOptText(it.gm)):'비어 있음'} <span class="meta">(${it.gm?GEM_N[it.gm.gk]:'소켓'})</span>${opt&&opt.skTag||''}</li>`:(opt&&opt.skNew?'<li style="color:#707070;list-style:none">'+SK1+'비어 있음 <span class="meta">(소켓 뚫림)</span> <b style="color:#ffd84a;font-size:11px">NEW</b></li>':'');
   if(it.aff.length||ex||skL) s+='<ul>'+affSorted(it).map(a=>`<li>${esc(affText(a))}${(a.cls&&a.cls!==me.cls)?' <span class="meta">(효과 없음)</span>':''}</li>`).join('')+(ex?`<li style="color:#ffe27a">${ex}</li>`:'')+skL+'</ul>';
   return s;
 }
