@@ -1188,7 +1188,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.3.0436</div>
+    <div class="ver" id="verT">v0.6.3.0437</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1631,7 +1631,7 @@ const iconCache=new Map();
 /* ===== 보석: 기타 탭에 쌓이는 아이템 (it.mat==='gem', gk=종류, ilvl=25/50/75 → 하급/중급/상급). 소켓에 박아 쓰는 옵션 ===== */
 const GEM_KINDS=['ruby','sapphire','topaz','emerald','amethyst','diamond'], GEM_TIER=[{il:25,n:'하급',g:300},{il:50,n:'중급',g:1000},{il:75,n:'상급',g:2000}];
 const GEM_N={ruby:'루비',sapphire:'사파이어',topaz:'토파즈',emerald:'에메랄드',amethyst:'자수정',diamond:'다이아몬드'}, GEM_C={ruby:'#ff6a7a',sapphire:'#6aa8ff',topaz:'#ffc84a',emerald:'#4be0a0',amethyst:'#b88cff',diamond:'#cfeeff'};
-const GEM_OPT={ruby:k=>`생명력 흡수 +${k}%`,sapphire:k=>`최대 마나 +${40*k}`,topaz:k=>`드롭률 +${10*k}%`,emerald:k=>`이동 속도 +${3*k}%`,amethyst:k=>`치명타 확률 +${k}%`,diamond:k=>`모든 능력치 +${k}`};
+const GEM_OPT={ruby:k=>`생명력 흡수 +${k}%`,sapphire:k=>`최대 마나 +${40*k}`,topaz:k=>`드롭률 +${10*k}%`,emerald:k=>`이동 속도 +${2*k}%`,amethyst:k=>`치명타 확률 +${k+1}%`,diamond:k=>`모든 능력치 +${k+1}`};
 const isGem=it=>!!(it&&it.mat==='gem');
 const gemTier=it=>Math.max(1,Math.min(3,Math.round((it.ilvl|0)/25)||1));   /* 1=하급 2=중급 3=상급 */
 const gemName=(gk,t)=>(t===1?'하급 ':t===3?'상급 ':'')+GEM_N[gk];
@@ -5871,7 +5871,7 @@ function smithModal(st){
 /* ===== 소켓에 보석 박기: 가방 기타 탭에서 보석 → [소켓에 박기] → 장비품 화면에서 빈 소켓이 있는 장비를 고르면 확인 후 박혀요 (박은 보석은 되돌릴 수 없음, 소켓을 비우면 보석은 사라짐) ===== */
 const gemTgt=it=>!!(it&&it.sk&&!it.gm&&SMITH_SLOTS.includes(it.slot)&&!it.mat);
 const gemSockN=()=>me.inv.filter(gemTgt).length+Object.values(me.eq).filter(gemTgt).length;
-function gemApply(d,g){ const k=gemTier(g); switch(g.gk){ case 'ruby':d.ls+=k; break; case 'sapphire':d.mana+=40*k; break; case 'topaz':d.mf+=10*k; break; case 'emerald':d.ms+=3*k; break; case 'amethyst':d.crit+=k; break; case 'diamond':d.str+=k; d.dex+=k; d.vit+=k; d.ene+=k; break; } }
+function gemApply(d,g){ const k=gemTier(g); switch(g.gk){ case 'ruby':d.ls+=k; break; case 'sapphire':d.mana+=40*k; break; case 'topaz':d.mf+=10*k; break; case 'emerald':d.ms+=2*k; break; case 'amethyst':d.crit+=k+1; break; case 'diamond':{ const v=k+1; d.str+=v; d.dex+=v; d.vit+=v; d.ene+=v; } break; } }
 function gemSockStart(){ const it=selItem&&selItem.it; if(!isGem(it)||selItem.store||selItem.misc===undefined||me.misc[selItem.misc]!==it)return;
   if(!gemSockN()){ sheetToast('빈 소켓이 있는 장비가 없어요 · 마을의 장인의 집에서 소켓을 뚫어 주세요','#ffb259'); return; }
   gemSock={it,ix:selItem.misc}; selItem=null; bagTab='eq'; rerender(); }
