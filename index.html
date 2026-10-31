@@ -1188,7 +1188,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.3.0439</div>
+    <div class="ver" id="verT">v0.6.3.0440</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -2140,7 +2140,7 @@ function migrateChars(){
 }
 function createChar(cls,name,nid){ const ids=charIds(); if(ids.length>=MAXCHAR||!CLASSES[cls])return null; if(nameTaken(name))return null; const p=newChar(cls,name,nid); p.ms=MAILQ.map(q=>q.id); lsSet(charKey(p.id),JSON.stringify(packChar(p))); ids.push(p.id); setIds(ids); selId=p.id; lsSet('dkdef2.sel',selId); return p; }
 function deleteChar(id){ setIds(charIds().filter(x=>x!==id)); lsDel(charKey(id)); lsDel('dkdef2.rk.'+id); lsDel('dkdef2.nmv.'+id); if(selId===id){selId='';lsSet('dkdef2.sel','');} rkQueueDel(id); nameQueueRel(id); }
-function packChar(p){ const {id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear,as,sy,au,sp,ct,cat,dv4,shard,ashard,misc,mail,ms,tut,cc}=p; return {id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear:clear|0,au:Math.max(0,Math.min(2,au|0)),sp:sp?1:0,ct:ct>0?ct|0:0,cat:cat>0?cat|0:0,as:as===undefined?-1:as,sy:sy===undefined?-1:sy,dv4:dv4?1:0,shard:shard|0,ashard:(ashard|0)||undefined,misc:Array.isArray(misc)?misc:undefined,mail:Array.isArray(mail)?mail:undefined,ms:Array.isArray(ms)?ms:undefined,tut:tut||undefined,cc:cc&&Object.keys(cc).length?cc:undefined}; }
+function packChar(p){ const {id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear,as,sy,au,sp,ct,cts,cat,dv4,shard,ashard,misc,mail,ms,tut,cc}=p; return {id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear:clear|0,au:Math.max(0,Math.min(2,au|0)),sp:sp?1:0,ct:ct>0?ct|0:0,cts:cts>0?cts|0:undefined,cat:cat>0?cat|0:0,as:as===undefined?-1:as,sy:sy===undefined?-1:sy,dv4:dv4?1:0,shard:shard|0,ashard:(ashard|0)||undefined,misc:Array.isArray(misc)?misc:undefined,mail:Array.isArray(mail)?mail:undefined,ms:Array.isArray(ms)?ms:undefined,tut:tut||undefined,cc:cc&&Object.keys(cc).length?cc:undefined}; }
 function saveChar(){ if(!me||!me.id)return; lsSet(charKey(me.id),JSON.stringify(packChar(me))); }
 const dispName=p=>(p&&p.name)||CLASSES[p.cls].n;
 const SELLBASE=[100,200,400,800,3000], ADVAFX=['ls','crit','ias','ms','mf','pr','mr'];
@@ -5236,7 +5236,7 @@ function rkSnap(c){ const D=derive(c), eq={}; for(const k of RKSL){ const x=rkIt
   const rows=[['생명력',D.maxHp],['마나',D.maxMp],['무기 공격력',`${D.wmn+D.dmg}–${D.wmx+D.dmg}`],['피해 보너스',`+${Math.round(D.str+D.dmgPct)}%`],['방어력',Math.round(D.def)]];
   if(c.cls==='pal'||D.blk>0) rows.push(['막기 확률',D.blk>=(D.blkMax||BLKMAX)?`${D.blkMax||BLKMAX}% (MAX)`:`${D.blk}%`]);
   rows.push(['공격 속도',`+${Math.round(D.ias+D.dex*.25)}%`],['치명타',`${Math.round(D.crit*10)/10}%`],['받는 피해 감소',`${Math.round((D.dr||0)*100)}%`],['스킬 쿨감',`${Math.round((D.cdr||0)*100)}%`],['이동 속도',`+${Math.round(D.ms)}%`],['생명력 흡수',`${Math.round(D.ls)}%`]);
-  return {eq,st:[Math.floor(D.str),Math.floor(D.dex),Math.floor(D.vit),Math.floor(D.ene)],rows:rows.map(r=>[r[0],String(r[1])]),v:1,...(c.ct>0?{ct:c.ct|0}:{}),...(c.clear>0?{cat:c.cat>0?c.cat|0:legacyCat(c.id)}:{})}; }
+  return {eq,st:[Math.floor(D.str),Math.floor(D.dex),Math.floor(D.vit),Math.floor(D.ene)],rows:rows.map(r=>[r[0],String(r[1])]),v:1,...(c.ct>0?{ct:c.ct|0,...(c.cts>0?{cts:c.cts|0}:{})}:{}),...(c.clear>0?{cat:c.cat>0?c.cat|0:legacyCat(c.id)}:{})}; }
 function rkRow(c){ const sn=rkSnap(c), cp=calcCP(c); return {id:String(c.id).slice(0,40),name:dispName(c).slice(0,8),cls:c.cls,lvl:Math.max(1,c.lvl|0),kills:Math.max(0,c.kills|0),clear:Math.max(0,Math.min(STAGES.length,c.clear|0)),cp:Math.max(0,Math.min(999999999,cp|0)),data:sn,updated_at:new Date().toISOString()}; }
 let rkFailT=0;
 async function rkSubmit(list,force){
@@ -5259,7 +5259,7 @@ async function rkFlushDel(){ if(rkDelBusy)return; const a=rkDelList(); if(!a.len
       try{ const r=await fetch(RK_URL+'?id=eq.'+encodeURIComponent(id),{method:'DELETE',headers:rkHead({Prefer:'return=minimal'})}); if(!r.ok)left.push(id); }catch(e){ left.push(id); } }
     lsSet('dkdef2.rkdel',JSON.stringify(left)); }finally{ rkDelBusy=false; } }
 function rkSubmitAll(force){ rkFlushDel(); const chars=charIds().map(loadChar).filter(Boolean); if(me&&me.id){ const i=chars.findIndex(c=>c.id===me.id); if(i>=0)chars[i]=me; } return rkSubmit(chars,force); }
-const RKMODES={stage:{o:'clear.desc,lvl.desc,kills.desc',f:'&kills=gt.0&clear=gt.0'},lvl:{o:'lvl.desc,cp.desc,kills.desc',f:'&kills=gt.0'},ta:{o:'clear.desc,data->ct.asc.nullslast,lvl.desc',f:'&kills=gt.0&clear=gt.0'}};
+const RKMODES={stage:{o:'clear.desc,lvl.desc,kills.desc',f:'&kills=gt.0&clear=gt.0'},lvl:{o:'lvl.desc,cp.desc,kills.desc',f:'&kills=gt.0'},ta:{o:'clear.desc,lvl.desc,kills.desc',f:'&kills=gt.0&clear=gt.0'}};
 const rkCt=r=>+(r&&r.data&&r.data.ct)||0;   /* 클리어 시간(초) — 표시용 */
 /* 클리어 시각(초): 그 클리어 수에 처음 도달한 때. 기록이 없는 예전 캐릭터는 id로 정한 '2026-10-13 10~22시(KST)' 사이의 고정 시각 */
 const legacyCat=id=>1791853200+hashStr(String(id))%43200;
@@ -5267,12 +5267,17 @@ const rkCat=r=>+(r&&r.data&&r.data.cat)||legacyCat(r&&r.id);
 const rkLvlCmp=(a,b)=>(b.lvl-a.lvl)||((b.cp|0)-(a.cp|0))||(b.kills-a.kills);   /* 레벨 → 전투력 → 처치 */
 const rkTaCmp=(a,b)=>(b.clear-a.clear)||((rkCt(a)||1e9)-(rkCt(b)||1e9))||(rkCat(a)-rkCat(b))||(b.lvl-a.lvl);   /* 타임어택: 높은 스테이지 클리어 → 그 최단 클리어 시간이 짧은 순 */
 const rkStageCmp=(a,b)=>(b.clear-a.clear)||(rkCat(a)-rkCat(b))||(b.lvl-a.lvl)||(b.kills-a.kills); /* 클리어 수 → 먼저 클리어한 사람 → 레벨 → 처치 */
+const RK_LITE='id,name,cls,lvl,kills,clear,cp,ct:data->ct,cat:data->cat,cts:data->cts'; let rkLiteBad=false;
+/* 목록은 장비 정보(data) 없이 가볍게 받고, 장비는 이름을 눌렀을 때 그 사람 것만 받아요 (목록 용량 1/10 이하) */
 async function rkFetch(mode){
-  const M=RKMODES[mode]; let r=null;
-  if(mode==='stage'){ try{ r=await fetch(RK_URL+'?select=id,name,cls,lvl,kills,clear,cp,data&order=clear.desc,data->cat.asc.nullslast,lvl.desc,kills.desc'+M.f+'&limit=50',{headers:rkHead()}); }catch(e){ r=null; } }
-  if(!r||!r.ok) r=await fetch(RK_URL+'?select=id,name,cls,lvl,kills,clear,cp,data&order='+M.o+M.f+'&limit=50',{headers:rkHead()});
+  const M=RKMODES[mode], q=sel=>RK_URL+'?select='+sel+'&order='+M.o+M.f+'&limit=100'; let r=null, lite=!rkLiteBad;
+  if(lite){ try{ r=await fetch(q(RK_LITE),{headers:rkHead()}); }catch(e){ r=null; } if(!r||!r.ok){ lite=false; if(r)rkLiteBad=true; } }
+  if(!lite) r=await fetch(q('id,name,cls,lvl,kills,clear,cp,data'),{headers:rkHead()});
   if(!r.ok) throw new Error('rank '+r.status);
-  let rows=await r.json(); if(Array.isArray(rows)){ if(mode==='stage')rows.sort(rkStageCmp); else if(mode==='lvl')rows.sort(rkLvlCmp); else if(mode==='ta'){ rows=rows.filter(x=>rkCt(x)>0); rows.sort(rkTaCmp); } } return rows;
+  let rows=await r.json(); if(!Array.isArray(rows))throw new Error('rank rows');
+  if(lite) rows=rows.map(x=>{ const {ct,cat,cts,...o}=x; o.data={lite:1,...(ct>0?{ct}:{}),...(cat>0?{cat}:{}),...(cts>0?{cts}:{})}; return o; });
+  if(mode==='stage')rows.sort(rkStageCmp); else if(mode==='lvl')rows.sort(rkLvlCmp); else if(mode==='ta'){ rows=rows.filter(x=>rkCt(x)>0); rows.sort(rkTaCmp); }
+  return rows.slice(0,50);
 }
 async function rkFetchOne(id){
   const r=await fetch(RK_URL+'?select=id,name,cls,lvl,kills,clear,cp,data&id=eq.'+encodeURIComponent(id)+'&limit=1',{headers:rkHead()});
@@ -5284,7 +5289,7 @@ function rkCacheGet(mode){ try{ const o=JSON.parse(lsGet('dkdef2.rkc2.'+mode)||'
 function rkCacheSet(mode,rows){ try{ lsSet('dkdef2.rkc2.'+mode,JSON.stringify({t:Date.now(),rows})); }catch(e){} }
 async function rkLoad(mode,force){ const c=rkCacheGet(mode); if(!force&&c&&Date.now()-c.t<RK_TTL)return {rows:c.rows,t:c.t,cached:true};
   const rows=await rkFetch(mode); rkCacheSet(mode,rows); return {rows,t:Date.now(),cached:false}; }
-function rkPrefetch(){ const c=rkCacheGet('lvl'); if(c&&Date.now()-c.t<RK_TTL)return; rkLoad('lvl',true).catch(()=>{}); }
+function rkPrefetch(){ ['lvl','ta','stage'].forEach((m,i)=>{ const c=rkCacheGet(m); if(c&&Date.now()-c.t<RK_TTL)return; setTimeout(()=>rkLoad(m,true).catch(()=>{}),i*1500); }); }   /* 시작하고 잠시 뒤 세 순위를 미리 받아 둬요 → 랭킹을 열면 바로 보임 */
 function rkVal(mode,r){ return mode==='stage'?(r.clear>0?STAGES[Math.min(STAGES.length,r.clear)-1].id+' 클리어':'-'):mode==='ta'?'⏱ '+fmtCt(rkCt(r)):'Lv '+(r.lvl|0); }
 const rkDate=t=>{ const d=new Date(t*1000); return (d.getMonth()+1)+'/'+d.getDate()+' '+d.getHours()+':'+String(d.getMinutes()).padStart(2,'0'); };
 function rkSub(mode,r){ return mode==='lvl'?`전투력 ${r.cp>0?rkFmt(r.cp):'집계 전'}`:mode==='ta'?`${r.clear>0?STAGES[Math.min(STAGES.length,r.clear)-1].id+' 클리어':'-'} · Lv ${r.lvl|0}`:`Lv ${r.lvl|0} · 처치 ${rkFmt(r.kills)}`+(mode==='stage'&&r.clear>0?` · ${rkDate(rkCat(r))}`:''); }
@@ -5343,9 +5348,11 @@ function openRank(mode0){
       if(!rows.length){ box.innerHTML='<p class="meta">아직 등록된 기록이 없어요. 먼저 사냥해 보세요!</p>'; return; }
       const hm=new Date(t||Date.now()), stamp=`${String(hm.getHours()).padStart(2,'0')}:${String(hm.getMinutes()).padStart(2,'0')}`;
       box.innerHTML=(local?'<p class="meta" style="color:#e0a070">랭킹 서버에 연결하지 못했어요. (준비 중이거나 오프라인) 내 캐릭터만 보여요.</p>':'')+rows.map((r,i)=>rowHtml(r,i,mine.has(r.id))).join('')+(local?'':`<p class="meta" style="font-size:11px;text-align:center;margin:8px 0 0">10분마다 갱신 · 마지막 갱신 ${stamp}</p>`);
-      box.querySelectorAll('.rkrow').forEach(b=>{ b.onclick=()=>{ const r=rows[+b.dataset.i]; if(!r)return;
+      box.querySelectorAll('.rkrow').forEach(b=>{ b.onclick=async()=>{ const r=rows[+b.dataset.i]; if(!r)return;
         if(mine.has(r.id)){ const c=loadChar(r.id); if(c){ rkProfile({id:c.id,name:dispName(c),cls:c.cls,lvl:c.lvl,kills:c.kills|0,clear:c.clear|0,cp:calcCP(c),data:rkSnap(c)},mode); return; } }
-        rkProfile(r,mode); }; });
+        if(r.data&&r.data.eq){ rkProfile(r,mode); return; }
+        b.style.opacity='.55'; let f=null; try{ f=await rkFetchOne(r.id); }catch(e){}
+        if(!box.isConnected)return; b.style.opacity=''; rkProfile(f||r,mode); }; });
     };
     const setTab=k=>{ mode=k; m.querySelectorAll('.rktabs button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===k)); load(); };
     m.querySelectorAll('.rktabs button').forEach(b=>b.onclick=()=>setTab(b.dataset.m)); m.querySelector('#rkRe').onclick=()=>load(true); m.querySelector('#rkNo').onclick=closeModal; load(); });
@@ -5952,8 +5959,8 @@ async function quitToTitle(){
 const fmtCt=t=>{ t=Math.max(0,Math.round(t)); return (t/60|0)+':'+String(t%60).padStart(2,'0'); };
 /* 클리어 기록: 가장 높이 클리어한 스테이지의 최단 클리어 시간(초)을 ct에 저장 — 랭킹에서 클리어 수가 같으면 ct가 짧은 순 */
 function markClear(){ const n=(G.stageIdx|0)+1, t=Math.max(1,Math.round(G.runT||0)); let ch=false; G.lastCt=t; G.bestCt=false; const wasLk=!spdOk();
-  if(n>(me.clear|0)){ me.clear=Math.min(STAGES.length,n); stageClear=me.clear; me.ct=t; me.cat=Math.floor(Date.now()/1000); ch=true; G.bestCt=true; G.firstClr=true; selStage=Math.max(0,Math.min(STAGES.length-1,me.clear|0)); lsSet('dkdef2.stage',String(selStage)); }   /* 처음 깬 스테이지면 다음 스테이지를 자동 선택 */
-  else if(n===(me.clear|0)&&!(me.ct>0&&t>=me.ct)){ me.ct=t; ch=true; G.bestCt=true; }
+  if(n>(me.clear|0)){ me.clear=Math.min(STAGES.length,n); stageClear=me.clear; me.ct=t; me.cts=me.cat=Math.floor(Date.now()/1000); ch=true; G.bestCt=true; G.firstClr=true; selStage=Math.max(0,Math.min(STAGES.length-1,me.clear|0)); lsSet('dkdef2.stage',String(selStage)); }   /* 처음 깬 스테이지면 다음 스테이지를 자동 선택 */
+  else if(n===(me.clear|0)&&!(me.ct>0&&t>=me.ct)){ me.ct=t; me.cts=Math.floor(Date.now()/1000); ch=true; G.bestCt=true; }
   { const cc=me.cc||(me.cc={}); cc[n]=Math.min(999999,(cc[n]|0)+1); G.ccThis=cc[n]; G.ccAll=Object.values(cc).reduce((a,b)=>a+b,0); ch=true; }   /* 누적 클리어 횟수: 스테이지별로, 클리어할 때마다 +1 (최고 기록과 상관없이) */
   if(ch){ saveChar(); rkSubmitAll(); }
   if(wasLk&&spdOk()){ G.spdNew=true; setSpd(G.spd>1); later(2,()=>{ if(G.inGame)toast('⏩ 1.3배속 · 🤖 AUTO 스킬이 열렸어요!','#ffb259'); }); } }   /* 1-5 첫 클리어 */
