@@ -1186,7 +1186,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.3.0432</div>
+    <div class="ver" id="verT">v0.6.3.0433</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1636,7 +1636,9 @@ const gemName=(gk,t)=>(t===1?'하급 ':t===3?'상급 ':'')+GEM_N[gk];
 const gemOptText=it=>GEM_OPT[it.gk]?GEM_OPT[it.gk](gemTier(it)):'';
 function mkGem(gk,t){ t=Math.max(1,Math.min(3,t|0)); return {id:++ITEMID,slot:'mat',mat:'gem',gk,rar:0,name:gemName(gk,t),base:'',ilvl:25*t,aff:[]}; }
 const GEMIMG={};
-function gemImg(it){ const f='gem_'+it.gk+'_'+gemTier(it); let e=GEMIMG[f]; if(!e){ e=GEMIMG[f]={ok:false,im:new Image()}; e.im.onload=()=>{ e.ok=true; iconCache.clear(); uiDirty=true; }; e.im.onerror=()=>{ e.bad=true; }; e.im.src='img/'+f+'.png'; } return e; }
+function gemImg(it){ const f='gem_'+it.gk+'_'+gemTier(it); let e=GEMIMG[f]; if(!e){ e=GEMIMG[f]={ok:false,im:new Image()}; e.im.onload=()=>{ e.ok=true; iconCache.clear(); uiDirty=true; gemIconRedraw(); }; e.im.onerror=()=>{ e.bad=true; }; e.im.src='img/'+f+'.png'; } return e; }
+let gemRdT=0;
+function gemIconRedraw(){ clearTimeout(gemRdT); gemRdT=setTimeout(()=>{ try{ const sh=$('#sheet'); if(sh&&!sh.hidden&&(sheetMode==='bag'||sheetMode==='store'))rerender(); }catch(e){} },60); }   /* 보석 그림이 늦게 도착하면 열려 있는 가방·보관함의 소켓 보석 그림을 다시 그림 */
 /* 유니크 전용 그림: 이름이 정확히 같은 유니크는 img/ 의 그림을 쓰고(그림이 없거나 아직 불러오는 중이면 기존 그림) — 새 이름 그림은 여기에 한 줄만 추가 */
 const UNQIMG={'밤의 망토':'item_u_shadowcloak','용비늘 갑주':'item_u_dragonscale','순교자의 흉갑':'item_u_martyr','서리 군주의 투구':'item_u_frostlord','광전사의 훈장':'item_u_rage','이그니스의 목걸이':'item_u_ignis','세케르의 목걸이':'item_u_sekr','데스락의 목걸이':'item_u_death','도살자의 이빨':'item_u_butcher','피의 맹세':'item_u_bloodoath','심판의 철퇴':'item_u_judge','망자의 지팡이':'item_u_necro','서리 송곳니':'item_u_frost','폭풍 절단기':'item_u_storm','금지된 마법서':'item_u_tome','해골 왕관':'item_u_skullcrown','프로스티아의 반지':'item_ring_starlight','사나리아의 반지':'item_ring_blood','니아의 반지':'item_ring_oblivion','모르그의 목걸이':'item_amulet_corrupt','영겁의 눈':'item_amulet_eternity','운명의 주사위 단검':'item_cas_wpn','딜러의 조끼':'item_cas_armor','황금 칩 목걸이':'item_cas_amu',
   '그림자 단검':'item_hero_dagger','그림자 투구':'item_hero_helm','그림자 갑옷':'item_hero_armor','그림자 목걸이':'item_hero_amulet','그림자 반지':'item_hero_ring','그림자 뿔':'item_hero_horn','그림자 방패':'item_hero_shield','그림자 오브':'item_hero_orb','그림자 등불':'item_hero_lantern','그림자 토템':'item_hero_totem',
