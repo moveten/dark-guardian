@@ -1188,7 +1188,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.3.0435</div>
+    <div class="ver" id="verT">v0.6.3.0436</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1640,7 +1640,8 @@ function mkGem(gk,t){ t=Math.max(1,Math.min(3,t|0)); return {id:++ITEMID,slot:'m
 const GEMIMG={};
 function gemImg(it){ const f='gem_'+it.gk+'_'+gemTier(it); let e=GEMIMG[f]; if(!e){ e=GEMIMG[f]={ok:false,im:new Image()}; e.im.onload=()=>{ e.ok=true; iconCache.clear(); uiDirty=true; gemIconRedraw(); }; e.im.onerror=()=>{ e.bad=true; }; e.im.src='img/'+f+'.png'; } return e; }
 let gemRdT=0;
-function gemIconRedraw(){ clearTimeout(gemRdT); gemRdT=setTimeout(()=>{ try{ const sh=$('#sheet'); if(sh&&!sh.hidden&&(sheetMode==='bag'||sheetMode==='store'))rerender(); }catch(e){} },60); }   /* 보석 그림이 늦게 도착하면 열려 있는 가방·보관함의 소켓 보석 그림을 다시 그림 */
+let rkRe=null;   /* 지금 열린 랭킹 장비 창을 다시 그리는 함수 */
+function gemIconRedraw(){ clearTimeout(gemRdT); gemRdT=setTimeout(()=>{ try{ const sh=$('#sheet'); if(sh&&!sh.hidden&&(sheetMode==='bag'||sheetMode==='store'))rerender(); if(rkRe&&document.querySelector('.rkpb,.rkit'))rkRe(); }catch(e){} },60); }   /* 보석 그림이 늦게 도착하면 열려 있는 가방·보관함의 소켓 보석 그림을 다시 그림 */
 /* 유니크 전용 그림: 이름이 정확히 같은 유니크는 img/ 의 그림을 쓰고(그림이 없거나 아직 불러오는 중이면 기존 그림) — 새 이름 그림은 여기에 한 줄만 추가 */
 const UNQIMG={'밤의 망토':'item_u_shadowcloak','용비늘 갑주':'item_u_dragonscale','순교자의 흉갑':'item_u_martyr','서리 군주의 투구':'item_u_frostlord','광전사의 훈장':'item_u_rage','이그니스의 목걸이':'item_u_ignis','세케르의 목걸이':'item_u_sekr','데스락의 목걸이':'item_u_death','도살자의 이빨':'item_u_butcher','피의 맹세':'item_u_bloodoath','심판의 철퇴':'item_u_judge','망자의 지팡이':'item_u_necro','서리 송곳니':'item_u_frost','폭풍 절단기':'item_u_storm','금지된 마법서':'item_u_tome','해골 왕관':'item_u_skullcrown','프로스티아의 반지':'item_ring_starlight','사나리아의 반지':'item_ring_blood','니아의 반지':'item_ring_oblivion','모르그의 목걸이':'item_amulet_corrupt','영겁의 눈':'item_amulet_eternity','운명의 주사위 단검':'item_cas_wpn','딜러의 조끼':'item_cas_armor','황금 칩 목걸이':'item_cas_amu',
   '그림자 단검':'item_hero_dagger','그림자 투구':'item_hero_helm','그림자 갑옷':'item_hero_armor','그림자 목걸이':'item_hero_amulet','그림자 반지':'item_hero_ring','그림자 뿔':'item_hero_horn','그림자 방패':'item_hero_shield','그림자 오브':'item_hero_orb','그림자 등불':'item_hero_lantern','그림자 토템':'item_hero_totem',
@@ -5291,6 +5292,7 @@ function rkBuildItem(k,x){ const rar=Math.max(0,Math.min(4,x.r|0)); const it={id
 function rkHeadHtml(row){ const c=CLASSES[row.cls]?row.cls:'war';
   return `<h3><span class="rkh"><img src="img/cls_${c}.png" alt="${CLSE[c]}"></span> ${esc(String(row.name||CLASSES[c].n).slice(0,8))} <span class="meta" style="font-weight:500">Lv ${row.lvl|0}</span></h3><div class="meta" style="margin:-4px 0 8px">⚔️ 전투력 <b style="color:#ffd84a">${row.cp>0?rkFmt(row.cp):'집계 전'}</b> · 처치 ${rkFmt(row.kills)}마리 · ${row.clear>0?STAGES[Math.min(STAGES.length,row.clear)-1].id+' 클리어'+(rkCt(row)?' ('+fmtCt(rkCt(row))+')':''):'스테이지 기록 없음'}</div>`; }
 function rkProfile(row,back){
+  rkRe=()=>rkProfile(row,back);
   const d=row.data; let body='';
   const go=()=>openRank(back);
   if(!d||!d.eq){ body='<p class="meta">장비 정보가 아직 등록되지 않았어요. (상대가 최신 버전으로 접속하면 표시돼요)</p>'; }
@@ -5309,6 +5311,7 @@ function rkProfile(row,back){
     m.querySelectorAll('.rkgc[data-k]').forEach(b=>b.onclick=()=>rkItemDetail(row,b.dataset.k,back)); });
 }
 function rkItemDetail(row,k,back){
+  rkRe=()=>rkItemDetail(row,k,back);
   const x=row.data&&row.data.eq&&row.data.eq[k]; if(!x){ rkProfile(row,back); return; }
   let it; try{ it=rkBuildItem(k,x); }catch(e){ rkProfile(row,back); return; }
   let ic=''; try{ ic=itemIcon(it).url; }catch(e){}
