@@ -1188,7 +1188,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.3.0437</div>
+    <div class="ver" id="verT">v0.6.3.0438</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -5259,18 +5259,20 @@ async function rkFlushDel(){ if(rkDelBusy)return; const a=rkDelList(); if(!a.len
       try{ const r=await fetch(RK_URL+'?id=eq.'+encodeURIComponent(id),{method:'DELETE',headers:rkHead({Prefer:'return=minimal'})}); if(!r.ok)left.push(id); }catch(e){ left.push(id); } }
     lsSet('dkdef2.rkdel',JSON.stringify(left)); }finally{ rkDelBusy=false; } }
 function rkSubmitAll(force){ rkFlushDel(); const chars=charIds().map(loadChar).filter(Boolean); if(me&&me.id){ const i=chars.findIndex(c=>c.id===me.id); if(i>=0)chars[i]=me; } return rkSubmit(chars,force); }
-const RKMODES={stage:{o:'clear.desc,lvl.desc,kills.desc',f:'&kills=gt.0&clear=gt.0'},lvl:{o:'lvl.desc,kills.desc',f:'&kills=gt.0'},cp:{o:'cp.desc,lvl.desc',f:'&kills=gt.0'}};
+const RKMODES={stage:{o:'clear.desc,lvl.desc,kills.desc',f:'&kills=gt.0&clear=gt.0'},lvl:{o:'lvl.desc,cp.desc,kills.desc',f:'&kills=gt.0'},ta:{o:'clear.desc,data->ct.asc.nullslast,lvl.desc',f:'&kills=gt.0&clear=gt.0'}};
 const rkCt=r=>+(r&&r.data&&r.data.ct)||0;   /* 클리어 시간(초) — 표시용 */
 /* 클리어 시각(초): 그 클리어 수에 처음 도달한 때. 기록이 없는 예전 캐릭터는 id로 정한 '2026-10-13 10~22시(KST)' 사이의 고정 시각 */
 const legacyCat=id=>1791853200+hashStr(String(id))%43200;
 const rkCat=r=>+(r&&r.data&&r.data.cat)||legacyCat(r&&r.id);
+const rkLvlCmp=(a,b)=>(b.lvl-a.lvl)||((b.cp|0)-(a.cp|0))||(b.kills-a.kills);   /* 레벨 → 전투력 → 처치 */
+const rkTaCmp=(a,b)=>(b.clear-a.clear)||((rkCt(a)||1e9)-(rkCt(b)||1e9))||(rkCat(a)-rkCat(b))||(b.lvl-a.lvl);   /* 타임어택: 높은 스테이지 클리어 → 그 최단 클리어 시간이 짧은 순 */
 const rkStageCmp=(a,b)=>(b.clear-a.clear)||(rkCat(a)-rkCat(b))||(b.lvl-a.lvl)||(b.kills-a.kills); /* 클리어 수 → 먼저 클리어한 사람 → 레벨 → 처치 */
 async function rkFetch(mode){
   const M=RKMODES[mode]; let r=null;
   if(mode==='stage'){ try{ r=await fetch(RK_URL+'?select=id,name,cls,lvl,kills,clear,cp,data&order=clear.desc,data->cat.asc.nullslast,lvl.desc,kills.desc'+M.f+'&limit=50',{headers:rkHead()}); }catch(e){ r=null; } }
   if(!r||!r.ok) r=await fetch(RK_URL+'?select=id,name,cls,lvl,kills,clear,cp,data&order='+M.o+M.f+'&limit=50',{headers:rkHead()});
   if(!r.ok) throw new Error('rank '+r.status);
-  const rows=await r.json(); if(mode==='stage'&&Array.isArray(rows))rows.sort(rkStageCmp); return rows;
+  let rows=await r.json(); if(Array.isArray(rows)){ if(mode==='stage')rows.sort(rkStageCmp); else if(mode==='lvl')rows.sort(rkLvlCmp); else if(mode==='ta'){ rows=rows.filter(x=>rkCt(x)>0); rows.sort(rkTaCmp); } } return rows;
 }
 async function rkFetchOne(id){
   const r=await fetch(RK_URL+'?select=id,name,cls,lvl,kills,clear,cp,data&id=eq.'+encodeURIComponent(id)+'&limit=1',{headers:rkHead()});
@@ -5278,14 +5280,14 @@ async function rkFetchOne(id){
 }
 function rkFmt(n){ return (n|0).toLocaleString('ko-KR'); }
 const RK_TTL=10*60*1000;
-function rkCacheGet(mode){ try{ const o=JSON.parse(lsGet('dkdef2.rkc.'+mode)||'null'); if(o&&Array.isArray(o.rows)&&o.t)return o; }catch(e){} return null; }
-function rkCacheSet(mode,rows){ try{ lsSet('dkdef2.rkc.'+mode,JSON.stringify({t:Date.now(),rows})); }catch(e){} }
+function rkCacheGet(mode){ try{ const o=JSON.parse(lsGet('dkdef2.rkc2.'+mode)||'null'); if(o&&Array.isArray(o.rows)&&o.t)return o; }catch(e){} return null; }
+function rkCacheSet(mode,rows){ try{ lsSet('dkdef2.rkc2.'+mode,JSON.stringify({t:Date.now(),rows})); }catch(e){} }
 async function rkLoad(mode,force){ const c=rkCacheGet(mode); if(!force&&c&&Date.now()-c.t<RK_TTL)return {rows:c.rows,t:c.t,cached:true};
   const rows=await rkFetch(mode); rkCacheSet(mode,rows); return {rows,t:Date.now(),cached:false}; }
 function rkPrefetch(){ const c=rkCacheGet('lvl'); if(c&&Date.now()-c.t<RK_TTL)return; rkLoad('lvl',true).catch(()=>{}); }
-function rkVal(mode,r){ return mode==='stage'?(r.clear>0?STAGES[Math.min(STAGES.length,r.clear)-1].id+' 클리어':'-'):mode==='lvl'?'Lv '+(r.lvl|0):(r.cp>0?'⚔️ '+rkFmt(r.cp):'집계 전'); }
+function rkVal(mode,r){ return mode==='stage'?(r.clear>0?STAGES[Math.min(STAGES.length,r.clear)-1].id+' 클리어':'-'):mode==='ta'?'⏱ '+fmtCt(rkCt(r)):'Lv '+(r.lvl|0); }
 const rkDate=t=>{ const d=new Date(t*1000); return (d.getMonth()+1)+'/'+d.getDate()+' '+d.getHours()+':'+String(d.getMinutes()).padStart(2,'0'); };
-function rkSub(mode,r){ return mode==='lvl'?`처치 ${rkFmt(r.kills)}마리`:`Lv ${r.lvl|0} · 처치 ${rkFmt(r.kills)}`+(mode==='stage'&&r.clear>0?` · ${rkDate(rkCat(r))}`:''); }
+function rkSub(mode,r){ return mode==='lvl'?`전투력 ${r.cp>0?rkFmt(r.cp):'집계 전'}`:mode==='ta'?`${r.clear>0?STAGES[Math.min(STAGES.length,r.clear)-1].id+' 클리어':'-'} · Lv ${r.lvl|0}`:`Lv ${r.lvl|0} · 처치 ${rkFmt(r.kills)}`+(mode==='stage'&&r.clear>0?` · ${rkDate(rkCat(r))}`:''); }
 function rkBuildItem(k,x){ const rar=Math.max(0,Math.min(4,x.r|0)); const it={id:0,slot:k.replace(/\d/,''),rar,ilvl:x.l|0,base:String(x.b||''),name:String(x.n||'?'),mn:x.mn|0,mx:x.mx|0,df:x.df|0,blk:x.bk|0,dm:x.dm|0,om:x.om|0,enh:x.e|0,req:x.rq|0,aff:[]}; if(x.sk){ it.sk=1; it.gm=x.gm&&GEM_KINDS.includes(x.gm.k)?{gk:x.gm.k,ilvl:[25,50,75].includes(x.gm.l|0)?x.gm.l|0:25}:null; } if(it.slot==='shield')it.oc=OFFN[x.oc]?x.oc:'pal';
   if(!it.mx){delete it.mn;delete it.mx;} if(!it.df)delete it.df; if(!it.blk)delete it.blk; if(!it.dm)delete it.dm; if(!it.om)delete it.om; if(x.sp&&SPFX[x.sp])it.sp=x.sp;
   for(const a of (x.a||[])){ if(a&&AFXBY[a.t]) it.aff.push({t:a.t,v:a.v|0,cls:a.c,key:a.k}); } return it; }
@@ -5326,7 +5328,7 @@ function rkItemDetail(row,k,back){
 }
 function openRank(mode0){
   let mode=RKMODES[mode0]?mode0:'lvl'; const mine=new Set(charIds());
-  const TABS=[['lvl','⭐ 레벨'],['cp','💪 전투력'],['stage','🗺️ 진행']];
+  const TABS=[['lvl','⭐ 레벨'],['ta','⏱️ 타임어택'],['stage','🗺️ 진행']];
   modal(`<h3>🏆 랭킹</h3><div class="rktabs">${TABS.map(([k,l])=>`<button data-m="${k}" aria-pressed="${k===mode}">${l}</button>`).join('')}</div><div class="rklist" id="rkBox"><p class="meta">불러오는 중…</p></div><div class="row2"><button class="btn" id="rkRe">🔄 새로고침</button><button class="btn" id="rkNo">닫기</button></div><p class="meta" style="margin:8px 0 0;font-size:11.5px">이름을 누르면 장비와 능력치를 한눈에 볼 수 있어요 · 내 캐릭터는 금색 · 전투 기록 없는 캐릭터 제외 · 🔄는 바로 갱신</p>`,m=>{
     const box=m.querySelector('#rkBox'); let seq=0;
     const rowHtml=(r,i,own)=>{ const c=CLASSES[r.cls]?r.cls:'war'; return `<button class="rkrow${own?' own':''}${i<3?' top':''}" data-i="${i}"><span class="rkn">${i<3?['🥇','🥈','🥉'][i]:i+1}</span><span class="rke"><img src="img/cls_${c}.png" alt="${CLSE[c]}" loading="lazy" decoding="async"></span><span class="rkm"><b>${esc(String(r.name||CLASSES[c].n).slice(0,8))}</b><small>${rkSub(mode,r)}</small></span><span class="rkv">${esc(rkVal(mode,r))}</span><span class="rkc">›</span></button>`; };
@@ -5335,7 +5337,7 @@ function openRank(mode0){
       let rows,local=false,t=Date.now();
       try{ const r=await rkLoad(mode,true); if(my!==seq)return; rows=r.rows; t=r.t; }
       catch(e){ if(my!==seq)return; if(c0&&!force)return; local=true;
-        rows=charIds().map(loadChar).filter(c=>c&&(c.kills|0)>0).map(c=>({id:c.id,name:dispName(c),cls:c.cls,lvl:c.lvl,kills:c.kills|0,clear:c.clear|0,cp:calcCP(c),data:rkSnap(c)})).sort((a,b)=>mode==='stage'?rkStageCmp(a,b):mode==='lvl'?(b.lvl-a.lvl||b.kills-a.kills):b.cp-a.cp); }
+        rows=charIds().map(loadChar).filter(c=>c&&(c.kills|0)>0).map(c=>({id:c.id,name:dispName(c),cls:c.cls,lvl:c.lvl,kills:c.kills|0,clear:c.clear|0,cp:calcCP(c),data:rkSnap(c)})); if(mode==='ta')rows=rows.filter(x=>x.clear>0&&rkCt(x)>0); rows.sort(mode==='stage'?rkStageCmp:mode==='ta'?rkTaCmp:rkLvlCmp); }
       show(rows,local,t); };
     const show=(rows,local,t)=>{
       if(!rows.length){ box.innerHTML='<p class="meta">아직 등록된 기록이 없어요. 먼저 사냥해 보세요!</p>'; return; }
