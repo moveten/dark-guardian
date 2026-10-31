@@ -699,7 +699,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   .ipop .acts.iact .tlb .ti{font-size:15px}
   .ipop .acts.iact .tlb .tx{font-size:11px;white-space:normal;word-break:keep-all}
   .ipop .acts.iact .tlb .ph{display:block}
-  .ipop .acts.iact #aEnh{flex:3 1 0} .ipop .acts.iact #aSell{flex:2 1 0} .ipop .acts.iact #aSend{flex:1 1 0}   /* 강화는 넓게, 자주 안 쓰는 보내기는 좁게 */
+  .ipop .acts.iact #aSock{flex:2 1 0} .ipop .acts.iact #aEnh{flex:3 1 0} .ipop .acts.iact #aSell{flex:2 1 0} .ipop .acts.iact #aSend{flex:1 1 0}   /* 강화는 넓게, 자주 안 쓰는 보내기는 좁게 */
   .ipop .lkb{display:grid;place-items:center;position:absolute;right:-6px;bottom:-6px;width:26px;height:26px;padding:0;border-radius:50%;font-size:13px;line-height:1;background:#2a2118;border:1px solid var(--line2);opacity:.9}
   .ipop .lkb svg{display:block}
   .ipop .lkb.on{opacity:1;border-color:#ffd84a;background:#4a3a14}
@@ -1212,7 +1212,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.3.0451</div>
+    <div class="ver" id="verT">v0.6.3.0452</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -4849,6 +4849,7 @@ function renderBag(){
   const ase=pq('#aShardEx'); if(ase)ase.onclick=()=>(selItem&&shMat(selItem.it)==='ashard'?ashardModal():shardModal());
   const ass=pq('#aShardSell'); if(ass)ass.onclick=()=>sellShard(); const ags=pq('#aGemSell'); if(ags)ags.onclick=()=>sellGem(); const agk=pq('#aGemSock'); if(agk)agk.onclick=()=>gemSockStart();
   const aen=pq('#aEnh'); if(aen)aen.onclick=()=>enhModal();
+  const ask=pq('#aSock'); if(ask)ask.onclick=()=>gemPick(selItem&&selItem.it);
   const asx=pq('#aShEx'); if(asx)asx.onclick=()=>shExModal();
   const au=pq('#aUnequip'); if(au)au.onclick=()=>{unequip(selItem.eq);};
   bagSelUi(b); gemSockUi(b);
@@ -5072,10 +5073,11 @@ function detailHtml(){
   const lk=`<button class="btn lkx" id="aLock" data-lk="1">${it.lock?'🔓 잠금 해제':'🔒 잠금'}</button>`,
     enh=canEnh(it)?`<button class="btn tlb" id="aEnh"><span class="ti">⚒</span> <span class="tx">강화${it.enh>0?' +'+it.enh:''}</span></button>`:'',
     send=(G.titleSheet&&charIds().length>1)?'<button class="btn tlb" id="aSend"><span class="ti">📤</span> <span class="tx">보내기</span></button>':'',
+    sock=gemTgt(it)?'<button class="btn tlb" id="aSock"><span class="ti">💎</span> <span class="tx">소켓박기</span></button>':'',
     shx=(selItem.inv!==undefined&&!selItem.store&&canShEx(it))?'<button class="btn tlb" id="aShEx" style="border-color:#c9a0ff;color:#d9b8ff"><span class="ti">🔮</span> <span class="tx">조각 교환</span></button>':'';
   if(selItem.inv!==undefined){
-    s+=`<div class="acts iact"><button class="btn primary" id="aEquip"${!canWear(it)?' style="opacity:.5"':''}>장착</button>${lk}${enh}${shx}<button class="btn tlb" id="aSell"${it.lock?' style="opacity:.45"':''}><span class="ti ph">💰</span><span class="tx">판매 ${sellInfo(it).total}G</span></button>${send}</div>`;
-  }else s+=`<div class="acts iact"><button class="btn" id="aUnequip">해제</button>${lk}${enh}${send}</div>`;
+    s+=`<div class="acts iact"><button class="btn primary" id="aEquip"${!canWear(it)?' style="opacity:.5"':''}>장착</button>${lk}${enh}${sock}${shx}<button class="btn tlb" id="aSell"${it.lock?' style="opacity:.45"':''}><span class="ti ph">💰</span><span class="tx">판매 ${sellInfo(it).total}G</span></button>${send}</div>`;
+  }else s+=`<div class="acts iact"><button class="btn" id="aUnequip">해제</button>${lk}${enh}${sock}${send}</div>`;
   return s;
 }
 function askRingSlot(i){ const it=me.inv[i]; const cp0=calcCP(me); modal(`<h3>💍 어느 반지를 바꿀까요?</h3><div class="col">${['ring1','ring2'].map((k,n)=>{ const cur=me.eq[k], cp=calcCP({...me,eq:{...me.eq,[k]:it}}), d=cp-cp0; return `<button class="btn" data-rk="${k}" style="text-align:left">반지 ${n+1}: <b style="color:${RARC[cur.rar]}">${esc(cur.name)}</b><br><small style="color:${d>0?'#9fd18b':d<0?'#ff8a7a':'#bbb'}">바꾸면 전투력 ${d>0?'+':''}${d}</small></button>`; }).join('')}<button class="btn" id="rkX">취소</button></div>`,m=>{ m.querySelectorAll('[data-rk]').forEach(b=>b.onclick=()=>{ closeModal(); equip(i,b.dataset.rk); }); m.querySelector('#rkX').onclick=closeModal; }); }
@@ -5938,9 +5940,16 @@ function gemSockUi(b){ if(!gemSock)return; const g=gemSock.it;
   b.querySelector('#gsNo').onclick=()=>{ gemSock=null; rerender(); };
   b.querySelectorAll('[data-inv],[data-eq]').forEach(el=>{ const it=el.dataset.inv!==undefined?me.inv[+el.dataset.inv]:me.eq[el.dataset.eq], ok=gemTgt(it); el.classList.add(ok?'gtg':'gdim');
     el.onclick=()=>{ if(!it)return; if(ok)gemSockConfirm(it); else toast(!SMITH_SLOTS.includes(it.slot)?'무기·갑옷·투구만 박을 수 있어요':it.sk?'이미 보석이 박혀 있어요':'소켓이 없는 장비예요','#ffb259'); }; }); }
-function gemSockConfirm(it){ const g=gemSock&&gemSock.it; if(!g||!gemTgt(it))return;
+/* 장비 상세의 [소켓박기]: 가방 기타 칸의 보석 중 하나를 고르면 확인창으로 이어져요 */
+function gemPick(it){ if(!it||!gemTgt(it))return;
+  const L=me.misc.map((g,i)=>g&&isGem(g)?{g,i}:null).filter(Boolean).sort((a,b)=>gemTier(b.g)-gemTier(a.g));
+  if(!L.length){ sheetToast('가방 기타 칸에 보석이 없어요','#ffb259'); return; }
+  modal(`<h3>💎 박을 보석 고르기</h3><p class="meta" style="margin:0 0 8px;font-size:12.5px">→ <b style="color:${RARC[it.rar]}">${esc(it.name)}</b></p><div class="col" style="max-height:52vh;overflow-y:auto;touch-action:pan-y">${L.map((o,n)=>`<button class="btn" data-gi="${n}" style="text-align:left;display:flex;align-items:center;gap:10px;padding:8px 10px"><img src="img/gem_${o.g.gk}_${gemTier(o.g)}.png" alt="" width="36" height="36" style="flex:none"><span style="min-width:0"><b style="color:${GEM_C[o.g.gk]}">${esc(o.g.name)}</b><br><small style="color:#afeeee">${esc(gemOptText(o.g))}</small></span></button>`).join('')}<button class="btn" id="gpX">취소</button></div>`,m=>{
+    m.querySelector('#gpX').onclick=closeModal;
+    m.querySelectorAll('[data-gi]').forEach(b=>b.onclick=()=>{ const o=L[+b.dataset.gi]; if(me.misc[o.i]!==o.g)return; gemSock={it:o.g,ix:o.i}; gemSockConfirm(it,1); }); }); }
+function gemSockConfirm(it,fromPick){ const g=gemSock&&gemSock.it; if(!g||!gemTgt(it))return;
   modal(`<h3>💎 소켓에 박기</h3><p style="margin:0 0 6px;font-size:13px"><b style="color:${GEM_C[g.gk]}">${esc(g.name)}</b> <span style="color:#afeeee">${esc(gemOptText(g))}</span></p><p style="margin:0 0 8px;font-size:13px">→ <b style="color:${RARC[it.rar]}">${esc(it.name)}</b>${Object.values(me.eq).includes(it)?' <span class="meta">(착용 중)</span>':''}</p><p class="meta" style="margin:0 0 10px;font-size:12px">박은 보석은 뺄 수 없어요. 장인의 집에서 소켓을 비우면 보석이 사라져요.</p><div class="row2"><button class="btn" id="gcNo">취소</button><button class="btn primary" id="gcGo">박기</button></div>`,m=>{
-    m.querySelector('#gcNo').onclick=closeModal;
+    m.querySelector('#gcNo').onclick=()=>{ if(fromPick)gemSock=null; closeModal(); }; if(fromPick)m.onclick=e=>{ if(e.target===m){ gemSock=null; closeModal(); } };
     m.querySelector('#gcGo').onclick=()=>{ if(!gemSock||me.misc[gemSock.ix]!==g||!gemTgt(it)){ closeModal(); return; }
       const cp0=calcCP(me), worn=Object.values(me.eq).includes(it); it.gm={gk:g.gk,ilvl:g.ilvl}; me.misc[gemSock.ix]=null; gemSock=null; selItem=null;
       if(worn){ const hr=me.hp/me.D.maxHp, mr=me.mp/me.D.maxMp; me.D=derive(me); me.hp=me.D.maxHp*hr; me.mp=me.D.maxMp*mr; buildSkills(); }
