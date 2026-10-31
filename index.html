@@ -269,6 +269,8 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 .cas .cs-rc{display:block;height:52px;line-height:52px;text-align:center;font-style:normal;font-size:32px}
 .cas .cs-rc.j7{font-family:var(--f-disp);font-weight:900;color:#d3202e;text-shadow:1px 1px 0 #7a0c14;font-size:40px}
 .cas .cs-rc.aw{color:#8a4cff;font-size:34px;text-shadow:0 0 6px #c8a8ff}
+.cas.si .cs-rc,.cas.si .cs-rc.j7,.cas.si .cs-rc.aw{font-size:0;color:transparent;text-shadow:none;line-height:0;box-sizing:content-box;width:44px;height:44px;padding:4px 0;margin:0 auto;background:url(img/cas_sym.webp) no-repeat;background-origin:content-box;background-clip:content-box;background-size:700% 100%}
+.cas.si .cs-rc.sh{background-position:0 0}.cas.si .cs-rc.aw{background-position:16.6667% 0}.cas.si .cs-rc.gd{background-position:33.3333% 0}.cas.si .cs-rc.j7{background-position:50% 0}.cas.si .cs-rc.dm{background-position:66.6667% 0}.cas.si .cs-rc.it{background-position:83.3333% 0}.cas.si .cs-rc.gm{background-position:100% 0}
 .cas .cs-reels.blur .cs-rs{filter:blur(1.3px)}
 .cas .cs-pl{position:absolute;left:2px;right:2px;top:50%;height:0;border-top:2px dashed #ff4a4a;transform:translateY(-1px);pointer-events:none;opacity:.8;z-index:2}
 .cas .cs-reels.hit .cs-reel{box-shadow:0 0 0 2px #ffd36a,0 0 14px #ffb23a}
@@ -1188,7 +1190,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.3.0446</div>
+    <div class="ver" id="verT">v0.6.3.0447</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -5677,7 +5679,7 @@ function townPreload(){ try{ const T=getTown(), u=['img/town_bg.webp','img/town_
     if(lv('tw')>=1)u.push('img/town_tower_'+Math.min(5,lv('tw'))+'.webp');
     if(lv('al')>=1)u.push('img/town_altar_'+Math.min(5,lv('al'))+'.webp');
     if(lv('mill')>=1){ const s=Math.max(1,Math.min(5,Math.ceil(lv('mill')/2))); u.push('img/town_mill_body_'+s+'.webp','img/town_mill_blades_'+s+'.webp'); }
-    u.forEach(s=>{ const im=new Image(); im.src=s; TPRE.push(im); }); }catch(e){} }
+    u.forEach(s=>{ const im=new Image(); im.src=s; TPRE.push(im); }); casSymImg(); }catch(e){} }
 setTimeout(()=>{ (window.requestIdleCallback||setTimeout)(townPreload); },4000);
 function townBub(k){ const B=getTown()[k], D=TOWN_B[k], lv=B.lv|0; if(lv<1)return null;
   if(D.lab){ labTick(); const busy=['a','b'].find(q=>B[q].e>0); if(busy)return {tx:`⏳ ${LAB_R[busy].n} ${labLeft(B[busy].e-Date.now())}`,cls:'g'}; return (B.a.l+B.b.l)?{tx:`🧱 Lv.${B.a.l} · 🔧 Lv.${B.b.l}`,cls:''}:{tx:'🔬 연구하기',cls:'g'}; }
@@ -5702,6 +5704,9 @@ function townSlot(k,pos){ pos=pos||''; const B=getTown()[k], D=TOWN_B[k], lv=B.l
    일반(99%): 절반은 조각(그림자/각성 반반, 1~20개) · 절반은 꽝(보상 없음)
    대박 조각 0.5%: 조각 100개 (7 7 7 + 폭죽) · 대박 골드 0.5%: 3,000,000G (💎 💎 💎 + 금화 비) */
 const CAS_COST=100000, CAS_JP_SHARD=100, CAS_JP_GOLD=3000000, CAS_JP_P=.005;
+/* 슬롯 심볼 그림(스프라이트 1장): 받아지기 전엔 이모지로 보여주다가, 다 받아지면 그림으로 바꿔요 */
+let CASYM=0; const casImg=new Image();
+function casSymImg(){ if(casImg.src)return; casImg.onload=()=>{ CASYM=1; const m=$('#modal'); if(m&&m.classList.contains('cas'))m.classList.add('si'); }; casImg.onerror=()=>{ CASYM=-1; }; casImg.src='img/cas_sym.webp'; }
 const CAS_SYM={sh:'🌑',aw:'✦',gd:'💰',j7:'7',dm:'💎',it:'🎲',gm:'💠'}, CAS_FILL=['sh','aw','gd','j7','dm','gd','sh','aw','gd','it','gm'];
 const CAS_PN={cas_wpn:'무기',cas_armor:'갑옷',cas_amu:'목걸이'};
 const CAS_SAY={
@@ -5806,7 +5811,7 @@ function casinoModal(){
         const stop=()=>{ n++; if(n===2&&jp){ card.classList.add('shake'); say('tense'); vib([40,70,40,70],true); } if(n===3){ reels.classList.remove('blur'); setTimeout(()=>reveal(o),jp?450:220); } };
         spinReel(els[0],(Array.isArray(sym)?sym[0]:sym),1250,3,()=>{ stop(); }); spinReel(els[1],(Array.isArray(sym)?sym[1]:sym),1850,3,()=>{ stop(); }); spinReel(els[2],(Array.isArray(sym)?sym[2]:sym),jp?4200:2500,jp?5:3,()=>{ stop(); }); },700); };
     btn.onclick=go; lever.onclick=go; });
-  $('#modal').classList.add('cas'); }
+  casSymImg(); $('#modal').classList.add('cas'); if(CASYM===1)$('#modal').classList.add('si'); }
 function renderTown(){ townUpTick(); const S=getStore(), now=Date.now(); let ch=false; { const L=getTown().lab; if((L.rf|0)>0){ townMsg=`🧪 연구소 개편 · 🌑 조각 ${L.rf}개 환급`; L.rf=0; saveTown(); } const M=getTown().mill; if((M.rf|0)>0){ townMsg=`✦ 풍차 골드 전환 · 조각 ${M.rf}개 환급`; M.rf=0; saveTown(); } } for(const k of ['tw','al','mill'])if(townTick(k,now))ch=true; if(ch)saveTown();
   $('#itemPop').hidden=true; $('#ptsBar').hidden=true; $('#sheetTabs').hidden=true; $('#sheetT').innerHTML='🏘️ 마을';
   const b=$('#sheetB'); b.className='sbody town';
