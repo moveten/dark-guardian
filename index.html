@@ -1212,7 +1212,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.3.0457</div>
+    <div class="ver" id="verT">v0.6.3.0458</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -2632,7 +2632,7 @@ function castleInit(){ const S=G.stg; if(!S||S.raid){ G.castle=null; return; } c
 const CAS_MS=[30,50,70,90];   /* 성 파괴 단계 메시지 */
 function casAlert(){ const el=$('#casAl'), h=$('#hCastle'); if(!el||!h||h.hidden)return; const b=el.parentNode.getBoundingClientRect(), r=h.getBoundingClientRect(); el.style.top=Math.round(r.bottom-b.top+4)+'px'; el.classList.remove('on'); void el.offsetWidth; el.classList.add('on'); h.classList.add('atk'); clearTimeout(el._t); el._t=setTimeout(()=>{ el.classList.remove('on'); h.classList.remove('atk'); },2400); }
 function casMs(p){ const el=$('#casMs'); if(!el)return; el.innerHTML=`🏰 성 ${p}% 파괴!<small>남은 성 체력 ${100-p}%</small>`; el.classList.remove('on'); void el.offsetWidth; el.classList.add('on'); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('on'),1800); }
-function castleHit(raw){ const c=G.castle; if(!c||c.hp<=0||G.mode==='guest'||G.phase==='clear'||G.phase==='win'||G.phase==='lose')return;
+function castleHit(raw){ const c=G.castle; if(!c||c.hp<=0||c.inv||G.mode==='guest'||G.phase==='clear'||G.phase==='win'||G.phase==='lose')return;
   const v=Math.min(c.hp,Math.max(0,raw*(1-(c.def||0)))); if(v<=0)return; c.hp-=v; c.fl=.16;
   if(c.hp>0&&G.inGame){ if(T-(c.alT==null?-99:c.alT)>=6){ c.alT=T; casAlert(); pushEv(['cat']); }   /* 성이 맞는 동안 6초에 한 번 붉은 경고 */
     const dp=(1-c.hp/c.max)*100, n=CAS_MS.filter(x=>x<=dp+1e-6).length; if(n>(c.msN|0)){ c.msN=n; casMs(CAS_MS[n-1]); pushEv(['cms',CAS_MS[n-1]]); } }
@@ -2642,7 +2642,7 @@ function castleHit(raw){ const c=G.castle; if(!c||c.hp<=0||G.mode==='guest'||G.p
   if(c.hp<=0)castleFall(); }
 function castleFall(){ if(G.endShown||G.phase==='lose')return; announce('🏰 성이 무너졌어요!','#ff6a4a'); sfx('boss'); G.shake=Math.max(G.shake,1); G.flash=Math.max(G.flash||0,.5);
   for(let i=0;i<3;i++)later(i*.18,()=>{ efx.push({k:'ring',x:VX+rand(-40,40),y:VY+rand(-30,10),r0:10,r1:130,t:0,life:.6,col:i%2?'#ffb070':'#ff6a3a',w:14}); burst(VX+rand(-50,50),VY+rand(-40,10),'#c9b8a0',36,420); impact(VX,VY-20,'255,150,80',260); });
-  G.lostCastle=true; if(['prep','wave','boss'].includes(G.phase)){ G.lostBoss=G.phase==='boss'; G.phase='lose'; setTimeout(()=>showEnd(),1500); } }
+  G.lostCastle=true; if(['prep','wave','boss'].includes(G.phase)){ G.lostBoss=G.phase==='boss'; G.phase='lose'; setTimeout(()=>{ if(G.phase==='lose')showEnd(); },1500); } }   /* 1.5초 사이에 우두머리를 쓰러뜨리면(phase가 clear로 바뀌면) 패배 화면을 띄우지 않음 */
 function castleRepair(){ const c=G.castle; if(!c||c.hp<=0||c.hp>=c.max)return; const v=Math.min(c.max-c.hp,Math.max(1,Math.round(c.max*(c.fix||CAS_FIX)))); c.hp+=v; c.msN=Math.min(c.msN|0,CAS_MS.filter(x=>x<=(1-c.hp/c.max)*100+1e-6).length);   /* 수리하면 파괴 단계도 되돌아가요 */
   addNum(VX,VY-78,'🏰 +'+Math.max(1,Math.round(v)),'#8be07a',true); efx.push({k:'ring',x:VX,y:VY+10,r0:20,r1:110,t:0,life:.6,col:'#8be07a',w:8}); burst(VX,VY-10,'#a9f0a0',18,160); }
 /* 매 프레임: 깜빡임·체력바 지연, 단계가 바뀌는 순간의 흙먼지 */
@@ -2701,7 +2701,7 @@ function updateWaves(dt){
   }
   if(G.allMode&&(G.phase!=='wave'&&G.phase!=='prep'||(G.phase==='prep'&&G.wave>=G.TW)))G.allMode=false;
   if(G.phase==='clear'){ G.clearT-=dt; if(G.clearT<=0)endClear(); }
-  if(G.mode!=='guest'&&me.out&&(!ally||ally.lobby||ally.out)&&['prep','wave','boss'].includes(G.phase)){G.lostBoss=G.phase==='boss'; G.phase='lose';setTimeout(()=>showEnd(),900);}
+  if(G.mode!=='guest'&&me.out&&(!ally||ally.lobby||ally.out)&&['prep','wave','boss'].includes(G.phase)){G.lostBoss=G.phase==='boss'; G.phase='lose';setTimeout(()=>{ if(G.phase==='lose')showEnd(); },900);}
 }
 function endClear(){ if(G.phase!=='clear')return; G.phase='win'; showEnd(); }
 function playersForAI(){
@@ -2947,7 +2947,8 @@ function killMob(m){
   if(m.boss&&!MT[m.type].raid&&G.mode!=='guest'&&!G.gemDone&&/^\d-\d$/.test(S.id)){ G.gemDone=true; if(Math.random()<gemP(S)){ const gt=Math.max(1,Math.min(3,Math.ceil((S.icap+1)/40))); pushEv(['gem',gt,Math.round(m.x),Math.round(m.y)]); gemDrop(gt,Math.round(m.x),Math.round(m.y)); } }   /* 스테이지 우두머리(1-1~3-5): 방장이 한 번만 30% 굴림 → 성공하면 모두에게 보석 하나씩 (종류는 각자 무작위) */
   if(m.boss&&m.rk){ const alive=G.mobs.filter(o=>o.rk&&!o.dead); if(alive.length){ G.sib=(G.sib||0)+1; for(const o of alive){ o.dmg=o.dmg0*(1+.1*G.sib); spark(o.x,o.y,'#ff3a2a',40); }
       announce(`💢 ${MT[m.type].n} 쓰러짐! 남은 형제의 피해 +${10*G.sib}%`,'#ff6a5a'); banner('💢 형제의 분노',`남은 형제의 피해 +${10*G.sib}%`); pushEv(['sib',G.sib]); sfx('boss'); return; } }
-  if(m.boss){ G.phase='clear'; if(!me.dead)voice('win'); G.clearT=CLEAR_T; me.god=Math.max(me.god||0,CLEAR_T+5); me.poison=0; if(!me.dead)addNum(me.x,me.y-50,'🛡️ 무적','#9fd0ff',true); for(const o of G.mobs) if(o!==m)o.dead=true; banner('우두머리 처치!',`${CLEAR_T}초 안에 전리품을 주워 보세요`); }
+  if(m.boss){ { const c=G.castle; if(c){ if(G.phase==='lose'&&!G.endShown&&c.hp<=0){ c.hp=Math.max(1,Math.round(c.max*.02)); G.lostCastle=false; G.lostBoss=false; announce('🏰 성이 간신히 버텼어요!','#9fe08a'); } c.inv=true; } }   /* 우두머리를 쓰러뜨린 순간 성도 무적 (그 직전 1.5초 안에 성이 무너졌어도 처치가 우선) */
+    G.phase='clear'; if(!me.dead)voice('win'); G.clearT=CLEAR_T; me.god=Math.max(me.god||0,CLEAR_T+5); me.poison=0; if(!me.dead)addNum(me.x,me.y-50,'🛡️ 무적','#9fd0ff',true); for(const o of G.mobs) if(o!==m)o.dead=true; banner('우두머리 처치!',`${CLEAR_T}초 안에 전리품을 주워 보세요`); }
 }
 
 /* ================= KILL / LOOT / XP ================= */
