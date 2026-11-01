@@ -1218,7 +1218,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.3.0460</div>
+    <div class="ver" id="verT">v0.6.3.0461</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -5127,8 +5127,7 @@ function psSync(){ if(!me||!me.ps||!Array.isArray(me.ps.s))return; me.ps.s[me.ps
 function psHold(it){ if(!it||!it.id||!me||!me.ps||!Array.isArray(me.ps.s))return false; return me.ps.s.some(t=>t&&Object.values(t).includes(it.id)); }   /* 세팅에 들어 있는 아이템: 판매·합성·강화재료에서 제외 */
 function psSwitch(n){
   const d=psData(), cur=d.cur; if(n===cur||(n!==0&&n!==1))return; psSync();
-  const tg=d.s[n];
-  if(!tg){ d.s[n]=psSnap(); d.cur=n; saveChar(); renderBag(); sheetToast(`✔ 아이템세팅 ${PSN[n]} 시작 · 지금 장비를 복사했어요. 바꾸면 자동 저장돼요`,'#9cf0d4'); return; }
+  const first=!d.s[n], tg=d.s[n]||{};   /* 처음 누른 세팅은 빈 장비칸으로 시작 (끼고 있던 장비는 가방으로) */
   const pool=[]; for(const k of EQSL){ if(me.eq[k])pool.push({it:me.eq[k],k}); } me.inv.forEach((it,i)=>{ if(it&&!isShard(it)&&it.slot!=='mat')pool.push({it,i}); });
   const used=new Set(), want={}; let miss=0;
   for(const k of EQSL){ const id=tg[k]; if(id==null)continue;
@@ -5143,7 +5142,7 @@ function psSwitch(n){
   for(const k of EQSL){ const o=want[k]; me.eq[k]=o?o.it:null; if(o)delete o.it.isNew; }
   const hpR=me.hp/me.D.maxHp, mpR=me.mp/me.D.maxMp; d.cur=n; me.D=derive(me); me.hp=me.D.maxHp*hpR; me.mp=me.D.maxMp*mpR;
   selItem=null; saveChar(); renderBag(); uiDirty=true; buildSkills();
-  const c1=calcCP(me); sheetToast(`✔ 아이템세팅 ${PSN[n]} 적용 · 전투력 ${cp0.toLocaleString()} → ${c1.toLocaleString()}${miss?` (못 찾은 ${miss}칸은 그대로)`:''}`,miss?'#ffb259':'#9cf0d4');
+  const c1=calcCP(me); sheetToast(first?`✔ 아이템세팅 ${PSN[n]} 시작 · 장비칸이 비었어요. 장비를 끼면 자동 저장돼요`:`✔ 아이템세팅 ${PSN[n]} 적용 · 전투력 ${cp0.toLocaleString()} → ${c1.toLocaleString()}${miss?` (못 찾은 ${miss}칸은 그대로)`:''}`,miss?'#ffb259':'#9cf0d4');
 }
 function renderStat(){
   const SKM=sheetMode==='skill'||sheetMode==='passive', PAS=sheetMode==='passive'; markTabs(); sheetHead();
