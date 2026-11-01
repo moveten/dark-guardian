@@ -1212,7 +1212,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.3.0456</div>
+    <div class="ver" id="verT">v0.6.3.0457</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -5032,7 +5032,7 @@ function itemLines(it,opt){
   const bt=baseText(it); if(bt)s+=`<div>${bt}</div>`;
   if(BASEFX[it.base]&&it.slot==='weapon') s+=`<div class="meta" style="color:#9fd0ff">▪ ${BASEFX[it.base].t}</div>`; s+=wpPenLine(it);
   if(it.sp&&SPFX[it.sp]) s+=`<div style="margin:4px 0;color:#ffb14a;font-weight:700">★ 특수 효과: ${SPFX[it.sp].d}</div>`;
-  if(it.rar===4&&it.sp&&SPFX[it.sp]&&SPFX[it.sp].aw){ const n=(me.D&&me.D.ac)|0, on=c=>c?'#d9c6ff':'#8a8a8a'; s+=`<div style="margin:4px 0;font-size:12px;line-height:1.55"><b style="color:#c8a8ff">✦ 각성 세트 (${n}/7)</b><br><span style="color:${on(n>=2)}">2개: 최대 생명력 +10%, 최대 마나 +250</span><br><span style="color:${on(n>=4)}">4개: 보스에게 주는 피해 +20%, 파괴 오브젝트에 주는 피해 +25%</span><br><span style="color:${on(n>=7)}">7개: 모든 스킬 +3, 피해 +15%, 생명력 50% 이하가 되면 8초간 피해 +30% · 공격 속도 +20% (재사용 45초)</span></div>`; }
+  if(it.rar===4&&it.sp&&SPFX[it.sp]&&SPFX[it.sp].aw){ const n=(me.D&&me.D.ac)|0, on=c=>c?'#d9c6ff':'#8a8a8a'; s+=`<div style="margin:4px 0;font-size:12px;line-height:1.55"><span style="color:${on(n>=2)}">2개: 최대 생명력 +10%, 최대 마나 +250</span><br><span style="color:${on(n>=4)}">4개: 보스에게 주는 피해 +20%, 파괴 오브젝트에 주는 피해 +25%</span><br><span style="color:${on(n>=7)}">7개: 모든 스킬 +3, 피해 +15%, 생명력 50% 이하가 되면 8초간 피해 +30% · 공격 속도 +20% (재사용 45초)</span></div>`; }
   else if(it.sp&&SPFX[it.sp]&&SPFX[it.sp].cas){ const n=(me&&me.D&&me.D.cs)|0, on=c=>c?'#d9c6ff':'#8a8a8a'; s+=`<div style="margin:4px 0;font-size:12px;line-height:1.55"><b style="color:#c8a8ff">🎲 행운의 도박꾼 세트 (${n}/3)</b> <span style="color:#8a8a8a">🎰 달빛 도박장 전용</span><br><span style="color:${on(n>=2)}">2개: 드롭률 +20%, 치명타 확률 +5%</span><br><span style="color:${on(n>=3)}">3개: 잭팟 타격(기본 공격이 7% 확률로 피해 3배) · 모든 스킬 +3 · 이동 속도 +30%</span></div>`; }
   else if(it.rar===4&&it.sp&&SPFX[it.sp]&&SPFX[it.sp].hero){ const n=(me.D&&me.D.hc)|0, on=(c,a)=>c?'#d9c6ff':'#8a8a8a'; s+=`<div style="margin:4px 0;font-size:12px;line-height:1.55"><b style="color:#b98cff">☾ 그림자 세트 (${n}/7)</b><br><span style="color:${on(n>=2)}">2개: 최대 마나 +200</span><br><span style="color:${on(n>=3)}">3개: 레이드 보스에게 주는 피해 +15%</span><br><span style="color:${on(n>=7)}">7개: 레이드 보스에게 주는 피해 추가 +15% (합계 +30%) · 모든 스킬 +3</span></div>`; }
   const ex=enhOptText(it);
@@ -5957,9 +5957,9 @@ function gemSockUi(b){ if(!gemSock)return; const g=gemSock.it;
     el.onclick=()=>{ if(!it)return; if(ok)gemSockConfirm(it); else toast(!SMITH_SLOTS.includes(it.slot)?'무기·갑옷·투구만 박을 수 있어요':it.sk?'이미 보석이 박혀 있어요':'소켓이 없는 장비예요','#ffb259'); }; }); }
 /* 장비 상세의 [소켓박기]: 가방 기타 칸의 보석 중 하나를 고르면 확인창으로 이어져요 */
 function gemPick(it){ if(!it||!gemTgt(it))return;
-  const L=me.misc.map((g,i)=>g&&isGem(g)?{g,i}:null).filter(Boolean).sort((a,b)=>gemTier(b.g)-gemTier(a.g));
+  const L=[], seen={}; me.misc.forEach((g,i)=>{ if(!g||!isGem(g))return; const k=g.gk+'_'+gemTier(g); if(seen[k]){ seen[k].n++; return; } seen[k]={g,i,n:1}; L.push(seen[k]); }); L.sort((a,b)=>gemTier(b.g)-gemTier(a.g));   /* 같은 종류·등급 보석은 한 줄로 (개수만 표시) */
   if(!L.length){ sheetToast('가방 기타 칸에 보석이 없어요','#ffb259'); return; }
-  modal(`<h3>💎 박을 보석 고르기</h3><p class="meta" style="margin:0 0 8px;font-size:12.5px">→ <b style="color:${RARC[it.rar]}">${esc(it.name)}</b></p><div class="col" style="max-height:52vh;overflow-y:auto;touch-action:pan-y">${L.map((o,n)=>`<button class="btn" data-gi="${n}" style="text-align:left;display:flex;align-items:center;gap:10px;padding:8px 10px"><img src="img/gem_${o.g.gk}_${gemTier(o.g)}.png" alt="" width="36" height="36" style="flex:none"><span style="min-width:0"><b style="color:${GEM_C[o.g.gk]}">${esc(o.g.name)}</b><br><small style="color:#afeeee">${esc(gemOptText(o.g))}</small></span></button>`).join('')}<button class="btn" id="gpX">취소</button></div>`,m=>{
+  modal(`<h3>💎 박을 보석 고르기</h3><p class="meta" style="margin:0 0 8px;font-size:12.5px">→ <b style="color:${RARC[it.rar]}">${esc(it.name)}</b></p><div class="col" style="max-height:52vh;overflow-y:auto;touch-action:pan-y">${L.map((o,n)=>`<button class="btn" data-gi="${n}" style="text-align:left;display:flex;align-items:center;gap:10px;padding:8px 10px"><img src="img/gem_${o.g.gk}_${gemTier(o.g)}.png" alt="" width="36" height="36" style="flex:none"><span style="min-width:0"><b style="color:${GEM_C[o.g.gk]}">${esc(o.g.name)}</b>${o.n>1?` <span style="color:#a89a84;font-size:12px">×${o.n}</span>`:''}<br><small style="color:#afeeee">${esc(gemOptText(o.g))}</small></span></button>`).join('')}<button class="btn" id="gpX">취소</button></div>`,m=>{
     m.querySelector('#gpX').onclick=closeModal;
     m.querySelectorAll('[data-gi]').forEach(b=>b.onclick=()=>{ const o=L[+b.dataset.gi]; if(me.misc[o.i]!==o.g)return; gemSock={it:o.g,ix:o.i}; gemSockConfirm(it,1); }); }); }
 function gemSockConfirm(it,fromPick){ const g=gemSock&&gemSock.it; if(!g||!gemTgt(it))return;
