@@ -1279,7 +1279,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.3.0476</div>
+    <div class="ver" id="verT">v0.6.4.0477</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3184,7 +3184,7 @@ function dropItem(it,x,y){
   if(it.rar>=2&&G.inGame){ const gx=ground[ground.length-1].x, gy=ground[ground.length-1].y, col=RARC[it.rar]; efx.push({k:'ring',x:gx,y:gy+6,r0:6,r1:it.rar>=4?96:it.rar===3?70:46,t:0,life:it.rar>=3?.55:.4,col,w:it.rar>=3?7:4}); if(it.rar>=3){ efx.push({k:'ring',x:gx,y:gy+6,r0:4,r1:it.rar>=4?60:40,t:0,life:.4,col:'#fff4d0',w:3}); impact(gx,gy,it.rar>=4?'255,80,120':'255,190,80',it.rar>=4?150:110); } burst(gx,gy,col,it.rar>=4?26:it.rar===3?16:7,it.rar>=3?240:160); }   /* 레어 이상: 떨어질 때 충격파 고리와 빛 알갱이 */
   if(ground.length>90){const i=ground.findIndex(g=>g.it.rar===0&&!isGem(g.it)); ground.splice(i>=0?i:Math.max(0,ground.findIndex(g=>!isGem(g.it))),1); G.stCap=(G.stCap|0)+1;}
 }
-const gemP=S=>{ const c=Math.max(1,(S&&S.icap)|0); return Math.min(30,Math.round(c/Math.ceil((c+1)/40)))/100; };   /* 스테이지 우두머리 보석 드롭 확률: min(30, round(아이템 레벨 상한 ÷ ceil((상한+1)÷40)))% */
+const gemP=S=>{ const c=Math.max(1,(S&&S.icap)|0); return Math.min(100,Math.max(12,Math.abs(c-79)+3))/100; };   /* 스테이지 우두머리 보석 드롭 확률: max(12, |아이템 레벨 상한 − 79| + 3)% */
 function gemDrop(tier,x,y){ const gk=pick(GEM_KINDS), it=mkGem(gk,tier); dropItem(it,x+rand(-26,26),y+rand(-26,26)); const g=ground[ground.length-1], col=GEM_C[gk];
   toast(`💎 ${it.name}이(가) 떨어졌어요!`,col,'drop'); sfx('rare'); if(G.inGame&&g){ efx.push({k:'ring',x:g.x,y:g.y+6,r0:6,r1:58,t:0,life:.5,col,w:5}); burst(g.x,g.y,col,10,200); } }
 function gainXp(xp){
@@ -4412,8 +4412,8 @@ const TUTS=[
  [ /* 1-3 */
   {t:'가방 열기',b:'아래 🎒 가방 버튼을 눌러 가방을 열어 보세요. 열려 있는 동안 게임은 잠시 멈춰요.',...tutOpenTab('bBag','bag')},
   {t:'장비 착용',b:'가방 칸의 아이템을 누르면 비교 창이 열려요. 초록 ▲가 붙은 아이템이 지금 장비보다 좋아요. [장착]을 눌러 입어 보세요.',can:()=>me.inv.some(it=>it&&!isShard(it)&&canWear(it)),b2:'가방 칸의 아이템을 누르면 비교 창이 열려요. 초록 ▲가 붙은 아이템이 지금 장비보다 좋고, [장착]으로 입어요. 레벨·능력치가 모자라면 입을 수 없어요.',pre:S=>{S.sg=tutEqSig();},tg:()=>tutQ('#modal [data-rk]')||tutQ('#aEquip')||(tutBag(it=>canWear(it)&&!!document.querySelector('#sheetB [data-inv="'+me.inv.indexOf(it)+'"] .up'))||tutBag(canWear))||tutQ('#bBag'),tgs:()=>[...document.querySelectorAll('#modal [data-rk]')],nt:()=>tutQ('#modal [data-rk]')?'반지가 두 개라서, 바꿀 반지를 골라 주세요.':'',ck:S=>tutEqSig()!==S.sg},
-  {t:'한꺼번에 팔기',b:'필요 없는 아이템은 [판매·도감]에서 한 번에 팔 수 있어요. 잠근 🔒 아이템과 장착 중인 장비는 팔리지 않아요.',tg:()=>tutQ('#aBulk')||tutQ('#bBag'),ok:1},
-  {t:'자동 판매 · 자동 합성',b:'[판매·도감]의 [자동 판매]는 고른 등급 이하를 줍는 즉시 팔고, [자동 합성]은 같은 등급 아이템을 모아 더 좋은 등급으로 합쳐 줘요. 가방이 가득 차는 걸 막아 줘요.',tg:()=>tutQ('#aSyn'),ok:1}
+  {t:'한꺼번에 팔기',b:'필요 없는 아이템은 [판매]로 한 번에 팔 수 있어요. 잠근 🔒 아이템과 장착 중인 장비는 팔리지 않아요.',tg:()=>tutQ('#aBulk')||tutQ('#bBag'),ok:1},
+  {t:'자동 판매 · 자동 합성',b:'[판매]창의 [자동 판매]는 고른 등급 이하를 줍는 즉시 팔고, [자동 합성]은 같은 등급 아이템을 모아 더 좋은 등급으로 합쳐 줘요. 가방이 가득 차는 걸 막아 줘요.',tg:()=>tutQ('#aSyn'),ok:1}
  ],
  [ /* 1-4 */
   {t:'가방 열기',b:'강화하려면 먼저 🎒 가방을 열어요.',...tutOpenTab('bBag','bag')},
@@ -4935,6 +4935,7 @@ function renderPet(){
     ${petSkillsHtml(lv)}
     <div class="pt-hint">펫은 이 캐릭터 전용이에요 · 다른 캐릭터로 옮길 수 없어요</div>`; }
 let dexTab='sp'; const dexClosed=new Set();
+function dexOpen(){ flushSortedNew(); sheetMode='dex'; selItem=null; bagSel=null; rerender(); $('#sheetB').scrollTop=0; }
 function dexCell(k,p,tone){ const S=SPFX[k], n=(p.dx&&p.dx[k])|0, im=UNQIMG[S.n];
   return `<div class="dxc ${tone}${n?' got':''}">${n>1?`<i class="dxn">×${n}</i>`:''}<div class="dxi">${im?`<img alt="" src="img/${im}.png" onerror="this.style.visibility='hidden'">`:''}</div><b>${n?esc(S.n):'???'}</b></div>`; }
 function dexGroup(id,title,ico,keys0,p,tone){ const keys=dexKeysOf(keys0,p), got=keys.filter(k=>(p.dx&&p.dx[k]|0)>0).length, open=!dexClosed.has(id);
@@ -5124,7 +5125,7 @@ function renderBag(){
   const eqOrder=['weapon','armor','helm','amulet','ring1','ring2'].concat(['shield']);
   if(gemSock){ bagTab='eq'; cellSel=true; }
   let h='<div class="bagtop" style="display:flex;flex-direction:column;gap:10px;min-width:0"><div class="eqp"><div class="eq">'+eqOrder.map(k=>{const it=me.eq[k]; return `<div style="position:relative">${cellHtml(it,'slot',`data-eq="${k}"`)}<div class="sl" style="position:absolute;bottom:2px;left:0;right:0;font-size:9.5px;color:var(--mute);text-align:center;pointer-events:none">${eqLbl(k)}</div></div>`;}).join('')+'</div>'+(gemSock||bagSel?'':psTabs())+'</div>';
-  h+=`<div class="meta psm" style="font-size:12px;color:var(--mute)">⚔️ 전투력 <b style="color:#ffd84a">${calcCP(me).toLocaleString()}</b> <span style="color:#6b5f50">·</span> 🛡️ Lv 합 <b style="color:#ffd84a">${eqSum(me.eq)}</b></div><div class="bagbtns" style="display:flex;flex-wrap:nowrap;gap:4px"><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap" data-sort="${SORTM[(sortCur()+1)%3]}">정렬(${SORTN[sortCur()]})</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap;${asLv>=0?`border-color:${RARC[asLv]};color:${RARC[asLv]};background:${['rgba(233,226,212,.14)','rgba(90,120,255,.28)','rgba(255,214,60,.24)'][asLv]};box-shadow:0 0 8px ${['rgba(233,226,212,.3)','rgba(110,140,255,.6)','rgba(255,214,60,.55)'][asLv]};font-weight:800`:''}" id="aBulk">판매·도감${asLv>=0?' ('+ASN[asLv+1]+')':''}</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap;${syLv>=0?`border-color:#c9a0ff;color:#d9b8ff;background:rgba(150,90,255,.22);box-shadow:0 0 8px rgba(150,90,255,.5);font-weight:800`:''}" id="aSyn" aria-pressed="${syLv>=0}">자동합성 ${syLv>=0?'ON':'OFF'}</button></div>`;
+  h+=`<div class="meta psm" style="font-size:12px;color:var(--mute)">⚔️ 전투력 <b style="color:#ffd84a">${calcCP(me).toLocaleString()}</b> <span style="color:#6b5f50">·</span> 🛡️ Lv 합 <b style="color:#ffd84a">${eqSum(me.eq)}</b></div><div class="bagbtns" style="display:flex;flex-wrap:nowrap;gap:4px"><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap" data-sort="${SORTM[(sortCur()+1)%3]}">정렬(${SORTN[sortCur()]})</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap;${asLv>=0?`border-color:${RARC[asLv]};color:${RARC[asLv]};background:${['rgba(233,226,212,.14)','rgba(90,120,255,.28)','rgba(255,214,60,.24)'][asLv]};box-shadow:0 0 8px ${['rgba(233,226,212,.3)','rgba(110,140,255,.6)','rgba(255,214,60,.55)'][asLv]};font-weight:800`:''}" id="aBulk">판매(${ASN[asLv+1]})</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap;${syLv>=0?`border-color:#c9a0ff;color:#d9b8ff;background:rgba(150,90,255,.22);box-shadow:0 0 8px rgba(150,90,255,.5);font-weight:800`:''}" id="aSyn" aria-pressed="${syLv>=0}">자동합성 ${syLv>=0?'ON':'OFF'}</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap" id="aDex">📖 도감</button></div>`;
   { const bi=h.indexOf('<div class="bagbtns"'), bs0='style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap"';
     h=h.slice(0,bi)+(gemSock?gemSockBar():tabStrip(me.inv,me.misc,bagTab,gsOn)+(bagTab==='misc'?`<div class="bagbtns" style="display:flex;flex-wrap:nowrap;gap:4px"><button class="btn sm" ${bs0} data-msort="1">정렬(등급순)</button><button class="btn sm" ${bs0} id="aMBulk">일괄 판매</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap;${gsOn?`font-weight:800;border-color:#7fe0c0;color:#9cf0d4;background:rgba(60,200,150,.18);box-shadow:0 0 8px rgba(60,200,150,.45)`:''}" id="aGSyn" aria-pressed="${gsOn}">💎 보석합성 ${gsOn?'ON':'OFF'}</button></div>`:h.slice(bi))); }
   cellSel=!!(bagSel||gemSock); let invH=''; try{ invH=bagTab==='misc'?me.misc.map((it,i)=>cellHtml(it,'cell',`data-mi="${i}"`)).join(''):me.inv.map((it,i)=>cellHtml(it,'cell',`data-inv="${i}"`)).join(''); }finally{ cellSel=false; }
@@ -5138,7 +5139,7 @@ function renderBag(){
   const asl=pq('#aSell'); if(asl)asl.onclick=()=>sellBtn(asl);
   $('#itemPop').querySelectorAll('[data-lk]').forEach(alk=>alk.onclick=()=>{ const it=selItem&&selItem.it; if(!it)return; it.lock=!it.lock; saveChar(); sheetToast(it.lock?'🔒 잠갔어요. 일괄 판매에서 제외돼요':'🔓 잠금을 풀었어요'); renderBag(); });
   b.querySelectorAll('[data-sort]').forEach(e=>e.onclick=()=>{ if(sortFresh){ sortFresh=false; sortInv(SORTM[sortCur()]); } else sortInv(e.dataset.sort); });
-  { const q=b.querySelector('#aBulk'); if(q)q.onclick=()=>bulkSell(); const aa=b.querySelector('#aAsh'); if(aa)aa.onclick=()=>ashardModal(); const a2=b.querySelector('#aSyn'); if(a2)a2.onclick=synToggle; }
+  { const q=b.querySelector('#aBulk'); if(q)q.onclick=()=>bulkSell(); const ad=b.querySelector('#aDex'); if(ad)ad.onclick=dexOpen; const aa=b.querySelector('#aAsh'); if(aa)aa.onclick=()=>ashardModal(); const a2=b.querySelector('#aSyn'); if(a2)a2.onclick=synToggle; }
   b.querySelectorAll('[data-bt]').forEach(e=>e.onclick=()=>{ bagTab=e.dataset.bt; selItem=null; rerender(); $('#sheetB').scrollTop=0; });
   b.querySelectorAll('[data-mi]').forEach(el=>el.onclick=()=>{ const i=+el.dataset.mi, it=me.misc[i]; if(it){ if(it.isNew){ delete it.isNew; saveChar(); } selItem={it,misc:i}; renderBag(); } });
   { const ms=b.querySelector('[data-msort]'); if(ms)ms.onclick=()=>{ sortedNew.add('misc'); sortMisc(me); }; const mb=b.querySelector('#aMBulk'); if(mb)mb.onclick=()=>bulkSellMisc(me); const gs=b.querySelector('#aGSyn'); if(gs)gs.onclick=gemSynToggle; }
@@ -5482,11 +5483,11 @@ function bulkSell(P){ P=P||me; const mine=P===me;
     m.querySelector('#bsGo').disabled=!f.n; uAsk=false; eAsk=false; m.querySelector('#bsGo').textContent='일괄 판매하기'; };
   const chips=()=>[[-1,'끔'],[0,'일반↓'],[1,'매직↓'],[2,'레어↓']].map(o=>`<button class="btn sm${asLv===o[0]?' primary':''}" data-a="${o[0]}" style="flex:1 1 0;min-width:0;padding:8px 2px;font-size:13px;${o[0]>=0&&asLv===o[0]?`color:${RARC[o[0]]};border-color:${RARC[o[0]]};font-weight:800`:''}">${o[1]}</button>`).join('');
   const rows=[0,1,2,3].map(r=>`<label class="toggle" style="display:flex;gap:8px;align-items:center;font-size:14px;padding:6px 8px;border:1px solid var(--line2);border-radius:8px"><input type="checkbox" data-r="${r}" ${r<=1&&cnt(r)?'checked':''} ${cnt(r)?'':'disabled'}> <span style="color:${RARC[r]};font-weight:700">${RARN[r]}</span> <span style="margin-left:auto;color:var(--mute)">${cnt(r)}개${ecnt(r)?` <span style="color:#ffb259">(강화 ${ecnt(r)})</span>`:''} · ${val(r)}G</span></label>`).join('');
-  modal(`<h3>🧺 ${mine?'판매 · 도감':'일괄 판매'}</h3><p class="meta" style="margin:0 0 6px">🔒 잠근 아이템은 제외돼요</p><div class="col" style="gap:6px">${rows}<div id="bsSum" style="min-height:20px;font-size:14px"></div>${mine?`<button class="btn primary danger" id="bsGo">일괄 판매하기</button><div style="display:flex;align-items:center;gap:6px;margin-top:2px"><b style="font-size:13px;white-space:nowrap">🪙 자동 판매</b><div id="bsAc" style="display:flex;gap:4px;flex:1;min-width:0">${chips()}</div></div><div class="row2"><button class="btn" id="bsDex">📖 도감</button><button class="btn" id="bsNo">닫기</button></div>`:`<div class="row2"><button class="btn" id="bsNo">취소</button><button class="btn primary danger" id="bsGo">일괄 판매하기</button></div>`}</div>`,m=>{
+  modal(`${mine?'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><h3 style="margin:0">🧺 일괄판매</h3><button class="btn sm" id="bsNo" aria-label="닫기" style="min-width:40px;padding:6px 10px">✕</button></div>':'<h3>🧺 일괄 판매</h3>'}<p class="meta" style="margin:0 0 6px">🔒 잠근 아이템은 제외돼요</p><div class="col" style="gap:6px">${rows}<div id="bsSum" style="min-height:20px;font-size:14px"></div>${mine?`<button class="btn primary danger" id="bsGo">일괄 판매하기</button><div style="display:flex;align-items:center;gap:6px;margin-top:2px"><b style="font-size:13px;white-space:nowrap">🪙 자동 판매</b><div id="bsAc" style="display:flex;gap:4px;flex:1;min-width:0">${chips()}</div></div>`:`<div class="row2"><button class="btn" id="bsNo">취소</button><button class="btn primary danger" id="bsGo">일괄 판매하기</button></div>`}</div>`,m=>{
     m.querySelectorAll('[data-r]').forEach(c=>c.onchange=()=>{ const r=+c.dataset.r; if(c.checked)sel.add(r); else sel.delete(r); draw(m); });
     m.querySelector('#bsNo').onclick=closeModal;
     if(mine){ const ac=m.querySelector('#bsAc'), bind=()=>ac.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{ asLv=+b.dataset.a; saveChar(); ac.innerHTML=chips(); bind(); sfx('ui'); if(sheetMode==='bag')renderBag(); }); bind();
-      m.querySelector('#bsDex').onclick=()=>{ closeModal(); flushSortedNew(); sheetMode='dex'; selItem=null; bagSel=null; rerender(); $('#sheetB').scrollTop=0; }; }
+      }
     if(!cnt(0)) sel.delete(0); if(!cnt(1)) sel.delete(1); draw(m);
     m.querySelector('#bsGo').onclick=()=>{ const f=info(); if(!f.n)return; if(sel.has(3)&&!uAsk){ uAsk=true; m.querySelector('#bsGo').textContent='⚠️ 유니크 포함! 한 번 더 누르면 판매'; return; } if(f.e&&!eAsk){ eAsk=true; uAsk=true; m.querySelector('#bsGo').textContent=`⚠️ 강화 아이템 ${f.e}개 포함! 한 번 더 누르면 판매`; return; } let g=0,n=0; P.inv.forEach((it,i)=>{ if(it&&!it.lock&&sel.has(it.rar)){g+=sellInfo(it).total;n++;P.inv[i]=null;} }); P.gold=(P.gold|0)+g; selItem=null; shopMsg=`${n}개 판매 +${g}G`; sfx('coin'); saveSrc(P); uiDirty=true; closeModal(); rerender(); sheetToast&&sheetToast(`${n}개 판매 +${g.toLocaleString()}G`); };
   });
@@ -5629,9 +5630,9 @@ async function rkFetchOne(id){
   if(!r.ok) throw new Error('rank '+r.status); const a=await r.json(); return a[0]||null;
 }
 const RKMON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-/* 랭킹 DB에 기록된 마지막 갱신 시각 → 'last updated - 2026/Nov/02 18:37' (기록이 없으면 N/A) */
+/* 랭킹 DB에 기록된 마지막 갱신 시각 → 'Last updated - 2026/Nov/02 18:37' (기록이 없으면 N/A) */
 function rkUpdLine(row){ const t=row&&row.updated_at?new Date(row.updated_at):null; const p=n=>String(n).padStart(2,'0');
-  return 'last updated - '+(t&&!isNaN(t)?`${t.getFullYear()}/${RKMON[t.getMonth()]}/${p(t.getDate())} ${p(t.getHours())}:${p(t.getMinutes())}`:'N/A'); }
+  return 'Last updated - '+(t&&!isNaN(t)?`${t.getFullYear()}/${RKMON[t.getMonth()]}/${p(t.getDate())} ${p(t.getHours())}:${p(t.getMinutes())}`:'N/A'); }
 function rkFmt(n){ return (n|0).toLocaleString('ko-KR'); }
 const RK_TTL=10*60*1000;
 function rkCacheGet(mode){ try{ const o=JSON.parse(lsGet('dkdef2.rkc2.'+mode)||'null'); if(o&&Array.isArray(o.rows)&&o.t)return o; }catch(e){} return null; }
@@ -5661,13 +5662,14 @@ function rkProfile(row,back){
     const pt=d.pet&&PETS[d.pet.id]?d.pet:null;   /* 장비 칸 맨 끝 빈 자리에 '펫' 칸 */
     if(pt)body+=`<button class="rkgc rkpet" aria-label="펫 ${PETS[pt.id].n}"><div class="rkgi" style="border-color:#ff9a3a;background:#1a0f08;position:relative;overflow:hidden"><img src="img/${PETS[pt.id].im}.png" alt="" style="width:100%;height:100%;object-fit:contain;padding:4px" onerror="this.onerror=null;this.src='img/boss_3_5.png'"><u style="position:absolute;right:3px;bottom:3px;background:#2a1608;color:#ffcf9a;border:1px solid #ff9a3a;border-radius:6px;padding:0 4px;font:800 11px/1.4 sans-serif;text-decoration:none;z-index:3">Lv${Math.max(1,Math.min(PET_MAXLV,pt.lv|0||1))}</u></div><small style="color:#ffcf9a">펫</small></button>`;
     else body+='<div class="rkgc empty"><div class="rkgi"></div><small>펫</small></div>';
-    body+='</div><div class="meta" style="margin:4px 0 8px;text-align:center">'+esc(rkUpdLine(row))+'</div>';
+    body+='</div><div class="meta" id="rkUpd" data-s="0" style="margin:4px 0 8px;text-align:center;cursor:pointer;user-select:none">장비를 누르면 상세 정보가 보여요</div>';
     const st=d.st||[0,0,0,0];
     body+=`<div class="rkst">${[['힘',st[0]],['민첩',st[1]],['체력',st[2]],['에너지',st[3]]].map(([a,b])=>`<div><span>${a}</span><b>${b|0}</b></div>`).join('')}${(d.rows||[]).map(([a,b])=>`<div><span>${esc(String(a))}</span><b>${esc(String(b))}</b></div>`).join('')}</div>`;
   }
   modal(`${rkHeadHtml(row)}<div class="rkpb">${body}</div><div class="row2"><button class="btn primary" id="rkNo">← 랭킹으로</button></div>`,m=>{
     m.onclick=e=>{ if(e.target===m)go(); }; m.querySelector('#rkNo').onclick=go;
     m.querySelectorAll('.rkgc[data-k]').forEach(b=>b.onclick=()=>rkItemDetail(row,b.dataset.k,back));
+    { const u=m.querySelector('#rkUpd'); if(u)u.onclick=()=>{ const on=u.dataset.s!=='1'; u.dataset.s=on?'1':'0'; u.textContent=on?rkUpdLine(row):'장비를 누르면 상세 정보가 보여요'; }; }   /* 누를 때마다 안내 문구 ↔ Last updated 번갈아 */
     const pb=m.querySelector('.rkpet'); if(pb&&d&&d.pet)pb.onclick=()=>petModal(d.pet,()=>rkProfile(row,back)); });
 }
 function rkItemDetail(row,k,back){
@@ -6166,7 +6168,7 @@ function casinoModal(){
       if(jp){ m.classList.remove('flash'); void m.offsetWidth; m.classList.add('flash'); casFx(o.k==='jpg'?'gold':'jackpot'); if(o.k==='jps')setTimeout(()=>casFx('jackpot'),1200); sfx('rare'); setTimeout(()=>sfx('win'),250); vib([80,40,80,40,160],true); say('jp'); }
       else if(o.gold){ casFx('coins'); sfx('coin'); say(o.gold>=30000?'win':'low'); }
       else { casFx('spark'); sfx('coin'); say(o.n>=12?'win':'low'); }
-      const t=o.gold?`💰 ${(o.gold/1000)|0}천G`:`${SHK.e}${o.n}`; casRecent.unshift({t:(jp?'🎉 ':'')+t,jp}); casRecent.length=Math.min(casRecent.length,6); drawHist();
+      const t=o.gold?`💰 ${o.gold>=10000?+(o.gold/10000).toFixed(1)+'만':((o.gold/1000)|0)+'천'}G`:`${SHK.e}${o.n}`; casRecent.unshift({t:(jp?'🎉 ':'')+t,jp}); casRecent.length=Math.min(casRecent.length,6); drawHist();
       $q('#casG').textContent=gtx(); busy=false; btn.disabled=false; };
     const go=()=>{ if(busy)return; const r=casCharge();
       if(r.err){ say(r.err); sfx('lose'); res.className='cs-res'; res.innerHTML=r.err==='poor'?`<b>골드가 부족해요</b><small>보유 골드 ${aGold().toLocaleString('ko-KR')}G · 필요 ${CAS_COST.toLocaleString('ko-KR')}G</small>`:r.err==='fullm'?`<b>기타 칸이 가득 찼어요</b><small>보석이 나올 수 있어서 공유보관함 기타 칸에 빈 자리가 1개 필요해요</small>`:`<b>보관함 자리가 부족해요</b><small>공유보관함에 조각 ${CAS_JP_SHARD}개가 들어갈 자리가 필요해요 (정렬하거나 비워 주세요)</small>`; return; }
