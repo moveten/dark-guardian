@@ -1250,7 +1250,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.3.0469</div>
+    <div class="ver" id="verT">v0.6.3.0470</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3549,12 +3549,12 @@ function updatePet(dt){
   for(let i=PET.mk.length-1;i>=0;i--){ const k=PET.mk[i], m=k.m; if(m.dead||k.t>=f.adur){ PET.mk.splice(i,1); continue; }
     k.t+=dt; k.tk-=dt; if(k.tk<=0&&k.n<f.adur){ k.n++; k.tk+=1; hitMob(m,physDmg(f.tick/100),0,false,{el:'fire',pet:1}); } }   /* 모든 직업 동일: 내 평균 무기 피해 × 틱 % */
   if(PET.cd2>0)PET.cd2=Math.max(0,PET.cd2-dt); else if(petCombat())petBrand(f); }
-function drawPet(t){ const e=petOf(me); if(!e)return; const x=PET.x, y=PET.y, hop=4+Math.sin(PET.an*4)*1.6;
+function drawPet(t){ const e=petOf(me); if(!e)return; const x=PET.x, y=PET.y, hop=.8+Math.sin(PET.an*4)*.8;
   ctx.save(); ctx.fillStyle='rgba(0,0,0,.28)'; ctx.beginPath(); ctx.ellipse(x,y+10,8,3,0,0,6.283); ctx.fill(); ctx.restore();
   const k=PETS[e.id].im, B=sprGet(k), im=B||sprGet('boss_3_5'); if(!im)return;   /* 전용 그림(img/pet_azazel.png)이 없으면 아자젤 보스 그림을 작게 줄여서 써요 */
   const h=26, CA=B?sprGet(k+'_cast'):null, WK=B?sprGet(k+'_walk'):null;
   if(CA&&PET.cast>0)sprDraw(CA,x,y+10,h*(CA.height/B.height),PET.face,{hop});
-  else if(WK&&PET.mv){ const cw=WK.width/6, fi=Math.floor(PET.an*9)%6; sprDraw(WK,x,y+10,h*(WK.height/B.height),PET.face,{hop,fr:[fi*cw,cw,WK.height]}); }
+  else if(WK&&PET.mv){ const cw=WK.width/6, fi=Math.floor(PET.an*9)%6; sprDraw(WK,x,y+10,h*(WK.height/B.height),PET.face,{hop:0,fr:[fi*cw,cw,WK.height]}); }
   else sprDraw(im,x,y+10,h,PET.face,{hop,sy:1+Math.sin(PET.an*3)*.02}); }
 function drawPetFx(t){ if(!PET.on||(!PET.fx.length&&!PET.mk.length))return;
   ctx.save(); ctx.globalCompositeOperation='lighter'; ctx.lineCap='round';
