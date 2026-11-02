@@ -80,4 +80,4 @@
 
 [전사 새 그림 — 적용 완료 (카툰풍)] hero_war.png(타이틀·카드용 한 장) · hero_war_idle.png(대기 3칸 왕복) · hero_war_walk.png(걷기 6칸) · hero_war_atk2.png(공격 5칸, 파일 이름 꼬리 _atk2). index.html 의 HIDLE(대기 시트) · HATK.war · RGW(폭주 눈 위치) 참고.
 
-[펫 아자젤 — 대기·걷기 그림 적용 완료, 시전 그림(pet_azazel_cast.png)은 대기] pet_azazel.png(대기 한 장) · pet_azazel_walk.png(걷기 6칸 가로) · pet_azazel_cast.png(불기둥 시전, 선택). 없으면 boss_3_5.png 를 작게 대신 씀. 프롬프트는 pet_azazel_prompt.txt
+[펫 아자젤 — 대기·걷기·시전(pet_azazel_cast.png) 그림 모두 적용 완료] pet_azazel.png(대기 한 장) · pet_azazel_walk.png(걷기 6칸 가로) · pet_azazel_cast.png(불기둥 시전, 선택). 없으면 boss_3_5.png 를 작게 대신 씀. 프롬프트는 pet_azazel_prompt.txt
