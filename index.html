@@ -1251,7 +1251,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.3.0466</div>
+    <div class="ver" id="verT">v0.6.3.0467</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3547,13 +3547,13 @@ function updatePet(dt){
   if(G.phase!=='wave'&&G.phase!=='boss'&&G.phase!=='clear')return;
   const m=petTarget(f); if(!m)return;
   PET.tel={x:m.x,y:m.y,t:0,life:.6,r:f.r}; PET.cd=f.cd; PET.cast=.5; sfx('fire'); }
-function drawPet(t){ const e=petOf(me); if(!e)return; const x=PET.x, y=PET.y, hop=9+Math.sin(PET.an*4)*3;
-  ctx.save(); ctx.fillStyle='rgba(0,0,0,.28)'; ctx.beginPath(); ctx.ellipse(x,y+8,12,4.5,0,0,6.283); ctx.fill(); ctx.restore();
+function drawPet(t){ const e=petOf(me); if(!e)return; const x=PET.x, y=PET.y, hop=4+Math.sin(PET.an*4)*1.6;
+  ctx.save(); ctx.fillStyle='rgba(0,0,0,.28)'; ctx.beginPath(); ctx.ellipse(x,y+10,8,3,0,0,6.283); ctx.fill(); ctx.restore();
   const k=PETS[e.id].im, B=sprGet(k), im=B||sprGet('boss_3_5'); if(!im)return;   /* 전용 그림(img/pet_azazel.png)이 없으면 아자젤 보스 그림을 작게 줄여서 써요 */
-  const h=B?54:48, CA=B?sprGet(k+'_cast'):null, WK=B?sprGet(k+'_walk'):null;
-  if(CA&&PET.cast>0)sprDraw(CA,x,y+8,h*(CA.height/B.height),PET.face,{hop});
-  else if(WK&&PET.mv){ const cw=WK.width/6, fi=Math.floor(PET.an*9)%6; sprDraw(WK,x,y+8,h*(WK.height/B.height),PET.face,{hop,fr:[fi*cw,cw,WK.height]}); }
-  else sprDraw(im,x,y+8,h,PET.face,{hop,sy:1+Math.sin(PET.an*3)*.02}); }
+  const h=26, CA=B?sprGet(k+'_cast'):null, WK=B?sprGet(k+'_walk'):null;
+  if(CA&&PET.cast>0)sprDraw(CA,x,y+10,h*(CA.height/B.height),PET.face,{hop});
+  else if(WK&&PET.mv){ const cw=WK.width/6, fi=Math.floor(PET.an*9)%6; sprDraw(WK,x,y+10,h*(WK.height/B.height),PET.face,{hop,fr:[fi*cw,cw,WK.height]}); }
+  else sprDraw(im,x,y+10,h,PET.face,{hop,sy:1+Math.sin(PET.an*3)*.02}); }
 function drawPetFx(t){ if(!PET.on)return; const T=PET.tel;
   if(T){ const q=Math.min(1,T.t/T.life); ctx.save(); ctx.globalCompositeOperation='lighter'; ctx.lineWidth=2.5; ctx.strokeStyle=`rgba(255,140,40,${.5+.4*q})`; ctx.fillStyle=`rgba(255,90,20,${.10+.22*q})`; ctx.beginPath(); ctx.ellipse(T.x,T.y+6,T.r,T.r*.55,0,0,6.283); ctx.fill(); ctx.stroke();
     ctx.strokeStyle='rgba(255,215,130,.9)'; ctx.beginPath(); ctx.ellipse(T.x,T.y+6,Math.max(2,T.r*q),Math.max(1,T.r*q*.55),0,0,6.283); ctx.stroke(); ctx.restore(); }
