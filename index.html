@@ -832,6 +832,58 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 #sTitle #bSolo::after{content:"";position:absolute;top:0;bottom:0;left:-40%;width:30%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.32),transparent);transform:skewX(-20deg);animation:btnSheen 3.4s ease-in-out infinite}
 @keyframes btnSheen{0%,55%{left:-40%}100%{left:130%}}
 @media (prefers-reduced-motion:reduce){#sTitle .cc .cpic::before,#sTitle #bSolo::after{animation:none!important}}
+
+/* ===== 캐릭터 카드 직업별 모션 (선택된 카드만 움직임 · transform/opacity만 사용) =====
+   body[data-cfx]: 'B' 눈에 띄게(기본) / 'A' 은은하게 / 'off' 끔  ← JS의 CARD_FX 상수 한 줄로 바꿔요 */
+.cc .fx{display:none}
+body[data-cfx="A"] #sTitle .cc[aria-current="true"] .fx,body[data-cfx="B"] #sTitle .cc[aria-current="true"] .fx{display:block;position:absolute;left:50%;bottom:0;width:150px;height:150px;margin-left:-75px;transform-origin:50% 100%;transform:scale(var(--fs,1));pointer-events:none;z-index:3}
+.fx .p{position:absolute;border-radius:50%;background:rgb(var(--ac,255,214,120));opacity:0}
+.fx .leaf{border-radius:0 100% 0 100%}
+.fx .wsp{filter:blur(3px)}
+.fx .ring{position:absolute;left:50%;bottom:6px;width:20px;height:8px;margin-left:-10px;border-radius:50%;border:2px solid rgba(var(--ac),.9);opacity:0}
+.fx .rune{position:absolute;left:50%;top:50%;width:132px;height:42px;margin:-8px 0 0 -66px;border-radius:50%;border:1.5px dashed rgba(var(--ac),.75);opacity:.8}
+.fx .rays{position:absolute;left:50%;top:50%;width:170px;height:170px;margin:-96px 0 0 -85px;border-radius:50%;background:repeating-conic-gradient(from 0deg,rgba(var(--ac),.22) 0 8deg,transparent 8deg 30deg);-webkit-mask:radial-gradient(circle,#000 0 20%,transparent 68%);mask:radial-gradient(circle,#000 0 20%,transparent 68%);z-index:-1}
+@keyframes cfRise{0%{transform:translate(0,0) scale(.6);opacity:0}15%{opacity:.95}100%{transform:translate(var(--dx,6px),-84px) scale(.2);opacity:0}}
+@keyframes cfTwk{0%,100%{transform:scale(.2);opacity:0}50%{transform:scale(1);opacity:1}}
+@keyframes cfFall{0%{transform:translate(0,-10px) rotate(0);opacity:0}15%{opacity:.95}100%{transform:translate(var(--dx,14px),96px) rotate(var(--rt,260deg));opacity:0}}
+@keyframes cfWisp{0%{transform:translate(0,0) scale(.5);opacity:0}25%{opacity:.55}100%{transform:translate(var(--dx,8px),-78px) scale(1.6);opacity:0}}
+@keyframes cfSpin{to{transform:rotate(360deg)}}
+@keyframes cfPulse{0%,100%{opacity:.55}50%{opacity:1}}
+@keyframes cfFlick{0%{opacity:.5}12%{opacity:1}30%{opacity:.6}44%{opacity:.95}70%{opacity:.55}85%{opacity:1}100%{opacity:.5}}
+@keyframes cfShock{0%,72%{transform:scale(.4);opacity:0}74%{opacity:.9}100%{transform:scale(6);opacity:0}}
+@keyframes cfRune{0%{transform:rotateZ(0) scaleX(1)}50%{transform:rotateZ(180deg) scaleX(.9)}100%{transform:rotateZ(360deg) scaleX(1)}}
+/* 안 B: 눈에 띄게 */
+body[data-cfx="B"] #sTitle .cc[aria-current="true"] .cpic.war img{animation:cfWarB 4s ease-in-out infinite}
+@keyframes cfWarB{0%,60%{transform:scale(1,1)}66%{transform:scale(1.07,.9)}72%{transform:scale(.97,1.05) translateY(-5px)}78%{transform:scale(1.03,.97)}86%,100%{transform:scale(1,1)}}
+body[data-cfx="B"] .fx .ring{animation:cfShock 4s ease-out infinite}
+body[data-cfx="B"] #sTitle .cc[aria-current="true"] .cpic.pal img{animation:cfPalB 4s ease-in-out infinite}
+@keyframes cfPalB{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-5px) scale(1.035)}}
+body[data-cfx="B"] #sTitle .cc[aria-current="true"] .cpic.pal::after{animation:cfPulse 2s ease-in-out infinite}
+body[data-cfx="B"] .fx .rays{animation:cfSpin 16s linear infinite}
+body[data-cfx="B"] #sTitle .cc[aria-current="true"] .cpic.sorc img{animation:cfSorcB 4s ease-in-out infinite}
+@keyframes cfSorcB{0%,100%{transform:translateY(0) rotate(-2.5deg)}50%{transform:translateY(-14px) rotate(2.5deg)}}
+body[data-cfx="B"] .fx .rune{animation:cfRune 4s linear infinite}
+body[data-cfx="B"] #sTitle .cc[aria-current="true"] .cpic.necro img{animation:cfNecB 4s ease-in-out infinite}
+@keyframes cfNecB{0%,100%{transform:translateX(-3px) rotate(-1.4deg) scale(1)}25%{transform:translateX(0) rotate(0) scale(1.02,1.03)}50%{transform:translateX(3px) rotate(1.4deg) scale(1)}75%{transform:translateX(0) rotate(0) scale(1.02,1.03)}}
+body[data-cfx="B"] #sTitle .cc[aria-current="true"] .cpic.necro::after{animation:cfFlick 2s steps(1) infinite}
+body[data-cfx="B"] #sTitle .cc[aria-current="true"] .cpic.druid img{animation:cfDruB 4s ease-in-out infinite}
+@keyframes cfDruB{0%,100%{transform:rotate(-3deg) scaleY(1)}50%{transform:rotate(3deg) scaleY(1.025)}}
+body[data-cfx="B"] #sTitle .cc[aria-current="true"] .cpic.druid::after{animation:cfPulse 4s ease-in-out infinite}
+/* 안 A: 은은하게 */
+body[data-cfx="A"] #sTitle .cc[aria-current="true"] .cpic.war img{animation:cfWarA 4s ease-in-out infinite}
+@keyframes cfWarA{0%,100%{transform:scale(1,1) rotate(0)}50%{transform:scale(1.012,1.028) rotate(.5deg)}}
+body[data-cfx="A"] #sTitle .cc[aria-current="true"] .cpic.pal img{animation:cfPalA 4s ease-in-out infinite}
+@keyframes cfPalA{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px) scale(1.01)}}
+body[data-cfx="A"] #sTitle .cc[aria-current="true"] .cpic.pal::after{animation:cfPulse 4s ease-in-out infinite}
+body[data-cfx="A"] #sTitle .cc[aria-current="true"] .cpic.sorc img{animation:cfSorcA 4s ease-in-out infinite}
+@keyframes cfSorcA{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-7px) rotate(1.2deg)}}
+body[data-cfx="A"] #sTitle .cc[aria-current="true"] .cpic.necro img{animation:cfNecA 4s ease-in-out infinite}
+@keyframes cfNecA{0%,100%{transform:translateX(-1.5px) rotate(-.6deg)}50%{transform:translateX(1.5px) rotate(.6deg) scaleY(1.012)}}
+body[data-cfx="A"] #sTitle .cc[aria-current="true"] .cpic.druid img{animation:cfDruA 4s ease-in-out infinite}
+@keyframes cfDruA{0%,100%{transform:rotate(-1.4deg)}50%{transform:rotate(1.4deg)}}
+/* 창(가방·상점 등)이 위에 열려 있으면 멈춤 · 움직임 줄이기 설정이면 끔 */
+body:has(#sheet:not([hidden])) #sTitle .cc .cpic *,body:has(#sheet:not([hidden])) #sTitle .cc .cpic::after{animation-play-state:paused!important}
+@media (prefers-reduced-motion:reduce){body[data-cfx] #sTitle .cc .cpic img,body[data-cfx] #sTitle .cc .cpic::after,.cc .fx,.cc .fx *{animation:none!important}.cc .fx{display:none!important}}
 /* ===== 타이틀: 왼쪽 시작하기 버튼 · 오른쪽 작은 상점 버튼을 한 줄에 (스테이지는 위쪽 보스 배너를 눌러 지도에서 고름) ===== */
 #sTitle .pp{flex-direction:row;align-items:stretch;gap:10px}
 #sTitle #bShop{flex:none;width:72px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:0;border-radius:16px;border:1px solid var(--gold);background:linear-gradient(#1d1511,#120d0b);box-shadow:0 0 0 3px #0f0b09,0 0 0 4px rgba(214,170,78,.5);color:#ffd36a;font:700 12px var(--f-disp,inherit);cursor:pointer;-webkit-tap-highlight-color:transparent}
@@ -1317,7 +1369,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.4.0495</div>
+    <div class="ver" id="verT">v0.6.4.0496</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -5798,7 +5850,21 @@ function fitWideCards(){ const box=$('#charList'), col=$('#lcol'); if(!box||!col
   const top=Math.max(...cand.map(x=>x.s)); let best=null; for(const x of cand){ if(x.s>=top*.97&&(!best||x.f>best.f+.01))best=x; }   /* 거의 가장 큰 크기 중에서, 마지막 줄이 가장 꽉 찬 배치를 골라요 */
   const s=Math.max(64,Math.floor(best.s)); box.style.setProperty('--cw',s+'px'); box.style.setProperty('--ch',Math.round(s/R)+'px'); box.style.setProperty('--cg',g+'px'); box.style.setProperty('--cwd',(best.c*s+(best.c-1)*g+8)+'px'); box.style.setProperty('--cs',Math.min(1.15,s/190).toFixed(3)); }
 try{ const ro=new ResizeObserver(()=>fitWideCards()); ro.observe($('#lcol')); ro.observe($('#cChips')); }catch(e){ addEventListener('resize',fitWideCards); }
-function carDots(){ const box=$('#charList'), d=$('#cDots'); if(!box||!d)return; const cs=[...box.querySelectorAll('.cc')]; if(d.children.length!==cs.length)d.innerHTML=cs.map(()=>'<i></i>').join(''); cs.forEach((e,i)=>d.children[i].classList.toggle('on',e.getAttribute('aria-current')==='true')); }
+/* ===== 캐릭터 카드 직업별 모션 효과 요소 (선택된 카드에서만 보이고 움직여요) =====
+   CARD_FX: 'B' 눈에 띄게 / 'A' 은은하게 / 'off' 끔 — 느려지면 'A'(또는 'off')로 한 줄만 바꾸면 돼요 */
+const CARD_FX='B';
+document.body.dataset.cfx=CARD_FX;
+function cardFx(k){ if(CARD_FX!=='A'&&CARD_FX!=='B')return ''; const B=CARD_FX==='B', P=(c,st,an)=>`<i class="p ${c}" style="${st};animation:${an}"></i>`; let h='';
+  if(k==='war'){ const n=B?5:3; for(let i=0;i<n;i++)h+=P('',`left:${40+i*(70/n)}px;bottom:${50+i*6}px;width:${3+i%2}px;height:${3+i%2}px;--dx:${(i%2?-1:1)*8}px`,`cfRise 4s linear infinite;animation-delay:${-i*4/n}s`); if(B)h+='<i class="ring"></i>'; }
+  else if(k==='pal'){ if(B)h+='<i class="rays"></i>'; const n=B?5:3; for(let i=0;i<n;i++)h+=P('',`left:${34+i*(82/n)}px;bottom:${44+(i*13%30)}px;width:3px;height:3px;--dx:${(i%2?-1:1)*5}px`,`cfRise 4s linear infinite;animation-delay:${-i*4/n}s`); }
+  else if(k==='sorc'){ if(B)h+='<i class="rune"></i>'; const n=B?7:4; for(let i=0;i<n;i++)h+=P('',`left:${22+(i*47%110)}px;top:${24+(i*31%90)}px;width:${3+i%2}px;height:${3+i%2}px`,`cfTwk 2s ease-in-out infinite;animation-delay:${-i*2/n}s`); }
+  else if(k==='necro'){ const n=B?5:3; for(let i=0;i<n;i++)h+=P('wsp',`left:${34+i*(76/n)}px;bottom:${36+i*5}px;width:${10+i%2*5}px;height:${10+i%2*5}px;--dx:${(i%2?-1:1)*10}px`,`cfWisp 4s ease-out infinite;animation-delay:${-i*4/n}s`); if(B)for(let i=0;i<3;i++)h+=P('',`left:${48+i*28}px;bottom:${70+i*14}px;width:4px;height:4px;--dx:${(i-1)*6}px`,`cfRise 2s linear infinite;animation-delay:${-i*.66}s`); }
+  else if(k==='druid'){ const n=B?7:4; for(let i=0;i<n;i++)h+=P('leaf',`left:${14+(i*43%110)}px;top:${6+(i*17%24)}px;width:7px;height:7px;--dx:${(i%2?-1:1)*(10+i*2)}px;--rt:${(i%2?-1:1)*(240+i*20)}deg`,`cfFall 4s linear infinite;animation-delay:${-i*4/n}s`); }
+  return h; }
+/* 효과 층(150×150)을 카드 그림 크기에 맞춰 줄이거나 늘려요 */
+function fitFx(){ const c=document.querySelector('#charList .cc[aria-current="true"] .cpic'); if(!c)return; const r=c.getBoundingClientRect(); if(r.height>0&&r.width>0)c.style.setProperty('--fs',Math.max(.4,Math.min(1.3,Math.min(r.height,r.width)/150)).toFixed(2)); }
+addEventListener('resize',()=>{ clearTimeout(fitFx.t); fitFx.t=setTimeout(fitFx,150); });
+function carDots(){ const box=$('#charList'), d=$('#cDots'); if(!box||!d)return; const cs=[...box.querySelectorAll('.cc')]; if(d.children.length!==cs.length)d.innerHTML=cs.map(()=>'<i></i>').join(''); cs.forEach((e,i)=>d.children[i].classList.toggle('on',e.getAttribute('aria-current')==='true')); fitFx(); }
 function buildCarousel(chars){
   const box=$('#charList');
   const tail=c=>`<b>${esc(dispName(c))}</b><span class="cl">${CLASSES[c.cls].n} · <em>Lv ${c.lvl}</em></span><span class="cl">💰 ${(c.gold|0).toLocaleString()}</span><span class="cpt">${c.statPts+c.skillPts?`포인트 ${c.statPts+c.skillPts}`:'&nbsp;'}</span>${petOf(c)?`<span class="cpet" aria-label="펫 ${PETS[c.pet.id].n} Lv ${c.pet.lv||1}"><span class="pbd"><img src="img/${PETS[c.pet.id].im}.png" alt="" onerror="this.onerror=null;this.src='img/boss_3_5.png'"></span><i>Lv${c.pet.lv||1}</i></span>`:''}`;
@@ -5807,7 +5873,7 @@ function buildCarousel(chars){
   if(same){ old.forEach((e,i)=>{ const pic=e.querySelector('.cpic'); while(pic.nextSibling)pic.nextSibling.remove(); pic.insertAdjacentHTML('afterend',tail(chars[i])); }); }
   else box.innerHTML='';
   if(!same)for(const c of chars){ const el=document.createElement('div'); el.className='cc'; el.dataset.id=c.id; el.setAttribute('role','button');
-    el.innerHTML=`<div class="cpic ${c.cls}"><span class="cem">${clsIc(c.cls,56)}</span><img src="img/hero_${c.cls}.png" alt="" onload="this.previousElementSibling.style.display='none'" onerror="this.remove()"></div>`+tail(c);
+    el.innerHTML=`<div class="cpic ${c.cls}"><span class="cem">${clsIc(c.cls,56)}</span><img src="img/hero_${c.cls}.png" alt="" onload="this.previousElementSibling.style.display='none'" onerror="this.remove()"><span class="fx" aria-hidden="true">${cardFx(c.cls)}</span></div>`+tail(c);
     el.onclick=()=>{ if(el.getAttribute('aria-current')==='true'&&c.id===selId) charMenu(c.id); else if(carWide()) carPick(box,el); else carCenter2(box,el); };
     box.appendChild(el); }
   if(!same&&chars.length<MAXCHAR){ const el=document.createElement('div'); el.className='cc add'; el.dataset.id=''; el.setAttribute('role','button'); el.innerHTML='<span class="plus2">＋</span><b>새 캐릭터</b><small>'+chars.length+' / '+MAXCHAR+'</small>'; el.onclick=()=>{ if(el.getAttribute('aria-current')==='true'||carWide()) showNew(true); else carCenter2(box,el); }; box.appendChild(el); }
