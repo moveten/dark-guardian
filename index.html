@@ -1316,7 +1316,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.4.0493</div>
+    <div class="ver" id="verT">v0.6.4.0494</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -2656,7 +2656,7 @@ function awkSealEnd(m){ const c=m.cast||{k:'seal',abs:0}, left=G.mobs.filter(o=>
   if(fail){ let msg='';
     if(c.k==='seal'){ const hl=heal(AWK.sealHeal); msg=`💜 봉인 실패! 보스 체력 +${Math.round(hl/m.max*100)}%`; banner('💜 봉인 실패','각성 그림자가 크게 회복했어요'); }
     else if(c.k==='lantern'){ awkAllStatus('doom',0); msg='☠️ 등불 실패! 그림자가 모두를 집어삼켰어요'; banner('☠️ 그림자 등불','등불을 끄지 못해 모두 쓰러졌어요'); }
-    else { const hl=heal(.15); awkAllStatus('hblockp',10); awkAllStatus('mblock',10); msg=`💔 파편 ${fail}개 흡수! 보스 체력 +${Math.round(hl/m.max*100)}% · 10초 봉쇄(물약만 회복)`; if(fail>=2){ awkAllStatus('erode',10); msg+=' · 그림자 잠식 10초'; } if(fail>=3){ awkAllStatus('stun',2); msg+=' · 그림자 사슬 2초'; } banner('💔 심장 파편 흡수',`${fail}개가 보스에게 닿았어요`); }
+    else { const hl=heal(.15); awkAllStatus('hblockp',10); awkAllStatus('mblock',10); msg=`💔 파편 ${fail}개 흡수! 보스 체력 +${Math.round(hl/m.max*100)}% · 10초 봉쇄(물약·치유 오라만 회복)`; if(fail>=2){ awkAllStatus('erode',10); msg+=' · 그림자 잠식 10초'; } if(fail>=3){ awkAllStatus('stun',2); msg+=' · 그림자 사슬 2초'; } banner('💔 심장 파편 흡수',`${fail}개가 보스에게 닿았어요`); }
     announce(msg,'#c090ff'); burst(m.x,m.y,'#8a6cff',50,360); impact(m.x,m.y,'160,120,255',260); G.shake=1; sfx('boss'); pushEv(['asf',c.k==='seal'?1:c.k==='lantern'?2:3,fail]); }
   else { m.stunT=AWK.okStun; m.stunImm=0; awkCutinOk(c.k,m.ph); announce(`✨ ${AWCN[c.k]} 성공! 각성 그림자가 잠시 쓰러졌어요`,'#9fe08a'); burst(m.x,m.y,'#cfe0ff',30,300); G.shake=Math.max(G.shake,.6); pushEv(['asf',0,0,m.ph|0,c.k==='seal'?1:c.k==='lantern'?2:3]); }
   m.bt=Math.max(m.bt,1.2); m.sealT=AWK.sealCd*rand(.9,1.1); }
@@ -3266,12 +3266,12 @@ function fixDmg(pct,txt,col){ if(me.dead||me.god>0)return; const loss=Math.max(1
 function applyStatus(kind,dur){ if(me.dead||me.god>0)return;
   { const ar=(me.D&&me.D.sp&&me.D.sp.aw_ring)|0; if(ar&&['erode','hblock','hblockp','mblock','slow','stun','bleed'].includes(kind))dur*=Math.max(.5,1-.25*ar); }   /* 각성 반지 '속박 해제': 디버프 지속시간 -25% (2개 -50%) */
   if(kind==='doom'){ if(me.hp>0){ addNum(me.x,me.y-50,'☠️ 즉사','#ff4a6a',true); burst(me.x,me.y,'#2a1a4a',40,320); spark(me.x,me.y,'#8a6cff',30); G.shake=1; sfx('hurt'); goDown(); } return; }   /* 그림자 등불 실패 */
-  if(kind==='bleed'){ if(!(me.bleed>0))me.bleedT=.5; me.bleed=Math.max(me.bleed||0,dur); me.bleedN=Math.max(me.bleedN|0,Math.round(dur/.5)); me.hblk=Math.max(me.hblk||0,dur); if(me.hpLk==null)me.hpLk=me.hp; addNum(me.x,me.y-46,'🩸 출혈 · 물약만 회복','#ff5a6a',true); return; }   /* 그림자 베기: 3초간 0.5초마다 최대 생명력 10% 고정 피해 + 생명력 회복 불가(물약만) */
+  if(kind==='bleed'){ if(!(me.bleed>0))me.bleedT=.5; me.bleed=Math.max(me.bleed||0,dur); me.bleedN=Math.max(me.bleedN|0,Math.round(dur/.5)); me.hblk=Math.max(me.hblk||0,dur); if(me.hpLk==null)me.hpLk=me.hp; addNum(me.x,me.y-46,'🩸 출혈 · 물약·치유 오라만 회복','#ff5a6a',true); return; }   /* 그림자 베기: 3초간 0.5초마다 최대 생명력 10% 고정 피해 + 생명력 회복 불가(물약만) */
   if(kind==='erode'){ me.erode=Math.max(me.erode||0,dur); addNum(me.x,me.y-46,'🌑 그림자 잠식','#b89cff',true); return; }
   if(kind==='hblock'||kind==='hblockp'){ const loss=Math.floor(me.D.maxHp*.5); tkAdd(loss); me.hpLk=null; me.hp-=loss; me.hurt=.3; addNum(me.x,me.y-30,'-'+loss,'#ff5a7a',true); spark(me.x,me.y,'#ff5a9a',18); sfx('hurt'); G.shake=Math.max(G.shake,.5); if(me.hp<=0){ goDown(); return; } }   /* 생명 봉쇄: 최대 생명력 50% 고정 피해 후 회복 막힘 */
   if(kind==='mblock'){ me.mpLk=null; me.mp=Math.max(0,me.mp-me.D.maxMp*.5); }   /* 마나 봉쇄: 최대 마나 50% 잃고 회복 막힘 */
-  if(kind==='hblock'){ me.hblk=Math.max(me.hblk||0,dur); me.hpLk=me.hp;   /* 공허의 낙인: 물약으로만 회복 가능 */ addNum(me.x,me.y-46,'💔 봉쇄 · 물약만 회복','#ff8ab0',true); return; }
-  if(kind==='hblockp'){ me.hblk=Math.max(me.hblk||0,dur); me.hpLk=me.hp; addNum(me.x,me.y-46,'💔 봉쇄 · 물약만 회복','#ff8ab0',true); return; }   /* 심장 파편 실패: 물약으로만 생명력 회복 */
+  if(kind==='hblock'){ me.hblk=Math.max(me.hblk||0,dur); me.hpLk=me.hp;   /* 공허의 낙인: 물약으로만 회복 가능 */ addNum(me.x,me.y-46,'💔 봉쇄 · 물약·치유 오라만 회복','#ff8ab0',true); return; }
+  if(kind==='hblockp'){ me.hblk=Math.max(me.hblk||0,dur); me.hpLk=me.hp; addNum(me.x,me.y-46,'💔 봉쇄 · 물약·치유 오라만 회복','#ff8ab0',true); return; }   /* 심장 파편 실패: 물약으로만 생명력 회복 */
   if(kind==='mblock'){ me.mblk=Math.max(me.mblk||0,dur); me.mpLk=me.mp; addNum(me.x,me.y-30,'💧 마나 봉쇄','#8fb0ff',true); return; }
   if(kind==='stun'){ if(me.stunImm>0)return; me.stun=dur; me.stunImm=dur+2.5; addNum(me.x,me.y-40,'💫 기절!','#ffd84a',true); }
   else if(kind==='slow'){ me.slowP=Math.max(me.slowP||0,dur); addNum(me.x,me.y-40,'🐌 둔화','#8fdcff',false); }
@@ -3324,8 +3324,8 @@ function updateMe(dt){
   // regen
   { const sb=spiritBuff(); me.mp=Math.min(D.maxMp,me.mp+(D.maxMp*.009+.2)*dt*(1+((D.mr||0)+(sb?sb.mr:0))/100)*(D.mrx||1)); }
   me.hp=Math.min(D.maxHp,me.hp+D.maxHp*(.008+(D.regen||0))*dt);
-  if(me.aura==='healaura'){const l=skLv(me,'healaura'); me.hp=Math.min(D.maxHp,me.hp+(1+.6*l)*dt);}
-  if(ally&&!ally.lobby&&!ally.dead&&ally.aura==='healaura'&&hyp(ally.x-me.x,ally.y-me.y)<320) me.hp=Math.min(D.maxHp,me.hp+(1+.6*ally.al)*dt);
+  if(me.aura==='healaura'){const l=skLv(me,'healaura'); me.hp=Math.min(D.maxHp,me.hp+(1+.6*l)*dt); if(me.hpLk!=null&&!(me.hbStrict>0))me.hpLk=me.hp;}   /* 회복 봉쇄 중에도 치유 오라는 잠금을 올려 줌 (물약과 같음) */
+  if(ally&&!ally.lobby&&!ally.dead&&ally.aura==='healaura'&&hyp(ally.x-me.x,ally.y-me.y)<320) { me.hp=Math.min(D.maxHp,me.hp+(1+.6*ally.al)*dt); if(me.hpLk!=null&&!(me.hbStrict>0))me.hpLk=me.hp; }
   if(hyp(me.x-hzX(),me.y-hzY())<hzR()){ me.hp=Math.min(D.maxHp,me.hp+D.maxHp*.1*dt); me.mp=Math.min(D.maxMp,me.mp+D.maxMp*.14*dt); }
   // movement
   if(me.leap){const L=me.leap; L.t+=dt; const p=Math.min(1,L.t/L.dur); me.x=L.sx+(L.ex-L.sx)*p; me.y=L.sy+(L.ey-L.sy)*p; me.z=Math.sin(p*Math.PI)*30; if(p>=1){me.leap=null;me.z=0;} return;}
