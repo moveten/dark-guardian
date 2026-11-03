@@ -793,7 +793,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 .cchips button{flex:1;min-width:0;position:relative;padding:7px 4px;border-radius:12px;border:1px solid rgba(214,170,78,.7);background:rgba(15,11,9,.7);text-align:center;font:inherit;font-size:11px;color:var(--mute);line-height:1.35;cursor:pointer}
 .cchips button:active{filter:brightness(1.25)}
 .cchips button b{display:block;font-size:15px;color:#ffd36a;white-space:nowrap}
-.mdl .card .smbody{max-height:calc(100dvh - 48px);overflow-y:auto}
+.mdl .card .smbody{max-height:calc(100dvh - 48px);overflow-y:auto;overflow-x:hidden}
 .smhd{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}.smhd h3{margin:0}
 .smsec{border:1px solid #3a2e22;background:#120d0b;border-radius:12px;padding:11px 12px;margin-bottom:10px}
 .smh{display:flex;justify-content:space-between;align-items:center;font-size:16px;font-weight:800;color:#ece0c4}
@@ -805,7 +805,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 .smrl i{width:18px;height:18px;border-radius:50%;border:2px solid #6a5a46;flex:none;position:relative}
 .smrl.on{border-color:var(--c);background:#241a0e}.smrl.on i{border-color:var(--c)}.smrl.on i::after{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--c)}
 .smrl b{font-size:15px;color:var(--c)}.smrl span{font-size:12px;color:#a99a7e;margin-left:auto}
-.smsum{border-top:1px solid #3a2e22;margin:12px -2px 10px;padding-top:10px;font-size:13px;color:#d9c9a4;text-align:center}.smsum b{color:#ffd36a}
+.smsum{border-top:1px solid #3a2e22;margin:12px 0 2px;padding-top:10px;font-size:13px;color:#d9c9a4;text-align:center}.smsum b{color:#ffd36a}
 .cchips button small{display:block;font-size:11px;font-weight:700;color:#ffd36a}
 #cMap{display:flex;align-items:center;justify-content:center}
 /* 스테이지 카드: 보스 얼굴 + 글자 */
@@ -1307,7 +1307,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.4.0489</div>
+    <div class="ver" id="verT">v0.6.4.0490</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -2247,7 +2247,7 @@ function loadChar(id){
     { const q={}; if(p.cc&&typeof p.cc==='object')for(const k in p.cc){ const v=Math.floor(+p.cc[k]); if(v>0&&isFinite(v))q[k]=Math.min(v,999999); } p.cc=q; }   /* 스테이지별 누적 클리어 횟수(0.6.0.0265부터 집계) */
     if(p.clear===undefined)p.clear=Math.max(0,+(lsGet('dkdef2.clear')||0));
     { const lg=k=>{ const v=parseInt(lsGet(k)); return isNaN(v)?-1:clamp(v,-1,2); }; if(p.as===undefined)p.as=lg('dkdef2.asell'); if(p.sy===undefined)p.sy=lg('dkdef2.asyn'); if(p.sy>=0)p.sy=2; } /* 캐릭터별 자동판매/합성: 기존 캐릭터는 예전 전역 설정을 한 번 이어받음 */
-    { const q={}; if(p.dx&&typeof p.dx==='object')for(const k in p.dx){ const v=Math.floor(+p.dx[k]); if(v>0&&isFinite(v)&&dexOk(k))q[k]=Math.min(v,9999); } p.dx=q; if(p.dxs!==undefined)p.dxs=Math.max(0,Math.min(999,+p.dxs|0)); }   /* 도감: 아이템별 직접 획득 횟수 · dxs = 도감을 마지막으로 열어 본 때의 수집 수(그보다 늘면 시작화면 도감 버튼에 NEW) */
+    { const q={}; if(p.dx&&typeof p.dx==='object')for(const k in p.dx){ const v=Math.floor(+p.dx[k]); if(v>0&&isFinite(v)&&dexOk(k))q[k]=Math.min(v,9999); } p.dx=q; if(p.dxs!==undefined)p.dxs=Math.max(0,Math.min(999,+p.dxs|0)); if(p.gas!==undefined)p.gas=Math.max(-1,Math.min(2,p.gas|0)); }   /* 도감: 아이템별 직접 획득 횟수 · dxs = 도감을 마지막으로 열어 본 때의 수집 수(그보다 늘면 시작화면 도감 버튼에 NEW) */
     p.sp=p.sp?1:0;   /* 캐릭터별 1.3배속 설정 */ petNorm(p);
     p.au=Math.max(0,Math.min(2,p.au|0));   /* 캐릭터별 AUTO 설정 (0 꺼짐 · 1 이동 · 2 이동+스킬) — 스테이지를 옮겨도 유지 */
     p.eq=p.eq||{}; if(p.eq.shield===undefined)p.eq.shield=null;
@@ -2287,7 +2287,7 @@ function migrateChars(){
 }
 function createChar(cls,name,nid){ const ids=charIds(); if(ids.length>=MAXCHAR||!CLASSES[cls])return null; if(nameTaken(name))return null; const p=newChar(cls,name,nid); p.ms=MAILQ.map(q=>q.id); lsSet(charKey(p.id),JSON.stringify(packChar(p))); ids.push(p.id); setIds(ids); selId=p.id; lsSet('dkdef2.sel',selId); return p; }
 function deleteChar(id){ setIds(charIds().filter(x=>x!==id)); lsDel(charKey(id)); lsDel('dkdef2.rk.'+id); lsDel('dkdef2.nmv.'+id); if(selId===id){selId='';lsSet('dkdef2.sel','');} rkQueueDel(id); nameQueueRel(id); }
-function packChar(p){ const {id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear,as,sy,gs,au,sp,ct,cts,cat,dv4,shard,ashard,misc,mail,ms,tut,cc,eq2,es,pet,dx,dxs}=p; return {dx:dx&&Object.keys(dx).length?dx:undefined,dxs:dxs===undefined?undefined:Math.max(0,dxs|0),id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear:clear|0,au:Math.max(0,Math.min(2,au|0)),sp:sp?1:0,ct:ct>0?ct|0:0,cts:cts>0?cts|0:undefined,cat:cat>0?cat|0:0,as:as===undefined?-1:as,sy:sy===undefined?-1:sy,gs:gs?1:undefined,dv4:dv4?1:0,shard:shard|0,ashard:(ashard|0)||undefined,misc:Array.isArray(misc)?misc:undefined,mail:Array.isArray(mail)?mail:undefined,ms:Array.isArray(ms)?ms:undefined,tut:tut||undefined,cc:cc&&Object.keys(cc).length?cc:undefined,eq2:eq2&&Object.values(eq2).some(Boolean)?eq2:undefined,es:es===1?1:undefined,pet:pet&&PETS[pet.id]?{id:pet.id,xp:Math.floor(pet.xp)||0}:undefined}; }
+function packChar(p){ const {id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear,as,sy,gs,au,sp,ct,cts,cat,dv4,shard,ashard,misc,mail,ms,tut,cc,eq2,es,pet,dx,dxs,gas}=p; return {gas:gas===undefined?undefined:Math.max(-1,Math.min(2,gas|0)),dx:dx&&Object.keys(dx).length?dx:undefined,dxs:dxs===undefined?undefined:Math.max(0,dxs|0),id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear:clear|0,au:Math.max(0,Math.min(2,au|0)),sp:sp?1:0,ct:ct>0?ct|0:0,cts:cts>0?cts|0:undefined,cat:cat>0?cat|0:0,as:as===undefined?-1:as,sy:sy===undefined?-1:sy,gs:gs?1:undefined,dv4:dv4?1:0,shard:shard|0,ashard:(ashard|0)||undefined,misc:Array.isArray(misc)?misc:undefined,mail:Array.isArray(mail)?mail:undefined,ms:Array.isArray(ms)?ms:undefined,tut:tut||undefined,cc:cc&&Object.keys(cc).length?cc:undefined,eq2:eq2&&Object.values(eq2).some(Boolean)?eq2:undefined,es:es===1?1:undefined,pet:pet&&PETS[pet.id]?{id:pet.id,xp:Math.floor(pet.xp)||0}:undefined}; }
 function saveChar(){ if(!me||!me.id)return; lsSet(charKey(me.id),JSON.stringify(packChar(me))); }
 const dispName=p=>(p&&p.name)||CLASSES[p.cls].n;
 const SELLBASE=[100,200,400,800,3000], ADVAFX=['ls','crit','ias','ms','mf','pr','mr'];
@@ -3344,18 +3344,20 @@ function autoPick(){
 let annQ=[], annSeq=0;
 function announce(t,col){ alPush(t,col,false); }
 const ASELL=[-1,0,1,2], ASN=['끔','일반↓','매직↓','레어↓'];
-function smartModal(){   /* 스마트 정리 = 자동판매 + 자동합성 한 창. 누르는 즉시 저장되고 창은 열려 있어요 */
-  const opts=[[-1,'끄기','팔지 않아요'],[0,'일반 이하','흰색 아이템'],[1,'매직 이하','흰색·파랑'],[2,'레어 이하','흰색·파랑·노랑']];
+function smartModal(kind){   /* 스마트 정리 = 자동판매 + 자동합성 한 창 (kind: 'item' 장비 / 'gem' 기타 탭 보석). 누르는 즉시 저장되고 창은 열려 있어요 */
+  kind=kind==='gem'?'gem':'item'; const G_=kind==='gem';
+  const opts=G_?[[-1,'끄기','팔지 않아요','#9a8c72'],[0,'하급 이하','하급 보석',GAC[0]],[1,'중급 이하','하급·중급',GAC[1]],[2,'모든 보석','하급·중급·상급',GAC[2]]]
+    :[[-1,'끄기','팔지 않아요','#9a8c72'],[0,'일반 이하','흰색 아이템',RARC[0]],[1,'매직 이하','흰색·파랑',RARC[1]],[2,'레어 이하','흰색·파랑·노랑',RARC[2]]];
   const draw=m=>{
-    const warn=syLv>=0&&asLv>=0&&asLv>=syLv;
+    const sel=G_?gasLv:asLv, on=G_?gsOn:syLv>=0, warn=G_?(on&&sel>=0):(on&&sel>=0&&sel>=syLv), nm=o=>o[1];
+    const sellTx=sel<0?'판매 안 함':(G_?GASN[sel+1]:RARN[sel]+' 이하')+' 판매';
     m.querySelector('.card').innerHTML=`<div class="smbody"><div class="smhd"><h3>✨ 스마트 정리</h3><button class="btn sm" id="smX" aria-label="닫기" style="min-width:40px;padding:6px 10px">✕</button></div>
-<div class="smsec"><div class="smh"><span>🪙 자동판매</span></div>${opts.map(o=>`<button type="button" class="smrl${asLv===o[0]?' on':''}" data-a="${o[0]}" style="--c:${o[0]>=0?RARC[o[0]]:'#9a8c72'}"><i></i><b>${o[1]}</b><span>${o[2]}</span></button>`).join('')}</div>
-<div class="smsec"><div class="smh"><span>🧬 자동합성</span><button type="button" class="smsw${syLv>=0?' on':''}" id="smSyn" role="switch" aria-checked="${syLv>=0}" aria-label="자동합성"></button></div><p class="smd">같은 등급 ${SYN_N}개가 모이면 한 단계 위 등급 1개로 합쳐요 (레어 이하)</p>${warn?`<p class="smd smw">⚠️ ${RARN[asLv]} 이하 자동판매가 켜져 있어서 합성 재료가 먼저 팔려요</p>`:''}</div>
-<div class="smsum">지금 설정 · <b>${asLv<0?'판매 안 함':RARN[asLv]+' 이하 판매'}</b> + <b>합성 ${syLv>=0?'ON':'OFF'}</b></div>
-<button class="btn primary" id="smOk" style="width:100%">완료</button></div>`;
-    m.querySelector('#smX').onclick=closeModal; m.querySelector('#smOk').onclick=closeModal;
-    m.querySelectorAll('[data-a]').forEach(q=>q.onclick=()=>{ asLv=+q.dataset.a; saveChar(); if(sheetMode==='bag')renderBag(); draw(m); });
-    m.querySelector('#smSyn').onclick=()=>{ syLv=syLv>=0?-1:2; saveChar(); autoSynth(); if(sheetMode==='bag')renderBag(); draw(m); };
+<div class="smsec"><div class="smh"><span>🛒 ${G_?'보석 ':''}자동판매</span></div>${opts.map(o=>`<button type="button" class="smrl${sel===o[0]?' on':''}" data-a="${o[0]}" style="--c:${o[3]}"><i></i><b>${o[1]}</b><span>${o[2]}</span></button>`).join('')}</div>
+<div class="smsec"><div class="smh"><span>🧬 ${G_?'보석':'자동'}합성</span><button type="button" class="smsw${on?' on':''}" id="smSyn" role="switch" aria-checked="${on}" aria-label="합성"></button></div><p class="smd">${G_?`하급·중급 보석 ${GEM_SYN_N}개가 모이면 한 단계 위 보석 1개로 합쳐요`:`같은 등급 ${SYN_N}개가 모이면 한 단계 위 등급 1개로 합쳐요 (레어 이하)`}</p>${warn?`<p class="smd smw">⚠️ ${G_?GASN[sel+1]:RARN[sel]+' 이하'} 자동판매가 켜져 있어서 합성 재료가 먼저 팔려요</p>`:''}</div>
+<div class="smsum">지금 설정 · <b>${sellTx}</b> + <b>합성 ${on?'ON':'OFF'}</b></div></div>`;
+    m.querySelector('#smX').onclick=closeModal;
+    m.querySelectorAll('[data-a]').forEach(q=>q.onclick=()=>{ if(G_)gasLv=+q.dataset.a; else asLv=+q.dataset.a; saveChar(); if(sheetMode==='bag')renderBag(); draw(m); });
+    m.querySelector('#smSyn').onclick=()=>{ if(G_){ gsOn=!gsOn; saveChar(); autoGemMerge(true); } else { syLv=syLv>=0?-1:2; saveChar(); autoSynth(); } if(sheetMode==='bag')renderBag(); draw(m); };
   };
   modal('',draw);
 }
@@ -3418,14 +3420,17 @@ function ashardModal(){ shardAdd(me,0,'ashard'); const n=shardCount(me,'ashard')
 /* 보석 자동 합성: 하급 5개 → 중급, 중급 5개 → 상급 (종류 무관, 결과 종류는 랜덤). 상급은 재료가 아님 */
 Object.defineProperty(window,'gsOn',{get(){ try{ return !!(me&&me.gs); }catch(e){ return false; } },set(v){ try{ if(me)me.gs=v?1:0; }catch(e){} }});
 const GEM_SYN_N=5;
+/* 보석 자동판매(스마트 정리·기타 탭): me.gas = -1 끄기 · 0 하급 이하 · 1 중급 이하 · 2 모든 보석. 보석 등급 색은 무난하게(채도·명도 낮게) */
+Object.defineProperty(window,'gasLv',{get(){ try{ return me&&me.gas!==undefined?me.gas:-1; }catch(e){ return -1; } },set(v){ try{ if(me)me.gas=v; }catch(e){} }});
+const GASN=['끄기','하급 이하','중급 이하','모든 보석'], GAC=['#7fae8c','#6a8fd6','#b07fd6'];
+const gemAutoSellOk=it=>isGem(it)&&gasLv>=0&&gemTier(it)-1<=gasLv&&!it.lock;
 function autoGemMerge(quiet){ if(!gsOn||!me||!Array.isArray(me.misc))return 0; let made=0, last=null;
   for(let t=1;t<=2;t++){ for(let g=0;g<40;g++){ const ix=[]; me.misc.forEach((x,i)=>{ if(x&&isGem(x)&&!x.lock&&gemTier(x)===t&&ix.length<GEM_SYN_N)ix.push(i); }); if(ix.length<GEM_SYN_N)break;
     const it=mkGem(pick(GEM_KINDS),t+1); it.isNew=1; for(const i of ix)me.misc[i]=null; me.misc[ix[0]]=it; made++; last=it; } }
   if(made){ saveChar(); uiDirty=true; if(!quiet){ sfx('pick'); toast(`💎 보석 합성! → ${last.name}${made>1?' 외 '+(made-1)+'개':''}`,GEM_C[last.gk]); } if(sheetMode==='bag')renderBag(); }
   return made; }
-function gemSynToggle(){ gsOn=!gsOn; saveChar(); autoGemMerge(true); if(sheetMode==='bag')renderBag(); sheetToast&&sheetToast(gsOn?`보석합성 ON — 하급·중급 보석 ${GEM_SYN_N}개가 모이면 합성돼요`:'보석합성을 껐어요'); }
-const lootFull=it=>isGem(it)?me.misc.indexOf(null)<0:(me.inv.indexOf(null)<0&&!autoSellOk(it));   /* 줍기 불가(자리 없음): 보석은 기타 칸, 나머지는 장비 칸(자동 판매 대상은 예외) */
-function pickGem(g){ const it=g.it, i=me.misc.indexOf(null); if(i<0){ toast('기타 칸이 가득 찼어요','#e07060'); return; } it.isNew=1; me.misc[i]=it; G.stGem=it; ground.splice(ground.indexOf(g),1); sfx('pick'); toast(`💎 획득: ${it.name}`,GEM_C[it.gk]); saveChar(); uiDirty=true; autoGemMerge(); if(sheetMode==='bag')renderBag(); }
+const lootFull=it=>isGem(it)?(me.misc.indexOf(null)<0&&!gemAutoSellOk(it)):(me.inv.indexOf(null)<0&&!autoSellOk(it));   /* 줍기 불가(자리 없음): 보석은 기타 칸, 나머지는 장비 칸(자동 판매 대상은 예외) */
+function pickGem(g){ const it=g.it; if(gemAutoSellOk(it)){ const v=GEM_TIER[gemTier(it)-1].g; ground.splice(ground.indexOf(g),1); me.gold+=v; sfx('coin'); addNum(me.x,me.y-34,'+'+v+'G','#ffd84a',false); G.asold=(G.asold|0)+v; saveChar(); uiDirty=true; if(sheetMode==='bag')renderBag(); return; } const i=me.misc.indexOf(null); if(i<0){ toast('기타 칸이 가득 찼어요','#e07060'); return; } it.isNew=1; me.misc[i]=it; G.stGem=it; ground.splice(ground.indexOf(g),1); sfx('pick'); toast(`💎 획득: ${it.name}`,GEM_C[it.gk]); saveChar(); uiDirty=true; autoGemMerge(); if(sheetMode==='bag')renderBag(); }
 function autoSellOk(it0){ if(isGem(it0))return false; if(!(asLv>=0&&it0.rar<=asLv&&!it0.lock))return false; const k0=it0.slot==='ring'?(!me.eq.ring1?'ring1':!me.eq.ring2?'ring2':null):(me.eq[it0.slot]?null:it0.slot); return !(k0&&canWear(it0)); }
 function pickUp(g){
   if(isGem(g.it)){ pickGem(g); return; }
@@ -5171,9 +5176,9 @@ function renderBag(){
   const eqOrder=['weapon','armor','helm','amulet','ring1','ring2'].concat(['shield']);
   if(gemSock){ bagTab='eq'; cellSel=true; }
   let h='<div class="bagtop" style="display:flex;flex-direction:column;gap:10px;min-width:0"><div class="eqp"><div class="eq">'+eqOrder.map(k=>{const it=me.eq[k]; return `<div style="position:relative">${cellHtml(it,'slot',`data-eq="${k}"`)}<div class="sl" style="position:absolute;bottom:2px;left:0;right:0;font-size:9.5px;color:var(--mute);text-align:center;pointer-events:none">${eqLbl(k)}</div></div>`;}).join('')+'</div>'+(gemSock||bagSel?'':psTabs())+'</div>';
-  h+=`<div class="meta psm" style="font-size:12px;color:var(--mute)">⚔️ 전투력 <b style="color:#ffd84a">${calcCP(me).toLocaleString()}</b> <span style="color:#6b5f50">·</span> 🛡️ Lv 합 <b style="color:#ffd84a">${eqSum(me.eq)}</b></div><div class="bagbtns" style="display:flex;flex-wrap:nowrap;gap:4px"><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap" data-sort="${SORTM[(sortCur()+1)%3]}">정렬(${SORTN[sortCur()]})</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap" id="aBulk">일괄판매</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap;${(asLv>=0||syLv>=0)?`border-color:#ffd36a;color:#ffd36a;background:rgba(255,214,60,.18);box-shadow:0 0 8px rgba(255,214,60,.45);font-weight:800`:''}" id="aSmart">✨ 스마트 정리</button></div>`;
+  h+=`<div class="meta psm" style="font-size:12px;color:var(--mute)">⚔️ 전투력 <b style="color:#ffd84a">${calcCP(me).toLocaleString()}</b> <span style="color:#6b5f50">·</span> 🛡️ Lv 합 <b style="color:#ffd84a">${eqSum(me.eq)}</b></div><div class="bagbtns" style="display:flex;flex-wrap:nowrap;gap:4px"><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap" data-sort="${SORTM[(sortCur()+1)%3]}">정렬(${SORTN[sortCur()]})</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap" id="aBulk">일괄판매</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap;${asLv>=0?`border-color:${RARC[asLv]};color:${RARC[asLv]};background:${['rgba(233,226,212,.14)','rgba(90,120,255,.28)','rgba(255,214,60,.24)'][asLv]};box-shadow:0 0 8px ${['rgba(233,226,212,.3)','rgba(110,140,255,.6)','rgba(255,214,60,.55)'][asLv]};font-weight:800`:''}" id="aSmart">✨ 스마트 정리</button></div>`;
   { const bi=h.indexOf('<div class="bagbtns"'), bs0='style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap"';
-    h=h.slice(0,bi)+(gemSock?gemSockBar():tabStrip(me.inv,me.misc,bagTab,gsOn)+(bagTab==='misc'?`<div class="bagbtns" style="display:flex;flex-wrap:nowrap;gap:4px"><button class="btn sm" ${bs0} data-msort="1">정렬(등급순)</button><button class="btn sm" ${bs0} id="aMBulk">일괄 판매</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap;${gsOn?`font-weight:800;border-color:#7fe0c0;color:#9cf0d4;background:rgba(60,200,150,.18);box-shadow:0 0 8px rgba(60,200,150,.45)`:''}" id="aGSyn" aria-pressed="${gsOn}">💎 보석합성 ${gsOn?'ON':'OFF'}</button></div>`:h.slice(bi))); }
+    h=h.slice(0,bi)+(gemSock?gemSockBar():tabStrip(me.inv,me.misc,bagTab,gsOn)+(bagTab==='misc'?`<div class="bagbtns" style="display:flex;flex-wrap:nowrap;gap:4px"><button class="btn sm" ${bs0} data-msort="1">정렬(등급순)</button><button class="btn sm" ${bs0} id="aMBulk">일괄 판매</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap;${gasLv>=0?`border-color:${GAC[gasLv]};color:${GAC[gasLv]};background:${GAC[gasLv]}2e;box-shadow:0 0 8px ${GAC[gasLv]}80;font-weight:800`:''}" id="aSmart">✨ 스마트 정리</button></div>`:h.slice(bi))); }
   cellSel=!!(bagSel||gemSock); let invH=''; try{ invH=bagTab==='misc'?me.misc.map((it,i)=>cellHtml(it,'cell',`data-mi="${i}"`)).join(''):me.inv.map((it,i)=>cellHtml(it,'cell',`data-inv="${i}"`)).join(''); }finally{ cellSel=false; }
   h+='<div class="inv">'+invH+'</div>';
   const b=$('#sheetB'); b.className='sbody bag'; b.innerHTML=h; fitInv(); try{ showPop(detailHtml(),curCmpHtml()); }catch(e){ console.error(e); selItem=null; showPop(''); }
@@ -5185,10 +5190,10 @@ function renderBag(){
   const asl=pq('#aSell'); if(asl)asl.onclick=()=>sellBtn(asl);
   $('#itemPop').querySelectorAll('[data-lk]').forEach(alk=>alk.onclick=()=>{ const it=selItem&&selItem.it; if(!it)return; it.lock=!it.lock; saveChar(); sheetToast(it.lock?'🔒 잠갔어요. 일괄 판매에서 제외돼요':'🔓 잠금을 풀었어요'); renderBag(); });
   b.querySelectorAll('[data-sort]').forEach(e=>e.onclick=()=>{ if(sortFresh){ sortFresh=false; sortInv(SORTM[sortCur()]); } else sortInv(e.dataset.sort); });
-  { const q=b.querySelector('#aBulk'); if(q)q.onclick=()=>bulkSell(); const aa=b.querySelector('#aAsh'); if(aa)aa.onclick=()=>ashardModal(); const a1=b.querySelector('#aSmart'); if(a1)a1.onclick=smartModal; }
+  { const q=b.querySelector('#aBulk'); if(q)q.onclick=()=>bulkSell(); const aa=b.querySelector('#aAsh'); if(aa)aa.onclick=()=>ashardModal(); const a1=b.querySelector('#aSmart'); if(a1&&bagTab!=='misc')a1.onclick=()=>smartModal('item'); }
   b.querySelectorAll('[data-bt]').forEach(e=>e.onclick=()=>{ bagTab=e.dataset.bt; selItem=null; rerender(); $('#sheetB').scrollTop=0; });
   b.querySelectorAll('[data-mi]').forEach(el=>el.onclick=()=>{ const i=+el.dataset.mi, it=me.misc[i]; if(it){ if(it.isNew){ delete it.isNew; saveChar(); } selItem={it,misc:i}; renderBag(); } });
-  { const ms=b.querySelector('[data-msort]'); if(ms)ms.onclick=()=>{ sortedNew.add('misc'); sortMisc(me); }; const mb=b.querySelector('#aMBulk'); if(mb)mb.onclick=()=>bulkSellMisc(me); const gs=b.querySelector('#aGSyn'); if(gs)gs.onclick=gemSynToggle; }
+  { const ms=b.querySelector('[data-msort]'); if(ms)ms.onclick=()=>{ sortedNew.add('misc'); sortMisc(me); }; const mb=b.querySelector('#aMBulk'); if(mb)mb.onclick=()=>bulkSellMisc(me); const gs=b.querySelector('#aSmart'); if(gs&&bagTab==='misc')gs.onclick=()=>smartModal('gem'); }
 
   if(!gemSock)enableDrag(b);
   const asn=pq('#aSend'); if(asn)asn.onclick=()=>sendPick();
