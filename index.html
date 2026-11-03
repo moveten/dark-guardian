@@ -493,6 +493,10 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 .dex .dxi{width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center}
 .dex .dxi img{width:92%;height:92%;object-fit:contain}
 .dex .dxc:not(.got) .dxi img{filter:brightness(0);opacity:.55}
+.dex .dxnew{position:absolute;top:-6px;right:-3px;z-index:2;padding:1px 5px;border-radius:8px;background:var(--blood);color:#fff;font-size:10px;font-weight:900;line-height:1.3;font-style:normal;box-shadow:0 0 8px rgba(255,90,50,.7)}
+.dex .dxc.nw{border-color:#ff8a5a}
+.dex .dxnb{display:inline-block;margin-left:6px;padding:0 5px;border-radius:8px;background:var(--blood);color:#fff;font-size:10px;font-weight:900;line-height:1.5;font-style:normal;vertical-align:middle}
+.dex .dxt button{position:relative}.dex .dxt button .dxnb{position:absolute;top:-6px;right:-2px;margin:0}
 .dex .dxc b{font-size:11.5px;line-height:1.2;text-align:center;color:#f1e6cc;margin-top:2px;min-height:28px;display:flex;align-items:center;justify-content:center;word-break:keep-all}
 .dex .dxc:not(.got) b{color:#6f6354}
 .dex .dxn{position:absolute;top:3px;right:4px;z-index:1;font-style:normal;font-size:11px;font-weight:800;color:#fff;background:rgba(0,0,0,.72);border-radius:99px;padding:1px 6px}
@@ -1312,7 +1316,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.4.0492</div>
+    <div class="ver" id="verT">v0.6.4.0493</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1929,8 +1933,9 @@ function dexOk(k){ if(!DEXOK){ DEXOK=new Set(); DEX_SP.forEach(g=>g[2].forEach(x
 const dexN=(p,keys)=>dexKeysOf(keys,p).filter(k=>(p.dx&&p.dx[k]|0)>0).length;
 const dexSpN=p=>dexN(p,DEX_SP.flatMap(g=>g[2])), dexStN=p=>dexN(p,DEX_ST.flatMap(g=>g[2]));
 const DEX_TOT=DEX_SP.reduce((n,g)=>n+g[2].length,0)+DEX_ST.reduce((n,g)=>n+g[2].length,0);   /* 도감 전체 칸 수(유니크 + 세트) */
-const dexTot=p=>dexSpN(p)+dexStN(p), dexNew=p=>!!p&&(p.dxs===undefined||dexTot(p)>(p.dxs|0));   /* 시작화면 도감 버튼 NEW: 처음 한 번 + 도감을 연 뒤 새로 채워졌을 때 */
-function dexAdd(p,it){ if(!p||!it||it.mat||!it.sp||!dexOk(it.sp))return; const had=dexSpN(p); if(!p.dx)p.dx={}; p.dx[it.sp]=Math.min(9999,(p.dx[it.sp]|0)+1);
+const dexTot=p=>dexSpN(p)+dexStN(p), dexNew=p=>!!p&&(p.dxs===undefined||dexTot(p)>(p.dxs|0)||dexNewN(p)>0), dexNewN=p=>p&&p.dxn?Object.keys(p.dxn).length:0;   /* 시작화면 도감 버튼 NEW: 처음 한 번 + 도감을 연 뒤 새로 채워졌을 때 */
+function dexAdd(p,it){ if(!p||!it||it.mat||!it.sp||!dexOk(it.sp))return; const had=dexSpN(p); if(!p.dx)p.dx={}; if(!(p.dx[it.sp]|0)){ if(!p.dxn)p.dxn={}; p.dxn[it.sp]=1; } p.dx[it.sp]=Math.min(9999,(p.dx[it.sp]|0)+1);   /* 처음 얻은 칸은 dxn에 표시 → 도감 안에서 NEW */
+ 
   if(p===me&&had<20&&dexSpN(p)>=20)later(1.2,()=>{ toast(`🏅 도감 완성! 칭호 「${DEX_TITLE}」 획득`,'#ffd84a'); sfx('rare'); }); }
 const HERO_PART={weapon:'hdag',helm:'hhelm',armor:'harmor',amulet:'hamu',ring:'hring'}; /* 부위 → 영웅 아이템 (보조무기는 직업별) */
 const HPARTN={weapon:'단검',helm:'투구',armor:'갑옷',amulet:'목걸이',ring:'반지',shield:'보조무기'};
@@ -2253,7 +2258,7 @@ function loadChar(id){
     { const q={}; if(p.cc&&typeof p.cc==='object')for(const k in p.cc){ const v=Math.floor(+p.cc[k]); if(v>0&&isFinite(v))q[k]=Math.min(v,999999); } p.cc=q; }   /* 스테이지별 누적 클리어 횟수(0.6.0.0265부터 집계) */
     if(p.clear===undefined)p.clear=Math.max(0,+(lsGet('dkdef2.clear')||0));
     { const lg=k=>{ const v=parseInt(lsGet(k)); return isNaN(v)?-1:clamp(v,-1,2); }; if(p.as===undefined)p.as=lg('dkdef2.asell'); if(p.sy===undefined)p.sy=lg('dkdef2.asyn'); if(p.sy>=0)p.sy=2; } /* 캐릭터별 자동판매/합성: 기존 캐릭터는 예전 전역 설정을 한 번 이어받음 */
-    { const q={}; if(p.dx&&typeof p.dx==='object')for(const k in p.dx){ const v=Math.floor(+p.dx[k]); if(v>0&&isFinite(v)&&dexOk(k))q[k]=Math.min(v,9999); } p.dx=q; if(p.dxs!==undefined)p.dxs=Math.max(0,Math.min(999,+p.dxs|0)); if(p.gas!==undefined)p.gas=Math.max(-1,Math.min(2,p.gas|0)); }   /* 도감: 아이템별 직접 획득 횟수 · dxs = 도감을 마지막으로 열어 본 때의 수집 수(그보다 늘면 시작화면 도감 버튼에 NEW) */
+    { const q={}; if(p.dx&&typeof p.dx==='object')for(const k in p.dx){ const v=Math.floor(+p.dx[k]); if(v>0&&isFinite(v)&&dexOk(k))q[k]=Math.min(v,9999); } p.dx=q; if(p.dxs!==undefined)p.dxs=Math.max(0,Math.min(999,+p.dxs|0)); { const n={}; if(p.dxn&&typeof p.dxn==='object')for(const k in p.dxn)if(dexOk(k)&&(p.dx[k]|0)>0)n[k]=1; p.dxn=n; } if(p.gas!==undefined)p.gas=Math.max(-1,Math.min(2,p.gas|0)); }   /* 도감: 아이템별 직접 획득 횟수 · dxs = 도감을 마지막으로 열어 본 때의 수집 수(그보다 늘면 시작화면 도감 버튼에 NEW) */
     p.sp=p.sp?1:0;   /* 캐릭터별 1.3배속 설정 */ petNorm(p);
     p.au=Math.max(0,Math.min(2,p.au|0));   /* 캐릭터별 AUTO 설정 (0 꺼짐 · 1 이동 · 2 이동+스킬) — 스테이지를 옮겨도 유지 */
     p.eq=p.eq||{}; if(p.eq.shield===undefined)p.eq.shield=null;
@@ -2293,7 +2298,7 @@ function migrateChars(){
 }
 function createChar(cls,name,nid){ const ids=charIds(); if(ids.length>=MAXCHAR||!CLASSES[cls])return null; if(nameTaken(name))return null; const p=newChar(cls,name,nid); p.ms=MAILQ.map(q=>q.id); lsSet(charKey(p.id),JSON.stringify(packChar(p))); ids.push(p.id); setIds(ids); selId=p.id; lsSet('dkdef2.sel',selId); return p; }
 function deleteChar(id){ setIds(charIds().filter(x=>x!==id)); lsDel(charKey(id)); lsDel('dkdef2.rk.'+id); lsDel('dkdef2.nmv.'+id); if(selId===id){selId='';lsSet('dkdef2.sel','');} rkQueueDel(id); nameQueueRel(id); }
-function packChar(p){ const {id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear,as,sy,gs,au,sp,ct,cts,cat,dv4,shard,ashard,misc,mail,ms,tut,cc,eq2,es,pet,dx,dxs,gas}=p; return {gas:gas===undefined?undefined:Math.max(-1,Math.min(2,gas|0)),dx:dx&&Object.keys(dx).length?dx:undefined,dxs:dxs===undefined?undefined:Math.max(0,dxs|0),id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear:clear|0,au:Math.max(0,Math.min(2,au|0)),sp:sp?1:0,ct:ct>0?ct|0:0,cts:cts>0?cts|0:undefined,cat:cat>0?cat|0:0,as:as===undefined?-1:as,sy:sy===undefined?-1:sy,gs:gs?1:undefined,dv4:dv4?1:0,shard:shard|0,ashard:(ashard|0)||undefined,misc:Array.isArray(misc)?misc:undefined,mail:Array.isArray(mail)?mail:undefined,ms:Array.isArray(ms)?ms:undefined,tut:tut||undefined,cc:cc&&Object.keys(cc).length?cc:undefined,eq2:eq2&&Object.values(eq2).some(Boolean)?eq2:undefined,es:es===1?1:undefined,pet:pet&&PETS[pet.id]?{id:pet.id,xp:Math.floor(pet.xp)||0}:undefined}; }
+function packChar(p){ const {id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear,as,sy,gs,au,sp,ct,cts,cat,dv4,shard,ashard,misc,mail,ms,tut,cc,eq2,es,pet,dx,dxs,dxn,gas}=p; return {dxn:dxn&&Object.keys(dxn).length?dxn:undefined,gas:gas===undefined?undefined:Math.max(-1,Math.min(2,gas|0)),dx:dx&&Object.keys(dx).length?dx:undefined,dxs:dxs===undefined?undefined:Math.max(0,dxs|0),id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear:clear|0,au:Math.max(0,Math.min(2,au|0)),sp:sp?1:0,ct:ct>0?ct|0:0,cts:cts>0?cts|0:undefined,cat:cat>0?cat|0:0,as:as===undefined?-1:as,sy:sy===undefined?-1:sy,gs:gs?1:undefined,dv4:dv4?1:0,shard:shard|0,ashard:(ashard|0)||undefined,misc:Array.isArray(misc)?misc:undefined,mail:Array.isArray(mail)?mail:undefined,ms:Array.isArray(ms)?ms:undefined,tut:tut||undefined,cc:cc&&Object.keys(cc).length?cc:undefined,eq2:eq2&&Object.values(eq2).some(Boolean)?eq2:undefined,es:es===1?1:undefined,pet:pet&&PETS[pet.id]?{id:pet.id,xp:Math.floor(pet.xp)||0}:undefined}; }
 function saveChar(){ if(!me||!me.id)return; lsSet(charKey(me.id),JSON.stringify(packChar(me))); }
 const dispName=p=>(p&&p.name)||CLASSES[p.cls].n;
 const SELLBASE=[100,200,400,800,3000], ADVAFX=['ls','crit','ias','ms','mf','pr','mr'];
@@ -4991,27 +4996,29 @@ function renderPet(){
     ${petSkillsHtml(lv)}
     <div class="pt-hint">펫은 이 캐릭터 전용이에요 · 다른 캐릭터로 옮길 수 없어요</div>`; }
 let dexTab='sp'; const dexClosed=new Set();
+function dexSeen(){ const q=me; if(!q||!q.id)return; if(q.dxs!==dexTot(q)||dexNewN(q)){ q.dxs=dexTot(q); delete q.dxn; saveChar(); } for(const e of document.querySelectorAll('#cDex,#bDexL'))e.classList.remove('new'); }   /* 도감을 닫으면(또는 다른 화면으로 가면) 확인한 것으로 보고 NEW 모두 해제 */
 function dexOpen(){ flushSortedNew(); sheetMode='dex'; selItem=null; bagSel=null; rerender(); $('#sheetB').scrollTop=0; }
 function dexCell(k,p,tone){ const S=SPFX[k], n=(p.dx&&p.dx[k])|0, im=UNQIMG[S.n];
-  return `<div class="dxc ${tone}${n?' got':''}">${n>1?`<i class="dxn">×${n}</i>`:''}<div class="dxi">${im?`<img alt="" src="img/${im}.png" onerror="this.style.visibility='hidden'">`:''}</div><b>${n?esc(S.n):'???'}</b></div>`; }
+  return `<div class="dxc ${tone}${n?' got':''}${p.dxn&&p.dxn[k]?' nw':''}" data-dk="${k}">${p.dxn&&p.dxn[k]?'<em class="dxnew">NEW</em>':''}${n>1?`<i class="dxn">×${n}</i>`:''}<div class="dxi">${im?`<img alt="" src="img/${im}.png" onerror="this.style.visibility='hidden'">`:''}</div><b>${n?esc(S.n):'???'}</b></div>`; }
 function dexGroup(id,title,ico,keys0,p,tone){ const keys=dexKeysOf(keys0,p), got=keys.filter(k=>(p.dx&&p.dx[k]|0)>0).length, open=!dexClosed.has(id);
-  return `<section class="dxg"><button class="dxh" data-dg="${id}" aria-expanded="${open}"><span>${ico} ${esc(title)} <em>${got}/${keys.length}</em></span><u>${open?'▾':'▸'}</u></button>${open?`<div class="dxgrid">${keys.map(k=>dexCell(k,p,tone)).join('')}</div>`:''}</section>`; }
+  return `<section class="dxg"><button class="dxh" data-dg="${id}" aria-expanded="${open}"><span>${ico} ${esc(title)} <em>${got}/${keys.length}</em>${keys.some(k=>p.dxn&&p.dxn[k])?'<i class="dxnb">NEW</i>':''}</span><u>${open?'▾':'▸'}</u></button>${open?`<div class="dxgrid">${keys.map(k=>dexCell(k,p,tone)).join('')}</div>`:''}</section>`; }
 function renderDex(){
-  { const q=me; if(q&&q.id&&q.dxs!==dexTot(q)){ q.dxs=dexTot(q); saveChar(); } const cd=$('#cDex'); if(cd)cd.classList.remove('new'); }   /* 도감을 열어 보면 NEW 해제 */
-  markTabs(); sheetHead(); const b=$('#sheetB'); b.className='sbody dex'; const p=me, spN=dexSpN(p), stN=dexStN(p), isSp=dexTab==='sp', got=isSp?spN:stN, tot=isSp?20:15, pct=(got/tot*100).toFixed(1)+'%';
-  b.innerHTML=`<div class="dxt"><button data-dt="sp" aria-pressed="${isSp}">✨ 스페셜 아이템<small>${spN}/20</small></button><button data-dt="st" aria-pressed="${!isSp}">🧩 세트 아이템<small>${stN}/15</small></button></div>
+  markTabs(); sheetHead(); const b=$('#sheetB'); b.className='sbody dex'; const p=me, spNw=DEX_SP.some(g=>g[2].some(k=>p.dxn&&p.dxn[k])), stNw=DEX_ST.some(g=>dexKeysOf(g[2],p).some(k=>p.dxn&&p.dxn[k])), spN=dexSpN(p), stN=dexStN(p), isSp=dexTab==='sp', got=isSp?spN:stN, tot=isSp?20:15, pct=(got/tot*100).toFixed(1)+'%';
+  b.innerHTML=`<div class="dxt"><button data-dt="sp" aria-pressed="${isSp}">✨ 스페셜 아이템<small>${spN}/20</small>${spNw?'<i class="dxnb">NEW</i>':''}</button><button data-dt="st" aria-pressed="${!isSp}">🧩 세트 아이템<small>${stN}/15</small>${stNw?'<i class="dxnb">NEW</i>':''}</button></div>
   <div class="dxp"><div class="dxpt"><b>${isSp?'특수 유니크 수집':'세트 수집'}</b><strong>${pct}</strong></div><div class="dxbar"><i style="width:${(got/tot*100).toFixed(2)}%"></i></div>${isSp?`<div class="dxpn">🏅 ${spN>=20?`칭호 <b>「${DEX_TITLE}」</b> 획득 완료`:`20종을 모두 모으면 칭호 <b>「${DEX_TITLE}」</b> 획득`}</div>`:''}</div>
   ${isSp?DEX_SP.map((g,i)=>dexGroup('sp'+i,g[0],g[1],g[2],p,'sp')).join(''):DEX_ST.map((g,i)=>dexGroup('st'+i,g[0],g[1],g[2],p,'st')).join('')+'<div class="dxsoon">+ 새 세트는 스토리와 함께 추가돼요 <span>🔒</span></div>'}`;
+  b.querySelectorAll('.dxc.nw').forEach(e=>e.onclick=()=>{ const y=b.scrollTop; delete p.dxn[e.dataset.dk]; saveChar(); renderDex(); b.scrollTop=y; });   /* 칸을 누르면 그 칸 NEW 확인 */
   b.querySelectorAll('[data-dt]').forEach(e=>e.onclick=()=>{ dexTab=e.dataset.dt; renderDex(); b.scrollTop=0; });
   b.querySelectorAll('[data-dg]').forEach(e=>e.onclick=()=>{ const id=e.dataset.dg, y=b.scrollTop; if(dexClosed.has(id))dexClosed.delete(id); else dexClosed.add(id); renderDex(); b.scrollTop=y; }); }
-function rerender(){ if(sheetMode!=='bag'){ gemSock=null; bagSel=null; $('#sheetTabs').classList.remove('selhide'); $('#selBar').hidden=true; } $('#sheet').classList.toggle('isstore',sheetMode==='store'||sheetMode==='town'); if(sheetMode==='store')renderStore(); else if(sheetMode==='town')renderTown(); else if(sheetMode==='bag')renderBag(); else if(sheetMode==='stat'||sheetMode==='skill'||sheetMode==='passive')renderStat(); else if(sheetMode==='shop')renderShop(); else if(sheetMode==='pet')renderPet(); else if(sheetMode==='dex')renderDex(); else renderMenu(); }
+let dexWas=false;
+function rerender(){ if(dexWas&&sheetMode!=='dex')dexSeen(); dexWas=sheetMode==='dex'; if(sheetMode!=='bag'){ gemSock=null; bagSel=null; $('#sheetTabs').classList.remove('selhide'); $('#selBar').hidden=true; } $('#sheet').classList.toggle('isstore',sheetMode==='store'||sheetMode==='town'); if(sheetMode==='store')renderStore(); else if(sheetMode==='town')renderTown(); else if(sheetMode==='bag')renderBag(); else if(sheetMode==='stat'||sheetMode==='skill'||sheetMode==='passive')renderStat(); else if(sheetMode==='shop')renderShop(); else if(sheetMode==='pet')renderPet(); else if(sheetMode==='dex')renderDex(); else renderMenu(); }
 function markTabs(){ $('#itemPop').hidden=true; $('#ptsBar').hidden=true; const t=$('#sheetTabs'), cm=sheetMode==='passive'?'skill':sheetMode; t.hidden=sheetMode==='menu'||sheetMode==='store'||sheetMode==='dex'||!!G.inGame; /* 게임 중에는 하단 독 하나만 사용 */ for(const [id,m] of [['bBag','bag'],['bStat','stat'],['bSkillT','skill'],['bMenu','menu']]){ const e=$('#'+id); if(e)e.setAttribute('aria-pressed',cm===m); } t.querySelectorAll('button').forEach(b=>{b.setAttribute('aria-pressed',b.dataset.m===cm); if(b.dataset.m==='shop')b.hidden=!!G.inGame&&sheetMode!=='shop'; const n=b.dataset.m==='bag'?newCnt(me):b.dataset.m==='stat'?(me.statPts|0):b.dataset.m==='skill'?(me.skillPts|0):0; let bd=b.querySelector('.pl'); if(!bd){bd=document.createElement('span');bd.className='pl';b.appendChild(bd);} bd.classList.toggle('dotn',b.dataset.m==='bag'); bd.textContent=n>0&&b.dataset.m!=='bag'?'+'+n:''; bd.hidden=!(n>0); }); }
 $('#ptsBar').onclick=()=>{ sheetMode='stat'; selItem=null; rerender(); };
 $('#sheetTabs').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; if(b.id==='tSend'){ sheetMode='bag'; selItem=null; bagSel=new Set(); bagSelM=new Set(); rerender(); $('#sheetB').scrollTop=0; return; }   /* 📦 창고로: 가방을 열고 선택 모드로 */
   if(sheetMode==='bag'&&b.dataset.m!=='bag')flushSortedNew();   /* 가방에서 정렬한 탭의 NEW는 가방을 벗어날 때 지움 (가방 탭을 한 번 더 눌러도 아무 일 없음) */
   bagSel=null; if(b.dataset.m!==sheetMode){ bagTab='eq'; storeTab='eq'; } sheetMode=b.dataset.m; selItem=null; shopMsg=''; buyMsg=''; rerender(); $('#sheetB').scrollTop=0; });
 function openTitleSheet(m){ prepMe(); G.titleSheet=true; if(m==='store')STORE=loadStore(); openSheet(m); }
-function closeSheet(){ flushSortedNew(); gemSock=null; try{ hoverHide(); }catch(e){} document.body.classList.remove('shopen'); for(const id of ['bBag','bStat','bSkillT','bMenu']){ const e=$('#'+id); if(e)e.setAttribute('aria-pressed','false'); } const was=G.titleSheet; if(me&&me.id&&sheetMode!=='town')saveChar(); sheetMode=null; bagSel=null; $('#sheetTabs').classList.remove('selhide'); $('#selBar').hidden=true; $('#sheet').hidden=true; G.paused=false; if(was){ G.titleSheet=false; renderClassCards(); } }
+function closeSheet(){ if(sheetMode==='dex'){ dexSeen(); dexWas=false; } flushSortedNew(); gemSock=null; try{ hoverHide(); }catch(e){} document.body.classList.remove('shopen'); for(const id of ['bBag','bStat','bSkillT','bMenu']){ const e=$('#'+id); if(e)e.setAttribute('aria-pressed','false'); } const was=G.titleSheet; if(me&&me.id&&sheetMode!=='town')saveChar(); sheetMode=null; bagSel=null; $('#sheetTabs').classList.remove('selhide'); $('#selBar').hidden=true; $('#sheet').hidden=true; G.paused=false; if(was){ G.titleSheet=false; renderClassCards(); } }
 $('#sheetX').onclick=closeSheet;
 /* 마을 창이 열려 있을 때 창 밖(어두운 배경·하단 탭 등)을 누르면 그 버튼은 실행하지 않고 마을 창만 닫음 */
 document.addEventListener('click',e=>{ if(sheetMode!=='town'||$('#sheet').hidden)return; if(e.target.closest&&e.target.closest('.sheet,#modal,#itemPop'))return; e.preventDefault(); e.stopPropagation(); closeSheet(); },true);
