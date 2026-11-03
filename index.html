@@ -793,6 +793,19 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 .cchips button{flex:1;min-width:0;position:relative;padding:7px 4px;border-radius:12px;border:1px solid rgba(214,170,78,.7);background:rgba(15,11,9,.7);text-align:center;font:inherit;font-size:11px;color:var(--mute);line-height:1.35;cursor:pointer}
 .cchips button:active{filter:brightness(1.25)}
 .cchips button b{display:block;font-size:15px;color:#ffd36a;white-space:nowrap}
+.mdl .card .smbody{max-height:calc(100dvh - 48px);overflow-y:auto}
+.smhd{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}.smhd h3{margin:0}
+.smsec{border:1px solid #3a2e22;background:#120d0b;border-radius:12px;padding:11px 12px;margin-bottom:10px}
+.smh{display:flex;justify-content:space-between;align-items:center;font-size:16px;font-weight:800;color:#ece0c4}
+.smd{margin:8px 0 0;font-size:12.5px;color:#a99a7e;line-height:1.5}.smd.smw{color:#ffcf8a}
+.smsw{width:50px;height:28px;border-radius:99px;background:#3a2e22;position:relative;flex:none;border:1px solid #5a4a38;padding:0}
+.smsw::after{content:"";position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:#bdb09a;transition:left .15s}
+.smsw.on{background:#7a4ad8;border-color:#c9a0ff}.smsw.on::after{left:24px;background:#fff}
+.smrl{display:flex;align-items:center;gap:10px;width:100%;padding:11px 12px;margin-top:7px;border-radius:10px;border:1.5px solid #3a2e22;background:#17110d;color:#cbbd9f;font:inherit;text-align:left}
+.smrl i{width:18px;height:18px;border-radius:50%;border:2px solid #6a5a46;flex:none;position:relative}
+.smrl.on{border-color:var(--c);background:#241a0e}.smrl.on i{border-color:var(--c)}.smrl.on i::after{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--c)}
+.smrl b{font-size:15px;color:var(--c)}.smrl span{font-size:12px;color:#a99a7e;margin-left:auto}
+.smsum{border-top:1px solid #3a2e22;margin:12px -2px 10px;padding-top:10px;font-size:13px;color:#d9c9a4;text-align:center}.smsum b{color:#ffd36a}
 .cchips button small{display:block;font-size:11px;font-weight:700;color:#ffd36a}
 #cMap{display:flex;align-items:center;justify-content:center}
 /* 스테이지 카드: 보스 얼굴 + 글자 */
@@ -1294,7 +1307,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.4.0488</div>
+    <div class="ver" id="verT">v0.6.4.0489</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3331,11 +3344,20 @@ function autoPick(){
 let annQ=[], annSeq=0;
 function announce(t,col){ alPush(t,col,false); }
 const ASELL=[-1,0,1,2], ASN=['끔','일반↓','매직↓','레어↓'];
-function autoSellModal(){
-  const opts=[[-1,'꺼짐'],[0,'일반 이하'],[1,'매직 이하'],[2,'레어 이하']];
-  modal(`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><h3 style="margin:0">🪙 자동판매</h3><button class="btn sm" id="asX" aria-label="닫기" style="min-width:40px;padding:6px 10px">✕</button></div><div class="col">${opts.map(o=>`<button class="btn${asLv===o[0]?' primary':''}" data-a="${o[0]}" style="text-align:left"><b style="${o[0]>=0?'color:'+RARC[o[0]]:''}">${asLv===o[0]?'✔ ':''}${o[1]}</b></button>`).join('')}</div>`,m=>{
-    m.querySelector('#asX').onclick=closeModal;
-    m.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{ asLv=+b.dataset.a; saveChar(); closeModal(); if(sheetMode==='bag')renderBag(); sheetToast&&sheetToast(asLv<0?'자동 판매를 껐어요':`${RARN[asLv]} 이하는 줍자마자 판매돼요`); }); });
+function smartModal(){   /* 스마트 정리 = 자동판매 + 자동합성 한 창. 누르는 즉시 저장되고 창은 열려 있어요 */
+  const opts=[[-1,'끄기','팔지 않아요'],[0,'일반 이하','흰색 아이템'],[1,'매직 이하','흰색·파랑'],[2,'레어 이하','흰색·파랑·노랑']];
+  const draw=m=>{
+    const warn=syLv>=0&&asLv>=0&&asLv>=syLv;
+    m.querySelector('.card').innerHTML=`<div class="smbody"><div class="smhd"><h3>✨ 스마트 정리</h3><button class="btn sm" id="smX" aria-label="닫기" style="min-width:40px;padding:6px 10px">✕</button></div>
+<div class="smsec"><div class="smh"><span>🪙 자동판매</span></div>${opts.map(o=>`<button type="button" class="smrl${asLv===o[0]?' on':''}" data-a="${o[0]}" style="--c:${o[0]>=0?RARC[o[0]]:'#9a8c72'}"><i></i><b>${o[1]}</b><span>${o[2]}</span></button>`).join('')}</div>
+<div class="smsec"><div class="smh"><span>🧬 자동합성</span><button type="button" class="smsw${syLv>=0?' on':''}" id="smSyn" role="switch" aria-checked="${syLv>=0}" aria-label="자동합성"></button></div><p class="smd">같은 등급 ${SYN_N}개가 모이면 한 단계 위 등급 1개로 합쳐요 (레어 이하)</p>${warn?`<p class="smd smw">⚠️ ${RARN[asLv]} 이하 자동판매가 켜져 있어서 합성 재료가 먼저 팔려요</p>`:''}</div>
+<div class="smsum">지금 설정 · <b>${asLv<0?'판매 안 함':RARN[asLv]+' 이하 판매'}</b> + <b>합성 ${syLv>=0?'ON':'OFF'}</b></div>
+<button class="btn primary" id="smOk" style="width:100%">완료</button></div>`;
+    m.querySelector('#smX').onclick=closeModal; m.querySelector('#smOk').onclick=closeModal;
+    m.querySelectorAll('[data-a]').forEach(q=>q.onclick=()=>{ asLv=+q.dataset.a; saveChar(); if(sheetMode==='bag')renderBag(); draw(m); });
+    m.querySelector('#smSyn').onclick=()=>{ syLv=syLv>=0?-1:2; saveChar(); autoSynth(); if(sheetMode==='bag')renderBag(); draw(m); };
+  };
+  modal('',draw);
 }
 /* 자동 판매/합성 설정은 캐릭터별로 저장 (me.as / me.sy, 없으면 예전 전역 설정을 이어받음) */
 Object.defineProperty(window,'asLv',{get(){ try{ return me&&me.as!==undefined?me.as:-1; }catch(e){ return -1; } },set(v){ try{ if(me)me.as=v; }catch(e){} }});
@@ -3392,7 +3414,6 @@ function ashardModal(){ shardAdd(me,0,'ashard'); const n=shardCount(me,'ashard')
     m.querySelector('#ashX').onclick=closeModal;
     m.querySelectorAll('[data-aw]').forEach(b=>b.onclick=()=>{ if(shardCount(me,'ashard')<ASHARD_N)return; const snap=JSON.stringify([me.misc,me.ashard|0]); shardTake(me,ASHARD_N,'ashard'); const i=me.inv.indexOf(null); if(i<0){ [me.misc,me.ashard]=JSON.parse(snap); toast('가방이 가득 찼어요','#e07060'); return; }
       const it=genHero(awKey(b.dataset.aw)); if(!it){ [me.misc,me.ashard]=JSON.parse(snap); return; } it.isNew=1; me.inv[i]=it; selItem=null; saveChar(); uiDirty=true; closeModal(); sfx('rare'); toast(`✦ 교환 완료: ${dn(it)}`,RARC[4]); if(sheetMode==='bag')renderBag(); }); }); }
-function synToggle(){ syLv=syLv>=0?-1:2; saveChar(); autoSynth(); if(sheetMode==='bag')renderBag(); const warn=syLv>=0&&asLv>=0&&asLv>=syLv; sheetToast&&sheetToast(syLv<0?'자동 합성을 껐어요':warn?`⚠️ 자동 판매(${RARN[asLv]} 이하)가 합성 등급을 먼저 팔아요`:`자동 합성 ON — 레어 이하 같은 등급 ${SYN_N}개가 모이면 합성돼요`,warn?'#ffb259':null); }
 
 /* 보석 자동 합성: 하급 5개 → 중급, 중급 5개 → 상급 (종류 무관, 결과 종류는 랜덤). 상급은 재료가 아님 */
 Object.defineProperty(window,'gsOn',{get(){ try{ return !!(me&&me.gs); }catch(e){ return false; } },set(v){ try{ if(me)me.gs=v?1:0; }catch(e){} }});
@@ -4437,7 +4458,7 @@ const TUTS=[
   {t:'가방 열기',b:'아래 🎒 가방 버튼을 눌러 가방을 열어 보세요. 열려 있는 동안 게임은 잠시 멈춰요.',...tutOpenTab('bBag','bag')},
   {t:'장비 착용',b:'가방 칸의 아이템을 누르면 비교 창이 열려요. 초록 ▲가 붙은 아이템이 지금 장비보다 좋아요. [장착]을 눌러 입어 보세요.',can:()=>me.inv.some(it=>it&&!isShard(it)&&canWear(it)),b2:'가방 칸의 아이템을 누르면 비교 창이 열려요. 초록 ▲가 붙은 아이템이 지금 장비보다 좋고, [장착]으로 입어요. 레벨·능력치가 모자라면 입을 수 없어요.',pre:S=>{S.sg=tutEqSig();},tg:()=>tutQ('#modal [data-rk]')||tutQ('#aEquip')||(tutBag(it=>canWear(it)&&!!document.querySelector('#sheetB [data-inv="'+me.inv.indexOf(it)+'"] .up'))||tutBag(canWear))||tutQ('#bBag'),tgs:()=>[...document.querySelectorAll('#modal [data-rk]')],nt:()=>tutQ('#modal [data-rk]')?'반지가 두 개라서, 바꿀 반지를 골라 주세요.':'',ck:S=>tutEqSig()!==S.sg},
   {t:'한꺼번에 팔기',b:'필요 없는 아이템은 [일괄판매]로 한 번에 팔 수 있어요. 잠근 🔒 아이템과 장착 중인 장비는 팔리지 않아요.',tg:()=>tutQ('#aBulk')||tutQ('#bBag'),ok:1},
-  {t:'자동 판매 · 자동 합성',b:'[자동판매]는 고른 등급 이하를 줍는 즉시 팔고, [자동 합성]은 같은 등급 아이템을 모아 더 좋은 등급으로 합쳐 줘요. 가방이 가득 차는 걸 막아 줘요.',tg:()=>tutQ('#aSyn'),ok:1}
+  {t:'스마트 정리',b:'[스마트 정리]에서 고른 등급 이하는 줍는 즉시 팔고, 같은 등급 아이템은 모아 더 좋은 등급으로 합쳐 줘요. 가방이 가득 차는 걸 막아 줘요.',tg:()=>tutQ('#aSmart'),ok:1}
  ],
  [ /* 1-4 */
   {t:'가방 열기',b:'강화하려면 먼저 🎒 가방을 열어요.',...tutOpenTab('bBag','bag')},
@@ -5150,7 +5171,7 @@ function renderBag(){
   const eqOrder=['weapon','armor','helm','amulet','ring1','ring2'].concat(['shield']);
   if(gemSock){ bagTab='eq'; cellSel=true; }
   let h='<div class="bagtop" style="display:flex;flex-direction:column;gap:10px;min-width:0"><div class="eqp"><div class="eq">'+eqOrder.map(k=>{const it=me.eq[k]; return `<div style="position:relative">${cellHtml(it,'slot',`data-eq="${k}"`)}<div class="sl" style="position:absolute;bottom:2px;left:0;right:0;font-size:9.5px;color:var(--mute);text-align:center;pointer-events:none">${eqLbl(k)}</div></div>`;}).join('')+'</div>'+(gemSock||bagSel?'':psTabs())+'</div>';
-  h+=`<div class="meta psm" style="font-size:12px;color:var(--mute)">⚔️ 전투력 <b style="color:#ffd84a">${calcCP(me).toLocaleString()}</b> <span style="color:#6b5f50">·</span> 🛡️ Lv 합 <b style="color:#ffd84a">${eqSum(me.eq)}</b></div><div class="bagbtns" style="display:flex;flex-wrap:nowrap;gap:4px"><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap" data-sort="${SORTM[(sortCur()+1)%3]}">정렬(${SORTN[sortCur()]})</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap" id="aBulk">일괄판매</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap;${asLv>=0?`border-color:${RARC[asLv]};color:${RARC[asLv]};background:${['rgba(233,226,212,.14)','rgba(90,120,255,.28)','rgba(255,214,60,.24)'][asLv]};box-shadow:0 0 8px ${['rgba(233,226,212,.3)','rgba(110,140,255,.6)','rgba(255,214,60,.55)'][asLv]};font-weight:800`:''}" id="aAuto">자동판매 ${ASN[asLv+1]}</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap;${syLv>=0?`border-color:#c9a0ff;color:#d9b8ff;background:rgba(150,90,255,.22);box-shadow:0 0 8px rgba(150,90,255,.5);font-weight:800`:''}" id="aSyn" aria-pressed="${syLv>=0}">자동합성 ${syLv>=0?'ON':'OFF'}</button></div>`;
+  h+=`<div class="meta psm" style="font-size:12px;color:var(--mute)">⚔️ 전투력 <b style="color:#ffd84a">${calcCP(me).toLocaleString()}</b> <span style="color:#6b5f50">·</span> 🛡️ Lv 합 <b style="color:#ffd84a">${eqSum(me.eq)}</b></div><div class="bagbtns" style="display:flex;flex-wrap:nowrap;gap:4px"><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap" data-sort="${SORTM[(sortCur()+1)%3]}">정렬(${SORTN[sortCur()]})</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap" id="aBulk">일괄판매</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap;${(asLv>=0||syLv>=0)?`border-color:#ffd36a;color:#ffd36a;background:rgba(255,214,60,.18);box-shadow:0 0 8px rgba(255,214,60,.45);font-weight:800`:''}" id="aSmart">✨ 스마트 정리</button></div>`;
   { const bi=h.indexOf('<div class="bagbtns"'), bs0='style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap"';
     h=h.slice(0,bi)+(gemSock?gemSockBar():tabStrip(me.inv,me.misc,bagTab,gsOn)+(bagTab==='misc'?`<div class="bagbtns" style="display:flex;flex-wrap:nowrap;gap:4px"><button class="btn sm" ${bs0} data-msort="1">정렬(등급순)</button><button class="btn sm" ${bs0} id="aMBulk">일괄 판매</button><button class="btn sm" style="flex:1 1 0;min-width:0;padding:8px 1px;font-size:12px;white-space:nowrap;${gsOn?`font-weight:800;border-color:#7fe0c0;color:#9cf0d4;background:rgba(60,200,150,.18);box-shadow:0 0 8px rgba(60,200,150,.45)`:''}" id="aGSyn" aria-pressed="${gsOn}">💎 보석합성 ${gsOn?'ON':'OFF'}</button></div>`:h.slice(bi))); }
   cellSel=!!(bagSel||gemSock); let invH=''; try{ invH=bagTab==='misc'?me.misc.map((it,i)=>cellHtml(it,'cell',`data-mi="${i}"`)).join(''):me.inv.map((it,i)=>cellHtml(it,'cell',`data-inv="${i}"`)).join(''); }finally{ cellSel=false; }
@@ -5164,7 +5185,7 @@ function renderBag(){
   const asl=pq('#aSell'); if(asl)asl.onclick=()=>sellBtn(asl);
   $('#itemPop').querySelectorAll('[data-lk]').forEach(alk=>alk.onclick=()=>{ const it=selItem&&selItem.it; if(!it)return; it.lock=!it.lock; saveChar(); sheetToast(it.lock?'🔒 잠갔어요. 일괄 판매에서 제외돼요':'🔓 잠금을 풀었어요'); renderBag(); });
   b.querySelectorAll('[data-sort]').forEach(e=>e.onclick=()=>{ if(sortFresh){ sortFresh=false; sortInv(SORTM[sortCur()]); } else sortInv(e.dataset.sort); });
-  { const q=b.querySelector('#aBulk'); if(q)q.onclick=()=>bulkSell(); const aa=b.querySelector('#aAsh'); if(aa)aa.onclick=()=>ashardModal(); const a1=b.querySelector('#aAuto'); if(a1)a1.onclick=autoSellModal; const a2=b.querySelector('#aSyn'); if(a2)a2.onclick=synToggle; }
+  { const q=b.querySelector('#aBulk'); if(q)q.onclick=()=>bulkSell(); const aa=b.querySelector('#aAsh'); if(aa)aa.onclick=()=>ashardModal(); const a1=b.querySelector('#aSmart'); if(a1)a1.onclick=smartModal; }
   b.querySelectorAll('[data-bt]').forEach(e=>e.onclick=()=>{ bagTab=e.dataset.bt; selItem=null; rerender(); $('#sheetB').scrollTop=0; });
   b.querySelectorAll('[data-mi]').forEach(el=>el.onclick=()=>{ const i=+el.dataset.mi, it=me.misc[i]; if(it){ if(it.isNew){ delete it.isNew; saveChar(); } selItem={it,misc:i}; renderBag(); } });
   { const ms=b.querySelector('[data-msort]'); if(ms)ms.onclick=()=>{ sortedNew.add('misc'); sortMisc(me); }; const mb=b.querySelector('#aMBulk'); if(mb)mb.onclick=()=>bulkSellMisc(me); const gs=b.querySelector('#aGSyn'); if(gs)gs.onclick=gemSynToggle; }
