@@ -842,6 +842,9 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 .ban{touch-action:pan-y;will-change:transform}
 .ban.pick{animation:scPick .9s ease-out}
 .cchips .new::after{content:"NEW";position:absolute;top:-6px;right:-3px;padding:1px 6px;border-radius:8px;background:var(--blood);color:#fff;font-size:10px}
+#cDex.new::after{font-weight:900;box-shadow:0 0 8px rgba(255,90,50,.7);animation:dxBadge 1.8s ease-in-out infinite}
+@keyframes dxBadge{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+@media (prefers-reduced-motion:reduce){#cDex.new::after{animation:none}}
 .ban .t{position:relative;padding:8px 130px 12px 14px}
 .ban .t b,.ban .t .sn,.ban .t i{white-space:nowrap;overflow:hidden}   /* 이름이 길어도 한 줄 — 칸이 늘어나지 않게 글자를 줄여 맞춰요(fitBan) */
 .ban .sid{font-family:var(--f-disp);font-size:46px;line-height:1.02;font-weight:900;letter-spacing:.02em;color:#ffe08a;text-shadow:0 0 14px rgba(255,200,70,.75),0 2px 0 #7a4c08,0 3px 6px #000}
@@ -1289,7 +1292,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.4.0485</div>
+    <div class="ver" id="verT">v0.6.4.0486</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1904,6 +1907,7 @@ let DEXOK=null;
 function dexOk(k){ if(!DEXOK){ DEXOK=new Set(); DEX_SP.forEach(g=>g[2].forEach(x=>DEXOK.add(x))); DEX_ST.forEach(g=>g[2].forEach(x=>{ if(x[0]==='@')Object.keys(CLASSES).forEach(c=>DEXOK.add(x.slice(1)+c)); else DEXOK.add(x); })); } return DEXOK.has(k); }
 const dexN=(p,keys)=>dexKeysOf(keys,p).filter(k=>(p.dx&&p.dx[k]|0)>0).length;
 const dexSpN=p=>dexN(p,DEX_SP.flatMap(g=>g[2])), dexStN=p=>dexN(p,DEX_ST.flatMap(g=>g[2]));
+const dexTot=p=>dexSpN(p)+dexStN(p), dexNew=p=>!!p&&(p.dxs===undefined||dexTot(p)>(p.dxs|0));   /* 시작화면 도감 버튼 NEW: 처음 한 번 + 도감을 연 뒤 새로 채워졌을 때 */
 function dexAdd(p,it){ if(!p||!it||it.mat||!it.sp||!dexOk(it.sp))return; const had=dexSpN(p); if(!p.dx)p.dx={}; p.dx[it.sp]=Math.min(9999,(p.dx[it.sp]|0)+1);
   if(p===me&&had<20&&dexSpN(p)>=20)later(1.2,()=>{ toast(`🏅 도감 완성! 칭호 「${DEX_TITLE}」 획득`,'#ffd84a'); sfx('rare'); }); }
 const HERO_PART={weapon:'hdag',helm:'hhelm',armor:'harmor',amulet:'hamu',ring:'hring'}; /* 부위 → 영웅 아이템 (보조무기는 직업별) */
@@ -2227,7 +2231,7 @@ function loadChar(id){
     { const q={}; if(p.cc&&typeof p.cc==='object')for(const k in p.cc){ const v=Math.floor(+p.cc[k]); if(v>0&&isFinite(v))q[k]=Math.min(v,999999); } p.cc=q; }   /* 스테이지별 누적 클리어 횟수(0.6.0.0265부터 집계) */
     if(p.clear===undefined)p.clear=Math.max(0,+(lsGet('dkdef2.clear')||0));
     { const lg=k=>{ const v=parseInt(lsGet(k)); return isNaN(v)?-1:clamp(v,-1,2); }; if(p.as===undefined)p.as=lg('dkdef2.asell'); if(p.sy===undefined)p.sy=lg('dkdef2.asyn'); if(p.sy>=0)p.sy=2; } /* 캐릭터별 자동판매/합성: 기존 캐릭터는 예전 전역 설정을 한 번 이어받음 */
-    { const q={}; if(p.dx&&typeof p.dx==='object')for(const k in p.dx){ const v=Math.floor(+p.dx[k]); if(v>0&&isFinite(v)&&dexOk(k))q[k]=Math.min(v,9999); } p.dx=q; }   /* 도감: 아이템별 직접 획득 횟수 */
+    { const q={}; if(p.dx&&typeof p.dx==='object')for(const k in p.dx){ const v=Math.floor(+p.dx[k]); if(v>0&&isFinite(v)&&dexOk(k))q[k]=Math.min(v,9999); } p.dx=q; if(p.dxs!==undefined)p.dxs=Math.max(0,Math.min(999,+p.dxs|0)); }   /* 도감: 아이템별 직접 획득 횟수 · dxs = 도감을 마지막으로 열어 본 때의 수집 수(그보다 늘면 시작화면 도감 버튼에 NEW) */
     p.sp=p.sp?1:0;   /* 캐릭터별 1.3배속 설정 */ petNorm(p);
     p.au=Math.max(0,Math.min(2,p.au|0));   /* 캐릭터별 AUTO 설정 (0 꺼짐 · 1 이동 · 2 이동+스킬) — 스테이지를 옮겨도 유지 */
     p.eq=p.eq||{}; if(p.eq.shield===undefined)p.eq.shield=null;
@@ -2267,7 +2271,7 @@ function migrateChars(){
 }
 function createChar(cls,name,nid){ const ids=charIds(); if(ids.length>=MAXCHAR||!CLASSES[cls])return null; if(nameTaken(name))return null; const p=newChar(cls,name,nid); p.ms=MAILQ.map(q=>q.id); lsSet(charKey(p.id),JSON.stringify(packChar(p))); ids.push(p.id); setIds(ids); selId=p.id; lsSet('dkdef2.sel',selId); return p; }
 function deleteChar(id){ setIds(charIds().filter(x=>x!==id)); lsDel(charKey(id)); lsDel('dkdef2.rk.'+id); lsDel('dkdef2.nmv.'+id); if(selId===id){selId='';lsSet('dkdef2.sel','');} rkQueueDel(id); nameQueueRel(id); }
-function packChar(p){ const {id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear,as,sy,gs,au,sp,ct,cts,cat,dv4,shard,ashard,misc,mail,ms,tut,cc,eq2,es,pet,dx}=p; return {dx:dx&&Object.keys(dx).length?dx:undefined,id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear:clear|0,au:Math.max(0,Math.min(2,au|0)),sp:sp?1:0,ct:ct>0?ct|0:0,cts:cts>0?cts|0:undefined,cat:cat>0?cat|0:0,as:as===undefined?-1:as,sy:sy===undefined?-1:sy,gs:gs?1:undefined,dv4:dv4?1:0,shard:shard|0,ashard:(ashard|0)||undefined,misc:Array.isArray(misc)?misc:undefined,mail:Array.isArray(mail)?mail:undefined,ms:Array.isArray(ms)?ms:undefined,tut:tut||undefined,cc:cc&&Object.keys(cc).length?cc:undefined,eq2:eq2&&Object.values(eq2).some(Boolean)?eq2:undefined,es:es===1?1:undefined,pet:pet&&PETS[pet.id]?{id:pet.id,xp:Math.floor(pet.xp)||0}:undefined}; }
+function packChar(p){ const {id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear,as,sy,gs,au,sp,ct,cts,cat,dv4,shard,ashard,misc,mail,ms,tut,cc,eq2,es,pet,dx,dxs}=p; return {dx:dx&&Object.keys(dx).length?dx:undefined,dxs:dxs===undefined?undefined:Math.max(0,dxs|0),id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear:clear|0,au:Math.max(0,Math.min(2,au|0)),sp:sp?1:0,ct:ct>0?ct|0:0,cts:cts>0?cts|0:undefined,cat:cat>0?cat|0:0,as:as===undefined?-1:as,sy:sy===undefined?-1:sy,gs:gs?1:undefined,dv4:dv4?1:0,shard:shard|0,ashard:(ashard|0)||undefined,misc:Array.isArray(misc)?misc:undefined,mail:Array.isArray(mail)?mail:undefined,ms:Array.isArray(ms)?ms:undefined,tut:tut||undefined,cc:cc&&Object.keys(cc).length?cc:undefined,eq2:eq2&&Object.values(eq2).some(Boolean)?eq2:undefined,es:es===1?1:undefined,pet:pet&&PETS[pet.id]?{id:pet.id,xp:Math.floor(pet.xp)||0}:undefined}; }
 function saveChar(){ if(!me||!me.id)return; lsSet(charKey(me.id),JSON.stringify(packChar(me))); }
 const dispName=p=>(p&&p.name)||CLASSES[p.cls].n;
 const SELLBASE=[100,200,400,800,3000], ADVAFX=['ls','crit','ias','ms','mf','pr','mr'];
@@ -4958,6 +4962,7 @@ function dexCell(k,p,tone){ const S=SPFX[k], n=(p.dx&&p.dx[k])|0, im=UNQIMG[S.n]
 function dexGroup(id,title,ico,keys0,p,tone){ const keys=dexKeysOf(keys0,p), got=keys.filter(k=>(p.dx&&p.dx[k]|0)>0).length, open=!dexClosed.has(id);
   return `<section class="dxg"><button class="dxh" data-dg="${id}" aria-expanded="${open}"><span>${ico} ${esc(title)} <em>${got}/${keys.length}</em></span><u>${open?'▾':'▸'}</u></button>${open?`<div class="dxgrid">${keys.map(k=>dexCell(k,p,tone)).join('')}</div>`:''}</section>`; }
 function renderDex(){
+  { const q=me; if(q&&q.id&&q.dxs!==dexTot(q)){ q.dxs=dexTot(q); saveChar(); } const cd=$('#cDex'); if(cd)cd.classList.remove('new'); }   /* 도감을 열어 보면 NEW 해제 */
   markTabs(); sheetHead(); const b=$('#sheetB'); b.className='sbody dex'; const p=me, spN=dexSpN(p), stN=dexStN(p), isSp=dexTab==='sp', got=isSp?spN:stN, tot=isSp?20:15, pct=(got/tot*100).toFixed(1)+'%';
   b.innerHTML=`<div class="dxt"><button data-dt="sp" aria-pressed="${isSp}">✨ 스페셜 아이템<small>${spN}/20</small></button><button data-dt="st" aria-pressed="${!isSp}">🧩 세트 아이템<small>${stN}/15</small></button></div>
   <div class="dxp"><div class="dxpt"><b>${isSp?'특수 유니크 수집':'세트 수집'}</b><strong>${pct}</strong></div><div class="dxbar"><i style="width:${(got/tot*100).toFixed(2)}%"></i></div>${isSp?`<div class="dxpn">🏅 ${spN>=20?`칭호 <b>「${DEX_TITLE}」</b> 획득 완료`:`20종을 모두 모으면 칭호 <b>「${DEX_TITLE}」</b> 획득`}</div>`:''}</div>
@@ -5882,7 +5887,7 @@ function renderStagePanel(){
     { const ban=$('#stageBan'); if(ban){ if(!cur){ ban.innerHTML=''; } else {
       const key=selId+'|'+selStage+'|'+stageClear+'|'+(cur.eq?Object.values(cur.eq).map(x=>x?x.id+':'+(x.ilvl|0):'').join(','):'');
       if(ban.dataset.k!==key||!ban.querySelector('.ban.cu')){ ban.dataset.k=key; ban.innerHTML=(selStage>0?banCard(cur,selStage-1,'bk pv'):'')+(selStage+1<STAGES.length?banCard(cur,selStage+1,'bk nx'):'')+banCard(cur,selStage,'cu'); fitBan(ban); } } } }
-    const chp=$('#cChips'); if(chp){ if(!cur){ chp.hidden=true; } else { const pt2=(cur.statPts|0)+(cur.skillPts|0); chp.hidden=false; chp.innerHTML=`<button type="button" id="cDex">도감<b>📖 보기</b></button><span class="${gw?'warn':''}">내 장비 Lv 합<b>${gp0?gp0.sum:'-'}</b></span><button type="button" id="cMap" class="${stageClear>(+lsGet('dkdef2.mapSeen')||0)&&stageClear<STAGES.length?'new':''}">전체맵<b>🗺️ 보기</b></button>`; } } }
+    const chp=$('#cChips'); if(chp){ if(!cur){ chp.hidden=true; } else { const pt2=(cur.statPts|0)+(cur.skillPts|0); chp.hidden=false; chp.innerHTML=`<button type="button" id="cDex" class="${dexNew(cur)?'new':''}">도감<b>📖 보기</b></button><span class="${gw?'warn':''}">내 장비 Lv 합<b>${gp0?gp0.sum:'-'}</b></span><button type="button" id="cMap" class="${stageClear>(+lsGet('dkdef2.mapSeen')||0)&&stageClear<STAGES.length?'new':''}">전체맵<b>🗺️ 보기</b></button>`; } } }
   { const cur=chars.find(c=>c.id===selId), nw=!!cur&&(cur.inv||[]).concat(cur.misc||[]).some(x=>x&&x.isNew), pt=cur?(cur.statPts|0)+(cur.skillPts|0):0;
     $('#tGearB').hidden=!nw; { const tb=$('#tTownB'); if(tb)tb.hidden=!townFull(); } $('#menuB').hidden=!mailUnreadAll(chars); const pb=$('#tGearP'); pb.hidden=!pt; pb.textContent=pt; for(const id of ['tGear','tStore'])$('#'+id).disabled=!cur; }
   { const hp=$('#bigHero'); if(hp){ const cur=chars.find(c=>c.id===selId); hp.hidden=!cur; if(cur){ const im=$('#bhImg'), u=`img/hero_${cur.cls}.png`; if(im.getAttribute('src')!==u){ im.style.display=''; im.onerror=()=>{ im.style.display='none'; }; im.src=u; } $('#bhName').textContent=dispName(cur); $('#bhSub').textContent=`${CLASSES[cur.cls].n} · Lv ${cur.lvl}`; hp.querySelectorAll('.bpet').forEach(e=>e.remove()); if(petOf(cur)){ const pe=document.createElement('div'); pe.className='bpet'; pe.setAttribute('aria-label',`펫 ${PETS[cur.pet.id].n} Lv ${cur.pet.lv||1}`); pe.innerHTML=`<span class="pbd"><img src="img/${PETS[cur.pet.id].im}.png" alt="" onerror="this.onerror=null;this.src='img/boss_3_5.png'"></span><i>Lv${cur.pet.lv||1}</i>`; hp.appendChild(pe); } } } }
