@@ -793,7 +793,8 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 .cchips button{flex:1;min-width:0;position:relative;padding:7px 4px;border-radius:12px;border:1px solid rgba(214,170,78,.7);background:rgba(15,11,9,.7);text-align:center;font:inherit;font-size:11px;color:var(--mute);line-height:1.35;cursor:pointer}
 .cchips button:active{filter:brightness(1.25)}
 .cchips button b{display:block;font-size:15px;color:#ffd36a;white-space:nowrap}
-.cchips button small{font-size:11px;font-weight:700;color:#ffd36a}
+.cchips button small{display:block;font-size:11px;font-weight:700;color:#ffd36a}
+#cMap{display:flex;align-items:center;justify-content:center}
 /* 스테이지 카드: 보스 얼굴 + 글자 */
 /* 안 B 황금 장식: 이중 금테 카드, 룬 문양 고리, 금빛 제목, 빛이 지나가는 시작 버튼 */
 #sTitle .eyebrow{display:flex;align-items:center;justify-content:center;gap:10px}
@@ -1293,7 +1294,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.4.0487</div>
+    <div class="ver" id="verT">v0.6.4.0488</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -5889,7 +5890,7 @@ function renderStagePanel(){
     { const ban=$('#stageBan'); if(ban){ if(!cur){ ban.innerHTML=''; } else {
       const key=selId+'|'+selStage+'|'+stageClear+'|'+(cur.eq?Object.values(cur.eq).map(x=>x?x.id+':'+(x.ilvl|0):'').join(','):'');
       if(ban.dataset.k!==key||!ban.querySelector('.ban.cu')){ ban.dataset.k=key; ban.innerHTML=(selStage>0?banCard(cur,selStage-1,'bk pv'):'')+(selStage+1<STAGES.length?banCard(cur,selStage+1,'bk nx'):'')+banCard(cur,selStage,'cu'); fitBan(ban); } } } }
-    const chp=$('#cChips'); if(chp){ if(!cur){ chp.hidden=true; } else { const pt2=(cur.statPts|0)+(cur.skillPts|0); chp.hidden=false; chp.innerHTML=`<button type="button" id="cDex" class="${dexNew(cur)?'new':''}">도감 <small>${dexTot(cur)}/${DEX_TOT}</small><b>📖 보기</b></button><span class="${gw?'warn':''}">내 장비 Lv 합<b>${gp0?gp0.sum:'-'}</b></span><button type="button" id="cMap" class="${stageClear>(+lsGet('dkdef2.mapSeen')||0)&&stageClear<STAGES.length?'new':''}">전체맵<b>🗺️ 보기</b></button>`; } } }
+    const chp=$('#cChips'); if(chp){ if(!cur){ chp.hidden=true; } else { const pt2=(cur.statPts|0)+(cur.skillPts|0); chp.hidden=false; chp.innerHTML=`<button type="button" id="cDex" class="${dexNew(cur)?'new':''}"><small>${dexTot(cur)}/${DEX_TOT}</small><b>📖 도감</b></button><span class="${gw?'warn':''}">내 장비 Lv 합<b>${gp0?gp0.sum:'-'}</b></span><button type="button" id="cMap" class="${stageClear>(+lsGet('dkdef2.mapSeen')||0)&&stageClear<STAGES.length?'new':''}"><b>🗺️ 전체맵</b></button>`; } } }
   { const cur=chars.find(c=>c.id===selId), nw=!!cur&&(cur.inv||[]).concat(cur.misc||[]).some(x=>x&&x.isNew), pt=cur?(cur.statPts|0)+(cur.skillPts|0):0;
     $('#tGearB').hidden=!nw; { const tb=$('#tTownB'); if(tb)tb.hidden=!townFull(); } $('#menuB').hidden=!mailUnreadAll(chars); const pb=$('#tGearP'); pb.hidden=!pt; pb.textContent=pt; for(const id of ['tGear','tStore'])$('#'+id).disabled=!cur; }
   { const hp=$('#bigHero'); if(hp){ const cur=chars.find(c=>c.id===selId); hp.hidden=!cur; if(cur){ const im=$('#bhImg'), u=`img/hero_${cur.cls}.png`; if(im.getAttribute('src')!==u){ im.style.display=''; im.onerror=()=>{ im.style.display='none'; }; im.src=u; } $('#bhName').textContent=dispName(cur); $('#bhSub').textContent=`${CLASSES[cur.cls].n} · Lv ${cur.lvl}`; hp.querySelectorAll('.bpet').forEach(e=>e.remove()); if(petOf(cur)){ const pe=document.createElement('div'); pe.className='bpet'; pe.setAttribute('aria-label',`펫 ${PETS[cur.pet.id].n} Lv ${cur.pet.lv||1}`); pe.innerHTML=`<span class="pbd"><img src="img/${PETS[cur.pet.id].im}.png" alt="" onerror="this.onerror=null;this.src='img/boss_3_5.png'"></span><i>Lv${cur.pet.lv||1}</i>`; hp.appendChild(pe); } } } }
