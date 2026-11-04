@@ -1346,7 +1346,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.4.0501</div>
+    <div class="ver" id="verT">v0.6.4.0502</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -5875,15 +5875,15 @@ function openRank(mode0){
     const box=m.querySelector('#rkBox'); let seq=0;
     const rowHtml=(r,i,own)=>{ const c=CLASSES[r.cls]?r.cls:'war'; return `<button class="rkrow${own?' own':''}${i<3&&mode!=='recent'?' top':''}${mode==='hc'&&r.dead_at?' dead':''}" data-i="${i}"><span class="rkn">${i<3&&mode!=='recent'?['🥇','🥈','🥉'][i]:i+1}</span><span class="rke"><img src="img/cls_${c}.png" alt="${CLSE[c]}" loading="lazy" decoding="async"></span><span class="rkm"><b>${mode==='hc'&&r.dead_at?'💀 ':''}${esc(String(r.name||CLASSES[c].n).slice(0,8))}</b><small>${rkSub(mode,r)}</small></span><span class="rkv">${mode==='ta'?`<b class="rks">${esc(r.clear>0?STAGES[Math.min(STAGES.length,r.clear)-1].id+' 클리어':'-')}</b><span class="rkt">${esc(rkVal(mode,r))}</span>`:esc(rkVal(mode,r))}</span><span class="rkc">›</span></button>`; };
     const load=async(force)=>{ const my=++seq; rkSubmitAll(false);
-      const c0=rkCacheGet(mode); if(c0&&!force){ show(c0.rows,false,c0.t); if(Date.now()-c0.t<RK_TTL)return; } else if(force&&box.querySelector('.rkrow')){ box.style.opacity='.5'; box.style.transition='opacity .15s'; }   /* 🔄: 창·목록은 그대로 두고 흐리게만 → 새 내용이 오면 목록 안쪽만 바꿔요 */
+      const c0=rkCacheGet(mode); if(c0&&!force){ show(c0.rows,false,c0.t); if(Date.now()-c0.t<RK_TTL)return; } else if(box.querySelector('.rkrow')){ box.style.opacity='.5'; box.style.pointerEvents='none'; box.style.transition='opacity .15s'; }   /* 🔄: 창·목록은 그대로 두고 흐리게만 → 새 내용이 오면 목록 안쪽만 바꿔요 */
       else box.innerHTML='<p class="meta">불러오는 중…</p>';
       let rows,local=false,t=Date.now();
       try{ const r=await rkLoad(mode,true); if(my!==seq)return; rows=r.rows; t=r.t; }
-      catch(e){ if(my!==seq)return; if(c0&&!force){ box.style.opacity=''; return; } local=true;
+      catch(e){ if(my!==seq)return; if(c0&&!force){ box.style.opacity=''; box.style.pointerEvents=''; return; } local=true;
         rows=charIds().map(loadChar).filter(c=>c&&(c.kills|0)>0).map(rkLocal); if(mode!=='recent')rows=rows.filter(x=>mode==='hc'?x.hc:!x.hc); if(mode==='ta')rows=rows.filter(x=>x.clear>0&&rkCt(x)>0); rows.sort(mode==='recent'?((a,b)=>String(b.updated_at||'').localeCompare(String(a.updated_at||''))):mode==='stage'?rkStageCmp:mode==='ta'?rkTaCmp:mode==='hc'?rkHcCmp:rkLvlCmp); }
       show(rows,local,t); };
     const show=(rows,local,t)=>{
-      box.style.opacity='';
+      box.style.opacity=''; box.style.pointerEvents='';
       const y0=want!=null?want:box.scrollTop; want=null;
       if(!rows.length){ box.innerHTML='<p class="meta">아직 등록된 기록이 없어요. 먼저 사냥해 보세요!</p>'; return; }
       const hm=new Date(t||Date.now()), stamp=`${String(hm.getHours()).padStart(2,'0')}:${String(hm.getMinutes()).padStart(2,'0')}`;
@@ -6367,7 +6367,7 @@ function casinoModal(){
   casSymImg(); $('#modal').classList.add('cas'); if(CASYM===1)$('#modal').classList.add('si'); }
 /* 마을 안내: 지도 아래 한 줄 배너(Info Banner)를 누르면 아래에서 올라오는 패널(Bottom Sheet)로 전체 설명을 보여줘요 */
 function townInfoSheet(){
-  modal(`<div class="bshg"></div><h3>🏘️ 마을 안내</h3><ul class="bshl"><li>건물을 누르면 <b>자세히</b> 볼 수 있어요.</li><li>모든 비용은 <b>캐릭터 → 공유창고</b> 순서로 차감 되어요.</li><li>그림자 연구소는 <b>골드</b>로, 각성 풍차는 건설과 Lv.5까지 <b>골드</b>로 해요.</li><li>말풍선을 누르면 만든 조각이 바로 <b>공유보관함</b>으로 들어가요.</li></ul><button class="btn bshx" id="bshX" type="button">닫기</button>`,m=>{ m.classList.add('bsh'); m.querySelector('#bshX').onclick=closeModal; }); }
+  modal(`<div class="bshg"></div><h3>🏘️ 마을 안내</h3><ul class="bshl"><li>건물을 누르면 <b>자세히</b> 볼 수 있어요.</li><li>모든 비용은 <b>캐릭터 → 공유창고</b> 순서로 차감 되어요.</li><li>그림자 연구소와 각성 풍차의 건설과 Lv.5까지는 <b>골드</b>를, Lv.6부터는 각각의 <b>조각</b>을 사용해요.</li><li>말풍선을 누르면 만든 조각이 바로 <b>공유보관함</b>으로 들어가요.</li></ul><button class="btn bshx" id="bshX" type="button">닫기</button>`,m=>{ m.classList.add('bsh'); m.querySelector('#bshX').onclick=closeModal; }); }
 function renderTown(){ townUpTick(); const S=getStore(), now=Date.now(); let ch=false; { const L=getTown().lab; if((L.rf|0)>0){ townMsg=`🧪 연구소 개편 · 🌑 조각 ${L.rf}개 환급`; L.rf=0; saveTown(); } if((L.gf|0)>0){ townMsg=`🧪 연구소 개편 · 성벽 연구 Lv.6 이상은 Lv.${LAB_GL}로 조정, 💰 ${(L.gf|0).toLocaleString('ko-KR')}G를 공유보관함으로 환급`; L.gf=0; saveTown(); } const M=getTown().mill; if((M.rf|0)>0){ townMsg=`✦ 풍차 골드 전환 · 조각 ${M.rf}개 환급`; M.rf=0; saveTown(); } } for(const k of ['tw','al','mill'])if(townTick(k,now))ch=true; if(ch)saveTown();
   $('#itemPop').hidden=true; $('#ptsBar').hidden=true; $('#sheetTabs').hidden=true; $('#sheetT').innerHTML='🏘️ 마을';
   const b=$('#sheetB'); b.className='sbody town';
