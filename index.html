@@ -1346,7 +1346,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.4.0504</div>
+    <div class="ver" id="verT">v0.6.4.0505</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -5870,8 +5870,8 @@ function rkItemDetail(row,k,back){
 let rkKeep=null;   /* 랭킹에서 프로필을 열기 직전의 탭·스크롤 위치 — '랭킹으로' 돌아오면 보던 자리 그대로 */
 function openRank(mode0){
   let mode=RKMODES[mode0]?mode0:'lvl'; const mine=new Set(charIds()); let want=(rkKeep&&rkKeep.mode===mode)?rkKeep.top:null;
-  const TABS=[['lvl','⭐ 레벨'],['ta','⏱️ 타임어택'],['stage','🗺️ 진행']], TABS2=[['recent','⏰ 최근활동'],['x1','📈 미사용1'],['hc','💀 하드코어']];   /* 관리자 전용 2번째 줄 */
-  if((mode==='recent'||mode==='hc')&&!rsOn())mode='lvl';
+  const TABS=[['lvl','⭐ 레벨'],['ta','⏱️ 타임어택'],rsOn()?['hc','💀 하드코어']:['stage','🗺️ 진행']], TABS2=[['recent','⏰ 최근활동'],['x1','📈 미사용1']];   /* 관리자는 3번째 칸이 진행 대신 하드코어, 2번째 줄은 관리자 전용 */
+  if((mode==='recent'||mode==='hc'||mode==='x1')&&!rsOn())mode='lvl'; if(mode==='stage'&&rsOn())mode='lvl';
   modal(`<h3>🏆 랭킹</h3><div class="rktabs">${TABS.map(([k,l])=>`<button data-m="${k}" aria-pressed="${k===mode}">${l}</button>`).join('')}</div>${rsOn()?`<div class="rktabs">${TABS2.map(([k,l])=>`<button data-m="${k}" aria-pressed="${k===mode}"${k==='x1'?' disabled style="opacity:.45"':''}>${l}</button>`).join('')}</div>`:''}<div class="rklist" id="rkBox"><p class="meta">불러오는 중…</p></div><div class="row2"><button class="btn" id="rkRe">🔄 새로고침</button><button class="btn" id="rkNo">닫기</button></div><p class="meta" style="margin:8px 0 0;font-size:11.5px">이름을 누르면 장비와 능력치를 한눈에 볼 수 있어요 · 내 캐릭터는 금색 · 전투 기록 없는 캐릭터 제외 · 🔄는 바로 갱신</p>`,m=>{
     const box=m.querySelector('#rkBox'); let seq=0;
     const rowHtml=(r,i,own)=>{ const c=CLASSES[r.cls]?r.cls:'war'; return `<button class="rkrow${own?' own':''}${i<3&&mode!=='recent'?' top':''}${mode==='hc'&&r.dead_at?' dead':''}" data-i="${i}"><span class="rkn">${i<3&&mode!=='recent'?['🥇','🥈','🥉'][i]:i+1}</span><span class="rke"><img src="img/cls_${c}.png" alt="${CLSE[c]}" loading="lazy" decoding="async"></span><span class="rkm"><b>${mode==='hc'&&r.dead_at?'💀 ':''}${esc(String(r.name||CLASSES[c].n).slice(0,8))}</b><small>${rkSub(mode,r)}</small></span><span class="rkv">${mode==='ta'?`<b class="rks">${esc(r.clear>0?STAGES[Math.min(STAGES.length,r.clear)-1].id+' 클리어':'-')}</b><span class="rkt">${esc(rkVal(mode,r))}</span>`:esc(rkVal(mode,r))}</span><span class="rkc">›</span></button>`; };
