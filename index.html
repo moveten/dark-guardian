@@ -1346,7 +1346,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.4.0503</div>
+    <div class="ver" id="verT">v0.6.4.0504</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -2833,7 +2833,7 @@ function castlePush(o){ if(!G.castle)return; const cx=VX, cy=VY+CAS_Y+4, rx=58, 
 function startStage(){
   AUD.voicePre(me.cls); setTimeout(()=>{ if(G.inGame&&!me.dead)voice('start'); },1500);
   dmgReset(); G.firstClr=false; G.stageIdx=selStage; G.stg=STAGES[selStage]; G.TW=G.stg.waves.length; preBoss(); setTheme(selStage); castleInit(); if(G.castle)later(3.2,()=>{ if(G.inGame&&G.castle&&G.phase!=='lose')toast('🏰 중앙의 성을 지켜요 · 체력이 0이 되면 패배 · 성 둘레에서는 생명력·마나가 회복돼요','#e0c080'); }); G.gts=[]; later(.5,()=>{ if(G.inGame)banner(`${G.stg.id} ${G.stg.n}`,`장비 Lv 합 ${Math.max(1,G.stg.icap-12)*EQSL.length}↑ · ${G.stg.tag||''}`); });
-  gobInit(); G.allMode=false; G.allQ=[]; G.fires=[]; G.freeRev=me.hc?0:1; me.rvGiven=0; me.seenRg=0; me.out=false; me.rvT=0;
+  gobInit(); G.allMode=false; G.allQ=[]; G.fires=[]; G.freeRev=me.hc?0:1; G.hcWhy=''; me.rvGiven=0; me.seenRg=0; me.out=false; me.rvT=0;
   G.gemDone=false; G.wave=0;G.skipUsed=false;G.phase='prep';G.timer=2;G.mobs.length=0;G.ev=[];G.spawnQ=0;G.lastSq=-1;G.endShown=false;G.coop=!!guestPeer;
   G.waveSides=[0,1,3]; G.nextSides=sidesFor(1); G.laneShow=G.nextSides;
   if(G.mode!=='guest'&&(me.clear|0)>selStage&&!STAGES[selStage].raid)later(.05,()=>{ if(G.inGame&&!G.allMode&&G.phase==='prep'&&G.wave===0&&G.stageIdx===selStage&&!tutS&&!tutWait&&!storyWait)startAllOut(); }); /* 이미 깬 스테이지는 들어가자마자 총공세 (튜토리얼이 시작되는 스테이지는 제외) */
@@ -3334,11 +3334,12 @@ function goDown(){ if(!me.dead)voice('die',0,true); me.hp=0; me.dead=true; me.le
   me.respawn=me.hc?0:revItems()>0?12:coopAlive?30:1.6;
   toast(revItems()>0?'쓰러졌습니다! 부활 버튼으로 일어나세요':coopAlive?'쓰러졌습니다! 동료가 구해주길 기다려요':'쓰러졌습니다…','#e07060'); if(me.hc)hcDown(); }
 /* 하드코어: 쓰러지면 바로 끝 — 사망 기록을 곧바로 저장하고(앱을 꺼도 유지) 랭킹에 💀 로 올린 뒤 YOU DIED 화면을 보여줘요 */
-function hcDown(){ if(!me||!me.hc||me.hd>0)return; me.hd=Date.now(); me.hs=(G.stageIdx|0)+1; me.out=true; me.respawn=0; me.rvT=0; saveChar();
-  if(!(ally&&!ally.lobby&&!ally.dead))G.endShown=true;   /* 혼자일 땐 일반 '쓰러졌습니다' 결과창 대신 YOU DIED 화면 */
+function hcDown(why){ if(!me||!me.hc||me.hd>0)return; G.hcWhy=why||''; me.hd=Date.now(); me.hs=(G.stageIdx|0)+1; me.out=true; me.respawn=0; me.rvT=0; saveChar();
+  if(why==='castle'){ G.endShown=true; G.inGame=false; me.dead=true; me.hp=0; for(const k in held)held[k]=false; }   /* 성이 무너져 패배한 것도 사망과 같음 */
+  else if(!(ally&&!ally.lobby&&!ally.dead))G.endShown=true;   /* 혼자일 땐 일반 '쓰러졌습니다' 결과창 대신 YOU DIED 화면 */
   try{ rkSubmitAll(true); }catch(e){}
   setTimeout(()=>{ try{ hcShowDie(); }catch(e){} },900); }
-function hcShowDie(){ if(!me||!me.hc||!(me.hd>0))return; const S=STAGES[(me.hs|0)-1]; $('#hcDieS').textContent=`${dispName(me)} · Lv ${me.lvl}`; $('#hcDieM').innerHTML=`${S?'스테이지 '+esc(S.id)+'에서 ':''}쓰러졌어요<br>처치 ${(me.kills|0).toLocaleString('ko-KR')}마리 · 랭킹에는 💀 표시로 남아요`; try{ storyStop(); }catch(e){} { const o=$('#hcDie'); if(o.parentNode!==document.body)document.body.appendChild(o); } $('#hcDie').hidden=false; sfx('lose'); }
+function hcShowDie(){ if(!me||!me.hc||!(me.hd>0))return; const S=STAGES[(me.hs|0)-1]; $('#hcDieS').textContent=`${dispName(me)} · Lv ${me.lvl}`; $('#hcDieM').innerHTML=`${S?'스테이지 '+esc(S.id)+'에서 ':''}${G.hcWhy==='castle'?'중앙의 성이 무너져 패배했어요':'쓰러졌어요'}<br>처치 ${(me.kills|0).toLocaleString('ko-KR')}마리${(me.kills|0)>0?' · 랭킹에는 💀 표시로 남아요':''}`; try{ storyStop(); }catch(e){} { const o=$('#hcDie'); if(o.parentNode!==document.body)document.body.appendChild(o); } $('#hcDie').hidden=false; sfx('lose'); }
 function reviveMe(pct,free){ voice('revive',0,true); G.stRev=(G.stRev|0)+1; me.vx=me.vy=0; const a=me.aura,pot=me.pot,bx=me.x,by=me.y; me.dead=false; me.out=false; me.stun=me.slowP=me.poison=0; me.respawn=0; me.leap=null; me.cds={}; me.buffs={}; me.aura=a; me.pot=pot; me.D=derive(me); me.hp=me.D.maxHp*pct; me.mp=me.D.maxMp*.5; me.god=3; me.x=bx; me.y=by;   /* 부활 후 3초 무적 */
   efx.push({k:'rvfx',x:me.x,y:me.y,t:0,life:1.3}); efx.push({k:'ring',x:me.x,y:me.y,r0:10,r1:190,t:0,life:.8,col:'#ffd84a',w:10}); later(.12,()=>efx.push({k:'ring',x:me.x,y:me.y,r0:10,r1:260,t:0,life:.9,col:'#fff6cc',w:7})); later(.26,()=>efx.push({k:'ring',x:me.x,y:me.y,r0:10,r1:330,t:0,life:1,col:'#ffb04a',w:5})); impact(me.x,me.y,'255,235,160',260); spark(me.x,me.y,'#ffd84a',50); burst(me.x,me.y,'#ffe08a',50,340); burst(me.x,me.y-30,'#ffffff',24,200); G.flash=.9; G.shake=Math.max(G.shake,.5); sfx('revive');
   for(const m of G.mobs){ if(m.dead||m.boss)continue; const dx=m.x-me.x,dy=m.y-me.y,d=hyp(dx,dy); if(d<170){ m.kx=(m.kx||0)+dx/(d||1)*420; m.ky=(m.ky||0)+dy/(d||1)*420; } } if(me.cls==='necro'&&!minions.length)autoSummon(); uiDirty=true; }   /* 부활하면 기본 소환수(수호 영혼·포격 영혼)는 다시 불러옴 */
@@ -6545,7 +6546,9 @@ function markClear(){ const n=(G.stageIdx|0)+1, t=Math.max(1,Math.round(G.runT||
 function endTab(t){ const bx=$('#endBox'); bx.dataset.tab=t; bx.querySelectorAll('.etabs button').forEach(b=>{ b.setAttribute('aria-selected',b.dataset.t===t); b.onclick=()=>{ endTab(b.dataset.t); sfx('ui'); }; }); }   /* 가로 모드: 전리품 / 데미지 순위 탭 (세로 모드는 탭 없이 둘 다 표시) */
 function showEnd(msg){
   sfx(G.phase==='win'?'win':'lose');
-  if(G.endShown)return; G.endShown=true; storyStop(); G.inGame=false; saveChar(); rkSubmitAll(); closeSheet(); for(const k in held)held[k]=false;
+  if(G.endShown)return;
+  if(!msg&&G.phase==='lose'&&G.lostCastle&&me&&me.hc&&!(me.hd>0)){ hcDown('castle'); return; }   /* 하드코어: 성이 100% 무너져 패배하면 쓰러진 것과 같이 사망 */
+  G.endShown=true; storyStop(); G.inGame=false; saveChar(); rkSubmitAll(); closeSheet(); for(const k in held)held[k]=false;
   const win=G.phase==='win';
   if(win&&!msg&&!G.clrDone){ G.clrDone=true; markClear(); }   /* 돌아갔다 다시 끝나도 기록은 처음 한 번만 */
   $('#bBack').hidden=!(win&&!msg&&G.mode==='solo'&&G.clearT>.5);   /* 전리품 시간이 남았을 때만: 게임화면으로 돌아가기 */
