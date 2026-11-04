@@ -791,7 +791,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
   #sTitle .clist.car{margin-top:auto;padding-inline:calc(50% - 120px)}
   #sTitle .cc{flex-basis:240px;padding:0 0 12px;gap:4px}
   #sTitle .cc .cpic{width:150px;height:clamp(140px,21vh,190px);margin-top:26px}
-  #sTitle .cc .cl+.cl,#sTitle .cc .cpt{display:none}   /* 골드·포인트는 카드 아래 정보칸으로 */
+  #sTitle .cc .cpt{display:none}   /* 포인트는 카드 아래 정보칸으로 (골드는 카드에 표시하지 않음) */
   #sTitle .pp{margin-top:auto;gap:12px}
   #sTitle #bSolo{min-height:72px;font-size:24px}
   #sTitle .ttabs{margin-top:0}
@@ -908,8 +908,9 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 .ban .tri img:nth-child(2){height:94px;z-index:1;filter:brightness(1.1) drop-shadow(0 0 8px rgba(150,90,220,.7)) drop-shadow(0 6px 8px #000c)}
 .ban img{position:absolute;right:10px;bottom:4px;height:100px;max-width:130px;object-fit:contain;filter:brightness(1.35) saturate(1.2) drop-shadow(0 6px 8px #000c);pointer-events:none}
 @media (orientation:portrait) and (min-height:700px){
-  #sTitle .clist.car{flex:1 1 0;min-height:180px;max-height:292px;margin-top:6px}   /* 남는 높이를 캐릭터 카드가 받아 한 화면에 다 들어오게 */
-  #sTitle .cc .cpic{flex:1 1 0;min-height:80px;height:auto;margin-top:20px}
+  #sTitle .clist.car{flex:1 1 0;min-height:180px;max-height:372px;margin-top:6px;padding-inline:calc(50% - 104px)}   /* 남는 높이를 캐릭터 카드가 받아 한 화면에 다 들어오게 (여유가 있으면 372px까지 크게) */
+  #sTitle .cc{flex-basis:208px}#sTitle .cc b{font-size:22px}
+  #sTitle .cc .cpic{flex:1 1 0;min-height:80px;width:100%;height:auto;margin-top:20px}
   #sTitle .pp{margin-top:auto;height:70px;min-height:70px;flex:none}
   #sTitle .pp #bSolo{min-height:0;height:100%}
   #sTitle #bShop{width:66px}
@@ -918,6 +919,9 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 /* ===== PC 와이드(가로 1000px↑, 높이 500px↑) 타이틀: 왼쪽 캐릭터 격자 · 오른쪽 큰 캐릭터 카드 + 이번 도전 + 시작·상점, 우상단 전체화면 버튼 ===== */
 #bigHero{display:none}
 #bFull{display:none}
+@media (orientation:portrait) and (min-height:700px) and (max-height:820px){   /* 낮은 화면: 칭호 칩이 늘린 만큼 글자 여백을 줄여 캐릭터가 작아지지 않게 */
+  #sTitle .cc{gap:1px}#sTitle .cc .cpic{margin-top:10px}#sTitle .cc b{font-size:19px}#sTitle .cc .ttc{margin-top:3px;min-height:24px;padding-block:0;font-size:11.5px}
+}
 @media (orientation:landscape) and (min-width:1000px) and (min-height:501px){
   /* 넓은 화면 타이틀: 화면 높이에 딱 맞게 구성 → 스크롤바 없음. 왼쪽 카드 격자는 JS(fitWideCards)가 남는 칸에 맞춰 크기·열 수를 정해요 */
   #sTitle{display:grid;grid-template-columns:minmax(0,1fr) clamp(400px,30vw,540px);grid-template-rows:auto auto minmax(0,1fr) auto auto auto;column-gap:48px;row-gap:14px;align-content:stretch;align-items:start;justify-items:stretch;padding:8px max(48px,calc((100vw - 1640px)/2)) 0;overflow:hidden}
@@ -1358,7 +1362,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.4.0507</div>
+    <div class="ver" id="verT">v0.6.4.0508</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -5953,7 +5957,7 @@ function buildCarousel(chars){
   const box=$('#charList');
   const ttChip=c=>{ const t=ttCur(c); if(c.hd>0)return t?`<span class="ttc"><span class="ttn">🏅 ${esc(t.n)}</span></span>`:'';
     return `<span class="ttc ttb${t?'':' no'}" role="button" tabindex="0" aria-label="${t?'칭호 '+esc(t.n)+' 변경':'칭호 선택'}"><span class="ttn">🏅 ${t?esc(t.n):'칭호 선택'}</span> <u>${t?'▾':'›'}</u>${ttNew(c)?'<i class="ttnw">NEW</i>':''}</span>`; };
-  const tail=c=>`${c.hc?`<span class="hcrb${c.hd>0?' d':''}">${c.hd>0?'💀 사망':'🔥 하드코어'}</span>`:''}<b>${esc(dispName(c))}</b><span class="cl">${CLASSES[c.cls].n} · <em>Lv ${c.lvl}</em></span>${ttChip(c)}<span class="cl">💰 ${(c.gold|0).toLocaleString()}</span><span class="cpt">${c.statPts+c.skillPts?`포인트 ${c.statPts+c.skillPts}`:'&nbsp;'}</span>${petOf(c)?`<span class="cpet" aria-label="펫 ${PETS[c.pet.id].n} Lv ${c.pet.lv||1}"><span class="pbd"><img src="img/${PETS[c.pet.id].im}.png" alt="" onerror="this.onerror=null;this.src='img/boss_3_5.png'"></span><i>Lv${c.pet.lv||1}</i></span>`:''}`;
+  const tail=c=>`${c.hc?`<span class="hcrb${c.hd>0?' d':''}">${c.hd>0?'💀 사망':'🔥 하드코어'}</span>`:''}<b>${esc(dispName(c))}</b><span class="cl">${CLASSES[c.cls].n} · <em>Lv ${c.lvl}</em></span>${ttChip(c)}<span class="cpt">${c.statPts+c.skillPts?`포인트 ${c.statPts+c.skillPts}`:'&nbsp;'}</span>${petOf(c)?`<span class="cpet" aria-label="펫 ${PETS[c.pet.id].n} Lv ${c.pet.lv||1}"><span class="pbd"><img src="img/${PETS[c.pet.id].im}.png" alt="" onerror="this.onerror=null;this.src='img/boss_3_5.png'"></span><i>Lv${c.pet.lv||1}</i></span>`:''}`;
   /* 캐릭터 구성이 그대로면(마을·가방·보관함을 닫을 때 등) 카드를 다시 만들지 않고 글자만 바꿔요 → 그림이 다시 로드되며 아이콘·자세가 번쩍이는 현상 방지 */
   const old=[...box.querySelectorAll('.cc:not(.add)')], same=old.length>0&&old.length===chars.length&&old.every((e,i)=>e.dataset.id===chars[i].id&&e.querySelector('.cpic')&&e.querySelector('.cpic').classList.contains(chars[i].cls))&&box.querySelectorAll('.cc.add').length===(chars.length<MAXCHAR?1:0);
   if(same){ old.forEach((e,i)=>{ e.classList.toggle('hc',!!chars[i].hc); e.classList.toggle('hcd',chars[i].hd>0); const pic=e.querySelector('.cpic'); while(pic.nextSibling)pic.nextSibling.remove(); pic.insertAdjacentHTML('afterend',tail(chars[i])); }); }
