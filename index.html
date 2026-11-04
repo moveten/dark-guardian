@@ -1346,7 +1346,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.4.0505</div>
+    <div class="ver" id="verT">v0.6.4.0506</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -5818,7 +5818,7 @@ function rkCacheGet(mode){ if(mode==='recent')return null; try{ const o=JSON.par
 function rkCacheSet(mode,rows){ if(mode==='recent')return; try{ lsSet('dkdef2.rkc2.'+mode,JSON.stringify({t:Date.now(),rows})); }catch(e){} }
 async function rkLoad(mode,force){ const c=rkCacheGet(mode); if(!force&&c&&Date.now()-c.t<RK_TTL)return {rows:c.rows,t:c.t,cached:true};
   const rows=await rkFetch(mode); rkCacheSet(mode,rows); return {rows,t:Date.now(),cached:false}; }
-function rkPrefetch(){ ['lvl','ta','stage'].forEach((m,i)=>{ const c=rkCacheGet(m); if(c&&Date.now()-c.t<RK_TTL)return; setTimeout(()=>rkLoad(m,true).catch(()=>{}),i*1500); }); }   /* 시작하고 잠시 뒤 세 순위를 미리 받아 둬요 → 랭킹을 열면 바로 보임 */
+function rkPrefetch(){ ['lvl','ta','hc'].forEach((m,i)=>{ const c=rkCacheGet(m); if(c&&Date.now()-c.t<RK_TTL)return; setTimeout(()=>rkLoad(m,true).catch(()=>{}),i*1500); }); }   /* 시작하고 잠시 뒤 세 순위를 미리 받아 둬요 → 랭킹을 열면 바로 보임 */
 const hcStg=r=>{ const h=+(r&&r.data&&r.data.hs)||0; return h>0&&STAGES[h-1]?STAGES[h-1].id:''; };   /* 하드코어: 사망한 스테이지 */
 function rkVal(mode,r){ return mode==='stage'||mode==='hc'?(r.clear>0?STAGES[Math.min(STAGES.length,r.clear)-1].id+' 클리어':'-'):mode==='ta'?'⏱ '+fmtCt(rkCt(r)):'Lv '+(r.lvl|0); }
 const rkDate=t=>{ const d=new Date(t*1000); return (d.getMonth()+1)+'/'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); };
@@ -5870,8 +5870,8 @@ function rkItemDetail(row,k,back){
 let rkKeep=null;   /* 랭킹에서 프로필을 열기 직전의 탭·스크롤 위치 — '랭킹으로' 돌아오면 보던 자리 그대로 */
 function openRank(mode0){
   let mode=RKMODES[mode0]?mode0:'lvl'; const mine=new Set(charIds()); let want=(rkKeep&&rkKeep.mode===mode)?rkKeep.top:null;
-  const TABS=[['lvl','⭐ 레벨'],['ta','⏱️ 타임어택'],rsOn()?['hc','💀 하드코어']:['stage','🗺️ 진행']], TABS2=[['recent','⏰ 최근활동'],['x1','📈 미사용1']];   /* 관리자는 3번째 칸이 진행 대신 하드코어, 2번째 줄은 관리자 전용 */
-  if((mode==='recent'||mode==='hc'||mode==='x1')&&!rsOn())mode='lvl'; if(mode==='stage'&&rsOn())mode='lvl';
+  const TABS=[['lvl','⭐ 레벨'],['ta','⏱️ 타임어택'],['hc','💀 하드코어']], TABS2=[['recent','⏰ 최근활동'],['x1','📈 미사용1']];   /* 3번째 칸은 진행 대신 하드코어, 2번째 줄은 관리자 전용 */
+  if((mode==='recent'||mode==='x1')&&!rsOn())mode='lvl'; if(mode==='stage')mode='lvl';
   modal(`<h3>🏆 랭킹</h3><div class="rktabs">${TABS.map(([k,l])=>`<button data-m="${k}" aria-pressed="${k===mode}">${l}</button>`).join('')}</div>${rsOn()?`<div class="rktabs">${TABS2.map(([k,l])=>`<button data-m="${k}" aria-pressed="${k===mode}"${k==='x1'?' disabled style="opacity:.45"':''}>${l}</button>`).join('')}</div>`:''}<div class="rklist" id="rkBox"><p class="meta">불러오는 중…</p></div><div class="row2"><button class="btn" id="rkRe">🔄 새로고침</button><button class="btn" id="rkNo">닫기</button></div><p class="meta" style="margin:8px 0 0;font-size:11.5px">이름을 누르면 장비와 능력치를 한눈에 볼 수 있어요 · 내 캐릭터는 금색 · 전투 기록 없는 캐릭터 제외 · 🔄는 바로 갱신</p>`,m=>{
     const box=m.querySelector('#rkBox'); let seq=0;
     const rowHtml=(r,i,own)=>{ const c=CLASSES[r.cls]?r.cls:'war'; return `<button class="rkrow${own?' own':''}${i<3&&mode!=='recent'?' top':''}${mode==='hc'&&r.dead_at?' dead':''}" data-i="${i}"><span class="rkn">${i<3&&mode!=='recent'?['🥇','🥈','🥉'][i]:i+1}</span><span class="rke"><img src="img/cls_${c}.png" alt="${CLSE[c]}" loading="lazy" decoding="async"></span><span class="rkm"><b>${mode==='hc'&&r.dead_at?'💀 ':''}${esc(String(r.name||CLASSES[c].n).slice(0,8))}</b><small>${rkSub(mode,r)}</small></span><span class="rkv">${mode==='ta'?`<b class="rks">${esc(r.clear>0?STAGES[Math.min(STAGES.length,r.clear)-1].id+' 클리어':'-')}</b><span class="rkt">${esc(rkVal(mode,r))}</span>`:esc(rkVal(mode,r))}</span><span class="rkc">›</span></button>`; };
@@ -6117,7 +6117,7 @@ function askName(title,init,okTxt,cb,exceptId,cheat,opt){ opt=opt||{};
 function showNew(canBack){ $('#bNewBack').hidden=canBack===false; const box=$('#newCards'); box.innerHTML='';
   for(const k of ['war','pal','sorc','necro','druid']){ const c=CLASSES[k]; const b=document.createElement('button'); b.className='ccard';
     b.innerHTML=`<div class="cn">${clsIc(k,34)}${c.n}</div><div class="cd">${c.d}</div>`;
-    b.onclick=()=>{ const nid=genId(); askName(`${clsIc(k,26)} ${c.n} · 닉네임 정하기`,'','✔ 만들기',(v,hc)=>{ const p=createChar(k,v,nid,!!hc&&rsOn()); if(p){ show('#sTitle'); renderTitle(); } else nameQueueRel(nid); },undefined,null,{claim:nid,hc:rsOn()});   /* 하드코어 체크는 관리자 권한이 있을 때만 보여요 */ };
+    b.onclick=()=>{ const nid=genId(); askName(`${clsIc(k,26)} ${c.n} · 닉네임 정하기`,'','✔ 만들기',(v,hc)=>{ const p=createChar(k,v,nid,!!hc); if(p){ show('#sTitle'); renderTitle(); } else nameQueueRel(nid); },undefined,null,{claim:nid,hc:true});   /* 하드코어 체크 */ };
     box.appendChild(b); }
   show('#sNew'); }
 $('#bNew').onclick=()=>showNew(true);
