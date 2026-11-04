@@ -1258,6 +1258,28 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 .vol input[type=range]{flex:1;min-width:0;height:28px;accent-color:var(--gold);background:transparent;margin:0}
 .vol .vp{flex:none;width:40px;text-align:right;font-size:12.5px;color:var(--mute);font-variant-numeric:tabular-nums}
 .vol .vr.off input,.vol .vr.off .vn,.vol .vr.off .vp{opacity:.45}
+
+/* 하드코어 (관리자 전용) */
+.hcchk{display:flex;gap:10px;align-items:flex-start;margin:0;padding:10px 12px;border-radius:10px;border:1px solid #6a2a24;background:rgba(80,14,10,.35);cursor:pointer;text-align:left}
+.hcchk input{width:22px;height:22px;margin:1px 0 0;accent-color:#c8403a;flex:none}
+.hcchk b{display:block;color:#ff9a8a;font-size:14.5px}.hcchk small{display:block;color:#c9a89a;font-size:12px;line-height:1.5;margin-top:2px}
+.hcchk:has(input:checked){border-color:#ff5a48;background:rgba(120,20,14,.55)}
+.cc{position:relative}
+.cc .hcrb{position:absolute;left:8px;top:8px;z-index:3;padding:1px 7px;border-radius:9px;background:linear-gradient(#b3342b,#6e1712);border:1px solid #ff8a6a;color:#ffe3d8;font:800 10.5px/1.5 'Noto Sans KR',sans-serif;letter-spacing:.3px;pointer-events:none;box-shadow:0 0 8px rgba(255,60,40,.4)}
+.cc .hcrb.d{background:#2a1a18;border-color:#7a4a44;color:#c9a89a;box-shadow:none}
+.cc.hc{border-color:#7a2a22;box-shadow:0 0 0 1px rgba(200,60,50,.25),0 0 14px rgba(200,50,40,.18)}
+.cc.hcd{border-color:#4a1a16;box-shadow:none}
+.cc.hcd .cpic img{filter:grayscale(1) brightness(.55) drop-shadow(0 6px 8px rgba(0,0,0,.6))}.cc.hcd .cpic .cem{filter:grayscale(1) brightness(.6)}
+.rkrow.dead{opacity:.62}.rkrow.dead b{color:#c98a80}
+body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
+#hcDie{position:fixed;inset:0;z-index:100000;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at center,rgba(58,0,0,.97),#050000 75%);animation:hcIn 1.4s ease both}
+#hcDie[hidden]{display:none}
+.hcd-in{text-align:center;padding:24px;max-width:420px}
+.hcd-t{font:900 52px/1.1 var(--f-disp,serif);letter-spacing:.16em;color:#b01c14;text-shadow:0 0 24px rgba(220,30,20,.55),0 2px 0 #000;animation:hcT 2.2s ease both;margin-bottom:14px}
+.hcd-s{font-size:18px;font-weight:800;color:#e9d9b4;margin-bottom:6px}.hcd-m{font-size:14px;line-height:1.6;color:#c9a89a;margin-bottom:22px}
+#hcDieOk{min-width:160px}
+@keyframes hcIn{from{opacity:0}to{opacity:1}}@keyframes hcT{from{opacity:0;letter-spacing:.4em;transform:scale(1.08)}to{opacity:1;letter-spacing:.16em;transform:none}}
+@media (max-width:420px){.hcd-t{font-size:40px}}
 </style>
 
 <nav id="dock" hidden>
@@ -1323,7 +1345,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.4.0499</div>
+    <div class="ver" id="verT">v0.6.4.0500</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1396,6 +1418,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
     <div class="ipop" id="itemPop" hidden></div>
   </div>
   <div class="mapov" id="mapOv" hidden></div>
+  <div id="hcDie" hidden role="alertdialog" aria-label="하드코어 캐릭터 사망"><div class="hcd-in"><div class="hcd-t">YOU DIED</div><div class="hcd-s" id="hcDieS"></div><div class="hcd-m" id="hcDieM"></div><button class="btn primary danger" id="hcDieOk" type="button">확인</button></div></div>
   <div class="ipop" id="modal" hidden style="z-index:30"></div>
   <div id="ult" hidden><div class="udim"></div><div class="uwrap"><div class="uband"><div class="ulines"></div></div><div class="ucont"><div class="uface"><img alt=""></div><div class="utx"><small>ULTIMATE</small><b></b><em></em></div></div></div><div class="uflash"></div></div>
   <div id="sty" hidden><div class="sdim"></div><div class="sps"><div class="sp l"><img alt=""></div><div class="sp r"><img alt=""></div></div><div class="sbox" role="dialog" aria-label="이야기"><div class="snm"><b id="stN"></b><em id="stT"></em></div><p class="stx"><span id="stA"></span><span id="stB"></span></p><div class="sft"><span class="spg" id="stPg"></span><span class="sgo" id="stGo">▼</span><button id="stSk" type="button">건너뛰기</button></div></div></div>
@@ -2162,8 +2185,8 @@ function labTick(){ const L=getTown().lab, now=Date.now(), done=[]; for(const k 
 const labDefPct=()=>{ const L=getTown().lab; if((L.lv|0)<1)return 0; labTick(); return L.a.l*2; };
 const labFixPct=()=>{ const L=getTown().lab; labTick(); return (L.lv|0)>=1?10+2*L.b.l:10; };
 /* 자산 = 지금 캐릭터(골드·그림자 조각·각성 조각) + 공유창고. 쓸 때는 캐릭터 몫을 먼저 쓰고, 모자란 만큼만 창고에서 뺌 */
-const aGold=()=>(me?me.gold|0:0)+(getStore().gold|0);
-const aShard=mat=>{ if(me)miscFix(me); return (me?shardCount(me,mat):0)+shardCount(getStore(),mat); };
+const aGold=()=>(me?me.gold|0:0)+((me&&me.hc)?0:(getStore().gold|0));   /* 하드코어 캐릭터는 공유보관함 골드를 쓰지 못해요 */
+const aShard=mat=>{ if(me)miscFix(me); return (me?shardCount(me,mat):0)+((me&&me.hc)?0:shardCount(getStore(),mat)); };
 function aPayGold(n){ n=Math.max(0,n|0); if(aGold()<n)return false; const S=getStore(), m=me?Math.min(me.gold|0,n):0; if(m>0){ me.gold-=m; saveChar(); uiDirty=true; } if(n-m>0){ S.gold=(S.gold|0)-(n-m); saveStore(); } return true; }
 function aPayShard(n,mat){ n=Math.max(0,n|0); if(aShard(mat)<n)return false; const S=getStore(), m=me?Math.min(shardCount(me,mat),n):0; if(m>0){ if(!shardTake(me,m,mat))return false; saveChar(); } if(n-m>0){ if(!shardTake(S,n-m,mat))return false; saveStore(); } return true; }
 function labBuild(){ const L=getTown().lab, S=getStore(); if((L.lv|0)>=1)return 'max'; if(!aPayGold(LAB_BUILD))return 'lack'; L.lv=1; saveTown(); return 'ok'; }
@@ -2202,7 +2225,7 @@ function townSend(k,cid){ townTick(k); const B=getTown()[k], D=TOWN_B[k], P=town
   if(p===me)saveChar(); else mailSave(p);
   if(n>=P.cap)B.t=Date.now(); B.n=0; saveTown(); return n; }
 /* 만든 조각을 공유보관함으로 바로 옮김: 보관함에 자리가 모자라면 들어간 만큼만 옮기고 나머지는 건물에 남겨요 */
-function townToStore(k){ townTick(k); const B=getTown()[k], D=TOWN_B[k], P=townProd(k), n=B.n|0; if(n<1||!P||D.pot)return {put:0,left:0};
+function townToStore(k){ if(me&&me.hc)return {put:0,left:(getTown()[k].n|0),hc:1}; townTick(k); const B=getTown()[k], D=TOWN_B[k], P=townProd(k), n=B.n|0; if(n<1||!P||D.pot)return {put:0,left:0};
   const S=getStore(), put=shardAdd(S,n,D.mat); S[D.mat]=0; if(put<=0)return {put:0,left:n};
   if(n>=P.cap)B.t=Date.now(); B.n=n-put; saveStore(); saveTown(); return {put,left:B.n}; }
 /* ===== 우편함 (캐릭터별) — 편지 내용은 여기 MAILS 에 있고 캐릭터에는 {id,d(받은 시각),r(읽음)}만 저장. 편지 보내기 기능은 없음 ===== */
@@ -2266,7 +2289,7 @@ function loadChar(id){
     if(p.clear===undefined)p.clear=Math.max(0,+(lsGet('dkdef2.clear')||0));
     { const lg=k=>{ const v=parseInt(lsGet(k)); return isNaN(v)?-1:clamp(v,-1,2); }; if(p.as===undefined)p.as=lg('dkdef2.asell'); if(p.sy===undefined)p.sy=lg('dkdef2.asyn'); if(p.sy>=0)p.sy=2; } /* 캐릭터별 자동판매/합성: 기존 캐릭터는 예전 전역 설정을 한 번 이어받음 */
     { const q={}; if(p.dx&&typeof p.dx==='object')for(const k in p.dx){ const v=Math.floor(+p.dx[k]); if(v>0&&isFinite(v)&&dexOk(k))q[k]=Math.min(v,9999); } p.dx=q; if(p.dxs!==undefined)p.dxs=Math.max(0,Math.min(999,+p.dxs|0)); { const n={}; if(p.dxn&&typeof p.dxn==='object')for(const k in p.dxn)if(dexOk(k)&&(p.dx[k]|0)>0)n[k]=1; p.dxn=n; } if(p.sd!==undefined)p.sd=p.sd===1?1:0; if(p.bs!==undefined)p.bs=Array.isArray(p.bs)?p.bs.map(x=>x|0).filter(x=>x>=0&&x<=3):[0,1]; if(p.gas!==undefined)p.gas=Math.max(-1,Math.min(2,p.gas|0)); }   /* 도감: 아이템별 직접 획득 횟수 · dxs = 도감을 마지막으로 열어 본 때의 수집 수(그보다 늘면 시작화면 도감 버튼에 NEW) */
-    p.sp=p.sp?1:0;   /* 캐릭터별 1.3배속 설정 */ petNorm(p);
+    p.sp=p.sp?1:0;   /* 캐릭터별 1.3배속 설정 */ p.hc=p.hc?1:0; p.hd=p.hc&&p.hd>0?Math.floor(p.hd):0; p.hs=p.hc&&p.hs>0?p.hs|0:0;   /* 하드코어: hc=1 · hd=사망 시각(ms) · hs=사망한 스테이지 번호 */ petNorm(p);
     p.au=Math.max(0,Math.min(2,p.au|0));   /* 캐릭터별 AUTO 설정 (0 꺼짐 · 1 이동 · 2 이동+스킬) — 스테이지를 옮겨도 유지 */
     p.eq=p.eq||{}; if(p.eq.shield===undefined)p.eq.shield=null;
     for(const k in p.eq){ if(p.eq[k])delete p.eq[k].isNew; } /* 장착했던 아이템의 NEW 꼬리표 정리(1회) */ if(!lsGet('dkdef2.nwf.'+id)){ (p.inv||[]).forEach(x=>{ if(x)delete x.isNew; }); lsSet('dkdef2.nwf.'+id,'1'); }
@@ -2303,11 +2326,12 @@ function migrateChars(){
     try{ const p=JSON.parse(raw); if(p&&p.cls===cls){ p.id=genId(); lsSet(charKey(p.id),JSON.stringify(p)); ids.push(p.id); } }catch(e){} }
   setIds(ids);
 }
-function createChar(cls,name,nid){ const ids=charIds(); if(ids.length>=MAXCHAR||!CLASSES[cls])return null; if(nameTaken(name))return null; const p=newChar(cls,name,nid); p.ms=MAILQ.map(q=>q.id); lsSet(charKey(p.id),JSON.stringify(packChar(p))); ids.push(p.id); setIds(ids); selId=p.id; lsSet('dkdef2.sel',selId); return p; }
+function createChar(cls,name,nid,hc){ const ids=charIds(); if(ids.length>=MAXCHAR||!CLASSES[cls])return null; if(nameTaken(name))return null; const p=newChar(cls,name,nid); if(hc)p.hc=1; p.ms=MAILQ.map(q=>q.id); lsSet(charKey(p.id),JSON.stringify(packChar(p))); ids.push(p.id); setIds(ids); selId=p.id; lsSet('dkdef2.sel',selId); return p; }
 function deleteChar(id){ setIds(charIds().filter(x=>x!==id)); lsDel(charKey(id)); lsDel('dkdef2.rk.'+id); lsDel('dkdef2.nmv.'+id); if(selId===id){selId='';lsSet('dkdef2.sel','');} rkQueueDel(id); nameQueueRel(id); }
-function packChar(p){ const {id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear,as,sy,gs,au,sp,ct,cts,cat,dv4,shard,ashard,misc,mail,ms,tut,cc,eq2,es,pet,dx,dxs,dxn,gas,sd,bs}=p; return {bs:Array.isArray(bs)?bs:undefined,sd:sd===1?1:undefined,dxn:dxn&&Object.keys(dxn).length?dxn:undefined,gas:gas===undefined?undefined:Math.max(-1,Math.min(2,gas|0)),dx:dx&&Object.keys(dx).length?dx:undefined,dxs:dxs===undefined?undefined:Math.max(0,dxs|0),id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear:clear|0,au:Math.max(0,Math.min(2,au|0)),sp:sp?1:0,ct:ct>0?ct|0:0,cts:cts>0?cts|0:undefined,cat:cat>0?cat|0:0,as:as===undefined?-1:as,sy:sy===undefined?-1:sy,gs:gs?1:undefined,dv4:dv4?1:0,shard:shard|0,ashard:(ashard|0)||undefined,misc:Array.isArray(misc)?misc:undefined,mail:Array.isArray(mail)?mail:undefined,ms:Array.isArray(ms)?ms:undefined,tut:tut||undefined,cc:cc&&Object.keys(cc).length?cc:undefined,eq2:eq2&&Object.values(eq2).some(Boolean)?eq2:undefined,es:es===1?1:undefined,pet:pet&&PETS[pet.id]?{id:pet.id,xp:Math.floor(pet.xp)||0}:undefined}; }
+function packChar(p){ const {id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear,as,sy,gs,au,sp,ct,cts,cat,dv4,shard,ashard,misc,mail,ms,tut,cc,eq2,es,pet,dx,dxs,dxn,gas,sd,bs,hc,hd,hs}=p; return {hc:hc?1:undefined,hd:hc&&hd>0?hd:undefined,hs:hc&&hs>0?hs|0:undefined,bs:Array.isArray(bs)?bs:undefined,sd:sd===1?1:undefined,dxn:dxn&&Object.keys(dxn).length?dxn:undefined,gas:gas===undefined?undefined:Math.max(-1,Math.min(2,gas|0)),dx:dx&&Object.keys(dx).length?dx:undefined,dxs:dxs===undefined?undefined:Math.max(0,dxs|0),id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear:clear|0,au:Math.max(0,Math.min(2,au|0)),sp:sp?1:0,ct:ct>0?ct|0:0,cts:cts>0?cts|0:undefined,cat:cat>0?cat|0:0,as:as===undefined?-1:as,sy:sy===undefined?-1:sy,gs:gs?1:undefined,dv4:dv4?1:0,shard:shard|0,ashard:(ashard|0)||undefined,misc:Array.isArray(misc)?misc:undefined,mail:Array.isArray(mail)?mail:undefined,ms:Array.isArray(ms)?ms:undefined,tut:tut||undefined,cc:cc&&Object.keys(cc).length?cc:undefined,eq2:eq2&&Object.values(eq2).some(Boolean)?eq2:undefined,es:es===1?1:undefined,pet:pet&&PETS[pet.id]?{id:pet.id,xp:Math.floor(pet.xp)||0}:undefined}; }
 function saveChar(){ if(!me||!me.id)return; lsSet(charKey(me.id),JSON.stringify(packChar(me))); }
 const dispName=p=>(p&&p.name)||CLASSES[p.cls].n;
+const isHc=p=>!!(p&&p.hc), hcDead=p=>!!(p&&p.hc&&p.hd>0);   /* 하드코어 캐릭터 · 사망한 하드코어 캐릭터 */
 const SELLBASE=[100,200,400,800,3000], ADVAFX=['ls','crit','ias','ms','mf','pr','mr'];
 function sellInfo(it){ let base=SELLBASE[it.rar]||100, ex=0; for(const a of it.aff){ if(a.t==='all')ex+=200+150*a.v; else if(a.t==='cls'||a.t==='sk')ex+=100+100*a.v; else if(ADVAFX.includes(a.t))ex+=200; } return {base,ex,total:base+ex}; }
 const need=l=>l<=58?Math.floor(23*Math.pow(l,1.92)):Math.floor(23*Math.pow(58,1.92)*Math.pow(l/58,9.5)); /* 레벨업 경험치: 계수 23 · 지수 1.92 · 전환 레벨 58 · 전환 후 지수 9.5 */
@@ -2804,7 +2828,7 @@ function castlePush(o){ if(!G.castle)return; const cx=VX, cy=VY+CAS_Y+4, rx=58, 
 function startStage(){
   AUD.voicePre(me.cls); setTimeout(()=>{ if(G.inGame&&!me.dead)voice('start'); },1500);
   dmgReset(); G.firstClr=false; G.stageIdx=selStage; G.stg=STAGES[selStage]; G.TW=G.stg.waves.length; preBoss(); setTheme(selStage); castleInit(); if(G.castle)later(3.2,()=>{ if(G.inGame&&G.castle&&G.phase!=='lose')toast('🏰 중앙의 성을 지켜요 · 체력이 0이 되면 패배 · 성 둘레에서는 생명력·마나가 회복돼요','#e0c080'); }); G.gts=[]; later(.5,()=>{ if(G.inGame)banner(`${G.stg.id} ${G.stg.n}`,`장비 Lv 합 ${Math.max(1,G.stg.icap-12)*EQSL.length}↑ · ${G.stg.tag||''}`); });
-  gobInit(); G.allMode=false; G.allQ=[]; G.fires=[]; G.freeRev=1; me.rvGiven=0; me.seenRg=0; me.out=false; me.rvT=0;
+  gobInit(); G.allMode=false; G.allQ=[]; G.fires=[]; G.freeRev=me.hc?0:1; me.rvGiven=0; me.seenRg=0; me.out=false; me.rvT=0;
   G.gemDone=false; G.wave=0;G.skipUsed=false;G.phase='prep';G.timer=2;G.mobs.length=0;G.ev=[];G.spawnQ=0;G.lastSq=-1;G.endShown=false;G.coop=!!guestPeer;
   G.waveSides=[0,1,3]; G.nextSides=sidesFor(1); G.laneShow=G.nextSides;
   if(G.mode!=='guest'&&(me.clear|0)>selStage&&!STAGES[selStage].raid)later(.05,()=>{ if(G.inGame&&!G.allMode&&G.phase==='prep'&&G.wave===0&&G.stageIdx===selStage&&!tutS&&!tutWait&&!storyWait)startAllOut(); }); /* 이미 깬 스테이지는 들어가자마자 총공세 (튜토리얼이 시작되는 스테이지는 제외) */
@@ -3298,12 +3322,18 @@ function takeDmg(raw,fire,rh){
     if(me.D.awk7&&me.hp>0&&me.hp<mx*.5&&!(me.awkCd>0)){ me.awkCd=45; me.buffs.awk={v:.3,t:8,m:8}; addNum(me.x,me.y-56,'✦ 각성!','#d8b0ff',true); burst(me.x,me.y,'#a68bff',24,260); announce('✦ 각성 세트 발동! 8초간 피해 +30% · 공격 속도 +20%','#d8b0ff'); } }   /* 각성 세트 7개 */
   if(me.hp<=0){ goDown(); }
 }
-function revItems(){ return (G.freeRev|0)+(me.rev|0); }
+function revItems(){ return me.hc?0:(G.freeRev|0)+(me.rev|0); }
 function goDown(){ if(!me.dead)voice('die',0,true); me.hp=0; me.dead=true; me.leap=null; me.rvT=0; if((me.cls==='necro'||me.cls==='druid')&&minions.length){ for(const mn of minions){ const K=MNK[mn.k]; if(mn.fe&&typeof rvDrop==='function')rvDrop(mn); burst(mn.x,mn.y,(K&&K.col)||'#8fe6d0',14,200); } minions.length=0; } /* 강령술사·드루이드가 쓰러지면 소환수(까마귀 포함)도 함께 사라짐 */ if(me.form||me.spirit){ me.form=''; me.spirit=null; me.D=derive(me); me.hp=0; } spark(me.x,me.y,'#7a1010',20);
   { const lost=Math.floor((me.gold|0)*.05); if(lost>0){ me.gold-=lost; saveChar(); uiDirty=true; later(.6,()=>toast(`💸 쓰러져서 ${lost}G를 잃었어요 (보유금의 5%)`,'#e0a070')); } }
   const coopAlive=ally&&!ally.lobby&&!ally.dead;
-  me.respawn=revItems()>0?12:coopAlive?30:1.6;
-  toast(revItems()>0?'쓰러졌습니다! 부활 버튼으로 일어나세요':coopAlive?'쓰러졌습니다! 동료가 구해주길 기다려요':'쓰러졌습니다…','#e07060'); }
+  me.respawn=me.hc?0:revItems()>0?12:coopAlive?30:1.6;
+  toast(revItems()>0?'쓰러졌습니다! 부활 버튼으로 일어나세요':coopAlive?'쓰러졌습니다! 동료가 구해주길 기다려요':'쓰러졌습니다…','#e07060'); if(me.hc)hcDown(); }
+/* 하드코어: 쓰러지면 바로 끝 — 사망 기록을 곧바로 저장하고(앱을 꺼도 유지) 랭킹에 💀 로 올린 뒤 YOU DIED 화면을 보여줘요 */
+function hcDown(){ if(!me||!me.hc||me.hd>0)return; me.hd=Date.now(); me.hs=(G.stageIdx|0)+1; me.out=true; me.respawn=0; me.rvT=0; saveChar();
+  if(!(ally&&!ally.lobby&&!ally.dead))G.endShown=true;   /* 혼자일 땐 일반 '쓰러졌습니다' 결과창 대신 YOU DIED 화면 */
+  try{ rkSubmitAll(true); }catch(e){}
+  setTimeout(()=>{ try{ hcShowDie(); }catch(e){} },900); }
+function hcShowDie(){ if(!me||!me.hc||!(me.hd>0))return; const S=STAGES[(me.hs|0)-1]; $('#hcDieS').textContent=`${dispName(me)} · Lv ${me.lvl}`; $('#hcDieM').innerHTML=`${S?'스테이지 '+esc(S.id)+'에서 ':''}쓰러졌어요<br>처치 ${(me.kills|0).toLocaleString('ko-KR')}마리 · 랭킹에는 💀 표시로 남아요`; try{ storyStop(); }catch(e){} { const o=$('#hcDie'); if(o.parentNode!==document.body)document.body.appendChild(o); } $('#hcDie').hidden=false; sfx('lose'); }
 function reviveMe(pct,free){ voice('revive',0,true); G.stRev=(G.stRev|0)+1; me.vx=me.vy=0; const a=me.aura,pot=me.pot,bx=me.x,by=me.y; me.dead=false; me.out=false; me.stun=me.slowP=me.poison=0; me.respawn=0; me.leap=null; me.cds={}; me.buffs={}; me.aura=a; me.pot=pot; me.D=derive(me); me.hp=me.D.maxHp*pct; me.mp=me.D.maxMp*.5; me.god=3; me.x=bx; me.y=by;   /* 부활 후 3초 무적 */
   efx.push({k:'rvfx',x:me.x,y:me.y,t:0,life:1.3}); efx.push({k:'ring',x:me.x,y:me.y,r0:10,r1:190,t:0,life:.8,col:'#ffd84a',w:10}); later(.12,()=>efx.push({k:'ring',x:me.x,y:me.y,r0:10,r1:260,t:0,life:.9,col:'#fff6cc',w:7})); later(.26,()=>efx.push({k:'ring',x:me.x,y:me.y,r0:10,r1:330,t:0,life:1,col:'#ffb04a',w:5})); impact(me.x,me.y,'255,235,160',260); spark(me.x,me.y,'#ffd84a',50); burst(me.x,me.y,'#ffe08a',50,340); burst(me.x,me.y-30,'#ffffff',24,200); G.flash=.9; G.shake=Math.max(G.shake,.5); sfx('revive');
   for(const m of G.mobs){ if(m.dead||m.boss)continue; const dx=m.x-me.x,dy=m.y-me.y,d=hyp(dx,dy); if(d<170){ m.kx=(m.kx||0)+dx/(d||1)*420; m.ky=(m.ky||0)+dy/(d||1)*420; } } if(me.cls==='necro'&&!minions.length)autoSummon(); uiDirty=true; }   /* 부활하면 기본 소환수(수호 영혼·포격 영혼)는 다시 불러옴 */
@@ -3325,7 +3355,7 @@ function updateMe(dt){
   me.hurt=Math.max(0,(me.hurt||0)-dt); me.god=Math.max(0,(me.god||0)-dt); me.stun=Math.max(0,(me.stun||0)-dt); me.stunImm=Math.max(0,(me.stunImm||0)-dt); me.slowP=Math.max(0,(me.slowP||0)-dt);
   if(me.buffs.rage&&me.buffs.rage.t>0&&!me.dead&&Math.random()<dt*34)parts.push({x:me.x+rand(-14,14),y:me.y+rand(-4,16),vx:rand(-12,12),vy:-rand(50,95),t:0,life:.75,col:Math.random()<.4?'#ff7a3a':'#ff2a1a',r:2.6,glow:1,dm:.95});   /* 폭주: 몸에서 붉은 기운이 피어오름 */
   if(me.poison>0&&!me.dead&&G.phase!=='clear'){ me.poison-=dt; tkAdd(Math.min(me.D.maxHp*.03*dt,Math.max(0,me.hp-1))); me.hp=Math.max(1,me.hp-me.D.maxHp*.03*dt); if(Math.random()<dt*6)parts.push({x:me.x+rand(-10,10),y:me.y-8,vx:0,vy:-30,t:0,life:.6,col:'#7ad04a',r:2.5,glow:1,dm:.95}); }
-  if(me.dead){ me.respawn-=dt; if(me.respawn<=0&&!me.out){ me.respawn=0; if(G.freeRev>0){ G.freeRev--; reviveMe(.6); saveChar(); toast('✨ 무료 부활 물약이 자동으로 사용됐어요','#ffd84a'); return; } me.out=true; } if(ally&&!ally.lobby&&ally.rg>(me.seenRg|0)){ me.seenRg=ally.rg; if(!me.out){ reviveMe(.45); toast('동료가 구해줬어요!','#9be38a'); } } return;}
+  if(me.dead){ me.respawn-=dt; if(me.respawn<=0&&!me.out){ me.respawn=0; if(G.freeRev>0&&!me.hc){ G.freeRev--; reviveMe(.6); saveChar(); toast('✨ 무료 부활 물약이 자동으로 사용됐어요','#ffd84a'); return; } me.out=true; } if(ally&&!ally.lobby&&ally.rg>(me.seenRg|0)){ me.seenRg=ally.rg; if(!me.out&&!me.hc){ reviveMe(.45); toast('동료가 구해줬어요!','#9be38a'); } } return;}
   if(ally&&!ally.lobby){ if(ally.rg>(me.seenRg|0))me.seenRg=ally.rg;
     if(ally.dead&&!ally.out&&hyp(me.x-ally.x,me.y-ally.y)<64){ me.rvT=(me.rvT||0)+dt; if(me.rvT>=3){ me.rvT=0; me.rvGiven=(me.rvGiven|0)+1; toast('동료를 일으켰어요!','#9be38a'); sfx('revive'); } } else me.rvT=0; }
   // regen
@@ -4319,7 +4349,7 @@ function potCdUi(){ const b=$('#bPot'); if(!b)return; b.classList.remove('pcd');
 function usePot(){ if(!G.inGame||me.dead)return; const nw=performance.now(); if(nw-(me.potAt||-1e9)<POT_CD)return; if(me.hbStrict>0){ if(nw-(me.potWarn||-1e9)>1500){ me.potWarn=nw; toast(`💔 생명 봉쇄 중이라 물약을 쓸 수 없어요 (${Math.ceil(me.hbStrict)}초)`,'#ff8ab0'); } return; } me.potAt=nw; potCdUi(); if(me.pot<=0&&me.potBuy<=0){toast('물약이 없어요. 상점에서 사거나 다음 습격을 기다리세요');return;} if(me.pot>0)me.pot--; else {me.potBuy--; saveChar();} me.hp=Math.min(me.D.maxHp,me.hp+me.D.maxHp*.45); me.mp=Math.min(me.D.maxMp,me.mp+me.D.maxMp*.45); if(me.hpLk!=null)me.hpLk=me.hp; if(me.mpLk!=null)me.mpLk=me.mp; spark(me.x,me.y,'#d0443a',10); sfx('potion'); }   /* 봉쇄 중에도 물약은 잠금을 올려 줌 */
 $('#bRev').addEventListener('pointerdown',e=>{e.preventDefault(); useRevive();});
 $('#bRevBig').addEventListener('pointerdown',e=>{e.preventDefault(); useRevive();});
-function useRevive(){ if(!G.inGame)return; if(!me.dead){toast('쓰러졌을 때 사용할 수 있어요');return;} if(me.out&&revItems()<=0)return; if(revItems()<=0){toast('부활 아이템이 없어요. 상점에서 살 수 있어요','#e07060');return;}
+function useRevive(){ if(!G.inGame||me.hc)return; if(!me.dead){toast('쓰러졌을 때 사용할 수 있어요');return;} if(me.out&&revItems()<=0)return; if(revItems()<=0){toast('부활 아이템이 없어요. 상점에서 살 수 있어요','#e07060');return;}
   if(G.freeRev>0)G.freeRev--; else me.rev--; reviveMe(.6); saveChar(); toast('부활!','#ffd84a'); }
 addEventListener('keydown',e=>{ if(e.key==='Escape'){ /* ESC: 열린 창을 닫음 (팝업 → 시트 순) */ const md=$('#modal'); if(md&&!md.hidden){ closeModal(); e.preventDefault(); return; } const sh=$('#sheet'); if(sh&&!sh.hidden){ closeSheet(); e.preventDefault(); return; } }
   if(e.target.tagName==='INPUT')return; const k=e.key.toLowerCase(); keys[k]=true;
@@ -4958,7 +4988,7 @@ function updateHud(){
   { const dd=!!(me.dead&&G.inGame&&['prep','wave','boss'].includes(G.phase)); $('#bSkip').hidden=!(G.phase==='clear'||dd); $('#bSkip').disabled=gobBusy(); $('#bRevBig').hidden=!dd; if(dd){ const rn=revItems(); $('#revBigN').textContent=rn; $('#bRevBig').classList.toggle('z',rn<=0); } }   /* 쓰러졌을 때: 승리 때와 같은 자리에 나가기 + 그 위에 부활 버튼 */
   const al=$('#hAlly');
   if(ally&&!ally.lobby){al.hidden=false; $('#hAllyN').textContent=`${ally.name||CLASSES[ally.cls].n} ${ally.lvl}`; $('#hAllyHp').style.transform=`scaleX(${clamp((ally.hp||0)/(ally.mh||1),0,1)})`;} else al.hidden=true;
-  { const pn=me.pot+me.potBuy, rn=revItems(); $('#potN').textContent=pn; $('#revN').textContent=rn; $('#potN').parentNode.classList.toggle('z',pn<=0); $('#bPot').classList.toggle('pblk',me.hbStrict>0); $('#revN').parentNode.classList.toggle('z',rn<=0); } $('#bRev').classList.toggle('rdy',!!me.dead&&revItems()>0); $('#hGold').textContent=`💰 ${(me.gold|0).toLocaleString()}G`;
+  { const pn=me.pot+me.potBuy, rn=revItems(); $('#potN').textContent=pn; $('#revN').textContent=rn; $('#potN').parentNode.classList.toggle('z',pn<=0); $('#bPot').classList.toggle('pblk',me.hbStrict>0); $('#revN').parentNode.classList.toggle('z',rn<=0); } $('#bRev').classList.toggle('rdy',!!me.dead&&revItems()>0); document.body.classList.toggle('hcrun',!!me.hc); $('#hGold').textContent=`💰 ${(me.gold|0).toLocaleString()}G`;
   { const nb=$('#bagNew'); if(nb){ const n=newCnt(me); nb.hidden=!n; nb.textContent=n>9?'9+':n; } }
   { const bd=$('#statBadge'), b2=$('#skillBadge'), a=me.statPts|0, k=me.skillPts|0; bd.hidden=a<=0; bd.textContent='+'+a; b2.hidden=k<=0; b2.textContent='+'+k; }
   for(const b of $('#skills').children){ const k=b.dataset.k, s=SKBY[k];
@@ -4976,7 +5006,7 @@ let shopMsg='', buyMsg='', sellAskIt=null;
 const sortedNew=new Set();   /* 가방에서 정렬한 탭('eq'·'misc'): 가방을 닫거나 다른 탭으로 나갈 때 그 탭의 NEW 표시를 모두 지움 */
 function flushSortedNew(){ try{ if(!sortedNew.size||!me)return; if(sortedNew.has('eq'))(me.inv||[]).forEach(x=>{ if(x)delete x.isNew; }); if(sortedNew.has('misc'))(me.misc||[]).forEach(x=>{ if(x)delete x.isNew; }); sortedNew.clear(); if(me.id)saveChar(); uiDirty=true; }catch(e){ sortedNew.clear(); } }
 let sortFresh=true;   /* 가방을 연 뒤 첫 정렬 누름: 저장된 방식 그대로 정렬 → 그다음부터 방식을 바꿔 가며 정렬 */
-function openSheet(m){ if(sheetMode==='bag'&&m!=='bag')flushSortedNew(); sortFresh=true; bagTab='eq'; storeTab='eq'; if(!G.inGame&&!G.titleSheet)return; document.body.classList.add('shopen'); sheetMode=m; selItem=null; shopMsg=''; buyMsg=''; $('#sheet').hidden=false; if(G.inGame&&G.mode==='solo')G.paused=true; for(const k in held)held[k]=false; joy.active=false;
+function openSheet(m){ if(m==='store'&&me&&me.hc){ warn('💀 하드코어 캐릭터는 공유보관함을 이용할 수 없어요'); return; } if(sheetMode==='bag'&&m!=='bag')flushSortedNew(); sortFresh=true; bagTab='eq'; storeTab='eq'; if(!G.inGame&&!G.titleSheet)return; document.body.classList.add('shopen'); sheetMode=m; selItem=null; shopMsg=''; buyMsg=''; $('#sheet').hidden=false; if(G.inGame&&G.mode==='solo')G.paused=true; for(const k in held)held[k]=false; joy.active=false;
   rerender(); $('#sheetB').scrollTop=0; }
 const petN=n=>n>=10000?Math.round(n/1e4).toLocaleString('ko-KR')+'만':Math.round(n).toLocaleString('ko-KR');
 function petSkillsHtml(lv){
@@ -5016,9 +5046,9 @@ function renderDex(){
   b.querySelectorAll('[data-dg]').forEach(e=>e.onclick=()=>{ const id=e.dataset.dg, y=b.scrollTop; if(dexClosed.has(id))dexClosed.delete(id); else dexClosed.add(id); renderDex(); b.scrollTop=y; }); }
 let dexWas=false;
 function rerender(){ if(dexWas&&sheetMode!=='dex')dexSeen(); dexWas=sheetMode==='dex'; if(sheetMode!=='bag'){ gemSock=null; bagSel=null; $('#sheetTabs').classList.remove('selhide'); $('#selBar').hidden=true; } $('#sheet').classList.toggle('isstore',sheetMode==='store'||sheetMode==='town'); if(sheetMode==='store')renderStore(); else if(sheetMode==='town')renderTown(); else if(sheetMode==='bag')renderBag(); else if(sheetMode==='stat'||sheetMode==='skill'||sheetMode==='passive')renderStat(); else if(sheetMode==='shop')renderShop(); else if(sheetMode==='pet')renderPet(); else if(sheetMode==='dex')renderDex(); else renderMenu(); }
-function markTabs(){ $('#itemPop').hidden=true; $('#ptsBar').hidden=true; const t=$('#sheetTabs'), cm=sheetMode==='passive'?'skill':sheetMode; t.hidden=sheetMode==='menu'||sheetMode==='store'||sheetMode==='dex'||!!G.inGame; /* 게임 중에는 하단 독 하나만 사용 */ for(const [id,m] of [['bBag','bag'],['bStat','stat'],['bSkillT','skill'],['bMenu','menu']]){ const e=$('#'+id); if(e)e.setAttribute('aria-pressed',cm===m); } t.querySelectorAll('button').forEach(b=>{b.setAttribute('aria-pressed',b.dataset.m===cm); if(b.dataset.m==='shop')b.hidden=!!G.inGame&&sheetMode!=='shop'; const n=b.dataset.m==='bag'?newCnt(me):b.dataset.m==='stat'?(me.statPts|0):b.dataset.m==='skill'?(me.skillPts|0):0; let bd=b.querySelector('.pl'); if(!bd){bd=document.createElement('span');bd.className='pl';b.appendChild(bd);} bd.classList.toggle('dotn',b.dataset.m==='bag'); bd.textContent=n>0&&b.dataset.m!=='bag'?'+'+n:''; bd.hidden=!(n>0); }); }
+function markTabs(){ $('#itemPop').hidden=true; $('#ptsBar').hidden=true; const t=$('#sheetTabs'), cm=sheetMode==='passive'?'skill':sheetMode; { const ts=$('#tSend'); if(ts)ts.style.display=(me&&me.hc)?'none':''; } t.hidden=sheetMode==='menu'||sheetMode==='store'||sheetMode==='dex'||!!G.inGame; /* 게임 중에는 하단 독 하나만 사용 */ for(const [id,m] of [['bBag','bag'],['bStat','stat'],['bSkillT','skill'],['bMenu','menu']]){ const e=$('#'+id); if(e)e.setAttribute('aria-pressed',cm===m); } t.querySelectorAll('button').forEach(b=>{b.setAttribute('aria-pressed',b.dataset.m===cm); if(b.dataset.m==='shop')b.hidden=!!G.inGame&&sheetMode!=='shop'; const n=b.dataset.m==='bag'?newCnt(me):b.dataset.m==='stat'?(me.statPts|0):b.dataset.m==='skill'?(me.skillPts|0):0; let bd=b.querySelector('.pl'); if(!bd){bd=document.createElement('span');bd.className='pl';b.appendChild(bd);} bd.classList.toggle('dotn',b.dataset.m==='bag'); bd.textContent=n>0&&b.dataset.m!=='bag'?'+'+n:''; bd.hidden=!(n>0); }); }
 $('#ptsBar').onclick=()=>{ sheetMode='stat'; selItem=null; rerender(); };
-$('#sheetTabs').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; if(b.id==='tSend'){ sheetMode='bag'; selItem=null; bagSel=new Set(); bagSelM=new Set(); rerender(); $('#sheetB').scrollTop=0; return; }   /* 📦 창고로: 가방을 열고 선택 모드로 */
+$('#sheetTabs').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; if(b.id==='tSend'){ if(me&&me.hc){ sheetToast('하드코어 캐릭터는 공유보관함을 이용할 수 없어요','#ff8a7a'); return; } sheetMode='bag'; selItem=null; bagSel=new Set(); bagSelM=new Set(); rerender(); $('#sheetB').scrollTop=0; return; }   /* 📦 창고로: 가방을 열고 선택 모드로 */
   if(sheetMode==='bag'&&b.dataset.m!=='bag')flushSortedNew();   /* 가방에서 정렬한 탭의 NEW는 가방을 벗어날 때 지움 (가방 탭을 한 번 더 눌러도 아무 일 없음) */
   bagSel=null; if(b.dataset.m!==sheetMode){ bagTab='eq'; storeTab='eq'; } sheetMode=b.dataset.m; selItem=null; shopMsg=''; buyMsg=''; rerender(); $('#sheetB').scrollTop=0; });
 function openTitleSheet(m){ prepMe(); G.titleSheet=true; if(m==='store')STORE=loadStore(); openSheet(m); }
@@ -5093,8 +5123,8 @@ function getStore(){ if(!STORE)STORE=loadStore(); return STORE; }
 function saveStore(){ if(!STORE)return; lsSet(STORE_KEY,JSON.stringify({inv:STORE.inv,misc:STORE.misc,gold:STORE.gold|0,smith:STORE.smith?1:0})); }
 const stamp=it=>{ if(it)it.sat=Date.now()+((satSeq=(satSeq+1)%1000)/1000); return it; };   /* 입고 시각(입고순 정렬용) */
 /* 보내기 대상: 캐릭터들 + 공유보관함. src(보내는 쪽)와 같은 곳은 제외 — 보관함에서 보낼 땐 지금 캐릭터도 포함 */
-function targetsFor(src){ const L=[];
-  for(const id of charIds()){ if(src===me&&id===me.id)continue; const c=id===me.id?me:loadChar(id); if(c)L.push({k:'c',id,o:c}); }
+function targetsFor(src){ const L=[]; if(me&&me.hc&&src===me)return L;   /* 하드코어: 주기·받기 모두 불가 */
+  for(const id of charIds()){ if(src===me&&id===me.id)continue; const c=id===me.id?me:loadChar(id); if(c&&!c.hc)L.push({k:'c',id,o:c}); }
   if(src!==STORE)L.push({k:'s',id:'store',o:getStore()});
   return L; }
 const tgLabel=(t,extra)=>t.k==='s'?`${STORE_IC} 공유보관함 <span style="color:var(--mute);font-weight:400">${extra||''}</span>`:`${clsIc(t.o.cls,20)} ${esc(dispName(t.o))} · Lv ${t.o.lvl} <span style="color:var(--mute);font-weight:400">${extra||''}</span>`;
@@ -5578,7 +5608,7 @@ function fitGo(root){ root.querySelectorAll('.sh2 .go').forEach(el=>{ const sp=e
 function renderShop(){
   markTabs(); sheetHead(); sellAskIt=null;
   selItem=null;   /* 상점에는 판매창이 없음 — 판매·일괄 판매는 가방에서 */
-  let h=`<div class="box"><h3>🛍️ 구매</h3>${shopRow('potion')}${shopRow('rev')}<div class="smsg">${esc(buyMsg)}</div></div>`;
+  let h=`<div class="box"><h3>🛍️ 구매</h3>${shopRow('potion')}${me.hc?'':shopRow('rev')}<div class="smsg">${esc(buyMsg)}</div></div>`;
   if(rsOn())h+=`<div class="box" id="rsBox"><h3>📚 연구실</h3><p style="margin:0 0 10px;font-size:14px;line-height:1.5">어서오세요, 관리자님 환영합니다.</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button class="btn" id="rsNote">📔 관리자 노트</button><button class="btn" id="rsLog">📜 출입 기록</button></div><button class="btn" id="rsExit" style="width:100%;margin-top:8px">🚪 나가기</button></div>`;
   const b=$('#sheetB'); b.className='sbody stats'; b.innerHTML=h; fitGo(b);
   { const q=id=>b.querySelector(id); if(q('#rsNote'))q('#rsNote').onclick=rsNotes; if(q('#rsLog'))q('#rsLog').onclick=rsLogView; if(q('#rsExit'))q('#rsExit').onclick=rsExit; }
@@ -5721,13 +5751,14 @@ function rkSnap(c){ const D=derive(c), eq={}; for(const k of RKSL){ const x=rkIt
   const rows=[['생명력',D.maxHp],['마나',D.maxMp],['무기 공격력',`${D.wmn+D.dmg}–${D.wmx+D.dmg}`],['피해 보너스',`+${Math.round(D.str+D.dmgPct)}%`],['방어력',Math.round(D.def)]];
   if(c.cls==='pal'||D.blk>0) rows.push(['막기 확률',D.blk>=(D.blkMax||BLKMAX)?`${D.blkMax||BLKMAX}% (MAX)`:`${D.blk}%`]);
   rows.push(['공격 속도',`+${Math.round(D.ias+D.dex*.25)}%`],['치명타',`${Math.round(D.crit*10)/10}%`],['받는 피해 감소',`${Math.round((D.dr||0)*100)}%`],['스킬 쿨감',`${Math.round((D.cdr||0)*100)}%`],['이동 속도',`+${Math.round(D.ms)}%`],['생명력 흡수',`${Math.round(D.ls)}%`]);
-  return {eq,st:[Math.floor(D.str),Math.floor(D.dex),Math.floor(D.vit),Math.floor(D.ene)],rows:rows.map(r=>[r[0],String(r[1])]),v:1,...(petOf(c)?{pet:{id:c.pet.id,lv:petLvOf(c.pet.xp|0)}}:{}),...(c.ct>0?{ct:c.ct|0,...(c.cts>0?{cts:c.cts|0}:{})}:{}),...(c.clear>0?{cat:c.cat>0?c.cat|0:legacyCat(c.id)}:{})}; }
-function rkRow(c){ const sn=rkSnap(c), cp=calcCP(c); return {id:String(c.id).slice(0,40),name:dispName(c).slice(0,8),cls:c.cls,lvl:Math.max(1,c.lvl|0),kills:Math.max(0,c.kills|0),clear:Math.max(0,Math.min(STAGES.length,c.clear|0)),cp:Math.max(0,Math.min(999999999,cp|0)),data:sn,updated_at:new Date().toISOString()}; }
+  return {eq,st:[Math.floor(D.str),Math.floor(D.dex),Math.floor(D.vit),Math.floor(D.ene)],rows:rows.map(r=>[r[0],String(r[1])]),v:1,...(petOf(c)?{pet:{id:c.pet.id,lv:petLvOf(c.pet.xp|0)}}:{}),...(c.ct>0?{ct:c.ct|0,...(c.cts>0?{cts:c.cts|0}:{})}:{}),...(c.clear>0?{cat:c.cat>0?c.cat|0:legacyCat(c.id)}:{}),...(c.hc&&c.hs>0?{hs:c.hs|0}:{})}; }
+const rkLocal=c=>({id:c.id,name:dispName(c),cls:c.cls,lvl:c.lvl,kills:c.kills|0,clear:c.clear|0,cp:calcCP(c),hc:!!c.hc,dead_at:c.hd>0?new Date(c.hd).toISOString():null,data:rkSnap(c),updated_at:lsGet('dkdef2.rkt.'+c.id)||null});
+function rkRow(c){ const sn=rkSnap(c), cp=calcCP(c); return {hc:!!c.hc,dead_at:c.hd>0?new Date(c.hd).toISOString():null,id:String(c.id).slice(0,40),name:dispName(c).slice(0,8),cls:c.cls,lvl:Math.max(1,c.lvl|0),kills:Math.max(0,c.kills|0),clear:Math.max(0,Math.min(STAGES.length,c.clear|0)),cp:Math.max(0,Math.min(999999999,cp|0)),data:sn,updated_at:new Date().toISOString()}; }
 let rkFailT=0;
 async function rkSubmit(list,force){
   if(!force&&Date.now()<rkFailT)return;
   try{
-    const rows=[]; for(const c of list){ if(!c||!c.id||!CLASSES[c.cls]||(c.kills|0)<=0)continue; const r=rkRow(c); const sig=[r.lvl,r.kills,r.clear,r.name,r.cp,hashStr(JSON.stringify(r.data))].join('|'); if(!force&&lsGet('dkdef2.rk.'+c.id)===sig)continue; rows.push({r,sig}); }
+    const rows=[]; for(const c of list){ if(!c||!c.id||!CLASSES[c.cls]||(c.kills|0)<=0)continue; const r=rkRow(c); const sig=[r.lvl,r.kills,r.clear,r.name,r.cp,r.hc?1:0,c.hd|0,hashStr(JSON.stringify(r.data))].join('|'); if(!force&&lsGet('dkdef2.rk.'+c.id)===sig)continue; rows.push({r,sig}); }
     if(!rows.length)return;
     const send=async body=>fetch(RK_URL+'?on_conflict=id',{method:'POST',headers:rkHead({Prefer:'resolution=merge-duplicates,return=minimal'}),body:JSON.stringify(body)});
     let r=await send(rows.map(x=>x.r));
@@ -5744,7 +5775,7 @@ async function rkFlushDel(){ if(rkDelBusy)return; const a=rkDelList(); if(!a.len
       try{ const r=await fetch(RK_URL+'?id=eq.'+encodeURIComponent(id),{method:'DELETE',headers:rkHead({Prefer:'return=minimal'})}); if(!r.ok)left.push(id); }catch(e){ left.push(id); } }
     lsSet('dkdef2.rkdel',JSON.stringify(left)); }finally{ rkDelBusy=false; } }
 function rkSubmitAll(force){ rkFlushDel(); const chars=charIds().map(loadChar).filter(Boolean); if(me&&me.id){ const i=chars.findIndex(c=>c.id===me.id); if(i>=0)chars[i]=me; } return rkSubmit(chars,force); }
-const RKMODES={stage:{o:'clear.desc,lvl.desc,kills.desc',f:'&kills=gt.0&clear=gt.0'},lvl:{o:'lvl.desc,cp.desc,kills.desc',f:'&kills=gt.0'},ta:{o:'clear.desc,lvl.desc,kills.desc',f:'&kills=gt.0&clear=gt.0'},recent:{o:'updated_at.desc',f:'&kills=gt.0'}};   /* recent: 관리자 전용 — 마지막으로 랭킹에 기록된 시각 순 */
+const RKMODES={stage:{o:'clear.desc,lvl.desc,kills.desc',f:'&kills=gt.0&clear=gt.0&hc=is.false'},lvl:{o:'lvl.desc,cp.desc,kills.desc',f:'&kills=gt.0&hc=is.false'},ta:{o:'clear.desc,lvl.desc,kills.desc',f:'&kills=gt.0&clear=gt.0&hc=is.false'},recent:{o:'updated_at.desc',f:'&kills=gt.0'},hc:{o:'clear.desc,kills.desc,lvl.desc',f:'&kills=gt.0&hc=is.true'}};   /* hc: 관리자 전용 하드코어 — 높은 스테이지 → 처치 수 → 레벨 (죽은 캐릭터도 삭제 전까지 💀 로 남음) */   /* recent: 관리자 전용 — 마지막으로 랭킹에 기록된 시각 순 */
 const rkCt=r=>+(r&&r.data&&r.data.ct)||0;   /* 클리어 시간(초) — 표시용 */
 /* 클리어 시각(초): 그 클리어 수에 처음 도달한 때. 기록이 없는 예전 캐릭터는 id로 정한 '2026-10-13 10~22시(KST)' 사이의 고정 시각 */
 const legacyCat=id=>1791853200+hashStr(String(id))%43200;
@@ -5752,21 +5783,22 @@ const rkCts=r=>+(r&&r.data&&r.data.cts)||rkCat(r);   /* 기록(최단 시간) �
 const rkCat=r=>+(r&&r.data&&r.data.cat)||legacyCat(r&&r.id);
 const rkLvlCmp=(a,b)=>(b.lvl-a.lvl)||((b.cp|0)-(a.cp|0))||(b.kills-a.kills);   /* 레벨 → 전투력 → 처치 */
 const rkTaCmp=(a,b)=>(b.clear-a.clear)||((rkCt(a)||1e9)-(rkCt(b)||1e9))||(rkCat(a)-rkCat(b))||(b.lvl-a.lvl);   /* 타임어택: 높은 스테이지 클리어 → 그 최단 클리어 시간이 짧은 순 */
+const rkHcCmp=(a,b)=>(b.clear-a.clear)||(b.kills-a.kills)||(b.lvl-a.lvl);
 const rkStageCmp=(a,b)=>(b.clear-a.clear)||(rkCat(a)-rkCat(b))||(b.lvl-a.lvl)||(b.kills-a.kills); /* 클리어 수 → 먼저 클리어한 사람 → 레벨 → 처치 */
-const RK_LITE='id,name,cls,lvl,kills,clear,cp,updated_at,ct:data->ct,cat:data->cat,cts:data->cts'; let rkLiteBad=false;
+const RK_LITE='id,name,cls,lvl,kills,clear,cp,updated_at,hc,dead_at,ct:data->ct,cat:data->cat,cts:data->cts,hs:data->hs'; let rkLiteBad=false;
 /* 목록은 장비 정보(data) 없이 가볍게 받고, 장비는 이름을 눌렀을 때 그 사람 것만 받아요 (목록 용량 1/10 이하) */
 async function rkFetch(mode){
   const M=RKMODES[mode], q=sel=>RK_URL+'?select='+sel+'&order='+M.o+M.f+'&limit=100'; let r=null, lite=!rkLiteBad;
   if(lite){ try{ r=await fetch(q(RK_LITE),{headers:rkHead()}); }catch(e){ r=null; } if(!r||!r.ok){ lite=false; if(r)rkLiteBad=true; } }
-  if(!lite) r=await fetch(q('id,name,cls,lvl,kills,clear,cp,updated_at,data'),{headers:rkHead()});
+  if(!lite) r=await fetch(q('id,name,cls,lvl,kills,clear,cp,updated_at,hc,dead_at,data'),{headers:rkHead()});
   if(!r.ok) throw new Error('rank '+r.status);
   let rows=await r.json(); if(!Array.isArray(rows))throw new Error('rank rows');
-  if(lite) rows=rows.map(x=>{ const {ct,cat,cts,...o}=x; o.data={lite:1,...(ct>0?{ct}:{}),...(cat>0?{cat}:{}),...(cts>0?{cts}:{})}; return o; });
-  if(mode==='stage')rows.sort(rkStageCmp); else if(mode==='lvl')rows.sort(rkLvlCmp); else if(mode==='ta'){ rows=rows.filter(x=>rkCt(x)>0); rows.sort(rkTaCmp); }
+  if(lite) rows=rows.map(x=>{ const {ct,cat,cts,hs,...o}=x; o.data={lite:1,...(ct>0?{ct}:{}),...(cat>0?{cat}:{}),...(cts>0?{cts}:{}),...(hs>0?{hs}:{})}; return o; });
+  if(mode==='stage')rows.sort(rkStageCmp); else if(mode==='lvl')rows.sort(rkLvlCmp); else if(mode==='hc')rows.sort(rkHcCmp); else if(mode==='ta'){ rows=rows.filter(x=>rkCt(x)>0); rows.sort(rkTaCmp); }
   return rows.slice(0,50);
 }
 async function rkFetchOne(id){
-  const r=await fetch(RK_URL+'?select=id,name,cls,lvl,kills,clear,cp,updated_at,data&id=eq.'+encodeURIComponent(id)+'&limit=1',{headers:rkHead()});
+  const r=await fetch(RK_URL+'?select=id,name,cls,lvl,kills,clear,cp,updated_at,hc,dead_at,data&id=eq.'+encodeURIComponent(id)+'&limit=1',{headers:rkHead()});
   if(!r.ok) throw new Error('rank '+r.status); const a=await r.json(); return a[0]||null;
 }
 const RKMON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -5780,18 +5812,20 @@ function rkCacheSet(mode,rows){ if(mode==='recent')return; try{ lsSet('dkdef2.rk
 async function rkLoad(mode,force){ const c=rkCacheGet(mode); if(!force&&c&&Date.now()-c.t<RK_TTL)return {rows:c.rows,t:c.t,cached:true};
   const rows=await rkFetch(mode); rkCacheSet(mode,rows); return {rows,t:Date.now(),cached:false}; }
 function rkPrefetch(){ ['lvl','ta','stage'].forEach((m,i)=>{ const c=rkCacheGet(m); if(c&&Date.now()-c.t<RK_TTL)return; setTimeout(()=>rkLoad(m,true).catch(()=>{}),i*1500); }); }   /* 시작하고 잠시 뒤 세 순위를 미리 받아 둬요 → 랭킹을 열면 바로 보임 */
-function rkVal(mode,r){ return mode==='stage'?(r.clear>0?STAGES[Math.min(STAGES.length,r.clear)-1].id+' 클리어':'-'):mode==='ta'?'⏱ '+fmtCt(rkCt(r)):'Lv '+(r.lvl|0); }
+const hcStg=r=>{ const h=+(r&&r.data&&r.data.hs)||0; return h>0&&STAGES[h-1]?STAGES[h-1].id:''; };   /* 하드코어: 사망한 스테이지 */
+function rkVal(mode,r){ return mode==='stage'||mode==='hc'?(r.clear>0?STAGES[Math.min(STAGES.length,r.clear)-1].id+' 클리어':'-'):mode==='ta'?'⏱ '+fmtCt(rkCt(r)):'Lv '+(r.lvl|0); }
 const rkDate=t=>{ const d=new Date(t*1000); return (d.getMonth()+1)+'/'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); };
-function rkSub(mode,r){ return mode==='recent'?(r.updated_at?rsStamp(r.updated_at):'기록 시각 없음'):mode==='lvl'?`전투력 ${r.cp>0?rkFmt(r.cp):'집계 전'}`:mode==='ta'?`Lv ${r.lvl|0} · ${rkDate(rkCts(r))} 경신`:`Lv ${r.lvl|0} · 처치 ${rkFmt(r.kills)}`+(mode==='stage'&&r.clear>0?` · ${rkDate(rkCat(r))}`:''); }
+function rkSub(mode,r){ return mode==='hc'?(r.dead_at?`💀 ${hcStg(r)?hcStg(r)+'에서 ':''}사망 · 처치 ${rkFmt(r.kills)}`:`Lv ${r.lvl|0} · 처치 ${rkFmt(r.kills)}`):mode==='recent'?(r.updated_at?rsStamp(r.updated_at):'기록 시각 없음'):mode==='lvl'?`전투력 ${r.cp>0?rkFmt(r.cp):'집계 전'}`:mode==='ta'?`Lv ${r.lvl|0} · ${rkDate(rkCts(r))} 경신`:`Lv ${r.lvl|0} · 처치 ${rkFmt(r.kills)}`+(mode==='stage'&&r.clear>0?` · ${rkDate(rkCat(r))}`:''); }
 function rkBuildItem(k,x){ const rar=Math.max(0,Math.min(4,x.r|0)); const it={id:0,slot:k.replace(/\d/,''),rar,ilvl:x.l|0,base:String(x.b||''),name:String(x.n||'?'),mn:x.mn|0,mx:x.mx|0,df:x.df|0,blk:x.bk|0,dm:x.dm|0,om:x.om|0,enh:x.e|0,req:x.rq|0,aff:[]}; if(x.sk){ it.sk=1; it.gm=x.gm&&GEM_KINDS.includes(x.gm.k)?{gk:x.gm.k,ilvl:[25,50,75].includes(x.gm.l|0)?x.gm.l|0:25}:null; } if(it.slot==='shield')it.oc=OFFN[x.oc]?x.oc:'pal';
   if(!it.mx){delete it.mn;delete it.mx;} if(!it.df)delete it.df; if(!it.blk)delete it.blk; if(!it.dm)delete it.dm; if(!it.om)delete it.om; if(x.sp&&SPFX[x.sp])it.sp=x.sp;
   for(const a of (x.a||[])){ if(a&&AFXBY[a.t]) it.aff.push({t:a.t,v:a.v|0,cls:a.c,key:a.k}); } return it; }
 function rkHeadHtml(row){ const c=CLASSES[row.cls]?row.cls:'war';
-  return `<h3><span class="rkh"><img src="img/cls_${c}.png" alt="${CLSE[c]}"></span> ${esc(String(row.name||CLASSES[c].n).slice(0,8))} <span class="meta" style="font-weight:500">Lv ${row.lvl|0}</span></h3><div class="meta" style="margin:-4px 0 8px">⚔️ 전투력 <b style="color:#ffd84a">${row.cp>0?rkFmt(row.cp):'집계 전'}</b> · 처치 ${rkFmt(row.kills)}마리 · ${row.clear>0?STAGES[Math.min(STAGES.length,row.clear)-1].id+' 클리어'+(rkCt(row)?' ('+fmtCt(rkCt(row))+')':''):'스테이지 기록 없음'}</div>`; }
+  return `<h3><span class="rkh"><img src="img/cls_${c}.png" alt="${CLSE[c]}"></span> ${row.hc&&row.dead_at?'💀 ':''}${esc(String(row.name||CLASSES[c].n).slice(0,8))} <span class="meta" style="font-weight:500">Lv ${row.lvl|0}</span></h3><div class="meta" style="margin:-4px 0 8px">${row.hc?`<b style="color:${row.dead_at?'#ff8a7a':'#ffb070'}">${row.dead_at?'💀 '+(hcStg(row)?'스테이지 '+hcStg(row)+'에서 ':'')+'사망한 하드코어 캐릭터':'🔥 하드코어 캐릭터'}</b><br>`:''}⚔️ 전투력 <b style="color:#ffd84a">${row.cp>0?rkFmt(row.cp):'집계 전'}</b> · 처치 ${rkFmt(row.kills)}마리 · ${row.clear>0?STAGES[Math.min(STAGES.length,row.clear)-1].id+' 클리어'+(rkCt(row)?' ('+fmtCt(rkCt(row))+')':''):'스테이지 기록 없음'}</div>`; }
+function rkGo(back){ if(back==='close'){ closeModal(); return; } openRank(back); }
 function rkProfile(row,back){
   rkRe=()=>rkProfile(row,back);
   const d=row.data; let body='';
-  const go=()=>openRank(back);
+  const go=()=>rkGo(back);
   if(!d||!d.eq){ body='<p class="meta">장비 정보가 아직 등록되지 않았어요. (상대가 최신 버전으로 접속하면 표시돼요)</p>'; }
   else {
     body+='<div class="rkg">';
@@ -5806,7 +5840,7 @@ function rkProfile(row,back){
     const st=d.st||[0,0,0,0];
     body+=`<div class="rkst">${[['힘',st[0]],['민첩',st[1]],['체력',st[2]],['에너지',st[3]]].map(([a,b])=>`<div><span>${a}</span><b>${b|0}</b></div>`).join('')}${(d.rows||[]).map(([a,b])=>`<div><span>${esc(String(a))}</span><b>${esc(String(b))}</b></div>`).join('')}</div>`;
   }
-  modal(`${rkHeadHtml(row)}<div class="rkpb">${body}</div><div class="row2"><button class="btn primary" id="rkNo">← 랭킹으로</button></div>`,m=>{
+  modal(`${rkHeadHtml(row)}<div class="rkpb">${body}</div><div class="row2"><button class="btn primary" id="rkNo">${back==='close'?'닫기':'← 랭킹으로'}</button></div>`,m=>{
     m.onclick=e=>{ if(e.target===m)go(); }; m.querySelector('#rkNo').onclick=go;
     m.querySelectorAll('.rkgc[data-k]').forEach(b=>b.onclick=()=>rkItemDetail(row,b.dataset.k,back));
     { const u=m.querySelector('#rkUpd'); if(u)u.onclick=()=>{ const on=u.dataset.s!=='1'; u.dataset.s=on?'1':'0'; u.textContent=on?rkUpdLine(row):'장비를 누르면 상세 정보가 보여요'; }; }   /* 누를 때마다 안내 문구 ↔ Last updated 번갈아 */
@@ -5823,23 +5857,24 @@ function rkItemDetail(row,k,back){
   let gl=''; try{ if(it.sk)gl=`<li style="color:${it.gm?'#afeeee':'#707070'}">${it.gm?esc(gemOptText(it.gm))+' <span class="meta">('+GEM_N[it.gm.gk]+')</span>':'비어 있음 <span class="meta">(소켓)</span>'}</li>`; }catch(e){}
   modal(`<div class="rkit" style="border:0"><img src="${ic}" alt="" style="border-color:${RBD[it.rar]}"><div class="rkib"><div style="font-size:16px"><b style="color:${RARC[it.rar]}">${esc(dn(it))}</b>${it.enh>0?` <span style="color:#ffd84a;font-weight:800">+${it.enh}</span>`:''}</div><div class="meta">${RKSN[k]} · ${RARN[it.rar]} · 아이템 레벨 ${it.ilvl}</div>${it.req?`<div class="meta">필요 레벨 ${it.req}</div>`:''}</div></div>
     ${bt?`<div style="margin:6px 0">${bt}</div>`:''}${BASEFX[it.base]&&it.slot==='weapon'?`<div class="meta" style="color:#9fd0ff">▪ ${esc(BASEFX[it.base].t)}</div>`:''}${wpPenLine(it)}${it.sp&&SPFX[it.sp]?`<div style="margin:6px 0;color:#ffb14a;font-weight:700">★ 특수 효과: ${esc(SPFX[it.sp].d)}</div>`:''}${(af||ex||gl)?`<ul style="margin:6px 0;padding-left:18px;line-height:1.55">${af}${ex?`<li style="color:#ffe27a">${ex}</li>`:''}${gl}</ul>`:''}
-    <div class="row2" style="margin-top:10px"><button class="btn" id="rkBack">← 장비 보기</button><button class="btn primary" id="rkNo">랭킹으로</button></div>`,m=>{
-    m.onclick=e=>{ if(e.target===m)openRank(back); }; m.querySelector('#rkBack').onclick=()=>rkProfile(row,back); m.querySelector('#rkNo').onclick=()=>openRank(back); });
+    <div class="row2" style="margin-top:10px"><button class="btn" id="rkBack">← 장비 보기</button><button class="btn primary" id="rkNo">${back==='close'?'닫기':'랭킹으로'}</button></div>`,m=>{
+    m.onclick=e=>{ if(e.target===m)rkGo(back); }; m.querySelector('#rkBack').onclick=()=>rkProfile(row,back); m.querySelector('#rkNo').onclick=()=>rkGo(back); });
 }
 let rkKeep=null;   /* 랭킹에서 프로필을 열기 직전의 탭·스크롤 위치 — '랭킹으로' 돌아오면 보던 자리 그대로 */
 function openRank(mode0){
   let mode=RKMODES[mode0]?mode0:'lvl'; const mine=new Set(charIds()); let want=(rkKeep&&rkKeep.mode===mode)?rkKeep.top:null;
   const TABS=[['lvl','⭐ 레벨'],['ta','⏱️ 타임어택'],['stage','🗺️ 진행']], TABS2=[['recent','⏰ 최근활동'],['x1','📈 미사용1'],['x2','📈 미사용2']];
-  if(mode==='recent'&&!rsOn())mode='lvl';
+  if(rsOn())TABS.push(['hc','💀 하드코어']);   /* 관리자 전용 4번째 탭 */
+  if((mode==='recent'||mode==='hc')&&!rsOn())mode='lvl';
   modal(`<h3>🏆 랭킹</h3><div class="rktabs">${TABS.map(([k,l])=>`<button data-m="${k}" aria-pressed="${k===mode}">${l}</button>`).join('')}</div>${rsOn()?`<div class="rktabs">${TABS2.map(([k,l])=>`<button data-m="${k}" aria-pressed="${k===mode}"${k==='recent'?'':' disabled style="opacity:.45"'}>${l}</button>`).join('')}</div>`:''}<div class="rklist" id="rkBox"><p class="meta">불러오는 중…</p></div><div class="row2"><button class="btn" id="rkRe">🔄 새로고침</button><button class="btn" id="rkNo">닫기</button></div><p class="meta" style="margin:8px 0 0;font-size:11.5px">이름을 누르면 장비와 능력치를 한눈에 볼 수 있어요 · 내 캐릭터는 금색 · 전투 기록 없는 캐릭터 제외 · 🔄는 바로 갱신</p>`,m=>{
     const box=m.querySelector('#rkBox'); let seq=0;
-    const rowHtml=(r,i,own)=>{ const c=CLASSES[r.cls]?r.cls:'war'; return `<button class="rkrow${own?' own':''}${i<3&&mode!=='recent'?' top':''}" data-i="${i}"><span class="rkn">${i<3&&mode!=='recent'?['🥇','🥈','🥉'][i]:i+1}</span><span class="rke"><img src="img/cls_${c}.png" alt="${CLSE[c]}" loading="lazy" decoding="async"></span><span class="rkm"><b>${esc(String(r.name||CLASSES[c].n).slice(0,8))}</b><small>${rkSub(mode,r)}</small></span><span class="rkv">${mode==='ta'?`<b class="rks">${esc(r.clear>0?STAGES[Math.min(STAGES.length,r.clear)-1].id+' 클리어':'-')}</b><span class="rkt">${esc(rkVal(mode,r))}</span>`:esc(rkVal(mode,r))}</span><span class="rkc">›</span></button>`; };
+    const rowHtml=(r,i,own)=>{ const c=CLASSES[r.cls]?r.cls:'war'; return `<button class="rkrow${own?' own':''}${i<3&&mode!=='recent'?' top':''}${mode==='hc'&&r.dead_at?' dead':''}" data-i="${i}"><span class="rkn">${i<3&&mode!=='recent'?['🥇','🥈','🥉'][i]:i+1}</span><span class="rke"><img src="img/cls_${c}.png" alt="${CLSE[c]}" loading="lazy" decoding="async"></span><span class="rkm"><b>${mode==='hc'&&r.dead_at?'💀 ':''}${esc(String(r.name||CLASSES[c].n).slice(0,8))}</b><small>${rkSub(mode,r)}</small></span><span class="rkv">${mode==='ta'?`<b class="rks">${esc(r.clear>0?STAGES[Math.min(STAGES.length,r.clear)-1].id+' 클리어':'-')}</b><span class="rkt">${esc(rkVal(mode,r))}</span>`:esc(rkVal(mode,r))}</span><span class="rkc">›</span></button>`; };
     const load=async(force)=>{ const my=++seq; rkSubmitAll(false);
       const c0=rkCacheGet(mode); if(c0&&!force){ show(c0.rows,false,c0.t); if(Date.now()-c0.t<RK_TTL)return; } else box.innerHTML='<p class="meta">불러오는 중…</p>';
       let rows,local=false,t=Date.now();
       try{ const r=await rkLoad(mode,true); if(my!==seq)return; rows=r.rows; t=r.t; }
       catch(e){ if(my!==seq)return; if(c0&&!force)return; local=true;
-        rows=charIds().map(loadChar).filter(c=>c&&(c.kills|0)>0).map(c=>({id:c.id,name:dispName(c),cls:c.cls,lvl:c.lvl,kills:c.kills|0,clear:c.clear|0,cp:calcCP(c),data:rkSnap(c),updated_at:lsGet('dkdef2.rkt.'+c.id)||null})); if(mode==='ta')rows=rows.filter(x=>x.clear>0&&rkCt(x)>0); rows.sort(mode==='recent'?((a,b)=>String(b.updated_at||'').localeCompare(String(a.updated_at||''))):mode==='stage'?rkStageCmp:mode==='ta'?rkTaCmp:rkLvlCmp); }
+        rows=charIds().map(loadChar).filter(c=>c&&(c.kills|0)>0).map(rkLocal); if(mode!=='recent')rows=rows.filter(x=>mode==='hc'?x.hc:!x.hc); if(mode==='ta')rows=rows.filter(x=>x.clear>0&&rkCt(x)>0); rows.sort(mode==='recent'?((a,b)=>String(b.updated_at||'').localeCompare(String(a.updated_at||''))):mode==='stage'?rkStageCmp:mode==='ta'?rkTaCmp:mode==='hc'?rkHcCmp:rkLvlCmp); }
       show(rows,local,t); };
     const show=(rows,local,t)=>{
       const y0=want!=null?want:box.scrollTop; want=null;
@@ -5848,7 +5883,7 @@ function openRank(mode0){
       box.innerHTML=(local?'<p class="meta" style="color:#e0a070">랭킹 서버에 연결하지 못했어요. (준비 중이거나 오프라인) 내 캐릭터만 보여요.</p>':'')+rows.map((r,i)=>rowHtml(r,i,mine.has(r.id))).join('')+(local?'':`<p class="meta" style="font-size:11px;text-align:center;margin:8px 0 0">${mode==='recent'?'열 때마다 새로 불러와요':'10분마다 갱신'} · 마지막 갱신 ${stamp}</p>`);
       box.scrollTop=y0;
       box.querySelectorAll('.rkrow').forEach(b=>{ b.onclick=async()=>{ const r=rows[+b.dataset.i]; if(!r)return; rkKeep={mode,top:box.scrollTop};
-        if(mine.has(r.id)){ const c=loadChar(r.id); if(c){ rkProfile({id:c.id,name:dispName(c),cls:c.cls,lvl:c.lvl,kills:c.kills|0,clear:c.clear|0,cp:calcCP(c),data:rkSnap(c),updated_at:lsGet('dkdef2.rkt.'+c.id)||null},mode); return; } }
+        if(mine.has(r.id)){ const c=loadChar(r.id); if(c){ rkProfile(rkLocal(c),mode); return; } }
         if(r.data&&r.data.eq){ rkProfile(r,mode); return; }
         b.style.opacity='.55'; let f=null; try{ f=await rkFetchOne(r.id); }catch(e){}
         if(!box.isConnected)return; b.style.opacity=''; rkProfile(f||r,mode); }; });
@@ -5874,12 +5909,12 @@ try{ const ro=new ResizeObserver(()=>fitWideCards()); ro.observe($('#lcol')); ro
 function carDots(){ const box=$('#charList'), d=$('#cDots'); if(!box||!d)return; const cs=[...box.querySelectorAll('.cc')]; if(d.children.length!==cs.length)d.innerHTML=cs.map(()=>'<i></i>').join(''); cs.forEach((e,i)=>d.children[i].classList.toggle('on',e.getAttribute('aria-current')==='true')); }
 function buildCarousel(chars){
   const box=$('#charList');
-  const tail=c=>`<b>${esc(dispName(c))}</b><span class="cl">${CLASSES[c.cls].n} · <em>Lv ${c.lvl}</em></span><span class="cl">💰 ${(c.gold|0).toLocaleString()}</span><span class="cpt">${c.statPts+c.skillPts?`포인트 ${c.statPts+c.skillPts}`:'&nbsp;'}</span>${petOf(c)?`<span class="cpet" aria-label="펫 ${PETS[c.pet.id].n} Lv ${c.pet.lv||1}"><span class="pbd"><img src="img/${PETS[c.pet.id].im}.png" alt="" onerror="this.onerror=null;this.src='img/boss_3_5.png'"></span><i>Lv${c.pet.lv||1}</i></span>`:''}`;
+  const tail=c=>`${c.hc?`<span class="hcrb${c.hd>0?' d':''}">${c.hd>0?'💀 사망':'🔥 하드코어'}</span>`:''}<b>${esc(dispName(c))}</b><span class="cl">${CLASSES[c.cls].n} · <em>Lv ${c.lvl}</em></span><span class="cl">💰 ${(c.gold|0).toLocaleString()}</span><span class="cpt">${c.statPts+c.skillPts?`포인트 ${c.statPts+c.skillPts}`:'&nbsp;'}</span>${petOf(c)?`<span class="cpet" aria-label="펫 ${PETS[c.pet.id].n} Lv ${c.pet.lv||1}"><span class="pbd"><img src="img/${PETS[c.pet.id].im}.png" alt="" onerror="this.onerror=null;this.src='img/boss_3_5.png'"></span><i>Lv${c.pet.lv||1}</i></span>`:''}`;
   /* 캐릭터 구성이 그대로면(마을·가방·보관함을 닫을 때 등) 카드를 다시 만들지 않고 글자만 바꿔요 → 그림이 다시 로드되며 아이콘·자세가 번쩍이는 현상 방지 */
   const old=[...box.querySelectorAll('.cc:not(.add)')], same=old.length>0&&old.length===chars.length&&old.every((e,i)=>e.dataset.id===chars[i].id&&e.querySelector('.cpic')&&e.querySelector('.cpic').classList.contains(chars[i].cls))&&box.querySelectorAll('.cc.add').length===(chars.length<MAXCHAR?1:0);
-  if(same){ old.forEach((e,i)=>{ const pic=e.querySelector('.cpic'); while(pic.nextSibling)pic.nextSibling.remove(); pic.insertAdjacentHTML('afterend',tail(chars[i])); }); }
+  if(same){ old.forEach((e,i)=>{ e.classList.toggle('hc',!!chars[i].hc); e.classList.toggle('hcd',chars[i].hd>0); const pic=e.querySelector('.cpic'); while(pic.nextSibling)pic.nextSibling.remove(); pic.insertAdjacentHTML('afterend',tail(chars[i])); }); }
   else box.innerHTML='';
-  if(!same)for(const c of chars){ const el=document.createElement('div'); el.className='cc'; el.dataset.id=c.id; el.setAttribute('role','button');
+  if(!same)for(const c of chars){ const el=document.createElement('div'); el.className='cc'+(c.hc?' hc':'')+(c.hd>0?' hcd':''); el.dataset.id=c.id; el.setAttribute('role','button');
     el.innerHTML=`<div class="cpic ${c.cls}"><span class="cem">${clsIc(c.cls,56)}</span><img src="img/hero_${c.cls}.png" alt="" onload="this.previousElementSibling.style.display='none'" onerror="this.remove()"></div>`+tail(c);
     el.onclick=()=>{ if(el.getAttribute('aria-current')==='true'&&c.id===selId) charMenu(c.id); else if(carWide()) carPick(box,el); else carCenter2(box,el); };
     box.appendChild(el); }
@@ -6007,7 +6042,7 @@ function renderStagePanel(){
   { const cur=chars.find(c=>c.id===selId), nw=!!cur&&(cur.inv||[]).concat(cur.misc||[]).some(x=>x&&x.isNew), pt=cur?(cur.statPts|0)+(cur.skillPts|0):0;
     $('#tGearB').hidden=!nw; { const tb=$('#tTownB'); if(tb)tb.hidden=!townFull(); } $('#menuB').hidden=!mailUnreadAll(chars); const pb=$('#tGearP'); pb.hidden=!pt; pb.textContent=pt; for(const id of ['tGear','tStore'])$('#'+id).disabled=!cur; }
   { const hp=$('#bigHero'); if(hp){ const cur=chars.find(c=>c.id===selId); hp.hidden=!cur; if(cur){ const im=$('#bhImg'), u=`img/hero_${cur.cls}.png`; if(im.getAttribute('src')!==u){ im.style.display=''; im.onerror=()=>{ im.style.display='none'; }; im.src=u; } $('#bhName').textContent=dispName(cur); $('#bhSub').textContent=`${CLASSES[cur.cls].n} · Lv ${cur.lvl}`; hp.querySelectorAll('.bpet').forEach(e=>e.remove()); if(petOf(cur)){ const pe=document.createElement('div'); pe.className='bpet'; pe.setAttribute('aria-label',`펫 ${PETS[cur.pet.id].n} Lv ${cur.pet.lv||1}`); pe.innerHTML=`<span class="pbd"><img src="img/${PETS[cur.pet.id].im}.png" alt="" onerror="this.onerror=null;this.src='img/boss_3_5.png'"></span><i>Lv${cur.pet.lv||1}</i>`; hp.appendChild(pe); } } } }
-  storyReUi(); $('#bSolo').disabled=!selId; $('#bShop').disabled=!selId; { const dl=$('#bDexL'), cu=chars.find(c=>c.id===selId); if(dl){ dl.disabled=!cu; dl.classList.toggle('new',!!cu&&dexNew(cu)); $('#bDexLn').textContent=cu?dexTot(cu)+'/'+DEX_TOT:''; } } if(room){ $('#bHost').disabled=!selId; $('#bJoin').disabled=!selId; }
+  storyReUi(); { const cd0=chars.find(c=>c.id===selId), dd0=hcDead(cd0); $('#bSolo').disabled=!selId||dd0; $('#bShop').disabled=!selId||dd0; if(dd0)$('#bSolo').innerHTML='💀 사망'; $('#tStore').disabled=!cd0||!!cd0.hc; } { const dl=$('#bDexL'), cu=chars.find(c=>c.id===selId); if(dl){ dl.disabled=!cu; dl.classList.toggle('new',!!cu&&dexNew(cu)); $('#bDexLn').textContent=cu?dexTot(cu)+'/'+DEX_TOT:''; } } if(room){ $('#bHost').disabled=!selId; $('#bJoin').disabled=!selId; }
 }
 function renderTitle(){
   migrateChars();
@@ -6056,24 +6091,25 @@ function nameForce(ids){ nmForcing=true; const id=ids.shift(); if(!id){ nmForcin
   askName(`⚠️ ${clsIc(c.cls,24)} ${esc(dispName(c))} · 닉네임 변경`,'','✔ 변경',v=>{ const q=loadChar(id); if(q){ q.name=v; lsSet(charKey(id),JSON.stringify(packChar(q))); lsSet(NMV+id,nameKey(v)); try{ rkSubmit([q],true); }catch(e){} toast(`닉네임을 '${v}'(으)로 정했어요`,'#9fe08a'); } renderTitle(); nameForce(ids); },id,null,{claim:id,force:true,note:`'${esc(dispName(c))}' 닉네임을 이미 먼저 만든 캐릭터가 쓰고 있어요. 새 닉네임을 정해 주세요 (무료)`}); }
 /* opt: {claim:캐릭터 id(서버에 이름 예약), force:true(취소 불가·치트키 없음), note:안내 글} */
 function askName(title,init,okTxt,cb,exceptId,cheat,opt){ opt=opt||{};
-  modal(`<h3>${title}</h3>${opt.note?`<p class="meta" style="margin:0 0 8px;font-size:13px;line-height:1.55">${opt.note}</p>`:''}<div class="col"><input type="text" id="nmIn" maxlength="8" placeholder="닉네임 (한글만, 2~8자)" autocomplete="off" value="${esc(init||'')}"><div class="err" id="nmErr"></div><div class="row2">${opt.force?'':'<button class="btn" id="nmNo">취소</button>'}<button class="btn primary" id="nmOk">${okTxt}</button></div></div>`,m=>{
-    const inp=m.querySelector('#nmIn'); inp.focus(); inp.select(); setTimeout(()=>inp.focus(),80); let busy=false;
+  modal(`<h3>${title}</h3>${opt.note?`<p class="meta" style="margin:0 0 8px;font-size:13px;line-height:1.55">${opt.note}</p>`:''}<div class="col"><input type="text" id="nmIn" maxlength="8" placeholder="닉네임 (한글만, 2~8자)" autocomplete="off" value="${esc(init||'')}">${opt.hc?'<label class="hcchk"><input type="checkbox" id="nmHc"><span><b>💀 하드코어 캐릭터</b><small>쓰러지면 끝 · 부활 없음 · 공유보관함 이용 불가<br>죽으면 선택할 수 없고 삭제만 가능해요 (풍차·연구소 효과는 공유)</small></span></label>':''}<div class="err" id="nmErr"></div><div class="row2">${opt.force?'':'<button class="btn" id="nmNo">취소</button>'}<button class="btn primary" id="nmOk">${okTxt}</button></div></div>`,m=>{
+    const inp=m.querySelector('#nmIn'); inp.focus(); inp.select(); setTimeout(()=>inp.focus(),80); let busy=false, okT=okTxt;
+    { const hk=m.querySelector('#nmHc'); if(hk)hk.onchange=()=>{ okT=hk.checked?'💀 만들기':okTxt; const ok=m.querySelector('#nmOk'); if(!ok.disabled)ok.textContent=okT; }; }
     if(opt.force)m.onclick=null;   /* 바깥을 눌러도 닫히지 않아요 */
     const go=async()=>{ if(busy)return; const v=cleanName(inp.value); if(!v){ m.querySelector('#nmErr').textContent='닉네임을 입력해 주세요'; return; } if(v.length<2){ m.querySelector('#nmErr').textContent='닉네임은 최소 2글자 이상이어야 해요'; inp.focus(); return; } if(!HANGUL.test(v)){ m.querySelector('#nmErr').textContent='닉네임은 한글만 사용할 수 있어요. 영문·숫자·공백·특수기호는 쓸 수 없어요. 다시 입력해 주세요'; inp.focus(); return; } if(cheat&&!opt.force){ const cr=cheat(v); if(cr!=null){ m.querySelector('#nmErr').textContent=cr; return; } } if(nameTaken(v,exceptId)){ m.querySelector('#nmErr').textContent='이미 있는 닉네임이에요. 다른 이름을 입력해 주세요'; return; }
       if(opt.claim){ busy=true; const ok=m.querySelector('#nmOk'); ok.disabled=true; ok.textContent='확인 중…'; const r=await nameClaim(opt.claim,v); busy=false;
         if(!m.isConnected||!m.querySelector('#nmIn')){ if(r==='ok'&&!charIds().includes(opt.claim))nameQueueRel(opt.claim); return; }   /* 확인하는 사이 창을 닫았으면 잡아 둔 이름을 풀어요 */
-        ok.disabled=false; ok.textContent=okTxt;
+        ok.disabled=false; ok.textContent=okT;
         if(r==='taken'){ m.querySelector('#nmErr').textContent='이미 다른 캐릭터가 쓰고 있는 닉네임이에요. 다른 이름을 입력해 주세요'; inp.focus(); return; }
         if(r!=='ok'){ m.querySelector('#nmErr').textContent='서버에 연결할 수 없어 닉네임을 확인하지 못했어요. 잠시 후 다시 시도해 주세요'; return; }
         lsSet(NMV+opt.claim,nameKey(v)); }
-      closeModal(); cb(v); };
+      { const hk=m.querySelector('#nmHc'), hcv=!!(hk&&hk.checked); closeModal(); cb(v,hcv); } };
     inp.addEventListener('input',()=>{ m.querySelector('#nmErr').textContent=''; });
     m.querySelector('#nmOk').onclick=go; const no=m.querySelector('#nmNo'); if(no)no.onclick=closeModal; inp.onkeydown=e=>{ if(e.key==='Enter')go(); }; });
 }
 function showNew(canBack){ $('#bNewBack').hidden=canBack===false; const box=$('#newCards'); box.innerHTML='';
   for(const k of ['war','pal','sorc','necro','druid']){ const c=CLASSES[k]; const b=document.createElement('button'); b.className='ccard';
     b.innerHTML=`<div class="cn">${clsIc(k,34)}${c.n}</div><div class="cd">${c.d}</div>`;
-    b.onclick=()=>{ const nid=genId(); askName(`${clsIc(k,26)} ${c.n} · 닉네임 정하기`,'','✔ 만들기',v=>{ const p=createChar(k,v,nid); if(p){ show('#sTitle'); renderTitle(); } else nameQueueRel(nid); },undefined,null,{claim:nid}); };
+    b.onclick=()=>{ const nid=genId(); askName(`${clsIc(k,26)} ${c.n} · 닉네임 정하기`,'','✔ 만들기',(v,hc)=>{ const p=createChar(k,v,nid,!!hc&&rsOn()); if(p){ show('#sTitle'); renderTitle(); } else nameQueueRel(nid); },undefined,null,{claim:nid,hc:rsOn()});   /* 하드코어 체크는 관리자 권한이 있을 때만 보여요 */ };
     box.appendChild(b); }
   show('#sNew'); }
 $('#bNew').onclick=()=>showNew(true);
@@ -6084,9 +6120,9 @@ function nameCheat(){ return null; }   /* 비활성화됨 */
 function charMenu(id){
   const p=loadChar(id); if(!p)return;
   modal(`<h3>${clsIc(p.cls,26)} ${esc(dispName(p))}<br><small style="color:var(--mute);font-weight:400">Lv ${p.lvl} · ${CLASSES[p.cls].n}</small></h3><div class="col" style="gap:6px"><button class="btn" id="cmRen" style="min-height:38px;padding:7px 14px;font-size:14px">✏️ 이름 변경 (${RENCOST.toLocaleString()}G)</button><button class="btn" id="cmDel" style="min-height:38px;padding:7px 14px;font-size:14px">🗑️ 삭제</button><button class="btn" id="cmX" style="min-height:38px;padding:7px 14px;font-size:14px">닫기</button></div>`,m=>{
-    m.querySelector('#cmRen').onclick=()=>{ if((p.gold|0)<RENCOST){ warn(`골드가 부족해요. 이름 변경은 ${RENCOST.toLocaleString()}G가 필요해요 (보유 ${(p.gold|0).toLocaleString()}G)`); return; }
+    if(hcDead(p))m.querySelector('#cmRen').style.display='none'; m.querySelector('#cmRen').onclick=()=>{ if((p.gold|0)<RENCOST){ warn(`골드가 부족해요. 이름 변경은 ${RENCOST.toLocaleString()}G가 필요해요 (보유 ${(p.gold|0).toLocaleString()}G)`); return; }
       askName(`✏️ 이름 변경 · ${RENCOST.toLocaleString()}G`,'','✔ 변경',v=>{ const q=loadChar(id); if(!q)return; if((q.gold|0)<RENCOST)return; q.gold-=RENCOST; q.name=v; lsSet(charKey(q.id),JSON.stringify(packChar(q))); renderTitle(); toast(`이름을 '${v}'(으)로 바꿨어요 (-${RENCOST.toLocaleString()}G)`,'#ffd84a'); },id,v=>nameCheat(id,v)||(v===dispName(p)?'현재 이름과 같아요. 다른 이름을 입력해 주세요':null),{claim:id}); };
-    m.querySelector('#cmDel').onclick=()=>modal(`<h3>🗑️ 삭제</h3><p style="margin:0 0 12px;font-size:14px">'${esc(dispName(p))}' (Lv ${p.lvl}) 캐릭터를 삭제할까요?<br>장비와 아이템도 함께 사라지며 되돌릴 수 없어요.</p><div class="row2"><button class="btn" id="dNo">취소</button><button class="btn primary danger" id="dYes">삭제</button></div>`,m2=>{ m2.querySelector('#dNo').onclick=closeModal; let dAsk=false; m2.querySelector('#dYes').onclick=()=>{ if(!dAsk){ dAsk=true; const y=m2.querySelector('#dYes'); y.textContent='⚠️ 정말 삭제 · 한 번 더 누르면 삭제'; y.style.background='#a62a22'; y.style.borderColor='#ff6a5a'; return; } deleteChar(id); closeModal(); renderTitle(); }; });
+    m.querySelector('#cmDel').onclick=()=>modal(`<h3>🗑️ 삭제</h3><p style="margin:0 0 12px;font-size:14px">'${esc(dispName(p))}' (Lv ${p.lvl}) 캐릭터를 삭제할까요?<br>장비와 아이템도 함께 사라지며 되돌릴 수 없어요.${p.hc?'<br><b style="color:#ff8a7a">💀 하드코어 캐릭터는 랭킹과 도감에서도 사라져요.</b>':''}</p><div class="row2"><button class="btn" id="dNo">취소</button><button class="btn primary danger" id="dYes">삭제</button></div>`,m2=>{ m2.querySelector('#dNo').onclick=closeModal; let dAsk=false; m2.querySelector('#dYes').onclick=()=>{ if(!dAsk){ dAsk=true; const y=m2.querySelector('#dYes'); y.textContent='⚠️ 정말 삭제 · 한 번 더 누르면 삭제'; y.style.background='#a62a22'; y.style.borderColor='#ff6a5a'; return; } deleteChar(id); closeModal(); renderTitle(); }; });
     m.querySelector('#cmX').onclick=closeModal; { const cd=m.querySelector('.card'); cd.style.width='220px'; cd.style.position='relative'; cd.style.top='-70px'; } });
 }
 /* 타이틀 메뉴 (예전 '설정') — 소리 · 우편함 · 클라우드 저장 · 패치노트 */
@@ -6120,7 +6156,7 @@ function mailClaim(cid,i,j){
   T.give(p,a); x.g.push(j); mailSave(p); sfx('rare'); renderStagePanel(); mailRead(cid,i,T.ok(a)); }
 /* 받지 않은 첨부 보상을 한꺼번에 받기 — cid·i 를 주면 그 편지 하나만, 없으면 모든 캐릭터의 모든 편지. 가방에 자리가 없는 아이템·조각은 못 받고 남겨 둠(경고 표시) */
 function mailClaimAll(cid,i){
-  const chars=cid?[loadChar(cid)].filter(Boolean):charIds().map(loadChar).filter(Boolean), got={}, skip={}; let nGot=0, nDel=0;
+  const chars=cid?[loadChar(cid)].filter(Boolean):charIds().map(loadChar).filter(c=>c&&!hcDead(c)), got={}, skip={}; let nGot=0, nDel=0;
   for(const p of chars){ let ch=false; const done=new Set();   /* done: 이번에 보상을 다 받아 지울 편지 */
     p.mail.forEach((x,ii)=>{ if(cid&&ii!==i)return; const A=mailAtt(x); if(!A)return; if(!Array.isArray(x.g))x.g=[]; let n0=0;
       A.forEach((a,j)=>{ if(x.g.includes(j))return; const T=MATT[a.k]; if(!T)return;
@@ -6173,7 +6209,7 @@ function resetWorld(){
   storyStop(); G.stZ=0; G.aim=null; G.lostBoss=false; G.castle=null; G.lostCastle=false; G.awz=null; G.awc=null; { const ac=$('#awCut'); if(ac)ac.classList.remove('on'); for(const q of ['#casAl','#casMs']){ const z=$(q); if(z)z.classList.remove('on'); } const hc=$('#hCastle'); if(hc)hc.classList.remove('atk'); } if(me){ me.erode=me.hblk=me.mblk=me.hbStrict=me.bleed=me.bleedN=0; me.hpLk=me.mpLk=null; }
   projs.length=zones.length=timers.length=parts.length=nums.length=ground.length=efx.length=0;
   G.mobs=[]; G.mobMap=new Map(); G.gemDone=false; G.stKills=0; G.stDrops=0; G.stCap=0; G.runT=0; G.stGot=[0,0,0,0,0]; G.stGem=null; G.sib=0; G.endShown=false; G.clrDone=false; alClear(); G.stRev=0; G.stTaken=0; G.stGold0=me?(me.gold|0):0; G.paused=false; G.bt=null; G.shake=0;
-  hitQ=[]; fxQ=[]; lastAllyFx=-1; lastEv=-1; lastHit=0; G.guestDmg=0; G.fires=[]; G.freeRev=1; G.fireT=3; if(me){ me.rvGiven=0; me.seenRg=0; me.out=false; me.rvT=0; }
+  hitQ=[]; fxQ=[]; lastAllyFx=-1; lastEv=-1; lastHit=0; G.guestDmg=0; G.fires=[]; G.freeRev=(me&&me.hc)?0:1; G.fireT=3; if(me){ me.rvGiven=0; me.seenRg=0; me.out=false; me.rvT=0; }
   spawnMe(); buildSkills(); petStart(); show(null); G.inGame=true; closeSheet(); setAuto(me?me.au|0:0,true);   /* 이 캐릭터가 마지막으로 정한 AUTO 설정으로 시작 */
   { const sp=G.mode!=='guest'&&!!(me&&me.sp); setSpd(sp,{hint:sp}); }   /* 1.3배속도 마지막 설정으로 (협동 참가자는 방장 설정을 받을 때까지 1배) */
 }
@@ -6443,19 +6479,20 @@ function townFxWatch(root){
 }
 let townUTimer=0;
 function townPick(k){ townTick(k); const B=getTown()[k], D=TOWN_B[k], n=B.n|0; if(n<1){ townMsg=`아직 ${D.pot?'만들어진 물약이':'만들어진 조각이'} 없어요`; renderTown(); return; }
+  if(!D.pot&&me&&me.hc){ townMsg='💀 하드코어 캐릭터는 공유보관함을 이용할 수 없어요'; renderTown(); return; }
   if(!D.pot){ const got=townToStore(k); sfx('pick'); townMsg=got.put>0?`📦 ${D.e} ${SHDK[D.mat].n.replace('각성 그림자','각성')} ${got.put}개 보관 완료${got.left>0?` (${got.left}개 남음)`:''}`:'보관함이 가득 찼어요'; if(got.put>0)toast(`📦 공유보관함으로 ${SHDK[D.mat].n} ${got.put}개 이동!`,'#c9a0ff'); renderTown(); return; }   /* 조각은 캐릭터를 고르지 않고 바로 공유보관함으로 */
-  const chars=charIds().map(id=>(me&&me.id===id)?me:loadChar(id)).filter(Boolean), what=D.pot?`🧪 물약 ${n}개`:`${D.e} ${SHDK[D.mat].n} ${n}개`;
+  const chars=charIds().map(id=>(me&&me.id===id)?me:loadChar(id)).filter(c=>c&&(me&&me.hc?c.id===me.id:!c.hc)), what=D.pot?`🧪 물약 ${n}개`:`${D.e} ${SHDK[D.mat].n} ${n}개`;
   const rows=chars.map(c=>`<button class="btn" data-to="${c.id}" style="text-align:left">${tgLabel({k:'c',o:c},'')}</button>`).join('');
   modal(`<h3>✉️ 우편으로 받기</h3><p style="margin:0 0 10px;font-size:13px;color:${RARC[4]}">${what}를 받을 캐릭터를 고르세요</p><div class="col">${rows||'<p class="meta">캐릭터가 없어요</p>'}<button class="btn" id="tpX">취소</button></div>`,m=>{
     m.querySelector('#tpX').onclick=closeModal;
     m.querySelectorAll('[data-to]').forEach(b=>b.onclick=()=>{ const cid=b.dataset.to, c=chars.find(o=>o.id===cid), got=townSend(k,cid); closeModal(); if(got>0){ sfx('pick'); townMsg=`✉️ ${dispName(c)} 우편함으로 ${D.pot?'🧪 물약':D.e+' '+SHDK[D.mat].n.replace('각성 그림자','각성')} ${got}개 발송`; try{ renderStagePanel(); }catch(e){} } else townMsg='보낼 것이 없어요'; renderTown(); }); }); }
 /* 타이틀 하단 탭 바 */
-$('#tGear').onclick=()=>{ if(selId)openTitleSheet('bag'); };
-$('#tStore').onclick=()=>{ if(selId)openTitleSheet('store'); };
+$('#tGear').onclick=()=>{ if(!selId)return; const c=loadChar(selId); if(hcDead(c)){ rkProfile(rkLocal(c),'close'); return; } openTitleSheet('bag'); };   /* 사망한 하드코어 캐릭터는 장비·펫·능력치를 보기만 */
+$('#tStore').onclick=()=>{ if(!selId)return; const c=loadChar(selId); if(c&&c.hc){ warn('💀 하드코어 캐릭터는 공유보관함을 이용할 수 없어요'); return; } openTitleSheet('store'); };
 $('#bShop').onclick=()=>{ if(selId){ sfx('ui'); openTitleSheet('shop'); } };
 $('#bDexL').onclick=()=>{ if(selId){ sfx('ui'); openTitleSheet('dex'); } };   /* 가로모드 도감 버튼 */
-$('#tTown').onclick=()=>openTown();
-$('#bSolo').onclick=()=>{ G.mode='solo';  prepMe(); ally=null; resetWorld(); startStage(); };
+$('#tTown').onclick=()=>{ if(hcDead(loadChar(selId))){ warn('💀 사망한 캐릭터로는 마을을 이용할 수 없어요'); return; } openTown(); };
+$('#bSolo').onclick=()=>{ if(hcDead(loadChar(selId)))return; G.mode='solo';  prepMe(); ally=null; resetWorld(); startStage(); };
 $('#bHost').onclick=async()=>{
   if(!room)return; G.mode='host';  prepMe();
   roomCode=String(ri(1000,9999));
@@ -6524,6 +6561,7 @@ function showEnd(msg){
 }
 function confirmExit(cb){ modal(`<h3>🚪 나갈까요?</h3><p style="margin:0 0 12px;font-size:14px">타이틀 화면으로 돌아갑니다.</p><div class="row2"><button class="btn" id="exN">취소</button><button class="btn primary danger" id="exY">나가기</button></div>`,m=>{ m.querySelector('#exN').onclick=closeModal; m.querySelector('#exY').onclick=()=>{ closeModal(); cb(); }; }); }
 $('#bToTitle').onclick=()=>quitToTitle();
+$('#hcDieOk').onclick=()=>{ $('#hcDie').hidden=true; quitToTitle(); };
 $('#bBack').onclick=()=>{ if(G.phase!=='win'||G.mode!=='solo'||!(G.clearT>.5))return; G.phase='clear'; G.clearT=Math.max(G.clearT,10); G.endShown=false; G.inGame=true; show(null); };   /* 실수로 나가기를 눌렀을 때: 남은 전리품 시간(최소 10초)으로 복귀 */
 $('#bRetry').onclick=()=>{ if(G.mode!=='solo'||!selId)return; selStage=Math.max(0,Math.min(STAGES.length-1,G.stageIdx|0)); G.mode='solo'; prepMe(); ally=null; resetWorld(); startStage(); };   /* 같은 스테이지를 처음부터 다시 */
 
