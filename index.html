@@ -1362,7 +1362,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.4.0508</div>
+    <div class="ver" id="verT">v0.6.4.0509</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3304,7 +3304,7 @@ function recalc(){me.D=derive(me); me.hp=Math.min(me.hp??me.D.maxHp,me.D.maxHp);
 function spawnMe(){
   me.x=VX+rand(-30,30); me.y=VY+VR+30; me.dead=false; me.stun=me.slowP=me.poison=0; me.respawn=0; me.cds={}; me.buffs={}; me.aura=me.aura&&SKBY[me.aura]&&SKBY[me.aura].aura&&skLv(me,me.aura)?me.aura:0;
   me.face=-Math.PI/2; me.swing=0; me.atkCd=0; me.pot=3; me.leap=null; me.pickT=null;
-  me.form=''; me.spirit=null; me.formLock=0; me.D=derive(me); me.hp=me.D.maxHp; me.mp=me.D.maxMp; autoSummon(); if(me.cls==='druid')crackImg(); if(me.cls==='necro')for(const k of MNIDX){ sprGet('mn_'+k); sprGet('mn_'+k+'_atk'); } if(me.cls==='druid'){ for(const k of ['papa','mama','baby']){ sprGet('mn_'+k); sprGet('mn_'+k+'_atk'); } sprGet('spirit_druid'); }
+  me.form=''; me.spirit=null; me.formLock=0; me.D=derive(me); me.hp=me.D.maxHp; me.mp=me.D.maxMp; autoSummon(); if(me.cls==='druid')crackImg(); if(me.cls==='necro')for(const k of ['guard','caster','colossus','dragon','fusion']){ sprGet('mn_'+k); sprGet('mn_'+k+'_atk'); } if(me.cls==='druid'){ for(const k of ['papa','mama','baby']){ sprGet('mn_'+k); sprGet('mn_'+k+'_atk'); } sprGet('spirit_druid'); }
 }
 function zealMul(){const l=me.cls==='pal'?skLv(me,'zeal'):0; return l?{d:1+(15+5*l)/100,t:1+(10+4*l)/100}:{d:1,t:1};}
 function buffDmg(){let v=0; const b=me.buffs; if(b.vil&&b.vil.t>0)v+=b.vil.v; if(b.shout&&b.shout.t>0)v+=b.shout.v; if(b.berserk&&b.berserk.t>0)v+=b.berserk.v; if(b.rage&&b.rage.t>0)v+=b.rage.v; if(b.fury&&b.fury.t>0)v+=b.fury.v; if(b.awk&&b.awk.t>0)v+=b.awk.v; const sb=spiritBuff(); if(sb)v+=sb.dmg; return v;}
@@ -6732,7 +6732,8 @@ function ceye(x,y,r,fa,iris,pup){ cball(x,y,r,'#fff',1.7); const px=x+Math.cos(f
 function cline(x1,y1,x2,y2,w,col){ ctx.lineCap='round'; ctx.strokeStyle=OUT; ctx.lineWidth=w+3.4; ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke(); ctx.strokeStyle=col; ctx.lineWidth=w; ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke(); }
 const SPRN=['imp','zombie','skeleton','morg','grak','malek','bat','kargon','izra','archer','bomber','healer','rbwar','rbsorc','rbshd'];
 const SPR={};
-function sprGet(k){ let e=SPR[k]; if(!e){ e=SPR[k]={ok:false,im:new Image()}; e.im.onload=()=>{e.ok=true;}; e.im.onerror=()=>{e.ok=false;e.bad=true;}; e.im.src='img/'+k+'.png'; } return e.ok?e.im:null; }
+function sprLoad(k,e){ const im=new Image(); e.im=im; im.onload=()=>{e.ok=true;}; im.onerror=()=>{ e.ok=false; if(k.startsWith('mn_')&&(e.n|0)<3){ e.n=(e.n|0)+1; setTimeout(()=>sprLoad(k,e),1200*e.n); } else e.bad=true; }; im.src='img/'+k+'.png'+(e.n?'?r='+e.n:''); }   /* 소환수(mn_) 그림은 일시적으로 못 불러와도 최대 3번 다시 시도해요 (도형으로만 보이는 것 방지) */
+function sprGet(k){ let e=SPR[k]; if(!e){ e=SPR[k]={ok:false,im:null}; sprLoad(k,e); } return e.ok?e.im:null; }
 /* 걷기 시트: hero_<직업>_walk.png = n프레임 가로 시트 (k = 저장 배율, cyc = 한 사이클을 걷는 데 필요한 이동 거리) */
 /* 보스 걷기 시트: <보스 그림 이름>_walk.png (n프레임 가로 시트, k=저장 배율, cyc=한 사이클(두 걸음)에 필요한 이동 거리 = 몸집 r의 배수) */
 const BWALKS={boss_shadow:{n:6,k:.75,cyc:2.6},hero_war:{n:6,k:.75,cyc:2.6},hero_sorc:{n:6,k:.75,cyc:2.6},boss_3_5:{n:6,k:1,cyc:2.6},mob_grak:{n:6,k:.75,cyc:2.6},mob_malek:{n:6,k:.75,cyc:2.6},mob_morg:{n:6,k:.75,cyc:2.6},mob_kargon:{n:6,k:.75,cyc:2.6}};
