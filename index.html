@@ -1362,7 +1362,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0521</div>
+    <div class="ver" id="verT">v0.6.5.0522</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1951,7 +1951,8 @@ const SPFX={
    fx: [옵션, 최소, 최대] · clsR = 무작위 직업의 '+N 직업 스킬' · clsM = 착용 직업의 '+N 직업 스킬' */
 const HERO_IL=100, HERO_REQ=90, HERO_P=.02, SHARD_N=120, SHARD_MAX=999, RAID_UQ=.6;   /* HERO_P=레이드 보스 한 마리당 영웅 아이템 추가 드랍 확률, SHARD_N=교환에 필요한 개수, SHARD_MAX=가방 한 칸에 쌓이는 최대 수량, RAID_UQ=레이드 스테이지 일반 드랍의 유니크 비율(나머지는 레어) */
 const HERO_AFC=[['life',150,210],['def',70,105],['vit',5,10],['mr',20,30],['dmgPct',25,50]];
-const AW_AFC=[['life',180,250],['def',85,125],['vit',6,12],['mr',25,35],['dmgPct',30,60]]; /* 각성 보조장비 공통 옵션 */ /* 보조무기 공통 옵션(+ 직업 스킬) */
+const AW_AFC=[['life',180,250],['def',85,125],['vit',6,12],['mr',25,35],['dmgPct',30,60]]; /* 각성 보조장비 공통 옵션 */
+const HERO_AFS=HERO_AFC.map(o=>o[0]==='dmgPct'?['sm',25,150]:o), AW_AFS=AW_AFC.map(o=>o[0]==='dmgPct'?['sm',30,180]:o);   /* 강령술사·드루이드 보조장비(등불·토템): 일반 옵션 '피해 +%' 자리가 '소환수 피해 +%' */ /* 보조무기 공통 옵션(+ 직업 스킬) */
 const HEROI={
  hdag:{mn:6,mx:14,fx:[['dmgPct',150,212],['ias',10,15],['crit',5,10],['ls',3,5],['dex',5,10],['clsR',1,2]]},
  hhelm:{df:10,fx:[['life',150,210],['def',70,105],['all',1,1],['crit',4,6],['dmgPct',25,50],['mr',10,30]]},
@@ -1961,8 +1962,8 @@ const HEROI={
  hoff_war:{dm:10,fx:[['clsM',1,2],...HERO_AFC]},
  hoff_pal:{df:16,blk:[30,35],fx:[['clsM',1,2],...HERO_AFC]},
  hoff_sorc:{om:36,fx:[['clsM',1,2],...HERO_AFC]},
- hoff_necro:{om:36,fx:[['clsM',1,2],...HERO_AFC]},
- hoff_druid:{dm:5,om:18,fx:[['clsM',1,2],...HERO_AFC]},
+ hoff_necro:{om:36,fx:[['clsM',1,2],...HERO_AFS]},
+ hoff_druid:{dm:5,om:18,fx:[['clsM',1,2],...HERO_AFS]},
  aw_wpn:{mn:8,mx:16,fx:[['dmgPct',180,250],['ias',12,18],['crit',6,12],['ls',4,6],['str',6,12],['clsR',1,2]]},
  aw_helm:{df:11,fx:[['life',180,250],['def',85,125],['all',1,1],['crit',5,7],['dmgPct',30,60],['mr',15,35]]},
  aw_armor:{df:22,fx:[['life',180,250],['def',85,125],['vit',6,12],['str',6,12],['dmgPct',30,60],['all',1,1]]},
@@ -1971,8 +1972,8 @@ const HEROI={
  awoff_war:{dm:11,fx:[['clsM',1,2],...AW_AFC]},
  awoff_pal:{df:17,blk:[32,37],fx:[['clsM',1,2],...AW_AFC]},
  awoff_sorc:{om:40,fx:[['clsM',1,2],...AW_AFC]},
- awoff_necro:{om:40,fx:[['clsM',1,2],...AW_AFC]},
- awoff_druid:{dm:6,om:20,fx:[['clsM',1,2],...AW_AFC]}};
+ awoff_necro:{om:40,fx:[['clsM',1,2],...AW_AFS]},
+ awoff_druid:{dm:6,om:20,fx:[['clsM',1,2],...AW_AFS]}};
 const AW_IL=102, AW_REQ=92, AW_M=2.11, ASHARD_N=120, AW_P=.03;   /* 각성 장비: 아이템 레벨·착용 레벨·기본 성능 배율 / 교환에 필요한 각성 그림자 조각 / 처치당 각성 장비 직접 드랍 확률 */
 const AW_PART={weapon:'aw_wpn',helm:'aw_helm',armor:'aw_armor',amulet:'aw_amu',ring:'aw_ring'};
 const awKey=(part,cls)=>part==='shield'?'awoff_'+(cls||(me&&me.cls)||'war'):AW_PART[part];
@@ -2058,12 +2059,17 @@ function newOptFix(it){ if(!it)return;
   if(it.rar===4&&it.sp==='harmor'&&!it.nfa&&Array.isArray(it.aff)){ it.aff=it.aff.filter(a=>a&&a.t!=='ms'); if(!it.aff.some(a=>a.t==='dmgPct'))it.aff.push({t:'dmgPct',v:ri(25,50)}); it.nfa=1; }   /* 그림자 갑옷: 갑옷에서 지워지던 이동속도 자리를 피해 +%로 바꿔 6개 */
   if(it.nof)return;
   if(it.rar===3&&it.sp==='rage'&&Array.isArray(it.aff)){ if(!it.aff.some(a=>a.t==='crit'))it.aff.push(rollAff(AFXBY.crit,3,it.ilvl||1,1.3,undefined,null,'amulet')); it.nof=1; }
-  else if(it.rar===4&&it.sp&&it.sp.indexOf('hoff_')===0&&Array.isArray(it.aff)){ if(!it.aff.some(a=>a.t==='dmgPct'))it.aff.push({t:'dmgPct',v:ri(25,50)}); it.nof=1; } }
+  else if(it.rar===4&&it.sp&&it.sp.indexOf('hoff_')===0&&Array.isArray(it.aff)){ if(!it.aff.some(a=>a.t==='dmgPct'||a.t==='sm'))it.aff.push({t:it.sp==='hoff_necro'||it.sp==='hoff_druid'?'sm':'dmgPct',v:it.sp==='hoff_necro'||it.sp==='hoff_druid'?ri(25,150):ri(25,50)}); it.nof=1; } }
 /* ===== v0.4.5 소환수 옵션 개편 보정: 예전에 얻은 유니크 무기·갑옷·투구·목걸이·반지의 '소환수 피해/생명력' 옵션을 그 아이템에 없는 새 옵션으로 다시 굴림.
    같은 이름 유니크는 항상 같은 새 옵션(이름·부위로 정한 순서에서 이미 없는 첫 옵션), 수치만 새로 굴림. 보조장비(방패 칸)·그림자(영웅)·특수 유니크는 제외. 가방·장착·공유보관함 공통(it.sf=1 로 한 번만) ===== */
 const SM_SL=new Set(['weapon','armor','helm','amulet','ring']);
 function smOrder(it){ const rng=mulberry(hashStr(it.name+'|'+it.slot)); const pool=AFX.filter(a=>!SKG.has(a.t)&&!a.only&&a.r&&(a.sl==='*'||a.sl.split(' ').includes(it.slot)));
   for(let k=pool.length-1;k>0;k--){ const j=Math.floor(rng()*(k+1)); [pool[k],pool[j]]=[pool[j],pool[k]]; } return pool; }   /* 새 유니크가 쓰는 것과 같은 섞기 순서 */
+/* 영웅 보조장비 4종(그림자·각성의 등불/토템): 이미 가진 아이템의 '피해 +%' 옵션을 '소환수 피해 +%'로 바꾸고, 굴린 위치(범위 안 비율)를 새 범위로 옮김. 이미 바뀐 건 그대로라 몇 번을 해도 같아요. 바뀌었으면 true */
+const HSM_FIX={hoff_necro:[25,50,25,150],hoff_druid:[25,50,25,150],awoff_necro:[30,60,30,180],awoff_druid:[30,60,30,180]};
+function heroSmFix(it){ const R=it&&it.rar===4&&it.sp&&HSM_FIX[it.sp]; if(!R||!Array.isArray(it.aff))return false; let c=false;
+  for(const a of it.aff){ if(a&&a.t==='dmgPct'){ const q=Math.max(0,Math.min(1,((a.v|0)-R[0])/(R[1]-R[0]))); a.t='sm'; a.v=Math.round(R[2]+q*(R[3]-R[2])); c=true; } }
+  return c; }
 function sumFix(it){ if(!it||it.rar!==3||it.sf||it.uv||it.sp||!SM_SL.has(it.slot)||!Array.isArray(it.aff)||typeof it.name!=='string')return false;
   if(!it.aff.some(a=>a&&(a.t==='sm'||a.t==='smhp')))return false;
   const ord=smOrder(it);
@@ -2358,7 +2364,7 @@ function loadChar(id){
       p.eq2=e2; p.es=cur; delete p.ps; }
     { const e2=(p.eq2&&typeof p.eq2==='object')?p.eq2:{}, o={}; for(const k of EQSL)o[k]=e2[k]||null; p.eq2=o; p.es=p.es===1?1:0; }
     miscFix(p); p.shard=p.shard|0; shardAdd(p,0); p.ashard=p.ashard|0; shardAdd(p,0,'ashard'); /* 예전 조각 숫자 → 가방 아이템으로 (각성 조각 포함) */
-    const fx=it=>{ if(!it)return; ilCapFix(it); heroFix(it); newOptFix(it); lanternFix(it); if(!Array.isArray(it.aff))it.aff=[]; if(it.rar===3&&it.name==='그림자 망토')it.name='밤의 망토'; /* 영웅 '그림자' 장비와 헷갈리지 않게 개명 */ if(!p.dv4&&it.slot!=='weapon')for(const a of it.aff)if(a&&(a.t==='dmgPct'||a.t==='sm'||a.t==='smhp'))a.v=Math.min(50,Math.max(1,Math.round(a.v/4))); /* v0.3: 무기 외 피해%·소환수 피해%·소환수 생명력% 옵션은 예전 수치를 4로 나눈 값으로(캐릭터마다 1회, p.dv4) */ if(!(it.rar===3&&it.sp))for(const a of it.aff)if(a&&(a.t==='str'||a.t==='dex'||a.t==='vit'||a.t==='ene')&&a.v>10)a.v=10; /* 힘·민첩·체력·에너지 옵션 상한 10(이전에 얻은 더 높은 수치도 10으로) */ if(it.rar===3&&!it.sv){ it.sv=1; const sh=it.slot==='shield'; /* 유니크 스킬 옵션 개편: 직업 스킬→모든 스킬, 개별 스킬→그 직업 스킬, 보조장비→내(보조장비) 직업 스킬 (1회) */
+    const fx=it=>{ if(!it)return; ilCapFix(it); heroFix(it); newOptFix(it); heroSmFix(it); lanternFix(it); if(!Array.isArray(it.aff))it.aff=[]; if(it.rar===3&&it.name==='그림자 망토')it.name='밤의 망토'; /* 영웅 '그림자' 장비와 헷갈리지 않게 개명 */ if(!p.dv4&&it.slot!=='weapon')for(const a of it.aff)if(a&&(a.t==='dmgPct'||a.t==='sm'||a.t==='smhp'))a.v=Math.min(50,Math.max(1,Math.round(a.v/4))); /* v0.3: 무기 외 피해%·소환수 피해%·소환수 생명력% 옵션은 예전 수치를 4로 나눈 값으로(캐릭터마다 1회, p.dv4) */ if(!(it.rar===3&&it.sp))for(const a of it.aff)if(a&&(a.t==='str'||a.t==='dex'||a.t==='vit'||a.t==='ene')&&a.v>10)a.v=10; /* 힘·민첩·체력·에너지 옵션 상한 10(이전에 얻은 더 높은 수치도 10으로) */ if(it.rar===3&&!it.sv){ it.sv=1; const sh=it.slot==='shield'; /* 유니크 스킬 옵션 개편: 직업 스킬→모든 스킬, 개별 스킬→그 직업 스킬, 보조장비→내(보조장비) 직업 스킬 (1회) */
       for(const a of it.aff){ if(!a)continue; const v=Math.min(2,Math.max(1,a.v|0)); if(a.t==='cls'){ if(sh){ a.cls=it.oc||cls; a.v=v; } else { a.t='all'; a.v=v; delete a.cls; } } else if(a.t==='sk'){ a.t='cls'; a.v=v; if(sh)a.cls=it.oc||cls; delete a.key; } }
       if(it.aff.some(a=>a&&a.t==='all'))it.aff=it.aff.filter(a=>!(a&&a.t==='cls')); }
     if(it.rar===3&&it.aff.some(a=>a&&a.t==='all'))it.aff=it.aff.filter(a=>!(a&&a.t==='sk')); it.aff=it.aff.filter(a=>a&&AFXBY[a.t]&&!(it.slot==='armor'&&a.t==='ms')&&!(a.cls&&!CLASSES[a.cls])&&!(a.t==='sk'&&!(SKBY[a.key]&&SK[a.cls]&&SK[a.cls].includes(SKBY[a.key])))); }; p.inv.forEach(fx); p.eq=p.eq||{}; for(const k in p.eq)fx(p.eq[k]); for(const k in p.eq2)fx(p.eq2[k]); p.dv4=1;
@@ -5237,7 +5243,7 @@ const STORE_N=100, STORE_KEY='dkdef2.store', STORE_IC=`<svg viewBox="0 0 24 24" 
 let STORE=null, satSeq=0;
 function loadStore(){ let o=null; try{ o=JSON.parse(lsGet(STORE_KEY)||'null'); }catch(e){} if(!o||typeof o!=='object')o={};
   const inv=Array.isArray(o.inv)?o.inv.slice(0,STORE_N):[]; while(inv.length<STORE_N)inv.push(null);
-  let ch=false; for(const it of inv){ if(it){ if(!Array.isArray(it.aff))it.aff=[]; try{ if(ilCapFix(it))ch=true; heroFix(it); newOptFix(it); lanternFix(it); if(sumFix(it))ch=true; if(optFix2(it))ch=true; if(itemMig(it,me&&me.cls))ch=true; if(baseFix(it))ch=true; if(nameFix(it))ch=true; }catch(e){} } }
+  let ch=false; for(const it of inv){ if(it){ if(!Array.isArray(it.aff))it.aff=[]; try{ if(ilCapFix(it))ch=true; heroFix(it); newOptFix(it); if(heroSmFix(it))ch=true; lanternFix(it); if(sumFix(it))ch=true; if(optFix2(it))ch=true; if(itemMig(it,me&&me.cls))ch=true; if(baseFix(it))ch=true; if(nameFix(it))ch=true; }catch(e){} } }
   const S={inv,gold:Math.max(0,o.gold|0),shard:0,st:1,smith:o.smith?1:0,misc:Array.isArray(o.misc)?o.misc.slice(0,MISC_NS):[]}; const had=inv.some(x=>x&&isShard(x)); miscFix(S);
   if(ch||had){ try{ lsSet(STORE_KEY,JSON.stringify({inv:S.inv,misc:S.misc,gold:S.gold,smith:S.smith})); }catch(e){} }
   return S; }
