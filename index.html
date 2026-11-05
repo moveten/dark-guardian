@@ -1362,7 +1362,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0520</div>
+    <div class="ver" id="verT">v0.6.5.0521</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1520,6 +1520,11 @@ const STAGES=[
  {id:'5',raid:2,bn:'각성 그림자',rl:99,n:'봉인의 심연',d:'삼남매가 지키던 봉인이 깨졌어요. 그 중심에서 이 길을 처음 걸었던 수호자의 그림자가 깨어납니다. 체력이 줄 때마다 더 강한 모습으로 각성해요.',tag:'⚔️ 레이드 · 3페이즈 보스 · 분신술 · 시간 안에 부숴야 하는 봉인 결정',waves:[],ilo:92,icap:102,boss:-1,spdM:1.8,hpM:120,dmgM:32,xpM:60,fly:0,el:0,
   mix:w=>({imp:30,zom:20,sk:30,ar:20,bo:0,he:0}),
   th:{g:'#0c0812',gd:'rgba(60,30,110,.5)',gl:'rgba(4,2,8,.8)',tuft:'rgba(140,110,255,.3)',road:['#1a1426','#221a32'],tint:'rgba(60,40,140,.18)',amb:'ember',pc:'150,120,255',crack:1,dec:[['lrock',.3],['crack',.3],['bones',.14],['pillar',.16],['torch',.1]]}}];
+/* 6스테이지(수문장 레이드) — 아직 미공개. 관리자(연구실) 권한이 켜진 기기에서만 목록에 들어가요 (공개 때 이 조건만 지우면 됨) */
+const STG6={id:'6',raid:3,bn:'수문장 카스텔',rl:99,n:'움직이는 성채',d:'성문이 닫히면 앞은 통하지 않아요. 성채 그 자체인 수문장이 군기를 들고 길을 막습니다.',tag:'🏰 레이드 · 3페이즈 보스 · 성문 닫기 · 스킬봉쇄 · 공포 · 공성장치',waves:[],ilo:96,icap:106,boss:-1,spdM:1.85,hpM:130,dmgM:34,xpM:65,fly:0,el:0,
+  mix:w=>({imp:30,zom:20,sk:30,ar:20,bo:0,he:0}),
+  th:{g:'#1c1b1f',gd:'rgba(70,64,76,.5)',gl:'rgba(6,5,8,.7)',tuft:'rgba(120,110,90,.3)',road:['#2b2823','#35312b'],tint:'rgba(120,90,60,.1)',amb:'ember',pc:'230,170,110',dec:[['rock',.3],['pillar',.3],['bones',.14],['torch',.16],['lrock',.1]]}};
+try{ if(localStorage.getItem('dkdef2.lab')==='1')STAGES.push(STG6); }catch(e){}
 const RARN=['일반','매직','레어','유니크','영웅'], RARC=['#e9e2d4','#7d96ff','#ffe24d','#e4b65a','#ff4f7a'];
 const dn=it=>it.rar>=2?`[${RARN[it.rar]}] ${it.name}`:it.name;
 /* 아이템 설명 이름 줄: 이름 바로 뒤에 등급 별(★1 일반 · ★2 매직 · ★3 레어 · ★4 유니크 · ★5 영웅), 색은 등급색 (★6은 아직 없음) */
@@ -1666,6 +1671,7 @@ const MT0=[
  /* 5스테이지 레이드 보스 — 3페이즈 · 분신술 · 파괴 패턴 */
  {n:'각성 그림자',hp:1900,dmg:17,spd:66,r:44,xp:3000,boss:1,raid:'awk',rhp:40e6,rhpC:54e6,rdm:1.69,skm:1,img:'boss_awake',bc:['#050308','#140c1c','#0c0812','#3a2a66']},
  {n:'봉인 결정',hp:100,dmg:0,spd:0,r:20,xp:0,obj:1},
+ {n:'수문장 카스텔',hp:1900,dmg:17,spd:48,r:56,xp:5000,boss:1,raid:'cas',rhp:8e7,rhpC:1.08e8,rdm:1.75,skm:1,img:'boss_6',bc:['#14110e','#3a2e24','#241c15','#8a6a44']},   /* 6스테이지 레이드 보스 — 3페이즈 · 성문 닫기 · 스킬봉쇄 · 공포 */
  {n:'황금 고블린',hp:1e9,dmg:0,spd:0,r:20,xp:0,gob:1}   /* 레이드 4·5 스테이지 이벤트: 체력 없음, 때린 횟수로 보상 */
 ];
 const MT=MT0.map(t=>({...t,r:t.r*MOBS}));
@@ -2525,7 +2531,7 @@ function snapMobs(){
   const out=[];
   for(const m of G.mobs){ if(m.dead)continue;
     const R0=m.fake?G.mobs.find(o=>o.id===m.realId&&!o.dead):null, hq=R0?R0.hp/R0.max:m.hp/m.max;
-    out.push([m.id,m.type,Math.round(m.x),Math.round(m.y),Math.max(1,Math.round(hq*100)),(m.elite?1:0)|(m.slowT>0?4:0)|(m.atk>0?8:0)|(m.boss&&m.tg===2?16:0)|(m.boss&&m.counter>0?32:0)|(m.stunT>0?64:0)|(m.burnT>0?128:0)|(m.taunt&&m.taunt.t>0?256:0)|(m.awk?512:0)|(m.inv>0?1024:0),m.rk==='awk'?((m.ph|0)+10*Math.max(0,m.shield|0)):m.obj?(m.ok|0):m.af|0]); }
+    out.push([m.id,m.type,Math.round(m.x),Math.round(m.y),Math.max(1,Math.round(hq*100)),(m.elite?1:0)|(m.slowT>0?4:0)|(m.atk>0?8:0)|(m.boss&&m.tg===2?16:0)|(m.boss&&m.counter>0?32:0)|(m.stunT>0?64:0)|(m.burnT>0?128:0)|(m.taunt&&m.taunt.t>0?256:0)|(m.awk?512:0)|(m.inv>0?1024:0),(m.rk==='awk'||m.rk==='cas')?((m.ph|0)+10*Math.max(0,m.shield|0)):m.obj?(m.ok|0):m.af|0]); }
   return out;
 }
 /* 보스 예고(텔레그래프) → 게스트용 배열: [종류,x,y,tx,ty,r,진행%, (선: 길이,폭,각도×100…) (여러 원: x,y…)] — 보스가 여럿이면 여러 개 */
@@ -2585,7 +2591,7 @@ function guestNet(){
     { const nw=performance.now(); if(m._tu){ const du=Math.max(.05,(nw-m._tu)/1000);   /* 갱신 사이의 이동 속도를 추정해 다음 위치를 미리 예측 */
         if(du<.5&&hyp(a[2]-m.tx,a[3]-m.ty)<160){ let vx=(a[2]-m.tx)/du, vy=(a[3]-m.ty)/du; const sp=hyp(vx,vy); if(sp>640){vx*=640/sp;vy*=640/sp;} m.ux=(m.ux||0)*.5+vx*.5; m.uy=(m.uy||0)*.5+vy*.5; }
         else { m.ux=m.uy=0; } } m._tu=nw; }
-    m.tx=a[2];m.ty=a[3];m.hpp=a[4];m.elite=!!(a[5]&1);m.slowT=a[5]&4?1:0;m.atk=a[5]&8?.2:0; m.tg=a[5]&16?2:1; m.counter=a[5]&32?1:0; m.stunT=a[5]&64?1:0; m.burnT=a[5]&128?1:0; m.taunt=a[5]&256?{i:0,t:1}:null; m.awk=!!(a[5]&512); m.rk=MT[m.type].raid; m.inv=a[5]&1024?1:0; if(m.rk==='awk'){ const v=a[6]|0; m.ph=v%10||1; m.shield=(v/10)|0; m.af=0; } else if(MT[m.type].obj){ m.ok=a[6]|0; m.af=0; } else m.af=a[6]|0; m.obj=!!MT[m.type].obj;
+    m.tx=a[2];m.ty=a[3];m.hpp=a[4];m.elite=!!(a[5]&1);m.slowT=a[5]&4?1:0;m.atk=a[5]&8?.2:0; m.tg=a[5]&16?2:1; m.counter=a[5]&32?1:0; m.stunT=a[5]&64?1:0; m.burnT=a[5]&128?1:0; m.taunt=a[5]&256?{i:0,t:1}:null; m.awk=!!(a[5]&512); m.rk=MT[m.type].raid; m.inv=a[5]&1024?1:0; if(m.rk==='awk'||m.rk==='cas'){ const v=a[6]|0; m.ph=v%10||1; m.shield=(v/10)|0; m.af=0; } else if(MT[m.type].obj){ m.ok=a[6]|0; m.af=0; } else m.af=a[6]|0; m.obj=!!MT[m.type].obj;
   }
   for(let i=G.mobs.length-1;i>=0;i--){const m=G.mobs[i]; if(!seen.has(m.id)){G.mobs.splice(i,1);G.mobMap.delete(m.id);}}
   // events
@@ -2612,6 +2618,7 @@ function guestEvent(e){
   else if(t==='w'){ banner(`습격 ${e[2]} / ${G.TW}`,'언데드가 몰려옵니다'); me.pot=3; }
   else if(t==='sib'){ G.sib=e[2]|0; announce(`💢 형제가 쓰러졌어요! 남은 형제의 피해 +${10*G.sib}%`,'#ff6a5a'); }
   else if(t==='awk'){ announce('🩸 검은 그림자가 깨어났어요! 공격·이동 속도 +50%','#ff4a4a'); }
+  else if(t==='cph'){ const np=e[2]|0, tx=np===2?['🏰 2페이즈 · 무너지는 성벽','성벽이 갈라지고 불길이 번져요']:['🏰 3페이즈 · 불타는 성채','방패가 부서졌어요 — 이제 물러서지 않아요']; banner(tx[0],tx[1]); announce(tx[0],'#e0b070'); G.shake=1.3; sfx('boss'); later(.3,()=>{ if(G.inGame)storyRun('p'+np); }); }
   else if(t==='aph'){ const np=e[2]|0, tx=np===2?['🌑 2페이즈 · 삼남매의 잔향','형과 누나의 힘을 삼켰어요']:['🌑 3페이즈 · 각성','마지막 각성 — 모든 것을 걸고 덤벼와요']; banner(tx[0],tx[1]); announce(tx[0],'#a68bff'); G.shake=1.2; sfx('boss'); later(.3,()=>{ if(G.inGame)storyRun('p'+np); }); }
   else if(t==='acl'){ announce((e[2]|0)>1?'👥 그림자 분신술! 셋 중 하나만 진짜예요':'👥 그림자 분신술! 둘 중 하나만 진짜예요','#b89cff'); sfx('boss'); }
   else if(t==='cat'){ casAlert(); } else if(t==='cms'){ casMs(e[2]|0); }
@@ -2686,6 +2693,28 @@ const AWK_SHIELD=30;   /* 1페이즈 그림자 배리어: 공격 30번을 막음
 function spawnAwake(){ const b=spawnMob(awkType(),VX,VY*.45,false); b.ph=1; b.shield=AWK_SHIELD; later(3.2,()=>{ if(G.inGame&&b.shield>0)announce(`🛡️ 그림자 배리어! 공격 ${AWK_SHIELD}번을 막아요 — 보스는 배리어 중에도 공격해요, 깨져야 피해가 들어가요`,'#c0a8ff'); }); b.wake=3; b.cloneT=10; b.sealT=Math.random()<AWK_ULT0?.1:18; if(b.sealT<1)b.bt=.3;   /* 페이즈 시작 60%: 바로 궁극기(파괴 미션) */ b.dmgB=b.dmg0; b.sum0=b.sum1=b.sum2=true;
   efx.push({k:'ring',x:b.x,y:b.y,r0:10,r1:180,t:0,life:.8,col:'#8a6cff',w:12}); burst(b.x,b.y,'#2a1a4a',50,360); impact(b.x,b.y,'130,100,255',240);
   G.laneShow=[0,1,3]; pushEv(['b',awkType()]); banner('🌑 각성 그림자','봉인이 깨지고, 첫 수호자의 그림자가 일어섭니다'); me.pot=3; G.shake=1; sfx('boss'); }
+/* ===== 6스테이지 수문장 카스텔 (방장/솔로만 AI 실행) =====
+   페이즈: 1(100~67%) 2(67~34%) 3(34~0%) — 문턱에서 한 번 멈추고 페이즈 전환(2.2초 무적), 몸이 부서지는 그림(boss_6 → hurt1 → hurt2)으로 바뀜
+   기술(1단계 뼈대): 철퇴 강타(1~) · 방패 돌진(2~) · 투석 포격(3~). 성문 닫기·스킬봉쇄·공포·공성장치는 이어서 추가 */
+const CAS={ph:[1,.67,.34], dmgM:[1,1.15,1.3], CDK:.8};
+const casType=()=>MT.findIndex(t=>t.raid==='cas');
+const casBoss=()=>G.mobs.find(m=>m.rk==='cas'&&!m.dead);
+const casFloor=m=>(m.ph||1)<3?CAS.ph[m.ph||1]:-1;
+function spawnCastle(){ const b=spawnMob(casType(),VX,VY*.42,false); b.ph=1; b.dmgB=b.dmg0; b.wake=3.2; b.bt=4; b.sum0=b.sum1=b.sum2=true;   /* 일반 보스 소환은 끄고, 성 수비대는 따로 */
+  efx.push({k:'ring',x:b.x,y:b.y,r0:10,r1:200,t:0,life:.8,col:'#d8a868',w:12}); burst(b.x,b.y,'#3a2e24',50,360); impact(b.x,b.y,'220,170,100',240);
+  G.laneShow=[0,1,3]; pushEv(['b',casType()]); banner('🏰 수문장 카스텔','움직이는 성채가 길을 막아섭니다'); me.pot=3; G.shake=1; sfx('boss'); }
+function casPhase(m,np){ m.ph=np; m.dmg0=m.dmgB*CAS.dmgM[np-1]; m.dmg=m.dmg0; m.tel=null; m.charge=null; m.counter=0; m.inv=2.2; m.bt=2.8;
+  const t=np===2?['🏰 2페이즈 · 무너지는 성벽','성벽이 갈라지고 불길이 번져요']:['🏰 3페이즈 · 불타는 성채','방패가 부서졌어요 — 이제 물러서지 않아요'];
+  banner(t[0],t[1]); announce(t[0],'#e0b070'); G.shake=1.3; sfx('boss'); burst(m.x,m.y,'#3a2e24',70,440); burst(m.x,m.y,'#8a4a1a',40,360); impact(m.x,m.y,'230,150,70',300); efx.push({k:'ring',x:m.x,y:m.y,r0:20,r1:280,t:0,life:.9,col:'#e0a050',w:16});
+  pushEv(['cph',np]); if(G.mode==='solo'||G.mode==='host')later(.3,()=>{ if(G.inGame&&G.phase==='boss')storyRun('p'+np); }); }
+function casAI(m,dt,pls,sf,best,bd,tau){
+  if(m.inv>0){ m.inv-=dt; m.fa=Math.atan2(best.y-m.y,best.x-m.x); return true; }   /* 페이즈 전환 중엔 제자리 */
+  const fl=casFloor(m); if(fl>0&&m.hp<m.max*fl){ casPhase(m,m.ph+1); return true; }
+  if(!m.tel&&!m.charge&&!(m.counter>0)&&m.bt<=0&&bd<560&&!tau){ const ph=m.ph|0||1, rr=Math.random(), du=1;
+    if(ph>=3&&rr<.3){ const pts=[{x:best.x,y:best.y}]; for(let i=0;i<4;i++)pts.push({x:clamp(best.x+rand(-200,200),40,WW-40),y:clamp(best.y+rand(-200,200),40,WH-40)}); m.tel={k:'slam',kind:'multi',x:pts[0].x,y:pts[0].y,pts,r:84,mul:1.4,col:'#e08a3a',t:0,dur:1.7*du}; }
+    else if(ph>=2&&rr<(ph>=3?.55:.4)&&bd>200) m.tel={k:'charge',kind:'charge',x:m.x,y:m.y,tx:best.x,ty:best.y,r:0,t:0,dur:.9*du};
+    else m.tel={k:'slam',kind:'slam',x:m.x,y:m.y,r:200,t:0,dur:1.2*du}; }
+  return false; }
 function awkFakesClear(fx){ for(const o of G.mobs){ if(o.dead||!o.fake)continue; o.dead=true; if(fx){ burst(o.x,o.y,'#2a1a4a',24,260); spark(o.x,o.y,'#8a6cff',16); } } }
 function awkObjsClear(){ for(const o of G.mobs){ if(!o.dead&&o.obj)o.dead=true; } }
 function awkPhase(m,np){ m.ph=np; if(np===3)m.dfM=(m.dfM||1)*1.2;   /* 3페이즈: 받는 피해 ÷1.2 (방어력 +20%) */ m.dmg0=m.dmgB*AWK.dmgM[np-1]; m.dmg=m.dmg0; m.tel=null; m.charge=null; m.counter=0; m.cast=null; G.awc=null; awkFakesClear(true); awkObjsClear();
@@ -2896,7 +2925,7 @@ function nextWave(){
       if(G.wave<G.TW){G.wave++;G.phase='wave';G.spawnQ=waveN(G.wave);G.spawnT=0;
         G.waveSides=G.nextSides; G.laneShow=G.waveSides;
         pushEv(['w',G.wave]); banner(`습격 ${G.wave} / ${G.TW}`,'언데드가 몰려옵니다'); me.pot=3;}
-      else if(G.stg.raid){ G.phase='boss'; G.waveSides=[0,1,3]; if(G.stg.raid===2)spawnAwake(); else spawnRaid(); }
+      else if(G.stg.raid){ G.phase='boss'; G.waveSides=[0,1,3]; if(G.stg.raid===3)spawnCastle(); else if(G.stg.raid===2)spawnAwake(); else spawnRaid(); }
       else{G.phase='boss'; G.waveSides=G.nextSides; G.laneShow=G.waveSides; const p=spawnPoint();
         const bt=G.stg.boss, b=spawnMob(bt,clamp(p.x,60,WW-60),clamp(p.y,60,WH-60),false);
         for(let i=0;i<4;i++)spawnMob(0,b.x+rand(-60,60),b.y+rand(-60,60),false);
@@ -3131,9 +3160,10 @@ function bossAI(m,dt,pls,sf){
   if(!best)return;
   if(m.wake>0){ m.wake-=dt; m.fa=Math.atan2(best.y-m.y,best.x-m.x); return; } /* 레이드 보스 등장 연출 */
   if(m.rk==='awk'&&awkAI(m,dt,pls,sf,best,bd,tau))return;
+  if(m.rk==='cas'&&casAI(m,dt,pls,sf,best,bd,tau))return;
   if(m.rk==='shd'&&!m.awk&&m.hp<m.max*.2){ m.awk=true; m.spd*=1.5; spark(m.x,m.y,'#ff2a2a',50); burst(m.x,m.y,'#8a0010',40,360); G.shake=1; sfx('boss'); announce('🩸 검은 그림자가 깨어났어요! 공격·이동 속도 +50%','#ff4a4a'); pushEv(['awk',1]); }
   if(m.hp<m.max*.75&&!m.sum0){m.sum0=true;summon(m);} if(m.hp<m.max*.5&&!m.sum1){m.sum1=true;summon(m);} if(m.hp<m.max*.25&&!m.sum2){m.sum2=true;summon(m);}
-  if(m.hp<m.max*.4&&!m.enr&&m.rk!=='shd'){ m.enr=true; m.spd*=1.25; spark(m.x,m.y,'#ff3a2a',40); G.shake=1; toast('우두머리가 분노했다!','#ff6a4a'); }
+  if(m.hp<m.max*.4&&!m.enr&&m.rk!=='shd'&&m.rk!=='cas'){ m.enr=true; m.spd*=1.25; spark(m.x,m.y,'#ff3a2a',40); G.shake=1; toast('우두머리가 분노했다!','#ff6a4a'); }
   if(m.counter>0){ m.counter-=dt; m.fa=Math.atan2(best.y-m.y,best.x-m.x); if(m.counter<=0){ m.counter=0; m.bt=m.rk==='shd'?rand(5,8)/(m.awk?1.5:1):m.enr?1:1.6; } return; }
   if(m.charge){ const c=m.charge; c.t-=dt; const sp=620;
     m.x=clamp(m.x+c.dx*sp*dt,40,WW-40); m.y=clamp(m.y+c.dy*sp*dt,40,WH-40);
@@ -3164,7 +3194,7 @@ function bossAI(m,dt,pls,sf){
       else if(t.k==='slam'){ for(const p of pls){ if(hyp(p.x-t.x,p.y-t.y)<t.r) mobHitPlayer(p.i,m.dmg*1.6*BSKM,'stun',1.2); }
         pushEv(['s',Math.round(t.x),Math.round(t.y),t.r]); slamFx(t.x,t.y,t.r); }
       else { const dx=t.tx-t.x,dy=t.ty-t.y,d=hyp(dx,dy)||1; m.charge={dx:dx/d,dy:dy/d,t:Math.min(.75,450/620),hit:{}}; }
-      m.tel=null; if(!m.counter)m.bt=(m.enr?rand(1.0,1.8):rand(1.6,2.8))*(m.rk==='awk'?AWK.CDK*((m.ph|0)<=1?.75:1):1); }   /* 각성 그림자 1페이즈는 기술 사이 쉬는 시간 추가 -25% */   /* 각성 그림자: 기술 사이 간격 -30% */
+      m.tel=null; if(!m.counter)m.bt=(m.enr?rand(1.0,1.8):rand(1.6,2.8))*(m.rk==='awk'?AWK.CDK*((m.ph|0)<=1?.75:1):m.rk==='cas'?CAS.CDK:1); }   /* 각성 그림자 1페이즈는 기술 사이 쉬는 시간 추가 -25% */   /* 각성 그림자: 기술 사이 간격 -30% */
     return; }
   // 시선 돌리기 (협동)
   if(pl1.length>1&&!tau&&best.i<10){ m.shk=(m.shk==null?rand(14,20):m.shk)-dt; if(m.shk<=0){ m.shk=rand(22,30); const top=best.i, other=pl1.find(q=>q.i!==top); if(other){ m.lock={i:other.i,t:5}; if(m.thr)m.thr[top]=(m.thr[top]||0)*.3; pushEv(['ag',other.i]); announce('👁️ 우두머리가 시선을 돌렸어요! 도발로 되찾으세요','#ff9a7a'); } } }
@@ -3174,7 +3204,7 @@ function bossAI(m,dt,pls,sf){
   const hvC=(G.stg&&G.stg.halve)||(m.rk==='sorc'?3.5:0); if(hvC){ m.hvT=(m.hvT==null?rand(9,13):m.hvT)-dt; }
   if(hvC&&m.hvT<=0&&m.bt<=0&&!tau){ m.hvT=m.enr?rand(17,23):rand(24,32); const du=m.enr?.85:1;
     m.tel={k:'slam',kind:'halve',x:m.x,y:m.y,r:285,t:0,dur:hvC*du}; pushEv(['hv',Math.round(m.tel.dur*10)]); halveWarn(); return; }
-  if(m.rk&&m.rk!=='awk'&&m.bt<=0&&bd<(m.rk==='sorc'?640:m.rk==='shd'?900:520)&&!tau){ raidPick(m,best,bd,pls); return; }
+  if(m.rk&&m.rk!=='awk'&&m.rk!=='cas'&&m.bt<=0&&bd<(m.rk==='sorc'?640:m.rk==='shd'?900:520)&&!tau){ raidPick(m,best,bd,pls); return; }
   if(!m.rk&&m.bt<=0&&bd<520&&!tau){
     const rr=Math.random(), du=m.enr?.8:1;
     if(rr<.14) m.tel={k:'slam',kind:'counter',x:m.x,y:m.y,r:Math.round(m.r*1.6),t:0,dur:.8};
@@ -3249,7 +3279,7 @@ function applyDmg(m,dmg,slow,fx){
   if(m.inv>0||m.shield>0)return;   /* 각성 그림자: 시전·페이즈 전환 중 무적, 배리어(지속 피해는 횟수에 안 셈) */
   if(m.dfM>1)dmg/=m.dfM;
   if(m.vuln&&m.vuln.t>0)dmg*=1+m.vuln.v;   /* 위압 함성: 받는 모든 피해 증가 (파티원 피해 포함) */
-  m.hp-=dmg; if(m.rk==='awk'&&!m.fake){ const fl=awkFloor(m); if(fl>0&&m.hp<m.max*fl)m.hp=m.max*fl-1; }   /* 다음 페이즈 문턱에서 한 번 멈춤 → 페이즈 전환 */
+  m.hp-=dmg; if((m.rk==='awk'&&!m.fake)||m.rk==='cas'){ const fl=m.rk==='cas'?casFloor(m):awkFloor(m); if(fl>0&&m.hp<m.max*fl)m.hp=m.max*fl-1; }   /* 다음 페이즈 문턱에서 한 번 멈춤 → 페이즈 전환 */
   m.flash=.12; if(slow){m.slowT=Math.max(m.slowT,slow); m.slowMax=Math.max(m.slowMax||0,slow);}
   if(fx){ if(fx.stun){ if(m.boss){ if(!(m.stunImm>0)){ m.stunT=Math.max(m.stunT||0,fx.stun); m.stunImm=fx.stun+2.5; addNum(m.x,m.y-m.r-22,'💫 기절!','#ffd84a',true); } } else { m.stunT=Math.max(m.stunT||0,fx.stun); if(m.et)m.et=null; if(m.ch)m.ch=null; if(m.dash)m.dash=null; } }   /* 우두머리도 기절함 (기절이 끝난 뒤 2.5초는 다시 기절하지 않아 연속 기절 방지) */ if(fx.burn){ m.burnT=Math.max(m.burnT||0,fx.burn); m.burnD=Math.max(m.burnD||0,fx.bd||0); m.bt=m.bt>0?m.bt:.3; m.bl=fx.bl?1:0; } }
   if(m.hp<=0) killMob(m);
@@ -3285,7 +3315,7 @@ function onKill(x,y,xp,tier,ilvl,type,lf){
   { const sp=me.D&&me.D.sp; if(sp&&!me.dead){ if(sp.bloodoath)me.mp=Math.min(me.D.maxMp,me.mp+10); if(sp.hring)me.hp=Math.min(me.D.maxHp,me.hp+me.D.maxHp*.02*sp.hring); if(sp.necro)me.mp=Math.min(me.D.maxMp,me.mp+15); if(sp.rvoid)me.mp=Math.min(me.D.maxMp,me.mp+15); if(sp.adeath)me.mp=Math.min(me.D.maxMp,me.mp+8); } }
   gainXp(Math.round(xp*comboMul()));
   { const RK=MT[type].raid; if(RK==='awk'){ const n=ri(3,7); shardAdd(me,n,'ashard'); later(.4,()=>toast(`✦ 각성 그림자 조각 +${n} (보유 ${shardCount(me,'ashard')})${(me.ashard|0)>0?' · 기타 칸이 가득 차서 일부는 보관 중':''}`,'#d8b0ff')); if(Math.random()<AW_P){ const hit=genHero(awKey(pick(['weapon','helm','armor','amulet','ring','shield']))); if(hit)dropItem(hit,x+rand(-20,20),y+rand(-20,20)); } saveChar(); }
-    if(RK&&RK!=='awk'){ const n=ri(1,3); shardAdd(me,n); later(.4,()=>toast(`🌑 그림자 조각 +${n} (보유 ${shardCount(me)})${(me.shard|0)>0?' · 기타 칸이 가득 차서 일부는 보관 중':''}`,'#c9a0ff'));
+    if(RK&&RK!=='awk'&&RK!=='cas'){ const n=ri(1,3); shardAdd(me,n); later(.4,()=>toast(`🌑 그림자 조각 +${n} (보유 ${shardCount(me)})${(me.shard|0)>0?' · 기타 칸이 가득 차서 일부는 보관 중':''}`,'#c9a0ff'));
       if(Math.random()<HERO_P){ const hit=genHero(heroKey(pick(HDROP[RK]))); if(hit)dropItem(hit,x+rand(-20,20),y+rand(-20,20)); } saveChar(); } }
   lf=lf>1?lf:1; const rolls=(tier>=2?4:tier>=1?2:1)+(tier<2?(Math.floor(lf-1)+(Math.random()<(lf-1)%1?1:0)):0);
   for(let i=0;i<rolls;i++){
@@ -4610,7 +4640,10 @@ const STSP={
  shd:{n:'검은 그림자',t:'삼남매 · 막내',img:'img/boss_shadow.png',c:'#b878ff'},
  awk:{n:'각성 그림자',t:'첫 번째 수호자',img:'img/boss_awake.png',c:'#a68bff'},
  awk2:{n:'각성 그림자',t:'삼남매의 잔향',img:'img/boss_awake2.png',c:'#a68bff'},
- awk3:{n:'각성 그림자',t:'각성',img:'img/boss_awake3.png',c:'#c08bff'}
+ awk3:{n:'각성 그림자',t:'각성',img:'img/boss_awake3.png',c:'#c08bff'},
+ cas:{n:'수문장 카스텔',t:'움직이는 성채',img:'img/boss_6.png',c:'#e0b070'},
+ cas2:{n:'수문장 카스텔',t:'무너지는 성벽',img:'img/boss_6_hurt1.png',c:'#e0a050'},
+ cas3:{n:'수문장 카스텔',t:'불타는 성채',img:'img/boss_6_hurt2.png',c:'#ff8a3a'}
 };
 const STORY={
  '1-1':{
@@ -4859,6 +4892,33 @@ const STORY={
    ['awk','그리고 조심해. 나를 삼킨 건 내가 아니었어. 아직, 저 아래에….'],
    ['nar','그림자가 흩어진 자리에 희미한 빛이 남았다. 세 남매의 목소리가 아주 멀리서, 함께 웃었다.','-'],
    ['nar','그리고 더 깊은 곳에서, 무언가가 눈을 떴다.','-']
+  ]},
+ '6':{
+  pre:[
+   ['nar','봉인 아래로 이어진 길 끝에서, 땅이 울린다. 산처럼 거대한 성벽이 스스로 걸어와 길을 막아선다.','cas'],
+   ['me','성이… 움직이고 있어?'],
+   ['cas','멈춰라. 이 문은 허락받은 자만 지난다.'],
+   ['cas','나는 수문장 카스텔. 이 길 끝에 선 성을 지키는 마지막 성벽이다.'],
+   ['me','길을 열어. 나는 저 너머로 가야 해.'],
+   ['cas','저 너머에는 이미 주인이 있다. 너 같은 침입자에게 열 성문은 없다.'],
+   ['nar','수문장이 방패를 땅에 박고 군기를 치켜든다. 성문이 굳게 닫힌다.','cas']
+  ],
+  p2:[
+   ['nar','성벽에 균열이 번지고, 갈라진 틈에서 불길이 치솟는다. 수문장의 방패가 한쪽으로 기운다.','cas2'],
+   ['cas2','…제법이군. 성벽이 이만큼 금이 간 건 오랜만이다.'],
+   ['cas2','하지만 성은 무너져도 문은 닫혀 있다. 한 걸음도 못 지나간다.']
+  ],
+  p3:[
+   ['nar','부서진 방패 너머로 불타는 성채가 모습을 드러낸다. 군기가 불에 타 재가 되어 흩날린다.','cas3'],
+   ['cas3','물러서지 않는다. 이 몸이 무너져도, 뒤의 성은 지켜야 한다!'],
+   ['cas3','전부 쏟아라! 이 문을 지나는 자는 모조리 짓밟아라!']
+  ],
+  post:[
+   ['nar','수문장의 성벽이 무너져 내린다. 연기 속에서 낡은 군기 한 장이 바람에 펄럭인다.','cas3'],
+   ['cas3','…문이 열렸군. 내 임무는 여기까지다.'],
+   ['me','너는 끝까지 문을 지켰어.'],
+   ['cas','그 너머의 성은… 나와 같지 않다. 문을 닫는 법을 잊은 성이다. 조심해라.'],
+   ['nar','길 끝, 안개 너머로 또 다른 성의 그림자가 어렴풋이 보인다. 이쪽을 향한 수많은 창끝이 어둠 속에서 빛난다.','-']
   ]}
 };
 var stS=null, stTm=0;
@@ -5045,7 +5105,7 @@ function updateHud(){
   { const rg=!!(me.buffs.rage&&me.buffs.rage.t>0&&!me.dead&&G.inGame), rv=$('#rageV'); if(rv.classList.contains('on')!==rg)rv.classList.toggle('on',rg); }
   const ph=G.phase;
   $('#hWave').textContent= ph==='prep'?(G.wave>=G.TW?`우두머리 출현까지 ${Math.max(0,Math.ceil(G.timer))}초`:`${G.stg.id} · 습격 ${G.wave+1}/${G.TW} 까지 ${Math.max(0,Math.ceil(G.timer))}초`)
-    : ph==='wave'?`${G.stg.id} · 습격 ${G.wave}/${G.TW}` : ph==='boss'?(G.stg&&G.stg.raid?(G.stg.raid===2?'🌑 각성 그림자 레이드':'⚔️ 삼남매 레이드'):'우두머리 토벌') : ph==='clear'?(G.mode==='guest'?'전리품 줍기':`전리품 줍기 ${Math.max(0,Math.ceil(G.clearT||0))}초`) : ph==='win'?'승리':'함락';
+    : ph==='wave'?`${G.stg.id} · 습격 ${G.wave}/${G.TW}` : ph==='boss'?(G.stg&&G.stg.raid?(G.stg.raid===3?'🏰 수문장 레이드':G.stg.raid===2?'🌑 각성 그림자 레이드':'⚔️ 삼남매 레이드'):'우두머리 토벌') : ph==='clear'?(G.mode==='guest'?'전리품 줍기':`전리품 줍기 ${Math.max(0,Math.ceil(G.clearT||0))}초`) : ph==='win'?'승리':'함락';
   { const c=G.castle, e=$('#hCastle'), on=!!(c&&G.inGame); if(e.hidden===on)e.hidden=!on; if(on){ const r=clamp(c.hp/c.max,0,1); $('#hCastleHp').style.transform=`scaleX(${r})`; const tx=Math.ceil(r*100)+'%'; const te=$('#hCastleT'); if(te.textContent!==tx)te.textContent=tx; e.classList.toggle('low',r<=.3); } }
   { const dd=!!(me.dead&&G.inGame&&['prep','wave','boss'].includes(G.phase)); $('#bSkip').hidden=!(G.phase==='clear'||dd); $('#bSkip').disabled=gobBusy(); $('#bRevBig').hidden=!dd; if(dd){ const rn=revItems(); $('#revBigN').textContent=rn; $('#bRevBig').classList.toggle('z',rn<=0); } }   /* 쓰러졌을 때: 승리 때와 같은 자리에 나가기 + 그 위에 부활 버튼 */
   const al=$('#hAlly');
@@ -6845,7 +6905,7 @@ function heroAnim(o,t,melee,wk){ wk=wk===undefined?1:wk;  /* wk: 걷기 시트�
 }
 const mobSfx=()=>{ const id=G.stg&&G.stg.id; return id?({'2':'_s2','3':'_s3'}[id[0]]||''):''; };  /* 스테이지별 일반 몹 이미지: mob_<이름>_s2 / _s3 (없으면 스테이지 1 이미지) */
 const mobKey=t=>{ const sf=mobSfx(), k='mob_'+SPRN[t]; return (sf&&sprGet(k+sf))?k+sf:k; };
-const preBoss=()=>{ try{ if(G.stg&&G.stg.raid===2){ for(const p of ['','2','3'])for(const q of ['','_atk','_sk','_cast'])sprGet('boss_awake'+p+q); } if(G.stg&&G.stg.raid===1){ for(const k of ['hero_war','hero_sorc']){ sprGet(k); sprGet(k+'_walk'); } sprGet('boss_shadow'); sprGet('boss_shadow_walk'); } const bt=G.stg&&G.stg.boss; if(bt!=null&&!(G.stg&&G.stg.raid)){ const bk=G.stg.bs||'mob_'+SPRN[bt]; sprGet(bk); sprGet(bk+'_atk'); sprGet(bk+'_sk'); if(BWALKS[bk])sprGet(bk+'_walk'); if(BWU[bk])sprGet(bk+'_wu'); }
+const preBoss=()=>{ try{ if(G.stg&&G.stg.raid===3){ for(const p of ['','_hurt1','_hurt2'])for(const q of ['','_atk','_sk','_cast'])sprGet('boss_6'+p+q); } if(G.stg&&G.stg.raid===2){ for(const p of ['','2','3'])for(const q of ['','_atk','_sk','_cast'])sprGet('boss_awake'+p+q); } if(G.stg&&G.stg.raid===1){ for(const k of ['hero_war','hero_sorc']){ sprGet(k); sprGet(k+'_walk'); } sprGet('boss_shadow'); sprGet('boss_shadow_walk'); } const bt=G.stg&&G.stg.boss; if(bt!=null&&!(G.stg&&G.stg.raid)){ const bk=G.stg.bs||'mob_'+SPRN[bt]; sprGet(bk); sprGet(bk+'_atk'); sprGet(bk+'_sk'); if(BWALKS[bk])sprGet(bk+'_walk'); if(BWU[bk])sprGet(bk+'_wu'); }
   const sf=mobSfx(); for(const t of [0,1,2,6,9,10,11]){ const k='mob_'+SPRN[t]; sprGet(k+sf); sprGet(k+sf+'_atk'); if(sf){ sprGet(k); sprGet(k+'_atk'); } } }catch(e){} };
 /* 몹 걸음·방향 상태: 실제로 움직인 거리만큼만 걸음 진행 · 좌우 반전은 부드럽게 돌아서기 · 공격 자세도 서서히 */
 function mobGait(m,t){
@@ -6880,21 +6940,21 @@ function drawMob(m,t){
   const X=x+ca*lunge, Y=y+sa*lunge+bob*.3, px=-sa, py=ca;
   const E=(s,f,e,rr,iris,pup)=>ceye(X+ca*r*f+px*r*e*s,Y+sa*r*f+py*r*e*s,rr,fa,iris,pup);
   const RK=MT[m.type].raid; if(RK==='shd'&&Math.random()<.35)parts.push({x:x+rand(-r,r)*.8,y:y-rand(0,r*2.2),vx:rand(-12,12),vy:-rand(18,40),t:0,life:rand(.5,.9),col:m.awk?'#5a0610':'#120818',r:rand(3,7)});
-  const AWP=RK==='awk'?((m.ph|0)>1?String(m.ph|0):''):'';
-  const bk=RK?MT[m.type].img+AWP:(m.boss&&G.stg.bs)?(sprGet(G.stg.bs)?G.stg.bs:null):m.boss?'mob_'+SPRN[m.type]:mobKey(m.type), bps=!m.boss?(m.atk>0?'_atk':''):RK==='awk'&&m.inv>0?'_cast':m.charge?'_sk':(m.tel&&m.tel.kind!=='counter')?((BWU[bk]&&m.tel.t<m.tel.dur*.7&&sprGet(bk+'_wu'))?'_wu':'_sk'):m.atk>0?'_atk':'';  /* 보스: 스킬 준비·돌진 중엔 스킬 포즈, 평타 중엔 공격 포즈 */
+  const AWP=RK==='awk'?((m.ph|0)>1?String(m.ph|0):''):RK==='cas'?((m.ph|0)>1?'_hurt'+((m.ph|0)-1):''):'';
+  const bk=RK?MT[m.type].img+AWP:(m.boss&&G.stg.bs)?(sprGet(G.stg.bs)?G.stg.bs:null):m.boss?'mob_'+SPRN[m.type]:mobKey(m.type), bps=!m.boss?(m.atk>0?'_atk':''):RK==='awk'&&m.inv>0?'_cast':RK==='cas'?((m.inv>0||m.charge)?'_sk':m.tel?(m.tel.kind==='slam'?'_atk':'_sk'):m.atk>0?'_atk':''):m.charge?'_sk':(m.tel&&m.tel.kind!=='counter')?((BWU[bk]&&m.tel.t<m.tel.dur*.7&&sprGet(bk+'_wu'))?'_wu':'_sk'):m.atk>0?'_atk':'';  /* 보스: 스킬 준비·돌진 중엔 스킬 포즈, 평타 중엔 공격 포즈 */
   let silDone=false;   /* 번쩍임을 몸 모양(흰 실루엣)으로 그렸는지 */
   const SI=bk&&((bps&&sprGet(bk+bps))||sprGet(bk));
   if(SI){ const BW=m.boss&&BWALKS[bk], WK=(BW&&!bps)?sprGet(bk+'_walk'):null;   /* 보스 걷기 시트 (움직일 때만, 스킬·공격 포즈가 아닐 때) */
     if(WK){ if(GT.wa>.35)m._wkOn=true; else if(GT.wa<.15)m._wkOn=false; } const useWK=!!(WK&&m._wkOn);
     const ph=m.type===6?0:GT.wp, wa=GT.wa*(useWK?.4:1), fl=m.type===6?Math.sin(m.anim*22):0, ak=GT.ak;  /* 걸음 위상은 실제 이동 거리 기준 (서 있으면 통통 튀지 않고 숨쉬기만) */
     const SO={flip:GT.flip,rot:Math.sin(ph)*(m.boss?.04:.1)*wa+ak*.25+GT.tk*.08,hop:(m.type===6?(Math.sin(m.anim*5)*r*.25+r*.4):Math.abs(Math.sin(ph))*r*(m.boss?.06:.16)*wa),sx:(1-fl*.05)*(1-.12*GT.tk),sy:(1+fl*.12)*(1+.04*GT.tk)+Math.sin(ph*2)*.03*wa+(m.type===6?0:Math.sin(t*2.2+(m.id||0))*.014*(1-wa)),fx:ak*r*.4};
-    const BH=RK==='awk'?78*1.75:RK?78*1.3:r*3.2;   /* 레이드 보스: 일반 캐릭터(78)의 1.3배 */
+    const BH=RK==='awk'?78*1.75:RK==='cas'?78*3.1:RK?78*1.3:r*3.2;   /* 레이드 보스: 일반 캐릭터(78)의 1.3배 */
     let cur={im:SI,h:(m.boss?BH:r*3.4)*(m.boss&&bps?SI.height/(sprGet(bk)||SI).height:1)};   /* 포즈 그림 캔버스 높이가 달라도 같은 배율로 */
     if(useWK){ const cw=WK.width/BW.n, fi=Math.floor((((GT.wp*1.8/(Math.PI*BW.cyc))%1)+1)%1*BW.n); cur={im:WK,fr:[fi*cw,cw,WK.height],h:BH*(WK.height/BW.k)/sprGet(bk).height}; }
     let PV=null,pq=1; if(m.boss){ if(m._pc&&m._pc.im!==cur.im){ m._pv=m._pc; m._pt=t; } m._pc=cur; if(m._pv){ pq=clamp((t-m._pt)/.1,0,1); if(pq<1)PV=m._pv; } }   /* 보스 포즈 교체: 0.1초 크로스페이드 */
     const dr=(c,al)=>{ const ga=ctx.globalAlpha; if(al<1)ctx.globalAlpha=ga*al; const o=c.fr?{...SO,fr:c.fr}:SO;
       if(RK&&(G.sib||0)>0){ const pu=.55+.3*Math.sin(t*6+(m.id||0)); ctx.globalAlpha=ga*al*pu; ctx.save(); ctx.globalCompositeOperation='lighter'; sprDraw(rbTint(c.im,'glow'),X,Y+r*.5+c.h*.02,c.h*1.08,fa,o); ctx.restore(); ctx.globalAlpha=ga*(al<1?al:1); }   /* 형제가 쓰러지면 붉은 테두리 빛 */
-      sprDraw(RK&&RK!=='awk'?(RK==='shd'&&!m.awk?c.im:rbTint(c.im,RK==='shd'?'red':'dark')):c.im,X,Y+r*.5,c.h,fa,o);
+      sprDraw(RK&&RK!=='awk'&&RK!=='cas'?(RK==='shd'&&!m.awk?c.im:rbTint(c.im,RK==='shd'?'red':'dark')):c.im,X,Y+r*.5,c.h,fa,o);
       if(m.flash>0){ ctx.globalAlpha=ga*al*Math.min(.75,m.flash*7); sprDraw(rbTint(c.im,'white'),X,Y+r*.5,c.h,fa,o); silDone=true; }   /* 맞은 순간 몸 모양 그대로 하얗게 번쩍 (색 입힌 그림은 처음 한 번만 만들어 재사용) */
       ctx.globalAlpha=ga; };
     if(PV)dr(PV,1);
@@ -7348,12 +7408,12 @@ function drawNums(){
   ctx.globalAlpha=1;
 }
 function drawBossBar(){
-  if(G.stg&&G.stg.raid===2){ if(G.phase!=='boss')return; const b=awkRealDraw(); if(!b)return;
+  if(G.stg&&(G.stg.raid===2||G.stg.raid===3)){ if(G.phase!=='boss')return; const CS=G.stg.raid===3, b=CS?casBoss():awkRealDraw(); if(!b)return;
     const p=b.hpp!==undefined?b.hpp/100:b.hp/b.max, mw=mmW(), w=Math.min(240,VW-mw-80), x=Math.max(10,Math.min((VW-w)/2,VW-mw-52-w)), y=86, ph=b.ph|0||1;
-    ctx.fillStyle='rgba(0,0,0,.78)'; ctx.fillRect(x-2,y-2,w+4,14); ctx.fillStyle=b.inv>0?'#6a5aa8':ph===3?'#9a2aff':ph===2?'#6e3ad0':'#4a2a8a'; ctx.fillRect(x,y,w*clamp(p,0,1),10);
+    ctx.fillStyle='rgba(0,0,0,.78)'; ctx.fillRect(x-2,y-2,w+4,14); ctx.fillStyle=CS?(b.inv>0?'#a08a60':ph===3?'#c0381a':ph===2?'#b86a24':'#8a6a3a'):b.inv>0?'#6a5aa8':ph===3?'#9a2aff':ph===2?'#6e3ad0':'#4a2a8a'; ctx.fillRect(x,y,w*clamp(p,0,1),10);
     ctx.fillStyle='rgba(255,255,255,.22)'; ctx.fillRect(x,y,w*clamp(p,0,1),3);
-    for(const q of [.7,.35]){ ctx.fillStyle='#e9d9b4'; ctx.fillRect(x+w*q-1,y-4,2,18); }   /* 페이즈 경계 */
-    ctx.font='700 12px "Noto Sans KR",sans-serif'; ctx.textAlign='center'; ctx.lineWidth=3; ctx.strokeStyle='#000'; const nm=`각성 그림자 · ${ph}페이즈${b.inv>0?' · 무적':''}`; ctx.strokeText(nm,x+w/2,y+26); ctx.fillStyle='#d8c8ff'; ctx.fillText(nm,x+w/2,y+26);
+    for(const q of (CS?[.67,.34]:[.7,.35])){ ctx.fillStyle='#e9d9b4'; ctx.fillRect(x+w*q-1,y-4,2,18); }   /* 페이즈 경계 */
+    ctx.font='700 12px "Noto Sans KR",sans-serif'; ctx.textAlign='center'; ctx.lineWidth=3; ctx.strokeStyle='#000'; const nm=`${CS?'수문장 카스텔':'각성 그림자'} · ${ph}페이즈${b.inv>0?' · 무적':''}`; ctx.strokeText(nm,x+w/2,y+26); ctx.fillStyle=CS?'#f0dcb0':'#d8c8ff'; ctx.fillText(nm,x+w/2,y+26);
     { const pc=Math.max(1,Math.round(p*100))+'%'; ctx.textAlign='left'; ctx.strokeText(pc,x+w+6,y+9); ctx.fillStyle='#e9d9b4'; ctx.fillText(pc,x+w+6,y+9); }
     const A=G.awc; if(A&&AWC[A.k]){ const left=Math.max(0,A.dur-A.t), cw=Math.min(240,VW*.6), cx=(VW-cw)/2, cy=y+40, pu=.6+.4*Math.sin(T*10);
       ctx.fillStyle='rgba(10,6,20,.85)'; ctx.fillRect(cx-3,cy-3,cw+6,30); ctx.strokeStyle=`rgba(180,150,255,${pu})`; ctx.lineWidth=2; ctx.strokeRect(cx-3,cy-3,cw+6,30);
