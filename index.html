@@ -1362,7 +1362,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.4.0510</div>
+    <div class="ver" id="verT">v0.6.4.0511</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1975,38 +1975,31 @@ const DEX_SP=[['무기','⚔️',['butcher','bloodoath','judge','necro','frost',
 const DEX_ST=[['행운의 도박꾼 세트','🎲',['cas_wpn','cas_armor','cas_amu']],['그림자 세트','🌑',['hdag','hhelm','harmor','hamu','hring','@hoff_']],['각성 세트','⭐',['aw_wpn','aw_helm','aw_armor','aw_amu','aw_ring','@awoff_']]];   /* '@…' = 내 직업의 보조 장비 (반지는 두 칸이어도 한 종류로 셈) */
 const DEX_TITLE='유니크 수집가';
 /* 칭호: 캐릭터마다 하나를 장착(tt) · 얻은 칭호를 시작화면 카드의 칭호 칩 → 바텀시트에서 고름 · tts=이미 확인한(NEW가 꺼진) 칭호들 */
-/* 칭호 달성 기록(계정 전체): dkdef2.ttf — 클라우드 저장에 함께 실려요. f=달성한 칭호들 · pets=지금까지 얻은 펫 종류(펫 종류별 칭호를 만들 때 쓰려고 미리 기록) */
-const TTF_KEY='dkdef2.ttf', TT_EQK=['helm','armor','weapon','amulet','ring1','ring2','shield']; let TTF=null, TTFR=null, TTFT=-1e9;
-function ttfAll(){ const nw=performance.now(); if(TTF&&nw-TTFT<400)return TTF; TTFT=nw; const raw=lsGet(TTF_KEY)||''; if(TTF&&raw===TTFR)return TTF; TTFR=raw; let o=null; try{ o=JSON.parse(raw||'null'); }catch(e){} TTF=o&&typeof o==='object'?o:{}; if(!TTF.f||typeof TTF.f!=='object')TTF.f={}; if(!TTF.pets||typeof TTF.pets!=='object')TTF.pets={}; return TTF; }
-const ttfHas=k=>!!ttfAll().f[k];
-function ttfSave(){ const s=JSON.stringify(TTF); TTFR=s; TTFT=performance.now(); lsSet(TTF_KEY,s); }
-function ttfSet(k,quiet){ const T=ttfAll(); if(T.f[k]||!TT_BY[k])return false; T.f[k]=1; ttfSave(); if(!quiet){ try{ const m='🏅 새 칭호 획득: '+TT_BY[k].n, sh=$('#sheet'); if(sh&&!sh.hidden)sheetToast(m,'#ffd84a'); else toast(m,'#ffd84a'); sfx('rare'); }catch(e){} } return true; }
-function ttfPet(id,quiet){ const T=ttfAll(); if(!PETS[id])return; if(!T.pets[id]){ T.pets[id]=1; ttfSave(); } ttfSet('pet',quiet); }
-function ttfGlit(p,quiet){ if(!p||!p.eq||ttfHas('glit'))return; if(TT_EQK.every(k=>p.eq[k]&&(p.eq[k].enh|0)>=MAXENH))ttfSet('glit',quiet); }
-/* 이미 조건을 채운 캐릭터·보관함·마을은 시작화면을 그릴 때 한 번씩 훑어서 소급 인정해요(알림 없이 NEW 배지로만 알려요) */
-function ttfSync(chars){ try{
-  const efOk=it=>!!it&&(it.ef|0)>=10, s5=TT_S5();
-  for(const c of chars){ if(!c)continue;
-    if(c.pet&&PETS[c.pet.id])ttfPet(c.pet.id,1);
-    if(s5>0&&c.cc&&(c.cc[s5]|0)>=100)ttfSet('lights',1);
-    if(!ttfHas('enf')&&((c.inv||[]).some(efOk)||TT_EQK.some(k=>efOk(c.eq&&c.eq[k]))))ttfSet('enf',1);
-    ttfGlit(c,1); }
-  if(!ttfHas('enf')&&getStore().inv.some(efOk))ttfSet('enf',1);
-  labTick(); const L=getTown().lab; if(L&&L.a&&L.a.l>=LAB_MAX)ttfSet('labA',1); if(L&&L.b&&L.b.l>=LAB_MAX)ttfSet('labB',1);
-}catch(e){ console.error(e); } }
+/* 칭호 달성 기록은 캐릭터마다 따로 저장해요: tf={칭호id:1} · tpt={이 캐릭터가 지금까지 가졌던 펫 종류(펫 종류별 칭호를 만들 때 쓰려고 미리 기록)}. 상태만 봐도 아는 것(스테이지 클리어 횟수·연속 실패 아이템·펫·+10 장비)은 캐릭터를 불러올 때 바로 인정해요 */
+const TT_EQK=['helm','armor','weapon','amulet','ring1','ring2','shield'];
+const ttfHas=(p,k)=>!!(p&&p.tf&&p.tf[k]);
+function ttfSet(k,quiet,p){ p=p||me; if(!p||!TT_BY[k]||ttfHas(p,k))return false; (p.tf||(p.tf={}))[k]=1; if(p===me)saveChar(); if(!quiet&&p===me){ try{ const m='🏅 새 칭호 획득: '+TT_BY[k].n, sh=$('#sheet'); if(sh&&!sh.hidden)sheetToast(m,'#ffd84a'); else toast(m,'#ffd84a'); sfx('rare'); }catch(e){} } return true; }
+function ttfPet(id,p,quiet){ p=p||me; if(!p||!PETS[id])return; if(!p.tpt)p.tpt={}; if(!p.tpt[id]){ p.tpt[id]=1; if(p===me)saveChar(); } ttfSet('pet',quiet,p); }
+function ttfGlit(p,quiet){ p=p||me; if(!p||!p.eq||ttfHas(p,'glit'))return; if(TT_EQK.every(k=>p.eq[k]&&(p.eq[k].enh|0)>=MAXENH))ttfSet('glit',quiet,p); }
+function ttfLab(){ try{ if(!me||(ttfHas(me,'labA')&&ttfHas(me,'labB')))return; const L=getTown().lab; if(L&&L.a&&L.a.l>=LAB_MAX)ttfSet('labA'); if(L&&L.b&&L.b.l>=LAB_MAX)ttfSet('labB'); }catch(e){} }   /* 연구소를 열거나 연구가 끝날 때, 지금 캐릭터가 얻어요 */
+function ttfDerive(p){ const efOk=it=>!!it&&(it.ef|0)>=10, f=p.tf||(p.tf={}), s5=TT_S5();
+  if(p.pet&&PETS[p.pet.id]){ f.pet=1; (p.tpt||(p.tpt={}))[p.pet.id]=1; }
+  if(s5>0&&p.cc&&(p.cc[s5]|0)>=100)f.lights=1;
+  if((p.inv||[]).some(efOk)||TT_EQK.some(k=>efOk(p.eq&&p.eq[k])))f.enf=1;
+  if(p.eq&&TT_EQK.every(k=>p.eq[k]&&(p.eq[k].enh|0)>=MAXENH))f.glit=1; }
 const TT_S5=()=>STAGES.findIndex(s=>s.id==='5')+1, TT_LAB=k=>{ try{ return getTown().lab[k].l|0; }catch(e){ return 0; } }, TT_NO=()=>'아직 달성하지 못했어요';
 const TITLES=[{id:'dex',n:DEX_TITLE,cond:'도감 특수 유니크 20종 수집',eff:'공격 속도 +5%',own:p=>dexSpN(p)>=20,prog:p=>`도감 ${Math.min(20,dexSpN(p))} / 20종`,ap:d=>{d.ias+=5;}},
-  {id:'lights',n:'소등하겠습니다',cond:'스테이지 5(봉인의 심연) 100회 클리어',eff:'마나 회복 +20%',own:()=>ttfHas('lights'),prog:p=>`이 캐릭터 ${Math.min(100,(p.cc&&p.cc[TT_S5()])|0)} / 100회`,ap:d=>{d.mr+=20;}},
-  {id:'pot',n:'카페인 중독자',cond:'한 스테이지에서 회복 물약을 20번 이상 쓰고 클리어',eff:'최대 마나 +50',own:()=>ttfHas('pot'),prog:TT_NO,ap:d=>{d.mana+=50;}},
-  {id:'enf',n:'로또 사러 갑니다',cond:'아이템 강화 10연속 실패',eff:'모든 능력치 +5',own:()=>ttfHas('enf'),prog:TT_NO,ap:d=>{d.str+=5;d.dex+=5;d.vit+=5;d.ene+=5;}},
-  {id:'pet',n:'신입 사육사',cond:'펫 획득',eff:'최대 생명력 +100',own:()=>ttfHas('pet'),prog:TT_NO,ap:d=>{d.life+=100;}},
-  {id:'bulk',n:'동묘 도매상',cond:'일괄 판매로 한 번에 장비 50개 판매',eff:'판매 가격 +10%',own:()=>ttfHas('bulk'),prog:TT_NO,ap:d=>{d.sellP=(d.sellP||0)+10;}},
-  {id:'glit',n:'글리터 홀릭',cond:'모든 장비 칸(7칸)에 +10강 장비 착용',eff:'드롭률 +33%',own:()=>ttfHas('glit'),prog:p=>`지금 +10강 착용 ${TT_EQK.filter(k=>p.eq&&p.eq[k]&&(p.eq[k].enh|0)>=MAXENH).length} / 7칸`,ap:d=>{d.mf+=33;}},
-  {id:'jpg',n:'잭팟 마스터',cond:'달빛 도박장에서 대박(골드) 당첨',eff:'치명타 확률 +3%',own:()=>ttfHas('jpg'),prog:TT_NO,ap:d=>{d.crit+=3;}},
-  {id:'jps',n:'⑦⑦⑦',cond:'달빛 도박장에서 대박(조각) 당첨',eff:'모든 능력치 +7',own:()=>ttfHas('jps'),prog:TT_NO,ap:d=>{d.str+=7;d.dex+=7;d.vit+=7;d.ene+=7;}},
-  {id:'gob0',n:'빛보다 느린자',cond:'황금 고블린을 아무도 한 번도 때리지 못하고 놓치기',eff:'이동 속도 +1%',own:()=>ttfHas('gob0'),prog:TT_NO,ap:d=>{d.ms+=1;}},
-  {id:'labA',n:'석학 박사',cond:'그림자 연구소 성벽 강화 최고 레벨 달성',eff:'이동 속도 +3%',own:()=>ttfHas('labA'),prog:()=>`성벽 강화 Lv.${TT_LAB('a')} / ${LAB_MAX}`,ap:d=>{d.ms+=3;}},
-  {id:'labB',n:'수리영역 만점자',cond:'그림자 연구소 성벽 수리 최고 레벨 달성',eff:'생명력 흡수 +3%',own:()=>ttfHas('labB'),prog:()=>`성벽 수리 Lv.${TT_LAB('b')} / ${LAB_MAX}`,ap:d=>{d.ls+=3;}}];
+  {id:'lights',n:'소등하겠습니다',cond:'스테이지 5(봉인의 심연) 100회 클리어',eff:'마나 회복 +20%',own:p=>ttfHas(p,'lights'),prog:p=>`이 캐릭터 ${Math.min(100,(p.cc&&p.cc[TT_S5()])|0)} / 100회`,ap:d=>{d.mr+=20;}},
+  {id:'pot',n:'카페인 중독자',cond:'한 스테이지에서 회복 물약을 20번 이상 쓰고 클리어',eff:'최대 마나 +50',own:p=>ttfHas(p,'pot'),prog:TT_NO,ap:d=>{d.mana+=50;}},
+  {id:'enf',n:'로또 사러 갑니다',cond:'아이템 강화 10연속 실패',eff:'모든 능력치 +5',own:p=>ttfHas(p,'enf'),prog:TT_NO,ap:d=>{d.str+=5;d.dex+=5;d.vit+=5;d.ene+=5;}},
+  {id:'pet',n:'신입 사육사',cond:'펫 획득',eff:'최대 생명력 +100',own:p=>ttfHas(p,'pet'),prog:TT_NO,ap:d=>{d.life+=100;}},
+  {id:'bulk',n:'동묘 도매상',cond:'일괄 판매로 한 번에 장비 50개 판매',eff:'판매 가격 +10%',own:p=>ttfHas(p,'bulk'),prog:TT_NO,ap:d=>{d.sellP=(d.sellP||0)+10;}},
+  {id:'glit',n:'글리터 홀릭',cond:'모든 장비 칸(7칸)에 +10강 장비 착용',eff:'드롭률 +33%',own:p=>ttfHas(p,'glit'),prog:p=>`지금 +10강 착용 ${TT_EQK.filter(k=>p.eq&&p.eq[k]&&(p.eq[k].enh|0)>=MAXENH).length} / 7칸`,ap:d=>{d.mf+=33;}},
+  {id:'jpg',n:'잭팟 마스터',cond:'달빛 도박장에서 대박(골드) 당첨',eff:'치명타 확률 +3%',own:p=>ttfHas(p,'jpg'),prog:TT_NO,ap:d=>{d.crit+=3;}},
+  {id:'jps',n:'⑦⑦⑦',cond:'달빛 도박장에서 대박(조각) 당첨',eff:'모든 능력치 +7',own:p=>ttfHas(p,'jps'),prog:TT_NO,ap:d=>{d.str+=7;d.dex+=7;d.vit+=7;d.ene+=7;}},
+  {id:'gob0',n:'빛보다 느린자',cond:'황금 고블린을 아무도 한 번도 때리지 못하고 놓치기',eff:'이동 속도 +1%',own:p=>ttfHas(p,'gob0'),prog:TT_NO,ap:d=>{d.ms+=1;}},
+  {id:'labA',n:'석학 박사',cond:'그림자 연구소 성벽 강화 최고 레벨 달성',eff:'이동 속도 +3%',own:p=>ttfHas(p,'labA'),prog:()=>`성벽 강화 Lv.${TT_LAB('a')} / ${LAB_MAX}`,ap:d=>{d.ms+=3;}},
+  {id:'labB',n:'수리영역 만점자',cond:'그림자 연구소 성벽 수리 최고 레벨 달성',eff:'생명력 흡수 +3%',own:p=>ttfHas(p,'labB'),prog:()=>`성벽 수리 Lv.${TT_LAB('b')} / ${LAB_MAX}`,ap:d=>{d.ls+=3;}}];
 const TT_BY=Object.fromEntries(TITLES.map(t=>[t.id,t]));
 const ttOwn=p=>TITLES.filter(t=>t.own(p)), ttCur=p=>{ const t=p&&p.tt&&TT_BY[p.tt]; return t&&t.own(p)?t:null; };
 const ttNew=p=>!lsGet('dkdef2.tti')||ttOwn(p).some(t=>!(p.tts&&p.tts.includes(t.id)));   /* NEW: 칭호 칩을 한 번도 안 열었을 때 + 새 칭호를 얻은 뒤 아직 확인 안 했을 때 */
@@ -2238,7 +2231,7 @@ const LAB_SH=l=>100+50*(l-LAB_GL);   /* Lv.6 연구부터는 🌑 그림자 조�
 const labGold=l=>l<LAB_GL;
 const LAB_R={a:{n:'성벽 강화',e:'🧱',im:'img/lab_wall_up.png'},b:{n:'성벽 수리',e:'🔧',im:'img/lab_wall_fix.png'}};
 const LAB_UI='B'; /* 연구 카드 배치: B 2열 타일(확정) — A는 가로 카드 */
-function labTick(){ const L=getTown().lab, now=Date.now(), done=[]; for(const k of ['a','b']){ const r=L[k]; if(r.e>0&&now>=r.e){ r.l=Math.min(LAB_MAX,r.l+1); r.e=0; done.push(k); } } if(done.length){ saveTown(); for(const k of done)if(L[k].l>=LAB_MAX)ttfSet(k==='a'?'labA':'labB'); } return done; }
+function labTick(){ const L=getTown().lab, now=Date.now(), done=[]; for(const k of ['a','b']){ const r=L[k]; if(r.e>0&&now>=r.e){ r.l=Math.min(LAB_MAX,r.l+1); r.e=0; done.push(k); } } if(done.length)saveTown(); ttfLab(); return done; }
 const labDefPct=()=>{ const L=getTown().lab; if((L.lv|0)<1)return 0; labTick(); return L.a.l*2; };
 const labFixPct=()=>{ const L=getTown().lab; labTick(); return (L.lv|0)>=1?10+2*L.b.l:10; };
 /* 자산 = 지금 캐릭터(골드·그림자 조각·각성 조각) + 공유창고. 쓸 때는 캐릭터 몫을 먼저 쓰고, 모자란 만큼만 창고에서 뺌 */
@@ -2347,6 +2340,7 @@ function loadChar(id){
     { const lg=k=>{ const v=parseInt(lsGet(k)); return isNaN(v)?-1:clamp(v,-1,2); }; if(p.as===undefined)p.as=lg('dkdef2.asell'); if(p.sy===undefined)p.sy=lg('dkdef2.asyn'); if(p.sy>=0)p.sy=2; } /* 캐릭터별 자동판매/합성: 기존 캐릭터는 예전 전역 설정을 한 번 이어받음 */
     { const q={}; if(p.dx&&typeof p.dx==='object')for(const k in p.dx){ const v=Math.floor(+p.dx[k]); if(v>0&&isFinite(v)&&dexOk(k))q[k]=Math.min(v,9999); } p.dx=q; if(p.dxs!==undefined)p.dxs=Math.max(0,Math.min(999,+p.dxs|0)); { const n={}; if(p.dxn&&typeof p.dxn==='object')for(const k in p.dxn)if(dexOk(k)&&(p.dx[k]|0)>0)n[k]=1; p.dxn=n; } if(p.sd!==undefined)p.sd=p.sd===1?1:0; if(p.bs!==undefined)p.bs=Array.isArray(p.bs)?p.bs.map(x=>x|0).filter(x=>x>=0&&x<=3):[0,1]; if(p.gas!==undefined)p.gas=Math.max(-1,Math.min(2,p.gas|0)); }   /* 도감: 아이템별 직접 획득 횟수 · dxs = 도감을 마지막으로 열어 본 때의 수집 수(그보다 늘면 시작화면 도감 버튼에 NEW) */
     p.sp=p.sp?1:0;   /* 캐릭터별 1.3배속 설정 */ p.hc=p.hc?1:0; p.hd=p.hc&&p.hd>0?Math.floor(p.hd):0; p.hs=p.hc&&p.hs>0?p.hs|0:0;   /* 하드코어: hc=1 · hd=사망 시각(ms) · hs=사망한 스테이지 번호 */ petNorm(p);
+    { const q={}, q2={}; if(p.tf&&typeof p.tf==='object')for(const k in p.tf)if(TT_BY[k]&&p.tf[k])q[k]=1; if(p.tpt&&typeof p.tpt==='object')for(const k in p.tpt)if(PETS[k]&&p.tpt[k])q2[k]=1; p.tf=q; p.tpt=q2; ttfDerive(p); }   /* 칭호 달성 기록(캐릭터별) */
     p.tts=Array.isArray(p.tts)?p.tts.filter(x=>TT_BY[x]):[]; p.tt=p.tt&&TT_BY[p.tt]&&TT_BY[p.tt].own(p)?p.tt:'';   /* 칭호: 장착(tt)은 얻은 것만 인정 */
     p.au=Math.max(0,Math.min(2,p.au|0));   /* 캐릭터별 AUTO 설정 (0 꺼짐 · 1 이동 · 2 이동+스킬) — 스테이지를 옮겨도 유지 */
     p.eq=p.eq||{}; if(p.eq.shield===undefined)p.eq.shield=null;
@@ -2386,7 +2380,7 @@ function migrateChars(){
 }
 function createChar(cls,name,nid,hc){ const ids=charIds(); if(ids.length>=MAXCHAR||!CLASSES[cls])return null; if(nameTaken(name))return null; const p=newChar(cls,name,nid); if(hc)p.hc=1; p.ms=MAILQ.map(q=>q.id); lsSet(charKey(p.id),JSON.stringify(packChar(p))); ids.push(p.id); setIds(ids); selId=p.id; lsSet('dkdef2.sel',selId); return p; }
 function deleteChar(id){ setIds(charIds().filter(x=>x!==id)); lsDel(charKey(id)); lsDel('dkdef2.rk.'+id); lsDel('dkdef2.nmv.'+id); if(selId===id){selId='';lsSet('dkdef2.sel','');} rkQueueDel(id); nameQueueRel(id); }
-function packChar(p){ const {id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear,as,sy,gs,au,sp,ct,cts,cat,dv4,shard,ashard,misc,mail,ms,tut,cc,eq2,es,pet,dx,dxs,dxn,gas,sd,bs,hc,hd,hs,tt,tts}=p; return {tt:tt&&TT_BY[tt]?tt:undefined,tts:Array.isArray(tts)&&tts.length?tts:undefined,hc:hc?1:undefined,hd:hc&&hd>0?hd:undefined,hs:hc&&hs>0?hs|0:undefined,bs:Array.isArray(bs)?bs:undefined,sd:sd===1?1:undefined,dxn:dxn&&Object.keys(dxn).length?dxn:undefined,gas:gas===undefined?undefined:Math.max(-1,Math.min(2,gas|0)),dx:dx&&Object.keys(dx).length?dx:undefined,dxs:dxs===undefined?undefined:Math.max(0,dxs|0),id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear:clear|0,au:Math.max(0,Math.min(2,au|0)),sp:sp?1:0,ct:ct>0?ct|0:0,cts:cts>0?cts|0:undefined,cat:cat>0?cat|0:0,as:as===undefined?-1:as,sy:sy===undefined?-1:sy,gs:gs?1:undefined,dv4:dv4?1:0,shard:shard|0,ashard:(ashard|0)||undefined,misc:Array.isArray(misc)?misc:undefined,mail:Array.isArray(mail)?mail:undefined,ms:Array.isArray(ms)?ms:undefined,tut:tut||undefined,cc:cc&&Object.keys(cc).length?cc:undefined,eq2:eq2&&Object.values(eq2).some(Boolean)?eq2:undefined,es:es===1?1:undefined,pet:pet&&PETS[pet.id]?{id:pet.id,xp:Math.floor(pet.xp)||0}:undefined}; }
+function packChar(p){ const {id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear,as,sy,gs,au,sp,ct,cts,cat,dv4,shard,ashard,misc,mail,ms,tut,cc,eq2,es,pet,dx,dxs,dxn,gas,sd,bs,hc,hd,hs,tt,tts,tf,tpt}=p; return {tf:tf&&Object.keys(tf).length?tf:undefined,tpt:tpt&&Object.keys(tpt).length?tpt:undefined,tt:tt&&TT_BY[tt]?tt:undefined,tts:Array.isArray(tts)&&tts.length?tts:undefined,hc:hc?1:undefined,hd:hc&&hd>0?hd:undefined,hs:hc&&hs>0?hs|0:undefined,bs:Array.isArray(bs)?bs:undefined,sd:sd===1?1:undefined,dxn:dxn&&Object.keys(dxn).length?dxn:undefined,gas:gas===undefined?undefined:Math.max(-1,Math.min(2,gas|0)),dx:dx&&Object.keys(dx).length?dx:undefined,dxs:dxs===undefined?undefined:Math.max(0,dxs|0),id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear:clear|0,au:Math.max(0,Math.min(2,au|0)),sp:sp?1:0,ct:ct>0?ct|0:0,cts:cts>0?cts|0:undefined,cat:cat>0?cat|0:0,as:as===undefined?-1:as,sy:sy===undefined?-1:sy,gs:gs?1:undefined,dv4:dv4?1:0,shard:shard|0,ashard:(ashard|0)||undefined,misc:Array.isArray(misc)?misc:undefined,mail:Array.isArray(mail)?mail:undefined,ms:Array.isArray(ms)?ms:undefined,tut:tut||undefined,cc:cc&&Object.keys(cc).length?cc:undefined,eq2:eq2&&Object.values(eq2).some(Boolean)?eq2:undefined,es:es===1?1:undefined,pet:pet&&PETS[pet.id]?{id:pet.id,xp:Math.floor(pet.xp)||0}:undefined}; }
 function saveChar(){ if(!me||!me.id)return; lsSet(charKey(me.id),JSON.stringify(packChar(me))); }
 const dispName=p=>(p&&p.name)||CLASSES[p.cls].n;
 const isHc=p=>!!(p&&p.hc), hcDead=p=>!!(p&&p.hc&&p.hd>0);   /* 하드코어 캐릭터 · 사망한 하드코어 캐릭터 */
@@ -6127,7 +6121,7 @@ function renderTitle(){
   migrateChars();
   const chars=charIds().map(loadChar).filter(Boolean);
   if(!chars.find(c=>c.id===selId)){ selId=chars[0]?chars[0].id:''; lsSet('dkdef2.sel',selId); }
-  ttfSync(chars); buildCarousel(chars); renderStagePanel(); try{ getStore(); }catch(e){}   /* 공유보관함 아이템 보정을 시작할 때 한 번 적용 */
+  buildCarousel(chars); renderStagePanel(); try{ getStore(); }catch(e){}   /* 공유보관함 아이템 보정을 시작할 때 한 번 적용 */
   if(!chars.length) showNew(false);
   rkSubmit(chars,false); setTimeout(rkPrefetch,1200); setTimeout(nameSweep,900);
 }
