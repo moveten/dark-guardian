@@ -1362,7 +1362,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0512</div>
+    <div class="ver" id="verT">v0.6.5.0513</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -2931,13 +2931,13 @@ function updateWaves(dt){
   if(G.mode!=='guest'&&me.out&&(!ally||ally.lobby||ally.out)&&['prep','wave','boss'].includes(G.phase)){G.lostBoss=G.phase==='boss'; G.phase='lose';setTimeout(()=>{ if(G.phase==='lose')showEnd(); },900);}
 }
 /* ===== 황금 고블린 (레이드 4·5 스테이지 이벤트) =====
-   시작할 때 3.1% → 우두머리를 쓰러뜨린 뒤 내 근처(240~380px)에 나타남 → 나타난 순간부터 10초 안에 30번 때리면 80~120만 G (때린 횟수에 비례, 모두 100%)
+   시작할 때 4스테이지 1% · 5스테이지 3.1% → 우두머리를 쓰러뜨린 뒤 내 근처(240~380px)에 나타남 → 나타난 순간부터 10초 안에 30번 때리면 80~120만 G (때린 횟수에 비례, 모두 100%)
    방장(혼자)이 계산하고 게스트는 이벤트(ga·gb·ge)로 같은 화면을 봄 */
-const GOB_P=.031, GOB_N=30, GOB_T=10, GOB_WAIT=16;
+const GOB_P=.031, GOB_P4=.01, GOB_N=30, GOB_T=10, GOB_WAIT=16;
 let GB=null;
 const gobTy=()=>MT.findIndex(q=>q.gob);
 function gobInit(){ GB=null; G.gobRoll=false; if(G.mode==='guest'||!G.stg||!G.stg.raid)return;
-  if(Math.random()<GOB_P){ G.gobRoll=true; later(1.4,()=>{ if(!G.inGame||!G.gobRoll)return; announce('💰 황금 고블린이 나타났습니다!','#ffd84a'); toast('💰 황금 고블린이 나타났습니다!','#ffd84a'); sfx('rare'); pushEv(['gs']); }); } }
+  if(Math.random()<(G.stg.id==='4'?GOB_P4:GOB_P)){ G.gobRoll=true; later(1.4,()=>{ if(!G.inGame||!G.gobRoll)return; announce('💰 황금 고블린이 나타났습니다!','#ffd84a'); toast('💰 황금 고블린이 나타났습니다!','#ffd84a'); sfx('rare'); pushEv(['gs']); }); } }
 function gobBegin(R,id){ GB={R,id,n:0,paid:0,left:GOB_T,wait:GOB_WAIT,started:true,end:0,endT:0,full:false,pops:[],rays:[],coins:[],glow:0,bump:0,pg:0}; }
 function gobSpawn(){
   if(G.mode==='guest'||!G.gobRoll)return; G.gobRoll=false; const ty=gobTy(); if(ty<0)return;
