@@ -1362,7 +1362,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0530</div>
+    <div class="ver" id="verT">v0.6.5.0531</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -2831,11 +2831,12 @@ function drawLeg(m,t){ const x=m.x, y=m.y, r=m.r*1.15, k=m.lk, C=CAS_CFG.leg, co
   if(m.warn>0){ const w=1-m.warn/C.sh.drainWarn; ctx.save(); ctx.fillStyle=`rgba(176,112,255,${.12+.2*w})`; ctx.beginPath(); ctx.arc(x,y,C.sh.drainR,0,6.283); ctx.fill(); ctx.strokeStyle=`rgba(210,160,255,${.5+.4*pu})`; ctx.lineWidth=3; ctx.setLineDash([12,8]); ctx.stroke(); ctx.restore(); }
   if(m.aim){ const a=m.aim, dx=a.x-x, dy=a.y-y, L2=hyp(dx,dy)||1, ang=Math.atan2(dy,dx), p=a.t/a.dur, w=C.bl.w; ctx.save(); ctx.translate(x,y); ctx.rotate(ang); ctx.fillStyle=`rgba(190,40,30,${.18+.08*pu})`; ctx.fillRect(0,-w/2,Math.max(L2+300,700),w); ctx.fillStyle='rgba(240,70,40,.4)'; ctx.fillRect(0,-w/2,Math.max(L2+300,700)*p,w); ctx.strokeStyle=`rgba(255,130,90,${.7+.3*pu})`; ctx.lineWidth=3; ctx.strokeRect(0,-w/2,Math.max(L2+300,700),w); ctx.restore(); }
   ctx.fillStyle='rgba(0,0,0,.4)'; ctx.beginPath(); ctx.ellipse(x,y+r*.6,r*1.1,r*.4,0,0,6.283); ctx.fill();
-  const im=sprGet('leg_'+(k==='sh'?'shield':k==='xb'?'xbow':'ballista')+(m.atk>0?'_atk':''))||sprGet('leg_'+(k==='sh'?'shield':k==='xb'?'xbow':'ballista'));
-  if(im){ const sz=r*3.2, h=sz*im.height/im.width; ctx.drawImage(im,x-sz/2,y+r*.7-h,sz,h); }
+  const kd=k==='sh'?(m.sub==='aura'?'shield2':'shield'):k==='xb'?'xbow':'ballista', im=sprGet('leg_'+kd+(m.atk>0?'_atk':''))||sprGet('leg_'+kd); let top=y-r*1.9, bodyY=y-r*.3;
+  if(im){ const sc=r*(k==='sh'?.01:k==='xb'?.0118:.0088), w=im.width*sc, h=im.height*sc, ax=k==='xb'?.36:k==='bl'?.46:.5, fl=me&&me.x<x?-1:1;   /* 그림은 오른쪽을 보고 있어서 플레이어가 왼쪽에 있으면 뒤집어요 */
+    ctx.save(); ctx.translate(x,0); ctx.scale(fl,1); ctx.drawImage(im,-w*ax,y+r*.7-h,w,h); ctx.restore(); top=y+r*.7-h-14; bodyY=y+r*.7-h*.5; }
   else { ctx.fillStyle=col; ctx.strokeStyle='#201810'; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(x,y-r*.3,r*1.1,0,6.283); ctx.fill(); ctx.stroke(); ctx.font=`${Math.round(r*1.5)}px sans-serif`; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillStyle='#fff'; ctx.fillText(k==='sh'?'🛡️':k==='xb'?'🏹':'🎯',x,y-r*.3); ctx.textBaseline='alphabetic'; }
-  if(m.flash>0){ ctx.save(); ctx.globalAlpha=Math.min(.55,m.flash*5); ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(x,y-r*.3,r*1.1,0,6.283); ctx.fill(); ctx.restore(); }
-  const hp=Math.max(0,Math.min(1,m.hp/m.max)), bw=48, by=y-r*1.9; ctx.fillStyle='rgba(0,0,0,.8)'; ctx.fillRect(x-bw/2-1.5,by-1.5,bw+3,8); ctx.fillStyle=col; ctx.fillRect(x-bw/2,by,bw*hp,5);
+  if(m.flash>0){ ctx.save(); ctx.globalAlpha=Math.min(.55,m.flash*5); ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(x,bodyY,r*1.1,0,6.283); ctx.fill(); ctx.restore(); }
+  const hp=Math.max(0,Math.min(1,m.hp/m.max)), bw=48, by=top; ctx.fillStyle='rgba(0,0,0,.8)'; ctx.fillRect(x-bw/2-1.5,by-1.5,bw+3,8); ctx.fillStyle=col; ctx.fillRect(x-bw/2,by,bw*hp,5);
   const tag=k==='sh'?(m.sub==='aura'?'🔰 방어 오라':'💧 마나 흡수'):k==='xb'?'🩸 출혈 사격':'💫 기절 포격'; ctx.font='700 11px "Noto Sans KR",sans-serif'; ctx.textAlign='center'; ctx.lineWidth=3; ctx.strokeStyle='#000'; ctx.strokeText(tag,x,by-4); ctx.fillStyle='#fff0c8'; ctx.fillText(tag,x,by-4); }
 function casHideDraw(m,t){ const L=G.leg; if(!L)return; const x=L.cx, y=L.cy-190, msg=`⚔️ 군단 호출 ${Math.max(0,Math.ceil(L.t))}초 · 쓰러뜨리면 보스 체력이 깎여요`; ctx.font='800 15px "Noto Sans KR",sans-serif'; ctx.textAlign='center'; ctx.lineWidth=4; ctx.strokeStyle='#000'; ctx.strokeText(msg,x,y); ctx.fillStyle='#ffe08a'; ctx.fillText(msg,x,y); }
 function spawnCastle(){ const b=spawnMob(casType(),VX,VY*.42,false); b.ph=1; b.dmgB=b.dmg0; b.wake=3.2; b.bt=2.5; b.sum0=b.sum1=b.sum2=true; b.cdG=14; b.cdS=9; b.cdH=8; b.cdP=7; me.sil=me.fear=0; G.leg=null; b.legPend=0;   /* 일반 보스 소환은 끄고, 성 수비대는 따로 */
