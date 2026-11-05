@@ -1362,7 +1362,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0527</div>
+    <div class="ver" id="verT">v0.6.5.0528</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1653,7 +1653,7 @@ function atkRg(o){ if(o===me&&me.buffs&&me.buffs.rage&&me.buffs.rage.t>0)return 
 function atkRg0(o){ if(o.cls==='druid'){ const f=formOf(o); return f==='bear'?112:210; } return ATKRG[o.cls]; } /* 드루이드는 형태에 따라 기본 공격 사거리가 달라요 */
 /* ===== 6스테이지 수문장 카스텔 설정표 — 수치는 여기서만 고쳐요 (미공개 · 관리자 전용) ===== */
 const CAS_CFG={
-  hp:2.8e8, hpC:3.78e8, rdm:2.6, spd:65,                       /* 체력(솔로/협동) · 기본 피해 배율 · 이동 속도 */
+  hp:2.8e8, hpC:3.78e8, rdm:3.38, spd:65,                       /* 체력(솔로/협동) · 기본 피해 배율 · 이동 속도 */
   ph:[1,.67,.34], dmgM:[1,1.25,1.5],                           /* 페이즈 문턱(체력 비율) · 페이즈별 피해 배율 */
   iv:[.6,.5,.4],                                               /* 기술 사이 쉬는 시간 배율 (작을수록 기술을 자주 씀) */
   skillRate:.75,                                               /* 특수기술이 준비됐을 때 실제로 쓸 확률 */
@@ -1664,7 +1664,7 @@ const CAS_CFG={
   horn:{cd:35,dur:3,tel:1.3,r:470,imm:1.5,gap:8},               /* 공성 나팔(공포): 대기·지속·시전·범위·면역·침묵과의 최소 간격 */
   spin:{cd:22,dur:3,inv:1,tel:1.3,w:1.0,r:340,n:6,tick:.4,pct:.34},   /* 회전 기술: 대기·지속·무적·시전·회전속도(rad/s)·반지름·조각 수·판정 간격·최대체력 비율 피해 */
   dev:{hp:5e6,resp:10,lvT:20,maxLv:5,lvDmg:.25,lvIv:.15,rad:250,defP:.10,asP:.10,   /* 공성장치: 체력·재생성 대기·레벨업 주기(초)·최대 레벨·레벨당 포격 피해 +·포격 간격 단축·배치 반지름(중앙~맵 끝의 중간)·레벨당 방어 감소·공속 감소 */
-    weak:{iv:2.6,mul:.55,r:46,dur:.8}, slow:{iv:2.6,mul:.55,r:46,dur:.8}, arrow:{iv:3.4,mul:1.5,r:56,dur:1.0}},
+    weak:{iv:2.6,mul:.55*1.2/1.3,r:46,dur:.8}, slow:{iv:2.6,mul:.55*1.2/1.3,r:46,dur:.8}, arrow:{iv:3.4,mul:1.5*1.2/1.3,r:56,dur:1.0}},   /* 포격 배율: 보스 피해 +30%가 따라오므로 ×1.2/1.3 으로 맞춰 최종 +20% */
   shard:[3,7], exch:120, heroDrop:()=>AW_P                      /* 수문장 조각(처치 보상 범위·교환 개수) · 영웅 장비 드랍 확률 = 5스테이지와 동일 */
 };
 const MT0=[
@@ -2766,7 +2766,7 @@ function casDevK(kind){ if(!G.stg||G.stg.raid!==3)return 0; let k=0; for(const o
 const casDevDef=()=>1+CAS_CFG.dev.defP*casDevK('weak');          /* 파갑의 탑: 받는 피해 증가(=방어 감소) */
 const casDevAs=()=>Math.max(.5,1-CAS_CFG.dev.asP*casDevK('slow'));   /* 족쇄의 탑: 공격 속도 감소 */
 function casDevTick(m,dt){ const B=casBoss(), C=CAS_CFG.dev; if(!B||m.gen!==(G.casGen|0)){ m.dead=true; return; }
-  m.x=m.hx; m.y=m.hy; m.kx=m.ky=0; m.age+=dt; m.atk=Math.max(0,m.atk-dt);
+  m.x=m.hx; m.y=m.hy; m.kx=m.ky=0; m.stunT=0; m.slowT=0; m.taunt=null; m.age+=dt; m.atk=Math.max(0,m.atk-dt);
   if(m.lv<C.maxLv&&m.age>=C.lvT*m.lv){ m.lv++; efx.push({k:'ring',x:m.x,y:m.y,r0:10,r1:120,t:0,life:.5,col:'#ff5a3a',w:12}); burst(m.x,m.y,'#ff5a3a',20,300); sfx('boss'); announce(`🔥 ${CAS_DVN[m.dv]} 레벨 ${m.lv}! 서둘러 부수세요`,'#ff7a5a'); }
   m.shot-=dt; if(m.shot>0)return;
   const dc=C[m.dv], pls=playersForAI().filter(p=>p.i<10); if(!pls.length)return; let t=pls[0],bd=1e9; for(const p of pls){ const d=hyp(p.x-m.x,p.y-m.y); if(d<bd){bd=d;t=p;} }
@@ -3395,6 +3395,7 @@ function summon(b){ for(let i=0;i<5;i++){const a=i/5*Math.PI*2; spawnMob(i%2?2:0
 function applyDmg(m,dmg,slow,fx){
   if(m.dead||m.gob||!(dmg>0))return;
   if(m.inv>0||m.shield>0)return;   /* 각성 그림자: 시전·페이즈 전환 중 무적, 배리어(지속 피해는 횟수에 안 셈) */
+  if(m.dev){ slow=0; if(fx&&fx.stun){ fx={...fx}; delete fx.stun; } }   /* 공성장치: 피해는 받지만 기절·둔화·밀림 등 군중 제어에는 면역 */
   if(m.dfM>1)dmg/=m.dfM;
   if(m.vuln&&m.vuln.t>0)dmg*=1+m.vuln.v;   /* 위압 함성: 받는 모든 피해 증가 (파티원 피해 포함) */
   m.hp-=dmg; if((m.rk==='awk'&&!m.fake)||m.rk==='cas'){ const fl=m.rk==='cas'?casFloor(m):awkFloor(m); if(fl>0&&m.hp<m.max*fl)m.hp=m.max*fl-1; }   /* 다음 페이즈 문턱에서 한 번 멈춤 → 페이즈 전환 */
@@ -3543,7 +3544,7 @@ function hcDown(why){ if(!me||!me.hc||me.hd>0)return; G.hcWhy=why||''; me.hd=Dat
 function hcShowDie(){ if(!me||!me.hc||!(me.hd>0))return; const S=STAGES[(me.hs|0)-1]; $('#hcDieS').textContent=`${dispName(me)} · Lv ${me.lvl}`; $('#hcDieM').innerHTML=`${S?'스테이지 '+esc(S.id)+'에서 ':''}${G.hcWhy==='castle'?'중앙의 성이 무너져 패배했어요':'쓰러졌어요'}<br>처치 ${(me.kills|0).toLocaleString('ko-KR')}마리${(me.kills|0)>0?' · 랭킹에는 💀 표시로 남아요':''}`; try{ storyStop(); }catch(e){} { const o=$('#hcDie'); if(o.parentNode!==document.body)document.body.appendChild(o); } $('#hcDie').hidden=false; sfx('lose'); }
 function reviveMe(pct,free){ voice('revive',0,true); G.stRev=(G.stRev|0)+1; me.vx=me.vy=0; const a=me.aura,pot=me.pot,bx=me.x,by=me.y; me.dead=false; me.out=false; me.stun=me.slowP=me.poison=me.sil=me.fear=0; me.respawn=0; me.leap=null; me.cds={}; me.buffs={}; me.aura=a; me.pot=pot; me.D=derive(me); me.hp=me.D.maxHp*pct; me.mp=me.D.maxMp*.5; me.god=3; me.x=bx; me.y=by;   /* 부활 후 3초 무적 */
   efx.push({k:'rvfx',x:me.x,y:me.y,t:0,life:1.3}); efx.push({k:'ring',x:me.x,y:me.y,r0:10,r1:190,t:0,life:.8,col:'#ffd84a',w:10}); later(.12,()=>efx.push({k:'ring',x:me.x,y:me.y,r0:10,r1:260,t:0,life:.9,col:'#fff6cc',w:7})); later(.26,()=>efx.push({k:'ring',x:me.x,y:me.y,r0:10,r1:330,t:0,life:1,col:'#ffb04a',w:5})); impact(me.x,me.y,'255,235,160',260); spark(me.x,me.y,'#ffd84a',50); burst(me.x,me.y,'#ffe08a',50,340); burst(me.x,me.y-30,'#ffffff',24,200); G.flash=.9; G.shake=Math.max(G.shake,.5); sfx('revive');
-  for(const m of G.mobs){ if(m.dead||m.boss)continue; const dx=m.x-me.x,dy=m.y-me.y,d=hyp(dx,dy); if(d<170){ m.kx=(m.kx||0)+dx/(d||1)*420; m.ky=(m.ky||0)+dy/(d||1)*420; } } if(me.cls==='necro'&&!minions.length)autoSummon(); uiDirty=true; }   /* 부활하면 기본 소환수(수호 영혼·포격 영혼)는 다시 불러옴 */
+  for(const m of G.mobs){ if(m.dead||m.boss||m.dev)continue; const dx=m.x-me.x,dy=m.y-me.y,d=hyp(dx,dy); if(d<170){ m.kx=(m.kx||0)+dx/(d||1)*420; m.ky=(m.ky||0)+dy/(d||1)*420; } } if(me.cls==='necro'&&!minions.length)autoSummon(); uiDirty=true; }   /* 부활하면 기본 소환수(수호 영혼·포격 영혼)는 다시 불러옴 */
 function mightLevel(){ let l=0; if(me.aura==='might')l=skLv(me,'might');
   if(ally&&!ally.lobby&&!ally.dead&&ally.aura==='might'&&hyp(ally.x-me.x,ally.y-me.y)<320) l=Math.max(l,ally.al|0); return l; }
 /* 회복 봉쇄: 걸려 있는 동안 생명력·마나가 올라가지 못하게 잠금 (물약·흡혈·재생·오라·회복 구역·처치 회복 등 모든 회복) */
@@ -3827,7 +3828,7 @@ function hitMob(m,r,slow,tn,fx){
   if(!(fx&&fx.sm&&!r.crit))sfx(r.crit?'crit':'hit',hitPm(),me.cls);
   spark(m.x,m.y,r.crit?'#ffd34d':'#ffb08a',r.crit?12:5);
   if(r.crit&&!(fx&&fx.sm))critSlash(m);
-  if(G.mode!=='guest'&&!m.boss&&!m.elite){ const kx=m.x-me.x,ky=m.y-me.y,kd=hyp(kx,ky)||1,kf=r.crit?95:55; m.kx=(m.kx||0)+kx/kd*kf; m.ky=(m.ky||0)+ky/kd*kf; }
+  if(G.mode!=='guest'&&!m.boss&&!m.elite&&!m.dev){ const kx=m.x-me.x,ky=m.y-me.y,kd=hyp(kx,ky)||1,kf=r.crit?95:55; m.kx=(m.kx||0)+kx/kd*kf; m.ky=(m.ky||0)+ky/kd*kf; }
   const smh=!!(fx&&fx.sm);
   const nhs=!!(fx&&fx.nohs);   /* 타격 정지(화면 멈춤)는 모든 공격에서 제거 — 여러 번 맞는 스킬에서 끊김처럼 보였음 */
   { const sk=smh?0:nhs?.05:r.crit?.3:.08; if(sk>G.shake){ G.shd=[Math.cos(m.sqa),Math.sin(m.sqa)]; G.shdT=T+.12; } G.shake=Math.max(G.shake,sk); }   /* 흔들림이 때린 방향으로 밀림 */
