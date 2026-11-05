@@ -1362,7 +1362,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0529</div>
+    <div class="ver" id="verT">v0.6.5.0530</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -2022,7 +2022,7 @@ function ttfDerive(p){ const efOk=it=>!!it&&(it.ef|0)>=10, f=p.tf||(p.tf={}), s5
 const TT_S5=()=>STAGES.findIndex(s=>s.id==='5')+1, TT_LAB=k=>{ try{ return getTown().lab[k].l|0; }catch(e){ return 0; } }, TT_NO=()=>'아직 달성하지 못했어요';
 const TITLES=[{id:'dex',n:DEX_TITLE,cond:'도감 특수 유니크 20종 수집',eff:'공격 속도 +5%',own:p=>dexSpN(p)>=20,prog:p=>`도감 ${Math.min(20,dexSpN(p))} / 20종`,ap:d=>{d.ias+=5;}},
   {id:'lights',n:'소등하겠습니다',cond:'스테이지 5(봉인의 심연) 100회 클리어',eff:'마나 회복 +20%',own:p=>ttfHas(p,'lights'),prog:p=>`이 캐릭터 ${Math.min(100,(p.cc&&p.cc[TT_S5()])|0)} / 100회`,ap:d=>{d.mr+=20;}},
-  {id:'pot',n:'카페인 중독자',cond:'한 스테이지에서 회복 물약을 20번 이상 쓰고 클리어',eff:'최대 마나 +50',own:p=>ttfHas(p,'pot'),prog:TT_NO,ap:d=>{d.mana+=50;}},
+  {id:'pot',n:'카페인 중독자',cond:'한 스테이지에서 회복 물약을 10번 이상 쓰고 클리어',eff:'최대 마나 +50',own:p=>ttfHas(p,'pot'),prog:TT_NO,ap:d=>{d.mana+=50;}},
   {id:'enf',n:'로또 사러 갑니다',cond:'아이템 강화 10연속 실패',eff:'모든 능력치 +5',own:p=>ttfHas(p,'enf'),prog:TT_NO,ap:d=>{d.str+=5;d.dex+=5;d.vit+=5;d.ene+=5;}},
   {id:'pet',n:'신입 사육사',cond:'펫 획득',eff:'최대 생명력 +100',own:p=>ttfHas(p,'pet'),prog:TT_NO,ap:d=>{d.life+=100;}},
   {id:'bulk',n:'동묘 도매상',cond:'일괄 판매로 한 번에 장비 50개 판매',eff:'판매 가격 +10%',own:p=>ttfHas(p,'bulk'),prog:TT_NO,ap:d=>{d.sellP=(d.sellP||0)+10;}},
@@ -2036,7 +2036,7 @@ const TITLES=[{id:'dex',n:DEX_TITLE,cond:'도감 특수 유니크 20종 수집',
   {id:'rich',n:'억만장자',cond:'100,000,000G 소유',eff:'힘 +20',own:p=>ttfHas(p,'rich'),prog:p=>`이 캐릭터 ${Math.min(TT_RICH,+p.gold||0).toLocaleString('en-US')} / ${TT_RICH.toLocaleString('en-US')}G`,ap:d=>{d.str+=20;}},
   {id:'dexall',n:'전시 관리인',cond:"도감 '세트 수집 100.0%' 달성",eff:'에너지 +20',own:p=>ttfHas(p,'dexall'),prog:p=>`세트 ${dexStN(p)} / ${dexStTot(p)}칸`,ap:d=>{d.ene+=20;}},
   {id:'aok',n:'아옳옳옳옳',cond:'스테이지 정복 횟수 토탈 999 달성',eff:'민첩 +20',own:p=>ttfHas(p,'aok'),prog:p=>`이 캐릭터 ${Math.min(999,ttCcSum(p))} / 999회`,ap:d=>{d.dex+=20;}},
-  {id:'mini',n:'미니멀리스트',cond:'한 스테이지 클리어에서 못 주운 아이템 150개 이상',eff:'마나 +150',own:p=>ttfHas(p,'mini'),prog:TT_NO,ap:d=>{d.mana+=150;}},
+  {id:'mini',n:'미니멀리스트',cond:'한 스테이지 클리어에서 못 주운 아이템 150개 이상',eff:'최대 마나 +150',own:p=>ttfHas(p,'mini'),prog:TT_NO,ap:d=>{d.mana+=150;}},
   {id:'idol',n:'아이돌 연습생',cond:'칭호 10개 획득',eff:'치명타 확률 +5%',hid:1,own:p=>ttfHas(p,'idol'),prog:TT_NO,ap:d=>{d.crit+=5;}},
   {id:'renne',n:'누군가의 리센느',cond:'칭호 15개 획득',eff:'치명타 확률 +10%',hid:1,own:p=>ttfHas(p,'renne'),prog:TT_NO,ap:d=>{d.crit+=10;}},
   {id:'star',n:'슈퍼★스타',cond:'칭호 20개 획득',eff:'치명타 확률 +15%',hid:1,own:p=>ttfHas(p,'star'),prog:TT_NO,ap:d=>{d.crit+=15;}},
@@ -4629,7 +4629,8 @@ function bindHold(el,key){
 $('#bPot').addEventListener('pointerdown',e=>{e.preventDefault(); usePot();});
 const POT_CD=1000; /* 물약 재사용 대기(ms, 실제 시간) — 연타로 여러 개가 한꺼번에 먹히지 않게 */
 function potCdUi(){ const b=$('#bPot'); if(!b)return; b.classList.remove('pcd'); void b.offsetWidth; b.classList.add('pcd'); clearTimeout(b._pt); b._pt=setTimeout(()=>b.classList.remove('pcd'),POT_CD); }
-function usePot(){ if(!G.inGame||me.dead)return; const nw=performance.now(); if(nw-(me.potAt||-1e9)<POT_CD)return; if(me.hbStrict>0){ if(nw-(me.potWarn||-1e9)>1500){ me.potWarn=nw; toast(`💔 생명 봉쇄 중이라 물약을 쓸 수 없어요 (${Math.ceil(me.hbStrict)}초)`,'#ff8ab0'); } return; } me.potAt=nw; potCdUi(); if(me.pot<=0&&me.potBuy<=0){toast('물약이 없어요. 상점에서 사거나 다음 습격을 기다리세요');return;} if(me.pot>0)me.pot--; else {me.potBuy--; saveChar();} G.potN=(G.potN|0)+1; me.hp=Math.min(me.D.maxHp,me.hp+me.D.maxHp*.45); me.mp=Math.min(me.D.maxMp,me.mp+me.D.maxMp*.45); if(me.hpLk!=null)me.hpLk=me.hp; if(me.mpLk!=null)me.mpLk=me.mp; spark(me.x,me.y,'#d0443a',10); sfx('potion'); }   /* 봉쇄 중에도 물약은 잠금을 올려 줌 */
+function usePot(){ if(!G.inGame||me.dead)return; const nw=performance.now(); if(nw-(me.potAt||-1e9)<POT_CD)return; if(me.hbStrict>0){ if(nw-(me.potWarn||-1e9)>1500){ me.potWarn=nw; toast(`💔 생명 봉쇄 중이라 물약을 쓸 수 없어요 (${Math.ceil(me.hbStrict)}초)`,'#ff8ab0'); } return; } if(me.hp>=me.D.maxHp-.5){ if(nw-(me.potWarn||-1e9)>1200){ me.potWarn=nw; toast('❤️ 생명력이 가득 차서 물약을 쓸 수 없어요','#ffb0a0'); } return; }   /* 생명력 100%면 물약을 아끼도록 막음 */
+  me.potAt=nw; potCdUi(); if(me.pot<=0&&me.potBuy<=0){toast('물약이 없어요. 상점에서 사거나 다음 습격을 기다리세요');return;} if(me.pot>0)me.pot--; else {me.potBuy--; saveChar();} G.potN=(G.potN|0)+1; me.hp=Math.min(me.D.maxHp,me.hp+me.D.maxHp*.45); me.mp=Math.min(me.D.maxMp,me.mp+me.D.maxMp*.45); if(me.hpLk!=null)me.hpLk=me.hp; if(me.mpLk!=null)me.mpLk=me.mp; spark(me.x,me.y,'#d0443a',10); sfx('potion'); }   /* 봉쇄 중에도 물약은 잠금을 올려 줌 */
 $('#bRev').addEventListener('pointerdown',e=>{e.preventDefault(); useRevive();});
 $('#bRevBig').addEventListener('pointerdown',e=>{e.preventDefault(); useRevive();});
 function useRevive(){ if(!G.inGame||me.hc)return; if(!me.dead){toast('쓰러졌을 때 사용할 수 있어요');return;} if(me.out&&revItems()<=0)return; if(revItems()<=0){toast('부활 아이템이 없어요. 상점에서 살 수 있어요','#e07060');return;}
@@ -5360,7 +5361,7 @@ function dexGroup(id,title,ico,keys0,p,tone){ const keys=dexKeysOf(keys0,p), got
 function renderDex(){
   markTabs(); sheetHead(); const b=$('#sheetB'); b.className='sbody dex'; const p=me, spNw=DEX_SP.some(g=>g[2].some(k=>p.dxn&&p.dxn[k])), stNw=DEX_ST.some(g=>dexKeysOf(g[2],p).some(k=>p.dxn&&p.dxn[k])), spN=dexSpN(p), stN=dexStN(p), isSp=dexTab==='sp', got=isSp?spN:stN, tot=isSp?20:Math.max(1,dexStTot(p)), pct=(got/tot*100).toFixed(1)+'%';
   b.innerHTML=`<div class="dxt"><button data-dt="sp" aria-pressed="${isSp}">✨ 스페셜 아이템<small>${spN}/20</small>${spNw?'<i class="dxnb">NEW</i>':''}</button><button data-dt="st" aria-pressed="${!isSp}">🧩 세트 아이템<small>${stN}/15</small>${stNw?'<i class="dxnb">NEW</i>':''}</button></div>
-  <div class="dxp"><div class="dxpt"><b>${isSp?'특수 유니크 수집':'세트 수집'}</b><strong>${pct}</strong></div><div class="dxbar"><i style="width:${(got/tot*100).toFixed(2)}%"></i></div>${isSp?`<div class="dxpn">🏅 ${spN>=20?`칭호 <b>「${DEX_TITLE}」</b> 획득 완료`:`20종을 모두 모으면 칭호 <b>「${DEX_TITLE}」</b> 획득`}</div>`:''}</div>
+  <div class="dxp"><div class="dxpt"><b>${isSp?'특수 유니크 수집':'세트 수집'}</b><strong>${pct}</strong></div><div class="dxbar"><i style="width:${(got/tot*100).toFixed(2)}%"></i></div>${isSp?`<div class="dxpn">🏅 ${spN>=20?`칭호 <b>「${DEX_TITLE}」</b> 획득 완료`:`20종을 모으면 칭호 <b>「${DEX_TITLE}」</b> 획득`}</div>`:''}</div>
   ${isSp?DEX_SP.map((g,i)=>dexGroup('sp'+i,g[0],g[1],g[2],p,'sp')).join(''):DEX_ST.map((g,i)=>dexGroup('st'+i,g[0],g[1],g[2],p,'st')).join('')+'<div class="dxsoon">+ 새 세트는 스토리와 함께 추가돼요 <span>🔒</span></div>'}`;
   b.querySelectorAll('.dxc.nw').forEach(e=>e.onclick=()=>{ const y=b.scrollTop; delete p.dxn[e.dataset.dk]; saveChar(); renderDex(); b.scrollTop=y; });   /* 칸을 누르면 그 칸 NEW 확인 */
   b.querySelectorAll('[data-dt]').forEach(e=>e.onclick=()=>{ dexTab=e.dataset.dt; renderDex(); b.scrollTop=0; });
@@ -6721,10 +6722,10 @@ const labLeft=ms=>{ const t=Math.max(0,Math.ceil(ms/1000)), h=Math.floor(t/3600)
 const labTm=m=>m<=0?'즉시':m>=60?(m%60?`${Math.floor(m/60)}시간 ${m%60}분`:`${m/60}시간`):`${m}분`;
 let labTimer=0;
 function labInfo(){ clearInterval(labTimer); labTick(); const L=getTown().lab, S=getStore(), gold=aGold(), built=(L.lv|0)>=1, f=n=>n.toLocaleString('ko-KR');
-  if(!built){ modal(`<div id="labM"><h3>🏗️ ${TOWN_B.lab.n}</h3><p style="margin:0 0 8px;font-size:13px;line-height:1.6">연구소를 지으면 <b>성벽 연구</b>를 할 수 있어요.<br>🧱 <b>성벽 강화</b>: 성이 받는 피해 -2% (Lv마다)<br>🔧 <b>성벽 수리</b>: 습격이 끝날 때 회복되는 성 체력 10% → +2% (Lv마다)</p><p class="meta" style="margin:0 0 8px;font-size:13px">건설 비용 <b style="color:#ffd34d">💰 ${f(LAB_BUILD)}G</b> · 보유 <b style="color:${gold>=LAB_BUILD?'#9fe08a':'#ff8a7a'}">${f(gold)}G</b></p><div class="row2"><button class="btn" id="lbX">닫기</button><button class="btn primary" id="lbGo"${gold>=LAB_BUILD?'':' disabled style="opacity:.5"'}>${gold>=LAB_BUILD?'🏗️ 건설':'골드 부족'}</button></div></div>`,m=>{
+  if(!built){ modal(`<div id="labM"><h3>🏗️ ${TOWN_B.lab.n}</h3><p style="margin:0 0 8px;font-size:13px;line-height:1.6">연구소를 지으면 <b>성벽 연구</b>를 할 수 있어요.<br>🧱 <b>성벽 강화</b>: 성이 받는 피해 -2% (Lv마다)<br>🔧 <b>성벽 수리</b>: 습격마다 회복되는 내구력 10% → +2% (Lv마다)</p><p class="meta" style="margin:0 0 8px;font-size:13px">건설 비용 <b style="color:#ffd34d">💰 ${f(LAB_BUILD)}G</b> · 보유 <b style="color:${gold>=LAB_BUILD?'#9fe08a':'#ff8a7a'}">${f(gold)}G</b></p><div class="row2"><button class="btn" id="lbX">닫기</button><button class="btn primary" id="lbGo"${gold>=LAB_BUILD?'':' disabled style="opacity:.5"'}>${gold>=LAB_BUILD?'🏗️ 건설':'골드 부족'}</button></div></div>`,m=>{
       m.querySelector('#lbX').onclick=closeModal; const go=m.querySelector('#lbGo'); if(go)go.onclick=()=>{ const r=labBuild(); closeModal(); if(r==='ok'){ sfx('rare'); townMsg=`🏗️ ${TOWN_B.lab.n} 완공!`; } else townMsg=r==='lack'?'골드가 부족해요':'이미 지었어요'; renderTown(); }; }); return; }
   const sh=aShard('shard'), card=k=>{ const r=L[k], R=LAB_R[k], lv=r.l, busy=r.e>0, max=lv>=LAB_MAX&&!busy, GL=labGold(Math.min(lv,LAB_MAX-1)), c=GL?LAB_G[Math.min(lv,LAB_MAX-1)]:LAB_SH(Math.min(lv,LAB_MAX-1)), have=GL?gold:sh, cT=GL?`💰 ${f(c)}G`:`🌑 ${f(c)}개`, mn=LAB_MIN[Math.min(lv,LAB_MAX-1)];
-    const now=k==='a'?`성이 받는 피해 <b style="color:#ffd34d">-${2*lv}%</b>`:`습격이 끝날 때 성 체력 <b style="color:#ffd34d">${10+2*lv}%</b> 회복`, nx=k==='a'?`-${2*(lv+1)}%`:`${10+2*(lv+1)}%`;
+    const now=k==='a'?`성이 받는 피해 <b style="color:#ffd34d">-${2*lv}%</b>`:`습격마다 내구력 <b style="color:#ffd34d">${10+2*lv}%</b> 회복`, nx=k==='a'?`-${2*(lv+1)}%`:`${10+2*(lv+1)}%`;
     const btn=busy?`<button class="btn" disabled style="opacity:.85">⏳ 연구 중 · 남은 시간 <b data-lt="${k}">${labLeft(r.e-Date.now())}</b></button>`:max?`<button class="btn" disabled style="opacity:.6">최고 레벨</button>`:`<button class="btn primary" data-rs="${k}"${have>=c?'':' disabled style="opacity:.5"'}>${have>=c?`연구 ${cT}${LAB_UI==='B'?'<br>':' · '}⏱ ${labTm(mn)}`:`${GL?'골드':'조각'} 부족 (${cT})`}</button>`;
     const ic=`<span class="lbi${lv>=LAB_MAX?' mx':''}"><img src="${R.im}" alt="" onerror="this.parentNode.classList.add('bad')"><span class="lbe">${R.e}</span><b class="lbl">Lv.${lv}</b></span>`, nxt=lv>=LAB_MAX?'':`<div class="meta" style="font-size:11.5px">→ Lv.${lv+1} ${nx}</div>`;
     if(LAB_UI==='B')return `<div class="lbt">${ic}<div class="lbn">${R.n}</div><div class="lbd">${now}${nxt}</div>${btn}</div>`;
@@ -6872,7 +6873,7 @@ const fmtCt=t=>{ t=Math.max(0,Math.round(t)); return (t/60|0)+':'+String(t%60).p
 function markClear(){ const n=(G.stageIdx|0)+1, t=Math.max(1,Math.round(G.runT||0)); let ch=false; G.lastCt=t; G.bestCt=false; const wasLk=!spdOk();
   if(n>(me.clear|0)){ me.clear=Math.min(STAGES.length,n); stageClear=me.clear; me.ct=t; me.cts=me.cat=Math.floor(Date.now()/1000); ch=true; G.bestCt=true; G.firstClr=true; selStage=Math.max(0,Math.min(STAGES.length-1,me.clear|0)); lsSet('dkdef2.stage',String(selStage)); }   /* 처음 깬 스테이지면 다음 스테이지를 자동 선택 */
   else if(n===(me.clear|0)&&!(me.ct>0&&t>=me.ct)){ me.ct=t; me.cts=Math.floor(Date.now()/1000); ch=true; G.bestCt=true; }
-  { const cc=me.cc||(me.cc={}); cc[n]=Math.min(999999,(cc[n]|0)+1); G.ccThis=cc[n]; G.ccAll=Object.values(cc).reduce((a,b)=>a+b,0); ch=true; if((G.potN|0)>=20)ttfSet('pot'); if(n===TT_S5()&&cc[n]>=100)ttfSet('lights'); }   /* 누적 클리어 횟수: 스테이지별로, 클리어할 때마다 +1 (최고 기록과 상관없이) */
+  { const cc=me.cc||(me.cc={}); cc[n]=Math.min(999999,(cc[n]|0)+1); G.ccThis=cc[n]; G.ccAll=Object.values(cc).reduce((a,b)=>a+b,0); ch=true; if((G.potN|0)>=10)ttfSet('pot'); if(n===TT_S5()&&cc[n]>=100)ttfSet('lights'); }   /* 누적 클리어 횟수: 스테이지별로, 클리어할 때마다 +1 (최고 기록과 상관없이) */
   if(ch){ saveChar(); rkSubmitAll(); }
   if(wasLk&&spdOk()){ G.spdNew=true; setSpd(G.spd>1); later(2,()=>{ if(G.inGame)toast('⏩ 1.3배속 · 🤖 AUTO 스킬이 열렸어요!','#ffb259'); }); } }   /* 1-5 첫 클리어 */
 function endTab(t){ const bx=$('#endBox'); bx.dataset.tab=t; bx.querySelectorAll('.etabs button').forEach(b=>{ b.setAttribute('aria-selected',b.dataset.t===t); b.onclick=()=>{ endTab(b.dataset.t); sfx('ui'); }; }); }   /* 가로 모드: 전리품 / 데미지 순위 탭 (세로 모드는 탭 없이 둘 다 표시) */
@@ -7719,10 +7720,10 @@ function drawMinimap0(){
   ctx.fillStyle='rgba(10,8,7,.75)'; ctx.fillRect(x,y,w,h); ctx.strokeStyle='#6b5432'; ctx.lineWidth=1.5; ctx.strokeRect(x+.5,y+.5,w,h); ctx.fillStyle='#2c241c'; ctx.fillRect(x+VX*(w/WW)-2,y,4,VY*(h/WH)); ctx.fillRect(x,y+VY*(h/WH)-2,w,4);
   const sx=w/WW, sy=h/WH;
   ctx.fillStyle='#8a6a3a'; ctx.beginPath(); ctx.arc(x+hzX()*sx,y+hzY()*sy,hzR()*sx,0,6.283); ctx.fill();
-  for(const m of G.mobs){ if(m.dead&&m.gob)continue; if(m.gob||MT[m.type].gob){ const bl=Math.sin(T*10)>0; ctx.fillStyle=bl?'#ffe27a':'#d49a10'; ctx.fillRect(x+m.x*sx-3.5,y+m.y*sy-3.5,7,7); ctx.strokeStyle='#fff'; ctx.lineWidth=1; ctx.strokeRect(x+m.x*sx-3.5,y+m.y*sy-3.5,7,7); continue; } ctx.fillStyle=m.boss?'#ff4a8a':m.elite?'#7d96ff':'#c2382e'; const r=m.boss?3:1.4; ctx.fillRect(x+m.x*sx-r,y+m.y*sy-r,r*2,r*2);}
+  for(const m of G.mobs){ if(m.dead&&m.gob)continue; if(m.gob||MT[m.type].gob){ const bl=Math.sin(T*10)>0; ctx.fillStyle=bl?'#ffe27a':'#d49a10'; ctx.fillRect(x+m.x*sx-3.5,y+m.y*sy-3.5,7,7); ctx.strokeStyle='#fff'; ctx.lineWidth=1; ctx.strokeRect(x+m.x*sx-3.5,y+m.y*sy-3.5,7,7); continue; } ctx.fillStyle=m.boss?'#ff4a8a':'#c2382e'; const r=m.boss?3:m.elite?2:1.4; ctx.fillRect(x+m.x*sx-r,y+m.y*sy-r,r*2,r*2);}
   ctx.save(); ctx.beginPath(); ctx.rect(x,y,w,h); ctx.clip();
-  for(const g of ground){ const q=g.it.rar, z=q>=2?2.2:1.5, cx=x+g.x*sx, cy=y+g.y*sy, mx=[5,8,12,17,22][q], ph=((T*.9+(g.it.id||0)*.37)%1); ctx.fillStyle=RBD[q]; ctx.fillRect(cx-z,cy-z,z*2,z*2);
-    for(let k=0;k<2;k++){ const f=(ph+k*.5)%1; ctx.strokeStyle=RBD[q]; ctx.globalAlpha=(1-f)*.85; ctx.lineWidth=q>=2?1.6:1; ctx.beginPath(); ctx.arc(cx,cy,1+f*mx,0,6.283); ctx.stroke(); } ctx.globalAlpha=1; } ctx.restore();
+  for(const g of ground){ const q=g.it.rar, z=q>=2?1.6:1.1, cx=x+g.x*sx, cy=y+g.y*sy, mx=[3,4.5,6.5,9,12][q], ph=((T*.9+(g.it.id||0)*.37)%1); ctx.fillStyle=RBD[q]; ctx.globalAlpha=.7; ctx.fillRect(cx-z,cy-z,z*2,z*2);
+    for(let k=0;k<2;k++){ const f=(ph+k*.5)%1; ctx.strokeStyle=RBD[q]; ctx.globalAlpha=(1-f)*.55; ctx.lineWidth=q>=2?1.6:1; ctx.beginPath(); ctx.arc(cx,cy,1+f*mx,0,6.283); ctx.stroke(); } ctx.globalAlpha=1; } ctx.restore();
   if(ally&&!ally.lobby&&ally.x!==undefined){ const ax=x+ally.x*sx, ay=y+ally.y*sy, hp_=ally.emo&&ally.emo.id===0&&ally.emo.t>0; ctx.fillStyle=hp_?'#ff4a3a':CLASSES[ally.cls].col; ctx.beginPath(); ctx.arc(ax,ay,hp_?5:3.5,0,6.283); ctx.fill(); ctx.strokeStyle='#fff'; ctx.lineWidth=1.2; ctx.stroke(); const pr=(T*1.2)%1; ctx.globalAlpha=(1-pr)*.8; ctx.strokeStyle=hp_?'#ff4a3a':CLASSES[ally.cls].col; ctx.beginPath(); ctx.arc(ax,ay,3.5+pr*8,0,6.283); ctx.stroke(); ctx.globalAlpha=1; }
   for(const sd of laneActive()){const L=LANE[sd]; chevron(x+(L.x+L.dx*40)*sx,y+(L.y+L.dy*40)*sy,Math.atan2(L.dy,L.dx),7,`rgba(255,58,42,${.6+.4*Math.sin(T*7)})`);}
   ctx.fillStyle='#fff'; ctx.fillRect(x+me.x*sx-2,y+me.y*sy-2,4,4);
