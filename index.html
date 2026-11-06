@@ -1386,7 +1386,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0564</div>
+    <div class="ver" id="verT">v0.6.5.0565</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -2718,7 +2718,7 @@ function guestEvent(e){
   else if(t==='ge'){ if(GB){ GB.end=1; GB.endT=0; GB.n=e[2]|0; GB.full=(e[2]|0)>=GOB_N; } gobEndTxt(e[2]|0,e[3]|0,(e[2]|0)>=GOB_N); if((e[2]|0)===0)ttfSet('gob0'); saveChar(); }
   else if(t==='h'){ if(!me.dead) takeDmg(e[3],false,e[4]?1:0); }
   else if(t==='x'){ applyStatus(e[3],e[4]); }
-  else if(t==='bx'){ bombFx(e[2],e[3],e[4]); }
+  else if(t==='bx'){ bombFx(e[2],e[3],e[4]); } else if(t==='am'){ addNum(e[1],e[2]-30,'🏹 화살 피격!','#ffb070',true); }
   else if(t==='ann'){ announce('🔥 총공세! 바닥에 불이 번집니다','#ff9a6a'); }
   else if(t==='hv'){ halveWarn(); }
   else if(t==='cn'){ announce('⚔️ 반격 태세! 스킬을 쓰면 크게 다쳐요 (일반공격은 OK)','#ffb347'); sfx('block'); }
@@ -2834,7 +2834,7 @@ function casDevTick(m,dt){ const B=casBoss(), C=CAS_CFG.dev; if(!B||m.gen!==(G.c
   m.shot-=dt; if(m.shot>0)return;
   const dc=C[m.dv], pls=playersForAI().filter(p=>p.i<10); if(!pls.length)return; let t=pls[0],bd=1e9; for(const p of pls){ const d=hyp(p.x-m.x,p.y-m.y); if(d<bd){bd=d;t=p;} }
   m.shot=dc.iv/(1+C.lvIv*(m.lv-1))*rand(.9,1.1); m.atk=.3; const sx=t.x+rand(-8,8), sy=t.y+rand(-8,8);
-  shots.push({x:sx,y:sy,t:0,dur:dc.dur,r:dc.r,dv:1,dmg:B.dmg*dc.mul*(1+C.lvDmg*(m.lv-1))}); pushEv(['e',Math.round(sx),Math.round(sy),dc.r,Math.round(dc.dur*100)]); arrowFx(m.x,m.y-m.r,sx,sy,m.dv==='arrow'?1:0); pushEv(['a',Math.round(m.x),Math.round(m.y-m.r),Math.round(sx),Math.round(sy)]); }
+  shots.push({x:sx,y:sy,t:0,dur:dc.dur,r:dc.r,dv:1,ar:m.dv==='arrow'?1:0,dmg:B.dmg*dc.mul*(1+C.lvDmg*(m.lv-1))}); pushEv(['e',Math.round(sx),Math.round(sy),dc.r,Math.round(dc.dur*100)]); arrowFx(m.x,m.y-m.r,sx,sy,m.dv==='arrow'?1:0); pushEv(['a',Math.round(m.x),Math.round(m.y-m.r),Math.round(sx),Math.round(sy)]); }
 function casWreckAdd(m){ (G.casWreck=G.casWreck||[]).push({k:m.dv,x:m.x,y:m.y,r:m.r*1.25,t0:T}); }   /* 부서진 자리에 잔해가 다시 세워질 때까지 남아요 */
 function casDevKill(m){ m.dead=true; casWreckAdd(m); const k=m.dv, lv=Math.max(1,(m.lv|0||1)-1), gen=G.casGen|0, P=CAS_CFG.dev;   /* 제때 부수면 레벨이 1 내려가서(최소 1) 다시 세워져요 */ burst(m.x,m.y,'#a08a60',34,340); burst(m.x,m.y,CAS_DVC[k],18,300); spark(m.x,m.y,'#fff0c0',18); efx.push({k:'ring',x:m.x,y:m.y,r0:8,r1:100,t:0,life:.45,col:CAS_DVC[k],w:12}); sfx('crit'); G.shake=Math.max(G.shake,.4); pushEv(['bx',Math.round(m.x),Math.round(m.y),50]);
   announce(`💥 ${CAS_DVN[k]} 파괴! ${P.resp}초 뒤 Lv${lv}로 다시 세워져요${(m.lv|0)>1?' (레벨 −1)':''}`,CAS_DVC[k]);
@@ -3334,7 +3334,7 @@ function mobSteer(m,dt){
 function mobKb(m,dt){ if(m.kx||m.ky){ m.x+=m.kx*dt; m.y+=m.ky*dt; const f=Math.pow(.004,dt); m.kx*=f; m.ky*=f; if(Math.abs(m.kx)+Math.abs(m.ky)<6)m.kx=m.ky=0; } }
 function updateMobs(dt){
   const pls=playersForAI().concat(minionTargets()); /* 소환수도 몹의 공격 대상 */
-  for(let i=shots.length-1;i>=0;i--){ const sh=shots[i]; sh.t+=dt; if(sh.t>=sh.dur){ shots.splice(i,1); if(sh.rift){ spawnMob(0,sh.x,sh.y,true); for(let k=0;k<4;k++)spawnMob(k%2?10:0,sh.x+rand(-40,40),sh.y+rand(-40,40),false); burst(sh.x,sh.y,'#c070ff',40,320); efx.push({k:'ring',x:sh.x,y:sh.y,r0:10,r1:110,t:0,life:.5,col:'#c070ff',w:12}); sfx('slam'); G.shake=Math.max(G.shake,.4); continue; } for(const p of pls){ if(hyp(p.x-sh.x,p.y-sh.y)<sh.r+10) mobHitPlayer(p.i,sh.dmg*(sh.dv&&p.i===1&&me.D&&me.D.sp&&me.D.sp.cs_armor?.7:1),sh.st||0,sh.sd||0); } if(G.castle){ if(sh.cas)castleHit(sh.dmg*.4); else if(sh.vil)castleHit(sh.dmg*.35); } pushEv(['bx',Math.round(sh.x),Math.round(sh.y),sh.r]); bombFx(sh.x,sh.y,sh.r); } }
+  for(let i=shots.length-1;i>=0;i--){ const sh=shots[i]; sh.t+=dt; if(sh.t>=sh.dur){ shots.splice(i,1); if(sh.rift){ spawnMob(0,sh.x,sh.y,true); for(let k=0;k<4;k++)spawnMob(k%2?10:0,sh.x+rand(-40,40),sh.y+rand(-40,40),false); burst(sh.x,sh.y,'#c070ff',40,320); efx.push({k:'ring',x:sh.x,y:sh.y,r0:10,r1:110,t:0,life:.5,col:'#c070ff',w:12}); sfx('slam'); G.shake=Math.max(G.shake,.4); continue; } for(const p of pls){ if(hyp(p.x-sh.x,p.y-sh.y)<sh.r+10) mobHitPlayer(p.i,sh.dmg*(sh.dv&&p.i===1&&me.D&&me.D.sp&&me.D.sp.cs_armor?.7:1),sh.st||0,sh.sd||0); } if(G.castle){ if(sh.cas)castleHit(sh.dmg*.4); else if(sh.vil)castleHit(sh.dmg*.35); } pushEv(['bx',Math.round(sh.x),Math.round(sh.y),sh.r]); bombFx(sh.x,sh.y,sh.r); if(sh.ar){ addNum(sh.x,sh.y-30,'🏹 화살 피격!','#ffb070',true); pushEv(['am',Math.round(sh.x),Math.round(sh.y)]); } } }
   RAID_HIT=0;
   for(const m of G.mobs){ if(m.dead)continue; RAID_HIT=m.rk?1:0;
     if(m.gob){ gobStep(m,dt); continue; }
@@ -7837,7 +7837,7 @@ function drawMinimap0(){
 /* ===== 어둠·조명: 낮은 해상도(1/4) 어둠판에 빛 구멍을 뚫어 한 번에 덧그림 — 비용이 아주 작음 ===== */
 const LT={cv:null,x:null,spr:null,warm:null};
 function ltMake(rgb,pk){ const c=document.createElement('canvas'); c.width=c.height=96; const g=c.getContext('2d'), gr=g.createRadialGradient(48,48,0,48,48,48); gr.addColorStop(0,`rgba(${rgb},${pk})`); gr.addColorStop(.4,`rgba(${rgb},${pk*.6})`); gr.addColorStop(.75,`rgba(${rgb},${pk*.2})`); gr.addColorStop(1,`rgba(${rgb},0)`); g.fillStyle=gr; g.fillRect(0,0,96,96); return c; }
-function drawDark(t,pass){   /* pass 1: 바닥에 진하게 · pass 2: 몹·플레이어 위에 약하게 (먼 적도 읽히게) */
+function drawDark(t,pass){   /* 바닥에만 어둠을 덮어요 (몹·플레이어 위 2차 어둠은 발열을 줄이려고 뺐어요) */
   if(!hudOn('light')||!me||VW<=0)return;
   const S=.25, w=Math.max(2,Math.ceil(VW*S)), h=Math.max(2,Math.ceil(VH*S));
   if(!LT.cv){ LT.cv=document.createElement('canvas'); LT.x=LT.cv.getContext('2d'); LT.spr=ltMake('0,0,0',1); LT.warm=ltMake('255,170,90',.5); }
@@ -7858,7 +7858,7 @@ function drawDark(t,pass){   /* pass 1: 바닥에 진하게 · pass 2: 몹·플�
     ctx.save(); ctx.setTransform(DPR,0,0,DPR,0,0); ctx.imageSmoothingEnabled=true; ctx.drawImage(LT.cv,0,0,VW,VH);
     if(!me.dead){ const px=(me.x-camX)*ZOOM, py=(me.y-camY)*ZOOM, r=210*ZOOM*fl; ctx.globalCompositeOperation='lighter'; ctx.globalAlpha=.22+.04*Math.sin(t*3.1); ctx.drawImage(LT.warm,px-r,py-r,r*2,r*2); }   /* 플레이어 주변 따뜻한 빛 번짐 */
     ctx.restore();
-  } else { ctx.save(); ctx.setTransform(DPR,0,0,DPR,0,0); ctx.globalAlpha=.4; ctx.drawImage(LT.cv,0,0,VW,VH); ctx.restore(); }
+  }
 }
 function render(t){
   blockTick(0);   /* 회복 봉쇄: 그리기 전에 한 번 더 잠금 */
@@ -7885,7 +7885,7 @@ function render(t){
   if(ally&&!ally.lobby&&ally.mnv)for(const q of ally.mnv)actors.push({y:q.y,f:()=>drawMinion(q,t)});
   actors.sort((a,b)=>a.y-b.y); { let past=false; const gh=[]; for(const a of actors){ if(a.cas){ past=true; a.f(); continue; } a.f(); if(!past&&G.castle&&a.o&&a.o.x!==undefined&&Math.abs(a.o.x-VX)<CAS_W*.5+8&&a.y>VY-128)gh.push(a); }
     if(gh.length){ ctx.save(); ctx.globalAlpha=.5; for(const a of gh)a.f(); ctx.restore(); } }   /* 성 뒤에 가려진 몹·플레이어는 반투명하게 한 번 더 그려서 보이게 */
-  casAimTagsDraw(); drawDark(t,2); drawProjs(); drawEfx(t); drawAmbient(t);
+  casAimTagsDraw(); drawProjs(); drawEfx(t); drawAmbient(t);
   drawHealFx(t);
   for(const p of parts){ if(p.glow)continue; ctx.globalAlpha=1-p.t/p.life; ctx.fillStyle=p.col; ctx.fillRect(p.x-p.r/2,p.y-p.r/2,p.r,p.r);} ctx.globalAlpha=1;
   ctx.globalCompositeOperation='lighter';
