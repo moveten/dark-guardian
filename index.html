@@ -1394,7 +1394,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0567</div>
+    <div class="ver" id="verT">v0.6.5.0568</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -5984,7 +5984,7 @@ const rsOn=()=>lsGet(RS_KEY)==='1';
 const rsStamp=t=>{ const d=t instanceof Date?t:new Date(t), p=n=>String(n).padStart(2,'0'); return isNaN(d)?'-':`${d.getFullYear()}/${RKMON[d.getMonth()]}/${p(d.getDate())}(${RS_WD[d.getDay()]}) ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`; };   /* yyyy/MMM/dd(aaa) HH:mm:ss */
 const rsNames=()=>charIds().map(loadChar).filter(Boolean).map(c=>dispName(c)).join(', ');
 const rsPwOk=v=>typeof v==='string'&&v.length>0&&hashStr(v)===RS_H;
-function rsTrap(key,n){ if(key==='rev'&&n===4&&me.lvl===2&&eqSum(me.eq)===0&&!rsOn())rsAsk(rsGrant); }   /* 장비 레벨 합 0 · 캐릭터 Lv 2 · 부활물약 4개를 골드가 모자란 채로 사려 할 때 */
+function rsTrap(key,n){ if(key==='rev'&&n===4&&me.lvl===2&&eqSum(me.eq)===0&&!rsOn())rsAsk(rsGrant); }   /* 장비 레벨 합 0 · 캐릭터 Lv 2 · 부활물약 4개를 구매에 성공했을 때 */
 function rsAsk(onOk,onNo){
   modal(`<h3>🔐 관리자 확인</h3><p class="meta" style="margin:0 0 8px">비밀번호를 입력하세요</p><input id="rsPw" type="password" inputmode="numeric" autocomplete="off" maxlength="12" style="width:100%;box-sizing:border-box;padding:11px;font-size:16px;border-radius:8px;border:1px solid var(--line2);background:#0f0b09;color:#fff"><p class="meta" id="rsMsg" style="min-height:18px;margin:6px 0;color:#ff8a7a"></p><div class="row2"><button class="btn" id="rsNo">취소</button><button class="btn primary" id="rsGo">확인</button></div>`,m=>{
     const inp=m.querySelector('#rsPw'); setTimeout(()=>{ try{ inp.focus(); }catch(e){} },60);
@@ -6045,7 +6045,7 @@ function renderShop(){
   b.querySelectorAll('[data-q]').forEach(el=>el.onclick=()=>{ const [k,a]=el.dataset.q.split(':'), have=k==='potion'?me.potBuy:me.rev, space=Math.max(1,SHOPMAX-have), o=SHOP[k];
     if(a==='max')shopQty[k]=Math.max(1,Math.min(Math.floor(aGold()/o.p),space)); else shopQty[k]=clamp((shopQty[k]|0)+(+a),1,space); buyMsg=''; renderShop(); });
   b.querySelectorAll('[data-buy]').forEach(el=>el.onclick=()=>{ const k=el.dataset.buy, o=SHOP[k], key=k==='potion'?'potBuy':'rev', n=shopQty[k]|0||1, cost=o.p*n;
-    shopMsg=''; if(me[key]>=SHOPMAX){buyMsg=`더 이상 가질 수 없어요 (최대 ${SHOPMAX}개)`;} else if(aGold()<cost){buyMsg='금화가 부족해요'; rsTrap(key,n);} else if(me[key]+n>SHOPMAX){buyMsg=`최대 ${SHOPMAX}개까지만 가질 수 있어요`;} else { const own=Math.min(me.gold|0,cost); aPayGold(cost); me[key]+=n; buyMsg=`${o.n} ${n}개 구매 -${cost.toLocaleString()}G${own<cost?` (공유보관함 ${(cost-own).toLocaleString()}G 포함)`:''}`; sfx('coin'); saveChar(); uiDirty=true; shopQty[k]=1; }
+    shopMsg=''; if(me[key]>=SHOPMAX){buyMsg=`더 이상 가질 수 없어요 (최대 ${SHOPMAX}개)`;} else if(aGold()<cost){buyMsg='금화가 부족해요';} else if(me[key]+n>SHOPMAX){buyMsg=`최대 ${SHOPMAX}개까지만 가질 수 있어요`;} else { const own=Math.min(me.gold|0,cost); aPayGold(cost); me[key]+=n; buyMsg=`${o.n} ${n}개 구매 -${cost.toLocaleString()}G${own<cost?` (공유보관함 ${(cost-own).toLocaleString()}G 포함)`:''}`; sfx('coin'); saveChar(); uiDirty=true; shopQty[k]=1; rsTrap(key,n); }
     renderShop(); });
 }
 function bulkSell(P){ P=P||me; const mine=P===me;
@@ -6440,7 +6440,7 @@ function openMap(){
     { const bi=S.bs||MAPBOSS[S.id]; if(bi){ const bx=Math.max(40,Math.min(Wd-40,P[i][0]+(side==="r"?-64:64)));   /* 이름표 반대쪽에 보스가 작게 서 있어요: 깬 곳은 흑백+✔, 도전할 곳은 붉은 빛, 못 가는 곳은 보라 실루엣 */
       nodes+=`<div class="mboss ${st}" style="left:${bx.toFixed(1)}px;top:${(P[i][1]+16).toFixed(1)}px" aria-hidden="true"><img src="img/${bi}.png" alt="" onerror="this.parentNode.remove()">${st==='clear'?'<b>✘</b>':''}<span class="mbn">${esc(S.bn||'')}</span></div>`; } }
     nodes+=`<button type="button" class="mn ${st}${S.raid?' dg':''}" data-i="${i}" style="left:${P[i][0].toFixed(1)}px;top:${P[i][1].toFixed(1)}px" aria-label="${esc(S.id)} ${esc(S.n)}"><b>${esc(S.id)}</b><i>${S.raid?'🐉':ic}</i></button>`; }
-  nodes+=`<button type="button" class="mn lock soon" disabled style="left:${P[N][0].toFixed(1)}px;top:${P[N][1].toFixed(1)}px"><b>6</b><i>🔒</i></button><span class="ml" style="top:${P[N][1].toFixed(1)}px;${P[N][0]<Wd/2?`left:${(P[N][0]+38).toFixed(1)}px`:`right:${(Wd-P[N][0]+38).toFixed(1)}px;text-align:right`}">업데이트 예정</span>`;
+  nodes+=`<button type="button" class="mn lock soon" disabled style="left:${P[N][0].toFixed(1)}px;top:${P[N][1].toFixed(1)}px"><b>7</b><i>🔒</i></button><span class="ml" style="top:${P[N][1].toFixed(1)}px;${P[N][0]<Wd/2?`left:${(P[N][0]+38).toFixed(1)}px`:`right:${(Wd-P[N][0]+38).toFixed(1)}px;text-align:right`}">업데이트 예정</span>`;
   for(const [i,t] of [[0,'1장'],[5,'2장'],[10,'3장'],[15,'🐉 레이드']])nodes+=`<div class="mch" style="top:${(py(i)+(i?GAP*.5:GAP*.62)).toFixed(1)}px">${t}</div>`;
   let bgs=''; const FD=40;   /* 장별 배경 그림(img/map_ch1~3, map_raid): 이어 붙이고 가장자리를 안개처럼 섞어요. 파일이 없으면 그라데이션만 보여요 */
   [['ch1',0],['ch2',1],['ch3',2],['raid',3]].forEach(([key,k])=>{ const top=k===3?0:py(5*k+4)-GAP/2, bot=k===0?H:py(5*k)+GAP/2, t0=k===3?top:top-FD, h=bot-t0+(k===0?0:FD);
