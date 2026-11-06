@@ -1386,7 +1386,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0565</div>
+    <div class="ver" id="verT">v0.6.5.0566</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1682,8 +1682,8 @@ const CAS_CFG={
   iv:[.6,.5,.4],                                               /* 기술 사이 쉬는 시간 배율 (작을수록 기술을 자주 씀) */
   rec:{slam:1},                                                /* 철퇴 강타 직후 다음 행동까지 추가로 쉬는 시간(초) */
   skillRate:.75,                                               /* 특수기술이 준비됐을 때 실제로 쓸 확률 */
-  mul:{slam:2.2,ring:2.2,charge:2.0,multi:1.8}, dur:{slam:1.5,ring:1.2,charge:1.0,multi:1.5},
-  tr:{slam:220,slamOut:400,multi:125,chargeW:45,chargeWm:.8,chargeLen:450,chargeDev:.5},               /* 기본 기술 범위: 철퇴 강타 반지름 · 투석 포격 반지름 · 돌진 폭(보스 반지름에 더함) · 돌진 길이 */   /* 철퇴 강타·돌진·투석 포격 피해 배율 / 시전 시간 */
+  mul:{slam:2.2,ring:2.2,charge:2.0,multi:1.8}, dur:{slam:1.5,ring:1.2,charge:1.4,multi:1.5},
+  tr:{slam:220,slamOut:400,multi:125,chargeHW:70,chargeLen:450,chargeDev:.5},               /* 기본 기술 범위: 철퇴 강타 반지름 · 투석 포격 반지름 · 돌진 반폭(중심선 좌우 각각) · 돌진 길이 */   /* 철퇴 강타·돌진·투석 포격 피해 배율 / 시전 시간 */
   gate:{cd:45,dur:8,heal:.03,healAt:2,tel:.7,cone:1.75},        /* 성문 닫기: 대기·지속·초당 회복(최대체력 비율, 최근 1초간 피해를 못 받았을 때만)·회복 시작·시전·막는 범위(라디안, 좌우 각각) */
   sil:{cd:30,dur:5,tel:1.3,crit:2},                             /* 침묵의 군기: 대기·지속·시전·보스가 받는 치명타 배율 */
   horn:{cd:35,dur:3,tel:1.3,r:470,imm:1.5,gap:8},               /* 공성 나팔(공포): 대기·지속·시전·범위·면역·침묵과의 최소 간격 */
@@ -2952,7 +2952,7 @@ function casSkillPick(m,best,bd,pls){ const C=CAS_CFG, ph=m.ph|0||1, opts=[], fr
     if(k!=='spin'&&k!=='shspin'){ casBan(k==='gate'?'🚪 성문 닫기':k==='sil'?'🚫 침묵의 군기':'📯 공성 나팔',k==='gate'?'정면 공격이 막혀요 — 뒤로 돌아가요':k==='sil'?'피할 수 없어요 · 일반공격만 가능, 치명타 ×2':'원 밖으로 벗어나세요 — 공포에 걸려요',2.0); casFlash(m,k==='gate'?'#ffd070':k==='sil'?'#c8a0ff':'#ff9a5a',k==='gate'?'🚪 성문 닫기':k==='sil'?'🚫 침묵의 군기':'📯 공성 나팔',k==='gate'?'255,210,110':k==='sil'?'190,150,255':'255,150,80',false); } return; }
   const rr=Math.random();   /* 기본 기술: 철퇴 강타 · 돌진(전 페이즈) · 투석 포격(3페이즈) */
   if(ph>=3&&rr<.3){ const pts=[{x:best.x,y:best.y}]; for(let i=0;i<4;i++)pts.push({x:clamp(best.x+rand(-230,230),40,WW-40),y:clamp(best.y+rand(-230,230),40,WH-40)}); m.tel={k:'slam',kind:'multi',cas:1,x:pts[0].x,y:pts[0].y,pts,r:C.tr.multi,mul:C.mul.multi,col:'#e08a3a',t:0,dur:C.dur.multi}; casBan('🪨 투석 포격','붉은 원 밖으로!',1.4); }
-  else if(rr<(ph>=3?.6:ph>=2?.5:.4)&&bd>170) { m.tel={k:'charge',kind:'charge',cas:1,x:m.x,y:m.y,tx:best.x,ty:best.y,r:0,w:(m.r+C.tr.chargeW)*C.tr.chargeWm,len:C.tr.chargeLen,t:0,dur:C.dur.charge,mul:C.mul.charge}; casBan('🛡️ 방패 돌격','붉은 길에서 비켜서세요!',1.4); casCutin(2); pushEv(['csc',2]); }
+  else if(rr<(ph>=3?.6:ph>=2?.5:.4)&&bd>170) { m.tel={k:'charge',kind:'charge',cas:1,x:m.x,y:m.y,tx:best.x,ty:best.y,r:0,w:C.tr.chargeHW,len:C.tr.chargeLen,t:0,dur:C.dur.charge,mul:C.mul.charge}; casBan('🛡️ 방패 돌격','붉은 길에서 비켜서세요!',1.4); casCutin(2); pushEv(['csc',2]); }
   else { m.tel={k:'slam',kind:'slam',cas:1,x:m.x,y:m.y,r:C.tr.slam,mul:C.mul.slam,t:0,dur:C.dur.slam}; casCutin(); pushEv(['csc',1]); } }
 function casAI(m,dt,pls,sf,best,bd,tau){
   for(const k of ['cdG','cdS','cdH','cdP']){ if(m[k]>0)m[k]-=dt; } if(m.silT>0)m.silT-=dt;
@@ -3423,8 +3423,8 @@ function bossAI(m,dt,pls,sf){
   if(m.counter>0){ m.counter-=dt; m.fa=Math.atan2(best.y-m.y,best.x-m.x); if(m.counter<=0){ m.counter=0; m.bt=m.rk==='shd'?rand(5,8)/(m.awk?1.5:1):m.enr?1:1.6; } return; }
   if(m.charge){ const c=m.charge; c.t-=dt; const sp=620;
     m.x=clamp(m.x+c.dx*sp*dt,40,WW-40); m.y=clamp(m.y+c.dy*sp*dt,40,WH-40);
-    for(const p of pls){ if(!c.hit[p.i]&&hyp(p.x-m.x,p.y-m.y)<(m.rk==='cas'?(m.r+CAS_CFG.tr.chargeW)*CAS_CFG.tr.chargeWm:m.r+20)){c.hit[p.i]=1;mobHitPlayer(p.i,m.dmg*(c.mul||1.6)*BSKM,'slow',2.5);} }
-    if(m.rk==='cas'){ const hr=(m.r+CAS_CFG.tr.chargeW)*CAS_CFG.tr.chargeWm; for(const o of casDevs()){ if(c.hit['d'+o.dv]||hyp(o.x-m.x,o.y-m.y)>=hr+o.r*.6)continue; c.hit['d'+o.dv]=1; const dm=Math.ceil(o.max*CAS_CFG.tr.chargeDev); o.hp-=dm; o.flash=.15; addNum(o.x,o.y-o.r-12,'💥 -'+dm,'#ffd070',true); burst(o.x,o.y,CAS_DVC[o.dv],14,280); spark(o.x,o.y,'#fff0c0',10); sfx('crit'); G.shake=Math.max(G.shake,.3); if(o.hp<=0)killMob(o); } }   /* 방패 돌격이 공성탑에 닿으면 탑 최대체력의 절반 피해 */
+    for(const p of pls){ if(!c.hit[p.i]&&hyp(p.x-m.x,p.y-m.y)<(m.rk==='cas'?CAS_CFG.tr.chargeHW:m.r+20)){c.hit[p.i]=1;mobHitPlayer(p.i,m.dmg*(c.mul||1.6)*BSKM,'slow',2.5);} }
+    if(m.rk==='cas'){ const hr=CAS_CFG.tr.chargeHW; for(const o of casDevs()){ if(c.hit['d'+o.dv]||hyp(o.x-m.x,o.y-m.y)>=hr+o.r*.6)continue; c.hit['d'+o.dv]=1; const dm=Math.ceil(o.max*CAS_CFG.tr.chargeDev); o.hp-=dm; o.flash=.15; addNum(o.x,o.y-o.r-12,'💥 -'+dm,'#ffd070',true); burst(o.x,o.y,CAS_DVC[o.dv],14,280); spark(o.x,o.y,'#fff0c0',10); sfx('crit'); G.shake=Math.max(G.shake,.3); if(o.hp<=0)killMob(o); } }   /* 방패 돌격이 공성탑에 닿으면 탑 최대체력의 절반 피해 */
     if(c.t<=0)m.charge=null; return; }
   if(m.tel){ const t=m.tel; t.t+=dt;
     if(t.kind==='stack'&&t.t<t.dur*.7){ t.x=best.x; t.y=best.y; }
