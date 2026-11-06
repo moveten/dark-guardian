@@ -1378,7 +1378,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0540</div>
+    <div class="ver" id="verT">v0.6.5.0541</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1675,7 +1675,7 @@ const CAS_CFG={
   skillRate:.75,                                               /* 특수기술이 준비됐을 때 실제로 쓸 확률 */
   mul:{slam:2.2,charge:2.0,multi:1.8}, dur:{slam:1.1,charge:.9,multi:1.5},
   tr:{slam:270,multi:125,chargeW:45,chargeLen:450},               /* 기본 기술 범위: 철퇴 강타 반지름 · 투석 포격 반지름 · 돌진 폭(보스 반지름에 더함) · 돌진 길이 */   /* 철퇴 강타·돌진·투석 포격 피해 배율 / 시전 시간 */
-  gate:{cd:45,dur:8,heal:.004,healAt:2,tel:.7,cone:1.35},       /* 성문 닫기: 대기·지속·초당 회복(최대체력 비율)·회복 시작·시전·막는 범위(라디안) */
+  gate:{cd:45,dur:8,heal:.03,healAt:2,tel:.7,cone:1.75},        /* 성문 닫기: 대기·지속·초당 회복(최대체력 비율, 최근 1초간 피해를 못 받았을 때만)·회복 시작·시전·막는 범위(라디안, 좌우 각각) */
   sil:{cd:30,dur:5,tel:1.3,crit:2},                             /* 침묵의 군기: 대기·지속·시전·보스가 받는 치명타 배율 */
   horn:{cd:35,dur:3,tel:1.3,r:470,imm:1.5,gap:8},               /* 공성 나팔(공포): 대기·지속·시전·범위·면역·침묵과의 최소 간격 */
   spin:{cd:22,dur:3,inv:1,tel:1.3,w:1.0,r:340,n:6,tick:.4,pct:.34},   /* 회전 기술: 대기·지속·무적·시전·회전속도(rad/s)·반지름·조각 수·판정 간격·최대체력 비율 피해 */
@@ -2909,13 +2909,13 @@ function casStartSpin(m,sh){ const C=CAS_CFG.spin; m.tel={k:'slam',kind:'cas_spi
   casFlash(m,sh?'#8ac0ff':'#ff8a3a',sh?'🛡️ 방패 회전!':'🔨 철퇴 회전!',sh?'120,180,255':'255,140,60',true); casBan(sh?'🛡️ 방패 회전':'🔨 철퇴 회전',sh?'왼쪽으로 같이 돌아야 안전해요':'오른쪽으로 같이 돌아야 안전해요',2.2); announce(sh?'🛡️ 방패 회전! 왼쪽으로 같이 돌아야 안전해요':'🔨 철퇴 회전! 오른쪽으로 같이 돌아야 안전해요',sh?'#9fd0ff':'#ffb070'); }
 /* ---- 시전이 끝났을 때 (bossAI의 텔레그래프 처리에서 호출) ---- */
 function casTelDone(m,t,best,pl1){ const C=CAS_CFG;
-  if(t.kind==='cas_gate'){ m.gt=C.gate.dur; m.gfa=Math.atan2(best.y-m.y,best.x-m.x); m.cdG=C.gate.cd+C.gate.dur; m.tel=null; m.charge=null; casFlash(m,'#ffd070','🚪 성문 닫힘!','255,210,110',true); announce('🚪 성문이 닫혔어요! 정면 공격은 막혀요 — 뒤로 돌아가서 치세요','#ffd070'); }
+  if(t.kind==='cas_gate'){ m.gt=C.gate.dur; m.gfa=Math.atan2(best.y-m.y,best.x-m.x); m.cdG=C.gate.cd+C.gate.dur; m.tel=null; m.charge=null; casFlash(m,'#ffd070','🚪 성문 닫힘!','255,210,110',true); announce('🚪 성문이 닫혔어요! 정면 공격은 막혀요 — 뒤로 돌아가서 치세요 (못 때리면 보스가 회복해요)','#ffd070'); }
   else if(t.kind==='cas_sil'){ for(const p of pl1)casStat(p,'sil',C.sil.dur); m.silT=C.sil.dur; m.tSil=T; m.cdS=C.sil.cd; casFlash(m,'#c8a0ff','🚫 침묵의 군기!','190,150,255',true); announce(`🚫 침묵의 군기! ${C.sil.dur}초간 일반공격만 가능 — 대신 치명타가 ${C.sil.crit}배로 들어가요`,'#d0a8ff'); }
   else if(t.kind==='cas_horn'){ for(const p of pl1){ if(hyp(p.x-t.x,p.y-t.y)<t.r)casStat(p,'fear',C.horn.dur); } m.tHorn=T; m.cdH=C.horn.cd; casFlash(m,'#ff9a5a','📯 공성 나팔!','255,150,80',true); efx.push({k:'ring',x:m.x,y:m.y,r0:20,r1:t.r,t:0,life:.5,col:'#ff9a5a',w:18}); }
   else if(t.kind==='cas_spin'){ m.spin={dir:t.dir,sh:t.sh,a0:t.a0,t:0,tk:.15}; m.inv=CAS_CFG.spin.inv; m.cdP=C.spin.cd; m.tel=null; } }
 /* ---- 성문 닫기 진행 ---- */
 function casGateTick(m,dt){ const C=CAS_CFG.gate; m.gt-=dt; m.fa=m.gfa; const el=C.dur-m.gt;
-  if(el>C.healAt){ const h=m.max*C.heal*dt; m.hp=Math.min(m.max,m.hp+h); m.hlA=(m.hlA||0)+h; m.hlT=(m.hlT||0)-dt; if(m.hlT<=0){ m.hlT=.5; addNum(m.x,m.y-m.r-6,'+'+Math.round(m.hlA),'#7ae08a',false); m.hlA=0; spark(m.x,m.y,'#7ae08a',6); } }
+  if(el>C.healAt&&T-(m.gHit||-9)>1){ const h=m.max*C.heal*dt; m.hp=Math.min(m.max,m.hp+h); m.hlA=(m.hlA||0)+h; m.hlT=(m.hlT||0)-dt; if(m.hlT<=0){ m.hlT=.5; addNum(m.x,m.y-m.r-6,'+'+Math.round(m.hlA),'#7ae08a',false); m.hlA=0; spark(m.x,m.y,'#7ae08a',6); } }
   if(m.gt<=0){ m.gt=0; m.bt=.8; efx.push({k:'ring',x:m.x,y:m.y,r0:m.r,r1:m.r*3,t:0,life:.4,col:'#ffd070',w:10}); burst(m.x,m.y,'#ffd070',20,260); sfx('boss'); announce('🚪 성문이 다시 열렸어요','#ffd070'); } }
 /* ---- 기술 고르기: 특수기술이 준비되면 평타보다 먼저 써요 ---- */
 function casSkillPick(m,best,bd,pls){ const C=CAS_CFG, ph=m.ph|0||1, opts=[], free=!(me.fear>0||me.sil>0)&&T-(m.tSil||-99)>C.sil.dur+2&&T-(m.tHorn||-99)>C.horn.dur+2;
@@ -3929,7 +3929,7 @@ function hitMob(m,r,slow,tn,fx){
   if((m.shield>0||m.inv>0)&&m.boss&&m.counter>0&&!(fx&&(fx.basic||fx.raw))&&!G.inProc)counterHit(m,r.v);   /* 배리어·무적이어도 반격 태세는 그대로 반사 */
   if(m.shield>0){ awkShieldHit(m,G.mode!=='guest'); return; }   /* 각성 그림자 1페이즈 배리어 */
   if(m.inv>0){ if(T-(m._invN||-9)>.45){ m._invN=T; addNum(m.x,m.y-m.r-8,'무적','#b8a8ff',false); } return; }   /* 각성 그림자 무적 */
-  if(m.gt>0){ const a=Math.atan2(me.y-m.y,me.x-m.x); let d=Math.abs(a-m.gfa); if(d>3.1416)d=6.283-d; if(d<CAS_CFG.gate.cone){ if(T-(m._gN||-9)>.3){ m._gN=T; addNum(m.x+Math.cos(a)*m.r,m.y+Math.sin(a)*m.r,'🚪 성문!','#ffd070',true); spark(m.x+Math.cos(a)*m.r,m.y+Math.sin(a)*m.r,'#ffd070',8); sfx('block'); } return; } }   /* 성문 닫기: 정면 공격은 모두 막힘 (뒤·옆에서만 들어감) */
+  if(m.gt>0){ const a=Math.atan2(me.y-m.y,me.x-m.x); let d=Math.abs(a-m.gfa); if(d>3.1416)d=6.283-d; if(d<CAS_CFG.gate.cone){ if(T-(m._gN||-9)>.3){ m._gN=T; addNum(m.x+Math.cos(a)*m.r,m.y+Math.sin(a)*m.r,'🚪 성문!','#ffd070',true); spark(m.x+Math.cos(a)*m.r,m.y+Math.sin(a)*m.r,'#ffd070',8); sfx('block'); } return; } m.gHit=T; }   /* 성문 닫기: 정면 공격은 모두 막힘 (뒤·옆에서만 들어감) — 피해가 들어가면 회복 멈춤 */
   const raw=!!(fx&&fx.raw); /* 고정 비율 피해(세크리파이스)는 장비·레벨 보정과 반격 태세를 무시 */
   if(!raw){ const gp=gearPen(); if(gp.wm!==1)r={v:r.v*gp.wm,crit:r.crit}; }
   if(!raw){ const P=lvPen(); if(P.ex){ if(Math.random()<P.miss){ addNum(m.x,m.y-m.r-6,'MISS','#9aa0aa',false); return; } r={v:r.v*P.dm,crit:r.crit}; } else if(P.over){ r={v:r.v*P.dm,crit:r.crit}; } }
