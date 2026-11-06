@@ -204,6 +204,14 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
 #awCut.cas .n{text-shadow:0 0 14px #ff8a3a,0 0 2px #000,0 3px 0 #4a1c08}
 #awCut.cas .s{color:#ffe3c4}
 #awCut.cas.on .bd,#awCut.cas.on img,#awCut.cas.on .tx{animation-duration:1.2s}
+#awCut.thin{height:62px}
+#awCut.thin .bd{top:8px;height:48px;transform:skewY(-4deg);box-shadow:0 0 18px rgba(255,140,60,.5)}
+#awCut.thin .sp{display:none}
+#awCut.thin img{height:84px;bottom:-4px;left:14px;transform:none}
+#awCut.thin .tx{left:104px;right:8px;top:12px;display:flex;flex-wrap:wrap;align-items:baseline;column-gap:8px;line-height:1.15}
+#awCut.thin .k{width:100%;font-size:11px;letter-spacing:2px}
+#awCut.thin .n{font-size:clamp(20px,5.6vw,24px);line-height:1.1;letter-spacing:1px;text-shadow:0 0 10px #ff8a3a,0 0 2px #000,0 2px 0 #4a1c08}
+#awCut.thin .s{margin-top:0;font-size:12px}
 @keyframes awBd{0%{clip-path:inset(0 0 0 100%)}17%{clip-path:inset(0 0 0 0)}83%{clip-path:inset(0 0 0 0);opacity:1}100%{clip-path:inset(0 100% 0 0);opacity:.6}}
 @keyframes awIm{0%{opacity:0;margin-left:60px}20%{opacity:1;margin-left:0}83%{opacity:1;margin-left:-6px}100%{opacity:0;margin-left:-60px}}
 @keyframes awTx{0%{opacity:0;transform:translateX(70px)}22%{opacity:1;transform:translateX(0)}83%{opacity:1;transform:translateX(-4px)}100%{opacity:0;transform:translateX(-70px)}}
@@ -1386,7 +1394,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0566</div>
+    <div class="ver" id="verT">v0.6.5.0567</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1682,7 +1690,7 @@ const CAS_CFG={
   iv:[.6,.5,.4],                                               /* 기술 사이 쉬는 시간 배율 (작을수록 기술을 자주 씀) */
   rec:{slam:1},                                                /* 철퇴 강타 직후 다음 행동까지 추가로 쉬는 시간(초) */
   skillRate:.75,                                               /* 특수기술이 준비됐을 때 실제로 쓸 확률 */
-  mul:{slam:2.2,ring:2.2,charge:2.0,multi:1.8}, dur:{slam:1.5,ring:1.2,charge:1.4,multi:1.5},
+  mul:{slam:2.2,ring:2.2,charge:2.0,multi:1.8}, dur:{slam:1.7,ring:1.5,charge:1.4,multi:1.5},
   tr:{slam:220,slamOut:400,multi:125,chargeHW:70,chargeLen:450,chargeDev:.5},               /* 기본 기술 범위: 철퇴 강타 반지름 · 투석 포격 반지름 · 돌진 반폭(중심선 좌우 각각) · 돌진 길이 */   /* 철퇴 강타·돌진·투석 포격 피해 배율 / 시전 시간 */
   gate:{cd:45,dur:8,heal:.03,healAt:2,tel:.7,cone:1.75},        /* 성문 닫기: 대기·지속·초당 회복(최대체력 비율, 최근 1초간 피해를 못 받았을 때만)·회복 시작·시전·막는 범위(라디안, 좌우 각각) */
   sil:{cd:30,dur:5,tel:1.3,crit:2},                             /* 침묵의 군기: 대기·지속·시전·보스가 받는 치명타 배율 */
@@ -3003,16 +3011,16 @@ function awkSeal(m){ const kind=m.ph===2?'lantern':m.ph===3?'heart':'seal', C=AW
 /* 모든 플레이어(나 + 동료)에게 상태이상 */
 /* 파괴 미션 컷인: 보스 시전 자세 전신(얼굴이 잘리지 않게 띠 위로 올라와도 그대로 보임) + 기술 이름 */
 function awkCutin(kind,ph){ const C=AWC[kind]; if(!C)return; const el=$('#awCut'); if(!el)return; ph=ph|0||1;
-  el.classList.remove('ok','cas'); el.querySelector('img').src='img/boss_awake'+(ph>1?ph:'')+'_cast.png'; el.querySelector('.k').textContent=`각성 그림자 · ${ph}페이즈 궁극기`;
+  el.classList.remove('ok','cas','thin'); el.querySelector('img').src='img/boss_awake'+(ph>1?ph:'')+'_cast.png'; el.querySelector('.k').textContent=`각성 그림자 · ${ph}페이즈 궁극기`;
   el.querySelector('.n').textContent=C.nm.replace(/^\S+\s/,''); el.querySelector('.s').textContent=C.sub;
   el.classList.remove('on'); void el.offsetWidth; el.classList.add('on'); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('on'),1550); }
 /* 파괴 미션 성공 컷인: 같은 띠, 초록색 · 쓰러진(기울어진) 보스 + 💤 */
 /* 수문장 카스텔 컷인(철퇴 강타): 각성 그림자 컷인과 같은 가로 띠 · 주황색, 1.2초 */
-function casCutin(k){ const el=$('#awCut'); if(!el)return; el.classList.remove('ok'); el.classList.add('cas'); el.querySelector('img').src=k===2?'img/boss_6_sk.png':k===3?'img/boss_6_cast.png':'img/boss_6_atk.png'; el.querySelector('.k').textContent='수문장 카스텔';
-  el.querySelector('.n').textContent=k===2?'방패 돌격':k===3?'성문 닫기':'철퇴 강타'; el.querySelector('.s').textContent=k===2?'붉은 길 밖으로 비켜서세요!':k===3?'정면 공격이 막혀요 — 뒤로 돌아가세요!':'안쪽 원 밖으로 → 바로 안쪽으로!';
+function casCutin(k){ const el=$('#awCut'); if(!el)return; el.classList.remove('ok'); el.classList.add('cas'); el.classList.toggle('thin',k===2);   /* 방패 돌격은 얇은 띠 컷인 */ el.querySelector('img').src=k===2?'img/boss_6_sk.png':k===3?'img/boss_6_cast.png':'img/boss_6_atk.png'; el.querySelector('.k').textContent='수문장 카스텔';
+  el.querySelector('.n').textContent=k===2?'방패 돌격':k===3?'성문 닫기':'철퇴 강타'; el.querySelector('.s').textContent=k===2?'붉은 길 밖으로!':k===3?'정면 공격이 막혀요 — 뒤로 돌아가세요!':'안쪽 원 밖으로 → 바로 안쪽으로!';
   el.classList.remove('on'); void el.offsetWidth; el.classList.add('on'); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('on'),1250); }
 const AWOK={seal:['봉인 성공!','결정 3개 파괴'],lantern:['소등 성공!','등불 2개 소등'],heart:['차단 성공!','심장 파편 3개 파괴']};
-function awkCutinOk(kind,ph){ const T=AWOK[kind], el=$('#awCut'); if(!T||!el)return; ph=ph|0||1; el.classList.remove('cas');
+function awkCutinOk(kind,ph){ const T=AWOK[kind], el=$('#awCut'); if(!T||!el)return; ph=ph|0||1; el.classList.remove('cas','thin');
   el.classList.add('ok'); el.querySelector('img').src='img/boss_awake'+(ph>1?ph:'')+'.png'; el.querySelector('.k').textContent=`각성 그림자 · ${ph}페이즈 궁극기`;
   el.querySelector('.n').textContent=T[0]; el.querySelector('.s').textContent=`${T[1]} · 보스 기절 ${AWK.okStun}초`;
   el.classList.remove('on'); void el.offsetWidth; el.classList.add('on'); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('on'),1550); }
