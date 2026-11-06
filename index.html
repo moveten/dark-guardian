@@ -1386,7 +1386,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0556</div>
+    <div class="ver" id="verT">v0.6.5.0557</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1998,8 +1998,8 @@ const SPFX={
  awoff_necro:{n:'각성의 등불',slot:'shield',base:'망령의 등불',il:999,hero:1,aw:1,fcls:'necro',d:'소환수 피해 +25%, 소환수 생명력 +25%',ap:d=>{d.sm+=25;d.smhp+=25;}},
  awoff_druid:{n:'각성의 토템',slot:'shield',base:'정령 토템',il:999,hero:1,aw:1,fcls:'druid',d:'변신 중 받는 피해 -12%, 피해 +10%',ap:d=>{d.dmgPct+=10;}},
  /* ===== 수문장 세트 (6스테이지 수문장 카스텔) — 아이템 레벨 CS_IL · 착용 Lv CS_REQ · 기본 수치 ×CS_M · 미공개 ===== */
- cs_mace:{n:'파성의 철퇴',slot:'weapon',base:'철퇴',il:999,hero:1,cs:1,d:'성문 강타: 기본 공격 시 8% 확률로 주변 적을 1초간 기절',ap:()=>{}},
- cs_sword:{n:'수문장의 대검',slot:'weapon',base:'대검',il:999,hero:1,cs:1,d:'성문 강타: 기본 공격 시 8% 확률로 주변 적을 1초간 기절',ap:()=>{}},
+ cs_mace:{n:'파성의 철퇴',slot:'weapon',base:'철퇴',il:999,hero:1,cs:1,d:'성문 강타: 기본 공격 시 5% 확률로 주변 적을 1초간 기절 (우두머리는 0.5%)',ap:()=>{}},
+ cs_sword:{n:'수문장의 대검',slot:'weapon',base:'대검',il:999,hero:1,cs:1,d:'성문 강타: 기본 공격 시 5% 확률로 주변 적을 1초간 기절 (우두머리는 0.5%)',ap:()=>{}},
  cs_helm:{n:'성가퀴 투구',slot:'helm',base:'뿔 달린 투구',il:999,hero:1,cs:1,d:'성벽의 수호: 받는 피해 -10%',ap:d=>{d.dr+=.1;}},
  cs_armor:{n:'성채의 갑주',slot:'armor',base:'사슬 갑옷',il:999,hero:1,cs:1,d:'철벽 장막: 생명력 30% 이하가 되면 피해를 5번 막는 방벽 생성(재사용 90초), 공성장치 포격 피해 -30%',ap:()=>{}},
  cs_amu:{n:'수문장의 인장',slot:'amulet',base:'목걸이',il:999,hero:1,cs:1,d:'침묵 속의 명상: 스킬봉쇄 중 마나 회복 2배',ap:()=>{}},
@@ -3973,7 +3973,7 @@ function hitMob(m,r,slow,tn,fx){
   if(!raw&&m.mark&&m.mark.t>0){ r={v:r.v*(1+m.mark.v),crit:r.crit}; } /* 처형 명령 표식: 받는 모든 피해 증가 */
   if(!raw&&me.D){ const D=me.D; if(m.boss&&D.abd)r={v:r.v*(1+D.abd/100),crit:r.crit}; if(m.obj){ const k=(D.sp&&D.sp.aw_helm?1.5:1)*(1+(D.aobj||0)/100); if(k!==1)r={v:r.v*k,crit:r.crit}; } }   /* 각성 세트 4개: 보스 피해 · 갈라진 왕관/세트: 파괴 오브젝트 피해 */
   if(!raw&&fx&&fx.basic&&!G.inProc&&me.D&&me.D.sp&&me.D.sp.aw_wpn&&Math.random()<.12){ const v2=r.v*.5, c2=r.crit; later(.12,()=>{ if(m.dead||!G.inGame)return; G.inProc=true; try{ hitMob(m,{v:v2,crit:c2},0,false,{basic:1}); spark(m.x,m.y,'#a68bff',8); }finally{ G.inProc=false; } }); }   /* 각성의 칼날: 분열 베기 */
-  if(!raw&&fx&&fx.basic&&!G.inProc&&me.D&&me.D.sp&&(me.D.sp.cs_mace||me.D.sp.cs_sword)&&Math.random()<.08){ G.inProc=true; try{ const qx=m.x, qy=m.y; for(const q of mobsIn(qx,qy,130))hitMob(q,{v:1,crit:false},0,false,{raw:1,stun:1}); efx.push({k:'ring',x:qx,y:qy,r0:10,r1:130,t:0,life:.35,col:'#f0d29a',w:8}); spark(qx,qy,'#f0d29a',10); }finally{ G.inProc=false; } }   /* 성문 강타(수문장 철퇴·대검): 기본 공격 8% 범위 기절 1초 */
+  if(!raw&&fx&&fx.basic&&!G.inProc&&me.D&&me.D.sp&&(me.D.sp.cs_mace||me.D.sp.cs_sword)&&Math.random()<(m.boss?.005:.05)){ G.inProc=true; try{ const qx=m.x, qy=m.y; for(const q of mobsIn(qx,qy,130)){ if(q.boss&&q!==m&&Math.random()>=.1)continue; hitMob(q,{v:1,crit:false},0,false,{raw:1,stun:1}); } efx.push({k:'ring',x:qx,y:qy,r0:10,r1:130,t:0,life:.35,col:'#f0d29a',w:8}); spark(qx,qy,'#f0d29a',10); }finally{ G.inProc=false; } }   /* 성문 강타(수문장 철퇴·대검): 기본 공격 5% 범위 기절 1초 — 우두머리는 0.5%(맞춘 상대가 우두머리일 때, 다른 적을 때려 터진 범위 안의 우두머리는 그중 10%) */
   if(!raw&&fx&&fx.basic&&!G.inProc&&me.D&&(me.D.cs|0)>=3&&Math.random()<.07){ r={v:r.v*3,crit:r.crit}; addNum(m.x,m.y-m.r-22,'🎰 잭팟!','#ffd34d',true); burst(m.x,m.y,'#ffd34d',16,240); }   /* 행운의 도박꾼 세트 3개: 잭팟 타격 */
   let shk=false; if(!raw&&fx&&(fx.el==='fire'||fx.el==='ice')&&m.shockT>0){ r={v:r.v*SHOCKB,crit:r.crit}; shk=true; } /* 감전된 적에게 화염/냉기 피해 +33% */
   if(!raw&&m.boss&&m.counter>0&&!(fx&&fx.basic)&&!G.inProc){ counterHit(m,r.v); } /* 스킬 피해는 보스에게도 그대로 들어가고, 나는 반사 피해를 받음(무적 아님) */
