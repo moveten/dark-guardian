@@ -1362,7 +1362,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0536</div>
+    <div class="ver" id="verT">v0.6.5.0537</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -7166,7 +7166,7 @@ function drawObj(m,t){ /* 봉인 결정: 떠 있는 보랏빛 마름모 + 보스
   const hpp=Math.max(0,Math.min(1,m.hpp!==undefined?m.hpp/100:m.hp/m.max)), bw=46, by=cy-h-12;
   ctx.fillStyle='rgba(0,0,0,.8)'; ctx.fillRect(x-bw/2-1.5,by-1.5,bw+3,8); ctx.fillStyle='#a68bff'; ctx.fillRect(x-bw/2,by,bw*hpp,5); }
 const awkRealDraw=()=>G.mobs.find(o=>o.rk==='awk'&&!o.dead&&!o.fake&&!o.obj)||G.mobs.find(o=>o.rk==='awk'&&!o.dead);   /* 게스트는 가짜를 몰라서 아무 보스나 */
-function drawWrecks(){ const a=G.casWreck; if(!a||!a.length)return; for(const w of a){ const im=sprGet('siege_'+w.k+'_wreck'); if(!im)continue; const sz=w.r*3.4, h=sz*im.height/im.width, al=Math.min(1,(T-w.t0)/.45); ctx.save(); ctx.globalAlpha=al; ctx.fillStyle='rgba(0,0,0,.35)'; ctx.beginPath(); ctx.ellipse(w.x,w.y+w.r*.55,sz*.42,w.r*.34,0,0,6.283); ctx.fill(); ctx.drawImage(im,w.x-sz/2,w.y+w.r*.7-h,sz,h); ctx.restore(); } }
+function drawWrecks(){ const a=G.casWreck; if(!a||!a.length)return; for(const w of a){ const im=sprGet('siege_'+w.k+'_wreck'); if(!im)continue; const sz=w.r*3.4, h=sz*im.height/im.width, al=Math.min(1,(T-w.t0)/.45); ctx.save(); ctx.globalAlpha=al; ctx.fillStyle='rgba(0,0,0,.35)'; ctx.beginPath(); ctx.ellipse(w.x,w.y+w.r*.55,sz*.42,w.r*.34,0,0,6.283); ctx.fill(); ctx.drawImage(im,w.x-sz/2,w.y+w.r*.7-h,sz,h); ctx.restore(); const left=Math.max(0,CAS_CFG.dev.resp-(T-w.t0)); if(left>0){ const p=1-left/CAS_CFG.dev.resp, col=CAS_DVC[w.k]||'#e0b070', ry=w.y+w.r*.7-h+h*.18-4; ctx.save(); ctx.globalAlpha=al; ctx.lineWidth=6; ctx.strokeStyle='rgba(0,0,0,.65)'; ctx.beginPath(); ctx.arc(w.x,ry,24,0,6.283); ctx.stroke(); ctx.fillStyle='rgba(12,9,7,.8)'; ctx.beginPath(); ctx.arc(w.x,ry,22,0,6.283); ctx.fill(); ctx.strokeStyle=col; ctx.lineCap='round'; ctx.beginPath(); ctx.arc(w.x,ry,24,-1.5708,-1.5708+6.283*p); ctx.stroke(); ctx.fillStyle='#fff'; ctx.font='800 22px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(Math.ceil(left),w.x,ry+1); ctx.restore(); } } }
 function drawDev(m,t){ const x=m.x,y=m.y,k=m.dv,col=CAS_DVC[k],C=CAS_CFG.dev, r=m.r*1.25, im=sprGet('siege_'+k), hot=m.lv>1, pu=.5+.5*Math.sin(t*(hot?8+m.lv*2:4)+m.id);
   ctx.fillStyle='rgba(0,0,0,.4)'; ctx.beginPath(); ctx.ellipse(x,y+r*.55,r*1.05,r*.38,0,0,6.283); ctx.fill();
   ctx.save(); ctx.globalCompositeOperation='lighter'; const g=ctx.createRadialGradient(x,y-r*.3,4,x,y-r*.3,r*2.3); g.addColorStop(0,hot?`rgba(255,80,50,${(.12*m.lv)*(.6+.4*pu)})`:`rgba(255,255,255,.08)`); g.addColorStop(1,'rgba(0,0,0,0)'); ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y-r*.3,r*2.3,0,6.283); ctx.fill(); ctx.restore();
