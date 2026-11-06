@@ -1386,7 +1386,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0558</div>
+    <div class="ver" id="verT">v0.6.5.0559</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1689,7 +1689,7 @@ const CAS_CFG={
   horn:{cd:35,dur:3,tel:1.3,r:470,imm:1.5,gap:8},               /* 공성 나팔(공포): 대기·지속·시전·범위·면역·침묵과의 최소 간격 */
   spin:{cd:22,dur:5,inv:1,tel:2.3,w:1.0,r:340,n:6,tick:.4,hitIv:.6,pct:.34},   /* 회전 기술: 대기·지속·무적·시전·회전속도(rad/s)·반지름·조각 수·연출 간격·같은 사람 재피해 간격(빨간 칸에 닿는 즉시 판정)·최대체력 비율 피해 */
   dev:{hp:2.5e6,resp:22,lvT:25,maxLv:5,lvDmg:.25,lvIv:.15,rad:250,defP:.05,asP:.05,   /* 공성장치: 체력·재생성 대기·레벨업 주기(초)·최대 레벨·레벨당 포격 피해 +·포격 간격 단축·배치 반지름(중앙~맵 끝의 중간)·레벨당 방어 감소·공속 감소 */
-    weak:{iv:2.6,mul:.55*1.2/1.3,r:46,dur:.8}, slow:{iv:2.6,mul:.55*1.2/1.3,r:46,dur:.8}, arrow:{iv:3.4,mul:3*1.2/1.3,r:56,dur:1.0}},   /* 포격 배율: 보스 피해 +30%가 따라오므로 ×1.2/1.3 으로 맞춰 최종 +20% */
+    weak:{iv:2.6,mul:.55*1.2/1.3,r:46,dur:.8}, slow:{iv:2.6,mul:.55*1.2/1.3,r:46,dur:.8}, arrow:{iv:3.4,mul:1.5*1.2,r:56,dur:1.0,mark:1.5}},   /* 포격 배율: 보스 피해 +30%가 따라오므로 ×1.2/1.3 으로 맞춰 최종 +20% */
   leg:{hpPct:.06,dur:40,gap:88,spd:26,                          /* 군단 호출: 군단 체력 합(보스 최대 체력 비율)·제한 시간·병사 간격·진형 이동 속도 */
     p2:{sh:4,xb:4,bl:1}, p3:{sh:6,xb:6,bl:2},                  /* 2·3페이즈 구성: 방패병·석궁병·발리스타 수 */
     w:{sh:1,xb:.6,bl:1.8},                                      /* 체력 배분 비중 */
@@ -2718,7 +2718,7 @@ function guestEvent(e){
   else if(t==='ge'){ if(GB){ GB.end=1; GB.endT=0; GB.n=e[2]|0; GB.full=(e[2]|0)>=GOB_N; } gobEndTxt(e[2]|0,e[3]|0,(e[2]|0)>=GOB_N); if((e[2]|0)===0)ttfSet('gob0'); saveChar(); }
   else if(t==='h'){ if(!me.dead) takeDmg(e[3],false,e[4]?1:0); }
   else if(t==='x'){ applyStatus(e[3],e[4]); }
-  else if(t==='bx'){ bombFx(e[2],e[3],e[4]); }
+  else if(t==='bx'){ bombFx(e[2],e[3],e[4]); } else if(t==='am'){ arrowMark(e[1],e[2],e[3]); }
   else if(t==='ann'){ announce('🔥 총공세! 바닥에 불이 번집니다','#ff9a6a'); }
   else if(t==='hv'){ halveWarn(); }
   else if(t==='cn'){ announce('⚔️ 반격 태세! 스킬을 쓰면 크게 다쳐요 (일반공격은 OK)','#ffb347'); sfx('block'); }
@@ -2834,7 +2834,7 @@ function casDevTick(m,dt){ const B=casBoss(), C=CAS_CFG.dev; if(!B||m.gen!==(G.c
   m.shot-=dt; if(m.shot>0)return;
   const dc=C[m.dv], pls=playersForAI().filter(p=>p.i<10); if(!pls.length)return; let t=pls[0],bd=1e9; for(const p of pls){ const d=hyp(p.x-m.x,p.y-m.y); if(d<bd){bd=d;t=p;} }
   m.shot=dc.iv/(1+C.lvIv*(m.lv-1))*rand(.9,1.1); m.atk=.3; const sx=t.x+rand(-8,8), sy=t.y+rand(-8,8);
-  shots.push({x:sx,y:sy,t:0,dur:dc.dur,r:dc.r,dv:1,dmg:B.dmg*dc.mul*(1+C.lvDmg*(m.lv-1))}); pushEv(['e',Math.round(sx),Math.round(sy),dc.r,Math.round(dc.dur*100)]); arrowFx(m.x,m.y-m.r,sx,sy,m.dv==='arrow'?1:0); pushEv(['a',Math.round(m.x),Math.round(m.y-m.r),Math.round(sx),Math.round(sy)]); }
+  shots.push({x:sx,y:sy,t:0,dur:dc.dur,r:dc.r,dv:1,ar:m.dv==='arrow'?1:0,dmg:B.dmg*dc.mul*(1+C.lvDmg*(m.lv-1))}); pushEv(['e',Math.round(sx),Math.round(sy),dc.r,Math.round(dc.dur*100)]); arrowFx(m.x,m.y-m.r,sx,sy,m.dv==='arrow'?1:0); pushEv(['a',Math.round(m.x),Math.round(m.y-m.r),Math.round(sx),Math.round(sy)]); }
 function casWreckAdd(m){ (G.casWreck=G.casWreck||[]).push({k:m.dv,x:m.x,y:m.y,r:m.r*1.25,t0:T}); }   /* 부서진 자리에 잔해가 다시 세워질 때까지 남아요 */
 function casDevKill(m){ m.dead=true; casWreckAdd(m); const k=m.dv, lv=Math.max(1,(m.lv|0||1)-1), gen=G.casGen|0, P=CAS_CFG.dev;   /* 제때 부수면 레벨이 1 내려가서(최소 1) 다시 세워져요 */ burst(m.x,m.y,'#a08a60',34,340); burst(m.x,m.y,CAS_DVC[k],18,300); spark(m.x,m.y,'#fff0c0',18); efx.push({k:'ring',x:m.x,y:m.y,r0:8,r1:100,t:0,life:.45,col:CAS_DVC[k],w:12}); sfx('crit'); G.shake=Math.max(G.shake,.4); pushEv(['bx',Math.round(m.x),Math.round(m.y),50]);
   announce(`💥 ${CAS_DVN[k]} 파괴! ${P.resp}초 뒤 Lv${lv}로 다시 세워져요${(m.lv|0)>1?' (레벨 −1)':''}`,CAS_DVC[k]);
@@ -3333,7 +3333,7 @@ function mobSteer(m,dt){
 function mobKb(m,dt){ if(m.kx||m.ky){ m.x+=m.kx*dt; m.y+=m.ky*dt; const f=Math.pow(.004,dt); m.kx*=f; m.ky*=f; if(Math.abs(m.kx)+Math.abs(m.ky)<6)m.kx=m.ky=0; } }
 function updateMobs(dt){
   const pls=playersForAI().concat(minionTargets()); /* 소환수도 몹의 공격 대상 */
-  for(let i=shots.length-1;i>=0;i--){ const sh=shots[i]; sh.t+=dt; if(sh.t>=sh.dur){ shots.splice(i,1); if(sh.rift){ spawnMob(0,sh.x,sh.y,true); for(let k=0;k<4;k++)spawnMob(k%2?10:0,sh.x+rand(-40,40),sh.y+rand(-40,40),false); burst(sh.x,sh.y,'#c070ff',40,320); efx.push({k:'ring',x:sh.x,y:sh.y,r0:10,r1:110,t:0,life:.5,col:'#c070ff',w:12}); sfx('slam'); G.shake=Math.max(G.shake,.4); continue; } for(const p of pls){ if(hyp(p.x-sh.x,p.y-sh.y)<sh.r+10) mobHitPlayer(p.i,sh.dmg*(sh.dv&&p.i===1&&me.D&&me.D.sp&&me.D.sp.cs_armor?.7:1),sh.st||0,sh.sd||0); } if(G.castle){ if(sh.cas)castleHit(sh.dmg*.4); else if(sh.vil)castleHit(sh.dmg*.35); } pushEv(['bx',Math.round(sh.x),Math.round(sh.y),sh.r]); bombFx(sh.x,sh.y,sh.r); } }
+  for(let i=shots.length-1;i>=0;i--){ const sh=shots[i]; sh.t+=dt; if(sh.t>=sh.dur){ shots.splice(i,1); if(sh.rift){ spawnMob(0,sh.x,sh.y,true); for(let k=0;k<4;k++)spawnMob(k%2?10:0,sh.x+rand(-40,40),sh.y+rand(-40,40),false); burst(sh.x,sh.y,'#c070ff',40,320); efx.push({k:'ring',x:sh.x,y:sh.y,r0:10,r1:110,t:0,life:.5,col:'#c070ff',w:12}); sfx('slam'); G.shake=Math.max(G.shake,.4); continue; } for(const p of pls){ if(hyp(p.x-sh.x,p.y-sh.y)<sh.r+10) mobHitPlayer(p.i,sh.dmg*(sh.dv&&p.i===1&&me.D&&me.D.sp&&me.D.sp.cs_armor?.7:1),sh.st||0,sh.sd||0); } if(G.castle){ if(sh.cas)castleHit(sh.dmg*.4); else if(sh.vil)castleHit(sh.dmg*.35); } pushEv(['bx',Math.round(sh.x),Math.round(sh.y),sh.r]); bombFx(sh.x,sh.y,sh.r); if(sh.ar){ arrowMark(sh.x,sh.y,sh.r); pushEv(['am',Math.round(sh.x),Math.round(sh.y),sh.r]); } } }
   RAID_HIT=0;
   for(const m of G.mobs){ if(m.dead)continue; RAID_HIT=m.rk?1:0;
     if(m.gob){ gobStep(m,dt); continue; }
@@ -4515,6 +4515,8 @@ function spark(x,y,col,n){ if(G.lowFx)n=n+1>>1; for(let i=0;i<n;i++){const a=Mat
 function addNum(x,y,v,col,big,key){
   if(key!=null&&typeof v==='number'){ for(let i=nums.length-1;i>=0&&i>=nums.length-14;i--){ const n=nums[i]; if(n.key===key&&n.col===col&&!!n.big===!!big&&n.t<.14&&(n.c|0)<14){ n.v+=v; n.t=.04; n.c=(n.c|0)+1; return; } } }
   nums.push({x:x+rand(-8,8),y,v,col,big,t:0,key}); if(nums.length>80)nums.shift(); }
+/* 화살탑 포격 자국: 터진 자리에 붉은 반점과 꽂힌 화살이 1.5초 남았다 사라져요 (img/fx_arrow_mark.png 가 있으면 그 그림, 없으면 코드로 그린 기본 모양) */
+function arrowMark(x,y,r){ efx.push({k:'amark',x,y,r:r||56,t:0,life:CAS_CFG.dev.arrow.mark,rot:rand(-.4,.4)}); }
 function arrowFx(x,y,tx,ty,sty){ efx.push({k:'arrow',x,y,tx,ty,t:0,life:sty?.3:.18,sty:sty|0}); }
 function slamFx(x,y,r,col){ sfx('slam'); efx.push({k:'ring',x,y,r0:r*.3,r1:r,t:0,life:.4,col:col||'#b04aa0',w:14}); spark(x,y,col||'#7a5a6a',18); G.shake=Math.max(G.shake,.5); }
 
@@ -6647,7 +6649,7 @@ function prepMe(){ me=loadChar(selId); me.D=derive(me); spawnMe(); }
 function resetWorld(){
   GB=null; G.gobRoll=false;
   storyStop(); G.stZ=0; G.aim=null; G.lostBoss=false; G.castle=null; G.lostCastle=false; G.awz=null; G.awc=null; { const ac=$('#awCut'); if(ac)ac.classList.remove('on'); for(const q of ['#casAl','#casMs']){ const z=$(q); if(z)z.classList.remove('on'); } const hc=$('#hCastle'); if(hc)hc.classList.remove('atk'); } if(me){ me.erode=me.hblk=me.mblk=me.hbStrict=me.bleed=me.bleedN=0; me.hpLk=me.mpLk=null; }
-  projs.length=zones.length=timers.length=parts.length=nums.length=ground.length=efx.length=0;
+  projs.length=zones.length=timers.length=parts.length=nums.length=ground.length=efx.length=0; G.casWreck=[];   /* 6스테이지 공성탑 잔해는 다른 스테이지로 넘어가지 않게 */
   G.mobs=[]; G.mobMap=new Map(); G.gemDone=false; G.stKills=0; G.stDrops=0; G.stCap=0; G.runT=0; G.stGot=[0,0,0,0,0]; G.stGem=null; G.sib=0; G.endShown=false; G.clrDone=false; alClear(); G.stRev=0; G.stTaken=0; G.stGold0=me?(me.gold|0):0; G.paused=false; G.bt=null; G.shake=0;
   hitQ=[]; fxQ=[]; lastAllyFx=-1; lastEv=-1; lastHit=0; G.guestDmg=0; G.fires=[]; G.freeRev=(me&&me.hc)?0:1; G.fireT=3; if(me){ me.rvGiven=0; me.seenRg=0; me.out=false; me.rvT=0; }
   spawnMe(); buildSkills(); petStart(); show(null); G.inGame=true; closeSheet(); setAuto(me?me.au|0:0,true);   /* 이 캐릭터가 마지막으로 정한 AUTO 설정으로 시작 */
@@ -7228,7 +7230,7 @@ function drawObj(m,t){ /* 봉인 결정: 떠 있는 보랏빛 마름모 + 보스
   const hpp=Math.max(0,Math.min(1,m.hpp!==undefined?m.hpp/100:m.hp/m.max)), bw=46, by=cy-h-12;
   ctx.fillStyle='rgba(0,0,0,.8)'; ctx.fillRect(x-bw/2-1.5,by-1.5,bw+3,8); ctx.fillStyle='#a68bff'; ctx.fillRect(x-bw/2,by,bw*hpp,5); }
 const awkRealDraw=()=>G.mobs.find(o=>o.rk==='awk'&&!o.dead&&!o.fake&&!o.obj)||G.mobs.find(o=>o.rk==='awk'&&!o.dead);   /* 게스트는 가짜를 몰라서 아무 보스나 */
-function drawWrecks(){ const a=G.casWreck; if(!a||!a.length)return; for(const w of a){ const im=sprGet('siege_'+w.k+'_wreck'); if(!im)continue; const sz=w.r*3.4, h=sz*im.height/im.width, al=Math.min(1,(T-w.t0)/.45); ctx.save(); ctx.globalAlpha=al; ctx.fillStyle='rgba(0,0,0,.35)'; ctx.beginPath(); ctx.ellipse(w.x,w.y+w.r*.55,sz*.42,w.r*.34,0,0,6.283); ctx.fill(); ctx.drawImage(im,w.x-sz/2,w.y+w.r*.7-h,sz,h); ctx.restore(); const left=Math.max(0,CAS_CFG.dev.resp-(T-w.t0)); if(left>0){ const p=1-left/CAS_CFG.dev.resp, col=CAS_DVC[w.k]||'#e0b070', ry=w.y+w.r*.7-h+h*.18-4; ctx.save(); ctx.globalAlpha=al; ctx.lineWidth=6; ctx.strokeStyle='rgba(0,0,0,.65)'; ctx.beginPath(); ctx.arc(w.x,ry,24,0,6.283); ctx.stroke(); ctx.fillStyle='rgba(12,9,7,.8)'; ctx.beginPath(); ctx.arc(w.x,ry,22,0,6.283); ctx.fill(); ctx.strokeStyle=col; ctx.lineCap='round'; ctx.beginPath(); ctx.arc(w.x,ry,24,-1.5708,-1.5708+6.283*p); ctx.stroke(); ctx.fillStyle='#fff'; ctx.font='800 22px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(Math.ceil(left),w.x,ry+1); ctx.restore(); } } }
+function drawWrecks(){ const a=G.casWreck; if(!a||!a.length||!G.stg||G.stg.raid!==3)return; for(const w of a){ const im=sprGet('siege_'+w.k+'_wreck'); if(!im)continue; const sz=w.r*3.4, h=sz*im.height/im.width, al=Math.min(1,(T-w.t0)/.45); ctx.save(); ctx.globalAlpha=al; ctx.fillStyle='rgba(0,0,0,.35)'; ctx.beginPath(); ctx.ellipse(w.x,w.y+w.r*.55,sz*.42,w.r*.34,0,0,6.283); ctx.fill(); ctx.drawImage(im,w.x-sz/2,w.y+w.r*.7-h,sz,h); ctx.restore(); const left=Math.max(0,CAS_CFG.dev.resp-(T-w.t0)); if(left>0){ const p=1-left/CAS_CFG.dev.resp, col=CAS_DVC[w.k]||'#e0b070', ry=w.y+w.r*.7-h+h*.18-4; ctx.save(); ctx.globalAlpha=al; ctx.lineWidth=6; ctx.strokeStyle='rgba(0,0,0,.65)'; ctx.beginPath(); ctx.arc(w.x,ry,24,0,6.283); ctx.stroke(); ctx.fillStyle='rgba(12,9,7,.8)'; ctx.beginPath(); ctx.arc(w.x,ry,22,0,6.283); ctx.fill(); ctx.strokeStyle=col; ctx.lineCap='round'; ctx.beginPath(); ctx.arc(w.x,ry,24,-1.5708,-1.5708+6.283*p); ctx.stroke(); ctx.fillStyle='#fff'; ctx.font='800 22px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(Math.ceil(left),w.x,ry+1); ctx.restore(); } } }
 function drawDev(m,t){ const x=m.x,y=m.y,k=m.dv,col=CAS_DVC[k],C=CAS_CFG.dev, r=m.r*1.25, im=sprGet('siege_'+k), hot=m.lv>1, pu=.5+.5*Math.sin(t*(hot?8+m.lv*2:4)+m.id);
   ctx.fillStyle='rgba(0,0,0,.4)'; ctx.beginPath(); ctx.ellipse(x,y+r*.55,r*1.05,r*.38,0,0,6.283); ctx.fill();
   ctx.save(); ctx.globalCompositeOperation='lighter'; const g=ctx.createRadialGradient(x,y-r*.3,4,x,y-r*.3,r*2.3); g.addColorStop(0,hot?`rgba(255,80,50,${(.12*m.lv)*(.6+.4*pu)})`:`rgba(255,255,255,.08)`); g.addColorStop(1,'rgba(0,0,0,0)'); ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y-r*.3,r*2.3,0,6.283); ctx.fill(); ctx.restore();
@@ -7609,7 +7611,12 @@ function drawEfx(t){
     else if(e.k==='btxt'){ const o=e.o, a=p<.15?p/.15:1-Math.pow((p-.15)/.85,2), yy=o.y-74-p*46, sc=1+.35*Math.max(0,1-p*6); ctx.save(); ctx.translate(o.x,yy); ctx.scale(sc,sc); ctx.globalAlpha=Math.max(0,a); ctx.font='900 34px "Noto Sans KR",sans-serif'; ctx.textAlign='center'; ctx.lineWidth=6; ctx.strokeStyle='#7a4a00'; ctx.shadowColor='#ffd24a'; ctx.shadowBlur=18; ctx.strokeText('축복',0,0); ctx.fillStyle='#fff0a0'; ctx.fillText('축복',0,0); ctx.restore(); }
     else if(e.k==='rvfx'){ const a=1-p, h=340*Math.min(1,p*4), w=54*(1-.55*p); ctx.save(); ctx.globalCompositeOperation='lighter'; const g=ctx.createLinearGradient(0,e.y-h,0,e.y+14); g.addColorStop(0,'rgba(255,230,140,0)'); g.addColorStop(.65,`rgba(255,222,120,${.5*a})`); g.addColorStop(1,`rgba(255,252,215,${.9*a})`); ctx.fillStyle=g; ctx.fillRect(e.x-w/2,e.y-h,w,h+14); circle(e.x,e.y+6,60*(1-.4*p),`rgba(255,240,170,${.45*a})`);
       for(let i=0;i<10;i++){ const an=i*.628+p*4, rr=26+p*120; circle(e.x+Math.cos(an)*rr,e.y+Math.sin(an)*rr*.55-p*70,3.8*a+1,`rgba(255,240,170,${a})`); } ctx.restore(); }
-    else if(e.k==='ring'){ const r=e.r0+(e.r1-e.r0)*Math.sqrt(p); ctx.strokeStyle=e.col; ctx.globalAlpha=(1-p)*.9; ctx.lineWidth=e.w*(1-p)+1; ctx.beginPath(); ctx.arc(e.x,e.y,Math.max(1,r),0,6.283); ctx.stroke(); ctx.globalAlpha=1; }
+    else if(e.k==='amark'){ const R=e.r*1.35, a=Math.min(1,(1-p)*3.2,p*14+.4), im=sprGet('fx_arrow_mark'); ctx.save(); ctx.globalAlpha=Math.max(0,a); ctx.translate(e.x,e.y); ctx.rotate(e.rot);
+      if(im){ ctx.drawImage(im,-R,-R,R*2,R*2); }
+      else { const g=ctx.createRadialGradient(0,0,R*.1,0,0,R); g.addColorStop(0,'rgba(120,16,16,.85)'); g.addColorStop(.7,'rgba(150,26,22,.55)'); g.addColorStop(1,'rgba(150,26,22,0)'); ctx.fillStyle=g; ctx.beginPath(); ctx.ellipse(0,0,R,R*.8,0,0,6.283); ctx.fill();
+        for(let i=0;i<4;i++){ const an=i*1.57+.5, d=R*.32, ax=Math.cos(an)*d, ay=Math.sin(an)*d, ta=an+3.4+i*.35; ctx.save(); ctx.translate(ax,ay); ctx.rotate(ta); ctx.strokeStyle='#3a2a1a'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(R*.62,0); ctx.stroke(); ctx.fillStyle='#b8b0a0'; ctx.beginPath(); ctx.moveTo(-6,0); ctx.lineTo(2,-4); ctx.lineTo(2,4); ctx.closePath(); ctx.fill(); ctx.strokeStyle='#d8c8a0'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(R*.5,0); ctx.lineTo(R*.62+6,-6); ctx.moveTo(R*.5,0); ctx.lineTo(R*.62+6,6); ctx.stroke(); ctx.restore(); } }
+      ctx.restore(); }
+    else if(e.k==='ring'){ const r=e.r0+(e.r1-e.r0)*(e.r1-e.r0)*Math.sqrt(p); ctx.strokeStyle=e.col; ctx.globalAlpha=(1-p)*.9; ctx.lineWidth=e.w*(1-p)+1; ctx.beginPath(); ctx.arc(e.x,e.y,Math.max(1,r),0,6.283); ctx.stroke(); ctx.globalAlpha=1; }
     else if(e.k==='hcrow'){   /* 대사냥 연출: 까마귀 (선회 떼 / 급강하) */
       ctx.save(); const col=e.col||'#150f22';
       if(e.dive){ const q=p*p, cx=e.x+e.dx*(1-q), cy=e.y-e.h*(1-q); ctx.globalAlpha=Math.min(1,p*6)*(1-Math.max(0,(p-.8)/.2)); ctx.strokeStyle='rgba(150,120,230,.7)'; ctx.lineWidth=6; ctx.beginPath(); ctx.moveTo(cx+e.dx*.12,cy-e.h*.12); ctx.lineTo(cx,cy); ctx.stroke(); crowShape(cx,cy,2.2+p*.8,e.t*40,col,ctx.globalAlpha); }
