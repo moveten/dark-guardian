@@ -1386,7 +1386,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0561</div>
+    <div class="ver" id="verT">v0.6.5.0562</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -2911,8 +2911,9 @@ function casPhase(m,np){ m.ph=np; m.dmg0=m.dmgB*CAS.dmgM[np-1]; m.dmg=m.dmg0; m.
   pushEv(['cph',np]); if(G.mode==='solo'||G.mode==='host')later(.3,()=>{ if(G.inGame&&G.phase==='boss')storyRun('p'+np); }); }
 /* ---- 회전 기술: 방사형 조각이 돌아요. 도는 방향으로 같이 돌면 안전 ---- */
 function casSpinDraw(x,y,R,rot,dir,p,act){ const C=CAS_CFG.spin, n=C.n, seg=6.283/n; ctx.save();
-  for(let i=0;i<n;i+=2){ const a0=rot+i*seg; ctx.beginPath(); ctx.moveTo(x,y); ctx.arc(x,y,R,a0,a0+seg); ctx.closePath(); ctx.fillStyle=`rgba(${act?'230,50,30':'200,60,40'},${act?.3:.12+.2*p})`; ctx.fill(); ctx.strokeStyle=`rgba(255,${act?120:140},80,.9)`; ctx.lineWidth=act?3:2; ctx.stroke();
+  for(let i=0;i<n;i+=2){ const a0=rot+i*seg; ctx.beginPath(); ctx.moveTo(x,y); ctx.arc(x,y,R,a0,a0+seg); ctx.closePath(); if(act){ ctx.fillStyle='rgba(230,50,30,.3)'; ctx.fill(); ctx.strokeStyle='rgba(255,120,80,.9)'; ctx.lineWidth=3; ctx.stroke(); } else { ctx.fillStyle=`rgba(255,196,70,${.06+.08*p})`; ctx.fill(); ctx.setLineDash([12,9]); ctx.strokeStyle='rgba(255,214,110,.95)'; ctx.lineWidth=2.5; ctx.stroke(); ctx.setLineDash([]); }   /* 시전 중(피해 없음)은 점선·노란색, 회전 중(피해 있음)은 실선·빨간색 */
     for(let k=0;k<3;k++){ const rr=R*(.35+.22*k), am=a0+seg*.5, cx=x+Math.cos(am)*rr, cy=y+Math.sin(am)*rr, ta=am+dir*1.5708, f=.55+.45*Math.sin(T*10-k*1.3); ctx.save(); ctx.translate(cx,cy); ctx.rotate(ta); ctx.strokeStyle=`rgba(255,230,160,${.35+.5*f})`; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(-9,-8); ctx.lineTo(4,0); ctx.lineTo(-9,8); ctx.stroke(); ctx.restore(); } }
+  if(!act){ const left=Math.max(0,(1-p)*CAS_CFG.spin.tel); ctx.font='800 17px "Noto Sans KR",sans-serif'; ctx.textAlign='center'; ctx.lineWidth=4; ctx.strokeStyle='#000'; const msg='⏳ 곧 회전! '+left.toFixed(1)+'초'; ctx.strokeText(msg,x,y-132); ctx.fillStyle='#ffd870'; ctx.fillText(msg,x,y-132); }
   ctx.restore(); }
 function casSpinTick(m,dt,pls){ const S=m.spin, C=CAS_CFG.spin; S.t+=dt; if(m.inv>0)m.inv-=dt; const rot=S.a0+S.dir*C.w*S.t; m.fa=rot; m.dvx=m.dvy=0;
   S.tk-=dt; if(S.tk<=0){ S.tk=C.tick; const seg=6.283/C.n;
@@ -3343,7 +3344,7 @@ function updateMobs(dt){
     const sf=m.slowT>0?.45:1;
     m.cd-=dt*sf; m.atk=Math.max(0,m.atk-dt); m.flash=Math.max(0,m.flash-dt); m.anim+=dt*sf;
     if(m.stunImm>0)m.stunImm-=dt;
-    if(m.stunT>0){ m.stunT-=dt; m.cd=Math.max(m.cd,.3); continue; }
+    if(m.stunT>0){ if(m.rk==='cas'&&m.spin){ m.stunT=0; } else { m.stunT-=dt; m.cd=Math.max(m.cd,.3); continue; } }   /* 회전 기술 중에는 기절해도 멈추지 않아요 (멈추면 빨간 칸만 남고 피해가 안 들어가요) */
     if(m.dev){ casDevTick(m,dt); continue; }
     if(m.leg){ casLegTick(m,dt); continue; }
     if(m.obj){ m.kx=m.ky=0; awkObjTick(m,dt); continue; }   /* 봉인 결정: 제자리에 가만히 */
@@ -3542,7 +3543,7 @@ function applyDmg(m,dmg,slow,fx){
   if(m.vuln&&m.vuln.t>0)dmg*=1+m.vuln.v;   /* 위압 함성: 받는 모든 피해 증가 (파티원 피해 포함) */
   m.hp-=dmg; if((m.rk==='awk'&&!m.fake)||m.rk==='cas'){ const fl=m.rk==='cas'?casFloor(m):awkFloor(m); if(fl>0&&m.hp<m.max*fl)m.hp=m.max*fl-1; }   /* 다음 페이즈 문턱에서 한 번 멈춤 → 페이즈 전환 */
   m.flash=.12; if(slow){m.slowT=Math.max(m.slowT,slow); m.slowMax=Math.max(m.slowMax||0,slow);}
-  if(fx){ if(fx.stun){ if(m.boss){ if(!(m.stunImm>0)){ m.stunT=Math.max(m.stunT||0,fx.stun); m.stunImm=fx.stun+2.5; addNum(m.x,m.y-m.r-22,'💫 기절!','#ffd84a',true); } } else { m.stunT=Math.max(m.stunT||0,fx.stun); if(m.et)m.et=null; if(m.ch)m.ch=null; if(m.dash)m.dash=null; } }   /* 우두머리도 기절함 (기절이 끝난 뒤 2.5초는 다시 기절하지 않아 연속 기절 방지) */ if(fx.burn){ m.burnT=Math.max(m.burnT||0,fx.burn); m.burnD=Math.max(m.burnD||0,fx.bd||0); m.bt=m.bt>0?m.bt:.3; m.bl=fx.bl?1:0; } }
+  if(fx){ if(fx.stun){ if(m.boss){ if(!(m.stunImm>0)&&!(m.rk==='cas'&&(m.spin||m.hide))){ m.stunT=Math.max(m.stunT||0,fx.stun); m.stunImm=fx.stun+2.5; addNum(m.x,m.y-m.r-22,'💫 기절!','#ffd84a',true); } } else { m.stunT=Math.max(m.stunT||0,fx.stun); if(m.et)m.et=null; if(m.ch)m.ch=null; if(m.dash)m.dash=null; } }   /* 우두머리도 기절함 (기절이 끝난 뒤 2.5초는 다시 기절하지 않아 연속 기절 방지) */ if(fx.burn){ m.burnT=Math.max(m.burnT||0,fx.burn); m.burnD=Math.max(m.burnD||0,fx.bd||0); m.bt=m.bt>0?m.bt:.3; m.bl=fx.bl?1:0; } }
   if(m.hp<=0) killMob(m);
 }
 function killMob(m){
