@@ -196,6 +196,14 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
 #awCut.ok .k{color:#9fe08a}
 #awCut.ok .n{text-shadow:0 0 14px #5fe08a,0 0 2px #000,0 3px 0 #0e4a2a}
 #awCut.ok .s{color:#dff8d8}
+#awCut.cas .bd{background:linear-gradient(90deg,rgba(20,8,4,.94),rgba(80,34,12,.9) 55%,rgba(20,8,4,.94));border-color:#ffb060;box-shadow:0 0 30px rgba(255,140,60,.55)}
+#awCut.cas .bd::before{background:repeating-linear-gradient(90deg,rgba(255,180,100,.07) 0 2px,transparent 2px 26px)}
+#awCut.cas .sp{background:linear-gradient(90deg,transparent,#ffe0b8,transparent)}
+#awCut.cas img{filter:drop-shadow(0 0 10px rgba(255,150,70,.9))}
+#awCut.cas .k{color:#ffc890}
+#awCut.cas .n{text-shadow:0 0 14px #ff8a3a,0 0 2px #000,0 3px 0 #4a1c08}
+#awCut.cas .s{color:#ffe3c4}
+#awCut.cas.on .bd,#awCut.cas.on img,#awCut.cas.on .tx{animation-duration:1.2s}
 @keyframes awBd{0%{clip-path:inset(0 0 0 100%)}17%{clip-path:inset(0 0 0 0)}83%{clip-path:inset(0 0 0 0);opacity:1}100%{clip-path:inset(0 100% 0 0);opacity:.6}}
 @keyframes awIm{0%{opacity:0;margin-left:60px}20%{opacity:1;margin-left:0}83%{opacity:1;margin-left:-6px}100%{opacity:0;margin-left:-60px}}
 @keyframes awTx{0%{opacity:0;transform:translateX(70px)}22%{opacity:1;transform:translateX(0)}83%{opacity:1;transform:translateX(-4px)}100%{opacity:0;transform:translateX(-70px)}}
@@ -1378,7 +1386,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0542</div>
+    <div class="ver" id="verT">v0.6.5.0543</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1680,7 +1688,7 @@ const CAS_CFG={
   sil:{cd:30,dur:5,tel:1.3,crit:2},                             /* 침묵의 군기: 대기·지속·시전·보스가 받는 치명타 배율 */
   horn:{cd:35,dur:3,tel:1.3,r:470,imm:1.5,gap:8},               /* 공성 나팔(공포): 대기·지속·시전·범위·면역·침묵과의 최소 간격 */
   spin:{cd:22,dur:3,inv:1,tel:1.3,w:1.0,r:340,n:6,tick:.4,pct:.34},   /* 회전 기술: 대기·지속·무적·시전·회전속도(rad/s)·반지름·조각 수·판정 간격·최대체력 비율 피해 */
-  dev:{hp:5e6,resp:18,lvT:20,maxLv:5,lvDmg:.25,lvIv:.15,rad:250,defP:.10,asP:.10,   /* 공성장치: 체력·재생성 대기·레벨업 주기(초)·최대 레벨·레벨당 포격 피해 +·포격 간격 단축·배치 반지름(중앙~맵 끝의 중간)·레벨당 방어 감소·공속 감소 */
+  dev:{hp:2.5e6,resp:22,lvT:20,maxLv:5,lvDmg:.25,lvIv:.15,rad:250,defP:.10,asP:.10,   /* 공성장치: 체력·재생성 대기·레벨업 주기(초)·최대 레벨·레벨당 포격 피해 +·포격 간격 단축·배치 반지름(중앙~맵 끝의 중간)·레벨당 방어 감소·공속 감소 */
     weak:{iv:2.6,mul:.55*1.2/1.3,r:46,dur:.8}, slow:{iv:2.6,mul:.55*1.2/1.3,r:46,dur:.8}, arrow:{iv:3.4,mul:1.5*1.2/1.3,r:56,dur:1.0}},   /* 포격 배율: 보스 피해 +30%가 따라오므로 ×1.2/1.3 으로 맞춰 최종 +20% */
   leg:{hpPct:.06,dur:40,gap:88,spd:26,                          /* 군단 호출: 군단 체력 합(보스 최대 체력 비율)·제한 시간·병사 간격·진형 이동 속도 */
     p2:{sh:4,xb:4,bl:1}, p3:{sh:6,xb:6,bl:2},                  /* 2·3페이즈 구성: 방패병·석궁병·발리스타 수 */
@@ -2721,7 +2729,7 @@ function guestEvent(e){
   else if(t==='cph'){ const np=e[2]|0, tx=np===2?['🏰 2페이즈 · 무너지는 성벽','성벽이 갈라지고 불길이 번져요']:['🏰 3페이즈 · 불타는 성채','방패가 부서졌어요 — 이제 물러서지 않아요']; banner(tx[0],tx[1]); announce(tx[0],'#e0b070'); G.shake=1.3; sfx('boss'); later(.3,()=>{ if(G.inGame)storyRun('p'+np); }); }
   else if(t==='aph'){ const np=e[2]|0, tx=np===2?['🌑 2페이즈 · 삼남매의 잔향','형과 누나의 힘을 삼켰어요']:['🌑 3페이즈 · 각성','마지막 각성 — 모든 것을 걸고 덤벼와요']; banner(tx[0],tx[1]); announce(tx[0],'#a68bff'); G.shake=1.2; sfx('boss'); later(.3,()=>{ if(G.inGame)storyRun('p'+np); }); }
   else if(t==='acl'){ announce((e[2]|0)>1?'👥 그림자 분신술! 셋 중 하나만 진짜예요':'👥 그림자 분신술! 둘 중 하나만 진짜예요','#b89cff'); sfx('boss'); }
-  else if(t==='cat'){ casAlert(); } else if(t==='cms'){ casMs(e[2]|0); }
+  else if(t==='csc'){ casCutin(); } else if(t==='cat'){ casAlert(); } else if(t==='cms'){ casMs(e[2]|0); }
   else if(t==='asl'){ const k=AWCK[e[2]|0]||'seal', C=AWC[k]; awkCutin(k,e[3]|0||(awkRealDraw()||{}).ph); announce(C.warn,'#c0a8ff'); sfx('boss'); }
   else if(t==='ash0'){ announce('🛡️ 그림자 배리어가 깨졌어요! 이제 피해가 들어가요','#c0a8ff'); }
   else if(t==='abz'){ banner('💢 광폭화','각성 그림자의 공격이 빨라져요'); announce('💢 각성 그림자 광폭화!','#ff6a8a'); }
@@ -2933,7 +2941,7 @@ function casSkillPick(m,best,bd,pls){ const C=CAS_CFG, ph=m.ph|0||1, opts=[], fr
   const rr=Math.random();   /* 기본 기술: 철퇴 강타 · 돌진(전 페이즈) · 투석 포격(3페이즈) */
   if(ph>=3&&rr<.3){ const pts=[{x:best.x,y:best.y}]; for(let i=0;i<4;i++)pts.push({x:clamp(best.x+rand(-230,230),40,WW-40),y:clamp(best.y+rand(-230,230),40,WH-40)}); m.tel={k:'slam',kind:'multi',cas:1,x:pts[0].x,y:pts[0].y,pts,r:C.tr.multi,mul:C.mul.multi,col:'#e08a3a',t:0,dur:C.dur.multi}; casBan('🪨 투석 포격','붉은 원 밖으로!',1.4); }
   else if(rr<(ph>=3?.6:ph>=2?.5:.4)&&bd>170) { m.tel={k:'charge',kind:'charge',cas:1,x:m.x,y:m.y,tx:best.x,ty:best.y,r:0,w:m.r+C.tr.chargeW,len:C.tr.chargeLen,t:0,dur:C.dur.charge,mul:C.mul.charge}; casBan('🛡️ 방패 돌진','붉은 길에서 비켜서세요!',1.4); }
-  else { m.tel={k:'slam',kind:'slam',cas:1,x:m.x,y:m.y,r:C.tr.slam,mul:C.mul.slam,t:0,dur:C.dur.slam}; casBan('🔨 철퇴 강타','붉은 원 밖으로!',1.4); } }
+  else { m.tel={k:'slam',kind:'slam',cas:1,x:m.x,y:m.y,r:C.tr.slam,mul:C.mul.slam,t:0,dur:C.dur.slam}; casCutin(); pushEv(['csc',1]); } }
 function casAI(m,dt,pls,sf,best,bd,tau){
   for(const k of ['cdG','cdS','cdH','cdP']){ if(m[k]>0)m[k]-=dt; } if(m.silT>0)m.silT-=dt;
   if(G.leg)casLegGlobal(m,dt,pls);
@@ -2983,12 +2991,16 @@ function awkSeal(m){ const kind=m.ph===2?'lantern':m.ph===3?'heart':'seal', C=AW
 /* 모든 플레이어(나 + 동료)에게 상태이상 */
 /* 파괴 미션 컷인: 보스 시전 자세 전신(얼굴이 잘리지 않게 띠 위로 올라와도 그대로 보임) + 기술 이름 */
 function awkCutin(kind,ph){ const C=AWC[kind]; if(!C)return; const el=$('#awCut'); if(!el)return; ph=ph|0||1;
-  el.classList.remove('ok'); el.querySelector('img').src='img/boss_awake'+(ph>1?ph:'')+'_cast.png'; el.querySelector('.k').textContent=`각성 그림자 · ${ph}페이즈 궁극기`;
+  el.classList.remove('ok','cas'); el.querySelector('img').src='img/boss_awake'+(ph>1?ph:'')+'_cast.png'; el.querySelector('.k').textContent=`각성 그림자 · ${ph}페이즈 궁극기`;
   el.querySelector('.n').textContent=C.nm.replace(/^\S+\s/,''); el.querySelector('.s').textContent=C.sub;
   el.classList.remove('on'); void el.offsetWidth; el.classList.add('on'); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('on'),1550); }
 /* 파괴 미션 성공 컷인: 같은 띠, 초록색 · 쓰러진(기울어진) 보스 + 💤 */
+/* 수문장 카스텔 컷인(철퇴 강타): 각성 그림자 컷인과 같은 가로 띠 · 주황색, 1.2초 */
+function casCutin(){ const el=$('#awCut'); if(!el)return; el.classList.remove('ok'); el.classList.add('cas'); el.querySelector('img').src='img/boss_6_atk.png'; el.querySelector('.k').textContent='수문장 카스텔';
+  el.querySelector('.n').textContent='철퇴 강타'; el.querySelector('.s').textContent='붉은 원 밖으로 벗어나세요!';
+  el.classList.remove('on'); void el.offsetWidth; el.classList.add('on'); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('on'),1250); }
 const AWOK={seal:['봉인 성공!','결정 3개 파괴'],lantern:['소등 성공!','등불 2개 소등'],heart:['차단 성공!','심장 파편 3개 파괴']};
-function awkCutinOk(kind,ph){ const T=AWOK[kind], el=$('#awCut'); if(!T||!el)return; ph=ph|0||1;
+function awkCutinOk(kind,ph){ const T=AWOK[kind], el=$('#awCut'); if(!T||!el)return; ph=ph|0||1; el.classList.remove('cas');
   el.classList.add('ok'); el.querySelector('img').src='img/boss_awake'+(ph>1?ph:'')+'.png'; el.querySelector('.k').textContent=`각성 그림자 · ${ph}페이즈 궁극기`;
   el.querySelector('.n').textContent=T[0]; el.querySelector('.s').textContent=`${T[1]} · 보스 기절 ${AWK.okStun}초`;
   el.classList.remove('on'); void el.offsetWidth; el.classList.add('on'); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('on'),1550); }
