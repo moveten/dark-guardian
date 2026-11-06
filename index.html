@@ -1386,7 +1386,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0548</div>
+    <div class="ver" id="verT">v0.6.5.0549</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -2004,11 +2004,11 @@ const SPFX={
  cs_armor:{n:'성채의 갑주',slot:'armor',base:'사슬 갑옷',il:999,hero:1,cs:1,d:'철벽 장막: 생명력 30% 이하가 되면 피해를 5번 막는 방벽 생성(재사용 90초), 공성장치 포격 피해 -30%',ap:()=>{}},
  cs_amu:{n:'수문장의 인장',slot:'amulet',base:'목걸이',il:999,hero:1,cs:1,d:'침묵 속의 명상: 스킬봉쇄 중 마나 회복 2배',ap:()=>{}},
  cs_ring:{n:'성문의 반지',slot:'ring',base:'반지',il:999,hero:1,cs:1,d:'군기 저항: 스킬봉쇄 지속시간 -10% (2개 끼면 -20%)',ap:()=>{}},
- csoff_war:{n:'공성의 뿔',slot:'shield',base:'전쟁의 뿔',il:999,hero:1,cs:1,fcls:'war',d:'',ap:()=>{}},
- csoff_pal:{n:'성벽의 방패',slot:'shield',base:'성스러운 방패',il:999,hero:1,cs:1,fcls:'pal',d:'',ap:()=>{}},
- csoff_sorc:{n:'수문장의 오브',slot:'shield',base:'별빛 오브',il:999,hero:1,cs:1,fcls:'sorc',d:'',ap:()=>{}},
- csoff_necro:{n:'성채의 등불',slot:'shield',base:'망령의 등불',il:999,hero:1,cs:1,fcls:'necro',d:'',ap:()=>{}},
- csoff_druid:{n:'성탑 토템',slot:'shield',base:'정령 토템',il:999,hero:1,cs:1,fcls:'druid',d:'',ap:()=>{}}};
+ csoff_war:{n:'공성의 뿔',slot:'shield',base:'전쟁의 뿔',il:999,hero:1,cs:1,fcls:'war',d:'피해 +18%, 스킬 범위 +12%',ap:d=>{d.dmgPct+=18;d.rng+=12;}},
+ csoff_pal:{n:'성벽의 방패',slot:'shield',base:'성스러운 방패',il:999,hero:1,cs:1,fcls:'pal',d:'막으면 받은 피해의 70%를 가까운 적에게 되돌리고 0.8초 기절',ap:()=>{}},
+ csoff_sorc:{n:'수문장의 오브',slot:'shield',base:'별빛 오브',il:999,hero:1,cs:1,fcls:'sorc',d:'스킬 마나 소모 -25%, 피해 +12%',ap:d=>{d.dmgPct+=12;}},
+ csoff_necro:{n:'성채의 등불',slot:'shield',base:'망령의 등불',il:999,hero:1,cs:1,fcls:'necro',d:'소환수 피해 +30%, 소환수 생명력 +30%',ap:d=>{d.sm+=30;d.smhp+=30;}},
+ csoff_druid:{n:'성탑 토템',slot:'shield',base:'정령 토템',il:999,hero:1,cs:1,fcls:'druid',d:'변신 중 받는 피해 -15%, 피해 +12%',ap:d=>{d.dmgPct+=12;}}};
 /* ===== 영웅 아이템: 아이템 레벨 100 · 착용 Lv 90 · 기본 수치 ×1.6 (유니크 ×1.3) · 옵션 종류 고정, 수치만 변동 =====
    fx: [옵션, 최소, 최대] · clsR = 무작위 직업의 '+N 직업 스킬' · clsM = 착용 직업의 '+N 직업 스킬' */
 const HERO_IL=100, HERO_REQ=90, HERO_P=.02, SHARD_N=120, SHARD_MAX=999, RAID_UQ=.6;   /* HERO_P=레이드 보스 한 마리당 영웅 아이템 추가 드랍 확률, SHARD_N=교환에 필요한 개수, SHARD_MAX=가방 한 칸에 쌓이는 최대 수량, RAID_UQ=레이드 스테이지 일반 드랍의 유니크 비율(나머지는 레어) */
@@ -3657,9 +3657,9 @@ function applyStatus(kind,dur){ if(me.dead||me.god>0)return;
   else if(kind==='poison'){ me.poison=Math.max(me.poison||0,dur); addNum(me.x,me.y-40,'☠️ 중독','#7ad04a',false); } }
 function takeDmg(raw,fire,rh){
   if(me.dead||G.phase==='win'||G.phase==='clear'||me.god>0)return;
-  if(!fire&&me.D.blk>0&&Math.random()*100<me.D.blk){ if(me.cls==='pal'&&skLv(me,'bulwark'))me.mp=Math.min(me.D.maxMp,me.mp+3);  addNum(me.x,me.y-30,'🛡️ 막기!','#9fd0ff',true); spark(me.x,me.y,'#9fd0ff',12); efx.push({k:'ring',x:me.x,y:me.y,r0:8,r1:34,t:0,life:.3,col:'#9fd0ff',w:5}); sfx('block'); if(me.D.sp&&(me.D.sp.hoff_pal||me.D.sp.awoff_pal)){ const q=nearestMob(me.x,me.y,160), aw=!!me.D.sp.awoff_pal; if(q&&raw>0)hitMob(q,{v:raw*(aw?.6:.5),crit:false},0,false,aw?{raw:1,stun:.5}:{raw:1}); } return; }
+  if(!fire&&me.D.blk>0&&Math.random()*100<me.D.blk){ if(me.cls==='pal'&&skLv(me,'bulwark'))me.mp=Math.min(me.D.maxMp,me.mp+3);  addNum(me.x,me.y-30,'🛡️ 막기!','#9fd0ff',true); spark(me.x,me.y,'#9fd0ff',12); efx.push({k:'ring',x:me.x,y:me.y,r0:8,r1:34,t:0,life:.3,col:'#9fd0ff',w:5}); sfx('block'); if(me.D.sp&&(me.D.sp.hoff_pal||me.D.sp.awoff_pal||me.D.sp.csoff_pal)){ const q=nearestMob(me.x,me.y,160), cs=!!me.D.sp.csoff_pal, aw=!!me.D.sp.awoff_pal; if(q&&raw>0)hitMob(q,{v:raw*(cs?.7:aw?.6:.5),crit:false},0,false,cs?{raw:1,stun:.8}:aw?{raw:1,stun:.5}:{raw:1}); } return; }
   const def=me.D.def*guardMul(), red=Math.min(rh&&!fire?RAID_RED:.8,def/(def+50+G.wave*8));
-  let d=raw*lvPen().tk*gearPen().tk*(1-red)*(1-(me.D.dr||0))*(me.buffs.barrier&&me.buffs.barrier.t>0?1-me.buffs.barrier.v:1)*drMul(); if(me.D.sp&&me.D.sp.martyr&&me.hp<me.D.maxHp*.5) d*=.6; if(me.erode>0)d*=1.5; if(G.stg&&G.stg.raid===3)d*=casDevDef(); if(me.D.sp&&me.D.sp.hoff_druid&&me.form) d*=.9; if(me.D.sp&&me.D.sp.awoff_druid&&me.form) d*=.88;
+  let d=raw*lvPen().tk*gearPen().tk*(1-red)*(1-(me.D.dr||0))*(me.buffs.barrier&&me.buffs.barrier.t>0?1-me.buffs.barrier.v:1)*drMul(); if(me.D.sp&&me.D.sp.martyr&&me.hp<me.D.maxHp*.5) d*=.6; if(me.erode>0)d*=1.5; if(G.stg&&G.stg.raid===3)d*=casDevDef(); if(me.D.sp&&me.D.sp.hoff_druid&&me.form) d*=.9; if(me.D.sp&&me.D.sp.awoff_druid&&me.form) d*=.88; if(me.D.sp&&me.D.sp.csoff_druid&&me.form) d*=.85;
   { const ms=skLv(me,'mshield'); if(ms&&me.mp>0&&d>0){ const sh=Math.min(.65,.2+.02*ms), cost=Math.max(.5,1.6-.04*ms), ab=Math.min(d*sh,me.mp/cost); me.mp-=ab*cost; d-=ab; if(ab>=1){ addNum(me.x+10,me.y-38,Math.round(ab),'#6fb0ff',false); efx.push({k:'ring',x:me.x,y:me.y,r0:10,r1:30,t:0,life:.25,col:'#7fb4ff',w:4}); } } }
   if(me.csBar>0&&d>0){ me.csBar--; addNum(me.x,me.y-40,`🏰 방벽 (${me.csBar}회 남음)`,'#f0d29a',true); spark(me.x,me.y,'#f0d29a',10); efx.push({k:'ring',x:me.x,y:me.y,r0:10,r1:40,t:0,life:.3,col:'#f0d29a',w:6}); sfx('block'); if(me.csBar<=0)me.csBar=0; return; }   /* 성채의 갑주 방벽 */
   tkAdd(d); me.hp-=d; me.hurt=.15; sfx('hurt'); voiceHurt(d); G.shake=Math.max(G.shake,.2);
@@ -3865,7 +3865,7 @@ const mobHpP=m=>m.hpp!==undefined?m.hpp/100:m.hp/Math.max(1,m.max);   /* 남은 
 function execTarget(x,y,range,lowHp){ let best=null,bk=-1,bd=1e9,bp=2; for(const m of G.mobs){ if(m.dead)continue; const d=hyp(m.x-x,m.y-y)-m.r; if(d>=range)continue; const k=m.boss?2:m.elite?1:0, p=lowHp?Math.round(mobHpP(m)*1000):0;
     if(k>bk||(k===bk&&(p<bp||(p===bp&&d<bd)))){ best=m; bk=k; bd=d; bp=p; } } return best; }   /* 우두머리>정예>일반, 같은 등급이면(lowHp) 남은 체력%가 가장 낮은 적, 비슷하면 가까운 적 */
 function mobsIn(x,y,r){return G.mobs.filter(m=>!m.dead&&hyp(m.x-x,m.y-y)<r+m.r);}
-function mpCost(s,lv){ return s.mp?Math.round(s.mp*(1+.15*(Math.max(1,lv)-1))*(me&&me.D&&me.D.sp&&(me.D.sp.tome||me.D.sp.hoff_sorc)?.85:1)*(me&&me.D&&me.D.sp&&me.D.sp.rvoid?.9:1)*(me&&me.D&&me.D.sp&&me.D.sp.awoff_sorc?.8:1)):0; }
+function mpCost(s,lv){ return s.mp?Math.round(s.mp*(1+.15*(Math.max(1,lv)-1))*(me&&me.D&&me.D.sp&&(me.D.sp.tome||me.D.sp.hoff_sorc)?.85:1)*(me&&me.D&&me.D.sp&&me.D.sp.rvoid?.9:1)*(me&&me.D&&me.D.sp&&me.D.sp.awoff_sorc?.8:1)*(me&&me.D&&me.D.sp&&me.D.sp.csoff_sorc?.75:1)):0; }
 const SKS={raven:'aura',hunt:'boss',bearform:'shout',bite:'slam',roar:'shout',spirit:'holy',fury:'shout',bears:'boss',bash:'slam',smite:'holy',rend:'swing',shout:'shout',whirl:'swing',leap:'slam',berserk:'shout',quake:'boom',hammer:'holy',judgment:'holy',fireball:'fire',frostnova:'ice',chain:'zap',barrier:'holy',meteor:'fire',blizzard:'ice',ragnarok:'boom',divine:'holy',armageddon:'fire',soulbolt:'bolt',guardian:'aura',spiritcaster:'cast',soulburst:'boom',execute:'shout',colossus:'boom',pact:'holy',lord:'boss'};
 function tryUse(key,hold){
   if(me.dead||me.leap||!G.inGame||G.paused)return;
