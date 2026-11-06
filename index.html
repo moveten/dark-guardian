@@ -1386,7 +1386,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0543</div>
+    <div class="ver" id="verT">v0.6.5.0544</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -2822,7 +2822,7 @@ const casDevPos=k=>{ const a=[3.5,5.92,1.5708][CAS_DV.indexOf(k)]; return {x:VX+
 function casDevSpawn(k,lv){ G.casWreck=(G.casWreck||[]).filter(w=>w.k!==k); const P=casDevPos(k), o=spawnMob(casDevType(),P.x,P.y,false); o.dev=1; o.dv=k; o.hx=P.x; o.hy=P.y; o.max=o.hp=CAS_CFG.dev.hp*(G.coop?1.5:1); o.xp=0; o.dmg=0; o.spd=0; o.age=0; o.lv=clamp(lv|0||1,1,CAS_CFG.dev.maxLv); o.shot=rand(1.2,2.2); o.gen=G.casGen|0; o.dfM=1;   /* 다시 세워질 때는 부서질 때의 레벨 그대로 — 레벨은 살아 있는 동안 못 부술 때만 올라요 */
   efx.push({k:'ring',x:P.x,y:P.y,r0:8,r1:90,t:0,life:.5,col:CAS_DVC[k],w:10}); burst(P.x,P.y,CAS_DVC[k],22,300); spark(P.x,P.y,'#fff0c0',12); pushEv(['bx',Math.round(P.x),Math.round(P.y),50]); return o; }
 function casDevReset(){ G.casGen=(G.casGen|0)+1; for(const o of G.mobs){ if(o.dev&&!o.dead){ o.dead=true; burst(o.x,o.y,'#8a7a60',14,220); } } for(const k of CAS_DV)casDevSpawn(k);
-  announce(`🏗️ 공성장치 3기가 세워졌어요! ${CAS_CFG.dev.lvT}초 안에 부수지 않으면 레벨이 올라 효과가 세지고, 부순 뒤에도 그 레벨로 다시 세워져요`,'#ffd860'); }
+  announce(`🏗️ 공성장치 3기가 세워졌어요! ${CAS_CFG.dev.lvT}초 안에 부수지 않으면 레벨이 올라 효과가 세지고, 부수면 레벨이 1 내려가(최소 Lv1) 다시 세워져요`,'#ffd860'); }
 function casDevK(kind){ if(!G.stg||G.stg.raid!==3)return 0; let k=0; for(const o of G.mobs){ if(o.dev&&!o.dead&&o.dv===kind)k+=o.lv|0; } return k; }
 const casDevDef=()=>1+CAS_CFG.dev.defP*casDevK('weak');          /* 파갑의 탑: 받는 피해 증가(=방어 감소) */
 const casDevAs=()=>Math.max(.5,1-CAS_CFG.dev.asP*casDevK('slow'));   /* 족쇄의 탑: 공격 속도 감소 */
@@ -2834,8 +2834,8 @@ function casDevTick(m,dt){ const B=casBoss(), C=CAS_CFG.dev; if(!B||m.gen!==(G.c
   m.shot=dc.iv/(1+C.lvIv*(m.lv-1))*rand(.9,1.1); m.atk=.3; const sx=t.x+rand(-8,8), sy=t.y+rand(-8,8);
   shots.push({x:sx,y:sy,t:0,dur:dc.dur,r:dc.r,dv:1,dmg:B.dmg*dc.mul*(1+C.lvDmg*(m.lv-1))}); pushEv(['e',Math.round(sx),Math.round(sy),dc.r,Math.round(dc.dur*100)]); arrowFx(m.x,m.y-m.r,sx,sy,m.dv==='arrow'?1:0); pushEv(['a',Math.round(m.x),Math.round(m.y-m.r),Math.round(sx),Math.round(sy)]); }
 function casWreckAdd(m){ (G.casWreck=G.casWreck||[]).push({k:m.dv,x:m.x,y:m.y,r:m.r*1.25,t0:T}); }   /* 부서진 자리에 잔해가 다시 세워질 때까지 남아요 */
-function casDevKill(m){ m.dead=true; casWreckAdd(m); const k=m.dv, lv=m.lv|0||1, gen=G.casGen|0, P=CAS_CFG.dev; burst(m.x,m.y,'#a08a60',34,340); burst(m.x,m.y,CAS_DVC[k],18,300); spark(m.x,m.y,'#fff0c0',18); efx.push({k:'ring',x:m.x,y:m.y,r0:8,r1:100,t:0,life:.45,col:CAS_DVC[k],w:12}); sfx('crit'); G.shake=Math.max(G.shake,.4); pushEv(['bx',Math.round(m.x),Math.round(m.y),50]);
-  announce(`💥 ${CAS_DVN[k]} 파괴! ${P.resp}초 뒤 Lv${lv}로 다시 세워져요`,CAS_DVC[k]);
+function casDevKill(m){ m.dead=true; casWreckAdd(m); const k=m.dv, lv=Math.max(1,(m.lv|0||1)-1), gen=G.casGen|0, P=CAS_CFG.dev;   /* 제때 부수면 레벨이 1 내려가서(최소 1) 다시 세워져요 */ burst(m.x,m.y,'#a08a60',34,340); burst(m.x,m.y,CAS_DVC[k],18,300); spark(m.x,m.y,'#fff0c0',18); efx.push({k:'ring',x:m.x,y:m.y,r0:8,r1:100,t:0,life:.45,col:CAS_DVC[k],w:12}); sfx('crit'); G.shake=Math.max(G.shake,.4); pushEv(['bx',Math.round(m.x),Math.round(m.y),50]);
+  announce(`💥 ${CAS_DVN[k]} 파괴! ${P.resp}초 뒤 Lv${lv}로 다시 세워져요${(m.lv|0)>1?' (레벨 −1)':''}`,CAS_DVC[k]);
   later(P.resp,()=>{ if(G.inGame&&(G.casGen|0)===gen&&casBoss()){ casDevSpawn(k,lv); announce(`🏗️ ${CAS_DVN[k]}이(가) Lv${lv}로 다시 세워졌어요`,CAS_DVC[k]); } }); }
 /* ---- 군단 호출: 보스는 사라져 무적, 군단이 받은 피해만큼 보스 체력이 깎여요 ---- */
 const casLegType=k=>MT.findIndex(t=>t.leg===k);
@@ -7203,7 +7203,9 @@ function drawDev(m,t){ const x=m.x,y=m.y,k=m.dv,col=CAS_DVC[k],C=CAS_CFG.dev, r=
   if(m.flash>0){ ctx.save(); ctx.globalAlpha=Math.min(.6,m.flash*5); ctx.globalCompositeOperation='lighter'; if(im){ const h=sz*im.height/im.width; ctx.drawImage(im,x-sz/2,y+r*.6-h,sz,h); } ctx.restore(); }
   const pr=m.lv>=C.maxLv?1:Math.min(1,m.age/C.lvT); ctx.lineWidth=4; ctx.strokeStyle='rgba(0,0,0,.55)'; ctx.beginPath(); ctx.arc(x,y-r*.3,r*1.25,0,6.283); ctx.stroke(); ctx.strokeStyle=hot?`rgba(255,${60+80*pu|0},50,.95)`:col; ctx.beginPath(); ctx.arc(x,y-r*.3,r*1.25,-1.5708,-1.5708+6.283*pr); ctx.stroke();
   const hp=Math.max(0,Math.min(1,m.hp/m.max)), bw=64, by=y-r*2.05; ctx.fillStyle='rgba(0,0,0,.8)'; ctx.fillRect(x-bw/2-1.5,by-1.5,bw+3,9); ctx.fillStyle=hot?'#ff5a3a':col; ctx.fillRect(x-bw/2,by,bw*hp,6);
-  ctx.font='700 12px "Noto Sans KR",sans-serif'; ctx.textAlign='center'; ctx.lineWidth=3.5; ctx.strokeStyle='#000'; const nm=CAS_DVN[k]+' Lv.'+m.lv; ctx.strokeText(nm,x,by-5); ctx.fillStyle=hot?'#ff9a7a':'#fff0c8'; ctx.fillText(nm,x,by-5); }
+  ctx.font='700 12px "Noto Sans KR",sans-serif'; ctx.textAlign='center'; ctx.lineWidth=3.5; ctx.strokeStyle='#000'; const nm=CAS_DVN[k]+' Lv.'+m.lv; ctx.strokeText(nm,x,by-5); ctx.fillStyle=hot?'#ff9a7a':'#fff0c8'; ctx.fillText(nm,x,by-5);
+  { const lv=m.lv|0||1, tx=k==='weak'?'🛡️ 받는 피해 +'+Math.round(C.defP*100*lv)+'%':k==='slow'?'⛓️ 공격 속도 −'+Math.min(50,Math.round(C.asP*100*lv))+'%':lv>1?'🏹 화살 포격 피해 +'+Math.round(C.lvDmg*100*(lv-1))+'%':'🏹 화살 포격';   /* 탑 효과를 글자로: 아래 알약 라벨 */
+    ctx.font='800 13px "Noto Sans KR",sans-serif'; ctx.textBaseline='middle'; const w=ctx.measureText(tx).width+22, yy=y+r*.95; ctx.fillStyle='rgba(14,10,8,.88)'; ctx.strokeStyle=col; ctx.lineWidth=1.8; ctx.beginPath(); if(ctx.roundRect)ctx.roundRect(x-w/2,yy-13,w,26,13); else ctx.rect(x-w/2,yy-13,w,26); ctx.fill(); ctx.stroke(); ctx.fillStyle='#fff'; ctx.fillText(tx,x,yy+1); ctx.textBaseline='alphabetic'; } }
 function casUnder(m,t){ const C=CAS_CFG;
   if(m.spin){ const S=m.spin; casSpinDraw(m.x,m.y,C.spin.r,S.a0+S.dir*C.spin.w*S.t,S.dir,1,true); }
   if(m.gt>0){ const R=m.r*1.7, pu=.5+.5*Math.sin(t*10); ctx.save(); ctx.translate(m.x,m.y); ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0,0,R,m.gfa-C.gate.cone,m.gfa+C.gate.cone); ctx.closePath(); ctx.fillStyle=`rgba(255,210,100,${.14+.1*pu})`; ctx.fill(); ctx.lineWidth=5; ctx.strokeStyle=`rgba(255,220,120,${.7+.3*pu})`; ctx.beginPath(); ctx.arc(0,0,R,m.gfa-C.gate.cone,m.gfa+C.gate.cone); ctx.stroke(); ctx.restore();
