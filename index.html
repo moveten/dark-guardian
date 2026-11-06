@@ -1362,7 +1362,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div class="spVer" id="spVer"></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0532</div>
+    <div class="ver" id="verT">v0.6.5.0533</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3477,7 +3477,7 @@ function killMob(m){
   if(m.gob)return;
   if(m.dev){ casDevKill(m); return; }
   if(m.leg){ casLegKill(m); return; }
-  if(m.rk==='cas'){ for(const o of G.mobs){ if((o.dev||o.leg)&&!o.dead){ o.dead=true; burst(o.x,o.y,'#a08a60',16,240); } } G.casGen=(G.casGen|0)+1; G.leg=null; }
+  if(m.rk==='cas'){ for(const o of G.mobs){ if((o.dev||o.leg)&&!o.dead){ o.dead=true; burst(o.x,o.y,'#a08a60',16,240); if(o.dev){ burst(o.x,o.y,CAS_DVC[o.dv],18,300); spark(o.x,o.y,'#fff0c0',14); efx.push({k:'ring',x:o.x,y:o.y,r0:8,r1:110,t:0,life:.5,col:CAS_DVC[o.dv],w:12}); } } } G.casGen=(G.casGen|0)+1; G.leg=null; }
   if(m.fake||m.obj){ m.dead=true; if(m.obj){ burst(m.x,m.y,'#cfc0ff',26,300); spark(m.x,m.y,'#8a6cff',20); efx.push({k:'ring',x:m.x,y:m.y,r0:8,r1:70,t:0,life:.4,col:'#b89cff',w:8}); sfx('crit'); pushEv(['bx',Math.round(m.x),Math.round(m.y),40]); const left=G.mobs.filter(o=>!o.dead&&o.obj).length; announce(left?`🔮 결정 파괴! 남은 결정 ${left}개`:'🔮 결정을 모두 부쉈어요!','#c0a8ff'); }
       else { burst(m.x,m.y,'#2a1a4a',30,300); spark(m.x,m.y,'#8a6cff',24); announce('👻 가짜였어요! 분신이 흩어졌어요','#b89cff'); sfx('kill'); } return; }   /* 분신·봉인 결정: 전리품·경험치 없음 */
   if(m.rk==='awk'){ awkFakesClear(true); awkObjsClear(); G.awc=null; G.awz=null; }
