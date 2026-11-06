@@ -1205,6 +1205,20 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 #sSplash .spTap{position:absolute;left:50%;bottom:calc(max(7vh,env(safe-area-inset-bottom)) + 12px);transform:translateX(-50%);padding:12px 28px;border-radius:999px;border:1.5px solid #ffe2a0aa;background:#0a0610a8;color:#ffefd0;font-weight:800;font-size:clamp(15px,4.6vw,20px);letter-spacing:.04em;white-space:nowrap;pointer-events:none;animation:spPulse 1.9s ease-in-out infinite}
 @keyframes spPulse{0%,100%{opacity:.55;transform:translateX(-50%) scale(1)}50%{opacity:1;transform:translateX(-50%) scale(1.045)}}
 #sSplash .spVer{position:absolute;left:14px;bottom:max(10px,env(safe-area-inset-bottom));font-size:11px;color:#bfaed0aa;letter-spacing:.08em;pointer-events:none}
+/* 홈 화면 추가 안내 (상단 배너 + 안내 카드) */
+#a2b{position:absolute;left:10px;right:10px;top:calc(env(safe-area-inset-top) + 10px);z-index:6;display:flex;align-items:center;gap:10px;padding:10px 12px;border:1.5px solid #c9a45a;border-radius:14px;background:rgba(20,15,12,.94);color:#f1e3c4;box-shadow:0 6px 20px #000a;cursor:default;transform:translateY(-130%);opacity:0;transition:transform .45s cubic-bezier(.2,.9,.3,1),opacity .35s}
+#a2b[hidden]{display:none}
+#a2b.on{transform:none;opacity:1}
+#a2b img{width:38px;height:38px;border-radius:9px;flex:none}
+#a2b .t{flex:1;min-width:0}#a2b .t b{display:block;font-size:14px;font-weight:800}#a2b .t span{display:block;font-size:12px;opacity:.72;margin-top:1px}
+#a2b .go{flex:none;padding:8px 13px;border:0;border-radius:9px;background:#e0b060;color:#1a1008;font-weight:800;font-size:13px}
+#a2b .x{flex:none;width:30px;height:30px;border:0;background:none;color:#f1e3c4;opacity:.6;font-size:16px;padding:0}
+#a2g{position:absolute;inset:0;z-index:7;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(5,4,3,.7);cursor:default}
+#a2g[hidden]{display:none}
+#a2g .c{width:100%;max-width:340px;border:1.5px solid #c9a45a;border-radius:16px;background:#17110e;color:#f1e3c4;padding:18px 18px 14px;box-shadow:0 10px 30px #000c}
+#a2g h3{margin:0 0 10px;font-size:17px;font-weight:800}
+#a2g ol{margin:0;padding-left:20px;font-size:14px;line-height:1.7}
+#a2g .ok{display:block;width:100%;margin-top:14px;padding:11px;border:0;border-radius:11px;background:#e0b060;color:#1a1008;font-weight:800;font-size:15px}
 @media (prefers-reduced-motion:reduce){#sSplash .spTap{animation:none}}
 #sSplash.go .spTap{opacity:0;animation:none;transition:opacity .2s}
 /* 결과 화면 연출(Phaser) 레이어: 글자 뒤에 깔려요 */
@@ -1360,9 +1374,11 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div class="spLogo"><h2>어둠의 수호자</h2><small>DARK GUARDIAN</small></div>
     <div class="spTap">화면을 터치해서 시작</div>
     <div class="spVer" id="spVer"></div>
+    <div id="a2b" hidden><img src="icon-192.png" alt=""><div class="t"><b id="a2T">앱처럼 설치해서 바로 실행!</b><span id="a2S">홈 화면에 추가하면 주소 없이 바로 켜져요</span></div><button class="go" id="a2Go" type="button">추가</button><button class="x" id="a2X" type="button" aria-label="닫기">✕</button></div>
+    <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0537</div>
+    <div class="ver" id="verT">v0.6.5.0538</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -7977,6 +7993,44 @@ requestAnimationFrame(step);
 })();
 </script>
 
+<script>
+/* ===== 홈 화면 추가 안내 — 시작 화면 상단 배너. Android(크롬)는 버튼 한 번으로 설치창, iPhone·앱 안 브라우저는 안내 카드 ===== */
+(function(){
+'use strict';
+try{
+  const sp=document.getElementById('sSplash'), bn=document.getElementById('a2b'), gd=document.getElementById('a2g'); if(!sp||!bn||!gd)return;
+  const KEY='dkdef2.a2hs', HOLD=7*864e5;
+  const standalone=()=>{ try{ return matchMedia('(display-mode: standalone)').matches||matchMedia('(display-mode: fullscreen)').matches||navigator.standalone===true; }catch(e){ return false; } };
+  if(standalone())return;
+  try{ const t=+localStorage.getItem(KEY)||0; if(t&&Date.now()-t<HOLD)return; }catch(e){}
+  const ua=navigator.userAgent||'', ios=/iPad|iPhone|iPod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  const inApp=/KAKAOTALK|NAVER\(inapp|NAVER|Line\/|Instagram|FBAN|FBAV|DaumApps|Snapchat|; wv\)/i.test(ua);
+  const $=id=>document.getElementById(id);
+  let dp=null, mode='';
+  const guard=el=>{ ['pointerdown','click'].forEach(ev=>el.addEventListener(ev,e=>e.stopPropagation())); };
+  guard(bn); guard(gd);
+  function show(m){ if(mode||sp.hidden)return; mode=m;
+    if(m==='open'){ $('a2T').textContent='Chrome으로 열면 앱처럼 설치할 수 있어요'; $('a2S').textContent='지금 브라우저에서는 홈 화면 추가가 안 돼요'; $('a2Go').textContent='열기'; }
+    bn.hidden=false; setTimeout(()=>bn.classList.add('on'),900); }
+  function hide(hold){ bn.classList.remove('on'); setTimeout(()=>{ bn.hidden=true; },500); mode='x'; if(hold){ try{ localStorage.setItem(KEY,String(Date.now())); }catch(e){} } }
+  function guide(h,steps){ $('a2gH').textContent=h; $('a2gL').innerHTML=steps.map(t=>'<li>'+t+'</li>').join(''); gd.hidden=false; }
+  $('a2X').addEventListener('click',()=>hide(true));
+  $('a2gOk').addEventListener('click',()=>{ gd.hidden=true; });
+  $('a2Go').addEventListener('click',async()=>{
+    if(mode==='prompt'&&dp){ try{ dp.prompt(); const r=await dp.userChoice; dp=null; hide(r&&r.outcome==='dismissed'); }catch(e){ hide(false); } return; }
+    if(mode==='ios'){ guide('홈 화면에 추가하는 방법',['화면 아래(또는 위)의 <b>공유 버튼 ⬆</b>을 눌러요','목록에서 <b>홈 화면에 추가</b>를 눌러요','오른쪽 위 <b>추가</b>를 누르면 끝!']); return; }
+    if(mode==='open'){
+      if(ios){ guide('Safari로 여는 방법',['오른쪽 아래(또는 위) <b>⋯</b> 또는 공유 버튼을 눌러요','<b>Safari로 열기</b>를 눌러요','Safari에서 <b>공유 ⬆ → 홈 화면에 추가</b>']); return; }
+      location.href='intent://'+location.host+location.pathname+location.search+'#Intent;scheme=https;package=com.android.chrome;end'; }
+  });
+  window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); if(inApp)return; dp=e; show('prompt'); });
+  window.addEventListener('appinstalled',()=>{ dp=null; hide(true); });
+  if(inApp) show('open'); else if(ios) show('ios');
+  /* 서비스 워커 — 크롬이 설치 가능한 앱으로 인식하는 데 필요(아무것도 가로채지 않음) */
+  if('serviceWorker' in navigator&&location.protocol==='https:') window.addEventListener('load',()=>{ try{ navigator.serviceWorker.register('sw.js').catch(()=>{}); }catch(e){} });
+}catch(e){}
+})();
+</script>
 <script>
 /* ===== 시작 화면: Phaser(CDN)로 배경 연출 — 불러오지 못하거나 오류가 나도 기본 그림 + 터치 시작은 항상 동작 ===== */
 (function(){
