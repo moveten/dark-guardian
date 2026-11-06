@@ -1378,7 +1378,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0538</div>
+    <div class="ver" id="verT">v0.6.5.0539</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -4681,7 +4681,7 @@ function bindHold(el,key){
 $('#bPot').addEventListener('pointerdown',e=>{e.preventDefault(); usePot();});
 const POT_CD=1000; /* 물약 재사용 대기(ms, 실제 시간) — 연타로 여러 개가 한꺼번에 먹히지 않게 */
 function potCdUi(){ const b=$('#bPot'); if(!b)return; b.classList.remove('pcd'); void b.offsetWidth; b.classList.add('pcd'); clearTimeout(b._pt); b._pt=setTimeout(()=>b.classList.remove('pcd'),POT_CD); }
-function usePot(){ if(!G.inGame||me.dead)return; const nw=performance.now(); if(nw-(me.potAt||-1e9)<POT_CD)return; if(me.hbStrict>0){ if(nw-(me.potWarn||-1e9)>1500){ me.potWarn=nw; toast(`💔 생명 봉쇄 중이라 물약을 쓸 수 없어요 (${Math.ceil(me.hbStrict)}초)`,'#ff8ab0'); } return; } if(me.hp>=me.D.maxHp-.5){ if(nw-(me.potWarn||-1e9)>1200){ me.potWarn=nw; toast('❤️ 생명력이 가득 차서 물약을 쓸 수 없어요','#ffb0a0'); } return; }   /* 생명력 100%면 물약을 아끼도록 막음 */
+function usePot(){ if(!G.inGame||me.dead)return; const nw=performance.now(); if(nw-(me.potAt||-1e9)<POT_CD)return; if(me.hbStrict>0){ if(nw-(me.potWarn||-1e9)>1500){ me.potWarn=nw; toast(`💔 생명 봉쇄 중이라 물약을 쓸 수 없어요 (${Math.ceil(me.hbStrict)}초)`,'#ff8ab0'); } return; } if(me.hp>=me.D.maxHp-.5&&me.mp>=me.D.maxMp-.5){ if(nw-(me.potWarn||-1e9)>1200){ me.potWarn=nw; toast('❤️ 생명력과 마나가 가득 차서 물약을 쓸 수 없어요','#ffb0a0'); } return; }   /* 생명력·마나가 둘 다 100%면 물약을 아끼도록 막음 */
   me.potAt=nw; potCdUi(); if(me.pot<=0&&me.potBuy<=0){toast('물약이 없어요. 상점에서 사거나 다음 습격을 기다리세요');return;} if(me.pot>0)me.pot--; else {me.potBuy--; saveChar();} G.potN=(G.potN|0)+1; me.hp=Math.min(me.D.maxHp,me.hp+me.D.maxHp*.45); me.mp=Math.min(me.D.maxMp,me.mp+me.D.maxMp*.45); if(me.hpLk!=null)me.hpLk=me.hp; if(me.mpLk!=null)me.mpLk=me.mp; spark(me.x,me.y,'#d0443a',10); sfx('potion'); }   /* 봉쇄 중에도 물약은 잠금을 올려 줌 */
 $('#bRev').addEventListener('pointerdown',e=>{e.preventDefault(); useRevive();});
 $('#bRevBig').addEventListener('pointerdown',e=>{e.preventDefault(); useRevive();});
@@ -6294,7 +6294,7 @@ function openTtSheet(id){
     return own?`<button type="button" class="tto${sel===t.id?' on':''}" role="radio" aria-checked="${sel===t.id}" data-t="${t.id}"><span class="trd"></span><div class="ttx"><b>${esc(t.n)}${fresh.has(t.id)?'<span class="tnw">NEW</span>':''}</b><small>조건: ${esc(t.cond)} ✔<br>효과: <em>${esc(t.eff)}</em></small></div></button>`
     :`<div class="tto tlk" aria-disabled="true"><span class="trd"></span><div class="ttx"><b>🔒 ${esc(t.n)}</b><small>조건: ${t.hid?'???':esc(t.cond)+' ('+t.prog(c)+')'}<br>효과: ${esc(t.eff)}</small></div></div>`; };
   const html=()=>`<div class="bshg"></div><h3>🏅 칭호 선택</h3><div class="ttlist" role="radiogroup" aria-label="칭호">${TITLES.map(row).join('')}<button type="button" class="tto${sel===''?' on':''}" role="radio" aria-checked="${sel===''}" data-t=""><span class="trd"></span><div class="ttx"><b>칭호 없음</b><small>효과 없음</small></div></button></div><button class="btn primary bshx" id="ttOk" type="button">${sel===(ttCur(c)?c.tt:'')?'닫기':'장착하기'}</button>`;
-  modal(html(),m=>{ m.classList.add('bsh'); const draw=()=>{ m.querySelector('.card').innerHTML=html(); bind(); };
+  modal(html(),m=>{ m.classList.add('bsh'); const draw=()=>{ const cd=m.querySelector('.card'), l0=cd.querySelector('.ttlist'), st=l0?l0.scrollTop:0, sc=cd.scrollTop; cd.innerHTML=html(); const l1=cd.querySelector('.ttlist'); if(l1)l1.scrollTop=st; cd.scrollTop=sc; bind(); };   /* 칭호를 골라도 스크롤 위치 유지 */
     const bind=()=>{ m.querySelectorAll('.tto[data-t]').forEach(b=>b.onclick=()=>{ sel=b.dataset.t; sfx('ui'); draw(); });
       m.querySelector('#ttOk').onclick=()=>{ const cur=ttCur(c)?c.tt:''; if(sel!==cur){ c.tt=sel; save(); renderTitle(); try{ rkSubmitAll(true); }catch(e){} } closeModal(); }; };
     bind(); });
