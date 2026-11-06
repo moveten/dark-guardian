@@ -1386,7 +1386,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0552</div>
+    <div class="ver" id="verT">v0.6.5.0553</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -2494,7 +2494,7 @@ function migrateChars(){
 }
 function createChar(cls,name,nid,hc){ const ids=charIds(); if(ids.length>=MAXCHAR||!CLASSES[cls])return null; if(nameTaken(name))return null; const p=newChar(cls,name,nid); if(hc)p.hc=1; p.ms=MAILQ.map(q=>q.id); lsSet(charKey(p.id),JSON.stringify(packChar(p))); ids.push(p.id); setIds(ids); selId=p.id; lsSet('dkdef2.sel',selId); return p; }
 function deleteChar(id){ setIds(charIds().filter(x=>x!==id)); lsDel(charKey(id)); lsDel('dkdef2.rk.'+id); lsDel('dkdef2.nmv.'+id); if(selId===id){selId='';lsSet('dkdef2.sel','');} rkQueueDel(id); nameQueueRel(id); }
-function packChar(p){ const {id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear,as,sy,gs,au,sp,ct,cts,cat,dv4,shard,ashard,cshard,misc,mail,ms,tut,cc,eq2,es,pet,dx,dxs,dxn,gas,sd,bs,hc,hd,hs,tt,tts,tf,tpt}=p; return {tf:tf&&Object.keys(tf).length?tf:undefined,tpt:tpt&&Object.keys(tpt).length?tpt:undefined,tt:tt&&TT_BY[tt]?tt:undefined,tts:Array.isArray(tts)&&tts.length?tts:undefined,hc:hc?1:undefined,hd:hc&&hd>0?hd:undefined,hs:hc&&hs>0?hs|0:undefined,bs:Array.isArray(bs)?bs:undefined,sd:sd===1?1:undefined,dxn:dxn&&Object.keys(dxn).length?dxn:undefined,gas:gas===undefined?undefined:Math.max(-1,Math.min(2,gas|0)),dx:dx&&Object.keys(dx).length?dx:undefined,dxs:dxs===undefined?undefined:Math.max(0,dxs|0),id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear:clear|0,au:Math.max(0,Math.min(2,au|0)),sp:sp?1:0,ct:ct>0?ct|0:0,cts:cts>0?cts|0:undefined,cat:cat>0?cat|0:0,as:as===undefined?-1:as,sy:sy===undefined?-1:sy,gs:gs?1:undefined,dv4:dv4?1:0,shard:shard|0,ashard:(ashard|0)||undefined,cshard:(cshard|0)||undefined,misc:Array.isArray(misc)?misc:undefined,mail:Array.isArray(mail)?mail:undefined,ms:Array.isArray(ms)?ms:undefined,tut:tut||undefined,cc:cc&&Object.keys(cc).length?cc:undefined,eq2:eq2&&Object.values(eq2).some(Boolean)?eq2:undefined,es:es===1?1:undefined,pet:pet&&PETS[pet.id]?{id:pet.id,xp:Math.floor(pet.xp)||0}:undefined}; }
+function packChar(p){ const {apb,arv,id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear,as,sy,gs,au,sp,ct,cts,cat,dv4,shard,ashard,cshard,misc,mail,ms,tut,cc,eq2,es,pet,dx,dxs,dxn,gas,sd,bs,hc,hd,hs,tt,tts,tf,tpt}=p; return {apb:apb?1:undefined,arv:arv?1:undefined,tf:tf&&Object.keys(tf).length?tf:undefined,tpt:tpt&&Object.keys(tpt).length?tpt:undefined,tt:tt&&TT_BY[tt]?tt:undefined,tts:Array.isArray(tts)&&tts.length?tts:undefined,hc:hc?1:undefined,hd:hc&&hd>0?hd:undefined,hs:hc&&hs>0?hs|0:undefined,bs:Array.isArray(bs)?bs:undefined,sd:sd===1?1:undefined,dxn:dxn&&Object.keys(dxn).length?dxn:undefined,gas:gas===undefined?undefined:Math.max(-1,Math.min(2,gas|0)),dx:dx&&Object.keys(dx).length?dx:undefined,dxs:dxs===undefined?undefined:Math.max(0,dxs|0),id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear:clear|0,au:Math.max(0,Math.min(2,au|0)),sp:sp?1:0,ct:ct>0?ct|0:0,cts:cts>0?cts|0:undefined,cat:cat>0?cat|0:0,as:as===undefined?-1:as,sy:sy===undefined?-1:sy,gs:gs?1:undefined,dv4:dv4?1:0,shard:shard|0,ashard:(ashard|0)||undefined,cshard:(cshard|0)||undefined,misc:Array.isArray(misc)?misc:undefined,mail:Array.isArray(mail)?mail:undefined,ms:Array.isArray(ms)?ms:undefined,tut:tut||undefined,cc:cc&&Object.keys(cc).length?cc:undefined,eq2:eq2&&Object.values(eq2).some(Boolean)?eq2:undefined,es:es===1?1:undefined,pet:pet&&PETS[pet.id]?{id:pet.id,xp:Math.floor(pet.xp)||0}:undefined}; }
 function saveChar(){ if(!me||!me.id)return; try{ ttfAutoT(); }catch(e){} lsSet(charKey(me.id),JSON.stringify(packChar(me))); }
 const dispName=p=>(p&&p.name)||CLASSES[p.cls].n;
 const isHc=p=>!!(p&&p.hc), hcDead=p=>!!(p&&p.hc&&p.hd>0);   /* 하드코어 캐릭터 · 사망한 하드코어 캐릭터 */
@@ -2944,6 +2944,7 @@ function casSkillPick(m,best,bd,pls){ const C=CAS_CFG, ph=m.ph|0||1, opts=[], fr
     else if(k==='sil')m.tel={k:'slam',kind:'cas_sil',x:m.x,y:m.y,r:560,t:0,dur:C.sil.tel,col:'#c8a0ff'};
     else if(k==='horn')m.tel={k:'slam',kind:'cas_horn',x:m.x,y:m.y,r:C.horn.r,t:0,dur:C.horn.tel,col:'#ff9a5a'};
     else casStartSpin(m,k==='shspin');
+    if(k==='gate'){ casCutin(3); pushEv(['csc',3]); }
     if(k!=='spin'&&k!=='shspin'){ casBan(k==='gate'?'🚪 성문 닫기':k==='sil'?'🚫 침묵의 군기':'📯 공성 나팔',k==='gate'?'정면 공격이 막혀요 — 뒤로 돌아가요':k==='sil'?'피할 수 없어요 · 일반공격만 가능, 치명타 ×2':'원 밖으로 벗어나세요 — 공포에 걸려요',2.0); casFlash(m,k==='gate'?'#ffd070':k==='sil'?'#c8a0ff':'#ff9a5a',k==='gate'?'🚪 성문 닫기':k==='sil'?'🚫 침묵의 군기':'📯 공성 나팔',k==='gate'?'255,210,110':k==='sil'?'190,150,255':'255,150,80',false); } return; }
   const rr=Math.random();   /* 기본 기술: 철퇴 강타 · 돌진(전 페이즈) · 투석 포격(3페이즈) */
   if(ph>=3&&rr<.3){ const pts=[{x:best.x,y:best.y}]; for(let i=0;i<4;i++)pts.push({x:clamp(best.x+rand(-230,230),40,WW-40),y:clamp(best.y+rand(-230,230),40,WH-40)}); m.tel={k:'slam',kind:'multi',cas:1,x:pts[0].x,y:pts[0].y,pts,r:C.tr.multi,mul:C.mul.multi,col:'#e08a3a',t:0,dur:C.dur.multi}; casBan('🪨 투석 포격','붉은 원 밖으로!',1.4); }
@@ -3003,8 +3004,8 @@ function awkCutin(kind,ph){ const C=AWC[kind]; if(!C)return; const el=$('#awCut'
   el.classList.remove('on'); void el.offsetWidth; el.classList.add('on'); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('on'),1550); }
 /* 파괴 미션 성공 컷인: 같은 띠, 초록색 · 쓰러진(기울어진) 보스 + 💤 */
 /* 수문장 카스텔 컷인(철퇴 강타): 각성 그림자 컷인과 같은 가로 띠 · 주황색, 1.2초 */
-function casCutin(k){ const el=$('#awCut'); if(!el)return; el.classList.remove('ok'); el.classList.add('cas'); el.querySelector('img').src=k===2?'img/boss_6_sk.png':'img/boss_6_atk.png'; el.querySelector('.k').textContent='수문장 카스텔';
-  el.querySelector('.n').textContent=k===2?'방패 돌격':'철퇴 강타'; el.querySelector('.s').textContent=k===2?'붉은 길 밖으로 비켜서세요!':'안쪽 원 밖으로 → 바로 안쪽으로!';
+function casCutin(k){ const el=$('#awCut'); if(!el)return; el.classList.remove('ok'); el.classList.add('cas'); el.querySelector('img').src=k===2?'img/boss_6_sk.png':k===3?'img/boss_6_cast.png':'img/boss_6_atk.png'; el.querySelector('.k').textContent='수문장 카스텔';
+  el.querySelector('.n').textContent=k===2?'방패 돌격':k===3?'성문 닫기':'철퇴 강타'; el.querySelector('.s').textContent=k===2?'붉은 길 밖으로 비켜서세요!':k===3?'정면 공격이 막혀요 — 뒤로 돌아가세요!':'안쪽 원 밖으로 → 바로 안쪽으로!';
   el.classList.remove('on'); void el.offsetWidth; el.classList.add('on'); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('on'),1250); }
 const AWOK={seal:['봉인 성공!','결정 3개 파괴'],lantern:['소등 성공!','등불 2개 소등'],heart:['차단 성공!','심장 파편 3개 파괴']};
 function awkCutinOk(kind,ph){ const T=AWOK[kind], el=$('#awCut'); if(!T||!el)return; ph=ph|0||1; el.classList.remove('cas');
@@ -6009,15 +6010,25 @@ const SHOP={potion:{n:'회복 물약',d:'생명력·마나 45% 회복. 습격마
 const SHOPMAX=20, shopQty={potion:1,rev:1};
 function shopRow(k){ const o=SHOP[k], have=k==='potion'?me.potBuy:me.rev, space=Math.max(0,SHOPMAX-have), q=space?clamp(shopQty[k]|0||1,1,space):0; shopQty[k]=q||1;
   return `<div class="sh2"><div class="top"><span class="nm">${o.n}</span><span class="hv${space?'':' full'}">보유 <b>${have}</b> <i>/ ${SHOPMAX}</i>${space?'':' <span style="color:#ff8a7a;font-weight:800">가득</span>'}</span></div><div class="qr"><button class="btn qbtn" data-q="${k}:-1"${space?'':' disabled'}>−</button><div class="qn">${q}</div><button class="btn qbtn" data-q="${k}:1"${space?'':' disabled'}>＋</button><button class="btn mx" data-q="${k}:max"${space?'':' disabled'}>MAX</button><button class="btn primary go" data-buy="${k}"${space?'':' disabled'}><span${space?` data-s="${q}개 · ${(q*o.p).toLocaleString()}G"`:''}>${space?`${q}개 구매 · ${(q*o.p).toLocaleString()}G`:'가득 찼어요'}</span></button></div></div>`; }
+const AUTOK={potion:'apb',rev:'arv'};
+function shopAuto(k){ const on=!!me[AUTOK[k]], nm=SHOP[k].n; return `<div class="sh2"><div class="top" style="margin-bottom:6px"><span class="nm" style="font-size:16px">${k==='potion'?'🧪':'✨'} 전투 후 ${nm} 자동 구매</span><button type="button" class="smsw${on?' on':''}" role="switch" aria-checked="${on}" aria-label="${nm} 자동 구매" data-atg="${k}"></button></div><p style="margin:0;font-size:12px;line-height:1.5;color:var(--mute)">홈 화면으로 돌아올 때 최대(${SHOPMAX}개)까지 채워요. 캐릭터 골드를 먼저 쓰고, 모자라면 공유보관함 골드에서 차감해요.</p></div>`; }
+/* 홈 화면으로 돌아올 때: 켜 둔 항목을 최대치까지 자동 구매 (캐릭터 골드 먼저 → 부족분은 공유보관함 골드, 하드코어는 캐릭터 골드만) */
+function autoBuyShop(){ if(!me)return; const got=[]; let paid=0, lack=false;
+  for(const k of ['potion','rev']){ if(!me[AUTOK[k]]||(k==='rev'&&me.hc))continue; const key=k==='potion'?'potBuy':'rev', o=SHOP[k], need=SHOPMAX-(me[key]|0); if(need<=0)continue;
+    const n=Math.min(need,Math.floor(aGold()/o.p)); if(n<need)lack=true; if(n<=0)continue;
+    aPayGold(n*o.p); me[key]=(me[key]|0)+n; paid+=n*o.p; got.push(`${o.n} ${n}개`); }
+  if(got.length){ saveChar(); uiDirty=true; toast(`🛍️ 자동 구매: ${got.join(' · ')} (-${paid.toLocaleString()}G)${lack?' · 골드 부족으로 일부만 샀어요':''}`); }
+  else if(lack)toast('🛍️ 자동 구매: 골드가 부족해요'); }
 function fitGo(root){ root.querySelectorAll('.sh2 .go').forEach(el=>{ const sp=el.firstElementChild; if(!sp)return; const lim=()=>el.clientWidth-12, shrink=min=>{ let fs=14; el.style.fontSize=fs+'px'; while(fs>min&&sp.getBoundingClientRect().width>lim()){ fs-=.5; el.style.fontSize=fs+'px'; } return sp.getBoundingClientRect().width<=lim(); };
   if(!shrink(11)&&sp.dataset.s){ sp.textContent=sp.dataset.s; shrink(9); } }); }   /* 버튼 크기는 그대로, 글자 크기만 줄이고(11px까지) 그래도 넘치면 '구매'를 뺀 짧은 문구로 */
 function renderShop(){
   markTabs(); sheetHead(); sellAskIt=null;
   selItem=null;   /* 상점에는 판매창이 없음 — 판매·일괄 판매는 가방에서 */
-  let h=`<div class="box"><h3>🛍️ 구매</h3>${shopRow('potion')}${me.hc?'':shopRow('rev')}<div class="smsg">${esc(buyMsg)}</div></div>`;
+  let h=`<div class="box"><h3>🛍️ 구매</h3>${shopRow('potion')}${shopAuto('potion')}${me.hc?'':shopRow('rev')+shopAuto('rev')}<div class="smsg">${esc(buyMsg)}</div></div>`;
   if(rsOn())h+=`<div class="box" id="rsBox"><h3>📚 연구실</h3><p style="margin:0 0 10px;font-size:14px;line-height:1.5">어서오세요, 관리자님 환영합니다.</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button class="btn" id="rsNote">📔 관리자 노트</button><button class="btn" id="rsLog">📜 출입 기록</button></div><button class="btn" id="rsExit" style="width:100%;margin-top:8px">🚪 나가기</button></div>`;
   const b=$('#sheetB'); b.className='sbody stats'; b.innerHTML=h; fitGo(b);
   { const q=id=>b.querySelector(id); if(q('#rsNote'))q('#rsNote').onclick=rsNotes; if(q('#rsLog'))q('#rsLog').onclick=rsLogView; if(q('#rsExit'))q('#rsExit').onclick=rsExit; }
+  b.querySelectorAll('[data-atg]').forEach(el=>el.onclick=()=>{ const f=AUTOK[el.dataset.atg]; me[f]=me[f]?0:1; saveChar(); sfx('ui'); renderShop(); });
   b.querySelectorAll('[data-q]').forEach(el=>el.onclick=()=>{ const [k,a]=el.dataset.q.split(':'), have=k==='potion'?me.potBuy:me.rev, space=Math.max(1,SHOPMAX-have), o=SHOP[k];
     if(a==='max')shopQty[k]=Math.max(1,Math.min(Math.floor(aGold()/o.p),space)); else shopQty[k]=clamp((shopQty[k]|0)+(+a),1,space); buyMsg=''; renderShop(); });
   b.querySelectorAll('[data-buy]').forEach(el=>el.onclick=()=>{ const k=el.dataset.buy, o=SHOP[k], key=k==='potion'?'potBuy':'rev', n=shopQty[k]|0||1, cost=o.p*n;
@@ -6948,7 +6959,7 @@ $('#bStart').onclick=()=>{ if(G.mode!=='host')return; ally=null; const gp=others
 $('#bLeave').onclick=()=>quitToTitle();
 function startGuestGame(pr){ dmgReset(); G.potN=0; resetWorld(); G.phase=pr.ph; toast('게임이 시작됐어요'); }
 async function quitToTitle(){
-  storyStop(); if(autoMode)setAuto(0,true); setSpd(false); G.inGame=false; G.phase='title'; G.aim=null; saveChar(); ally=null; if(me){ const pl=G.mode==='guest'?-1:(G.stageIdx|0); selStage=Math.max(0,Math.min(STAGES.length-1,G.firstClr?(me.clear|0):pl>=0?Math.min(pl,me.clear|0):(me.clear|0)-1)); G.firstClr=false; }   /* 방금 처음 깼다면 다음 스테이지, 이미 깬 스테이지(또는 진 판)면 했던 스테이지 그대로, 손님은 가장 높이 깬 스테이지 */
+  storyStop(); if(autoMode)setAuto(0,true); setSpd(false); G.inGame=false; G.phase='title'; G.aim=null; saveChar(); ally=null; autoBuyShop(); if(me){ const pl=G.mode==='guest'?-1:(G.stageIdx|0); selStage=Math.max(0,Math.min(STAGES.length-1,G.firstClr?(me.clear|0):pl>=0?Math.min(pl,me.clear|0):(me.clear|0)-1)); G.firstClr=false; }   /* 방금 처음 깼다면 다음 스테이지, 이미 깬 스테이지(또는 진 판)면 했던 스테이지 그대로, 손님은 가장 높이 깬 스테이지 */
   if(R){try{R.presence({role:null,pl:null,m:null,ev:null,h:null,bt:null}).catch(()=>{}); await R.leave();}catch(e){} R=null;}
   show('#sTitle'); renderClassCards(); rkSubmitAll();
 }
