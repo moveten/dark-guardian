@@ -1312,6 +1312,11 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 .hcchk:has(input:checked){border-color:#ff5a48;background:rgba(120,20,14,.55)}
 .cc{position:relative}
 .cc .hcrb{position:absolute;left:8px;top:8px;z-index:3;padding:1px 7px;border-radius:9px;background:linear-gradient(#b3342b,#6e1712);border:1px solid #ff8a6a;color:#ffe3d8;font:800 10.5px/1.5 'Noto Sans KR',sans-serif;letter-spacing:.3px;pointer-events:none;box-shadow:0 0 8px rgba(255,60,40,.4)}
+/* 캐릭터 카드: 칭호 배지를 머리 위로 — 배지가 빠진 만큼 그림 칸 위에 여백(--tth)을 줘서 캐릭터 크기는 그대로, 위치만 아래로 */
+#sTitle .cc>.ttc{position:absolute;left:50%;top:12px;transform:translateX(-50%);margin:0;z-index:3;white-space:nowrap;max-width:calc(100% - 20px);background:rgba(20,14,8,.72)}
+#sTitle .cc.hc>.ttc{top:32px}
+#sTitle .cc.tt .cpic{box-sizing:content-box;padding-top:var(--tth,35px)}
+@media (orientation:portrait) and (min-height:700px) and (max-height:820px){#sTitle .cc{--tth:28px}}
 .cc .hcrb.d{background:#2a1a18;border-color:#7a4a44;color:#c9a89a;box-shadow:none}
 .cc.hc{border-color:#7a2a22;box-shadow:0 0 0 1px rgba(200,60,50,.25),0 0 14px rgba(200,50,40,.18)}
 .cc.hcd{border-color:#4a1a16;box-shadow:none}
@@ -1394,7 +1399,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0569</div>
+    <div class="ver" id="verT">v0.6.5.0570</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -6361,9 +6366,9 @@ function buildCarousel(chars){
   const tail=c=>`${c.hc?`<span class="hcrb${c.hd>0?' d':''}">${c.hd>0?'💀 사망':'🔥 하드코어'}</span>`:''}<b>${esc(dispName(c))}</b><span class="cl">${CLASSES[c.cls].n} · <em>Lv ${c.lvl}</em></span>${ttChip(c)}<span class="cpt">${c.statPts+c.skillPts?`포인트 ${c.statPts+c.skillPts}`:'&nbsp;'}</span>${petOf(c)?`<span class="cpet" aria-label="펫 ${PETS[c.pet.id].n} Lv ${c.pet.lv||1}"><span class="pbd"><img src="img/${PETS[c.pet.id].im}.png" alt="" onerror="this.onerror=null;this.src='img/boss_3_5.png'"></span><i>Lv${c.pet.lv||1}</i></span>`:''}`;
   /* 캐릭터 구성이 그대로면(마을·가방·보관함을 닫을 때 등) 카드를 다시 만들지 않고 글자만 바꿔요 → 그림이 다시 로드되며 아이콘·자세가 번쩍이는 현상 방지 */
   const old=[...box.querySelectorAll('.cc:not(.add)')], same=old.length>0&&old.length===chars.length&&old.every((e,i)=>e.dataset.id===chars[i].id&&e.querySelector('.cpic')&&e.querySelector('.cpic').classList.contains(chars[i].cls))&&box.querySelectorAll('.cc.add').length===(chars.length<MAXCHAR?1:0);
-  if(same){ old.forEach((e,i)=>{ e.classList.toggle('hc',!!chars[i].hc); e.classList.toggle('hcd',chars[i].hd>0); const pic=e.querySelector('.cpic'); while(pic.nextSibling)pic.nextSibling.remove(); pic.insertAdjacentHTML('afterend',tail(chars[i])); }); }
+  if(same){ old.forEach((e,i)=>{ e.classList.toggle('hc',!!chars[i].hc); e.classList.toggle('tt',!!ttChip(chars[i])); e.classList.toggle('hcd',chars[i].hd>0); const pic=e.querySelector('.cpic'); while(pic.nextSibling)pic.nextSibling.remove(); pic.insertAdjacentHTML('afterend',tail(chars[i])); }); }
   else box.innerHTML='';
-  if(!same)for(const c of chars){ const el=document.createElement('div'); el.className='cc'+(c.hc?' hc':'')+(c.hd>0?' hcd':''); el.dataset.id=c.id; el.setAttribute('role','button');
+  if(!same)for(const c of chars){ const el=document.createElement('div'); el.className='cc'+(c.hc?' hc':'')+(c.hd>0?' hcd':'')+(ttChip(c)?' tt':''); el.dataset.id=c.id; el.setAttribute('role','button');
     el.innerHTML=`<div class="cpic ${c.cls}"><span class="cem">${clsIc(c.cls,56)}</span><img src="img/hero_${c.cls}.png" alt="" onload="this.previousElementSibling.style.display='none'" onerror="this.remove()"></div>`+tail(c);
     el.onclick=e=>{ if(e&&e.target&&e.target.closest&&e.target.closest('.ttb')){ e.stopPropagation(); sfx('ui'); openTtSheet(c.id); return; } if(el.getAttribute('aria-current')==='true'&&c.id===selId) charMenu(c.id); else if(carWide()) carPick(box,el); else carCenter2(box,el); };
     box.appendChild(el); }
