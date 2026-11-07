@@ -1405,7 +1405,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
       <div class="ab"><button id="bBas" class="s1" hidden aria-label="기본공격 켜짐"><span class="in"><b>⚔️</b><small>ON</small></span></button><button id="bSpd" class="s0" aria-label="배속: 1배"><span class="in"><b>⏩</b><small>1.0x</small></span></button><button id="bAuto" class="s0" aria-label="자동 사냥: 꺼짐"><span class="in"><b>AUTO</b><small>OFF</small></span></button></div>
       <div id="skills"></div>
     </div>
-    <button id="bSkip" hidden aria-label="나가기">🚪 나가기</button><div id="trBar" hidden><div class="r"><button id="trHome">🏠 홈화면으로</button><button id="trMn">💨 소환수 소멸</button><button id="trCd">⏱️ 쿨 초기화</button></div><button id="trAn">🔬 분석하기</button></div><aside id="trDr" aria-label="분석"><header><b>🔬 분석</b><span id="trCnt"></span><button id="trClr">🗑 지우기</button><button id="trX" aria-label="닫기">✕</button></header><h4>상수</h4><div id="trCs"></div><h4>전투 로그 <small>최근 기록이 위 · ** = 식과 실제 데미지가 달라요</small></h4><div id="trLg"></div></aside><button id="bRevBig" hidden aria-label="즉시 부활">✨ 부활 <b id="revBigN">0</b><kbd class="kh">R</kbd></button><div id="emg" hidden></div>
+    <button id="bSkip" hidden aria-label="나가기">🚪 나가기</button><div id="trBar" hidden><div class="r"><button id="trCd">⏱️ 쿨 초기화</button><button id="trMn">💨 소환수 소멸</button><button id="trHome">🏠 홈화면으로</button></div><button id="trAn">🔬 분석하기</button></div><aside id="trDr" aria-label="분석"><header><b>🔬 분석</b><span id="trCnt"></span><button id="trClr">🗑 지우기</button><button id="trX" aria-label="닫기">✕</button></header><h4>상수</h4><div id="trCs"></div><h4>전투 로그 <small>최근 기록이 위 · ** = 식과 실제 데미지가 달라요</small></h4><div id="trLg"></div></aside><button id="bRevBig" hidden aria-label="즉시 부활">✨ 부활 <b id="revBigN">0</b><kbd class="kh">R</kbd></button><div id="emg" hidden></div>
     <div id="rageV"></div>
     <div id="stoast"></div>
     <div class="qb">
@@ -1435,7 +1435,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0581</div>
+    <div class="ver" id="verT">v0.6.5.0582</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -4015,7 +4015,13 @@ function dmgRows(full){ const map=new Map(); const add=(key,n,v)=>{ if(!(v>0))re
   if(ally&&!ally.lobby&&Array.isArray(ally.dd)){ add('p:ally',ally.name||'동료',+ally.dd[0]||0); add('pet:ally','🐾 동료 펫',+ally.dd[2]||0); for(const a of (Array.isArray(ally.dd[1])?ally.dd[1]:[])){ const k=MNIDX[a[0]|0]; if(k)add('m:'+mnSkName(k),mnSkName(k),+a[1]||0); } }
   const all=[...map.values()].sort((a,b)=>b.v-a.v); return full?all:all.slice(0,8); }
 let dmgRkHtml='';
-function renderDmgRank(){ const el=$('#dmgRank'); if(!el)return; const rows=(hudOn('rank')&&G.inGame)?dmgRows():[]; const h=rows.map((r,i)=>`<div><span>${i+1}. ${esc(r.n)}</span><b>${Math.round(r.v).toLocaleString('en-US')}</b></div>`).join(''); if(h===dmgRkHtml)return; dmgRkHtml=h; el.innerHTML=h; el.hidden=!rows.length; }
+function renderDmgRank(){ const el=$('#dmgRank'); if(!el)return;
+  if(G.train&&G.inGame&&hudOn('rank')){   /* 훈련장: 스킬 이름별 소계 순위 + 최근 10초 DPS(1초마다 갱신) */
+    if(T-TR.dpsAt>=1||T<TR.dpsAt){ TR.dpsAt=T; let sum=0; for(const e of TR.ev)if(e[0]>=T-10)sum+=e[1]; TR.dps=sum/10; }
+    const rs=Object.entries(TR.sum).sort((a,b)=>b[1]-a[1]);
+    const h2=rs.map(([n,v],i)=>`<div><span>${i+1}. ${esc(n)}</span><b>${Math.round(v).toLocaleString('en-US')}</b></div>`).join('')+`<div style="margin-top:3px;padding-top:2px;border-top:1px solid rgba(255,255,255,.18);color:#ffd9a0"><span>DPS (10초)</span><b>${Math.round(TR.dps).toLocaleString('en-US')}</b></div>`;
+    if(h2!==dmgRkHtml){ dmgRkHtml=h2; el.innerHTML=h2; } el.hidden=false; return; }
+  const rows=(hudOn('rank')&&G.inGame)?dmgRows():[]; const h=rows.map((r,i)=>`<div><span>${i+1}. ${esc(r.n)}</span><b>${Math.round(r.v).toLocaleString('en-US')}</b></div>`).join(''); if(h===dmgRkHtml)return; dmgRkHtml=h; el.innerHTML=h; el.hidden=!rows.length; }
 /* ===== 화면 표시(HUD) 켜기/끄기 — 설정 메뉴의 체크박스 ===== */
 const HUDK=[['mini','🗺️ 미니맵'],['get','📦 획득 로그 (아이템 획득 알림)'],['drop','💎 드랍 로그 (아이템 드랍·동료 알림)'],['label','🏷️ 바닥 아이템 이름표 (끄면 가까이 가면 자동 습득)'],['rank','🏆 데미지 랭크표'],['num','💥 피해 숫자'],['combo','🔥 콤보 표시'],['ult','⚡ 궁극기 컷인 연출'],['light','🌑 어둠·조명 효과 (끄면 더 가벼워요)'],];
 let HUDS={}; try{ HUDS=JSON.parse(lsGet('dkdef2.hud')||'{}')||{}; }catch(e){ HUDS={}; }
@@ -6731,12 +6737,13 @@ function resetWorld(){
    지형·환경 피해·습격 없이 가운데 회복 원만 있는 빈 들판. 3초 뒤 허수아비 6기(생명력 1억 · 5초간 안 맞으면 전체 회복 · 공격 안 함 · 제자리로 돌아감 · 드랍 없음)
    훈련장 안: 능력치·스킬 초기화 0원, 강화 100%, 치명타 0%. 🔬 분석하기 = 상수 목록 + 전투 로그(계산식) 드로어 */
 const TRAIN_STG={id:'훈련장',bn:'허수아비',rl:95,n:'훈련장',d:'',tag:'',waves:[],ilo:0,icap:102,boss:0,spdM:1,hpM:1,dmgM:1,xpM:0,fly:0,train:1,mix:()=>({imp:100}),th:STAGES[0].th};   /* rl 95: Lv90↑ 패널티 없음 · icap 102: 권장 장비 Lv 합 630↑ */
-const TR={sk:'기본공격',log:[],dirty:false,iv:0};
+const TR={sk:'기본공격',log:[],dirty:false,iv:0,sum:{},ev:[],dps:0,dpsAt:0};
+function trAcc(nm,d){ TR.sum[nm]=(TR.sum[nm]||0)+d; const ev=TR.ev; ev.push([T,d]); while(ev.length&&ev[0][0]<T-12)ev.shift(); }   /* 훈련장 소계·DPS용 집계 */
 zones.push=function(...a){ if(G.train)for(const z of a)if(z&&z.sk==null)z.sk=TR.sk; return Array.prototype.push.apply(this,a); };   /* 훈련장: 장판에 만든 스킬 이름을 붙여요 */
 const TR_D=45.25, TR_POS=[[-320,0],[320,0],[320-TR_D,-TR_D],[320+TR_D,-TR_D],[320-TR_D,TR_D],[320+TR_D,TR_D]];   /* 왼쪽 1기 · 오른쪽 X자 5기(반경 64) */
 function startTraining(){
   if(!rsOn()||G.inGame||!selId)return; if(hcDead(loadChar(selId)))return;
-  closeModal(); G.mode='solo'; prepMe(); ally=null; resetWorld(); G.train=1; TR.log=[]; TR.sk='기본공격'; TR.dirty=true;
+  closeModal(); G.mode='solo'; prepMe(); ally=null; resetWorld(); G.train=1; TR.log=[]; TR.sk='기본공격'; TR.dirty=true; TR.sum={}; TR.ev=[]; TR.dps=0; TR.dpsAt=0;
   dmgReset(); G.firstClr=false; G.potN=0; G.stageIdx=selStage; G.stg=TRAIN_STG; G.TW=0; setTheme(0); G.castle=null; G.gts=[];
   G.allMode=false; G.allQ=[]; G.fires=[]; G.freeRev=me.hc?0:1; G.hcWhy=''; me.rvGiven=0; me.seenRg=0; me.out=false; me.rvT=0;
   G.gemDone=true; G.wave=0; G.skipUsed=true; G.phase='train'; G.timer=0; G.mobs.length=0; G.ev=[]; G.spawnQ=0; G.lastSq=-1; G.endShown=false; G.coop=false;
@@ -6755,9 +6762,9 @@ function trScareTick(m,dt){ m.stunT=0; m.slowT=0; m.taunt=null; m.cd=99; mobKb(m
 /* --- 데미지 추적: 계산 단계마다 곱한 값을 r.tr에 쌓아요. 스킬 쪽에서 r.v를 다시 곱해도(r.v*=…) 그 배율이 자동으로 기록돼요 --- */
 function trMk(r,k,p){ const tr={k,p}; let v=r.v; Object.defineProperty(r,'v',{get(){ return v; },set(x){ if(v)tr.p.push(['',x/v]); v=x; },enumerable:true,configurable:true}); r.tr=tr; return r; }
 function trX(r,f,k){ const o={v:r.v*f,crit:r.crit}; if(r.tr){ r.tr.p.push([k,f]); o.tr=r.tr; } return o; }
-function trLog(r,dmg,fx){ const pe=petOf(me), nm=fx&&fx.mk&&MNK[fx.mk]?MNK[fx.mk].n:fx&&fx.pet?('펫 · '+((pe&&PETS[pe.id]&&PETS[pe.id].an)||'펫')):TR.sk;
+function trLog(r,dmg,fx){ const pe=petOf(me), nm=fx&&fx.mk&&MNK[fx.mk]?MNK[fx.mk].n:fx&&fx.pet?('펫 · '+((pe&&PETS[pe.id]&&PETS[pe.id].an)||'펫')):TR.sk; trAcc(nm,dmg);
   TR.log.unshift({t:G.runT||0,n:nm,d:dmg,v:r.v,c:fx&&fx.mk?'mn':(nm==='기본공격'?'atk':''),tr:r.tr?{...r.tr,p:r.tr.p.slice()}:null}); if(TR.log.length>500)TR.log.length=500; TR.dirty=true; }
-function trLogBurn(bd){ TR.log.unshift({t:G.runT||0,n:'화상',d:Math.max(1,Math.round(bd*.3)),burn:bd}); if(TR.log.length>500)TR.log.length=500; TR.dirty=true; }
+function trLogBurn(bd){ trAcc('화상',Math.max(1,Math.round(bd*.3))); TR.log.unshift({t:G.runT||0,n:'화상',d:Math.max(1,Math.round(bd*.3)),burn:bd}); if(TR.log.length>500)TR.log.length=500; TR.dirty=true; }
 const trN=v=>{ if(v==null||!isFinite(v))return String(v); const a=Math.abs(v); const s=a>=1000?v.toFixed(1):a>=1?v.toFixed(4):v.toFixed(5); return s.replace(/\.?0+$/,''); };
 function trConsts(){ const D=me.D, b=buffDmg(), P=gearPen(), L=lvPen(), wa=(D.wmn+D.wmx)/2, bs=b?` + 버프 ${trN(b)}`:'', C={};
   C.W={n:'무기 공격력',e:`${D.wmn} ~ ${D.wmx} (때릴 때마다 굴림 → 로그에는 굴린 숫자)`,v:null};
