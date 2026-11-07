@@ -1435,7 +1435,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0584</div>
+    <div class="ver" id="verT">v0.6.5.0585</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -6720,7 +6720,8 @@ function noticeShow(){ if(lsGet(NT_KEY)===ntDay())return;
   fetch('notice.txt?'+Date.now(),{cache:'no-store'}).then(r=>{ if(!r.ok)throw 0; return r.text(); }).then(t=>{ const E=ntParse(t); if(!E.length||!$('#modal').hidden)return;
     modal(`<div class="ntH"><h3>📢 공지사항</h3><button class="ntX" id="ntX" aria-label="닫기">✕</button></div><div class="ntL">${E.map((e,i)=>`<section class="ntE${i?'':' new'}"><div class="ntT">${i?'':'<i>NEW</i>'}${esc(e.t)}</div><ul>${ntBody(e.b)}</ul></section>`).join('')}</div><label class="ntC"><input type="checkbox" id="ntChk"><span>오늘 다시 보지 않기</span></label>`,m=>{
       const go=()=>{ if(m.querySelector('#ntChk').checked)lsSet(NT_KEY,ntDay()); closeModal(); };
-      m.querySelector('#ntX').onclick=go; m.onclick=e=>{ if(e.target===m)go(); }; }); }).catch(()=>{}); }
+      m.querySelector('#ntX').onclick=go; m.querySelector('#ntChk').onchange=e=>{ if(e.target.checked)go(); };   /* 체크하는 순간 바로 닫혀요 */
+      m.onclick=e=>{ if(e.target===m)go(); }; }); }).catch(()=>{}); }
 window.__noticeShow=noticeShow;
 function prepMe(){ me=loadChar(selId); me.D=derive(me); spawnMe(); }
 function resetWorld(){
