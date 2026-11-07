@@ -1128,9 +1128,20 @@ body.land #bBas{position:absolute;width:calc(var(--u) + 4px);height:calc(var(--u
   #sheetB.bag .bagtop .bagbtns{grid-column:1;grid-row:4;display:grid!important;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:3px!important;align-content:start}   /* 버튼 3개를 한 줄로 */
   #sheetB.bag .bagtop .bagbtns .btn{padding:8px 0!important;min-height:34px;font-size:11px!important;letter-spacing:-.4px;overflow:hidden}
   #sheetB.bag .bagtop .inv{grid-column:2;grid-row:1/5;overflow:auto;min-height:0;max-height:100%;align-content:start;padding-right:2px}
+  /* 장비품·기타 탭: 가방 칸 왼쪽에 세로 책갈피(안 B) — 아이콘 위, 이름·개수 아래 · 고른 탭은 금색 줄로 가방 칸과 이어져요 */
+  #sheetB.bag .bagtop{grid-template-columns:232px 62px minmax(0,1fr);column-gap:0}
+  #sheetB.bag .bagtop .eqp,#sheetB.bag .bagtop .meta,#sheetB.bag .bagtop .bagbtns{margin-right:12px}
+  #sheetB.bag .bagtop .bagbtns{grid-row:3}
+  #sheetB.bag .bagtop .tbs{grid-column:2;grid-row:1/5;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:6px;border-bottom:0;border-right:2px solid #a98a4a;margin:0;padding-top:4px}
+  #sheetB.bag .bagtop .tbs .tb{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:3px;border-radius:12px 0 0 12px;border:1px solid #3a2e22;border-right:0;margin:0 0 0 6px;padding:12px 2px;font-size:12px;line-height:1.15;white-space:normal}
+  #sheetB.bag .bagtop .tbs .tb.on{margin:0 -2px 0 0;padding:12px 2px;box-shadow:inset 3px 0 0 #d6aa4e;border-color:#a98a4a}
+  #sheetB.bag .bagtop .tbs .tb small{margin:0;font-size:10.5px}
+  #sheetB.bag .bagtop .tbs .tb .ic{font-size:22px;line-height:1}
+  #sheetB.bag .bagtop .tbs .tb i.n{top:-5px;right:2px}
+  #sheetB.bag .bagtop .inv{grid-column:3;padding-left:10px}
 }
 @media (orientation:landscape) and (max-height:340px){   /* 아주 낮은 화면: 장비를 한 줄로, 버튼을 더 납작하게 */
-  #sheetB.bag .bagtop{grid-template-columns:216px minmax(0,1fr)}
+  #sheetB.bag .bagtop{grid-template-columns:216px 58px minmax(0,1fr)}
   #sheetB.bag .bagtop .eq{grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}#sheetB.bag .bagtop .eq .sl{display:none}
   #sheetB.bag .bagtop .bagbtns .btn{min-height:30px;padding:6px 1px!important}
 }
@@ -1424,7 +1435,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0574</div>
+    <div class="ver" id="verT">v0.6.5.0575</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -5676,7 +5687,7 @@ function fitInv(){ const b=$('#sheetB'); if(!b)return; const inv=b.querySelector
   const n=Math.max(INV_COLS_MIN,Math.min(INV_COLS_MAX,Math.round((w+4)/(INV_CELL+4)))); inv.style.gridTemplateColumns=`repeat(${n},minmax(0,1fr))`; }
 try{ new ResizeObserver(()=>fitInv()).observe($('#sheetB')); }catch(e){}
 const cntNN=a=>a.reduce((t,x)=>t+(x?1:0),0);
-const tabStrip=(inv,misc,tab,chip)=>`<div class="tbs"><button class="tb${tab==='eq'?' on':''}" data-bt="eq">🎒 장비품 <small>${cntNN(inv)}/${inv.length}</small></button><button class="tb${tab==='misc'?' on':''}" data-bt="misc">💎 기타 <small>${cntNN(misc)}/${misc.length}</small>${misc.some(x=>x&&x.isNew)?'<i class="n">NEW</i>':''}</button></div>`;
+const tabStrip=(inv,misc,tab,chip)=>`<div class="tbs"><button class="tb${tab==='eq'?' on':''}" data-bt="eq"><span class="ic">🎒</span> <span class="tn">장비품</span> <small>${cntNN(inv)}/${inv.length}</small></button><button class="tb${tab==='misc'?' on':''}" data-bt="misc"><span class="ic">💎</span> <span class="tn">기타</span> <small>${cntNN(misc)}/${misc.length}</small>${misc.some(x=>x&&x.isNew)?'<i class="n">NEW</i>':''}</button></div>`;
 /* 기타 탭 정렬(등급순): 조각(그림자→각성) 먼저, 그 다음 보석을 상급→중급→하급, 같은 등급이면 보석 종류 순서 */
 function sortMisc(P){ shardRepack(P); const its=P.misc.filter(Boolean); const key=it=>isShard(it)?[0,it.mat==='cshard'?2:it.mat==='ashard'?1:0,0]:[1,-(it.ilvl|0),Math.max(0,GEM_KINDS.indexOf(it.gk))];
   its.sort((a,b)=>{ const x=key(a),y=key(b); return x[0]-y[0]||x[1]-y[1]||x[2]-y[2]; });
