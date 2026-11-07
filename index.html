@@ -1435,7 +1435,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0576</div>
+    <div class="ver" id="verT">v0.6.5.0577</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1744,7 +1744,7 @@ const CAS_CFG={
     w:{sh:1,xb:.6,bl:1.8},                                      /* 체력 배분 비중 */
     sh:{front:.4,auraR:230,auraDef:.3,drainR:210,drainIv:4,drainWarn:.8,drainPct:.9,bash:.5,bashIv:2},   /* 방패병: 정면 피해 배율(−60%) · 방어 오라 범위/피해감소 · 마나 흡수 범위/간격/예고 · 밀치기 배율/간격 */
     xb:{iv:2.2,mul:.55,r:36,dur:.9,bleed:3},                    /* 석궁병: 사격 간격·피해 배율·범위·예고·출혈 지속 */
-    bl:{iv:5.5,mul:2.5,w:64,tel:2.0,stun:.5}},                  /* 발리스타: 느린 공속·큰 피해 배율·선 폭·예고·기절 */
+    bl:{iv:5.5,mul:2.5,w:64,tel:2.0,stun:.5,dev:.25}},                  /* 발리스타: 느린 공속·큰 피해 배율·선 폭·예고·기절 */
   shard:[3,7], exch:120, heroDrop:()=>CS_P                      /* 수문장 조각(처치 보상 범위·교환 개수) · 영웅 장비 드랍 확률 = 5스테이지와 동일 */
 };
 const MT0=[
@@ -2930,6 +2930,7 @@ function casLegTick(m,dt){ const L=G.leg, C=CAS_CFG.leg, B=casBoss(); if(!B||!L)
     if(m.aim){ const a=m.aim; a.t+=dt; if(a.t<a.dur*.6){ a.x=t.x; a.y=t.y; }
       if(a.t>=a.dur){ m.aim=null; m.atk=.4; const dx=a.x-m.x, dy=a.y-m.y, L2=hyp(dx,dy)||1, ux=dx/L2, uy=dy/L2, len=Math.max(L2+300,700);
         for(const p of pls){ const px=p.x-m.x, py=p.y-m.y, pr=px*ux+py*uy, pd=Math.abs(px*uy-py*ux); if(pr>0&&pr<len&&pd<C.bl.w/2+12)mobHitPlayer(p.i,m.dmgB*C.bl.mul,'stun',C.bl.stun); }
+        for(const o of casDevs()){ const px=o.x-m.x, py=o.y-m.y, pr=px*ux+py*uy, pd=Math.abs(px*uy-py*ux); if(!(pr>0&&pr<len&&pd<C.bl.w/2+o.r*.6))continue; const dm=Math.ceil(o.max*C.bl.dev); o.hp-=dm; o.flash=.15; addNum(o.x,o.y-o.r-12,'🎯 -'+dm,'#ffd070',true); burst(o.x,o.y,CAS_DVC[o.dv],16,300); spark(o.x,o.y,'#fff0c0',12); sfx('crit'); if(o.hp<=0)killMob(o); }   /* 발리스타 화살이 공성탑을 지나가면 탑 최대 체력의 1/4 피해 (탑으로 유인해서 부수기) */
         arrowFx(m.x,m.y,m.x+ux*len,m.y+uy*len,1); for(let k=1;k<=6;k++)burst(m.x+ux*len*k/6,m.y+uy*len*k/6,'#ffb070',6,200); impact(m.x,m.y,'255,170,90',200); G.shake=Math.max(G.shake,.6); sfx('slam'); } } }
 }
 const casAimTags=[];
