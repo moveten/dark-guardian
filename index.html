@@ -517,6 +517,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 .dex .dxc b{font-size:11.5px;line-height:1.2;text-align:center;color:#f1e6cc;margin-top:2px;min-height:28px;display:flex;align-items:center;justify-content:center;word-break:keep-all}
 .dex .dxc:not(.got) b{color:#6f6354}
 .dex .dxn{position:absolute;top:3px;right:4px;z-index:1;font-style:normal;font-size:11px;font-weight:800;color:#fff;background:rgba(0,0,0,.72);border-radius:99px;padding:1px 6px}
+.dex .dxpr{margin-top:8px;padding:9px 12px;border-radius:12px;border:1px solid #6a4aa0;background:#150f1e;color:#e0d0ff;font-size:13.5px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}.dex .dxpr b{color:#d8b8ff}.dex .dxpr em{color:#8aff9a;font-style:normal;margin-left:auto}.dex .dxpr small{margin-left:auto;color:#9a8cb0}.dex .dxpr .btn{margin-left:auto;padding:6px 16px}
 .dex .dxsoon{display:flex;justify-content:space-between;align-items:center;border:1px dashed #4a3a2a;border-radius:12px;padding:11px 13px;color:#9a8c72;font-size:14px}
 .ptv{display:block!important}
 .ptv .pt-card{border:1px solid #3a2e22;background:#120d0b;border-radius:12px;padding:11px 12px;margin-bottom:9px;color:#e9d9b4}
@@ -1435,7 +1436,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0592</div>
+    <div class="ver" id="verT">v0.6.5.0593</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -5570,12 +5571,19 @@ function dexOpen(){ flushSortedNew(); sheetMode='dex'; selItem=null; bagSel=null
 function dexCell(k,p,tone){ const S=SPFX[k], n=(p.dx&&p.dx[k])|0, im=UNQIMG[S.n];
   return `<div class="dxc ${tone}${n?' got':''}${p.dxn&&p.dxn[k]?' nw':''}" data-dk="${k}">${p.dxn&&p.dxn[k]?'<em class="dxnew">NEW</em>':''}${n>1?`<i class="dxn">×${n}</i>`:''}<div class="dxi">${im?`<img alt="" src="img/${im}.png" onerror="this.style.visibility='hidden'">`:''}</div><b>${n?esc(S.n):'???'}</b></div>`; }
 function dexGroup(id,title,ico,keys0,p,tone){ const keys=dexKeysOf(keys0,p), got=keys.filter(k=>(p.dx&&p.dx[k]|0)>0).length, open=!dexClosed.has(id);
-  return `<section class="dxg"><button class="dxh" data-dg="${id}" aria-expanded="${open}"><span>${ico} ${esc(title)} <em>${got}/${keys.length}</em>${keys.some(k=>p.dxn&&p.dxn[k])?'<i class="dxnb">NEW</i>':''}</span><u>${open?'▾':'▸'}</u></button>${open?`<div class="dxgrid">${keys.map(k=>dexCell(k,p,tone)).join('')}</div>`:''}</section>`; }
+  return `<section class="dxg"><button class="dxh" data-dg="${id}" aria-expanded="${open}"><span>${ico} ${esc(title)} <em>${got}/${keys.length}</em>${keys.some(k=>p.dxn&&p.dxn[k])?'<i class="dxnb">NEW</i>':''}</span><u>${open?'▾':'▸'}</u></button>${open?`<div class="dxgrid">${keys.map(k=>dexCell(k,p,tone)).join('')}</div>${dexPetRow(id,title,got,keys.length,p)}`:''}</section>`; }
+/* 그림자 세트 도감 완성 보상: 유니크 펫 '그림자 삼남매' (캐릭터마다 한 번 · 펫 칸이 비어 있어야 받아요) */
+const dexTrioDone=p=>!!p&&dexKeysOf(['hdag','hhelm','harmor','hamu','hring','@hoff_'],p).every(k=>(p.dx&&p.dx[k]|0)>0);
+function dexPetRow(id,title,got,tot,p){ if(title!=='그림자 세트')return ''; const done=got>=tot, had=!!(p.tpt&&p.tpt.trio);
+  return `<div class="dxpr">🐾 완성 보상 · 유니크 펫 <b>그림자 삼남매</b> ${had?'<em>✔ 수령 완료</em>':done?'<button class="btn primary" data-pr="trio">받기</button>':`<small>(${got}/${tot})</small>`}</div>`; }
+function dexPetClaim(){ const p=me; if(!p||!dexTrioDone(p)||(p.tpt&&p.tpt.trio))return; const cur=petOf(p); if(cur){ toast(`🐾 이미 펫(${PETS[cur.id].n})이 있어요 · 펫이 없는 캐릭터에서 받아 주세요`,'#ff9a6a'); return; }
+  p.pet={id:'trio',xp:0}; petNorm(p); ttfPet('trio',p); recalc(); saveChar(); sfx('rare'); toast('🐾 유니크 펫 「그림자 삼남매」를 받았어요!','#b48cff'); renderDex(); }
 function renderDex(){
   markTabs(); sheetHead(); const b=$('#sheetB'); b.className='sbody dex'; const p=me, spNw=DEX_SP.some(g=>g[2].some(k=>p.dxn&&p.dxn[k])), stNw=DEX_ST.some(g=>dexKeysOf(g[2],p).some(k=>p.dxn&&p.dxn[k])), spN=dexSpN(p), stN=dexStN(p), isSp=dexTab==='sp', got=isSp?spN:stN, tot=isSp?20:Math.max(1,dexStTot(p)), pct=(got/tot*100).toFixed(1)+'%';
   b.innerHTML=`<div class="dxt"><button data-dt="sp" aria-pressed="${isSp}">✨ 스페셜 아이템<small>${spN}/20</small>${spNw?'<i class="dxnb">NEW</i>':''}</button><button data-dt="st" aria-pressed="${!isSp}">🧩 세트 아이템<small>${stN}/${dexStTot(p)}</small>${stNw?'<i class="dxnb">NEW</i>':''}</button></div>
   <div class="dxp"><div class="dxpt"><b>${isSp?'특수 유니크 수집':'세트 수집'}</b><strong>${pct}</strong></div><div class="dxbar"><i style="width:${(got/tot*100).toFixed(2)}%"></i></div>${isSp?`<div class="dxpn">🏅 ${spN>=20?`칭호 <b>「${DEX_TITLE}」</b> 획득 완료`:`20종을 모으면 칭호 <b>「${DEX_TITLE}」</b> 획득`}</div>`:''}</div>
   ${isSp?DEX_SP.map((g,i)=>dexGroup('sp'+i,g[0],g[1],g[2],p,'sp')).join(''):DEX_ST.map((g,i)=>dexGroup('st'+i,g[0],g[1],g[2],p,'st')).join('')+'<div class="dxsoon">+ 새 세트는 스토리와 함께 추가돼요 <span>🔒</span></div>'}`;
+  b.querySelectorAll('[data-pr]').forEach(e=>e.onclick=dexPetClaim);
   b.querySelectorAll('.dxc.nw').forEach(e=>e.onclick=()=>{ const y=b.scrollTop; delete p.dxn[e.dataset.dk]; saveChar(); renderDex(); b.scrollTop=y; });   /* 칸을 누르면 그 칸 NEW 확인 */
   b.querySelectorAll('[data-dt]').forEach(e=>e.onclick=()=>{ dexTab=e.dataset.dt; renderDex(); b.scrollTop=0; });
   b.querySelectorAll('[data-dg]').forEach(e=>e.onclick=()=>{ const id=e.dataset.dg, y=b.scrollTop; if(dexClosed.has(id))dexClosed.delete(id); else dexClosed.add(id); renderDex(); b.scrollTop=y; }); }
