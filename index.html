@@ -1435,7 +1435,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0589</div>
+    <div class="ver" id="verT">v0.6.5.0590</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -7358,7 +7358,7 @@ function heroAnim(o,t,melee,wk){ wk=wk===undefined?1:wk;  /* wk: 걷기 시트�
 }
 const mobSfx=()=>{ const id=G.stg&&G.stg.id; return id?({'2':'_s2','3':'_s3'}[id[0]]||''):''; };  /* 스테이지별 일반 몹 이미지: mob_<이름>_s2 / _s3 (없으면 스테이지 1 이미지) */
 const mobKey=t=>{ const sf=mobSfx(), k='mob_'+SPRN[t]; return (sf&&sprGet(k+sf))?k+sf:k; };
-const preBoss=()=>{ try{ if(G.stg&&G.stg.raid===3){ for(const p of ['','_hurt1','_hurt2'])for(const q of ['','_atk','_sk','_cast'])sprGet('boss_6'+p+q); } if(G.stg&&G.stg.raid===2){ for(const p of ['','2','3'])for(const q of ['','_atk','_sk','_cast'])sprGet('boss_awake'+p+q); } if(G.stg&&G.stg.raid===1){ for(const k of ['hero_war','hero_sorc']){ sprGet(k); sprGet(k+'_walk'); } sprGet('boss_shadow'); sprGet('boss_shadow_walk'); } const bt=G.stg&&G.stg.boss; if(bt!=null&&!(G.stg&&G.stg.raid)){ const bk=G.stg.bs||'mob_'+SPRN[bt]; sprGet(bk); sprGet(bk+'_atk'); sprGet(bk+'_sk'); if(BWALKS[bk])sprGet(bk+'_walk'); if(BWU[bk])sprGet(bk+'_wu'); }
+const preBoss=()=>{ try{ if(G.stg&&G.stg.raid===3){ for(const p of ['','_hurt1','_hurt2'])for(const q of ['','_atk','_sk','_cast'])sprGet('boss_6'+p+q); sprGet('boss_6_gate'); } if(G.stg&&G.stg.raid===2){ for(const p of ['','2','3'])for(const q of ['','_atk','_sk','_cast'])sprGet('boss_awake'+p+q); } if(G.stg&&G.stg.raid===1){ for(const k of ['hero_war','hero_sorc']){ sprGet(k); sprGet(k+'_walk'); } sprGet('boss_shadow'); sprGet('boss_shadow_walk'); } const bt=G.stg&&G.stg.boss; if(bt!=null&&!(G.stg&&G.stg.raid)){ const bk=G.stg.bs||'mob_'+SPRN[bt]; sprGet(bk); sprGet(bk+'_atk'); sprGet(bk+'_sk'); if(BWALKS[bk])sprGet(bk+'_walk'); if(BWU[bk])sprGet(bk+'_wu'); }
   const sf=mobSfx(); for(const t of [0,1,2,6,9,10,11]){ const k='mob_'+SPRN[t]; sprGet(k+sf); sprGet(k+sf+'_atk'); if(sf){ sprGet(k); sprGet(k+'_atk'); } } }catch(e){} };
 /* 몹 걸음·방향 상태: 실제로 움직인 거리만큼만 걸음 진행 · 좌우 반전은 부드럽게 돌아서기 · 공격 자세도 서서히 */
 function mobGait(m,t){
@@ -7420,15 +7420,15 @@ function drawMob(m,t){
   const E=(s,f,e,rr,iris,pup)=>ceye(X+ca*r*f+px*r*e*s,Y+sa*r*f+py*r*e*s,rr,fa,iris,pup);
   const RK=MT[m.type].raid; if(RK==='shd'&&Math.random()<.35)parts.push({x:x+rand(-r,r)*.8,y:y-rand(0,r*2.2),vx:rand(-12,12),vy:-rand(18,40),t:0,life:rand(.5,.9),col:m.awk?'#5a0610':'#120818',r:rand(3,7)});
   const AWP=RK==='awk'?((m.ph|0)>1?String(m.ph|0):''):RK==='cas'?((m.ph|0)>1?'_hurt'+((m.ph|0)-1):''):'';
-  const bk=RK?MT[m.type].img+AWP:(m.boss&&G.stg.bs)?(sprGet(G.stg.bs)?G.stg.bs:null):m.boss?'mob_'+SPRN[m.type]:mobKey(m.type), bps=!m.boss?(m.atk>0?'_atk':''):RK==='awk'&&m.inv>0?'_cast':RK==='cas'?((m.inv>0||m.charge)?'_sk':m.tel?(m.tel.kind==='slam'||m.tel.kind==='ring'?'_atk':'_sk'):m.atk>0?'_atk':''):m.charge?'_sk':(m.tel&&m.tel.kind!=='counter')?((BWU[bk]&&m.tel.t<m.tel.dur*.7&&sprGet(bk+'_wu'))?'_wu':'_sk'):m.atk>0?'_atk':'';  /* 보스: 스킬 준비·돌진 중엔 스킬 포즈, 평타 중엔 공격 포즈 */
+  const bk=RK?MT[m.type].img+AWP:(m.boss&&G.stg.bs)?(sprGet(G.stg.bs)?G.stg.bs:null):m.boss?'mob_'+SPRN[m.type]:mobKey(m.type), bps=!m.boss?(m.atk>0?'_atk':''):RK==='awk'&&m.inv>0?'_cast':RK==='cas'?((m.gt>0||(m.tel&&m.tel.kind==='cas_gate'))?'_gate':(m.inv>0||m.charge)?'_sk':m.tel?(m.tel.kind==='slam'||m.tel.kind==='ring'?'_atk':'_sk'):m.atk>0?'_atk':''):m.charge?'_sk':(m.tel&&m.tel.kind!=='counter')?((BWU[bk]&&m.tel.t<m.tel.dur*.7&&sprGet(bk+'_wu'))?'_wu':'_sk'):m.atk>0?'_atk':'';  /* 보스: 스킬 준비·돌진 중엔 스킬 포즈, 평타 중엔 공격 포즈 */
   let silDone=false;   /* 번쩍임을 몸 모양(흰 실루엣)으로 그렸는지 */
-  const SI=bk&&((bps&&sprGet(bk+bps))||sprGet(bk));
+  const GSP=bps==='_gate'?sprGet('boss_6_gate'):null, SI=bk&&(GSP||(bps&&sprGet(bk+bps))||sprGet(bk));   /* 성문 닫기: 시전 준비부터 닫혀 있는 동안 내내 방패 성문 그림 (페이즈와 상관없이) */
   if(SI){ const BW=m.boss&&BWALKS[bk], WK=(BW&&!bps)?sprGet(bk+'_walk'):null;   /* 보스 걷기 시트 (움직일 때만, 스킬·공격 포즈가 아닐 때) */
     if(WK){ if(GT.wa>.35)m._wkOn=true; else if(GT.wa<.15)m._wkOn=false; } const useWK=!!(WK&&m._wkOn);
     const ph=m.type===6?0:GT.wp, wa=GT.wa*(useWK?.4:1), fl=m.type===6?Math.sin(m.anim*22):0, ak=GT.ak;  /* 걸음 위상은 실제 이동 거리 기준 (서 있으면 통통 튀지 않고 숨쉬기만) */
     const SO={flip:GT.flip,rot:Math.sin(ph)*(m.boss?.04:.1)*wa+ak*.25+GT.tk*.08,hop:(m.type===6?(Math.sin(m.anim*5)*r*.25+r*.4):Math.abs(Math.sin(ph))*r*(m.boss?.06:.16)*wa),sx:(1-fl*.05)*(1-.12*GT.tk),sy:(1+fl*.12)*(1+.04*GT.tk)+Math.sin(ph*2)*.03*wa+(m.type===6?0:Math.sin(t*2.2+(m.id||0))*.014*(1-wa)),fx:ak*r*.4};
     const BH=RK==='awk'?78*1.75:RK==='cas'?78*3.1:RK?78*1.3:r*3.2;   /* 레이드 보스: 일반 캐릭터(78)의 1.3배 */
-    let cur={im:SI,h:(m.boss?BH:r*3.4)*(m.boss&&bps?SI.height/(sprGet(bk)||SI).height:1)};   /* 포즈 그림 캔버스 높이가 달라도 같은 배율로 */
+    let cur={im:SI,h:(m.boss?BH:r*3.4)*(m.boss&&bps&&!GSP?SI.height/(sprGet(bk)||SI).height:1)};   /* 포즈 그림 캔버스 높이가 달라도 같은 배율로 */
     if(useWK){ const cw=WK.width/BW.n, fi=Math.floor((((GT.wp*1.8/(Math.PI*BW.cyc))%1)+1)%1*BW.n); cur={im:WK,fr:[fi*cw,cw,WK.height],h:BH*(WK.height/BW.k)/sprGet(bk).height}; }
     let PV=null,pq=1; if(m.boss){ if(m._pc&&m._pc.im!==cur.im){ m._pv=m._pc; m._pt=t; } m._pc=cur; if(m._pv){ pq=clamp((t-m._pt)/.1,0,1); if(pq<1)PV=m._pv; } }   /* 보스 포즈 교체: 0.1초 크로스페이드 */
     const dr=(c,al)=>{ const ga=ctx.globalAlpha; if(al<1)ctx.globalAlpha=ga*al; const o=c.fr?{...SO,fr:c.fr}:SO;
