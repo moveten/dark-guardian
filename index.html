@@ -500,6 +500,10 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 .dex .dxbar i{display:block;height:100%;background:linear-gradient(90deg,#d99a1a,#ffe45a);border-radius:99px}
 .dex .dxpn{margin-top:8px;font-size:13px;color:#b9a98a}.dex .dxpn b{color:#ffd84a}
 .dex .dxg{border:1px solid #3a2e22;background:#120d0b;border-radius:12px;margin-bottom:10px;overflow:hidden}
+.rwm{text-align:center}.rwm h3{margin:0 0 6px;font-size:17px;color:#ffe9b0}.rwm .pt{height:112px;display:flex;align-items:flex-end;justify-content:center;filter:drop-shadow(0 0 16px #8a5cff)}.rwm .pt img{width:215px;max-width:100%}
+.rwm .nm{font-size:20px;font-weight:900;margin-top:6px;color:#eadcff}.rwm .tg{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:99px;background:#b48cff;color:#1b0f2e;font-size:12px;font-weight:800;vertical-align:middle}
+.rwm-sk{display:flex;align-items:center;gap:9px;text-align:left;padding:7px 9px;margin-top:6px;border-radius:11px;border:1px solid #4a3a5a;background:#150f1e}.rwm-sk img{height:30px}.rwm-sk b{display:block;font-size:13.5px;color:#eadcff}.rwm-sk small{color:#a898c8;font-size:11.5px}.rwm-sk i{margin-left:auto;font-style:normal;font-size:11px;color:#bfb0dc;border:1px solid #6a5a8a;border-radius:99px;padding:1px 8px}
+.rwm .nt{font-size:11.5px;color:#a898c8;margin:10px 0}.rwm .bt{display:flex;gap:8px}.rwm .bt .btn{flex:1}.rwm .bt .go{flex:1.6}
 .dex .dxh2{position:relative}.dex .dxh2 .rwA{position:absolute;right:38px;top:50%;transform:translateY(-50%)}
 .dex .rwA{display:inline-flex;align-items:center;gap:5px;padding:6px 11px;border-radius:999px;font-size:12.5px;font-weight:800;font-family:inherit;border:1px solid #b48cff;background:linear-gradient(180deg,#7a4cff,#4a2a9a);color:#fff;box-shadow:0 0 10px #8a5cff88;white-space:nowrap;cursor:pointer}
 .dex .rwA.done{background:#1a1424;border-color:#3f3556;color:#8aff9a;box-shadow:none;font-weight:700;cursor:default}
@@ -1442,7 +1446,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0603</div>
+    <div class="ver" id="verT">v0.6.5.0604</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -5620,13 +5624,19 @@ const dexTrioDone=p=>!!p&&dexKeysOf(['hdag','hhelm','harmor','hamu','hring','@ho
 function dexPetRow(){ return ''; }   /* 보상은 그림자 세트 제목줄 오른쪽 알약 버튼으로 이동 */
 function dexPetBtn(title,got,tot,p){ if(title!=='그림자 세트')return ''; const done=got>=tot, had=!!(p.tpt&&p.tpt.trio);
   return had?'<span class="rwA done" aria-label="도감 보상 수령 완료">✔ 보상 완료</span>':done?'<button class="rwA" data-pr="trio" aria-label="도감 보상 받기">🎁 보상 받기</button>':`<span class="rwA lock" aria-label="도감 보상 미완성">🔒 보상 ${got}/${tot}</span>`; }
+function dexPetAsk(){ const p=me; if(!p||!dexTrioDone(p)||(p.tpt&&p.tpt.trio))return; sfx('ui');
+  const sk=(im,n,d,l)=>`<div class="rwm-sk"><img alt="" src="img/${im}.png"><div><b>${n}</b><small>${d}</small></div><i>Lv${l}</i></div>`;
+  modal(`<div class="rwm"><h3>🎁 도감 완성 보상</h3><div class="pt"><img alt="" src="img/pet_trio.png"></div><div class="nm">그림자 삼남매<span class="tg">영웅</span></div>`
+   +sk('pet_trio_war','전투 함성',`${TRIO.sdur}초간 내 피해 증가`,3)+sk('pet_trio_shd','그림자 강습','순간이동하며 적을 강타',7)+sk('pet_trio_sorc','감전','연쇄 번개 · 감전 상태',10)
+   +`<div class="nt">Lv1부터 시작 · 이미 펫이 있으면 펫 보관함에 저장돼요</div><div class="bt"><button class="btn" id="rwNo">닫기</button><button class="btn primary go" id="rwGo">🎁 받기</button></div></div>`,
+   m=>{ m.querySelector('#rwNo').onclick=closeModal; m.querySelector('#rwGo').onclick=()=>{ closeModal(); dexPetClaim(); }; }); }
 function dexPetClaim(){ const p=me; if(!p||!dexTrioDone(p)||(p.tpt&&p.tpt.trio))return; const r=petGive(p,'trio'); if(!r)return; recalc(); saveChar(); sfx('rare'); toast(r===1?'🐾 영웅 펫 「그림자 삼남매」를 받았어요!':'🐾 「그림자 삼남매」를 받았어요 · 정비 > 펫에서 함께 다닐 펫을 바꿀 수 있어요','#b48cff'); renderDex(); }
 function renderDex(){
   markTabs(); sheetHead(); const b=$('#sheetB'); b.className='sbody dex'; const p=me, spNw=DEX_SP.some(g=>g[2].some(k=>p.dxn&&p.dxn[k])), stNw=DEX_ST.some(g=>dexKeysOf(g[2],p).some(k=>p.dxn&&p.dxn[k])), spN=dexSpN(p), stN=dexStN(p), isSp=dexTab==='sp', got=isSp?spN:stN, tot=isSp?20:Math.max(1,dexStTot(p)), pct=(got/tot*100).toFixed(1)+'%';
   b.innerHTML=`<div class="dxt"><button data-dt="sp" aria-pressed="${isSp}">✨ 스페셜 아이템<small>${spN}/20</small>${spNw?'<i class="dxnb">NEW</i>':''}</button><button data-dt="st" aria-pressed="${!isSp}">🧩 세트 아이템<small>${stN}/${dexStTot(p)}</small>${stNw?'<i class="dxnb">NEW</i>':''}</button></div>
   <div class="dxp"><div class="dxpt"><b>${isSp?'특수 유니크 수집':'세트 수집'}</b><strong>${pct}</strong></div><div class="dxbar"><i style="width:${(got/tot*100).toFixed(2)}%"></i></div>${isSp?`<div class="dxpn">🏅 ${spN>=20?`칭호 <b>「${DEX_TITLE}」</b> 획득 완료`:`20종을 모으면 칭호 <b>「${DEX_TITLE}」</b> 획득`}</div>`:''}</div>
   ${isSp?DEX_SP.map((g,i)=>dexGroup('sp'+i,g[0],g[1],g[2],p,'sp')).join(''):DEX_ST.map((g,i)=>dexGroup('st'+i,g[0],g[1],g[2],p,'st')).join('')+'<div class="dxsoon">+ 새 세트는 스토리와 함께 추가돼요 <span>🔒</span></div>'}`;
-  b.querySelectorAll('[data-pr]').forEach(e=>e.onclick=dexPetClaim);
+  b.querySelectorAll('[data-pr]').forEach(e=>e.onclick=dexPetAsk);
   b.querySelectorAll('.dxc.nw').forEach(e=>e.onclick=()=>{ const y=b.scrollTop; delete p.dxn[e.dataset.dk]; saveChar(); renderDex(); b.scrollTop=y; });   /* 칸을 누르면 그 칸 NEW 확인 */
   b.querySelectorAll('[data-dt]').forEach(e=>e.onclick=()=>{ dexTab=e.dataset.dt; renderDex(); b.scrollTop=0; });
   b.querySelectorAll('[data-dg]').forEach(e=>e.onclick=()=>{ const id=e.dataset.dg, y=b.scrollTop; if(dexClosed.has(id))dexClosed.delete(id); else dexClosed.add(id); renderDex(); b.scrollTop=y; }); }
