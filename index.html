@@ -1442,7 +1442,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0602</div>
+    <div class="ver" id="verT">v0.6.5.0603</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -4294,7 +4294,7 @@ function drawPetFxTop(){ const x0=PET.x, y0=PET.y;
         ctx.save(); ctx.translate(x0,ty); ctx.scale(pop,pop); ctx.font="900 28px 'Noto Sans KR',sans-serif"; ctx.lineJoin='round'; ctx.lineWidth=6; ctx.strokeStyle='#5a2a00'; ctx.strokeText('LEVEL UP!',0,0); const gg=ctx.createLinearGradient(0,-14,0,14); gg.addColorStop(0,'#fff6a8'); gg.addColorStop(1,'#ffb81c'); ctx.fillStyle=gg; ctx.shadowColor='#ffb000'; ctx.shadowBlur=10; ctx.fillText('LEVEL UP!',0,0); ctx.restore();
         const lt='Lv '+F.a+' → Lv '+F.b; ctx.font="800 14px 'Noto Sans KR',sans-serif"; const w=ctx.measureText(lt).width+26, py=ty+26; ctx.beginPath(); ctx.moveTo(x0-w/2+11,py-11); ctx.arcTo(x0+w/2,py-11,x0+w/2,py+11,11); ctx.arcTo(x0+w/2,py+11,x0-w/2,py+11,11); ctx.arcTo(x0-w/2,py+11,x0-w/2,py-11,11); ctx.arcTo(x0-w/2,py-11,x0+w/2,py-11,11); ctx.closePath(); const pg2=ctx.createLinearGradient(0,py-11,0,py+11); pg2.addColorStop(0,'#7a4cff'); pg2.addColorStop(1,'#4a2a9a'); ctx.fillStyle=pg2; ctx.fill(); ctx.lineWidth=2; ctx.strokeStyle='#ffe08a'; ctx.stroke(); ctx.fillStyle='#fff'; ctx.fillText(lt,x0,py+1); }
       ctx.restore(); } } }
-function drawPetFx(t){ if(!PET.on||(!PET.fx.length&&!PET.mk.length))return; drawPetFxTop();
+function drawPetFx(t){ if(!PET.on||(!PET.fx.length&&!PET.mk.length))return;
   ctx.save(); ctx.globalCompositeOperation='lighter'; ctx.lineCap='round';
   for(const F of PET.fx){ if(F.k==='bolt'){ const a=1-F.t/F.life; ctx.globalAlpha=a; ctx.strokeStyle='rgba(170,180,255,.95)'; ctx.lineWidth=3*a+1; ctx.beginPath(); for(let i=0;i<F.pts.length;i++){ const p=F.pts[i]; if(!i){ ctx.moveTo(p[0],p[1]); continue; } const q=F.pts[i-1], n=4; for(let j=1;j<=n;j++){ const u=j/n, jx=(j<n?(Math.sin(F.t*90+i*3+j*7)*7):0), jy=(j<n?(Math.cos(F.t*80+i*5+j*3)*7):0); ctx.lineTo(q[0]+(p[0]-q[0])*u+jx,q[1]+(p[1]-q[1])*u+jy); } } ctx.stroke(); ctx.strokeStyle='rgba(255,255,255,.8)'; ctx.lineWidth=1.2*a; ctx.stroke(); continue; } if(F.k!=='beam')continue; const q=F.t/F.life, a=1-q, p=Math.min(1,q*2.2), px=F.x0+(F.x1-F.x0)*p, py=F.y0+(F.y1-F.y0)*p;
     ctx.globalAlpha=a; ctx.strokeStyle='rgba(255,140,40,.95)'; ctx.lineWidth=5*a+1; ctx.beginPath(); ctx.moveTo(F.x0,F.y0); ctx.lineTo(px,py); ctx.stroke();
@@ -8137,7 +8137,7 @@ function render(t){
   if(ally&&!ally.lobby&&ally.mnv)for(const q of ally.mnv)actors.push({y:q.y,f:()=>drawMinion(q,t)});
   actors.sort((a,b)=>a.y-b.y); { let past=false; const gh=[]; for(const a of actors){ if(a.cas){ past=true; a.f(); continue; } a.f(); if(!past&&G.castle&&a.o&&a.o.x!==undefined&&Math.abs(a.o.x-VX)<CAS_W*.5+8&&a.y>VY-128)gh.push(a); }
     if(gh.length){ ctx.save(); ctx.globalAlpha=.5; for(const a of gh)a.f(); ctx.restore(); } }   /* 성 뒤에 가려진 몹·플레이어는 반투명하게 한 번 더 그려서 보이게 */
-  casAimTagsDraw(); drawProjs(); drawEfx(t); drawAmbient(t);
+  casAimTagsDraw(); drawProjs(); drawEfx(t); drawAmbient(t); if(PET.on&&PET.fx.length)drawPetFxTop();   /* 레벨업·스킬 이름표는 몹·성 위에 그려서 가려지지 않게 */
   drawHealFx(t);
   for(const p of parts){ if(p.glow)continue; ctx.globalAlpha=1-p.t/p.life; ctx.fillStyle=p.col; ctx.fillRect(p.x-p.r/2,p.y-p.r/2,p.r,p.r);} ctx.globalAlpha=1;
   ctx.globalCompositeOperation='lighter';
