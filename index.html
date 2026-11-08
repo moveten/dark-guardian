@@ -1435,7 +1435,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0590</div>
+    <div class="ver" id="verT">v0.6.5.0591</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3689,7 +3689,7 @@ function recalc(){me.D=derive(me); me.hp=Math.min(me.hp??me.D.maxHp,me.D.maxHp);
 function spawnMe(){
   me.x=VX+rand(-30,30); me.y=VY+VR+30; me.dead=false; me.stun=me.slowP=me.poison=me.sil=me.fear=0; me.respawn=0; me.cds={}; me.buffs={}; me.aura=me.aura&&SKBY[me.aura]&&SKBY[me.aura].aura&&skLv(me,me.aura)?me.aura:0;
   me.face=-Math.PI/2; me.swing=0; me.atkCd=0; me.pot=3; me.leap=null; me.pickT=null;
-  me.form=''; me.spirit=null; me.formLock=0; me.D=derive(me); me.hp=me.D.maxHp; me.mp=me.D.maxMp; autoSummon(); if(me.cls==='druid')crackImg(); if(me.cls==='necro')for(const k of ['guard','caster','colossus','dragon','fusion']){ sprGet('mn_'+k); sprGet('mn_'+k+'_atk'); } if(me.cls==='druid'){ for(const k of ['papa','mama','baby']){ sprGet('mn_'+k); sprGet('mn_'+k+'_atk'); } sprGet('spirit_druid'); }
+  me.form=''; me.spirit=null; me.formLock=0; me.D=derive(me); me.hp=me.D.maxHp; me.mp=me.D.maxMp; autoSummon(); if(me.cls==='druid')crackImg(); if(me.cls==='necro')for(const k of ['guard','caster','colossus','dragon','fusion']){ sprGet('mn_'+k); sprGet('mn_'+k+'_atk'); } if(me.cls==='druid'){ for(const k of ['papa','mama','baby']){ sprGet('mn_'+k); sprGet('mn_'+k+'_atk'); sprGet('mn_'+k+'_walk'); } sprGet('spirit_druid'); }
 }
 function zealMul(){const l=me.cls==='pal'?skLv(me,'zeal'):0; return l?{d:1+(15+5*l)/100,t:1+(10+4*l)/100}:{d:1,t:1};}
 function buffDmg(){let v=0; const b=me.buffs; if(b.vil&&b.vil.t>0)v+=b.vil.v; if(b.shout&&b.shout.t>0)v+=b.shout.v; if(b.berserk&&b.berserk.t>0)v+=b.berserk.v; if(b.rage&&b.rage.t>0)v+=b.rage.v; if(b.fury&&b.fury.t>0)v+=b.fury.v; if(b.awk&&b.awk.t>0)v+=b.awk.v; const sb=spiritBuff(); if(sb)v+=sb.dmg; return v;}
@@ -7580,7 +7580,11 @@ function drawMinion(q,t){
     else if(GI&&CI){ sprDraw(CI,x-(Math.cos(a)>=0?1:-1)*22,y-34-2-Math.sin(ph*.8)*4,62,a,{rot:Math.sin(ph*.5)*.05,sy:1}); sprDraw(GI,x,y+r*.85-100*.12,100,a,{rot:Math.sin(ph*.5)*.03+ak*.12,hop:Math.abs(Math.sin(ph))*2,sy:1+Math.sin(ph*2)*.015,fx:ak*r*.35}); }
     else { const yy=y+Math.sin(ph)*2; cball(x,yy,r,'#a8f5e4',2.6); cpoly([[x-r*.7,yy-r*.6],[x-r*.2,yy-r*1.7],[x+r*.2,yy-r*.6]],'#8ff0ff',2); cpoly([[x+r*.7,yy-r*.6],[x+r*.2,yy-r*1.7],[x-r*.2,yy-r*.6]],'#8ff0ff',2); ctx.fillStyle='#0b3a33'; ctx.fillRect(x-r*.4,yy-r*.2,r*.25,r*.22); ctx.fillRect(x+r*.15,yy-r*.2,r*.25,r*.22); } }
   else if(MIS){ const ak=q.atk>0?Math.min(1,q.atk/(q.k==='colossus'?.3:.25)):0, ph=(q.an||0)*3, hh=MSH.h, hov=MSH.hv?MSH.hv+Math.sin(ph)*3:Math.abs(Math.sin(ph))*(big?1:2);
-    sprDraw(MIS,x,y+r*.85-hh*.12,hh,a,{rot:Math.sin(ph*.5)*.03+ak*.12,hop:hov,sy:1+Math.sin(ph*2)*.015,fx:ak*r*.35});
+    let WS=null; if(q.k==='papa'||q.k==='mama'||q.k==='baby'){ /* 곰 걷기 시트(6칸): 이동 중·비공격일 때만 */
+      const d=Math.hypot(x-(q._px===undefined?x:q._px),y-(q._py===undefined?y:q._py)); q._px=x; q._py=y; if(d>.15&&d<60){ q._wd=(q._wd||0)+d; q._mvN=8; } else if(q._mvN>0)q._mvN--;
+      if(q._mvN>0&&!(q.atk>0)) WS=sprGet('mn_'+q.k+'_walk'); }
+    if(WS){ const cw=WS.width/6, fi=Math.floor((q._wd||0)/(r*1.5)*6)%6; sprDraw(WS,x,y+r*.85-hh*.12,hh,a,{fr:[fi*cw,cw,WS.height],sy:1+Math.sin(ph*2)*.01}); }
+    else sprDraw(MIS,x,y+r*.85-hh*.12,hh,a,{rot:Math.sin(ph*.5)*.03+ak*.12,hop:hov,sy:1+Math.sin(ph*2)*.015,fx:ak*r*.35});
     if(q.k==='dragon'&&sw>0){ const hx=x, hy=y+bob; ctx.strokeStyle='rgba(125,255,216,'+(.35+sw*.4)+')'; ctx.lineWidth=14; ctx.lineCap='round'; ctx.beginPath(); ctx.moveTo(hx+ca*r,hy+sa*r); ctx.lineTo(hx+ca*230,hy+sa*230); ctx.stroke(); ctx.lineCap='butt'; } }
   else if(K.bear){ drawBear(q,x,y,r,a,sw); }
   else if(q.k==='guard'){ const yy=y+bob;
