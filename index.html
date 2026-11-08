@@ -1440,7 +1440,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0599</div>
+    <div class="ver" id="verT">v0.6.5.0600</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1654,7 +1654,7 @@ const SK={
   {k:'mshield',lb:['마나분담','피해당마나'],e:'🔮',n:'에너지 실드',s:'실드',req:9,mp:0,cd:0,el:'#7fb4ff',passive:1,d:l=>`패시브: 받는 피해의 ${V(Math.round(Math.min(.65,.2+.02*l)*100))}%를 마나가 대신 받음 · 피해 1당 마나 ${V(Math.max(.5,1.6-.04*l).toFixed(2))} 소모`},
   {k:'frostnova',lb:['연타','반경','피해'],e:'❄️',n:'서리 고리',s:'서리',req:6,mp:10,cd:6,el:'#8fdcff',d:l=>`${V(HMN(l))}연타, 반경 ${RR(160*FNR,l)} · 기본 피해 ${V(Math.round((14+10*l)*FND*HMF(HMN(l))))} · 3초간 감속, 감전된 적에게 피해 +33%`},
   {k:'teleport',lb:['거리'],e:'🌀',n:'순간이동',s:'이동',req:9,mp:12,cd:5,el:'#b98bff',d:l=>`누른 곳으로 순간이동, 최대 거리 ${V(240+4*l)} · 도착 직후 0.4초 무적`},
-  {k:'chain',lb:['튕김','갈래','피해','감전'],e:'⚡',n:'연쇄 번개',s:'번개',req:12,mp:9,cd:4,el:'#dfe7ff',rg:280,d:l=>`적 사이를 ${V(3+Math.floor(l/4))}번 튀는 번개 ${V(HMN(l))}갈래 · 기본 피해 ${V(Math.round((22+16*l)*HMF(HMN(l))))} · 맞은 적은 ${V(SHK(l).toFixed(1))}초간 ⚡감전, 화염·냉기 스킬 피해 +33%`},
+  {k:'chain',lb:['튕김','갈래','피해','감전'],e:'⚡',n:'연쇄 번개',s:'번개',req:12,mp:9,cd:4,el:'#dfe7ff',rg:280,d:l=>`적 사이를 ${V(3+Math.floor(l/4))}번 튀는 번개 ${V(HMN(l))}갈래 · 기본 피해 ${V(Math.round((22+16*l)*HMF(HMN(l))))} · 맞은 적은 ${V(SHK(l).toFixed(1))}초간 ⚡감전, 감전된 적이 받는 스킬 피해 +33%`},
   {k:'barrier',lb:['지속시간','받는피해'],e:'🔷',n:'마력 방벽',s:'방벽',req:18,mp:14,cd:22,el:'#8fb6ff',d:l=>`${V(6+Math.floor(l/3))}초간 받는 피해 -${V(Math.min(70,30+2*l))}%`},
   {k:'meteor',lb:['유성','반경','피해','기절'],e:'☄️',n:'유성',s:'유성',req:24,mp:18,cd:10,el:'#ff5a1f',rg:300,d:l=>`잠시 뒤 유성 ${V(HMN(l))}개 낙하, 폭발 반경 ${RR(100,l)} · 기본 피해 ${V(Math.round((80+40*l)*HMF(HMN(l))))} · ${V((.5+.02*l).toFixed(1))}초 기절 후 0.9초간 화상`},
   {k:'armageddon',lb:['피해'],e:'🌠',n:'대재앙',s:'재앙',req:90,mp:60,cd:75,el:'#ff5a1f',rg:420,d:l=>`[궁극기] 4초간 하늘에서 유성 14개가 쏟아져요. 반경 95 범위 피해 ${V(150+45*l)}, 1.5초 기절`},
@@ -4063,7 +4063,7 @@ function hitMob(m,r,slow,tn,fx){
   if(!raw&&fx&&fx.basic&&!G.inProc&&me.D&&me.D.sp&&me.D.sp.aw_wpn&&Math.random()<.12){ const v2=r.v*.5, c2=r.crit; later(.12,()=>{ if(m.dead||!G.inGame)return; G.inProc=true; try{ hitMob(m,{v:v2,crit:c2},0,false,{basic:1}); spark(m.x,m.y,'#a68bff',8); }finally{ G.inProc=false; } }); }   /* 각성의 칼날: 분열 베기 */
   if(!raw&&fx&&fx.basic&&!G.inProc&&me.D&&me.D.sp&&(me.D.sp.cs_mace||me.D.sp.cs_sword)&&Math.random()<(m.boss?.005:.05)){ G.inProc=true; try{ const qx=m.x, qy=m.y; for(const q of mobsIn(qx,qy,130)){ if(q.boss&&q!==m&&Math.random()>=.1)continue; hitMob(q,{v:1,crit:false},0,false,{raw:1,stun:1}); } efx.push({k:'ring',x:qx,y:qy,r0:10,r1:130,t:0,life:.35,col:'#f0d29a',w:8}); spark(qx,qy,'#f0d29a',10); }finally{ G.inProc=false; } }   /* 성문 강타(수문장 철퇴·대검): 기본 공격 5% 범위 기절 1초 — 우두머리는 0.5%(맞춘 상대가 우두머리일 때, 다른 적을 때려 터진 범위 안의 우두머리는 그중 10%) */
   if(!raw&&fx&&fx.basic&&!G.inProc&&me.D&&(me.D.cs|0)>=3&&Math.random()<.07){ r=trX(r,3,'잭팟'); addNum(m.x,m.y-m.r-22,'🎰 잭팟!','#ffd34d',true); burst(m.x,m.y,'#ffd34d',16,240); }   /* 행운의 도박꾼 세트 3개: 잭팟 타격 */
-  let shk=false; if(!raw&&fx&&(fx.el==='fire'||fx.el==='ice')&&(m.shockT>0||m.shockP>0)){ r=trX(r,1+(m.shockT>0?SHOCKB-1:0)+(m.shockP>0?SHOCKP:0),'L'); shk=true; } /* 감전된 적에게 화염/냉기 피해: 마법사 감전 +33% · 펫 감전 +12% (합연산, 둘 다면 +45%) */
+  let shk=false; if(!raw&&!(fx&&fx.basic)&&(m.shockT>0||m.shockP>0)){ r=trX(r,1+(m.shockT>0?SHOCKB-1:0)+(m.shockP>0?SHOCKP:0),'L'); shk=true; } /* 감전된 적이 받는 스킬 피해(기본 공격 제외): 마법사 감전 +33% · 펫 감전 +12% (합연산, 둘 다면 +45%) */
   if(!raw&&(m.boss||m.cnD)&&m.counter>0&&!(fx&&fx.basic)&&!G.inProc){ counterHit(m,r.v); } /* 스킬 피해는 보스에게도 그대로 들어가고, 나는 반사 피해를 받음(무적 아님) */
   const dmg=Math.max(1,Math.round(r.v)); if(G.train)trLog(r,dmg,fx); if(r.v>0)dmgTally(fx,m.hp>0?Math.min(dmg,m.hp):dmg); const sp=me.D&&me.D.sp; if(sp&&sp.frost&&Math.random()<.5&&!G.inProc) slow=Math.max(slow||0,5);
   if(fx&&fx.shockP){ m.shockP=Math.max(m.shockP||0,fx.shockP); burst(m.x,m.y,'#8f96ff',4,160); }
@@ -5584,7 +5584,7 @@ function petSkHtml(id,lv){
   const nxc=(()=>{ for(let l=lv+1;l<=15;l++)if(TRIO.sn(l)>TRIO.sn(lv))return `다음 증가 Lv${l} ${TRIO.sn(l)}마리`; return '대상 수 최대'; })();
   return petSkCard(TRI_C.war,'pet_trio_war','강타',3,lv,`<div class="nm">가장 가까운 적 1마리를 내려쳐요</div><div class="ds">내 무기 피해의 <b>${TRIO.sl(lv)}%</b>${nx(TRIO.sl,lv)} · 쿨타임 <b>${TRIO.cd.sl}초</b></div>`,`내 무기 피해의 ${TRIO.sl(3)}% → Lv15 ${TRIO.sl(15)}% · 쿨타임 ${TRIO.cd.sl}초`,bg)
    +petSkCard(TRI_C.shd,'pet_trio_shd','그림자 강습',7,lv,`<div class="nm">순간이동하며 적을 한 마리씩 강타해요</div><div class="ds">한 마리당 <b>${TRIO.sd(lv)}%</b>${nx(TRIO.sd,lv)} · 대상 <b>${TRIO.sn(lv)}마리</b> (${nxc}) · 쿨타임 <b>${TRIO.cd.sd}초</b></div>`,`한 마리당 ${TRIO.sd(7)}% → Lv15 ${TRIO.sd(15)}% · 대상 1마리 → 5마리 · 쿨타임 ${TRIO.cd.sd}초`,bg)
-   +petSkCard(TRI_C.sorc,'pet_trio_sorc','감전',10,lv,`<div class="nm">적 ${TRIO.en}마리에 연쇄 번개 · 짧은 경직 · ${TRIO.sk}초 감전 (화염·냉기 피해 +12%, 마법사 감전과 합산)</div><div class="ds">한 마리당 <b>${TRIO.ek(lv)}%</b>${nx(TRIO.ek,lv)} · 쿨타임 <b>${TRIO.cd.ek}초</b></div>`,`적 ${TRIO.en}마리 · ${TRIO.ek(10)}% → Lv15 ${TRIO.ek(15)}% · 짧은 경직 · 감전 ${TRIO.sk}초 · 쿨타임 ${TRIO.cd.ek}초`,bg); }
+   +petSkCard(TRI_C.sorc,'pet_trio_sorc','감전',10,lv,`<div class="nm">적 ${TRIO.en}마리에 연쇄 번개 · 짧은 경직 · ${TRIO.sk}초 감전 (받는 스킬 피해 +12%, 마법사 감전과 합산)</div><div class="ds">한 마리당 <b>${TRIO.ek(lv)}%</b>${nx(TRIO.ek,lv)} · 쿨타임 <b>${TRIO.cd.ek}초</b></div>`,`적 ${TRIO.en}마리 · ${TRIO.ek(10)}% → Lv15 ${TRIO.ek(15)}% · 짧은 경직 · 감전 ${TRIO.sk}초 · 쿨타임 ${TRIO.cd.ek}초`,bg); }
 function petModal(pet,back){ const lv=Math.max(1,Math.min(petMax(pet.id),pet.lv|0||1));
   modal(`<div class="ptv">${petHead(pet.id,lv,null,false)}${petRoad(pet.id,lv)}${petSkHtml(pet.id,lv)}</div><div class="row2"><button class="btn primary" id="pmNo">← 돌아가기</button></div>`,m=>{ m.onclick=e=>{ if(e.target===m)back(); }; m.querySelector('#pmNo').onclick=back; }); }
 let petSel=null; const PET_SLOTS=10;
@@ -6879,7 +6879,7 @@ function trConsts(){ const D=me.D, b=buffDmg(), P=gearPen(), L=lvPen(), wa=(D.wm
   if(me.cls==='necro')C.I={n:'소환수 배율',e:`(1+0.04×영혼 연결 ${skLv(me,'soullink')})×(1+0.04×교감 ${skLv(me,'communion')})×(1+소환수 피해 ${D.sm||0}/100)${lordOn()?'×군주 1.4':''}`,v:mnMul()};
   C.J={n:'장비 보정',e:`장비 Lv 합 ${P.sum} (권장 ${P.need}↑)`,v:P.wm};
   C.K={n:'레벨 보정',e:`Lv ${me.lvl} (Lv90↑ 패널티 없음)`,v:L.dm};
-  C.L={n:'감전 추가 피해(화염·냉기)',e:'4/3',v:SHOCKB};
+  C.L={n:'감전 추가 피해(스킬)',e:'4/3',v:SHOCKB};
   C.M={n:'치명타',e:'훈련장에서는 항상 실패',v:null};
   return C; }
 function trFmt(e,C){
