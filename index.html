@@ -1440,7 +1440,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0600</div>
+    <div class="ver" id="verT">v0.6.5.0601</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -2559,7 +2559,7 @@ function sellInfo(it){ let base=SELLBASE[it.rar]||100, ex=0; for(const a of it.a
 const need=l=>l<=58?Math.floor(23*Math.pow(l,1.92)):Math.floor(23*Math.pow(58,1.92)*Math.pow(l/58,9.5)); /* 레벨업 경험치: 계수 23 · 지수 1.92 · 전환 레벨 58 · 전환 후 지수 9.5 */
 /* ===== 펫 (유니크 '아자젤'): 캐릭터마다 따로 · 도박장에서만 · 경험치 = 그 캐릭터가 얻는 경험치와 같은 양 (펫 Lv10 = 캐릭터 Lv99까지의 누적 경험치) ===== */
 const PETS={azazel:{n:'아자젤',rn:'유니크',col:'#ff9a3a',pn:'지옥불의 가호',an:'업화의 낙인',im:'pet_azazel',un:{3:'지옥불의 가호',5:'업화의 낙인'}},
-  trio:{n:'그림자 삼남매',rn:'영웅',col:'#b48cff',pn:'강타',an:'그림자 강습',im:'pet_trio',un:{3:'강타',7:'그림자 강습',10:'감전'},max:15,eq:[0,40,55,65,75,82,88,93,97,99,101,104,106,108,110]}};   /* 삼남매: 전사펫 강타(Lv3) · 검은 그림자 강습(Lv7) · 마법사펫 감전(Lv10) */
+  trio:{n:'그림자 삼남매',rn:'영웅',col:'#b48cff',pn:'전투 함성',an:'그림자 강습',im:'pet_trio',un:{3:'전투 함성',7:'그림자 강습',10:'감전'},max:15,eq:[0,40,55,65,75,82,88,93,97,99,101,104,106,108,110]}};   /* 삼남매: 전사펫 전투 함성(Lv3) · 검은 그림자 강습(Lv7) · 마법사펫 감전(Lv10) */
 const PET_MAXLV=10, PET_LVEQ=[0,40,55,65,75,82,88,93,97,99], PET_DUP_GOLD=500000;   /* PET_LVEQ: 펫 레벨 n에 필요한 누적 경험치 = 캐릭터 Lv(PET_LVEQ[n-1])까지의 누적 경험치 */
 const PET_TC={};
 const petMax=id=>(PETS[id]&&PETS[id].max)||PET_MAXLV;
@@ -2568,7 +2568,7 @@ const petLvOf=(xp,id)=>{ id=id||'azazel'; const T=petT(id), mx=petMax(id); let l
 const petEq=id=>PETS[id].eq||PET_LVEQ;
 const petOf=p=>p&&p.pet&&PETS[p.pet.id]?p.pet:null;
 const PET_TN=[0,0,0,0,3,3,4,4,5,6];
-const TRIO={sl:l=>l>=3?5+2*(l-3):0,sd:l=>l>=7?10+2*(l-7):0,sn:l=>l>=7?1+((l-7)>>1):0,ek:l=>l>=10?2+2*(l-10):0,cd:{sl:8,sd:14,ek:12},en:3,sk:4};   /* 삼남매 스킬: 내 무기 평균 피해 대비 % · 강습 대상 수 · 감전 대상 수 */
+const TRIO={sl:l=>l>=3?5*(l-2):0,sd:l=>l>=7?10+2*(l-7):0,sn:l=>l>=7?1+((l-7)>>1):0,ek:l=>l>=10?2+2*(l-10):0,cd:{sl:20,sd:14,ek:12},en:3,sk:4,sr:160,sdur:8};   /* 삼남매 스킬: 내 무기 평균 피해 대비 % · 강습 대상 수 · 감전 대상 수 */
 const petFx=lv=>({spd:1.1+.1*(lv-1),rad:140+20*(lv-1),buf:lv>=3,bms:20,bdur:6+Math.max(0,lv-3),bcd:20,act:lv>=5,tn:PET_TN[lv-1]||0,tick:80+12*Math.max(0,lv-5),adur:6,acd:20});   /* 펫 이동속도(내 이속 대비) · 탐색 반경 · 가호(이속 %·지속·쿨타임) · 낙인(대상 수·틱 피해 %·지속·쿨타임) */
 const petNm=e=>{ const xp=Math.max(0,Math.min(petT(e.id)[petMax(e.id)-1],Math.floor(+e.xp)||0)); return {id:e.id,xp,lv:petLvOf(xp,e.id)}; };
 function petNorm(p){ const e=p.pet; if(e&&PETS[e.id])p.pet=petNm(e); else delete p.pet;
@@ -3708,7 +3708,7 @@ function spawnMe(){
   me.form=''; me.spirit=null; me.formLock=0; me.D=derive(me); me.hp=me.D.maxHp; me.mp=me.D.maxMp; autoSummon(); if(me.cls==='druid')crackImg(); if(me.cls==='necro')for(const k of ['guard','caster','colossus','dragon','fusion']){ sprGet('mn_'+k); sprGet('mn_'+k+'_atk'); } if(me.cls==='druid'){ for(const k of ['papa','mama','baby']){ sprGet('mn_'+k); sprGet('mn_'+k+'_atk'); sprGet('mn_'+k+'_walk'); } sprGet('spirit_druid'); }
 }
 function zealMul(){const l=me.cls==='pal'?skLv(me,'zeal'):0; return l?{d:1+(15+5*l)/100,t:1+(10+4*l)/100}:{d:1,t:1};}
-function buffDmg(){let v=0; const b=me.buffs; if(b.vil&&b.vil.t>0)v+=b.vil.v; if(b.shout&&b.shout.t>0)v+=b.shout.v; if(b.berserk&&b.berserk.t>0)v+=b.berserk.v; if(b.rage&&b.rage.t>0)v+=b.rage.v; if(b.fury&&b.fury.t>0)v+=b.fury.v; if(b.awk&&b.awk.t>0)v+=b.awk.v; const sb=spiritBuff(); if(sb)v+=sb.dmg; return v;}
+function buffDmg(){let v=0; const b=me.buffs; if(b.vil&&b.vil.t>0)v+=b.vil.v; if(b.shout&&b.shout.t>0)v+=b.shout.v; if(b.pcry&&b.pcry.t>0)v+=b.pcry.v; if(b.berserk&&b.berserk.t>0)v+=b.berserk.v; if(b.rage&&b.rage.t>0)v+=b.rage.v; if(b.fury&&b.fury.t>0)v+=b.fury.v; if(b.awk&&b.awk.t>0)v+=b.awk.v; const sb=spiritBuff(); if(sb)v+=sb.dmg; return v;}
 /* 드루이드: 영혼 정령 버프(내 정령 또는 반경 안에 있는 동료의 정령 중 센 쪽) · 받는 피해 감소 버프 묶음 */
 function spiritBuff(){ if(!me||me.cls===undefined)return null; let l=0; if(me.spirit&&me.spirit.t>0)l=me.spirit.lv; if(ally&&!ally.lobby&&!ally.dead&&ally.sp>0&&ally.x!==undefined&&hyp(ally.x-me.x,ally.y-me.y)<260)l=Math.max(l,ally.sp|0); return l?{lv:l,dmg:(10+1.5*l)/100,ias:(8+l)/100,mr:30+3*l}:null; }
 function drMul(){ const b=me.buffs; let m=1; if(b.rage&&b.rage.t>0)m*=1+b.rage.pen; if(b.fury&&b.fury.t>0&&b.fury.dr)m*=1-b.fury.dr; if(b.roar&&b.roar.t>0)m*=1-b.roar.v; if(b.hunt&&b.hunt.t>0)m*=1-b.hunt.dr; return m; }
@@ -4223,15 +4223,15 @@ function petBrand(f){ const c=G.mobs.filter(m=>!m.dead&&hyp(m.x-me.x,m.y-me.y)<5
   PET.mk=c.map(m=>({m,t:0,tk:0,n:0})); PET.cd2=f.acd; PET.cast=.55; sfx('fire'); petTag('업화의 낙인','🔥','#ff9a3a',0,-80);
   for(const m of c){ PET.fx.push({k:'beam',x0:PET.x,y0:PET.y-12,x1:m.x,y1:m.y-m.r*.4,t:0,life:.3}); efx.push({k:'ring',x:m.x,y:m.y,r0:4,r1:m.r+18,t:0,life:.35,col:'#ff9a3a',w:5}); burst(m.x,m.y,'#ff8a2a',G.lowFx?4:8,200); }
   return true; }
-/* ===== 삼남매 펫: 세 마리가 한 몸처럼 움직임 · 강타(전사) · 그림자 강습(그림자) · 감전(마법사) — 피해는 내 무기 평균 피해 × % ===== */
+/* ===== 삼남매 펫: 세 마리가 한 몸처럼 움직임 · 전투 함성(전사) · 그림자 강습(그림자) · 감전(마법사) — 피해는 내 무기 평균 피해 × % ===== */
 function trioNear(n,R){ return G.mobs.filter(m=>!m.dead&&hyp(m.x-me.x,m.y-me.y)<R).sort((a,b)=>hyp(a.x-me.x,a.y-me.y)-hyp(b.x-me.x,b.y-me.y)).slice(0,n); }
 function trioSkills(lv,dt){ const C=PET.tc||(PET.tc={sl:3,sd:5,ek:7}); C.sl=Math.max(0,C.sl-dt); C.sd=Math.max(0,C.sd-dt); C.ek=Math.max(0,C.ek-dt);
-  if(PET.lg){ const g=PET.lg; g.t+=dt; if(!g.h&&g.t>=.18){ g.h=1; const m=g.m; if(!m.dead){ hitMob(m,physDmg(TRIO.sl(lv)/100),0,false,{pet:1,pn:'강타'}); impact(m.x,m.y,'224,112,138',90); efx.push({k:'ring',x:m.x,y:m.y,r0:4,r1:m.r+26,t:0,life:.35,col:'#e0708a',w:6}); burst(m.x,m.y,'#e0708a',G.lowFx?5:10,220); sfx('hit'); } } if(g.t>=.5)PET.lg=null; }
   if(PET.sq){ const q=PET.sq; q.t+=dt; const m=q.L[q.i];
     if(!q.h&&q.t>=.1){ q.h=1; if(m&&!m.dead){ hitMob(m,physDmg(TRIO.sd(lv)/100),0,false,{pet:1,pn:'그림자 강습'}); impact(m.x,m.y,'160,110,255',100); efx.push({k:'ring',x:m.x,y:m.y,r0:4,r1:m.r+30,t:0,life:.35,col:'#b48cff',w:7}); burst(m.x,m.y,'#9a6cff',G.lowFx?6:12,240); sfx('hit'); } }
     if(q.t>=.26){ q.i++; q.t=0; q.h=0; if(q.i>=q.L.length)PET.sq=null; } }
   if(!petCombat())return;
-  if(lv>=3&&C.sl<=0&&!PET.lg){ const t=trioNear(1,420)[0]; if(t){ C.sl=TRIO.cd.sl; PET.lg={m:t,t:0,h:0}; petTag('강타','⚔️','#e0708a',-52*(Math.cos(PET.face)>=0?1:-1),-60); } }
+  if(lv>=3&&C.sl<=0&&trioNear(1,420).length){ C.sl=TRIO.cd.sl; PET.cast=.5; petTag('전투 함성','📣','#e0708a',-52*(Math.cos(PET.face)>=0?1:-1),-60); efx.push({k:'ring',x:PET.x,y:PET.y,r0:8,r1:TRIO.sr,t:0,life:.45,col:'#e0708a',w:6}); efx.push({k:'ring',x:PET.x,y:PET.y,r0:4,r1:TRIO.sr*.7,t:.1,life:.45,col:'#ffd0a0',w:3}); burst(PET.x,PET.y,'#e0708a',G.lowFx?5:12,220); sfx('rare');
+    if(!me.dead&&hyp(me.x-PET.x,me.y-PET.y)<=TRIO.sr)me.buffs.pcry={v:TRIO.sl(lv)/100,t:TRIO.sdur,m:TRIO.sdur}; }   /* 전사 전투 함성(buffs.shout)과는 별개 슬롯 → buffDmg에서 합연산 */
   if(lv>=7&&C.sd<=0&&!PET.sq){ const L=trioNear(TRIO.sn(lv),520); if(L.length){ C.sd=TRIO.cd.sd; PET.sq={L,i:0,t:0,h:0}; petTag('그림자 강습','🌑','#b48cff',52*(Math.cos(PET.face)>=0?1:-1),-60); efx.push({k:'ring',x:PET.x,y:PET.y,r0:4,r1:34,t:0,life:.3,col:'#b48cff',w:5}); } }
   if(lv>=10&&C.ek<=0){ const L=trioNear(TRIO.en,480); if(L.length){ C.ek=TRIO.cd.ek; PET.cast=.4; petTag('감전','⚡','#8f96ff',0,-104); let px=PET.x, py=PET.y-18; const pts=[[px,py]];
       for(const m of L){ hitMob(m,physDmg(TRIO.ek(lv)/100),0,false,{pet:1,pn:'감전',stun:.6,shockP:TRIO.sk}); pts.push([m.x,m.y-m.r*.4]); impact(m.x,m.y,'143,150,255',80); burst(m.x,m.y,'#8f96ff',G.lowFx?4:8,200); }
@@ -5582,7 +5582,7 @@ function petSkHtml(id,lv){
      +petSkCard('#ff7a3a','pet_azazel','업화의 낙인',5,lv,`<div class="nm">가까운 적 ${f.tn}마리에 ${f.adur}초간 불꽃 낙인</div><div class="ds">1초마다 내 무기 공격력의 <b>${f.tick}%</b> (한 마리당 합계 ${f.tick*f.adur}%) · 쿨타임 <b>${f.acd}초</b><br>${nextTn==='최대'?'대상 수 최대':'다음 대상 증가: '+nextTn}</div>`,`Lv5 ${n5.tn}마리 · 틱 ${n5.tick}% → Lv10 ${n10.tn}마리 · 틱 ${n10.tick}% · 쿨타임 ${n5.acd}초`,H.bg2); }
   const bg=PET_TH.trio.bg2, nx=(fn,l)=>l<15?` (다음 Lv${l+1} ${fn(l+1)}%)`:'';
   const nxc=(()=>{ for(let l=lv+1;l<=15;l++)if(TRIO.sn(l)>TRIO.sn(lv))return `다음 증가 Lv${l} ${TRIO.sn(l)}마리`; return '대상 수 최대'; })();
-  return petSkCard(TRI_C.war,'pet_trio_war','강타',3,lv,`<div class="nm">가장 가까운 적 1마리를 내려쳐요</div><div class="ds">내 무기 피해의 <b>${TRIO.sl(lv)}%</b>${nx(TRIO.sl,lv)} · 쿨타임 <b>${TRIO.cd.sl}초</b></div>`,`내 무기 피해의 ${TRIO.sl(3)}% → Lv15 ${TRIO.sl(15)}% · 쿨타임 ${TRIO.cd.sl}초`,bg)
+  return petSkCard(TRI_C.war,'pet_trio_war','전투 함성',3,lv,`<div class="nm">함성으로 ${TRIO.sdur}초간 내 피해 증가</div><div class="ds">피해 <b>+${TRIO.sl(lv)}%</b>${nx(TRIO.sl,lv)} · 범위 ${TRIO.sr} · 쿨타임 <b>${TRIO.cd.sl}초</b><br>전사 전투 함성과 합산돼요 · 쿨타임 감소는 없어요</div>`,`피해 +${TRIO.sl(3)}% → Lv15 +${TRIO.sl(15)}% · ${TRIO.sdur}초 · 범위 ${TRIO.sr} · 쿨타임 ${TRIO.cd.sl}초`,bg)
    +petSkCard(TRI_C.shd,'pet_trio_shd','그림자 강습',7,lv,`<div class="nm">순간이동하며 적을 한 마리씩 강타해요</div><div class="ds">한 마리당 <b>${TRIO.sd(lv)}%</b>${nx(TRIO.sd,lv)} · 대상 <b>${TRIO.sn(lv)}마리</b> (${nxc}) · 쿨타임 <b>${TRIO.cd.sd}초</b></div>`,`한 마리당 ${TRIO.sd(7)}% → Lv15 ${TRIO.sd(15)}% · 대상 1마리 → 5마리 · 쿨타임 ${TRIO.cd.sd}초`,bg)
    +petSkCard(TRI_C.sorc,'pet_trio_sorc','감전',10,lv,`<div class="nm">적 ${TRIO.en}마리에 연쇄 번개 · 짧은 경직 · ${TRIO.sk}초 감전 (받는 스킬 피해 +12%, 마법사 감전과 합산)</div><div class="ds">한 마리당 <b>${TRIO.ek(lv)}%</b>${nx(TRIO.ek,lv)} · 쿨타임 <b>${TRIO.cd.ek}초</b></div>`,`적 ${TRIO.en}마리 · ${TRIO.ek(10)}% → Lv15 ${TRIO.ek(15)}% · 짧은 경직 · 감전 ${TRIO.sk}초 · 쿨타임 ${TRIO.cd.ek}초`,bg); }
 function petModal(pet,back){ const lv=Math.max(1,Math.min(petMax(pet.id),pet.lv|0||1));
@@ -7798,7 +7798,7 @@ function drawPlayer(o,isMe,t){
   const nm=(isMe?me.name:(o.name||'동료'))||'', label=`Lv${lv} ${nm}`;
   ctx.font='700 11px "Noto Sans KR",sans-serif'; ctx.textAlign='center'; ctx.lineJoin='round'; ctx.lineWidth=3.5; ctx.strokeStyle='rgba(0,0,0,.9)'; ctx.strokeText(label,x,y-45); ctx.fillStyle=isMe?'#fff3dc':C.col; ctx.fillText(label,x,y-45);
   { const ic=[];
-    if(isMe){ const b=me.buffs; if(b.shout&&b.shout.t>0)ic.push(['📣',clamp(1-b.shout.t/(b.shout.m||10),0,1),Math.ceil(b.shout.t),true]); if(b.barrier&&b.barrier.t>0)ic.push(['🔷',clamp(1-b.barrier.t/10,0,1),Math.ceil(b.barrier.t),true]); if(me.stun>0)ic.push(['💫',0,Math.ceil(me.stun),true]); if(me.sil>0)ic.push(['🚫',0,Math.ceil(me.sil),true]); if(me.fear>0)ic.push(['😱',0,Math.ceil(me.fear),true]); if(me.slowP>0)ic.push(['🐌',0,Math.ceil(me.slowP),true]); if(me.poison>0)ic.push(['☠️',0,Math.ceil(me.poison),true]); if(me.erode>0)ic.push(['🌑',0,Math.ceil(me.erode),true]); if(me.bleed>0)ic.push(['🩸',0,Math.ceil(me.bleed),true]); if(me.hblk>0)ic.push(['💔',0,Math.ceil(me.hblk),true]); if(me.mblk>0)ic.push(['💧',0,Math.ceil(me.mblk),true]); if(b.berserk&&b.berserk.t>0)ic.push(['😡',clamp(1-b.berserk.t/8,0,1),Math.ceil(b.berserk.t),true]); for(const [bk,be] of [['roar','📢'],['fury','💢'],['hunt','🌕'],['rage','🔥']]){ const bb=b[bk]; if(bb&&bb.t>0)ic.push([be,clamp(1-bb.t/(bb.m||8),0,1),Math.ceil(bb.t),true]); } if(me.spirit&&me.spirit.t>0)ic.push(['👻',clamp(1-me.spirit.t/me.spirit.m,0,1),Math.ceil(me.spirit.t),true]); if(me.aura)ic.push([SKBY[me.aura].e,0,'',true]); }
+    if(isMe){ const b=me.buffs; if(b.shout&&b.shout.t>0)ic.push(['📣',clamp(1-b.shout.t/(b.shout.m||10),0,1),Math.ceil(b.shout.t),true]); if(b.pcry&&b.pcry.t>0)ic.push(['📣',clamp(1-b.pcry.t/(b.pcry.m||8),0,1),Math.ceil(b.pcry.t),true]); if(b.barrier&&b.barrier.t>0)ic.push(['🔷',clamp(1-b.barrier.t/10,0,1),Math.ceil(b.barrier.t),true]); if(me.stun>0)ic.push(['💫',0,Math.ceil(me.stun),true]); if(me.sil>0)ic.push(['🚫',0,Math.ceil(me.sil),true]); if(me.fear>0)ic.push(['😱',0,Math.ceil(me.fear),true]); if(me.slowP>0)ic.push(['🐌',0,Math.ceil(me.slowP),true]); if(me.poison>0)ic.push(['☠️',0,Math.ceil(me.poison),true]); if(me.erode>0)ic.push(['🌑',0,Math.ceil(me.erode),true]); if(me.bleed>0)ic.push(['🩸',0,Math.ceil(me.bleed),true]); if(me.hblk>0)ic.push(['💔',0,Math.ceil(me.hblk),true]); if(me.mblk>0)ic.push(['💧',0,Math.ceil(me.mblk),true]); if(b.berserk&&b.berserk.t>0)ic.push(['😡',clamp(1-b.berserk.t/8,0,1),Math.ceil(b.berserk.t),true]); for(const [bk,be] of [['roar','📢'],['fury','💢'],['hunt','🌕'],['rage','🔥']]){ const bb=b[bk]; if(bb&&bb.t>0)ic.push([be,clamp(1-bb.t/(bb.m||8),0,1),Math.ceil(bb.t),true]); } if(me.spirit&&me.spirit.t>0)ic.push(['👻',clamp(1-me.spirit.t/me.spirit.m,0,1),Math.ceil(me.spirit.t),true]); if(me.aura)ic.push([SKBY[me.aura].e,0,'',true]); }
     { const oth=isMe?ally:me; if(!isMe&&o.aura&&SKBY[o.aura])ic.push([SKBY[o.aura].e,0,'',true]); if(oth&&!oth.lobby&&!oth.dead&&oth.aura&&oth.aura!==o.aura&&oth.aura!=='holyfire'&&SKBY[oth.aura]&&oth.x!==undefined&&hyp(oth.x-o.x,oth.y-o.y)<320)ic.push([SKBY[oth.aura].e,0,'받음',false]); }
     ctx.textBaseline='middle'; const w=24, x0=x-(ic.length-1)*w/2, cy=y-76;
     ic.forEach((q,i)=>{ const cx=x0+i*w; ctx.fillStyle='rgba(18,14,10,.9)'; ctx.beginPath(); ctx.arc(cx,cy,10,0,6.283); ctx.fill(); ctx.lineWidth=2; ctx.strokeStyle=q[3]?'#ffd84a':'#6a5a3a'; ctx.stroke(); ctx.font='12px sans-serif'; ctx.textAlign='center'; ctx.fillStyle='#fff'; ctx.fillText(q[0],cx,cy+1);
