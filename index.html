@@ -1436,7 +1436,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0594</div>
+    <div class="ver" id="verT">v0.6.5.0595</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -2575,7 +2575,7 @@ const petHas=(p,id)=>petOwned(p).includes(id);
 function petGive(p,id){ if(!p||!PETS[id]||petHas(p,id))return 0; if(!petOf(p)){ p.pet={id,xp:0}; petNorm(p); ttfPet(id,p,true); return 1; } (p.pets||(p.pets={}))[id]={id,xp:0}; petNorm(p); ttfPet(id,p,true); return 2; }   /* 1 = 바로 데리고 다님 · 2 = 보관 */
 function petSwap(id){ const p=me; if(!p||!p.pets||!p.pets[id]||(p.pet&&p.pet.id===id))return; if(p.pet)p.pets[p.pet.id]={id:p.pet.id,xp:p.pet.xp,lv:p.pet.lv}; p.pet=p.pets[id]; delete p.pets[id]; petNorm(p); petDrop(); PET.mk.length=0; PET.fx.length=0; PET.lg=null; PET.sq=null; PET.on=false; if(G.inGame)petStart(); recalc(); saveChar(); sfx('ui'); toast(`🐾 ${PETS[id].n}와(과) 함께 다녀요`,PETS[id].col); }
 function petGain(xp){ const e=petOf(me); if(!e||!(xp>0))return; const top=petT(e.id)[petMax(e.id)-1]; if(e.xp>=top)return; e.xp=Math.min(top,e.xp+xp); const lv=petLvOf(e.xp,e.id);
-  if(lv>(e.lv||1)){ e.lv=lv; recalc(); saveChar(); toast(`🐾 ${PETS[e.id].n} Lv ${lv}!`,PETS[e.id].col); { const un=PETS[e.id].un&&PETS[e.id].un[lv]; if(un)toast(`스킬 「${un}」 해금 · 쿨타임마다 자동 발동`,PETS[e.id].col); } sfx('lvl'); } }
+  if(lv>(e.lv||1)){ const pv=e.lv||1; e.lv=lv; recalc(); saveChar(); PET.fx.push({k:'lvup',t:0,life:1.8,a:pv,b:lv}); { const un=PETS[e.id].un&&PETS[e.id].un[lv]; if(un)toast(`스킬 「${un}」 해금 · 쿨타임마다 자동 발동`,PETS[e.id].col); } sfx('lvl'); } }
 
 function derive(p,nm){   /* nm=true: 마을 풍차 보너스를 빼고 계산 (능력치 창에서 풍차 몫을 따로 보여주려고) */
   const d={rng:0,blk:0,mf:0,pr:0,mr:0,str:p.stats.str,dex:p.stats.dex,vit:p.stats.vit,ene:p.stats.ene,dmg:0,dmgPct:0,def:0,life:0,mana:0,ias:0,ms:0,ls:0,crit:5,cls:0,sk:{},wmn:1,wmx:3,dr:0,regen:0,cdr:0,sm:0,smhp:0,sp:{},hc:0,rbd:0};
@@ -4212,10 +4212,10 @@ const petCombat=()=>G.phase==='wave'||G.phase==='boss'||G.phase==='clear';
 /* 지옥불의 가호: 이동 속도 버프 (발동 순간에만 연출) */
 function petBuff(f){ me.buffs.hf={ms:f.bms/100,t:f.bdur,m:f.bdur}; PET.cd1=f.bcd; PET.cast=.55; sfx('fire');
   efx.push({k:'ring',x:me.x,y:me.y+10,r0:8,r1:64,t:0,life:.45,col:'#ff9a3a',w:7}); efx.push({k:'ring',x:me.x,y:me.y+10,r0:6,r1:98,t:0,life:.7,col:'#ffd36a',w:4});
-  burst(me.x,me.y+6,'#ffb36a',G.lowFx?8:18,260); addNum(me.x,me.y-56,'🔥 지옥불의 가호','#ffb36a',true); }
+  burst(me.x,me.y+6,'#ffb36a',G.lowFx?8:18,260); petTag('지옥불의 가호','🔥','#ff9a3a'); }
 /* 업화의 낙인: 가까운 적 N마리에 불꽃 표식 → 6초 동안 1초마다 틱 피해 (대상 선택은 발동 때 한 번만) */
 function petBrand(f){ const c=G.mobs.filter(m=>!m.dead&&hyp(m.x-me.x,m.y-me.y)<560).sort((a,b)=>hyp(a.x-me.x,a.y-me.y)-hyp(b.x-me.x,b.y-me.y)).slice(0,f.tn); if(!c.length)return false;
-  PET.mk=c.map(m=>({m,t:0,tk:0,n:0})); PET.cd2=f.acd; PET.cast=.55; sfx('fire');
+  PET.mk=c.map(m=>({m,t:0,tk:0,n:0})); PET.cd2=f.acd; PET.cast=.55; sfx('fire'); petTag('업화의 낙인','🔥','#ff9a3a',0,-80);
   for(const m of c){ PET.fx.push({k:'beam',x0:PET.x,y0:PET.y-12,x1:m.x,y1:m.y-m.r*.4,t:0,life:.3}); efx.push({k:'ring',x:m.x,y:m.y,r0:4,r1:m.r+18,t:0,life:.35,col:'#ff9a3a',w:5}); burst(m.x,m.y,'#ff8a2a',G.lowFx?4:8,200); }
   return true; }
 /* ===== 삼남매 펫: 세 마리가 한 몸처럼 움직임 · 강타(전사) · 그림자 강습(그림자) · 감전(마법사) — 피해는 내 무기 평균 피해 × % ===== */
@@ -4226,9 +4226,9 @@ function trioSkills(lv,dt){ const C=PET.tc||(PET.tc={sl:3,sd:5,ek:7}); C.sl=Math
     if(!q.h&&q.t>=.1){ q.h=1; if(m&&!m.dead){ hitMob(m,physDmg(TRIO.sd(lv)/100),0,false,{pet:1,pn:'그림자 강습'}); impact(m.x,m.y,'160,110,255',100); efx.push({k:'ring',x:m.x,y:m.y,r0:4,r1:m.r+30,t:0,life:.35,col:'#b48cff',w:7}); burst(m.x,m.y,'#9a6cff',G.lowFx?6:12,240); sfx('hit'); } }
     if(q.t>=.26){ q.i++; q.t=0; q.h=0; if(q.i>=q.L.length)PET.sq=null; } }
   if(!petCombat())return;
-  if(lv>=3&&C.sl<=0&&!PET.lg){ const t=trioNear(1,420)[0]; if(t){ C.sl=TRIO.cd.sl; PET.lg={m:t,t:0,h:0}; } }
-  if(lv>=7&&C.sd<=0&&!PET.sq){ const L=trioNear(TRIO.sn(lv),520); if(L.length){ C.sd=TRIO.cd.sd; PET.sq={L,i:0,t:0,h:0}; efx.push({k:'ring',x:PET.x,y:PET.y,r0:4,r1:34,t:0,life:.3,col:'#b48cff',w:5}); } }
-  if(lv>=10&&C.ek<=0){ const L=trioNear(TRIO.en,480); if(L.length){ C.ek=TRIO.cd.ek; PET.cast=.4; let px=PET.x, py=PET.y-18; const pts=[[px,py]];
+  if(lv>=3&&C.sl<=0&&!PET.lg){ const t=trioNear(1,420)[0]; if(t){ C.sl=TRIO.cd.sl; PET.lg={m:t,t:0,h:0}; petTag('강타','⚔️','#e0708a',-52*(Math.cos(PET.face)>=0?1:-1),-60); } }
+  if(lv>=7&&C.sd<=0&&!PET.sq){ const L=trioNear(TRIO.sn(lv),520); if(L.length){ C.sd=TRIO.cd.sd; PET.sq={L,i:0,t:0,h:0}; petTag('그림자 강습','🌑','#b48cff',52*(Math.cos(PET.face)>=0?1:-1),-60); efx.push({k:'ring',x:PET.x,y:PET.y,r0:4,r1:34,t:0,life:.3,col:'#b48cff',w:5}); } }
+  if(lv>=10&&C.ek<=0){ const L=trioNear(TRIO.en,480); if(L.length){ C.ek=TRIO.cd.ek; PET.cast=.4; petTag('감전','⚡','#8f96ff',0,-104); let px=PET.x, py=PET.y-18; const pts=[[px,py]];
       for(const m of L){ hitMob(m,physDmg(TRIO.ek(lv)/100),0,false,{pet:1,pn:'감전',stun:.6}); pts.push([m.x,m.y-m.r*.4]); impact(m.x,m.y,'143,150,255',80); burst(m.x,m.y,'#8f96ff',G.lowFx?4:8,200); }
       PET.fx.push({k:'bolt',pts,t:0,life:.35}); sfx('bolt'); } } }
 function drawTrio(){ const x=PET.x, y=PET.y, dir=Math.cos(PET.face)>=0?1:-1, mv=PET.mv, an=PET.an, SP={};
@@ -4266,7 +4266,28 @@ function drawPet(t){ const e=petNow(); if(!e)return; if(e.id==='trio'){ drawTrio
   if(CA&&PET.cast>0)sprDraw(CA,x,y+10,h*(CA.height/B.height),PET.face,{hop});
   else if(WK&&PET.mv){ const cw=WK.width/6, fi=Math.floor(PET.an*9)%6; sprDraw(WK,x,y+10,h*(WK.height/B.height),PET.face,{hop:0,fr:[fi*cw,cw,WK.height]}); }
   else sprDraw(im,x,y+10,h,PET.face,{hop,sy:1+Math.sin(PET.an*3)*.02}); }
-function drawPetFx(t){ if(!PET.on||(!PET.fx.length&&!PET.mk.length))return;
+/* 펫 스킬 이름표(알약 모양) · 펫 레벨업 연출(빛기둥 + 링 + LEVEL UP 글자) */
+const PET_TAGC={};
+function petTagImg(txt,ic,col){ const k=txt+col; if(PET_TAGC[k])return PET_TAGC[k]; const D=2, c=document.createElement('canvas'), g=c.getContext('2d'); g.font="800 13px 'Noto Sans KR',sans-serif"; const tw=Math.ceil(g.measureText(txt).width), W=tw+42, H=28; c.width=W*D; c.height=H*D; g.scale(D,D);
+  const rr=(x,y,w,h,r)=>{ g.beginPath(); g.moveTo(x+r,y); g.arcTo(x+w,y,x+w,y+h,r); g.arcTo(x+w,y+h,x,y+h,r); g.arcTo(x,y+h,x,y,r); g.arcTo(x,y,x+w,y,r); g.closePath(); };
+  g.shadowColor=col; g.shadowBlur=6; rr(3,3,W-6,H-6,11); const gr=g.createLinearGradient(0,3,0,H-3); gr.addColorStop(0,'rgba(34,22,50,.95)'); gr.addColorStop(1,'rgba(14,8,22,.95)'); g.fillStyle=gr; g.fill(); g.shadowBlur=0; g.lineWidth=2; g.strokeStyle=col; g.stroke();
+  g.fillStyle=col; g.beginPath(); g.arc(15,H/2,9,0,6.283); g.fill(); g.font='12px sans-serif'; g.textAlign='center'; g.textBaseline='middle'; g.fillStyle='#fff'; g.fillText(ic,15,H/2+1);
+  g.font="800 13px 'Noto Sans KR',sans-serif"; g.textAlign='left'; g.fillText(txt,29,H/2+1); const o={c,W,H}; PET_TAGC[k]=o; return o; }
+function petTag(txt,ic,col,ox,oy){ PET.fx.push({k:'tag',txt,ic,col,ox:ox||0,oy:oy==null?-62:oy,t:0,life:1.1}); }
+function drawPetFxTop(){ const x0=PET.x, y0=PET.y;
+  for(const F of PET.fx){
+    if(F.k==='tag'){ const u=F.t/F.life, im=petTagImg(F.txt,F.ic,F.col), a=u<.12?u/.12:u>.75?Math.max(0,1-(u-.75)/.25):1, rise=14*(1-Math.pow(1-Math.min(1,u*1.6),2)); ctx.save(); ctx.globalAlpha=a; ctx.drawImage(im.c,x0+F.ox-im.W/2,y0+F.oy-im.H/2-rise,im.W,im.H); ctx.restore(); }
+    else if(F.k==='lvup'){ const t=F.t, u=t/F.life, gy=y0+10, E=q=>1-Math.pow(1-Math.min(1,Math.max(0,q)),3), fa=Math.pow(Math.max(0,1-u),.7);
+      ctx.save(); ctx.globalCompositeOperation='lighter';
+      { const pw=Math.min(1,t/.2), ph=u>.35?Math.max(0,1-(u-.35)/.4):1, g=ctx.createLinearGradient(0,gy,0,gy-150*pw); g.addColorStop(0,'rgba(255,240,200,'+(.9*ph)+')'); g.addColorStop(.6,'rgba(208,140,255,'+(.5*ph)+')'); g.addColorStop(1,'rgba(208,140,255,0)'); const hh=150*pw; for(let j=0;j<10;j++){ const y1=gy-hh*(j+1)/10, f1=1-j/10, hg=ctx.createLinearGradient(x0-20,0,x0+20,0); hg.addColorStop(0,'rgba(208,140,255,0)'); hg.addColorStop(.5,'rgba(255,236,255,'+(.85*ph*f1)+')'); hg.addColorStop(1,'rgba(208,140,255,0)'); ctx.fillStyle=hg; ctx.fillRect(x0-20,y1,40,hh/10+1); } }
+      for(const [r,dl,col,w] of [[70,0,'255,224,138',4],[105,.12,'208,140,255',2.5]]){ const q=E((t-dl)/.45); if(q<=0)continue; ctx.strokeStyle='rgba('+col+','+(fa*.95)+')'; ctx.lineWidth=w; ctx.beginPath(); ctx.ellipse(x0,gy+4,r*q,r*q*.32,0,0,6.283); ctx.stroke(); }
+      if(!G.lowFx)for(let i=0;i<8;i++){ const ang=i*2.4, rad=30+((i*37)%50), st=.1+i*.05, q=Math.max(0,(t-st)/1.2); if(q<=0||q>1)continue; const sx=x0+Math.cos(ang)*rad, sy=gy-20-q*110-((i*13)%30), sz=(5+(i%3)*2)*(1-q*.6); ctx.fillStyle='rgba(255,242,176,'+(1-q)+')'; ctx.beginPath(); ctx.moveTo(sx,sy-sz); ctx.quadraticCurveTo(sx,sy,sx+sz,sy); ctx.quadraticCurveTo(sx,sy,sx,sy+sz); ctx.quadraticCurveTo(sx,sy,sx-sz,sy); ctx.quadraticCurveTo(sx,sy,sx,sy-sz); ctx.fill(); }
+      ctx.restore(); ctx.save();
+      { const pop=1+.45*Math.max(0,1-t/.22), al=u>.72?Math.max(0,1-(u-.72)/.28):Math.min(1,t/.08), ty=gy-128-8*E(t/.5); ctx.globalAlpha=al; ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.save(); ctx.translate(x0,ty); ctx.scale(pop,pop); ctx.font="900 28px 'Noto Sans KR',sans-serif"; ctx.lineJoin='round'; ctx.lineWidth=6; ctx.strokeStyle='#5a2a00'; ctx.strokeText('LEVEL UP!',0,0); const gg=ctx.createLinearGradient(0,-14,0,14); gg.addColorStop(0,'#fff6a8'); gg.addColorStop(1,'#ffb81c'); ctx.fillStyle=gg; ctx.shadowColor='#ffb000'; ctx.shadowBlur=10; ctx.fillText('LEVEL UP!',0,0); ctx.restore();
+        const lt='Lv '+F.a+' → Lv '+F.b; ctx.font="800 14px 'Noto Sans KR',sans-serif"; const w=ctx.measureText(lt).width+26, py=ty+26; ctx.beginPath(); ctx.moveTo(x0-w/2+11,py-11); ctx.arcTo(x0+w/2,py-11,x0+w/2,py+11,11); ctx.arcTo(x0+w/2,py+11,x0-w/2,py+11,11); ctx.arcTo(x0-w/2,py+11,x0-w/2,py-11,11); ctx.arcTo(x0-w/2,py-11,x0+w/2,py-11,11); ctx.closePath(); const pg2=ctx.createLinearGradient(0,py-11,0,py+11); pg2.addColorStop(0,'#7a4cff'); pg2.addColorStop(1,'#4a2a9a'); ctx.fillStyle=pg2; ctx.fill(); ctx.lineWidth=2; ctx.strokeStyle='#ffe08a'; ctx.stroke(); ctx.fillStyle='#fff'; ctx.fillText(lt,x0,py+1); }
+      ctx.restore(); } } }
+function drawPetFx(t){ if(!PET.on||(!PET.fx.length&&!PET.mk.length))return; drawPetFxTop();
   ctx.save(); ctx.globalCompositeOperation='lighter'; ctx.lineCap='round';
   for(const F of PET.fx){ if(F.k==='bolt'){ const a=1-F.t/F.life; ctx.globalAlpha=a; ctx.strokeStyle='rgba(170,180,255,.95)'; ctx.lineWidth=3*a+1; ctx.beginPath(); for(let i=0;i<F.pts.length;i++){ const p=F.pts[i]; if(!i){ ctx.moveTo(p[0],p[1]); continue; } const q=F.pts[i-1], n=4; for(let j=1;j<=n;j++){ const u=j/n, jx=(j<n?(Math.sin(F.t*90+i*3+j*7)*7):0), jy=(j<n?(Math.cos(F.t*80+i*5+j*3)*7):0); ctx.lineTo(q[0]+(p[0]-q[0])*u+jx,q[1]+(p[1]-q[1])*u+jy); } } ctx.stroke(); ctx.strokeStyle='rgba(255,255,255,.8)'; ctx.lineWidth=1.2*a; ctx.stroke(); continue; } if(F.k!=='beam')continue; const q=F.t/F.life, a=1-q, p=Math.min(1,q*2.2), px=F.x0+(F.x1-F.x0)*p, py=F.y0+(F.y1-F.y0)*p;
     ctx.globalAlpha=a; ctx.strokeStyle='rgba(255,140,40,.95)'; ctx.lineWidth=5*a+1; ctx.beginPath(); ctx.moveTo(F.x0,F.y0); ctx.lineTo(px,py); ctx.stroke();
@@ -5562,20 +5583,30 @@ function petSkillsHtml(lv,id){ if(id==='trio')return trioSkHtml(lv);
 function petModal(pet,back){ const P=PETS[pet.id], lv=Math.max(1,Math.min(petMax(pet.id),pet.lv|0||1));
   if(pet.id==='trio'){ modal(`<div class="ptv">${trioHead(lv,null,false)}${trioRoad(lv)}${trioSkHtml(lv)}</div><div class="row2"><button class="btn primary" id="pmNo">← 돌아가기</button></div>`,m=>{ m.onclick=e=>{ if(e.target===m)back(); }; m.querySelector('#pmNo').onclick=back; }); return; }
   modal(`<div class="ptv"><div class="pt-card"><div class="pt-row"><div class="pt-por"><img alt="" src="img/${P.im}.png" onerror="this.onerror=null;this.src='img/boss_3_5.png'"></div><div style="flex:1"><div class="pt-nm">${P.n}<span class="pt-tag">${P.rn}</span></div><div class="pt-lv">Lv ${lv} / ${PET_MAXLV}</div></div></div></div>${petSkillsHtml(lv)}</div><div class="row2"><button class="btn primary" id="pmNo">← 돌아가기</button></div>`,m=>{ m.onclick=e=>{ if(e.target===m)back(); }; m.querySelector('#pmNo').onclick=back; }); }
-function renderPet(){ renderPet0(); petChips(); }
-function petChips(){ const ids=petOwned(me); if(ids.length<2)return; const b=$('#sheetB'), cur=me.pet&&me.pet.id;
-  b.insertAdjacentHTML('afterbegin',`<div class="pt-card" style="padding:8px 10px"><div class="pt-sm" style="margin-bottom:6px">보유 펫 · 함께 다니는 펫만 경험치를 얻고 스킬을 써요</div><div style="display:flex;gap:6px">${ids.map(k=>`<button data-pw="${k}" style="flex:1;padding:8px 4px;border-radius:10px;border:1px solid ${k===cur?PETS[k].col:'#3a2e22'};background:${k===cur?'#2a1b12':'#120d0b'};color:${k===cur?'#fff':'#a89a80'};font-weight:800;font-size:12.5px">${k===cur?'🐾 ':''}${PETS[k].n}<br><small style="font-weight:500;font-size:10.5px">${k===cur?'함께 다니는 중':'눌러서 함께 다니기'}</small></button>`).join('')}</div></div>`);
-  b.querySelectorAll('[data-pw]').forEach(e=>e.onclick=()=>{ petSwap(e.dataset.pw); renderPet(); }); }
-function renderPet0(){
-  markTabs(); sheetHead(); const b=$('#sheetB'); b.className='sbody ptv'; const e=petOf(me);
-  if(!e){ b.innerHTML=`<div class="pt-card pt-empty"><div style="font-size:42px">🐾</div><b style="font-size:16px;color:#ffe9b0">아직 펫이 없어요</b><br>마을의 <b>🎰 달빛 도박장</b>에서 <b>2%</b> 확률로<br><b style="color:#ff9a3a">유니크 펫 '아자젤'</b>을 만날 수 있어요.<br><span class="pt-sm">펫은 캐릭터마다 따로이고, 다른 캐릭터로 옮길 수 없어요.</span></div>`; return; }
-  if(e.id==='trio'){ const lv=e.lv||petLvOf(e.xp,'trio'), f=petFx(lv); b.innerHTML=trioHead(lv,e,true)+trioRoad(lv)+`<div class="pt-g2"><div class="pt-card"><h4>펫 이동속도</h4><div class="pt-big">${Math.round(f.spd*100)}%</div><div class="pt-sm">내 이동속도 대비</div></div><div class="pt-card"><h4>아이템 탐색 반경</h4><div class="pt-big">${f.rad}</div><div class="pt-sm">이 안의 아이템을 물어와요</div></div></div>`+trioSkHtml(lv)+`<div class="pt-hint">펫은 이 캐릭터 전용이에요 · 다른 캐릭터로 옮길 수 없어요</div>`; return; }
+let petSel=null; const PET_SLOTS=10;
+const petEntry=id=>me.pet&&me.pet.id===id?me.pet:((me.pets&&me.pets[id])||null);
+function petDetailHtml(e){
+  if(e.id==='trio'){ const lv=e.lv||petLvOf(e.xp,'trio'), f=petFx(lv); return trioHead(lv,e,true)+trioRoad(lv)+`<div class="pt-g2"><div class="pt-card"><h4>펫 이동속도</h4><div class="pt-big">${Math.round(f.spd*100)}%</div><div class="pt-sm">내 이동속도 대비</div></div><div class="pt-card"><h4>아이템 탐색 반경</h4><div class="pt-big">${f.rad}</div><div class="pt-sm">이 안의 아이템을 물어와요</div></div></div>`+trioSkHtml(lv); }
   const P=PETS[e.id], lv=e.lv||petLvOf(e.xp), f=petFx(lv), T=petT(), max=lv>=PET_MAXLV, lo=T[lv-1], hi=max?T[PET_MAXLV-1]:T[lv], pct=max?100:Math.max(0,Math.min(100,(e.xp-lo)/(hi-lo)*100));
-  b.innerHTML=`<div class="pt-card"><div class="pt-row"><div class="pt-por"><img alt="" src="img/${P.im}.png" onerror="this.onerror=null;this.src='img/boss_3_5.png'"></div><div style="flex:1"><div class="pt-nm">${P.n}<span class="pt-tag">${P.rn}</span></div><div class="pt-lv">Lv ${lv} / ${PET_MAXLV}</div></div></div>
+  return `<div class="pt-card"><div class="pt-row"><div class="pt-por"><img alt="" src="img/${P.im}.png" onerror="this.onerror=null;this.src='img/boss_3_5.png'"></div><div style="flex:1"><div class="pt-nm">${P.n}<span class="pt-tag">${P.rn}</span></div><div class="pt-lv">Lv ${lv} / ${PET_MAXLV}</div></div></div>
       <div class="pt-bar"><i style="width:${pct.toFixed(1)}%"></i></div><div class="pt-sm">${max?`경험치 ${petN(e.xp)} · 최대 레벨`:`경험치 ${petN(e.xp)} / ${petN(hi)} · 다음 Lv${lv+1} (캐릭터 Lv${PET_LVEQ[lv]} 상당)`}<br>캐릭터가 얻는 경험치와 같은 양이 쌓여요</div></div>
     <div class="pt-g2"><div class="pt-card"><h4>펫 이동속도</h4><div class="pt-big">${Math.round(f.spd*100)}%</div><div class="pt-sm">내 이동속도 대비</div></div><div class="pt-card"><h4>아이템 탐색 반경</h4><div class="pt-big">${f.rad}</div><div class="pt-sm">이 안의 아이템을 물어와요</div></div></div>
-    ${petSkillsHtml(lv)}
-    <div class="pt-hint">펫은 이 캐릭터 전용이에요 · 다른 캐릭터로 옮길 수 없어요</div>`; }
+    ${petSkillsHtml(lv,e.id)}`; }
+function renderPet(){
+  markTabs(); sheetHead(); const b=$('#sheetB'); b.className='sbody ptv'; const ids=petOwned(me);
+  if(!ids.length){ b.innerHTML=`<div class="pt-card pt-empty"><div style="font-size:42px">🐾</div><b style="font-size:16px;color:#ffe9b0">아직 펫이 없어요</b><br>마을의 <b>🎰 달빛 도박장</b>에서 <b>2%</b> 확률로<br><b style="color:#ff9a3a">유니크 펫 '아자젤'</b>을 만날 수 있어요.<br><span class="pt-sm">펫은 캐릭터마다 따로이고, 다른 캐릭터로 옮길 수 없어요.</span></div>`; return; }
+  const act=me.pet&&me.pet.id; if(!petSel||!ids.includes(petSel))petSel=act||ids[0];
+  let cells=''; for(let i=0;i<PET_SLOTS;i++){ const id=ids[i];
+    if(!id){ cells+='<div class="cell" style="border-style:dashed;opacity:.4"></div>'; continue; }
+    const P=PETS[id], e=petEntry(id), sel=id===petSel, on=id===act, col=id==='trio'?'#6a4aa0':P.col;
+    cells+=`<div class="cell${sel?' sel':''}" data-ps="${id}" style="cursor:pointer;border-color:${on||sel?P.col:col};${id==='trio'?'background:#150f1e;':''}"><img alt="" src="img/${P.im}.png" style="max-width:${id==='trio'?92:86}%;max-height:${id==='trio'?80:86}%;object-fit:contain" onerror="this.style.visibility='hidden'">${on?`<em style="position:absolute;top:2px;left:2px;font:800 9px/1 sans-serif;background:${P.col};color:#1b0f2e;border-radius:99px;padding:2px 5px">동행</em>`:''}<i style="position:absolute;bottom:2px;right:4px;font:800 10px/1 sans-serif;color:#ffd84a;font-style:normal">Lv${e.lv||petLvOf(e.xp,id)}</i></div>`; }
+  const e=petEntry(petSel), isAct=petSel===act;
+  b.innerHTML=`<div class="pt-card"><div style="display:flex;justify-content:space-between;align-items:center"><b style="font-size:15px;color:#ffe9b0">🐾 펫 보관함</b><span style="font-size:12.5px;color:#c9b99a">${ids.length} / ${PET_SLOTS}칸</span></div><div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:10px">${cells}</div><div class="pt-sm" style="margin-top:8px">칸을 누르면 아래에 정보가 나와요 · 함께 다니는 펫만 경험치를 얻고 스킬을 써요</div></div>`
+   +petDetailHtml(e)
+   +(isAct?'<div class="pt-hint" style="color:#8aff9a;font-weight:800">🐾 지금 함께 다니는 중</div>':`<button class="btn primary" data-pw="${petSel}" style="width:100%;padding:12px;margin:4px 0 8px">🐾 함께 다니기</button>`)
+   +'<div class="pt-hint">펫은 이 캐릭터 전용이에요 · 다른 캐릭터로 옮길 수 없어요</div>';
+  b.querySelectorAll('[data-ps]').forEach(c=>c.onclick=()=>{ petSel=c.dataset.ps; const y=b.scrollTop; renderPet(); b.scrollTop=y; });
+  b.querySelectorAll('[data-pw]').forEach(c=>c.onclick=()=>{ petSwap(c.dataset.pw); petSel=c.dataset.pw; renderPet(); }); }
 let dexTab='sp'; const dexClosed=new Set();
 function dexSeen(){ const q=me; if(!q||!q.id)return; if(q.dxs!==dexTot(q)||dexNewN(q)){ q.dxs=dexTot(q); delete q.dxn; saveChar(); } for(const e of document.querySelectorAll('#cDex,#bDexL'))e.classList.remove('new'); }   /* 도감을 닫으면(또는 다른 화면으로 가면) 확인한 것으로 보고 NEW 모두 해제 */
 function dexOpen(){ flushSortedNew(); sheetMode='dex'; selItem=null; bagSel=null; rerender(); $('#sheetB').scrollTop=0; }
