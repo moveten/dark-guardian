@@ -1436,7 +1436,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0596</div>
+    <div class="ver" id="verT">v0.6.5.0597</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -2555,7 +2555,7 @@ function sellInfo(it){ let base=SELLBASE[it.rar]||100, ex=0; for(const a of it.a
 const need=l=>l<=58?Math.floor(23*Math.pow(l,1.92)):Math.floor(23*Math.pow(58,1.92)*Math.pow(l/58,9.5)); /* 레벨업 경험치: 계수 23 · 지수 1.92 · 전환 레벨 58 · 전환 후 지수 9.5 */
 /* ===== 펫 (유니크 '아자젤'): 캐릭터마다 따로 · 도박장에서만 · 경험치 = 그 캐릭터가 얻는 경험치와 같은 양 (펫 Lv10 = 캐릭터 Lv99까지의 누적 경험치) ===== */
 const PETS={azazel:{n:'아자젤',rn:'유니크',col:'#ff9a3a',pn:'지옥불의 가호',an:'업화의 낙인',im:'pet_azazel',un:{3:'지옥불의 가호',5:'업화의 낙인'}},
-  trio:{n:'그림자 삼남매',rn:'유니크',col:'#b48cff',pn:'강타',an:'그림자 강습',im:'pet_trio',un:{3:'강타',7:'그림자 강습',10:'감전'},max:15,eq:[0,40,55,65,75,82,88,93,97,99,101,104,106,108,110]}};   /* 삼남매: 전사펫 강타(Lv3) · 검은 그림자 강습(Lv7) · 마법사펫 감전(Lv10) */
+  trio:{n:'그림자 삼남매',rn:'영웅',col:'#b48cff',pn:'강타',an:'그림자 강습',im:'pet_trio',un:{3:'강타',7:'그림자 강습',10:'감전'},max:15,eq:[0,40,55,65,75,82,88,93,97,99,101,104,106,108,110]}};   /* 삼남매: 전사펫 강타(Lv3) · 검은 그림자 강습(Lv7) · 마법사펫 감전(Lv10) */
 const PET_MAXLV=10, PET_LVEQ=[0,40,55,65,75,82,88,93,97,99], PET_DUP_GOLD=500000;   /* PET_LVEQ: 펫 레벨 n에 필요한 누적 경험치 = 캐릭터 Lv(PET_LVEQ[n-1])까지의 누적 경험치 */
 const PET_TC={};
 const petMax=id=>(PETS[id]&&PETS[id].max)||PET_MAXLV;
@@ -5611,8 +5611,8 @@ function dexGroup(id,title,ico,keys0,p,tone){ const keys=dexKeysOf(keys0,p), got
 /* 그림자 세트 도감 완성 보상: 유니크 펫 '그림자 삼남매' (캐릭터마다 한 번 · 펫 칸이 비어 있어야 받아요) */
 const dexTrioDone=p=>!!p&&dexKeysOf(['hdag','hhelm','harmor','hamu','hring','@hoff_'],p).every(k=>(p.dx&&p.dx[k]|0)>0);
 function dexPetRow(id,title,got,tot,p){ if(title!=='그림자 세트')return ''; const done=got>=tot, had=!!(p.tpt&&p.tpt.trio);
-  return `<div class="dxpr">🐾 완성 보상 · 유니크 펫 <b>그림자 삼남매</b> ${had?'<em>✔ 수령 완료</em>':done?'<button class="btn primary" data-pr="trio">받기</button>':`<small>(${got}/${tot})</small>`}</div>`; }
-function dexPetClaim(){ const p=me; if(!p||!dexTrioDone(p)||(p.tpt&&p.tpt.trio))return; const r=petGive(p,'trio'); if(!r)return; recalc(); saveChar(); sfx('rare'); toast(r===1?'🐾 유니크 펫 「그림자 삼남매」를 받았어요!':'🐾 「그림자 삼남매」를 받았어요 · 정비 > 펫에서 함께 다닐 펫을 바꿀 수 있어요','#b48cff'); renderDex(); }
+  return `<div class="dxpr">🐾 완성 보상 · 영웅 펫 <b>그림자 삼남매</b> ${had?'<em>✔ 수령 완료</em>':done?'<button class="btn primary" data-pr="trio">받기</button>':`<small>(${got}/${tot})</small>`}</div>`; }
+function dexPetClaim(){ const p=me; if(!p||!dexTrioDone(p)||(p.tpt&&p.tpt.trio))return; const r=petGive(p,'trio'); if(!r)return; recalc(); saveChar(); sfx('rare'); toast(r===1?'🐾 영웅 펫 「그림자 삼남매」를 받았어요!':'🐾 「그림자 삼남매」를 받았어요 · 정비 > 펫에서 함께 다닐 펫을 바꿀 수 있어요','#b48cff'); renderDex(); }
 function renderDex(){
   markTabs(); sheetHead(); const b=$('#sheetB'); b.className='sbody dex'; const p=me, spNw=DEX_SP.some(g=>g[2].some(k=>p.dxn&&p.dxn[k])), stNw=DEX_ST.some(g=>dexKeysOf(g[2],p).some(k=>p.dxn&&p.dxn[k])), spN=dexSpN(p), stN=dexStN(p), isSp=dexTab==='sp', got=isSp?spN:stN, tot=isSp?20:Math.max(1,dexStTot(p)), pct=(got/tot*100).toFixed(1)+'%';
   b.innerHTML=`<div class="dxt"><button data-dt="sp" aria-pressed="${isSp}">✨ 스페셜 아이템<small>${spN}/20</small>${spNw?'<i class="dxnb">NEW</i>':''}</button><button data-dt="st" aria-pressed="${!isSp}">🧩 세트 아이템<small>${stN}/${dexStTot(p)}</small>${stNw?'<i class="dxnb">NEW</i>':''}</button></div>
@@ -6524,7 +6524,7 @@ function buildCarousel(chars){
   else box.innerHTML='';
   if(!same)for(const c of chars){ const el=document.createElement('div'); el.className='cc'+(c.hc?' hc':'')+(c.hd>0?' hcd':'')+(ttChip(c)?' tt':''); el.dataset.id=c.id; el.setAttribute('role','button');
     el.innerHTML=`<div class="cpic ${c.cls}"><span class="cem">${clsIc(c.cls,56)}</span><img src="img/hero_${c.cls}.png" alt="" onload="this.previousElementSibling.style.display='none'" onerror="this.remove()"></div>`+tail(c);
-    el.onclick=e=>{ if(e&&e.target&&e.target.closest&&e.target.closest('.ttb')){ e.stopPropagation(); sfx('ui'); openTtSheet(c.id); return; } if(el.getAttribute('aria-current')==='true'&&c.id===selId) charMenu(c.id); else if(carWide()) carPick(box,el); else carCenter2(box,el); };
+    el.onclick=e=>{ if(e&&e.target&&e.target.closest&&e.target.closest('.cpet')&&el.getAttribute('aria-current')==='true'&&c.id===selId){ e.stopPropagation(); sfx('ui'); openTitleSheet('pet'); return; } if(e&&e.target&&e.target.closest&&e.target.closest('.ttb')){ e.stopPropagation(); sfx('ui'); openTtSheet(c.id); return; } if(el.getAttribute('aria-current')==='true'&&c.id===selId) charMenu(c.id); else if(carWide()) carPick(box,el); else carCenter2(box,el); };
     box.appendChild(el); }
   if(!same&&chars.length<MAXCHAR){ const el=document.createElement('div'); el.className='cc add'; el.dataset.id=''; el.setAttribute('role','button'); el.innerHTML='<span class="plus2">＋</span><b>새 캐릭터</b><small>'+chars.length+' / '+MAXCHAR+'</small>'; el.onclick=()=>{ if(el.getAttribute('aria-current')==='true'||carWide()) showNew(true); else carCenter2(box,el); }; box.appendChild(el); }
   carLock=Date.now()+400; fitWideCards();
