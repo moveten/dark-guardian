@@ -1446,7 +1446,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0604</div>
+    <div class="ver" id="verT">v0.6.5.0605</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -2154,10 +2154,18 @@ const TITLES=[{id:'dex',n:DEX_TITLE,cond:'도감 특수 유니크 20종 수집',
   {id:'idol',n:'아이돌 연습생',cond:'칭호 10개 획득',eff:'치명타 확률 +5%',hid:1,own:p=>ttfHas(p,'idol'),prog:TT_NO,ap:d=>{d.crit+=5;}},
   {id:'renne',n:'누군가의 리센느',cond:'칭호 15개 획득',eff:'치명타 확률 +10%',hid:1,own:p=>ttfHas(p,'renne'),prog:TT_NO,ap:d=>{d.crit+=10;}},
   {id:'star',n:'슈퍼★스타',cond:'칭호 20개 획득',eff:'치명타 확률 +15%',hid:1,own:p=>ttfHas(p,'star'),prog:TT_NO,ap:d=>{d.crit+=15;}},
-  {id:'pets4',n:'프로 집사',cond:'4종 이상 펫 획득',eff:'생명력 +369',own:p=>ttfHas(p,'pets4'),prog:p=>`지금까지 획득한 펫 ${ttPetN(p)} / 4종`,ap:d=>{d.life+=369;}}];
+  {id:'pets4',n:'프로 집사',cond:'4종 이상 펫 획득',eff:'생명력 +369',own:p=>ttfHas(p,'pets4'),prog:p=>`지금까지 획득한 펫 ${ttPetN(p)} / 4종`,ap:d=>{d.life+=369;}},
+  {id:'soda',n:'탄산수 애호가',cond:'한 스테이지에서 부활 물약을 7번 이상 쓰고 클리어',eff:'생명력 흡수 +1%',own:p=>ttfHas(p,'soda'),prog:TT_NO,ap:d=>{d.ls+=1;}},
+  {id:'chiv',n:'기사도',cond:'중앙 성의 내구력이 5% 미만 남은 상태로 스테이지 클리어',eff:'공격 속도 +6%',own:p=>ttfHas(p,'chiv'),prog:TT_NO,ap:d=>{d.ias+=6;}},
+  {id:'monk',n:'금강법사',cond:'받은 피해 35 이하로 스테이지 3-5 클리어',eff:'받는 피해 -5%',own:p=>ttfHas(p,'monk'),prog:TT_NO,ap:d=>{d.dr+=.05;}},
+  {id:'tomeN',n:'활자 중독',cond:'금지된 마법서 10번 획득 (도감에서 확인)',eff:'피해 +30%',own:p=>ttfHas(p,'tomeN'),prog:p=>`이 캐릭터 ${Math.min(10,(p.dx&&p.dx.tome)|0)} / 10번`,ap:d=>{d.dmgPct+=30;}},
+  {id:'swm',n:'소드마스터',cond:'스페셜 아이템 무기 획득 합계 200',eff:'공격력 +100',own:p=>ttfHas(p,'swm'),prog:p=>`이 캐릭터 ${Math.min(200,ttDexSum(p,0))} / 200`,ap:d=>{d.dmg+=100;}},
+  {id:'dock',n:'투머치도커',cond:'스페셜 아이템 방어구 획득 합계 200',eff:'방어력 +300',own:p=>ttfHas(p,'dock'),prog:p=>`이 캐릭터 ${Math.min(200,ttDexSum(p,1))} / 200`,ap:d=>{d.def+=300;}},
+  {id:'rings',n:'링스온디짓',cond:'스페셜 아이템 액세서리 획득 합계 300',eff:'스킬 쿨감 +7%',own:p=>ttfHas(p,'rings'),prog:p=>`이 캐릭터 ${Math.min(300,ttDexSum(p,2))} / 300`,ap:d=>{d.cdr+=.07;}}];
 const TT_BY=Object.fromEntries(TITLES.map(t=>[t.id,t]));
 /* 상태로 판정하는 칭호(Lv99 · 보유 골드 · 도감 세트 100% · 정복 횟수 · 칭호 개수 · 펫 종류): 한 번 달성하면 칭호는 유지돼요(골드를 써도, 세트가 늘어도 안 없어짐). 저장할 때(1.5초에 한 번까지)와 캐릭터를 불러올 때 확인 */
 const TT_RICH=20261009;
+const ttDexSum=(p,g)=>DEX_SP[g][2].reduce((a,k)=>a+((p&&p.dx&&p.dx[k])|0),0);   /* 스페셜 아이템 종류별(0무기·1방어구·2액세서리) 획득 횟수 합계 */
 const dexStKeys=p=>dexKeysOf(DEX_ST.flatMap(g=>g[2]),p), dexStTot=p=>dexStKeys(p).length;
 const ttCcSum=p=>Object.values(p&&p.cc||{}).reduce((a,b)=>a+(+b||0),0), ttPetN=p=>Object.keys(p&&p.tpt||{}).filter(k=>PETS[k]).length;
 let ttAutoT=0;
@@ -2167,6 +2175,8 @@ function ttfAuto(p,quiet){ p=p||me; if(!p||!p.cls)return; ttAutoT=Date.now();
   { const k=dexStKeys(p); if(k.length&&k.every(x=>(p.dx&&p.dx[x]|0)>0))ttfSet('dexall',quiet,p); }
   if(ttCcSum(p)>=999)ttfSet('aok',quiet,p);
   if(ttPetN(p)>=4)ttfSet('pets4',quiet,p);
+  if((p.dx&&p.dx.tome|0)>=10)ttfSet('tomeN',quiet,p);
+  if(ttDexSum(p,0)>=200)ttfSet('swm',quiet,p); if(ttDexSum(p,1)>=200)ttfSet('dock',quiet,p); if(ttDexSum(p,2)>=300)ttfSet('rings',quiet,p);
   for(const [k,n] of [['idol',10],['renne',15],['star',20]])if(!ttfHas(p,k)&&ttOwn(p).length>=n)ttfSet(k,quiet,p);   /* 칭호 개수(방금 얻은 마일스톤 칭호도 셈) */ }
 const ttfAutoT=()=>{ if(Date.now()-ttAutoT>1500)ttfAuto(me); };
 const ttOwn=p=>TITLES.filter(t=>t.own(p)), ttCur=p=>{ const t=p&&p.tt&&TT_BY[p.tt]; return t&&t.own(p)?t:null; };
@@ -7231,7 +7241,7 @@ const fmtCt=t=>{ t=Math.max(0,Math.round(t)); return (t/60|0)+':'+String(t%60).p
 function markClear(){ const n=(G.stageIdx|0)+1, t=Math.max(1,Math.round(G.runT||0)); let ch=false; G.lastCt=t; G.bestCt=false; const wasLk=!spdOk();
   if(n>(me.clear|0)){ me.clear=Math.min(STAGES.length,n); stageClear=me.clear; me.ct=t; me.cts=me.cat=Math.floor(Date.now()/1000); ch=true; G.bestCt=true; G.firstClr=true; selStage=Math.max(0,Math.min(STAGES.length-1,me.clear|0)); lsSet('dkdef2.stage',String(selStage)); }   /* 처음 깬 스테이지면 다음 스테이지를 자동 선택 */
   else if(n===(me.clear|0)&&!(me.ct>0&&t>=me.ct)){ me.ct=t; me.cts=Math.floor(Date.now()/1000); ch=true; G.bestCt=true; }
-  { const cc=me.cc||(me.cc={}); cc[n]=Math.min(999999,(cc[n]|0)+1); G.ccThis=cc[n]; G.ccAll=Object.values(cc).reduce((a,b)=>a+b,0); ch=true; if((G.potN|0)>=10)ttfSet('pot'); if(n===TT_S5()&&cc[n]>=100)ttfSet('lights'); }   /* 누적 클리어 횟수: 스테이지별로, 클리어할 때마다 +1 (최고 기록과 상관없이) */
+  { const cc=me.cc||(me.cc={}); cc[n]=Math.min(999999,(cc[n]|0)+1); G.ccThis=cc[n]; G.ccAll=Object.values(cc).reduce((a,b)=>a+b,0); ch=true; if((G.potN|0)>=10)ttfSet('pot'); if(n===TT_S5()&&cc[n]>=100)ttfSet('lights'); if((G.stRev|0)>=7)ttfSet('soda'); if(G.castle&&G.castle.hp>0&&G.castle.hp<G.castle.max*.05)ttfSet('chiv'); if(n===STAGES.findIndex(s=>s.id==='3-5')+1&&(G.stTaken||0)<=35)ttfSet('monk'); }   /* 누적 클리어 횟수: 스테이지별로, 클리어할 때마다 +1 (최고 기록과 상관없이) */
   if(ch){ saveChar(); rkSubmitAll(); }
   if(wasLk&&spdOk()){ G.spdNew=true; setSpd(G.spd>1); later(2,()=>{ if(G.inGame)toast('⏩ 1.3배속 · 🤖 AUTO 스킬이 열렸어요!','#ffb259'); }); } }   /* 1-5 첫 클리어 */
 function endTab(t){ const bx=$('#endBox'); bx.dataset.tab=t; bx.querySelectorAll('.etabs button').forEach(b=>{ b.setAttribute('aria-selected',b.dataset.t===t); b.onclick=()=>{ endTab(b.dataset.t); sfx('ui'); }; }); }   /* 가로 모드: 전리품 / 데미지 순위 탭 (세로 모드는 탭 없이 둘 다 표시) */
