@@ -1449,7 +1449,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0615</div>
+    <div class="ver" id="verT">v0.6.5.0616</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3249,7 +3249,7 @@ function castleTick(dt){ const c=G.castle; if(!c)return; c.fl=Math.max(0,c.fl-dt
 function castlePush(o){ if(!G.castle)return; const cx=VX, cy=VY+CAS_Y+4, rx=58, ry=26, dx=(o.x-cx)/rx, dy=(o.y-cy)/ry, q=dx*dx+dy*dy; if(q>=1)return; if(q<1e-6){ o.y=cy+ry; return; } const k=1/Math.sqrt(q); o.x=cx+dx*k*rx; o.y=cy+dy*k*ry; }
 function startStage(){
   AUD.voicePre(me.cls); setTimeout(()=>{ if(G.inGame&&!me.dead)voice('start'); },1500);
-  dmgReset(); G.firstClr=false; G.potN=0; G.stageIdx=selStage; G.stg=STAGES[selStage]; G.TW=G.stg.waves.length; preBoss(); setTheme(selStage); castleInit(); if(G.castle)later(3.2,()=>{ if(G.inGame&&G.castle&&G.phase!=='lose')toast('🏰 중앙의 성을 지켜요 · 체력이 0이 되면 패배 · 성 둘레에서는 생명력·마나가 회복돼요','#e0c080'); }); G.gts=[]; later(.5,()=>{ if(G.inGame)banner(`${G.stg.id} ${G.stg.n}`,`장비 Lv 합 ${Math.max(1,G.stg.icap-12)*EQSL.length}↑ · ${G.stg.tag||''}`); });
+  dmgReset(); G.firstClr=false; G.potN=0; G.stageIdx=selStage; G.stg=STAGES[selStage]; G.TW=G.stg.waves.length; preBoss(); setTheme(selStage); castleInit(); if(G.castle)later(3.2,()=>{ if(G.inGame&&G.castle&&G.phase!=='lose')toast('🏰 중앙의 성을 지켜요 · 체력이 0이 되면 패배 · 성 둘레에서는 생명력·마나가 회복돼요','#e0c080'); }); G.gts=[]; later(.5,()=>{ if(G.inGame)banner(`${G.stg.id} ${G.stg.n}`,G.stg.tag||''); });
   gobInit(); G.allMode=false; G.allQ=[]; G.fires=[]; G.freeRev=me.hc?0:1; G.hcWhy=''; me.rvGiven=0; me.seenRg=0; me.out=false; me.rvT=0;
   G.gemDone=false; G.wave=0;G.skipUsed=false;G.phase='prep';G.timer=2;G.mobs.length=0;G.ev=[];G.spawnQ=0;G.lastSq=-1;G.endShown=false;G.coop=!!guestPeer;
   G.waveSides=[0,1,3]; G.nextSides=sidesFor(1); G.laneShow=G.nextSides;
@@ -5800,8 +5800,8 @@ function takeGold(){
   if(!L.length){ sheetToast('가져올 캐릭터가 없어요','#ff8a7a'); return; }
   const rows=L.map(t=>{ const g=t.o.gold|0, off=t.lock||g<=0; return `<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;border:1px solid var(--line2);background:#14100d">${clsIc(t.o.cls,22)}<div style="flex:1;min-width:0"><div style="font-size:14px">${esc(dispName(t.o))} <span style="color:var(--mute);font-size:12px">Lv ${t.o.lvl}${t.lock?' · 플레이 중':''}</span></div><div style="color:#ffd84a;font-size:13px">💰 ${g.toLocaleString('ko-KR')}G</div></div><button class="btn sm gtOne" data-id="${t.id}" style="padding:6px 12px${off?';opacity:.4':''}"${off?' disabled':''}>받기</button></div>`; }).join('');
   const tot=L.reduce((a,t)=>a+(t.lock?0:t.o.gold|0),0);
-  modal(`<h3>💰 골드 받기</h3><p class="meta" style="margin:0 0 8px">캐릭터가 가진 골드를 공유보관함으로 가져와요</p><button class="btn primary" id="gtAll" style="width:100%;margin-bottom:10px${tot<=0?';opacity:.5':''}"${tot<=0?' disabled':''}>⚡ 일괄 받기 (모든 캐릭터)</button><div class="col" style="gap:6px;margin-bottom:10px">${rows}</div><button class="btn" id="gtNo" style="width:100%">닫기</button>`,m=>{
-    m.querySelector('#gtNo').onclick=closeModal;
+  modal(`<div style="position:sticky;top:-18px;z-index:2;margin:-18px -18px 8px;padding:18px 18px 4px;background:var(--panel);display:flex;align-items:flex-start;justify-content:space-between;gap:8px"><h3 style="margin:0">💰 골드 받기</h3><button type="button" id="gtX" aria-label="닫기" style="flex:none;width:36px;height:36px;margin-top:-4px;border-radius:9px;border:1.5px solid #8a7440;background:#14100d;color:#ffd84a;font:700 18px/1 sans-serif;cursor:pointer">✕</button></div><p class="meta" style="margin:0 0 8px">캐릭터가 가진 골드를 공유보관함으로 가져와요</p><button class="btn primary" id="gtAll" style="width:100%;margin-bottom:10px${tot<=0?';opacity:.5':''}"${tot<=0?' disabled':''}>⚡ 일괄 받기 (모든 캐릭터)</button><div class="col" style="gap:6px;margin-bottom:10px">${rows}</div><button class="btn" id="gtNo" style="width:100%">닫기</button>`,m=>{
+    m.querySelector('#gtNo').onclick=closeModal; m.querySelector('#gtX').onclick=closeModal;
     const done=(n,msg)=>{ saveStore(); uiDirty=true; sfx('coin'); rerender(); toast(msg,'#ffd84a'); };
     m.querySelectorAll('.gtOne').forEach(b=>b.onclick=()=>{ const t=L.find(x=>x.id===b.dataset.id); if(!t||t.lock)return; const g=t.o.gold|0; if(g<=0)return;
       t.o.gold=0; saveTarget(t); S.gold=(S.gold|0)+g; done(g,`${dispName(t.o)}에게서 ${g.toLocaleString('ko-KR')}G를 받았어요`); takeGold(); });
