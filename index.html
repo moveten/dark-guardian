@@ -1446,7 +1446,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0605</div>
+    <div class="ver" id="verT">v0.6.5.0606</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3524,7 +3524,7 @@ function bossAI(m,dt,pls,sf){
       else if(t.kind==='drain'){ let n=0; for(const p of pls){ if(p.i>=10||hyp(p.x-t.x,p.y-t.y)>=t.r)continue; n++; if(p.i===1)applyStatus('mdrain',.6); else pushEv(['x',2,'mdrain',.6]); }   /* 범위 안 플레이어 마나 흡수(최대 마나의 약 60%, 에너지로 경감) → 보스는 1명당 최대 생명력의 1.5% 회복 */
         pushEv(['s',Math.round(t.x),Math.round(t.y),t.r]); slamFx(t.x,t.y,t.r,'#b070ff'); burst(m.x,m.y,'#b070ff',24,220);
         if(n){ const hl=m.max*.015*n; m.hp=Math.min(m.max,m.hp+hl); addNum(m.x,m.y-m.r-10,'+'+Math.round(hl),'#c090ff',false); } }
-      else if(t.kind==='counter'){ m.counter=2.6; pushEv(['cn',1]); announce('⚔️ 반격 태세! 스킬을 쓰면 크게 다쳐요 (일반공격은 OK)','#ffb347'); sfx('block'); }
+      else if(t.kind==='counter'){ m.counter=2.3; pushEv(['cn',1]); announce('⚔️ 반격 태세! 스킬을 쓰면 크게 다쳐요 (일반공격은 OK)','#ffb347'); sfx('block'); }
       else if(t.kind==='blink'){ burst(m.x,m.y,'#241044',26,260); m.x=clamp(t.x,40,WW-40); m.y=clamp(t.y,40,WH-40); m.fa=Math.atan2(best.y-m.y,best.x-m.x); burst(m.x,m.y,'#9a6bff',30,320); slamFx(m.x,m.y,t.r,'#9a6bff'); pushEv(['s',Math.round(m.x),Math.round(m.y),t.r]); G.shake=Math.max(G.shake,.3);
         for(const p of pls){ if(hyp(p.x-m.x,p.y-m.y)<t.r+12) mobHitPlayer(p.i,m.dmg*2); } m.cd=Math.max(m.cd,.6); }   /* 도착 즉시 일반 공격(2배) */
       else if(t.kind==='aoe'||t.kind==='leap'){ if(t.kind==='leap'){ m.x=clamp(t.x,40,WW-40); m.y=clamp(t.y,40,WH-40); } const dm=m.dmg*t.mul*BSKM*(m.skm||1);
@@ -4018,7 +4018,7 @@ function doCast(key,range,lv){
   fxQ.push([++fxSeq,key,Math.round(tx),Math.round(ty),lv,key==='divine'?(me.dvPc|0):0]); if(fxQ.length>6)fxQ.shift();
 }
 /* 반격 태세: 우두머리는 무적이 아니라서 일반공격·소환수·스킬 피해가 모두 그대로 들어가고, 태세 중에 내가 스킬을 쓰면 추가로 내 최대 생명력의 CNT_PCT 만큼 방어력·막기 무시로 되돌려받음 */
-const CNT_PCT=.4, CNT_WIN=2, CNT_BLK=3; /* 반사 피해(최대 생명력 비율) / 태세 중 시전한 스킬만 반사 대상으로 인정하는 시간(초) — 태세 전에 깔아 둔 장판·지연 피해는 반사 없이 보스에게만 들어감 */
+const CNT_PCT=.22, CNT_WIN=2, CNT_BLK=3; /* 반사 피해(최대 생명력 비율) / 태세 중 시전한 스킬만 반사 대상으로 인정하는 시간(초) — 태세 전에 깔아 둔 장판·지연 피해는 반사 없이 보스에게만 들어감 */
 function counterHit(m,v){ if(T-(me.cLast||-9)<.6||me.dead||T-(me.cnCast||-9)>CNT_WIN||me.cnDone===me.cnId)return; me.cLast=T; me.cnDone=me.cnId;   /* 스킬 한 번에 반사는 한 번만 (여러 발·여러 번 맞는 스킬도) */ addNum(me.x,me.y-44,'⚔️ 반격!','#ff8a3a',true); efx.push({k:'ring',x:me.x,y:me.y,r0:8,r1:50,t:0,life:.35,col:'#ff8a3a',w:7});
   if(me.god>0||G.phase==='win'||G.phase==='clear')return; const d=Math.round(me.D.maxHp*CNT_PCT*(me.D.sp&&me.D.sp.hamu?.5:1)); tkAdd(d); me.hp-=d; me.hurt=.15; sfx('hurt'); G.shake=Math.max(G.shake,.4); addNum(me.x,me.y-24,d,'#ff5a4a',false); if(me.hp<=0){ goDown(); counterTip(); return; } me.hblk=Math.max(me.hblk||0,CNT_BLK); me.hpLk=me.hp; addNum(me.x,me.y-66,'💔 '+CNT_BLK+'초 봉쇄 · 물약·치유 오라만 회복','#ff8ab0',true); }   /* 반사 피해를 받으면 3초 회복 봉쇄 */
 const LVP0={ex:0,gap:0,dm:1,tk:1,miss:0};
@@ -5416,7 +5416,7 @@ function spdTip(){ const t=me&&me.tut; if(!t||t.sp||G.mode!=='solo'||G.coop||!sp
   later(2.8,()=>{ if(!G.inGame||G.mode!=='solo'||G.coop||tutS||stS||tutWait||storyWait||t.sp||!$('#modal').hidden)return; t.sp=1; saveChar();
     modal(`<h3>⏩ 1.3배속 · 🤖 AUTO 스킬 해금!</h3><div class="mbody" style="line-height:1.7"><p style="margin:0 0 8px">1-5 스테이지를 클리어해서 <b style="color:#ffb259">배속 기능</b>과 <b style="color:#ffb259">AUTO 스킬</b>(AUTO를 두 번 눌러 스킬까지 자동 사용)이 열렸어요.</p><p style="margin:0 0 8px">AUTO 왼쪽의 <b>⏩ 버튼</b>을 누르면 게임이 <b>1.3배</b> 빨라지고, 한 번 더 누르면 원래 속도로 돌아와요.</p><p style="margin:0;color:var(--mute)">설정은 캐릭터마다 기억돼요. 협동에서는 방장의 설정을 따라가요. 클리어 시간은 실제 시간으로 기록돼요.</p></div><div class="row2"><button class="btn" id="spNo">알겠어요</button><button class="btn primary" id="spOn">지금 켜 보기</button></div>`,m=>{ m.querySelector('#spNo').onclick=closeModal; m.querySelector('#spOn').onclick=()=>{ closeModal(); setSpd(true,{save:true,hint:true}); sfx('aura'); }; }); }); }
 function counterTip(){ const t=me&&me.tut; if(!t||t.cn||tutS)return; t.cn=1; saveChar(); const au=autoMode===2;
-  later(.7,()=>{ if(!G.inGame)return; modal(`<h3>⚔️ 보스의 반격 태세!</h3><div class="mbody" style="line-height:1.7"><p style="margin:0 0 8px">보스 머리 위에 <b style="color:#ffb347">⚔️ 반격 태세</b>가 뜨는 동안(약 3초)에는 <b>스킬을 쓰면 안 돼요.</b> 쓰는 순간 내 최대 생명력의 <b style="color:#ff8a7a">40%</b>가 피해로 되돌아와요.</p><p style="margin:0 0 8px">일반공격과 소환수 공격은 괜찮아요. 태세가 풀리면 다시 스킬을 쓰세요.</p>${au?'<p style="margin:0;color:#ffb259"><b>AUTO(+스킬)</b>도 태세를 구분하지 못해요. 보스가 태세에 들어가면 AUTO를 1단계(이동)로 낮추거나 직접 조작하세요.</p>':'<p style="margin:0;color:var(--mute)">AUTO(+스킬)를 쓸 때도 태세를 구분하지 못하니 조심하세요.</p>'}</div><div class="row2"><button class="btn primary" id="cnOk" style="grid-column:1/-1">알겠어요</button></div>`,m=>{ m.querySelector('#cnOk').onclick=closeModal; }); }); }
+  later(.7,()=>{ if(!G.inGame)return; modal(`<h3>⚔️ 보스의 반격 태세!</h3><div class="mbody" style="line-height:1.7"><p style="margin:0 0 8px">보스 머리 위에 <b style="color:#ffb347">⚔️ 반격 태세</b>가 뜨는 동안(약 3초)에는 <b>스킬을 쓰면 안 돼요.</b> 쓰는 순간 내 최대 생명력의 <b style="color:#ff8a7a">${Math.round(CNT_PCT*100)}%</b>가 피해로 되돌아와요.</p><p style="margin:0 0 8px">일반공격과 소환수 공격은 괜찮아요. 태세가 풀리면 다시 스킬을 쓰세요.</p>${au?'<p style="margin:0;color:#ffb259"><b>AUTO(+스킬)</b>도 태세를 구분하지 못해요. 보스가 태세에 들어가면 AUTO를 1단계(이동)로 낮추거나 직접 조작하세요.</p>':'<p style="margin:0;color:var(--mute)">AUTO(+스킬)를 쓸 때도 태세를 구분하지 못하니 조심하세요.</p>'}</div><div class="row2"><button class="btn primary" id="cnOk" style="grid-column:1/-1">알겠어요</button></div>`,m=>{ m.querySelector('#cnOk').onclick=closeModal; }); }); }
 function tutBegin(){ const k=selStage; if(tutS||!me||!me.tut||!me.tut.on||G.mode!=='solo'||G.coop||k>=TUTS.length||me.tut.d[k]!==0)return false;
   later(1.4,()=>{ if(G.inGame&&G.stageIdx===k&&!tutS&&G.mode==='solo'&&!G.coop)tutRun(k); }); return true; }
 function tutRun(k){ tutS={k,i:-1,fl:{},S:{},ok:false,pz:false,conf:0,key:''}; $('#tq').hidden=false; clearInterval(tutIv); tutIv=setInterval(tutTick,120); tutGo(0); }
@@ -6874,7 +6874,7 @@ function trSpawn(){ if(!G.inGame||!G.train)return;
   { const m=spawnMob(0,VX+TR_CN[0],VY+TR_CN[1],false); m.scare=1; m.cnD=1; m.hx=m.x; m.hy=m.y; m.hp=m.max=1e8; m.dmg=0; m.xp=0; m.spd=70; m.fa=m.f0=Math.PI/2; m.scLast=-99; m.cd=99; m.counter=TR_CN_DUR; m.cnW=0;   /* 소환되자마자 반격 태세 → 끝나면 1초 뒤 다시 */
     efx.push({k:'ring',x:m.x,y:m.y,r0:6,r1:50,t:0,life:.4,col:'#ffb347',w:6}); burst(m.x,m.y,'#ffb347',12,200); }
   sfx('boss'); toast('🎯 허수아비 7기가 나타났어요 (위쪽 1기는 반격 태세)','#e0c080'); }
-const TR_CN_DUR=2.6, TR_CN_GAP=1;   /* 반격 태세 지속 시간(보스와 같음) · 끝난 뒤 다시 쓰기까지 */
+const TR_CN_DUR=2.3, TR_CN_GAP=1;   /* 반격 태세 지속 시간(보스와 같음) · 끝난 뒤 다시 쓰기까지 */
 function trScareTick(m,dt){ if(m.cnD){ if(m.counter>0){ m.counter-=dt; if(m.counter<=0){ m.counter=0; m.cnW=TR_CN_GAP; } } else { m.cnW-=dt; if(m.cnW<=0){ m.counter=TR_CN_DUR; addNum(m.x,m.y-m.r-30,'⚔️ 반격 태세!','#ffb347',true); sfx('block'); } } }
   m.stunT=0; m.slowT=0; m.taunt=null; m.cd=99; mobKb(m,dt);
   const dx=m.hx-m.x, dy=m.hy-m.y, d=hyp(dx,dy);
