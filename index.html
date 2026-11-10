@@ -1449,7 +1449,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0622</div>
+    <div class="ver" id="verT">v0.6.5.0623</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1746,7 +1746,7 @@ const CAS_CFG={
   rec:{slam:1},                                                /* 철퇴 강타 직후 다음 행동까지 추가로 쉬는 시간(초) */
   skillRate:.75,                                               /* 특수기술이 준비됐을 때 실제로 쓸 확률 */
   mul:{slam:2.2,ring:2.2,charge:2.0,multi:1.8}, dur:{slam:1.7,ring:1.5,charge:1.4,multi:1.5},
-  tr:{slam:220,slamOut:400,multi:125,chargeHW:70,chargeLen:450,chargeDev:.5},               /* 기본 기술 범위: 철퇴 강타 반지름 · 투석 포격 반지름 · 돌진 반폭(중심선 좌우 각각) · 돌진 길이 */   /* 철퇴 강타·돌진·투석 포격 피해 배율 / 시전 시간 */
+  tr:{slam:220,slamOut:400,multi:125,multiStun:2,multiBlk:5,chargeHW:70,chargeLen:450,chargeDev:.5},               /* 기본 기술 범위: 철퇴 강타 반지름 · 투석 포격 반지름 · 돌진 반폭(중심선 좌우 각각) · 돌진 길이 */   /* 철퇴 강타·돌진·투석 포격 피해 배율 / 시전 시간 */
   gate:{cd:45,dur:7,heal:.03,healAt:2,tel:.7,cone:1.75},        /* 성문 닫기: 대기·지속·초당 회복(최대체력 비율, 최근 1초간 피해를 못 받았을 때만)·회복 시작·시전·막는 범위(라디안, 좌우 각각) */
   sil:{cd:30,dur:5,tel:1.3,crit:2},                             /* 침묵의 군기: 대기·지속·시전·보스가 받는 치명타 배율 */
   horn:{cd:35,dur:3,tel:1.3,r:470,imm:1.5,gap:8},               /* 공성 나팔(공포): 대기·지속·시전·범위·면역·침묵과의 최소 간격 */
@@ -3042,7 +3042,7 @@ function casSkillPick(m,best,bd,pls){ const C=CAS_CFG, ph=m.ph|0||1, opts=[], fr
     if(k==='gate'){ casCutin(3); pushEv(['csc',3]); }
     if(k!=='spin'&&k!=='shspin'){ casBan(k==='gate'?'🚪 성문 닫기':k==='sil'?'🚫 침묵의 군기':'📯 공성 나팔',k==='gate'?'정면 공격이 막혀요 — 뒤로 돌아가요':k==='sil'?'피할 수 없어요 · 일반공격만 가능, 치명타 ×2':'원 밖으로 벗어나세요 — 공포에 걸려요',2.0); casFlash(m,k==='gate'?'#ffd070':k==='sil'?'#c8a0ff':'#ff9a5a',k==='gate'?'🚪 성문 닫기':k==='sil'?'🚫 침묵의 군기':'📯 공성 나팔',k==='gate'?'255,210,110':k==='sil'?'190,150,255':'255,150,80',false); } return; }
   const rr=Math.random();   /* 기본 기술: 철퇴 강타 · 돌진(전 페이즈) · 투석 포격(3페이즈) */
-  if(ph>=3&&rr<.3){ const pts=[{x:best.x,y:best.y}]; for(let i=0;i<4;i++)pts.push({x:clamp(best.x+rand(-230,230),40,WW-40),y:clamp(best.y+rand(-230,230),40,WH-40)}); m.tel={k:'slam',kind:'multi',cas:1,x:pts[0].x,y:pts[0].y,pts,r:C.tr.multi,mul:C.mul.multi,col:'#e08a3a',t:0,dur:C.dur.multi}; casBan('🪨 투석 포격','붉은 원 밖으로!',1.4); }
+  if(ph>=3&&rr<.3){ const pts=[{x:best.x,y:best.y}]; for(let i=0;i<4;i++)pts.push({x:clamp(best.x+rand(-230,230),40,WW-40),y:clamp(best.y+rand(-230,230),40,WH-40)}); m.tel={k:'slam',kind:'multi',cas:1,x:pts[0].x,y:pts[0].y,pts,r:C.tr.multi,mul:C.mul.multi,st:'stun',sd:C.tr.multiStun,st2:'hlock',sd2:C.tr.multiBlk,col:'#e08a3a',t:0,dur:C.dur.multi}; casBan('🪨 투석 포격','붉은 원 밖으로! 맞으면 2초 기절 · 5초 회복 봉쇄',1.4); }
   else if(rr<(ph>=3?.6:ph>=2?.5:.4)&&bd>170) { m.tel={k:'charge',kind:'charge',cas:1,x:m.x,y:m.y,tx:best.x,ty:best.y,r:0,w:C.tr.chargeHW,len:C.tr.chargeLen,t:0,dur:C.dur.charge,mul:C.mul.charge}; casBan('🛡️ 방패 돌격','붉은 길에서 비켜서세요!',1.4); casCutin(2); pushEv(['csc',2]); }
   else { m.tel={k:'slam',kind:'slam',cas:1,x:m.x,y:m.y,r:C.tr.slam,mul:C.mul.slam,t:0,dur:C.dur.slam}; casCutin(); pushEv(['csc',1]); } }
 function casAI(m,dt,pls,sf,best,bd,tau){
@@ -3541,7 +3541,7 @@ function bossAI(m,dt,pls,sf){
           for(let k=1;k<=4;k++){ const ex=t.x+ux*t.len*k/4, ey=t.y+uy*t.len*k/4; slamFx(ex,ey,t.w*.6,t.col); pushEv(['s',Math.round(ex),Math.round(ey),Math.round(t.w*.6)]); } } G.shake=Math.max(G.shake,.4);
         if(t.dash){ const a=t.as[(t.as.length/2)|0]; burst(m.x,m.y,'#2a1a4a',20,240); m.x=clamp(t.x+Math.cos(a)*t.len*.85,50,WW-50); m.y=clamp(t.y+Math.sin(a)*t.len*.85,50,WH-50); m.fa=a; burst(m.x,m.y,'#b88aff',24,300); } }   /* 맏이의 검: 가운데 길 끝까지 돌진 */
       else if(t.kind==='multi'&&t.brand){ for(const p of pls){ if(p.i>=10)continue; if(!t.pts.some(q=>hyp(p.x-q.x,p.y-q.y)<t.r))continue; for(const k of t.brand){ const st=k==='h'?'hblock':'mblock'; if(p.i===1)applyStatus(st,5); else pushEv(['x',2,st,5]); } } for(const q of t.pts){ pushEv(['s',Math.round(q.x),Math.round(q.y),t.r]); slamFx(q.x,q.y,t.r,t.col); } }
-      else if(t.kind==='multi'){ const dm=m.dmg*t.mul*BSKM*(m.skm||1); for(const q of t.pts){ for(const p of pls){ if(hyp(p.x-q.x,p.y-q.y)<t.r) mobHitPlayer(p.i,dm,t.st||0,t.sd||0); } pushEv(['s',Math.round(q.x),Math.round(q.y),t.r]); slamFx(q.x,q.y,t.r,t.col); } G.shake=Math.max(G.shake,.6); }
+      else if(t.kind==='multi'){ const dm=m.dmg*t.mul*BSKM*(m.skm||1); for(const q of t.pts){ for(const p of pls){ if(hyp(p.x-q.x,p.y-q.y)<t.r){ mobHitPlayer(p.i,dm,t.st||0,t.sd||0); if(t.st2&&p.i<10){ if(p.i===1)applyStatus(t.st2,t.sd2); else pushEv(['x',2,t.st2,t.sd2]); } } } pushEv(['s',Math.round(q.x),Math.round(q.y),t.r]); slamFx(q.x,q.y,t.r,t.col); } G.shake=Math.max(G.shake,.6); }
       else if(t.k==='slam'){ for(const p of pls){ const dd=hyp(p.x-t.x,p.y-t.y); if(t.kind==='ring'?(dd>=t.ri&&dd<t.r):dd<t.r) mobHitPlayer(p.i,m.dmg*(t.mul||1.6)*BSKM,'stun',1.2); }
         pushEv(['s',Math.round(t.x),Math.round(t.y),t.r]); slamFx(t.x,t.y,t.r); }
       else { const dx=t.tx-t.x,dy=t.ty-t.y,d=hyp(dx,dy)||1; m.charge={dx:dx/d,dy:dy/d,t:Math.min(.75,450/620),hit:{},mul:t.mul||1.6}; if(t.len&&m.rk==='cas'){ m.charge.t=t.len/620; } }
@@ -3748,13 +3748,14 @@ const tkAdd=n=>{ if(n>0&&G.inGame)G.stTaken=(G.stTaken||0)+n; };   /* 이번 판
 function spinHitMe(pct){ fixDmg(pct,'💥','#ff6a3a'); if(me.dead||me.hp<=0||me.god>0)return; const b=CAS_CFG.spin.blk; me.hblk=Math.max(me.hblk||0,b); me.hpLk=me.hp; if(T-(me._sbN||-9)>1){ me._sbN=T; addNum(me.x,me.y-66,'💔 '+b+'초 봉쇄 · 물약·치유 오라만 회복','#ff8ab0',true); } }   /* 방패·철퇴 회전에 맞으면 3초 회복 봉쇄 */
 function fixDmg(pct,txt,col){ if(me.dead||me.god>0)return; const loss=Math.max(1,Math.floor(me.D.maxHp*pct)); tkAdd(loss); me.hp-=loss; me.hurt=.3; addNum(me.x,me.y-34,(txt||'')+'-'+loss,col||'#ff5a7a',false); spark(me.x,me.y,col||'#ff5a7a',8); sfx('hurt'); if(me.hp<=0)goDown(); }
 function applyStatus(kind,dur){ if(me.dead||me.god>0)return;
-  { const ar=(me.D&&me.D.sp&&me.D.sp.aw_ring)|0; if(ar&&['erode','hblock','hblockp','mblock','slow','stun','bleed'].includes(kind))dur*=Math.max(.5,1-.25*ar); }   /* 각성 반지 '속박 해제': 디버프 지속시간 -25% (2개 -50%) */
+  { const ar=(me.D&&me.D.sp&&me.D.sp.aw_ring)|0; if(ar&&['erode','hblock','hblockp','mblock','slow','stun','bleed','hlock'].includes(kind))dur*=Math.max(.5,1-.25*ar); }   /* 각성 반지 '속박 해제': 디버프 지속시간 -25% (2개 -50%) */
   { const sp=me.D&&me.D.sp; if(sp){ if(kind==='sil'){ dur*=Math.max(.5,1-.1*(sp.cs_ring|0))*((me.D.ks|0)>=4?.5:1); } else if(kind==='fear'&&(me.D.ks|0)>=7)dur=Math.min(dur,1); } }   /* 수문장 세트: 반지 봉쇄 -10%(2개 -20%) · 4세트 봉쇄 절반 · 7세트 공포 1초 */
   if(kind==='sil'){ me.sil=dur; addNum(me.x,me.y-52,'🚫 침묵!','#d0a8ff',true); spark(me.x,me.y,'#c8a0ff',14); return; }
   if(kind==='fear'){ if(me.fearImm>0)return; me.fear=dur; me.fearImm=dur+CAS_CFG.horn.imm; me.fearT2=0; addNum(me.x,me.y-52,'😱 공포!','#ffb070',true); spark(me.x,me.y,'#ff9a5a',14); return; }
   if(kind==='cfix'){ spinHitMe(dur); return; }
   if(kind==='doom'){ if(me.hp>0){ addNum(me.x,me.y-50,'☠️ 즉사','#ff4a6a',true); burst(me.x,me.y,'#2a1a4a',40,320); spark(me.x,me.y,'#8a6cff',30); G.shake=1; sfx('hurt'); goDown(); } return; }   /* 그림자 등불 실패 */
   if(kind==='bleed'){ if(!(me.bleed>0))me.bleedT=.5; me.bleed=Math.max(me.bleed||0,dur); me.bleedN=Math.max(me.bleedN|0,Math.round(dur/.5)); me.hblk=Math.max(me.hblk||0,dur); if(me.hpLk==null)me.hpLk=me.hp; addNum(me.x,me.y-46,'🩸 출혈 · 물약·치유 오라만 회복','#ff5a6a',true); return; }   /* 그림자 베기: 3초간 0.5초마다 최대 생명력 10% 고정 피해 + 생명력 회복 불가(물약만) */
+  if(kind==='hlock'){ me.hblk=Math.max(me.hblk||0,dur); me.hpLk=me.hp; addNum(me.x,me.y-46,'💔 '+Math.round(dur)+'초 봉쇄 · 물약·치유 오라만 회복','#ff8ab0',true); return; }   /* 투석 포격 피격: 생명력 회복 금지(물약·치유 오라만 가능), 고정 피해 없음 */
   if(kind==='erode'){ me.erode=Math.max(me.erode||0,dur); addNum(me.x,me.y-46,'🌑 그림자 잠식','#b89cff',true); return; }
   if(kind==='hblock'||kind==='hblockp'){ const loss=Math.floor(me.D.maxHp*.5); tkAdd(loss); me.hpLk=null; me.hp-=loss; me.hurt=.3; addNum(me.x,me.y-30,'-'+loss,'#ff5a7a',true); spark(me.x,me.y,'#ff5a9a',18); sfx('hurt'); G.shake=Math.max(G.shake,.5); if(me.hp<=0){ goDown(); return; } }   /* 생명 봉쇄: 최대 생명력 50% 고정 피해 후 회복 막힘 */
   if(kind==='mblock'){ me.mpLk=null; me.mp=Math.max(0,me.mp-me.D.maxMp*.5); }   /* 마나 봉쇄: 최대 마나 50% 잃고 회복 막힘 */
