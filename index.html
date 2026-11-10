@@ -1449,7 +1449,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0623</div>
+    <div class="ver" id="verT">v0.6.5.0624</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -2582,7 +2582,9 @@ function sellInfo(it){ let base=SELLBASE[it.rar]||100, ex=0; for(const a of it.a
 const need=l=>l<=58?Math.floor(23*Math.pow(l,1.92)):Math.floor(23*Math.pow(58,1.92)*Math.pow(l/58,9.5)); /* 레벨업 경험치: 계수 23 · 지수 1.92 · 전환 레벨 58 · 전환 후 지수 9.5 */
 /* ===== 펫 (유니크 '아자젤'): 캐릭터마다 따로 · 도박장에서만 · 경험치 = 그 캐릭터가 얻는 경험치와 같은 양 (펫 Lv10 = 캐릭터 Lv99까지의 누적 경험치) ===== */
 const PETS={azazel:{n:'아자젤',rn:'유니크',col:'#ff9a3a',pn:'지옥불의 가호',an:'업화의 낙인',im:'pet_azazel',un:{3:'지옥불의 가호',5:'업화의 낙인'}},
-  trio:{n:'그림자 삼남매',rn:'영웅',col:'#b48cff',pn:'전투 함성',an:'그림자 강습',im:'pet_trio',un:{3:'전투 함성',7:'그림자 강습',10:'감전'},max:15,eq:[0,40,55,65,75,82,88,93,97,99,101,104,106,108,110]}};   /* 삼남매: 전사펫 전투 함성(Lv3) · 검은 그림자 강습(Lv7) · 마법사펫 감전(Lv10) */
+  trio:{n:'그림자 삼남매',rn:'영웅',col:'#b48cff',pn:'전투 함성',an:'그림자 강습',im:'pet_trio',un:{3:'전투 함성',7:'그림자 강습',10:'감전'},max:15,eq:[0,40,55,65,75,82,88,93,97,99,101,104,106,108,110]},
+  dealer:{n:'베이비 딜러',rn:'레어',col:'#e8c04a',pn:'행운의 칩',an:'단골 흥정',im:'pet_dealer',pas:1,un:{3:'행운의 칩',6:'단골 흥정'}}};   /* 베이비 딜러(패시브 전용): 행운의 칩(Lv3) 드롭률 +30, 레벨당 +10 → Lv10 +100 · 단골 흥정(Lv6) 자동판매 금액 +5%, 레벨당 +2% → Lv10 +13% */
+const DEALER={mf:l=>l>=3?30+10*(l-3):0,sp:l=>l>=6?5+2*(l-6):0};   /* 삼남매: 전사펫 전투 함성(Lv3) · 검은 그림자 강습(Lv7) · 마법사펫 감전(Lv10) */
 const PET_MAXLV=10, PET_LVEQ=[0,40,55,65,75,82,88,93,97,99], PET_DUP_GOLD=500000;   /* PET_LVEQ: 펫 레벨 n에 필요한 누적 경험치 = 캐릭터 Lv(PET_LVEQ[n-1])까지의 누적 경험치 */
 const PET_TC={};
 const petMax=id=>(PETS[id]&&PETS[id].max)||PET_MAXLV;
@@ -2602,7 +2604,7 @@ const petHas=(p,id)=>petOwned(p).includes(id);
 function petGive(p,id){ if(!p||!PETS[id]||petHas(p,id))return 0; if(!petOf(p)){ p.pet={id,xp:0}; petNorm(p); ttfPet(id,p,true); return 1; } (p.pets||(p.pets={}))[id]={id,xp:0}; petNorm(p); ttfPet(id,p,true); return 2; }   /* 1 = 바로 데리고 다님 · 2 = 보관 */
 function petSwap(id){ const p=me; if(!p||!p.pets||!p.pets[id]||(p.pet&&p.pet.id===id))return; if(p.pet)p.pets[p.pet.id]={id:p.pet.id,xp:p.pet.xp,lv:p.pet.lv}; p.pet=p.pets[id]; delete p.pets[id]; petNorm(p); petDrop(); PET.mk.length=0; PET.fx.length=0; PET.lg=null; PET.sq=null; PET.on=false; if(G.inGame)petStart(); recalc(); saveChar(); sfx('ui'); toast(`🐾 ${PETS[id].n}와(과) 함께 다녀요`,PETS[id].col); }
 function petGain(xp){ const e=petOf(me); if(!e||!(xp>0))return; const top=petT(e.id)[petMax(e.id)-1]; if(e.xp>=top)return; e.xp=Math.min(top,e.xp+xp); const lv=petLvOf(e.xp,e.id);
-  if(lv>(e.lv||1)){ const pv=e.lv||1; e.lv=lv; recalc(); saveChar(); PET.fx.push({k:'lvup',t:0,life:1.8,a:pv,b:lv}); { const un=PETS[e.id].un&&PETS[e.id].un[lv]; if(un)toast(`스킬 「${un}」 해금 · 쿨타임마다 자동 발동`,PETS[e.id].col); } sfx('lvl'); } }
+  if(lv>(e.lv||1)){ const pv=e.lv||1; e.lv=lv; recalc(); saveChar(); PET.fx.push({k:'lvup',t:0,life:1.8,a:pv,b:lv}); { const un=PETS[e.id].un&&PETS[e.id].un[lv]; if(un)toast(PETS[e.id].pas?`패시브 「${un}」 해금`:`스킬 「${un}」 해금 · 쿨타임마다 자동 발동`,PETS[e.id].col); } sfx('lvl'); } }
 
 function derive(p,nm){   /* nm=true: 마을 풍차 보너스를 빼고 계산 (능력치 창에서 풍차 몫을 따로 보여주려고) */
   const d={rng:0,blk:0,mf:0,pr:0,mr:0,str:p.stats.str,dex:p.stats.dex,vit:p.stats.vit,ene:p.stats.ene,dmg:0,dmgPct:0,def:0,life:0,mana:0,ias:0,ms:0,ls:0,crit:5,cls:0,sk:{},wmn:1,wmx:3,dr:0,regen:0,cdr:0,sm:0,smhp:0,sp:{},hc:0,rbd:0};
@@ -2627,6 +2629,7 @@ function derive(p,nm){   /* nm=true: 마을 풍차 보너스를 빼고 계산 (�
   if(p.buffs&&p.buffs.bless&&p.buffs.bless.t>0){ const v=p.buffs.bless.v|0; d.str+=v; d.dex+=v; d.vit+=v; d.ene+=v; }   /* 세크리파이스 축복: 올스탯 */
   if(p.mb){ d.dmgPct+=p.mb.dmg||0; d.ias+=p.mb.ias||0; d.ms+=p.mb.ms||0; }
   { const t=p.tt&&TT_BY[p.tt]; if(t&&t.ap)t.ap(d); }   /* 장착한 칭호 효과 */
+  if(p.pet&&p.pet.id==='dealer'){ const l=p.pet.lv||petLvOf(p.pet.xp|0,'dealer'); d.mf+=DEALER.mf(l); d.sellP=(d.sellP||0)+DEALER.sp(l); }   /* 베이비 딜러(동행 중): 드롭률 · 판매 금액 */
   const C=CLASSES[p.cls];
   const pen=wpPen(p); if(pen){ d.ms-=pen.ms; d.blkMax=pen.blk||BLKMAX; d.mrx=pen.mr||1; }   /* 대검·도끼 패널티 */
   { const pl=k=>{ if(pen&&pen.sk.includes(k))return 0; const b=(p.skills&&p.skills[k])||0; return b>0?b+d.cls+(d.sk[k]||0):0;}; const a1=pl('ironbody'),a2=pl('bulwark'),a3=pl('arcane'),a4=pl('swift'); if(a4)d.ms+=10+2*a4; d.dr+=a1*.012; d.regen+=a1*.0015; d.mr+=a3*3; d.cdr+=a3*.01; d.blk+=a2; }
@@ -4282,6 +4285,7 @@ function updatePet(dt){
   if(!go){ tx=me.x+(Math.cos(me.face||0)>=0?-30:30); ty=me.y+10; const d=hyp(tx-PET.x,ty-PET.y); if(d>420){ PET.x=tx; PET.y=ty; } else if(d>14)go=true; }
   PET.mv=0; if(go){ const dx=tx-PET.x, dy=ty-PET.y, d=hyp(dx,dy)||1, st=Math.min(d,sp*dt); PET.x+=dx/d*st; PET.y+=dy/d*st; if(Math.abs(dx)>2)PET.face=dx>0?0:Math.PI; PET.mv=1; }
   if(e.id==='trio'){ trioSkills(e.lv||1,dt); return; }
+  if(PETS[e.id].pas)return;   /* 패시브 전용 펫(베이비 딜러)은 스킬이 없어요 */
   /* 스킬 (자동 발동) */
   if(f.buf){ if(PET.cd1>0)PET.cd1=Math.max(0,PET.cd1-dt); else if(petCombat()&&G.mobs.some(m=>!m.dead&&hyp(m.x-me.x,m.y-me.y)<420))petBuff(f); }
   if(!f.act)return;
@@ -5593,6 +5597,7 @@ function openSheet(m){ if(m==='pet'&&sheetMode!=='pet')petSel=null;   /* 펫 창
 const petN=n=>n>=10000?Math.round(n/1e4).toLocaleString('ko-KR')+'만':Math.round(n).toLocaleString('ko-KR');
 /* ===== 펫 정보 화면 공통 양식 (삼남매 양식이 기본): 머리 카드 · 레벨 로드맵 · 스킬 카드 ===== */
 const PET_TH={azazel:{bd:'#8a4a1a',bg:'#1a0f08',bg2:'#241408',bar:['#ff6a1f','#ffb13a'],on:['#ff7a1f','#ffc04a'],off:'#2a1a10',mk:{3:'🔥',5:'🔥'},mkt:'🔥 Lv3 · 🔥 Lv5',tagc:'#ff9a3a',tagt:'#2a1608'},
+  dealer:{bd:'#8a6a1a',bg:'#1a1406',bg2:'#241a08',bar:['#c98a1a','#ffe27a'],on:['#d9a020','#ffe27a'],off:'#2a200c',mk:{3:'🍀',6:'💰'},mkt:'🍀 Lv3 · 💰 Lv6',tagc:'#5aa8ff',tagt:'#06142a'},
   trio:{bd:'#6a4aa0',bg:'#150f1e',bg2:'#1a1224',bar:['#7a4cff','#d08cff'],on:['#8a5cff','#d08cff'],off:'#241a2e',mk:{3:'⚔️',7:'🌑',10:'⚡'},mkt:'⚔️ Lv3 · 🌑 Lv7 · ⚡ Lv10',tagc:'#b48cff',tagt:'#1b0f2e'}};
 const TRI_C={war:'#e0708a',shd:'#b48cff',sorc:'#8f96ff'};
 function petHead(id,lv,e,bar){ const P=PETS[id], H=PET_TH[id], mx=petMax(id), T=petT(id), max=lv>=mx, lo=T[lv-1], hi=max?T[mx-1]:T[lv], pct=max?100:Math.max(0,Math.min(100,((e?e.xp:lo)-lo)/(hi-lo)*100));
@@ -5610,6 +5615,9 @@ function petSkHtml(id,lv){
     const nextTn=(()=>{ for(let l=lv+1;l<=PET_MAXLV;l++)if(PET_TN[l-1]>PET_TN[lv-1])return `Lv${l} ${PET_TN[l-1]}마리`; return '최대'; })();
     return petSkCard('#ff9a3a','pet_azazel','지옥불의 가호',3,lv,`<div class="nm">이동 속도 +${f.bms}% 버프</div><div class="ds">지속 <b>${f.bdur}초</b> (${nextDur}) · 쿨타임 <b>${f.bcd}초</b><br>적이 가까이 오면 자동으로 발동해요 · 전투력에는 포함되지 않아요</div>`,`이동 속도 +${a.bms}% · 지속 Lv3 ${a.bdur}초 → Lv10 ${z.bdur}초 · 쿨타임 ${a.bcd}초`,H.bg2)
      +petSkCard('#ff7a3a','pet_azazel','업화의 낙인',5,lv,`<div class="nm">가까운 적 ${f.tn}마리에 ${f.adur}초간 불꽃 낙인</div><div class="ds">1초마다 내 무기 공격력의 <b>${f.tick}%</b> (한 마리당 합계 ${f.tick*f.adur}%) · 쿨타임 <b>${f.acd}초</b><br>${nextTn==='최대'?'대상 수 최대':'다음 대상 증가: '+nextTn}</div>`,`Lv5 ${n5.tn}마리 · 틱 ${n5.tick}% → Lv10 ${n10.tn}마리 · 틱 ${n10.tick}% · 쿨타임 ${n5.acd}초`,H.bg2); }
+  if(id==='dealer'){ const bg=PET_TH.dealer.bg2, C='#e8c04a', pas=(col,nm,un,on,off)=>{ const ok=lv>=un; return `<div class="pt-card pt-sk${ok?'':' pt-lock'}" style="border-color:${ok?col:'#4a3a2a'};background:${ok?bg:'#15110a'}"><h4 style="color:${ok?col:'#a89868'};display:flex;align-items:center;gap:8px"><span>${nm}</span><span class="pt-pill" style="border-color:${ok?col:'#6a5a3a'};background:#2a200c;color:#fff0c8;margin-left:auto">${ok?'패시브':'Lv'+un+' 해금'}</span></h4>${ok?on:`<div class="nm">🔒 Lv${un}에 해금돼요</div><div class="ds">${off}</div>`}</div>`; };
+    return pas(C,'행운의 칩',3,`<div class="nm">드롭률 <b>+${DEALER.mf(lv)}</b></div><div class="ds">레벨이 오를 때마다 +10 · ${lv<10?`다음 Lv${lv+1} +${DEALER.mf(lv+1)}`:'최대'}</div>`,`드롭률 +${DEALER.mf(3)} → Lv10 +${DEALER.mf(10)} (레벨당 +10)`)
+     +pas('#ffb13a','단골 흥정',6,`<div class="nm">자동 판매 금액 <b>+${DEALER.sp(lv)}%</b></div><div class="ds">레벨이 오를 때마다 +2% · ${lv<10?`다음 Lv${lv+1} +${DEALER.sp(lv+1)}%`:'최대'} · 판매 가격 보너스와 합산돼요</div>`,`자동 판매 금액 +${DEALER.sp(6)}% → Lv10 +${DEALER.sp(10)}% (레벨당 +2%)`); }
   const bg=PET_TH.trio.bg2, nx=(fn,l)=>l<15?` (다음 Lv${l+1} ${fn(l+1)}%)`:'';
   const nxc=(()=>{ for(let l=lv+1;l<=15;l++)if(TRIO.sn(l)>TRIO.sn(lv))return `다음 증가 Lv${l} ${TRIO.sn(l)}마리`; return '대상 수 최대'; })();
   return petSkCard(TRI_C.war,'pet_trio_war','전투 함성',3,lv,`<div class="nm">함성으로 ${TRIO.sdur}초간 내 피해 증가</div><div class="ds">피해 <b>+${TRIO.sl(lv)}%</b>${nx(TRIO.sl,lv)} · 범위 ${TRIO.sr} · 쿨타임 <b>${TRIO.cd.sl}초</b><br>전사 전투 함성과 합산돼요 · 쿨타임 감소는 없어요</div>`,`피해 +${TRIO.sl(3)}% → Lv15 +${TRIO.sl(15)}% · ${TRIO.sdur}초 · 범위 ${TRIO.sr} · 쿨타임 ${TRIO.cd.sl}초`,bg)
