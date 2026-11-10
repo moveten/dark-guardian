@@ -1449,7 +1449,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0619</div>
+    <div class="ver" id="verT">v0.6.5.0620</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -5587,7 +5587,7 @@ let shopMsg='', buyMsg='', sellAskIt=null;
 const sortedNew=new Set();   /* 가방에서 정렬한 탭('eq'·'misc'): 가방을 닫거나 다른 탭으로 나갈 때 그 탭의 NEW 표시를 모두 지움 */
 function flushSortedNew(){ try{ if(!sortedNew.size||!me)return; if(sortedNew.has('eq'))(me.inv||[]).forEach(x=>{ if(x)delete x.isNew; }); if(sortedNew.has('misc'))(me.misc||[]).forEach(x=>{ if(x)delete x.isNew; }); sortedNew.clear(); if(me.id)saveChar(); uiDirty=true; }catch(e){ sortedNew.clear(); } }
 let sortFresh=true;   /* 가방을 연 뒤 첫 정렬 누름: 저장된 방식 그대로 정렬 → 그다음부터 방식을 바꿔 가며 정렬 */
-function openSheet(m){ if(G.train)trOpen(false); if(m==='store'&&me&&me.hc){ warn('💀 하드코어 캐릭터는 공유보관함을 이용할 수 없어요'); return; } if(sheetMode==='bag'&&m!=='bag')flushSortedNew(); sortFresh=true; bagTab='eq'; storeTab='eq'; if(!G.inGame&&!G.titleSheet)return; document.body.classList.add('shopen'); sheetMode=m; selItem=null; shopMsg=''; buyMsg=''; $('#sheet').hidden=false; if(G.inGame&&G.mode==='solo')G.paused=true; for(const k in held)held[k]=false; joy.active=false;
+function openSheet(m){ if(m==='pet'&&sheetMode!=='pet')petSel=null;   /* 펫 창에 들어올 때마다 지금 함께 다니는 펫이 먼저 선택돼요 */ if(G.train)trOpen(false); if(m==='store'&&me&&me.hc){ warn('💀 하드코어 캐릭터는 공유보관함을 이용할 수 없어요'); return; } if(sheetMode==='bag'&&m!=='bag')flushSortedNew(); sortFresh=true; bagTab='eq'; storeTab='eq'; if(!G.inGame&&!G.titleSheet)return; document.body.classList.add('shopen'); sheetMode=m; selItem=null; shopMsg=''; buyMsg=''; $('#sheet').hidden=false; if(G.inGame&&G.mode==='solo')G.paused=true; for(const k in held)held[k]=false; joy.active=false;
   rerender(); $('#sheetB').scrollTop=0; }
 const petN=n=>n>=10000?Math.round(n/1e4).toLocaleString('ko-KR')+'만':Math.round(n).toLocaleString('ko-KR');
 /* ===== 펫 정보 화면 공통 양식 (삼남매 양식이 기본): 머리 카드 · 레벨 로드맵 · 스킬 카드 ===== */
@@ -5670,7 +5670,7 @@ $('#ptsBar').onclick=()=>{ sheetMode='stat'; selItem=null; rerender(); };
 $('#sheetTabs').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; if(b.id==='tSend'){ if(me&&me.hc){ sheetToast('하드코어 캐릭터는 공유보관함을 이용할 수 없어요','#ff8a7a'); return; } sheetMode='bag'; selItem=null; bagSel=new Set(); bagSelM=new Set(); rerender(); $('#sheetB').scrollTop=0; return; }   /* 📦 창고로: 가방을 열고 선택 모드로 */
   if(sheetMode==='bag'&&b.dataset.m!=='bag')flushSortedNew();   /* 가방에서 정렬한 탭의 NEW는 가방을 벗어날 때 지움 (가방 탭을 한 번 더 눌러도 아무 일 없음) */
   bagSel=null; if(b.dataset.m!==sheetMode){ bagTab='eq'; storeTab='eq'; } sheetMode=b.dataset.m; selItem=null; shopMsg=''; buyMsg=''; rerender(); $('#sheetB').scrollTop=0; });
-function openTitleSheet(m){ prepMe(); G.titleSheet=true; if(m==='store')STORE=loadStore(); openSheet(m); }
+function openTitleSheet(m){ if(m==='pet')petSel=null; prepMe(); G.titleSheet=true; if(m==='store')STORE=loadStore(); openSheet(m); }
 function closeSheet(){ if(sheetMode==='dex'){ dexSeen(); dexWas=false; } flushSortedNew(); gemSock=null; try{ hoverHide(); }catch(e){} document.body.classList.remove('shopen'); for(const id of ['bBag','bStat','bSkillT','bMenu']){ const e=$('#'+id); if(e)e.setAttribute('aria-pressed','false'); } const was=G.titleSheet; if(me&&me.id&&sheetMode!=='town')saveChar(); sheetMode=null; bagSel=null; $('#sheetTabs').classList.remove('selhide'); $('#selBar').hidden=true; $('#sheet').hidden=true; G.paused=false; if(was){ G.titleSheet=false; renderClassCards(); } }
 $('#sheetX').onclick=closeSheet;
 /* 마을 창이 열려 있을 때 창 밖(어두운 배경·하단 탭 등)을 누르면 그 버튼은 실행하지 않고 마을 창만 닫음 */
