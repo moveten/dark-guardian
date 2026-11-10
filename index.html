@@ -1449,7 +1449,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0624</div>
+    <div class="ver" id="verT">v0.6.5.0625</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -2583,8 +2583,8 @@ const need=l=>l<=58?Math.floor(23*Math.pow(l,1.92)):Math.floor(23*Math.pow(58,1.
 /* ===== 펫 (유니크 '아자젤'): 캐릭터마다 따로 · 도박장에서만 · 경험치 = 그 캐릭터가 얻는 경험치와 같은 양 (펫 Lv10 = 캐릭터 Lv99까지의 누적 경험치) ===== */
 const PETS={azazel:{n:'아자젤',rn:'유니크',col:'#ff9a3a',pn:'지옥불의 가호',an:'업화의 낙인',im:'pet_azazel',un:{3:'지옥불의 가호',5:'업화의 낙인'}},
   trio:{n:'그림자 삼남매',rn:'영웅',col:'#b48cff',pn:'전투 함성',an:'그림자 강습',im:'pet_trio',un:{3:'전투 함성',7:'그림자 강습',10:'감전'},max:15,eq:[0,40,55,65,75,82,88,93,97,99,101,104,106,108,110]},
-  dealer:{n:'베이비 딜러',rn:'레어',col:'#e8c04a',pn:'행운의 칩',an:'단골 흥정',im:'pet_dealer',pas:1,un:{3:'행운의 칩',6:'단골 흥정'}}};   /* 베이비 딜러(패시브 전용): 행운의 칩(Lv3) 드롭률 +30, 레벨당 +10 → Lv10 +100 · 단골 흥정(Lv6) 자동판매 금액 +5%, 레벨당 +2% → Lv10 +13% */
-const DEALER={mf:l=>l>=3?30+10*(l-3):0,sp:l=>l>=6?5+2*(l-6):0};   /* 삼남매: 전사펫 전투 함성(Lv3) · 검은 그림자 강습(Lv7) · 마법사펫 감전(Lv10) */
+  dealer:{n:'베이비 딜러',rn:'레어',col:'#e8c04a',pn:'행운의 칩',an:'단골 우대',im:'pet_dealer',pas:1,un:{3:'행운의 칩',5:'단골 우대'}}};   /* 베이비 딜러(패시브 전용): 행운의 칩(Lv3) 드롭률 +30, 레벨당 +10 → Lv10 +100 · 단골 우대(Lv5) 도박장 비용 -10%, 레벨당 -2% → Lv10 -20% (획득: 도감 행운의 도박꾼 세트 완성 보상) */
+const DEALER={mf:l=>l>=3?30+10*(l-3):0,cd:l=>l>=5?10+2*(l-5):0};   /* 삼남매: 전사펫 전투 함성(Lv3) · 검은 그림자 강습(Lv7) · 마법사펫 감전(Lv10) */
 const PET_MAXLV=10, PET_LVEQ=[0,40,55,65,75,82,88,93,97,99], PET_DUP_GOLD=500000;   /* PET_LVEQ: 펫 레벨 n에 필요한 누적 경험치 = 캐릭터 Lv(PET_LVEQ[n-1])까지의 누적 경험치 */
 const PET_TC={};
 const petMax=id=>(PETS[id]&&PETS[id].max)||PET_MAXLV;
@@ -2629,7 +2629,7 @@ function derive(p,nm){   /* nm=true: 마을 풍차 보너스를 빼고 계산 (�
   if(p.buffs&&p.buffs.bless&&p.buffs.bless.t>0){ const v=p.buffs.bless.v|0; d.str+=v; d.dex+=v; d.vit+=v; d.ene+=v; }   /* 세크리파이스 축복: 올스탯 */
   if(p.mb){ d.dmgPct+=p.mb.dmg||0; d.ias+=p.mb.ias||0; d.ms+=p.mb.ms||0; }
   { const t=p.tt&&TT_BY[p.tt]; if(t&&t.ap)t.ap(d); }   /* 장착한 칭호 효과 */
-  if(p.pet&&p.pet.id==='dealer'){ const l=p.pet.lv||petLvOf(p.pet.xp|0,'dealer'); d.mf+=DEALER.mf(l); d.sellP=(d.sellP||0)+DEALER.sp(l); }   /* 베이비 딜러(동행 중): 드롭률 · 판매 금액 */
+  if(p.pet&&p.pet.id==='dealer'){ const l=p.pet.lv||petLvOf(p.pet.xp|0,'dealer'); d.mf+=DEALER.mf(l); d.casD=DEALER.cd(l); }   /* 베이비 딜러(동행 중): 드롭률 · 도박장 비용 할인(%) */
   const C=CLASSES[p.cls];
   const pen=wpPen(p); if(pen){ d.ms-=pen.ms; d.blkMax=pen.blk||BLKMAX; d.mrx=pen.mr||1; }   /* 대검·도끼 패널티 */
   { const pl=k=>{ if(pen&&pen.sk.includes(k))return 0; const b=(p.skills&&p.skills[k])||0; return b>0?b+d.cls+(d.sk[k]||0):0;}; const a1=pl('ironbody'),a2=pl('bulwark'),a3=pl('arcane'),a4=pl('swift'); if(a4)d.ms+=10+2*a4; d.dr+=a1*.012; d.regen+=a1*.0015; d.mr+=a3*3; d.cdr+=a3*.01; d.blk+=a2; }
@@ -5597,7 +5597,7 @@ function openSheet(m){ if(m==='pet'&&sheetMode!=='pet')petSel=null;   /* 펫 창
 const petN=n=>n>=10000?Math.round(n/1e4).toLocaleString('ko-KR')+'만':Math.round(n).toLocaleString('ko-KR');
 /* ===== 펫 정보 화면 공통 양식 (삼남매 양식이 기본): 머리 카드 · 레벨 로드맵 · 스킬 카드 ===== */
 const PET_TH={azazel:{bd:'#8a4a1a',bg:'#1a0f08',bg2:'#241408',bar:['#ff6a1f','#ffb13a'],on:['#ff7a1f','#ffc04a'],off:'#2a1a10',mk:{3:'🔥',5:'🔥'},mkt:'🔥 Lv3 · 🔥 Lv5',tagc:'#ff9a3a',tagt:'#2a1608'},
-  dealer:{bd:'#8a6a1a',bg:'#1a1406',bg2:'#241a08',bar:['#c98a1a','#ffe27a'],on:['#d9a020','#ffe27a'],off:'#2a200c',mk:{3:'🍀',6:'💰'},mkt:'🍀 Lv3 · 💰 Lv6',tagc:'#5aa8ff',tagt:'#06142a'},
+  dealer:{bd:'#8a6a1a',bg:'#1a1406',bg2:'#241a08',bar:['#c98a1a','#ffe27a'],on:['#d9a020','#ffe27a'],off:'#2a200c',mk:{3:'🍀',5:'🎰'},mkt:'🍀 Lv3 · 🎰 Lv5',tagc:'#5aa8ff',tagt:'#06142a'},
   trio:{bd:'#6a4aa0',bg:'#150f1e',bg2:'#1a1224',bar:['#7a4cff','#d08cff'],on:['#8a5cff','#d08cff'],off:'#241a2e',mk:{3:'⚔️',7:'🌑',10:'⚡'},mkt:'⚔️ Lv3 · 🌑 Lv7 · ⚡ Lv10',tagc:'#b48cff',tagt:'#1b0f2e'}};
 const TRI_C={war:'#e0708a',shd:'#b48cff',sorc:'#8f96ff'};
 function petHead(id,lv,e,bar){ const P=PETS[id], H=PET_TH[id], mx=petMax(id), T=petT(id), max=lv>=mx, lo=T[lv-1], hi=max?T[mx-1]:T[lv], pct=max?100:Math.max(0,Math.min(100,((e?e.xp:lo)-lo)/(hi-lo)*100));
@@ -5617,7 +5617,7 @@ function petSkHtml(id,lv){
      +petSkCard('#ff7a3a','pet_azazel','업화의 낙인',5,lv,`<div class="nm">가까운 적 ${f.tn}마리에 ${f.adur}초간 불꽃 낙인</div><div class="ds">1초마다 내 무기 공격력의 <b>${f.tick}%</b> (한 마리당 합계 ${f.tick*f.adur}%) · 쿨타임 <b>${f.acd}초</b><br>${nextTn==='최대'?'대상 수 최대':'다음 대상 증가: '+nextTn}</div>`,`Lv5 ${n5.tn}마리 · 틱 ${n5.tick}% → Lv10 ${n10.tn}마리 · 틱 ${n10.tick}% · 쿨타임 ${n5.acd}초`,H.bg2); }
   if(id==='dealer'){ const bg=PET_TH.dealer.bg2, C='#e8c04a', pas=(col,nm,un,on,off)=>{ const ok=lv>=un; return `<div class="pt-card pt-sk${ok?'':' pt-lock'}" style="border-color:${ok?col:'#4a3a2a'};background:${ok?bg:'#15110a'}"><h4 style="color:${ok?col:'#a89868'};display:flex;align-items:center;gap:8px"><span>${nm}</span><span class="pt-pill" style="border-color:${ok?col:'#6a5a3a'};background:#2a200c;color:#fff0c8;margin-left:auto">${ok?'패시브':'Lv'+un+' 해금'}</span></h4>${ok?on:`<div class="nm">🔒 Lv${un}에 해금돼요</div><div class="ds">${off}</div>`}</div>`; };
     return pas(C,'행운의 칩',3,`<div class="nm">드롭률 <b>+${DEALER.mf(lv)}</b></div><div class="ds">레벨이 오를 때마다 +10 · ${lv<10?`다음 Lv${lv+1} +${DEALER.mf(lv+1)}`:'최대'}</div>`,`드롭률 +${DEALER.mf(3)} → Lv10 +${DEALER.mf(10)} (레벨당 +10)`)
-     +pas('#ffb13a','단골 흥정',6,`<div class="nm">자동 판매 금액 <b>+${DEALER.sp(lv)}%</b></div><div class="ds">레벨이 오를 때마다 +2% · ${lv<10?`다음 Lv${lv+1} +${DEALER.sp(lv+1)}%`:'최대'} · 판매 가격 보너스와 합산돼요</div>`,`자동 판매 금액 +${DEALER.sp(6)}% → Lv10 +${DEALER.sp(10)}% (레벨당 +2%)`); }
+     +pas('#ffb13a','단골 우대',5,`<div class="nm">달빛 도박장 비용 <b>-${DEALER.cd(lv)}%</b> (한 판 ${casCostOf(DEALER.cd(lv)).toLocaleString('ko-KR')}G)</div><div class="ds">레벨이 오를 때마다 -2% · ${lv<10?`다음 Lv${lv+1} -${DEALER.cd(lv+1)}%`:'최대'}</div>`,`도박장 비용 -${DEALER.cd(5)}% → Lv10 -${DEALER.cd(10)}% (레벨당 -2%)`); }
   const bg=PET_TH.trio.bg2, nx=(fn,l)=>l<15?` (다음 Lv${l+1} ${fn(l+1)}%)`:'';
   const nxc=(()=>{ for(let l=lv+1;l<=15;l++)if(TRIO.sn(l)>TRIO.sn(lv))return `다음 증가 Lv${l} ${TRIO.sn(l)}마리`; return '대상 수 최대'; })();
   return petSkCard(TRI_C.war,'pet_trio_war','전투 함성',3,lv,`<div class="nm">함성으로 ${TRIO.sdur}초간 내 피해 증가</div><div class="ds">피해 <b>+${TRIO.sl(lv)}%</b>${nx(TRIO.sl,lv)} · 범위 ${TRIO.sr} · 쿨타임 <b>${TRIO.cd.sl}초</b><br>전사 전투 함성과 합산돼요 · 쿨타임 감소는 없어요</div>`,`피해 +${TRIO.sl(3)}% → Lv15 +${TRIO.sl(15)}% · ${TRIO.sdur}초 · 범위 ${TRIO.sr} · 쿨타임 ${TRIO.cd.sl}초`,bg)
@@ -5652,23 +5652,26 @@ function dexCell(k,p,tone){ const S=SPFX[k], n=(p.dx&&p.dx[k])|0, im=UNQIMG[S.n]
 function dexGroup(id,title,ico,keys0,p,tone){ const keys=dexKeysOf(keys0,p), got=keys.filter(k=>(p.dx&&p.dx[k]|0)>0).length, open=!dexClosed.has(id);
   return `<section class="dxg"><div class="dxh2"><button class="dxh" data-dg="${id}" aria-expanded="${open}"><span>${ico} ${esc(title)} <em>${got}/${keys.length}</em>${keys.some(k=>p.dxn&&p.dxn[k])?'<i class="dxnb">NEW</i>':''}</span><u>${open?'▾':'▸'}</u></button>${dexPetBtn(title,got,keys.length,p)}</div>${open?`<div class="dxgrid">${keys.map(k=>dexCell(k,p,tone)).join('')}</div>`:''}</section>`; }
 /* 그림자 세트 도감 완성 보상: 유니크 펫 '그림자 삼남매' (캐릭터마다 한 번 · 펫 칸이 비어 있어야 받아요) */
-const dexTrioDone=p=>!!p&&dexKeysOf(['hdag','hhelm','harmor','hamu','hring','@hoff_'],p).every(k=>(p.dx&&p.dx[k]|0)>0);
+const DEX_PET={'그림자 세트':{id:'trio',keys:['hdag','hhelm','harmor','hamu','hring','@hoff_']},'행운의 도박꾼 세트':{id:'dealer',keys:['cas_wpn','cas_armor','cas_amu']}};   /* 도감 세트 완성 보상 펫 */
+const dexPetDone=(id,p)=>{ const g=Object.values(DEX_PET).find(x=>x.id===id); return !!p&&!!g&&dexKeysOf(g.keys,p).every(k=>(p.dx&&p.dx[k]|0)>0); };
 function dexPetRow(){ return ''; }   /* 보상은 그림자 세트 제목줄 오른쪽 알약 버튼으로 이동 */
-function dexPetBtn(title,got,tot,p){ if(title!=='그림자 세트')return ''; const done=got>=tot, had=!!(p.tpt&&p.tpt.trio);
-  return had?'<span class="rwA done" aria-label="도감 보상 수령 완료">✔ 보상 완료</span>':done?'<button class="rwA" data-pr="trio" aria-label="도감 보상 받기">🎁 보상 받기</button>':`<span class="rwA lock" aria-label="도감 보상 미완성">🔒 보상 ${got}/${tot}</span>`; }
-function dexPetAsk(){ const p=me; if(!p||!dexTrioDone(p)||(p.tpt&&p.tpt.trio))return; sfx('ui');
-  const sk=(im,n,d,l)=>`<div class="rwm-sk"><img alt="" src="img/${im}.png"><div><b>${n}</b><small>${d}</small></div><i>Lv${l}</i></div>`;
-  modal(`<div class="rwm"><h3>🎁 도감 완성 보상</h3><div class="pt"><img alt="" src="img/pet_trio.png"></div><div class="nm">그림자 삼남매<span class="tg">영웅</span></div>`
-   +sk('pet_trio_war','전투 함성',`${TRIO.sdur}초간 내 피해 증가`,3)+sk('pet_trio_shd','그림자 강습','순간이동하며 적을 강타',7)+sk('pet_trio_sorc','감전','연쇄 번개 · 감전 상태',10)
-   +`<div class="nt">Lv1부터 시작 · 이미 펫이 있으면 펫 보관함에 저장돼요</div><div class="bt"><button class="btn" id="rwNo">닫기</button><button class="btn primary go" id="rwGo">🎁 받기</button></div></div>`,
-   m=>{ m.querySelector('#rwNo').onclick=closeModal; m.querySelector('#rwGo').onclick=()=>{ closeModal(); dexPetClaim(); }; }); }
-function dexPetClaim(){ const p=me; if(!p||!dexTrioDone(p)||(p.tpt&&p.tpt.trio))return; const r=petGive(p,'trio'); if(!r)return; recalc(); saveChar(); sfx('rare'); toast(r===1?'🐾 영웅 펫 「그림자 삼남매」를 받았어요!':'🐾 「그림자 삼남매」를 받았어요 · 정비 > 펫에서 함께 다닐 펫을 바꿀 수 있어요','#b48cff'); renderDex(); }
+function dexPetBtn(title,got,tot,p){ const pd=DEX_PET[title]; if(!pd)return ''; const done=got>=tot, had=!!(p.tpt&&p.tpt[pd.id]);
+  return had?'<span class="rwA done" aria-label="도감 보상 수령 완료">✔ 보상 완료</span>':done?`<button class="rwA" data-pr="${pd.id}" aria-label="도감 보상 받기">🎁 보상 받기</button>`:`<span class="rwA lock" aria-label="도감 보상 미완성">🔒 보상 ${got}/${tot}</span>`; }
+function dexPetAsk(id){ const p=me; if(!p||!dexPetDone(id,p)||(p.tpt&&p.tpt[id]))return; sfx('ui');
+  const sk=(im,n,d,l)=>`<div class="rwm-sk">${im?`<img alt="" src="img/${im}.png">`:'<img alt="" src="img/pet_dealer.png" style="visibility:hidden">'}<div><b>${n}</b><small>${d}</small></div><i>Lv${l}</i></div>`;
+  const body=id==='dealer'?`<div class="pt"><img alt="" src="img/pet_dealer.png"></div><div class="nm">베이비 딜러<span class="tg">레어</span></div>`
+     +sk('','행운의 칩',`드롭률 +${DEALER.mf(3)} · 레벨당 +10 (Lv10 +${DEALER.mf(10)})`,3)+sk('','단골 우대',`달빛 도박장 비용 -${DEALER.cd(5)}% · 레벨당 -2% (Lv10 -${DEALER.cd(10)}%)`,5)
+    :`<div class="pt"><img alt="" src="img/pet_trio.png"></div><div class="nm">그림자 삼남매<span class="tg">영웅</span></div>`
+     +sk('pet_trio_war','전투 함성',`${TRIO.sdur}초간 내 피해 증가`,3)+sk('pet_trio_shd','그림자 강습','순간이동하며 적을 강타',7)+sk('pet_trio_sorc','감전','연쇄 번개 · 감전 상태',10);
+  modal(`<div class="rwm"><h3>🎁 도감 완성 보상</h3>${body}<div class="nt">Lv1부터 시작 · 이미 펫이 있으면 펫 보관함에 저장돼요</div><div class="bt"><button class="btn" id="rwNo">닫기</button><button class="btn primary go" id="rwGo">🎁 받기</button></div></div>`,
+   m=>{ m.querySelector('#rwNo').onclick=closeModal; m.querySelector('#rwGo').onclick=()=>{ closeModal(); dexPetClaim(id); }; }); }
+function dexPetClaim(id){ const p=me; if(!p||!dexPetDone(id,p)||(p.tpt&&p.tpt[id]))return; const r=petGive(p,id); if(!r)return; recalc(); saveChar(); sfx('rare'); const P=PETS[id]; toast(r===1?`🐾 ${P.rn} 펫 「${P.n}」를 받았어요!`:`🐾 「${P.n}」를 받았어요 · 정비 > 펫에서 함께 다닐 펫을 바꿀 수 있어요`,P.col); renderDex(); }
 function renderDex(){
   markTabs(); sheetHead(); const b=$('#sheetB'); b.className='sbody dex'; const p=me, spNw=DEX_SP.some(g=>g[2].some(k=>p.dxn&&p.dxn[k])), stNw=DEX_ST.some(g=>dexKeysOf(g[2],p).some(k=>p.dxn&&p.dxn[k])), spN=dexSpN(p), stN=dexStN(p), isSp=dexTab==='sp', got=isSp?spN:stN, tot=isSp?20:Math.max(1,dexStTot(p)), pct=(got/tot*100).toFixed(1)+'%';
   b.innerHTML=`<div class="dxt"><button data-dt="sp" aria-pressed="${isSp}">✨ 스페셜 아이템<small>${spN}/20</small>${spNw?'<i class="dxnb">NEW</i>':''}</button><button data-dt="st" aria-pressed="${!isSp}">🧩 세트 아이템<small>${stN}/${dexStTot(p)}</small>${stNw?'<i class="dxnb">NEW</i>':''}</button></div>
   <div class="dxp"><div class="dxpt"><b>${isSp?'특수 유니크 수집':'세트 수집'}</b><strong>${pct}</strong></div><div class="dxbar"><i style="width:${(got/tot*100).toFixed(2)}%"></i></div>${isSp?`<div class="dxpn">🏅 ${spN>=20?`칭호 <b>「${DEX_TITLE}」</b> 획득 완료`:`20종을 모으면 칭호 <b>「${DEX_TITLE}」</b> 획득`}</div>`:''}</div>
   ${isSp?DEX_SP.map((g,i)=>dexGroup('sp'+i,g[0],g[1],g[2],p,'sp')).join(''):DEX_ST.map((g,i)=>dexGroup('st'+i,g[0],g[1],g[2],p,'st')).join('')+'<div class="dxsoon">+ 새 세트는 스토리와 함께 추가돼요 <span>🔒</span></div>'}`;
-  b.querySelectorAll('[data-pr]').forEach(e=>e.onclick=dexPetAsk);
+  b.querySelectorAll('[data-pr]').forEach(e=>e.onclick=()=>dexPetAsk(e.dataset.pr));
   b.querySelectorAll('.dxc.nw').forEach(e=>e.onclick=()=>{ const y=b.scrollTop; delete p.dxn[e.dataset.dk]; saveChar(); renderDex(); b.scrollTop=y; });   /* 칸을 누르면 그 칸 NEW 확인 */
   b.querySelectorAll('[data-dt]').forEach(e=>e.onclick=()=>{ dexTab=e.dataset.dt; renderDex(); b.scrollTop=0; });
   b.querySelectorAll('[data-dg]').forEach(e=>e.onclick=()=>{ const id=e.dataset.dg, y=b.scrollTop; if(dexClosed.has(id))dexClosed.delete(id); else dexClosed.add(id); renderDex(); b.scrollTop=y; }); }
@@ -6978,7 +6981,7 @@ function townSlot(k,pos){ pos=pos||''; const B=getTown()[k], D=TOWN_B[k], lv=B.l
 /* ===== 달빛 도박장 (슬롯머신): 한 판 100,000G(공유보관함 골드) → 결과를 먼저 정해 저장하고, 화면은 연출만 보여줘요 =====
    일반(99%): 절반은 조각(그림자/각성 반반, 1~20개) · 절반은 꽝(보상 없음)
    대박 조각 0.5%: 조각 100개 (7 7 7 + 폭죽) · 대박 골드 0.5%: 3,000,000G (💎 💎 💎 + 금화 비) */
-const CAS_COST=100000, CAS_JP_SHARD=100, CAS_JP_GOLD=3000000, CAS_JP_P=.005, CAS_PET_P=.02;   /* 유니크 펫 '아자젤' 2% (나머지 보상은 97%: 조각 49.2 · 세트 24.4 · 보석 23.4) */
+const CAS_COST=100000, casCostOf=pc=>Math.round(CAS_COST*(1-(pc||0)/100)), casCost=()=>casCostOf(me&&me.D&&me.D.casD), CAS_JP_SHARD=100, CAS_JP_GOLD=3000000, CAS_JP_P=.005, CAS_PET_P=.02;   /* 유니크 펫 '아자젤' 2% (나머지 보상은 97%: 조각 49.2 · 세트 24.4 · 보석 23.4) */
 /* 슬롯 심볼 그림(스프라이트 1장): 받아지기 전엔 이모지로 보여주다가, 다 받아지면 그림으로 바꿔요 */
 let CASYM=0; const casImg=new Image();
 function casSymImg(){ if(casImg.src)return; casImg.onload=()=>{ CASYM=1; const m=$('#modal'); if(m&&m.classList.contains('cas'))m.classList.add('si'); }; casImg.onerror=()=>{ CASYM=-1; }; casImg.src='img/cas_sym.webp'; }
@@ -7010,11 +7013,11 @@ function casRoll(){ const r=Math.random(), ri2=(a,b)=>a+Math.floor(Math.random()
 const casMiss=()=>{ const a=['sh','aw','gd','j7','dm'].sort(()=>Math.random()-.5).slice(0,3); return a; };   /* 꽝: 서로 다른 그림 3개 */
 const casSym=o=>o.k==='pet'?'pt':o.k==='jps'?'j7':o.k==='jpg'?'dm':o.k==='gd'?'gd':o.k==='it'?'it':o.k==='gem'?'gm':o.mat==='ashard'?'aw':'sh';
 function casCharge(){ const S=getStore();
-  if(aGold()<CAS_COST)return {err:'poor'};
+  if(aGold()<casCost())return {err:'poor'};
   if(!shardRoom(S,CAS_JP_SHARD,'shard')||!shardRoom(S,CAS_JP_SHARD,'ashard'))return {err:'full'};   /* 어떤 결과든 보관함에 들어갈 자리가 있을 때만 */
   if(S.inv.indexOf(null)<0)return {err:'full'};   /* 장비가 나올 수 있어서 빈 칸 1개는 꼭 필요 */
   if(S.misc.indexOf(null)<0)return {err:'fullm'};   /* 보석이 나올 수 있어서 기타 칸도 1개 필요 */
-  const o=casRoll(); aPayGold(CAS_COST); if(o.gold)S.gold+=o.gold; else if(o.k==='it'){ o.it=genCas(o.key); S.inv[S.inv.indexOf(null)]=o.it; dexAdd(me,o.it); saveChar(); } else if(o.k==='gem'){ o.it=mkGem(o.gk,o.t); S.misc[S.misc.indexOf(null)]=o.it; } else if(o.k==='pet'){ const c=smChar(); if(c&&petGive(c,'azazel')){ saveChar(); } else { o.dup=1; S.gold+=PET_DUP_GOLD; } } else if(o.n)shardAdd(S,o.n,o.mat); saveStore(); if(o.k==='jpg')ttfSet('jpg'); else if(o.k==='jps')ttfSet('jps'); else if(o.k==='pet'&&!o.dup)ttfPet('azazel'); return {o}; }
+  const o=casRoll(); aPayGold(casCost()); if(o.gold)S.gold+=o.gold; else if(o.k==='it'){ o.it=genCas(o.key); S.inv[S.inv.indexOf(null)]=o.it; dexAdd(me,o.it); saveChar(); } else if(o.k==='gem'){ o.it=mkGem(o.gk,o.t); S.misc[S.misc.indexOf(null)]=o.it; } else if(o.k==='pet'){ const c=smChar(); if(c&&petGive(c,'azazel')){ saveChar(); } else { o.dup=1; S.gold+=PET_DUP_GOLD; } } else if(o.n)shardAdd(S,o.n,o.mat); saveStore(); if(o.k==='jpg')ttfSet('jpg'); else if(o.k==='jps')ttfSet('jps'); else if(o.k==='pet'&&!o.dup)ttfPet('azazel'); return {o}; }
 const casOwnerSvg=()=>`<svg viewBox="0 0 100 110" aria-hidden="true"><path d="M10 110Q14 78 50 74Q86 78 90 110Z" fill="#1b1426" stroke="#07040a" stroke-width="3"/><path d="M42 76H58L54 98H46Z" fill="#ddd5c2"/><path d="M50 82L38 76V90ZM50 82L62 76V90Z" fill="#b3202f" stroke="#2a0a10" stroke-width="1.5"/><circle cx="50" cy="82" r="3" fill="#7a1420"/>
  <g class="cs-jaw"><path d="M31 56Q31 76 50 76Q69 76 69 56Z" fill="#e9e2cf" stroke="#1a1410" stroke-width="3" stroke-linejoin="round"/><path d="M38 68H62M44 63V73M50 63V74M56 63V73" stroke="#1a1410" stroke-width="2" stroke-linecap="round" fill="none"/></g>
  <ellipse cx="50" cy="46" rx="22" ry="22" fill="#e9e2cf" stroke="#1a1410" stroke-width="3"/><ellipse cx="41" cy="46" rx="6.5" ry="7.5" fill="#120d18"/><ellipse cx="59" cy="46" rx="6.5" ry="7.5" fill="#120d18"/><circle class="cs-eyeg" cx="41" cy="47" r="2.4" fill="#7dffd6"/><circle class="cs-eyeg" cx="59" cy="47" r="2.4" fill="#7dffd6"/><path d="M50 52L47 59H53Z" fill="#1a1410"/>
@@ -7050,10 +7053,10 @@ function casinoModal(){
     <div class="cs-mach"><div class="cs-mq"><u></u><u></u><u></u><b>MOONLIGHT SLOTS</b><u></u><u></u><u></u></div>
       <div class="cs-row"><div class="cs-reels" id="casR">${init()}<div class="cs-pl"></div></div><div class="cs-lever" id="casL"><div class="cs-lv"><i></i><b></b></div><div class="cs-lbase"></div></div></div>
       <div class="cs-slot"><em>동전 투입구</em><div class="cs-coin" id="casC"></div></div></div>
-    <div class="cs-res" id="casS"><b>${CAS_COST.toLocaleString('ko-KR')}G를 넣고 당겨 보세요</b><small>조각 · 세트 장비 · 보석 · 대박 0.5% · 유니크 펫 2%</small></div>
+    <div class="cs-res" id="casS"><b>${casCost().toLocaleString('ko-KR')}G를 넣고 당겨 보세요</b><small>조각 · 세트 장비 · 보석 · 대박 0.5% · 유니크 펫 2%</small></div>
     <div class="cs-hist" id="casH"></div>
-    <div class="cs-act"><button class="btn primary go" id="casGo" type="button">💰 ${CAS_COST.toLocaleString('ko-KR')}G 넣고 당기기</button><button class="btn" id="casX" type="button">나가기</button></div>
-    <details class="cs-odds"><summary>ⓘ 확률 · 보상 보기</summary>한 판 ${CAS_COST.toLocaleString('ko-KR')}G (캐릭터 골드를 먼저 쓰고 모자라면 공유보관함 골드 사용, 보상은 공유보관함으로)<br>· 조각 <b>약 49.2%</b>: 그림자/각성 조각 중 하나 1~20개 (고르게)<br>· 🎲 세트 장비 <b>약 24.4%</b>: 행운의 도박꾼 세트(착용 Lv 30)의 무기 · 갑옷 · 목걸이 중 하나 (각 약 8.1%) · 도박장에서만 나와요<br>· 💠 보석 <b>약 23.4%</b>: 루비 · 사파이어 · 토파즈 · 에메랄드 · 자수정 · 다이아몬드 중 하나 (고르게), 등급은 항상 상급<br>· 🔥 대박 조각 <b>0.5%</b>: 그림자/각성 조각 중 하나 ${CAS_JP_SHARD}개<br>· 💎 대박 골드 <b>0.5%</b>: ${CAS_JP_GOLD.toLocaleString('ko-KR')}G<br>· 😈 유니크 펫 <b>2%</b>: 아자젤 (지금 선택한 캐릭터의 펫 · 이미 있으면 💰 ${PET_DUP_GOLD.toLocaleString('ko-KR')}G 환급)<br>· 결과는 당기는 순간 정해지고 바로 저장돼요. 조각·장비·보석이 들어갈 보관함 빈 칸(장비 1칸·기타 1칸)이 필요해요.</details>`,
+    <div class="cs-act"><button class="btn primary go" id="casGo" type="button">💰 ${casCost().toLocaleString('ko-KR')}G 넣고 당기기</button><button class="btn" id="casX" type="button">나가기</button></div>
+    <details class="cs-odds"><summary>ⓘ 확률 · 보상 보기</summary>한 판 ${casCost().toLocaleString('ko-KR')}G (캐릭터 골드를 먼저 쓰고 모자라면 공유보관함 골드 사용, 보상은 공유보관함으로)<br>· 조각 <b>약 49.2%</b>: 그림자/각성 조각 중 하나 1~20개 (고르게)<br>· 🎲 세트 장비 <b>약 24.4%</b>: 행운의 도박꾼 세트(착용 Lv 30)의 무기 · 갑옷 · 목걸이 중 하나 (각 약 8.1%) · 도박장에서만 나와요<br>· 💠 보석 <b>약 23.4%</b>: 루비 · 사파이어 · 토파즈 · 에메랄드 · 자수정 · 다이아몬드 중 하나 (고르게), 등급은 항상 상급<br>· 🔥 대박 조각 <b>0.5%</b>: 그림자/각성 조각 중 하나 ${CAS_JP_SHARD}개<br>· 💎 대박 골드 <b>0.5%</b>: ${CAS_JP_GOLD.toLocaleString('ko-KR')}G<br>· 😈 유니크 펫 <b>2%</b>: 아자젤 (지금 선택한 캐릭터의 펫 · 이미 있으면 💰 ${PET_DUP_GOLD.toLocaleString('ko-KR')}G 환급)<br>· 결과는 당기는 순간 정해지고 바로 저장돼요. 조각·장비·보석이 들어갈 보관함 빈 칸(장비 1칸·기타 1칸)이 필요해요.</details>`,
   m=>{ const $q=s=>m.querySelector(s), card=m.querySelector('.card'), bub=$q('#casB'), own=$q('#casO'), reels=$q('#casR'), lever=$q('#casL'), coin=$q('#casC'), res=$q('#casS'), hist=$q('#casH'), btn=$q('#casGo');
     const say=k=>{ bub.textContent=casPick(CAS_SAY[k]); bub.classList.remove('pop'); void bub.offsetWidth; bub.classList.add('pop'); own.classList.add('talk'); clearTimeout(hold); hold=setTimeout(()=>own.classList.remove('talk'),900); };
     const leave=()=>{ closeModal(); if(sheetMode==='town')renderTown(); };
@@ -7079,7 +7082,7 @@ function casinoModal(){
       const t=o.gold?`💰 ${o.gold>=10000?+(o.gold/10000).toFixed(1)+'만':((o.gold/1000)|0)+'천'}G`:`${SHK.e}${o.n}`; casRecent.unshift({t:(jp?'🎉 ':'')+t,jp}); casRecent.length=Math.min(casRecent.length,6); drawHist();
       $q('#casG').textContent=gtx(); busy=false; btn.disabled=false; };
     const go=()=>{ if(busy)return; const r=casCharge();
-      if(r.err){ say(r.err); sfx('lose'); res.className='cs-res'; res.innerHTML=r.err==='poor'?`<b>골드가 부족해요</b><small>보유 골드 ${aGold().toLocaleString('ko-KR')}G · 필요 ${CAS_COST.toLocaleString('ko-KR')}G</small>`:r.err==='fullm'?`<b>기타 칸이 가득 찼어요</b><small>보석이 나올 수 있어서 공유보관함 기타 칸에 빈 자리가 1개 필요해요</small>`:`<b>보관함 자리가 부족해요</b><small>공유보관함에 조각 ${CAS_JP_SHARD}개가 들어갈 자리가 필요해요 (정렬하거나 비워 주세요)</small>`; return; }
+      if(r.err){ say(r.err); sfx('lose'); res.className='cs-res'; res.innerHTML=r.err==='poor'?`<b>골드가 부족해요</b><small>보유 골드 ${aGold().toLocaleString('ko-KR')}G · 필요 ${casCost().toLocaleString('ko-KR')}G</small>`:r.err==='fullm'?`<b>기타 칸이 가득 찼어요</b><small>보석이 나올 수 있어서 공유보관함 기타 칸에 빈 자리가 1개 필요해요</small>`:`<b>보관함 자리가 부족해요</b><small>공유보관함에 조각 ${CAS_JP_SHARD}개가 들어갈 자리가 필요해요 (정렬하거나 비워 주세요)</small>`; return; }
       const o=r.o, sym=o.k==='no'?casMiss():casSym(o), jp=o.k==='jps'||o.k==='jpg'||o.k==='pet'; busy=true; btn.disabled=true; reels.classList.remove('hit'); for(const e of reels.querySelectorAll('.cs-reel'))e.classList.remove('stop');
       $q('#casG').textContent=gtx(); res.className='cs-res'; res.innerHTML='<b>…</b><small>돌아가는 중</small>'; say('go'); m.classList.add('spin');
       coin.classList.remove('go'); void coin.offsetWidth; coin.classList.add('go'); sfx('coin');
