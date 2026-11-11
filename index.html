@@ -331,7 +331,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 .twrap{min-width:0;max-width:100%}
 .tmapv{touch-action:none;position:relative;width:100%;aspect-ratio:848/1264;overflow:auto;border-radius:12px;border:1px solid #2a2240;overscroll-behavior:contain;scrollbar-width:none;-webkit-overflow-scrolling:touch;cursor:grab;background:#0a0710}
 .tmapv::-webkit-scrollbar{display:none}.tmapv.drg{cursor:grabbing;user-select:none}
-.tmap{position:relative;flex:none;width:800px;height:1200px;background:url(img/town_bg.webp) center/100% 100% no-repeat,radial-gradient(ellipse at 50% 30%,#2a1f42 0%,#140e20 58%,#0a0710 100%);overflow:hidden}   /* 큰 마을 지도: 800×1200 안을 위·아래·좌·우로 끌어서 둘러봐요 */
+.tmap{position:relative;flex:none;width:600px;height:900px;background:url(img/town_bg.webp) center/100% 100% no-repeat,radial-gradient(ellipse at 50% 30%,#2a1f42 0%,#140e20 58%,#0a0710 100%);overflow:hidden}   /* 큰 마을 지도: 600×900 안을 위·아래·좌·우로 끌어서 둘러봐요 */
 .tmhint{position:absolute;left:50%;top:10px;transform:translateX(-50%);z-index:7;pointer-events:none;padding:4px 10px;border-radius:12px;background:rgba(14,12,20,.62);border:1px solid rgba(255,255,255,.14);color:#e6dcff;font-size:11.5px;font-weight:700;white-space:nowrap;animation:tmh 4.5s ease forwards}
 @keyframes tmh{0%,70%{opacity:1}100%{opacity:0}}
 .tmap .tmine{position:absolute;left:var(--x);top:var(--y);transform:translate(-50%,calc(-100% + 12px));display:flex;flex-direction:column;align-items:center;gap:3px;z-index:1;pointer-events:none}
@@ -1352,7 +1352,7 @@ body.land #bBas{position:absolute;width:calc(var(--u) + 4px);height:calc(var(--u
 .mapbar .row2{display:flex;gap:8px;margin-top:2px}.mapbar .row2 .btn{flex:1}.mapbar .row2 .btn:disabled{opacity:.5}
 /* 마을 연출(Phaser) 레이어: 건물 버튼 뒤, 화면 합성(screen)이라 검은 부분은 투명하게 보임 */
 .tmap .tfx{position:absolute;left:0;top:0;width:50%;height:50%;transform:scale(2);transform-origin:0 0;z-index:0;pointer-events:none;mix-blend-mode:screen;overflow:hidden}   /* 지도가 커져도 그리기 부담이 늘지 않게 절반 크기로 그려서 2배로 늘려 보여줘요 */
-.tmap .tfx canvas{display:block;width:400px!important;height:600px!important}   /* 지도 확대(zoom)와 상관없이 고정 크기 → 연출 위치가 어긋나지 않아요 */
+.tmap .tfx canvas{display:block;width:300px!important;height:450px!important}   /* 지도 확대(zoom)와 상관없이 고정 크기 → 연출 위치가 어긋나지 않아요 */
 /* 소리 설정: 효과음·음성·음악 볼륨 슬라이더 */
 .vol{width:100%;display:flex;flex-direction:column;gap:8px;margin:2px 0 4px}
 .vol .vr{display:flex;align-items:center;gap:10px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:6px 10px 6px 6px}
@@ -1459,7 +1459,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0642</div>
+    <div class="ver" id="verT">v0.6.5.0643</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -7145,10 +7145,10 @@ let townZ=0;   /* 마을 지도 확대 배율 (다시 그려도 유지 · 0이�
 const tcFind=(arr,t)=>{ let lo=0,hi=arr.length-1; while(lo<hi){ const m=(lo+hi+1)>>1; if(arr[m].t<=t)lo=m; else hi=m-1; } return arr[lo]; };   /* t 이하 가장 가까운 구간 */
 /* 마을 고양이: 풀밭 빈자리를 어슬렁거리다가 앉아서 눈 깜빡이고 하품해요 (걷기 6칸 + 앉기 3칸 시트) */
 const TCAT={walk:{im:'town_cat_walk',cw:117,ch:109,n:6},sit:{im:'town_cat_sit',cw:125,ch:118,n:3},k:.4};
-const TCAT_EV=[['w',230,1080],['w',340,1115],['s',6],['w',560,1090],['w',650,1000],['s',5],['w',700,880],['w',640,720],['w',700,560],['s',6],['w',690,400],['w',600,300],['s',5],['w',420,330],['w',230,330],['s',6],['w',150,470],['w',150,640],['w',210,780],['w',170,930],['w',230,1080]];   /* w = 그 자리로 걷기, s = 앉아서 쉬기(초) — 지도 전체를 한 바퀴 돌아요 */
+const TCAT_EV=[['w',172,810],['w',255,836],['s',6],['w',420,818],['w',488,750],['s',5],['w',525,660],['w',480,540],['w',525,420],['s',6],['w',518,300],['w',450,225],['s',5],['w',315,248],['w',172,248],['s',6],['w',112,352],['w',112,480],['w',158,585],['w',128,698],['w',172,810]];   /* w = 그 자리로 걷기, s = 앉아서 쉬기(초) — 지도 전체를 한 바퀴 돌아요 */
 function townCatPart(){
   try{
-    const K=TCAT.k, ww=Math.round(TCAT.walk.cw*K), wh=Math.round(TCAT.walk.ch*K), sw=Math.round(TCAT.sit.cw*K), sh=Math.round(TCAT.sit.ch*K), SPD=26;
+    const K=TCAT.k, ww=Math.round(TCAT.walk.cw*K), wh=Math.round(TCAT.walk.ch*K), sw=Math.round(TCAT.sit.cw*K), sh=Math.round(TCAT.sit.ch*K), SPD=20;
     let x=TCAT_EV[0][1], y=TCAT_EV[0][2], T=0, ev=[], face=1;
     for(let i=1;i<TCAT_EV.length;i++){ const e=TCAT_EV[i]; if(e[0]==='w'){ const d=Math.hypot(e[1]-x,e[2]-y)/SPD; if(e[1]!==x)face=e[1]>x?1:-1; ev.push({t:T,d,k:'w',a:[x,y],b:[e[1],e[2]],f:face}); T+=d; x=e[1]; y=e[2]; } else { ev.push({t:T,d:e[1],k:'s',a:[x,y],b:[x,y],f:face}); T+=e[1]; } }
     const css=`.tcw{position:absolute;left:0;top:0;z-index:1;pointer-events:none;will-change:transform}.tcf{position:absolute;left:0;top:0}.tcsh{position:absolute;left:-14px;top:-4px;width:28px;height:7px;border-radius:50%;background:radial-gradient(ellipse,rgba(0,0,0,.45),rgba(0,0,0,0) 70%)}.tcl,.tcs{position:absolute;background-repeat:no-repeat}.tcl{left:${-ww/2}px;top:${-wh}px;width:${ww}px;height:${wh}px;background-image:url(img/${TCAT.walk.im}.webp);background-size:${TCAT.walk.n*100}% 100%}.tcs{left:${-sw/2}px;top:${-sh}px;width:${sw}px;height:${sh}px;background-image:url(img/${TCAT.sit.im}.webp);background-size:${TCAT.sit.n*100}% 100%;visibility:hidden}@media(prefers-reduced-motion:reduce){.tcw{display:none}}`;
@@ -7163,7 +7163,7 @@ function townCatPart(){
   }catch(e){ return null; }
 }
 /* 마을 올빼미: 왼쪽 큰 나무 가지에 앉아 가끔 눈을 깜빡이고 고개를 돌려요 (3칸 시트) */
-const TOWL={x:84,y:408,w:66,cw:150,ch:126};   /* x,y = 가지 아래 가운데 (지도 px) */
+const TOWL={x:63,y:306,w:50,cw:150,ch:126};   /* x,y = 가지 아래 가운데 (지도 px) */
 function townOwlPart(){
   const w=TOWL.w, h=Math.round(w*TOWL.ch/TOWL.cw);
   const css=`.tow{position:absolute;left:${TOWL.x-w/2}px;top:${TOWL.y-h}px;width:${w}px;height:${h}px;z-index:1;pointer-events:none;background:url(img/town_owl.webp) 0 0/300% 100% no-repeat;filter:drop-shadow(0 2px 2px rgba(0,0,0,.45))}`;
@@ -7190,9 +7190,9 @@ function renderTown(){ townUpTick(); const S=getStore(), now=Date.now(); let ch=
   $('#itemPop').hidden=true; $('#ptsBar').hidden=true; $('#sheetTabs').hidden=true; $('#sheetT').innerHTML='🏘️ 마을';
   const b=$('#sheetB'); const oldV=b.querySelector('#tMapV'), keepX=oldV?oldV.scrollLeft:-1, keepY=oldV?oldV.scrollTop:-1; b.className='sbody town';
   b.innerHTML=`<div class="tcur2"><div class="h"></div><div class="h r">💰 골드</div><div class="h r">🌑 그림자</div><div class="h r">✦ 각성</div><div class="n">${me?clsIc(me.cls,16)+' <span class="nm">'+esc(dispName(me))+'</span>':'캐릭터'}</div><div class="r">${me?(me.gold|0).toLocaleString('ko-KR'):0}</div><div class="r">${me?shardCount(me,'shard'):0}</div><div class="r">${me?shardCount(me,'ashard'):0}</div><div class="n">${STORE_IC} <span class="nm">공유창고</span></div><div class="r">${(S.gold|0).toLocaleString('ko-KR')}</div><div class="r">${shardCount(S,'shard')}</div><div class="r">${shardCount(S,'ashard')}</div></div><div class="twrap"><div class="tmapw">${townMsg?`<div class="tqtoast" role="status">${esc(townMsg)}</div>`:''}<div class="tmhint" aria-hidden="true">끌어서 이동 · 두 손가락으로 확대/축소</div><div class="tmapv" id="tMapV"><div class="tmap">${townPetHtml()}<div class="tmine" style="--x:50%;--y:17%" role="img" aria-label="광산 (업데이트 예정)"><img src="img/town_mine.webp" alt="" draggable="false"><div class="tlb">⛏️ 업데이트 예정</div></div><button class="tcsb" id="tCas" type="button" style="--x:39%;--y:52.5%" aria-label="달빛 도박장"><span class="tbd"><img class="cimg" src="img/town_casino.webp" alt="" draggable="false" onerror="this.closest('.tcsb').classList.add('cbad')"><svg viewBox="0 0 140 130" preserveAspectRatio="xMidYMax meet"><use href="#tw-casino" width="140" height="130"/></svg></span><span class="tlb">달빛 도박장</span></button>${S.smith?`<button class="tcsb smi" id="tSmi" type="button" style="--x:62%;--y:50%" aria-label="장인의 집"><span class="tbd"><img class="cimg" src="img/town_smith.webp" alt="" draggable="false" onerror="this.closest('.tcsb').classList.add('cbad')">${SMITH_SVG}<span class="smx" aria-hidden="true"><i class="sm-m"></i><i class="sm-m m2"></i><i class="sm-m m3"></i><i class="sm-a"></i><i class="sm-f"></i><i class="sm-s"></i><i class="sm-s s2"></i><i class="sm-s s3"></i></span></span><span class="tlb">장인의 집</span></button>`:`<div class="tsl e" style="--x:62%;--y:50%"><button class="tplot" id="tSmi"><b>＋</b>건설<br><span style="color:#ffd34d">💰 ${SMITH_BUILD.toLocaleString('ko-KR')}</span></button><div class="tlb">장인의 집</div></div>`}${TOWN_FAM.map((f,i)=>{ const y=i?[68,68.5]:[37.5,36]; return `${townSlot(f.main,`--x:${i?38.5:40}%;--y:${y[0]}%`)}${townSlot(f.aux,`--x:${i?63:61}%;--y:${y[1]}%`)}`; }).join('')}</div></div></div><button class="tinfo" id="tInfo" type="button" aria-haspopup="dialog"><span class="ic">ⓘ</span><span class="tx">조각 사용·건설 비용 안내</span><span class="ar">›</span></button></div>`;
-  { const mv=b.querySelector('#tMapV'); if(mv){ const tm=mv.querySelector('.tmap'), zMin=()=>Math.max(mv.clientWidth/800,mv.clientHeight/1200), zSet=(z,fx,fy)=>{ const o=townZ; z=Math.max(zMin(),Math.min(2.2,z)); if(Math.abs(z-o)<.0005)return; const cx=(mv.scrollLeft+fx)/o, cy=(mv.scrollTop+fy)/o; townZ=z; tm.style.zoom=z; mv.scrollLeft=cx*z-fx; mv.scrollTop=cy*z-fy; };   /* 두 손가락 확대·축소: 손가락 가운데 지점이 그대로 있게 */
+  { const mv=b.querySelector('#tMapV'); if(mv){ const tm=mv.querySelector('.tmap'), zMin=()=>Math.max(mv.clientWidth/600,mv.clientHeight/900), zSet=(z,fx,fy)=>{ const o=townZ; z=Math.max(zMin(),Math.min(2.2,z)); if(Math.abs(z-o)<.0005)return; const cx=(mv.scrollLeft+fx)/o, cy=(mv.scrollTop+fy)/o; townZ=z; tm.style.zoom=z; mv.scrollLeft=cx*z-fx; mv.scrollTop=cy*z-fy; };   /* 두 손가락 확대·축소: 손가락 가운데 지점이 그대로 있게 */
     townZ=Math.max(zMin(),Math.min(2.2,townZ)); tm.style.zoom=townZ;
-    if(keepX>=0){ mv.scrollLeft=keepX; mv.scrollTop=keepY; } else { mv.scrollLeft=(800*townZ-mv.clientWidth)/2; mv.scrollTop=(1200*townZ-mv.clientHeight)/2; }
+    if(keepX>=0){ mv.scrollLeft=keepX; mv.scrollTop=keepY; } else { mv.scrollLeft=(600*townZ-mv.clientWidth)/2; mv.scrollTop=(900*townZ-mv.clientHeight)/2; }
     let pz=null, raf=0; const tdist=t=>Math.hypot(t[0].clientX-t[1].clientX,t[0].clientY-t[1].clientY), tmid=t=>{ const r=mv.getBoundingClientRect(); return [(t[0].clientX+t[1].clientX)/2-r.left,(t[0].clientY+t[1].clientY)/2-r.top]; };
     mv.addEventListener('touchstart',e=>{ if(e.touches.length===2){ pz={d:tdist(e.touches),z:townZ}; } else pz=null; },{passive:true});
     mv.addEventListener('touchmove',e=>{ if(!pz||e.touches.length!==2)return; e.preventDefault(); const d=tdist(e.touches), m=tmid(e.touches); if(raf)return; raf=requestAnimationFrame(()=>{ raf=0; zSet(pz.z*d/pz.d,m[0],m[1]); }); },{passive:false});
@@ -8732,7 +8732,7 @@ function start(){
     }
   }
   try{
-    game=new P.Game({type:P.AUTO,parent:host,width:400,height:600,transparent:true,banner:false,
+    game=new P.Game({type:P.AUTO,parent:host,width:300,height:450,transparent:true,banner:false,
       scale:{mode:P.Scale.NONE},scene:[Town],render:{antialias:true},fps:{target:60,smoothStep:true},audio:{noAudio:true},input:{keyboard:false,mouse:false,touch:false,gamepad:false}});
     if(window.ResizeObserver){ ro=new ResizeObserver(()=>{ try{ if(game)game.scale.refresh(); }catch(e){} }); ro.observe(host); }
   }catch(err){ destroy(); }
