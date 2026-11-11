@@ -1449,7 +1449,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0630</div>
+    <div class="ver" id="verT">v0.6.5.0631</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -2169,7 +2169,7 @@ const TITLES=[{id:'dex',n:DEX_TITLE,cond:'도감 특수 유니크 20종 수집',
   {id:'tomeN',n:'활자 중독',cond:'금지된 마법서 20번 획득 (도감에서 확인)',eff:'피해 +30%',own:p=>ttfHas(p,'tomeN'),prog:p=>`이 캐릭터 ${Math.min(20,(p.dx&&p.dx.tome)|0)} / 20번`,ap:d=>{d.dmgPct+=30;}},
   {id:'swm',n:'소드마스터',cond:'스페셜 아이템 무기 획득 합계 200',eff:'공격력 +100',own:p=>ttfHas(p,'swm'),prog:p=>`이 캐릭터 ${Math.min(200,ttDexSum(p,0))} / 200`,ap:d=>{d.dmg+=100;}},
   {id:'dock',n:'투머치도커',cond:'스페셜 아이템 방어구 획득 합계 200',eff:'방어력 +300',own:p=>ttfHas(p,'dock'),prog:p=>`이 캐릭터 ${Math.min(200,ttDexSum(p,1))} / 200`,ap:d=>{d.def+=300;}},
-  {id:'rings',n:'링스온디짓',cond:'스페셜 아이템 액세서리 획득 합계 300',eff:'스킬 쿨감 +7%',own:p=>ttfHas(p,'rings'),prog:p=>`이 캐릭터 ${Math.min(300,ttDexSum(p,2))} / 300`,ap:d=>{d.cdr+=.07;}},
+  {id:'rings',n:'링스온디짓',cond:'스페셜 아이템 액세서리 획득 합계 300',eff:'스킬 쿨감 +5%',own:p=>ttfHas(p,'rings'),prog:p=>`이 캐릭터 ${Math.min(300,ttDexSum(p,2))} / 300`,ap:d=>{d.cdr+=.05;}},
   {id:'noon',n:'12시가되면은',cond:'스테이지 6(수문장 카스텔) 100회 클리어',eff:'공격 속도 +8%',own:p=>ttfHas(p,'noon'),prog:p=>`이 캐릭터 ${Math.min(100,(p.cc&&p.cc[TT_S6()])|0)} / 100회`,ap:d=>{d.ias+=8;}},
   {id:'agi',n:'어질리티 우승자',cond:'15레벨 이상의 펫 소유',eff:'생명력 +500, 마나 +500',own:p=>ttfHas(p,'agi'),prog:p=>`가장 높은 펫 Lv ${Math.min(15,ttPetMax(p))} / 15`,ap:d=>{d.life+=500;d.mana+=500;}}];
 const TT_BY=Object.fromEntries(TITLES.map(t=>[t.id,t]));
@@ -2488,7 +2488,7 @@ const MAILS={
     b:p=>`${CLASSES[p.cls].n}${p.name?' '+p.name:''}님, 안녕하세요.\n\n최근 0.4.5 패치에서 소환수 관련 옵션에 큰 변화가 있었어요. 자세한 내용은 패치노트를 확인해주세요.\n\n그에 따라 소지하신 아이템에 부득이한 조정이 있었어요. 보상을 준비했으니 아래 선물을 받아가세요.\n\n앞으로도 어둠의 수호자를 잘 부탁드려요.\n- 수호자 길드 -`}
 };
 /* 자동 발송 편지: 조건(to)에 맞는 캐릭터가 로드될 때 한 번만 받음(p.ms 에 받은 편지 id 기록 → 지워도 다시 안 옴). 새로 만든 캐릭터는 이미 지난 편지를 받지 않음 */
-const MAILQ=[{id:'smfix',d:new Date(2026,9,22).getTime(),to:p=>p.cls==='necro'||p.cls==='druid'},{id:'tutinv',d:new Date(2026,9,22).getTime(),to:()=>true},{id:'peppero',d:Date.UTC(2026,10,11,0,0,0),to:()=>Date.now()<PPR_EXP,all:1}];   /* all: 새로 만든 캐릭터에게도 (기간 안이면) 보냄 */
+const MAILQ=[{id:'smfix',d:new Date(2026,9,22).getTime(),to:p=>p.cls==='necro'||p.cls==='druid'},{id:'tutinv',d:new Date(2026,9,22).getTime(),to:()=>true},{id:'peppero',d:Date.UTC(2026,10,11,0,0,0),to:()=>Date.now()<PPR_EXP}];   /* 이벤트 전에 만들어진 캐릭터만 받아요 (새로 만든 캐릭터는 createChar에서 받은 것으로 처리) */
 function mailPurge(p){ const n=p.mail.length, now=Date.now(); p.mail=p.mail.filter(x=>{ const M=x&&MAILS[x.id]; return !(M&&M.exp&&now>=M.exp); }); return p.mail.length!==n; }   /* 기한(exp)이 지난 편지는 자동 삭제 */
 function mailDeliver(p){ if(!Array.isArray(p.ms))p.ms=[]; let ch=mailPurge(p); for(const q of MAILQ){ if(p.ms.includes(q.id)||!q.to(p))continue; p.ms.push(q.id); p.mail.push(mailNew(q.id,q.d)); ch=true; } return ch; }
 /* 편지 첨부 보상 종류: ic=아이콘, tx=수량 글자, can=받을 수 있나(가방 자리), give=지급 */
@@ -2585,7 +2585,7 @@ function migrateChars(){
     try{ const p=JSON.parse(raw); if(p&&p.cls===cls){ p.id=genId(); lsSet(charKey(p.id),JSON.stringify(p)); ids.push(p.id); } }catch(e){} }
   setIds(ids);
 }
-function createChar(cls,name,nid,hc){ const ids=charIds(); if(ids.length>=MAXCHAR||!CLASSES[cls])return null; if(nameTaken(name))return null; const p=newChar(cls,name,nid); if(hc)p.hc=1; p.ms=MAILQ.filter(q=>!q.all).map(q=>q.id); lsSet(charKey(p.id),JSON.stringify(packChar(p))); ids.push(p.id); setIds(ids); selId=p.id; lsSet('dkdef2.sel',selId); return p; }
+function createChar(cls,name,nid,hc){ const ids=charIds(); if(ids.length>=MAXCHAR||!CLASSES[cls])return null; if(nameTaken(name))return null; const p=newChar(cls,name,nid); if(hc)p.hc=1; p.ms=MAILQ.map(q=>q.id); lsSet(charKey(p.id),JSON.stringify(packChar(p))); ids.push(p.id); setIds(ids); selId=p.id; lsSet('dkdef2.sel',selId); return p; }
 function deleteChar(id){ setIds(charIds().filter(x=>x!==id)); lsDel(charKey(id)); lsDel('dkdef2.rk.'+id); lsDel('dkdef2.nmv.'+id); if(selId===id){selId='';lsSet('dkdef2.sel','');} rkQueueDel(id); nameQueueRel(id); }
 function packChar(p){ const {apb,arv,id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear,as,sy,gs,au,sp,ct,cts,cat,dv4,shard,ashard,cshard,misc,mail,ms,tut,cc,eq2,es,pet,pets,dx,dxs,dxn,gas,sd,bs,hc,hd,hs,tt,tts,tf,tpt}=p; return {apb:apb?1:undefined,arv:arv?1:undefined,tf:tf&&Object.keys(tf).length?tf:undefined,tpt:tpt&&Object.keys(tpt).length?tpt:undefined,tt:tt&&TT_BY[tt]?tt:undefined,tts:Array.isArray(tts)&&tts.length?tts:undefined,hc:hc?1:undefined,hd:hc&&hd>0?hd:undefined,hs:hc&&hs>0?hs|0:undefined,bs:Array.isArray(bs)?bs:undefined,sd:sd===1?1:undefined,dxn:dxn&&Object.keys(dxn).length?dxn:undefined,gas:gas===undefined?undefined:Math.max(-1,Math.min(2,gas|0)),dx:dx&&Object.keys(dx).length?dx:undefined,dxs:dxs===undefined?undefined:Math.max(0,dxs|0),id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear:clear|0,au:Math.max(0,Math.min(2,au|0)),sp:sp?1:0,ct:ct>0?ct|0:0,cts:cts>0?cts|0:undefined,cat:cat>0?cat|0:0,as:as===undefined?-1:as,sy:sy===undefined?-1:sy,gs:gs?1:undefined,dv4:dv4?1:0,shard:shard|0,ashard:(ashard|0)||undefined,cshard:(cshard|0)||undefined,misc:Array.isArray(misc)?misc:undefined,mail:Array.isArray(mail)?mail:undefined,ms:Array.isArray(ms)?ms:undefined,tut:tut||undefined,cc:cc&&Object.keys(cc).length?cc:undefined,eq2:eq2&&Object.values(eq2).some(Boolean)?eq2:undefined,es:es===1?1:undefined,pets:pets&&Object.keys(pets).length?pets:undefined,pet:pet&&PETS[pet.id]?{id:pet.id,xp:Math.floor(pet.xp)||0}:undefined}; }
 function saveChar(){ if(!me||!me.id)return; try{ ttfAutoT(); }catch(e){} lsSet(charKey(me.id),JSON.stringify(packChar(me))); }
@@ -6505,7 +6505,7 @@ function rkProfile(row,back){
       let ic=''; try{ ic=itemIcon(it).url; }catch(e){}
       body+=`<button class="rkgc" data-k="${k}" aria-label="${esc(it.name)}"><div class="rkgi" style="border-color:${RBD[it.rar]};background:${RBG[it.rar]}"><img src="${ic}" alt="">${it.enh>0?`<i class="en">+${it.enh}</i>`:''}${it.enh>=5?`<i class="gl"></i>`:''}</div><small>${RKSN[k]}</small></button>`; }
     const pt=d.pet&&PETS[d.pet.id]?d.pet:null;   /* 장비 칸 맨 끝 빈 자리에 '펫' 칸 */
-    if(pt)body+=`<button class="rkgc rkpet" aria-label="펫 ${PETS[pt.id].n}"><div class="rkgi" style="border-color:#ff9a3a;background:#1a0f08;position:relative;overflow:hidden"><img src="img/${PETS[pt.id].im}.png" alt="" style="width:100%;height:100%;object-fit:contain;padding:4px" onerror="this.onerror=null;this.src='img/boss_3_5.png'"><u style="position:absolute;right:3px;bottom:3px;background:#2a1608;color:#ffcf9a;border:1px solid #ff9a3a;border-radius:6px;padding:0 4px;font:800 11px/1.4 sans-serif;text-decoration:none;z-index:3">Lv${Math.max(1,Math.min(PET_MAXLV,pt.lv|0||1))}</u></div><small style="color:#ffcf9a">펫</small></button>`;
+    if(pt)body+=`<button class="rkgc rkpet" aria-label="펫 ${PETS[pt.id].n}"><div class="rkgi" style="border-color:#ff9a3a;background:#1a0f08;position:relative;overflow:hidden"><img src="img/${PETS[pt.id].im}.png" alt="" style="width:100%;height:100%;object-fit:contain;padding:4px" onerror="this.onerror=null;this.src='img/boss_3_5.png'"><u style="position:absolute;right:3px;bottom:3px;background:#2a1608;color:#ffcf9a;border:1px solid #ff9a3a;border-radius:6px;padding:0 4px;font:800 11px/1.4 sans-serif;text-decoration:none;z-index:3">Lv${Math.max(1,Math.min(petMax(pt.id),pt.lv|0||1))}</u></div><small style="color:#ffcf9a">펫</small></button>`;
     else body+='<div class="rkgc empty"><div class="rkgi"></div><small>펫</small></div>';
     body+='</div><div class="meta" id="rkUpd" data-s="0" style="margin:4px 0 8px;text-align:center;cursor:pointer;user-select:none">장비를 누르면 상세 정보가 보여요</div>';
     const st=d.st||[0,0,0,0];
