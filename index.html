@@ -1459,7 +1459,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0633</div>
+    <div class="ver" id="verT">v0.6.5.0634</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3758,18 +3758,18 @@ function spawnMe(){
   me.form=''; me.spirit=null; me.formLock=0; me.D=derive(me); me.hp=me.D.maxHp; me.mp=me.D.maxMp; autoSummon(); if(me.cls==='druid')crackImg(); if(me.cls==='necro')for(const k of ['guard','caster','colossus','dragon','fusion']){ sprGet('mn_'+k); sprGet('mn_'+k+'_atk'); } if(me.cls==='druid'){ for(const k of ['papa','mama','baby']){ sprGet('mn_'+k); sprGet('mn_'+k+'_atk'); sprGet('mn_'+k+'_walk'); } sprGet('spirit_druid'); }
 }
 function zealMul(){const l=me.cls==='pal'?skLv(me,'zeal'):0; return l?{d:1+(15+5*l)/100,t:1+(10+4*l)/100}:{d:1,t:1};}
-const PPR_MB=['shout','berserk','rage','fury'];   /* 곱연산 버프: 전투 함성 · 광폭화 · 광전사 폭주 · 광란 (+ 영혼 정령) */
+const PPR_MB=['shout','berserk','rage','fury'];   /* (현재 buffMul은 묶음 계산을 직접 해요) */   /* 곱연산 버프: 전투 함성 · 광폭화 · 광전사 폭주 · 광란 (+ 영혼 정령) */
 function buffDmg(){let v=0; const b=me.buffs; if(b.vil&&b.vil.t>0)v+=b.vil.v; if(b.pcry&&b.pcry.t>0)v+=b.pcry.v; if(b.awk&&b.awk.t>0)v+=b.awk.v;
   if(!PPR){ if(b.shout&&b.shout.t>0)v+=b.shout.v; if(b.berserk&&b.berserk.t>0)v+=b.berserk.v; if(b.rage&&b.rage.t>0)v+=b.rage.v; if(b.fury&&b.fury.t>0)v+=b.fury.v; const sb=spiritBuff(); if(sb)v+=sb.dmg; }
   return v;}
-function buffMul(){ if(!PPR)return 1; const b=me.buffs; let m=1; for(const k of PPR_MB){ if(b[k]&&b[k].t>0)m*=1+b[k].v; } const sb=spiritBuff(); if(sb)m*=1+sb.dmg; return m; }   /* 🥨 빼빼로: 위 버프들은 합연산이 아니라 각각 곱해요 */
+function buffMul(){ if(!PPR)return 1; const b=me.buffs, g=k=>b[k]&&b[k].t>0?b[k].v:0; const sb=spiritBuff(); return (1+g('shout')+g('berserk')+g('rage'))*(1+g('fury')+(sb?sb.dmg:0)); }   /* 🥨 빼빼로: 전사 버프(함성·광폭화·폭주)끼리는 합, 드루이드 버프(광란·영혼 정령)끼리는 합, 두 묶음은 서로 곱해요 */
 /* 드루이드: 영혼 정령 버프(내 정령 또는 반경 안에 있는 동료의 정령 중 센 쪽) · 받는 피해 감소 버프 묶음 */
 function spiritBuff(){ if(!me||me.cls===undefined)return null; let l=0; if(me.spirit&&me.spirit.t>0)l=me.spirit.lv; if(ally&&!ally.lobby&&!ally.dead&&ally.sp>0&&ally.x!==undefined&&hyp(ally.x-me.x,ally.y-me.y)<260)l=Math.max(l,ally.sp|0); return l?{lv:l,dmg:(10+1.5*l)/100,ias:(8+l)/100,mr:30+3*l}:null; }
 function drMul(){ const b=me.buffs; let m=1; if(b.rage&&b.rage.t>0)m*=1+b.rage.pen; if(b.fury&&b.fury.t>0&&b.fury.dr)m*=1-b.fury.dr; if(b.roar&&b.roar.t>0)m*=1-b.roar.v; if(b.hunt&&b.hunt.t>0)m*=1-b.hunt.dr; return m; }
 /* 형태 바꾸기: 생명력 비율은 그대로, 0.3초 동안 움직임 잠금 */
 function setForm(f){ const hr=me.hp/me.D.maxHp; me.form=f||''; me.D=derive(me); me.hp=Math.min(me.D.maxHp,me.D.maxHp*hr); me.mp=Math.min(me.mp,me.D.maxMp); me.formLock=.3; me.vx=me.vy=0; uiDirty=true; }
 function critRoll(v){const c=!G.train&&Math.random()*100<me.D.crit;   /* 훈련장: 치명타 항상 실패 */ return {v:c?v*1.5*(me.D.sp&&me.D.sp.hdag?1.4:1)*(me.D.sp&&me.D.sp.aw_amu?1.3:1)*(me.D.sp&&me.D.sp.cas_wpn?1.5:1):v,crit:c};}
-function physDmg(mult,basic){const D=me.D; const wr=ri(D.wmn,D.wmx), w=wr+D.dmg, pm=1+D.str/100+D.dmgPct/100+buffDmg(), bm=buffMul(), wk=PPR&&!basic?1+(D.wmn+D.wmx)/2/350:1; const r=critRoll(w*pm*mult*bm*wk); if(G.train)trMk(r,'p',[['W',wr],['A',D.dmg],['B',pm],['m',mult],['U',bm],['T',wk]]); return r;}   /* 🥨 빼빼로: 스킬(기본 공격 제외)에 무기 기술 보정 (1+무기 평균/350) */
+function physDmg(mult,basic){const D=me.D; const wr=ri(D.wmn,D.wmx), w=wr+D.dmg, pm=1+D.str/100+D.dmgPct/100+buffDmg(), bm=buffMul(), wk=PPR&&!basic?1+(D.wmn+D.wmx)/2/450:1; const r=critRoll(w*pm*mult*bm*wk); if(G.train)trMk(r,'p',[['W',wr],['A',D.dmg],['B',pm],['m',mult],['U',bm],['T',wk]]); return r;}   /* 🥨 빼빼로: 스킬(기본 공격 제외)에 무기 기술 보정 (1+무기 평균/450) */
 const ENEM=.003; /* 에너지 1당 마법 피해 +0.3% */
 function spellDmg(base,noPct){const D=me.D; const sm=1+D.ene*ENEM+(noPct?0:D.dmgPct/100)+buffDmg(), wm=1+((D.wmn+D.wmx)/2)/35, tm=D.sp.tome?1.3:1, bm=buffMul(); const r=critRoll(base*sm*wm*tm*bm); if(G.train)trMk(r,'s',[['b',base],[noPct?'D':'C',sm],['E',wm],['F',tm],['U',bm]]); return r;}
 function guardMul(){let g=0; if(me.aura==='guard')g=Math.max(g,(30+6*skLv(me,'guard'))/100);
@@ -4521,8 +4521,8 @@ function druidCast(o,key,real,lv,tgt,tx,ty,ang){
   }
 }
 const BASICFX={basic:1};
-const atkM=()=>PPR?.5+3/Math.abs(Math.min(me.lvl|0,99)-99.5):.6;   /* 기본 공격 배율 (빼빼로: 0.5 + 3/|min(Lv,99) − 99.5|) */
-const rngM=()=>PPR?Math.max(1+me.D.ene/350,1.2):1+me.D.ene/150;   /* 원거리 기본 공격 보정 (빼빼로: max(1+에너지/350, 1.2)) */
+const atkM=()=>PPR?.5+3/Math.abs(Math.min(me.lvl|0,99)-99.7):.6;   /* 기본 공격 배율 (빼빼로: 0.5 + 3/|min(Lv,99) − 99.7|) */
+const rngM=()=>PPR?Math.max(1+me.D.ene/250,1.2):1+me.D.ene/150;   /* 원거리 기본 공격 보정 (빼빼로: max(1+에너지/250, 1.2)) */
 const HFR=l=>Math.min(112,46+4*l); /* 성화 오라 범위: 레벨 올려도 112까지 */
 const hfMul=l=>l<=10?.55+.045*l:1+.05*(l-10);
 function giveBless(big){ const v=big?30:10; me.buffs.bless={t:10,m:10,v}; reBless(); toast(big?'✨ 축복! 10초간 올스탯 +30':'올스탯 +10 (10초)',big?'#ffe27a':'#ffd9a0');
@@ -4657,7 +4657,7 @@ function castSkill(o,key,real,tx,ty,lv,tgt){
   case 'chain':{ const fn=HMN(lv), ff=HMFM(fn), n=3+Math.floor(lv/4), br=[];
     if(real){ const sk=new Set(); const first=tgt&&!tgt.dead?tgt:nearestMob(o.x,o.y,280);
       for(let b=0;b<fn;b++){ let cur=b===0?first:nearestMob(o.x,o.y,300,sk); if(!cur)break; const pts=[{x:o.x,y:o.y}]; let f=1;
-        for(let i=0;i<n&&cur;i++){ sk.add(cur); pts.push({x:cur.x,y:cur.y}); hitMob(cur,spellDmg((22+16*lv)*f*ff),0,false,{shock:SHK(lv),shockB:(30+3*lv)/100}); f*=.9; cur=nearestMob(cur.x,cur.y,170,sk); }
+        for(let i=0;i<n&&cur;i++){ sk.add(cur); pts.push({x:cur.x,y:cur.y}); hitMob(cur,spellDmg((22+16*lv)*f*ff),0,false,{shock:SHK(lv),shockB:(30+2*lv)/100}); f*=.9; cur=nearestMob(cur.x,cur.y,170,sk); }
         br.push(pts); }
       if(!br.length) br.push([{x:o.x,y:o.y},{x:tx,y:ty}]); }
     else br.push([{x:o.x,y:o.y},{x:tx,y:ty}]);
@@ -6962,14 +6962,14 @@ function trConsts(){ const D=me.D, b=buffDmg(), P=gearPen(), L=lvPen(), wa=(D.wm
   C.D={n:'마법 배율(피해% 미적용)',e:`(1 + 에너지 ${D.ene}×0.003${bs})`,v:1+D.ene*ENEM+b};
   C.E={n:'무기 마법 보정',e:`(1 + 무기 평균 ${trN(wa)}/35)`,v:1+wa/35};
   C.F={n:'마도서',e:D.sp&&D.sp.tome?'1.3':'1 (없음)',v:D.sp&&D.sp.tome?1.3:1};
-  C.G={n:'기본 공격 배율',e:PPR?`0.5 + 3/|min(Lv ${me.lvl},99) − 99.5|`:'0.6',v:atkM()};
-  C.H={n:'원거리 기본 공격 보정',e:PPR?`max(1 + 에너지 ${D.ene}/350, 1.2)`:`(1 + 에너지 ${D.ene}/150)`,v:rngM()};
+  C.G={n:'기본 공격 배율',e:PPR?`0.5 + 3/|min(Lv ${me.lvl},99) − 99.7|`:'0.6',v:atkM()};
+  C.H={n:'원거리 기본 공격 보정',e:PPR?`max(1 + 에너지 ${D.ene}/250, 1.2)`:`(1 + 에너지 ${D.ene}/150)`,v:rngM()};
   if(me.cls==='necro')C.I={n:'소환수 배율',e:`(1+0.04×영혼 연결 ${skLv(me,'soullink')})×(1+0.04×교감 ${skLv(me,'communion')})×(1+소환수 피해 ${D.sm||0}/100)${lordOn()?'×군주 1.4':''}`,v:mnMul()};
   C.J={n:'장비 보정',e:`장비 Lv 합 ${P.sum} (권장 ${P.need}↑)`,v:P.wm};
   C.K={n:'레벨 보정',e:`Lv ${me.lvl} (Lv90↑ 패널티 없음)`,v:L.dm};
-  C.L={n:'감전 추가 피해(스킬)',e:PPR?`1 + (30 + 3×연쇄 번개 Lv)/100 (화상 틱에도 적용)`:'4/3',v:PPR?null:SHOCKB};
-  C.T={n:'무기 기술 보정(스킬)',e:`(1 + 무기 평균 ${trN(wa)}/350)`+(PPR?'':' — 꺼짐'),v:PPR?1+wa/350:1};
-  C.U={n:'곱연산 버프',e:PPR?'(1+전투 함성)×(1+광폭화)×(1+폭주)×(1+광란)×(1+영혼 정령)':'꺼짐 (합연산)',v:buffMul()};
+  C.L={n:'감전 추가 피해(스킬)',e:PPR?`1 + (30 + 2×연쇄 번개 Lv)/100 (화상 틱에도 적용)`:'4/3',v:PPR?null:SHOCKB};
+  C.T={n:'무기 기술 보정(스킬)',e:`(1 + 무기 평균 ${trN(wa)}/450)`+(PPR?'':' — 꺼짐'),v:PPR?1+wa/450:1};
+  C.U={n:'곱연산 버프',e:PPR?'(1+전투 함성+광폭화+폭주)×(1+광란+영혼 정령)':'꺼짐 (합연산)',v:buffMul()};
   C.P={n:'🥨 빼빼로 적용',e:PPR?'ON':'OFF',v:null};
   C.M={n:'치명타',e:'훈련장에서는 항상 실패',v:null};
   return C; }
