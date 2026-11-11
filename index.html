@@ -1459,7 +1459,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0637</div>
+    <div class="ver" id="verT">v0.6.5.0638</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -7143,18 +7143,38 @@ let townZ=1;   /* 마을 지도 확대 배율 (다시 그려도 유지) */
 /* 마을 산책 펫: 착용한 펫이 가운데 길을 따라 왔다 갔다 해요 (CSS 애니메이션만 써서 가벼워요 · 걷기 그림이 없는 펫은 통통 뛰어요) */
 const TPET={dealer:{im:'pet_dealer_walk',w:231,h:318,hh:58,n:6},azazel:{im:'pet_azazel_walk',w:370,h:318,hh:62,n:6},trio:{im:'pet_trio',w:680,h:239,hh:34,n:1}};
 const TPATH=[[404,470],[396,600],[412,740],[398,880],[406,1010]];
-function townPetHtml(){
+function townPetPart(){
   try{
-    const id=me&&me.pet&&me.pet.id, D=id&&TPET[id]; if(!D)return '';
+    const id=me&&me.pet&&me.pet.id, D=id&&TPET[id]; if(!D)return null;
     const pts=[...TPATH,...TPATH.slice(0,-1).reverse()], SPD=26, PAUSE=1.2; let T=0, seg=[];
     for(let i=0;i<pts.length-1;i++){ const dx=pts[i+1][0]-pts[i][0], dy=pts[i+1][1]-pts[i][1], d=Math.hypot(dx,dy)/SPD; seg.push({a:pts[i],b:pts[i+1],d,dx}); T+=d; }
     let acc=0, mv='', fl=''; for(const g of seg){ const p0=(acc/T*100).toFixed(2); mv+=`${p0}%{transform:translate(${g.a[0]}px,${g.a[1]}px)}`; fl+=`${p0}%{transform:scaleX(${g.dx>=0?1:-1})}`; acc+=g.d; }
     mv+=`100%{transform:translate(${pts[0][0]}px,${pts[0][1]}px)}`; fl+=`100%{transform:scaleX(1)}`;
     const w=Math.round(D.hh*D.w/D.h), fr=D.n>1?Array.from({length:D.n},(_,k)=>`${(k/D.n*100).toFixed(2)}%{background-position:${D.n>1?k*100/(D.n-1):0}% 0}`).join(''):'';
     const css=`.tpw{position:absolute;left:0;top:0;z-index:1;pointer-events:none;will-change:transform;animation:tpm ${T.toFixed(1)}s linear infinite}.tpf{position:absolute;left:0;top:0;animation:tpf ${T.toFixed(1)}s step-end infinite}.tpsh{position:absolute;left:${-w*.4}px;top:-5px;width:${w*.8}px;height:9px;border-radius:50%;background:radial-gradient(ellipse,rgba(0,0,0,.45),rgba(0,0,0,0) 70%)}.tpi{position:absolute;left:${-w/2}px;top:${-D.hh}px;width:${w}px;height:${D.hh}px;background:url(img/${D.im}.png) 0 0/${D.n*100}% 100% no-repeat;animation:${D.n>1?'tpw .72s steps(1,end) infinite':'tph .55s ease-in-out infinite'}}@keyframes tpm{${mv}}@keyframes tpf{${fl}}${D.n>1?`@keyframes tpw{${fr}}`:'@keyframes tph{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}'}@media(prefers-reduced-motion:reduce){.tpw{display:none}}`;
-    let st=document.getElementById('tpetCss'); if(!st){ st=document.createElement('style'); st.id='tpetCss'; document.head.appendChild(st); } if(st.textContent!==css)st.textContent=css;
-    return '<div class="tpw" aria-hidden="true"><div class="tpf"><i class="tpsh"></i><i class="tpi"></i></div></div>';
-  }catch(e){ return ''; }
+    return {css,html:'<div class="tpw" aria-hidden="true"><div class="tpf"><i class="tpsh"></i><i class="tpi"></i></div></div>'};
+  }catch(e){ return null; }
+}
+/* 마을 고양이: 풀밭 빈자리를 어슬렁거리다가 앉아서 눈 깜빡이고 하품해요 (걷기 6칸 + 앉기 3칸 시트 · CSS 애니메이션만 사용) */
+const TCAT={walk:{im:'town_cat_walk',cw:117,ch:109,n:6},sit:{im:'town_cat_sit',cw:125,ch:118,n:3},k:.4};
+const TCAT_EV=[['w',230,1080],['w',340,1115],['s',7],['w',300,1035],['w',190,1015],['s',6],['w',230,1080]];   /* w = 그 자리로 걷기, s = 앉아서 쉬기(초) */
+function townCatPart(){
+  try{
+    const K=TCAT.k, ww=Math.round(TCAT.walk.cw*K), wh=Math.round(TCAT.walk.ch*K), sw=Math.round(TCAT.sit.cw*K), sh=Math.round(TCAT.sit.ch*K), SPD=22;
+    let x=TCAT_EV[0][1], y=TCAT_EV[0][2], T=0, ev=[], face=1;
+    for(let i=1;i<TCAT_EV.length;i++){ const e=TCAT_EV[i]; if(e[0]==='w'){ const d=Math.hypot(e[1]-x,e[2]-y)/SPD; if(e[1]!==x)face=e[1]>x?1:-1; ev.push({t:T,d,k:'w',a:[x,y],b:[e[1],e[2]],f:face}); T+=d; x=e[1]; y=e[2]; } else { ev.push({t:T,d:e[1],k:'s',a:[x,y],b:[x,y],f:face}); T+=e[1]; } }
+    let mv='', fl='', vw='', vs=''; for(const e of ev){ const p=(e.t/T*100).toFixed(2); mv+=`${p}%{transform:translate(${e.a[0]}px,${e.a[1]}px)}`; fl+=`${p}%{transform:scaleX(${e.f})}`; vw+=`${p}%{visibility:${e.k==='w'?'visible':'hidden'}}`; vs+=`${p}%{visibility:${e.k==='s'?'visible':'hidden'}}`; }
+    mv+=`100%{transform:translate(${TCAT_EV[0][1]}px,${TCAT_EV[0][2]}px)}`; fl+=`100%{transform:scaleX(${ev[0].f})}`; vw+=`100%{visibility:visible}`; vs+=`100%{visibility:hidden}`;
+    const Ts=T.toFixed(1), fr=Array.from({length:TCAT.walk.n},(_,k)=>`${(k/TCAT.walk.n*100).toFixed(2)}%{background-position:${k*100/(TCAT.walk.n-1)}% 0}`).join('');
+    const css=`.tcw{position:absolute;left:0;top:0;z-index:1;pointer-events:none;will-change:transform;animation:tcm ${Ts}s linear infinite}.tcf{position:absolute;left:0;top:0;animation:tcf ${Ts}s step-end infinite}.tcsh{position:absolute;left:-14px;top:-4px;width:28px;height:7px;border-radius:50%;background:radial-gradient(ellipse,rgba(0,0,0,.45),rgba(0,0,0,0) 70%)}.tcl,.tcs{position:absolute;background-repeat:no-repeat}.tcl{left:${-ww/2}px;top:${-wh}px;width:${ww}px;height:${wh}px;background-image:url(img/${TCAT.walk.im}.webp);background-size:${TCAT.walk.n*100}% 100%;animation:tcw .66s steps(1,end) infinite,tcvw ${Ts}s step-end infinite}.tcs{left:${-sw/2}px;top:${-sh}px;width:${sw}px;height:${sh}px;background-image:url(img/${TCAT.sit.im}.webp);background-size:${TCAT.sit.n*100}% 100%;animation:tcst 6.4s step-end infinite,tcvs ${Ts}s step-end infinite}@keyframes tcm{${mv}}@keyframes tcf{${fl}}@keyframes tcvw{${vw}}@keyframes tcvs{${vs}}@keyframes tcw{${fr}}@keyframes tcst{0%{background-position:0 0}68%{background-position:50% 0}72%{background-position:0 0}88%{background-position:100% 0}96%{background-position:0 0}}@media(prefers-reduced-motion:reduce){.tcw{display:none}}`;
+    return {css,html:'<div class="tcw" aria-hidden="true"><div class="tcf"><i class="tcsh"></i><i class="tcl"></i><i class="tcs"></i></div></div>'};
+  }catch(e){ return null; }
+}
+function townPetHtml(){
+  const a=townPetPart(), c=townCatPart(); let css='', h='';
+  if(a){ css+=a.css; h+=a.html; } if(c){ css+=c.css; h+=c.html; }
+  try{ let st=document.getElementById('tpetCss'); if(!st){ st=document.createElement('style'); st.id='tpetCss'; document.head.appendChild(st); } if(st.textContent!==css)st.textContent=css; }catch(e){}
+  return h;
 }
 function renderTown(){ townUpTick(); const S=getStore(), now=Date.now(); let ch=false; { const L=getTown().lab; if((L.rf|0)>0){ townMsg=`🧪 연구소 개편 · 🌑 조각 ${L.rf}개 환급`; L.rf=0; saveTown(); } if((L.gf|0)>0){ townMsg=`🧪 연구소 개편 · 성벽 연구 Lv.6 이상은 Lv.${LAB_GL}로 조정, 💰 ${(L.gf|0).toLocaleString('ko-KR')}G를 공유보관함으로 환급`; L.gf=0; saveTown(); } const M=getTown().mill; if((M.rf|0)>0){ townMsg=`✦ 풍차 골드 전환 · 조각 ${M.rf}개 환급`; M.rf=0; saveTown(); } } for(const k of ['tw','al','mill'])if(townTick(k,now))ch=true; if(ch)saveTown();
   $('#itemPop').hidden=true; $('#ptsBar').hidden=true; $('#sheetTabs').hidden=true; $('#sheetT').innerHTML='🏘️ 마을';
