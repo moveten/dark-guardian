@@ -1419,7 +1419,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
       <div class="ab"><button id="bBas" class="s1" hidden aria-label="기본공격 켜짐"><span class="in"><b>⚔️</b><small>ON</small></span></button><button id="bSpd" class="s0" aria-label="배속: 1배"><span class="in"><b>⏩</b><small>1.0x</small></span></button><button id="bAuto" class="s0" aria-label="자동 사냥: 꺼짐"><span class="in"><b>AUTO</b><small>OFF</small></span></button></div>
       <div id="skills"></div>
     </div>
-    <button id="bSkip" hidden aria-label="나가기">🚪 나가기</button><div id="trBar" hidden><div class="r"><button id="trCd">⏱️ 쿨 초기화</button><button id="trMn">💨 소환수 소멸</button><button id="trHome">🏠 홈화면으로</button></div><div class="r"><button id="trPet">🐾 삼남매 펫</button></div><button id="trAn">🔬 분석하기</button></div><aside id="trDr" aria-label="분석"><header><b>🔬 분석</b><span id="trCnt"></span><button id="trClr">🗑 지우기</button><button id="trX" aria-label="닫기">✕</button></header><h4>상수</h4><div id="trCs"></div><h4>전투 로그 <small>최근 기록이 위 · ** = 식과 실제 데미지가 달라요</small></h4><div id="trLg"></div></aside><button id="bRevBig" hidden aria-label="즉시 부활">✨ 부활 <b id="revBigN">0</b><kbd class="kh">R</kbd></button><div id="emg" hidden></div>
+    <button id="bSkip" hidden aria-label="나가기">🚪 나가기</button><div id="trBar" hidden><div class="r"><button id="trCd">⏱️ 쿨 초기화</button><button id="trMn">💨 소환수 소멸</button><button id="trHome">🏠 홈화면으로</button></div><div class="r"><button id="trPet">🐾 삼남매 펫</button><button id="trPp">🥨 빼빼로 OFF</button></div><button id="trAn">🔬 분석하기</button></div><aside id="trDr" aria-label="분석"><header><b>🔬 분석</b><span id="trCnt"></span><button id="trClr">🗑 지우기</button><button id="trX" aria-label="닫기">✕</button></header><h4>상수</h4><div id="trCs"></div><h4>전투 로그 <small>최근 기록이 위 · ** = 식과 실제 데미지가 달라요</small></h4><div id="trLg"></div></aside><button id="bRevBig" hidden aria-label="즉시 부활">✨ 부활 <b id="revBigN">0</b><kbd class="kh">R</kbd></button><div id="emg" hidden></div>
     <div id="rageV"></div>
     <div id="stoast"></div>
     <div class="qb">
@@ -1449,7 +1449,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0626</div>
+    <div class="ver" id="verT">v0.6.5.0627</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1658,14 +1658,14 @@ function nxList(s,lv){ let a,c; try{ a=s.d(lv); c=s.d(lv+1); }catch(e){ return [
 function nxHtml(s,b,eff){ if(!b||b>=20)return ''; const L=nxList(s,Math.max(1,eff)); if(!L.length)return ''; return '다음Lv : '+L.map(o=>`${esc(o.lb)} ▶ <span class="sv">${esc(o.v)}</span>`).join(', '); }
 const SK={
  sorc:[
-  {k:'fireball',lb:['발수','반경','피해'],e:'🔥',n:'화염구',s:'화염',req:1,mp:4,cd:1,el:'#ff7a2e',rg:300,d:l=>`${V(HMN(l))}발 발사, 폭발 반경 ${RR(60,l)} · 기본 피해 ${V(Math.round((18+13*l)*HMF(HMN(l))))}`},
+  {k:'fireball',lb:['발수','반경','피해'],e:'🔥',n:'화염구',s:'화염',req:1,mp:4,cd:1,el:'#ff7a2e',rg:300,d:l=>`${V(HMN(l))}발 발사, 폭발 반경 ${RR(60,l)} · 기본 피해 ${V(Math.round((18+13*l)*HMFM(HMN(l))))}`},
   {k:'arcane',lb:['마나회복','재사용대기'],e:'🔷',n:'비전 집중',s:'비전',req:3,mp:0,cd:0,el:'#8fb0ff',passive:1,d:l=>`패시브: 마나 회복 +${V(3*l)}%, 스킬 재사용 대기시간 -${V(Math.min(25,l))}%`},
   {k:'mshield',lb:['마나분담','피해당마나'],e:'🔮',n:'에너지 실드',s:'실드',req:9,mp:0,cd:0,el:'#7fb4ff',passive:1,d:l=>`패시브: 받는 피해의 ${V(Math.round(Math.min(.65,.2+.02*l)*100))}%를 마나가 대신 받음 · 피해 1당 마나 ${V(Math.max(.5,1.6-.04*l).toFixed(2))} 소모`},
-  {k:'frostnova',lb:['연타','반경','피해'],e:'❄️',n:'서리 고리',s:'서리',req:6,mp:10,cd:6,el:'#8fdcff',d:l=>`${V(HMN(l))}연타, 반경 ${RR(160*FNR,l)} · 기본 피해 ${V(Math.round((14+10*l)*FND*HMF(HMN(l))))} · 3초간 감속, 감전된 적에게 피해 +33%`},
+  {k:'frostnova',lb:['연타','반경','피해'],e:'❄️',n:'서리 고리',s:'서리',req:6,mp:10,cd:6,el:'#8fdcff',d:l=>`${V(HMN(l))}연타, 반경 ${RR(160*FNR,l)} · 기본 피해 ${V(Math.round((14+10*l)*FND*HMFM(HMN(l))))} · 3초간 감속, 감전된 적에게 피해 +33%`},
   {k:'teleport',lb:['거리'],e:'🌀',n:'순간이동',s:'이동',req:9,mp:12,cd:5,el:'#b98bff',d:l=>`누른 곳으로 순간이동, 최대 거리 ${V(240+4*l)} · 도착 직후 0.4초 무적`},
-  {k:'chain',lb:['튕김','갈래','피해','감전'],e:'⚡',n:'연쇄 번개',s:'번개',req:12,mp:9,cd:4,el:'#dfe7ff',rg:280,d:l=>`적 사이를 ${V(3+Math.floor(l/4))}번 튀는 번개 ${V(HMN(l))}갈래 · 기본 피해 ${V(Math.round((22+16*l)*HMF(HMN(l))))} · 맞은 적은 ${V(SHK(l).toFixed(1))}초간 ⚡감전, 감전된 적이 받는 스킬 피해 +33%`},
+  {k:'chain',lb:['튕김','갈래','피해','감전'],e:'⚡',n:'연쇄 번개',s:'번개',req:12,mp:9,cd:4,el:'#dfe7ff',rg:280,d:l=>`적 사이를 ${V(3+Math.floor(l/4))}번 튀는 번개 ${V(HMN(l))}갈래 · 기본 피해 ${V(Math.round((22+16*l)*HMFM(HMN(l))))} · 맞은 적은 ${V(SHK(l).toFixed(1))}초간 ⚡감전, 감전된 적이 받는 스킬 피해 +33%`},
   {k:'barrier',lb:['지속시간','받는피해'],e:'🔷',n:'마력 방벽',s:'방벽',req:18,mp:14,cd:22,el:'#8fb6ff',d:l=>`${V(6+Math.floor(l/3))}초간 받는 피해 -${V(Math.min(70,30+2*l))}%`},
-  {k:'meteor',lb:['유성','반경','피해','기절'],e:'☄️',n:'유성',s:'유성',req:24,mp:18,cd:10,el:'#ff5a1f',rg:300,d:l=>`잠시 뒤 유성 ${V(HMN(l))}개 낙하, 폭발 반경 ${RR(100,l)} · 기본 피해 ${V(Math.round((80+40*l)*HMF(HMN(l))))} · ${V((.5+.02*l).toFixed(1))}초 기절 후 0.9초간 화상`},
+  {k:'meteor',lb:['유성','반경','피해','기절'],e:'☄️',n:'유성',s:'유성',req:24,mp:18,cd:10,el:'#ff5a1f',rg:300,d:l=>`잠시 뒤 유성 ${V(HMN(l))}개 낙하, 폭발 반경 ${RR(100,l)} · 기본 피해 ${V(Math.round((80+40*l)*HMFM(HMN(l))))} · ${V((.5+.02*l).toFixed(1))}초 기절 후 0.9초간 화상`},
   {k:'armageddon',lb:['피해'],e:'🌠',n:'대재앙',s:'재앙',req:90,mp:60,cd:75,el:'#ff5a1f',rg:420,d:l=>`[궁극기] 4초간 하늘에서 유성 14개가 쏟아져요. 반경 95 범위 피해 ${V(150+45*l)}, 1.5초 기절`},
   {k:'blizzard',lb:['반경','피해'],e:'🌨️',n:'눈보라',s:'눈보',req:30,mp:24,cd:17,el:'#bfe9ff',rg:300,d:l=>`4초간 반경 ${RR(130,l)} · 0.5초마다 피해 ${V(22+13*l)}, 감속`}],
  war:[
@@ -1698,9 +1698,9 @@ const SK={
   {k:'resonance',lb:['공격속도','생명력회복'],e:'💠',n:'영혼 공명',s:'공명',req:12,mp:0,cd:0,el:'#7dffd8',passive:1,d:l=>`패시브: 소환수 공격 속도 +${V(Math.min(40,2*l))}%, 소환수가 준 피해의 ${V((3+.2*l).toFixed(1))}%만큼 내 생명력 회복`},
   {k:'soulburst',lb:['반경','피해','생명력비례'],e:'💥',n:'수호 폭발',s:'폭발',req:30,mp:16,cd:12,el:'#ff9a6a',rg:NRG(300),d:l=>`수호 영혼을 폭파해 반경 ${RR(110,l)} 범위 피해 ${V(100+40*l)} + 수호 영혼 현재 생명력의 ${V(Math.round(SBHP(l)*100))}% · 최대 200%, 1초 기절`},
   {k:'execute',lb:['받는피해증가'],e:'🎯',n:'처형 명령',s:'처형',req:18,mp:12,cd:18,el:'#ff5a5a',rg:NRG(360),d:l=>`반경 ${NRG(360)}. 적 하나의 받는 피해를 +${V(20+3*l)}%하고 8초간 집중공격. 우두머리 > 정예 > 같은 티어 체력이 낮은 적 순. 소환수의 공속 +30%`},
-  {k:'colossus',lb:['지속시간','생명력','피해'],e:'🗿',n:'고대 거인',s:'거인',req:24,mp:30,cd:45,el:'#9aa6b8',d:l=>`[소환수·시한] ${V((18+.5*l).toFixed(1))}초간 등장. 생명력은 내 최대 생명력의 ${V(300+15*l)}%, 받는 피해 -50%. 1.5초마다 반경 86 범위 피해 ${V(120+45*l)}, 4초마다 반경 220 도발. 시한 소환수는 동시에 하나만 나와요`},
+  {k:'colossus',lb:['지속시간','생명력','피해'],e:'🗿',n:'고대 거인',s:'거인',req:24,mp:30,cd:45,el:'#9aa6b8',d:l=>`[소환수·시한] ${V((18+.5*l).toFixed(1))}초간 등장. 생명력은 내 최대 생명력의 ${V(300+15*l)}%, 받는 피해 -${PPR?10:50}%. 1.5초마다 반경 86 범위 피해 ${V(120+45*l)}, 4초마다 반경 220 도발. 시한 소환수는 동시에 하나만 나와요`},
   {k:'lord',lb:['피해'],e:'🐉',n:'영혼 군주 강림',s:'강림',req:90,mp:60,cd:90,el:'#7dffd8',rg:NRG(420),d:l=>`[궁극기·시한] 15초간 영혼 용령이 나와 전방 사거리 250에 숨결을 뿜어요. 0.5초마다 범위 피해 ${V(100+30*l)}, 모든 소환수 피해 +40%`},
-  {k:'fusion',lb:['지속시간','생명력','지속피해','영혼탄','영혼탄피해','휩쓸기피해'],e:'🌀',n:'영혼 융합',s:'융합',req:21,mp:25,cd:40,el:'#8ff0ff',d:l=>`수호 영혼과 포격 영혼이 하나로 합쳐 ${V((10+.3*l).toFixed(1))}초간 [융합 영혼]이 되고, 다시 누르면 분리. 생명력은 내 최대 생명력의 ${V(220+10*l)}%, 받는 피해 -50%. ① 0.5초마다 반경 105 지속 피해 ${V(6+4*l)} ② 2초마다 영혼탄 ${V(FZB(l))}발 · 기본 피해 ${V(16+10*l)} ③ 4초마다 반경 150 휩쓸기 범위 피해 ${V(50+22*l)}, 4초마다 반경 200 도발`}],
+  {k:'fusion',lb:['지속시간','생명력','지속피해','영혼탄','영혼탄피해','휩쓸기피해'],e:'🌀',n:'영혼 융합',s:'융합',req:21,mp:25,cd:40,el:'#8ff0ff',d:l=>`수호 영혼과 포격 영혼이 하나로 합쳐 ${V((10+.3*l).toFixed(1))}초간 [융합 영혼]이 되고, 다시 누르면 분리. 생명력은 내 최대 생명력의 ${V(220+10*l)}%, 받는 피해 -${PPR?5:50}%. ① 0.5초마다 반경 105 지속 피해 ${V(6+4*l)} ② 2초마다 영혼탄 ${V(FZB(l))}발 · 기본 피해 ${V(16+10*l)} ③ 4초마다 반경 150 휩쓸기 범위 피해 ${V(50+22*l)}, 4초마다 반경 200 도발`}],
  druid:[
   {k:'raven',lb:['까마귀','피해','생명력'],e:'🐦',n:'까마귀 소환',s:'까마귀',req:1,mp:8,cd:6,el:'#9a86c8',d:l=>`[소환수·영구] 까마귀 ${V(RVN(l))}마리를 불러요. 1.1초마다 피해 ${V(Math.round((12+9*l)*RVF(RVN(l))))}, 생명력은 내 최대 생명력의 ${V(Math.round(RVHP(l)*100))}%`},
   {k:'wildblood',lb:['최대생명력','초당회복','받는피해'],e:'🩸',n:'야생의 혈통',s:'혈통',req:3,mp:0,cd:0,el:'#d0705a',passive:1,d:l=>`패시브: 최대 생명력 +${V(2*l)}%, 초당 생명력 회복 +${V((.1*l).toFixed(1))}%, 변신한 동안 받는 피해 -${V((.5*l).toFixed(1))}%`},
@@ -1722,12 +1722,16 @@ const RAID_RED=.7; /* 레이드 보스 공격에 대한 방어력 피해 감소 
 const GZM=1.3, BSKM=1.3; /* 바닥 장판(용암·불길) 피해 배율 / 시전 시간이 있는 우두머리 기술 피해 배율 */
 const FNR=1.3, FND=1.3, SHOCKB=4/3, SHOCKP=.12, SHK=l=>4+.15*l; /* 서리 고리 범위·피해 배율 / 감전 상태에서 화·수 속성 피해 배율(+1/3) / 감전 지속시간 */
 const FZB=l=>3+Math.min(3,Math.floor(l/8)); /* 융합 영혼 영혼탄 발수 */
-const HMN=l=>l>=14?3:l>=7?2:1, HMF=n=>[1,.7,.55][n-1]||.55; /* 망치 개수/개당 피해 배율 */
+var PPR=0;   /* 🥨 빼빼로 적용(연구실 on/off · 관리자 전용 테스트): 켜면 아래 PPR 분기의 새 계산식, 끄면 기존 계산식 */
+const HMN=l=>l>=14?3:l>=7?2:1,
+  HMF=n=>PPR?([1,.7,.55,.47,.42,.38][n-1]||.35):([1,.7,.55][n-1]||.55),      /* 망치 개수/개당 피해 배율 (빼빼로: 4발 이상 구간 추가) */
+  HMFM=n=>PPR?([1,.95,.92,.9,.88,.86][n-1]||.85):HMF(n);                      /* 마법사(화염구·서리 고리·연쇄 번개·유성) 연타 보정 (빼빼로: 2발 .95 · 3발 .92) */
 function mightBonus(l){ return {dmg:Math.round(2*l),ias:Math.round(1.5*l),ms:Math.min(15,Math.round(.6*l))}; }
 /* 전투 함성: 레벨이 오를수록 지속시간↑ 재사용 대기↓ (Lv10부터 지속시간 ≥ 재사용 대기 → 끊김 없이 유지, 대기 하한 8초) */
 const SHD=l=>10+.6*l, SHC=l=>Math.max(8,20-.4*l);
 const RS0=lv=>1+Math.min(lv|0,25)*.025, RS=RS0, RNGMAX=15; /* RNGMAX: 아이템 '스킬 범위' 옵션 합계 상한(%) — castSkill 안에서 내 스킬에만 곱해짐 */
 const SKBY={}; for(const c in SK) for(const s of SK[c]) SKBY[s.k]=s;
+Object.defineProperty(SKBY.smite,'cd',{get(){ return PPR?3:2; },enumerable:true,configurable:true});   /* 🥨 빼빼로: 신성 타격 재사용 대기 2초 → 3초 */
 const SYN={
  sorc:{fireball:['chain','meteor'],frostnova:['blizzard','fireball'],chain:['frostnova','meteor','barrier'],barrier:['fireball','chain'],meteor:['blizzard','frostnova'],blizzard:['meteor','fireball']},
  war:{bash:['whirl','leap','rend'],rend:['quake','bash','whirl'],shout:['berserk','bash'],whirl:['quake','bash'],leap:['bash','quake'],berserk:['shout','whirl'],quake:['leap','whirl']},
@@ -3435,7 +3439,7 @@ function updateMobs(dt){
     if(m.gob){ gobStep(m,dt); continue; }
     if(m.slowT>0)m.slowT-=dt; if(m.shockT>0)m.shockT-=dt; if(m.shockP>0)m.shockP-=dt; if(m.mark&&m.mark.t>0)m.mark.t-=dt; if(m.vuln&&m.vuln.t>0)m.vuln.t-=dt;
     if(m.taunt)m.taunt.t-=dt;
-    if(m.burnT>0){ m.burnT-=dt; m.bt=(m.bt||.3)-dt; if(m.bt<=0){ m.bt=.3; if(m.burnD>0){ addNum(m.x,m.y-m.r-4,Math.max(1,Math.round(m.burnD*.3)),m.bl?'#ff4a4a':'#ff9a3c',false); if(G.train)trLogBurn(m.burnD); burst(m.x,m.y,m.bl?'#c01818':'#ff8a2a',4,90); applyDmg(m,m.burnD*.3,0); if(m.dead)continue; } } if(m.burnT<=0){ m.burnD=0; } }
+    if(m.burnT>0){ m.burnT-=dt; m.bt=(m.bt||.3)-dt; if(m.bt<=0){ m.bt=.3; if(m.burnD>0){ const bsf=PPR&&(m.shockT>0||m.shockP>0)?shockF(m):1; addNum(m.x,m.y-m.r-4,Math.max(1,Math.round(m.burnD*.3*bsf)),m.bl?'#ff4a4a':'#ff9a3c',false); if(G.train)trLogBurn(m.burnD,bsf); burst(m.x,m.y,m.bl?'#c01818':'#ff8a2a',4,90); applyDmg(m,m.burnD*.3*bsf,0); if(m.dead)continue; } } if(m.burnT<=0){ m.burnD=0; } }
     const sf=m.slowT>0?.45:1;
     m.cd-=dt*sf; m.atk=Math.max(0,m.atk-dt); m.flash=Math.max(0,m.flash-dt); m.anim+=dt*sf;
     if(m.stunImm>0)m.stunImm-=dt;
@@ -3734,16 +3738,20 @@ function spawnMe(){
   me.form=''; me.spirit=null; me.formLock=0; me.D=derive(me); me.hp=me.D.maxHp; me.mp=me.D.maxMp; autoSummon(); if(me.cls==='druid')crackImg(); if(me.cls==='necro')for(const k of ['guard','caster','colossus','dragon','fusion']){ sprGet('mn_'+k); sprGet('mn_'+k+'_atk'); } if(me.cls==='druid'){ for(const k of ['papa','mama','baby']){ sprGet('mn_'+k); sprGet('mn_'+k+'_atk'); sprGet('mn_'+k+'_walk'); } sprGet('spirit_druid'); }
 }
 function zealMul(){const l=me.cls==='pal'?skLv(me,'zeal'):0; return l?{d:1+(15+5*l)/100,t:1+(10+4*l)/100}:{d:1,t:1};}
-function buffDmg(){let v=0; const b=me.buffs; if(b.vil&&b.vil.t>0)v+=b.vil.v; if(b.shout&&b.shout.t>0)v+=b.shout.v; if(b.pcry&&b.pcry.t>0)v+=b.pcry.v; if(b.berserk&&b.berserk.t>0)v+=b.berserk.v; if(b.rage&&b.rage.t>0)v+=b.rage.v; if(b.fury&&b.fury.t>0)v+=b.fury.v; if(b.awk&&b.awk.t>0)v+=b.awk.v; const sb=spiritBuff(); if(sb)v+=sb.dmg; return v;}
+const PPR_MB=['shout','berserk','rage','fury'];   /* 곱연산 버프: 전투 함성 · 광폭화 · 광전사 폭주 · 광란 (+ 영혼 정령) */
+function buffDmg(){let v=0; const b=me.buffs; if(b.vil&&b.vil.t>0)v+=b.vil.v; if(b.pcry&&b.pcry.t>0)v+=b.pcry.v; if(b.awk&&b.awk.t>0)v+=b.awk.v;
+  if(!PPR){ if(b.shout&&b.shout.t>0)v+=b.shout.v; if(b.berserk&&b.berserk.t>0)v+=b.berserk.v; if(b.rage&&b.rage.t>0)v+=b.rage.v; if(b.fury&&b.fury.t>0)v+=b.fury.v; const sb=spiritBuff(); if(sb)v+=sb.dmg; }
+  return v;}
+function buffMul(){ if(!PPR)return 1; const b=me.buffs; let m=1; for(const k of PPR_MB){ if(b[k]&&b[k].t>0)m*=1+b[k].v; } const sb=spiritBuff(); if(sb)m*=1+sb.dmg; return m; }   /* 🥨 빼빼로: 위 버프들은 합연산이 아니라 각각 곱해요 */
 /* 드루이드: 영혼 정령 버프(내 정령 또는 반경 안에 있는 동료의 정령 중 센 쪽) · 받는 피해 감소 버프 묶음 */
 function spiritBuff(){ if(!me||me.cls===undefined)return null; let l=0; if(me.spirit&&me.spirit.t>0)l=me.spirit.lv; if(ally&&!ally.lobby&&!ally.dead&&ally.sp>0&&ally.x!==undefined&&hyp(ally.x-me.x,ally.y-me.y)<260)l=Math.max(l,ally.sp|0); return l?{lv:l,dmg:(10+1.5*l)/100,ias:(8+l)/100,mr:30+3*l}:null; }
 function drMul(){ const b=me.buffs; let m=1; if(b.rage&&b.rage.t>0)m*=1+b.rage.pen; if(b.fury&&b.fury.t>0&&b.fury.dr)m*=1-b.fury.dr; if(b.roar&&b.roar.t>0)m*=1-b.roar.v; if(b.hunt&&b.hunt.t>0)m*=1-b.hunt.dr; return m; }
 /* 형태 바꾸기: 생명력 비율은 그대로, 0.3초 동안 움직임 잠금 */
 function setForm(f){ const hr=me.hp/me.D.maxHp; me.form=f||''; me.D=derive(me); me.hp=Math.min(me.D.maxHp,me.D.maxHp*hr); me.mp=Math.min(me.mp,me.D.maxMp); me.formLock=.3; me.vx=me.vy=0; uiDirty=true; }
 function critRoll(v){const c=!G.train&&Math.random()*100<me.D.crit;   /* 훈련장: 치명타 항상 실패 */ return {v:c?v*1.5*(me.D.sp&&me.D.sp.hdag?1.4:1)*(me.D.sp&&me.D.sp.aw_amu?1.3:1)*(me.D.sp&&me.D.sp.cas_wpn?1.5:1):v,crit:c};}
-function physDmg(mult){const D=me.D; const wr=ri(D.wmn,D.wmx), w=wr+D.dmg, pm=1+D.str/100+D.dmgPct/100+buffDmg(); const r=critRoll(w*pm*mult); if(G.train)trMk(r,'p',[['W',wr],['A',D.dmg],['B',pm],['m',mult]]); return r;}
+function physDmg(mult,basic){const D=me.D; const wr=ri(D.wmn,D.wmx), w=wr+D.dmg, pm=1+D.str/100+D.dmgPct/100+buffDmg(), bm=buffMul(), wk=PPR&&!basic?1+(D.wmn+D.wmx)/2/350:1; const r=critRoll(w*pm*mult*bm*wk); if(G.train)trMk(r,'p',[['W',wr],['A',D.dmg],['B',pm],['m',mult],['U',bm],['T',wk]]); return r;}   /* 🥨 빼빼로: 스킬(기본 공격 제외)에 무기 기술 보정 (1+무기 평균/350) */
 const ENEM=.003; /* 에너지 1당 마법 피해 +0.3% */
-function spellDmg(base,noPct){const D=me.D; const sm=1+D.ene*ENEM+(noPct?0:D.dmgPct/100)+buffDmg(), wm=1+((D.wmn+D.wmx)/2)/35, tm=D.sp.tome?1.3:1; const r=critRoll(base*sm*wm*tm); if(G.train)trMk(r,'s',[['b',base],[noPct?'D':'C',sm],['E',wm],['F',tm]]); return r;}
+function spellDmg(base,noPct){const D=me.D; const sm=1+D.ene*ENEM+(noPct?0:D.dmgPct/100)+buffDmg(), wm=1+((D.wmn+D.wmx)/2)/35, tm=D.sp.tome?1.3:1, bm=buffMul(); const r=critRoll(base*sm*wm*tm*bm); if(G.train)trMk(r,'s',[['b',base],[noPct?'D':'C',sm],['E',wm],['F',tm],['U',bm]]); return r;}
 function guardMul(){let g=0; if(me.aura==='guard')g=Math.max(g,(30+6*skLv(me,'guard'))/100);
   if(ally&&!ally.lobby&&!ally.dead&&ally.aura==='guard'&&hyp(ally.x-me.x,ally.y-me.y)<320)g=Math.max(g,(30+6*ally.al)/100); return 1+g;}
 /* 방어력·피해감소를 무시하는 고정 피해 (최대 생명력의 pct) */
@@ -4074,6 +4082,8 @@ function applyHud(){ for(const k of ['combo','rank'])document.body.classList.tog
 function hudSet(k,on){ HUDS[k]=on?1:0; lsSet('dkdef2.hud',JSON.stringify(HUDS)); applyHud(); }
 function awkShieldHit(m,host){ if(host){ m.shield--; m.shF=.2; } addNum(m.x,m.y-m.r-8,m.shield>0?`🛡️ 막힘 · ${m.shield}`:'🛡️ 배리어 파괴!','#c0a8ff',m.shield<=0); spark(m.x,m.y-m.r*.5,'#c0a8ff',6);
   if(host&&m.shield<=0){ burst(m.x,m.y,'#c0a8ff',40,360); efx.push({k:'ring',x:m.x,y:m.y,r0:20,r1:150,t:0,life:.5,col:'#c0a8ff',w:10}); G.shake=Math.max(G.shake,.6); sfx('crit'); announce('🛡️ 그림자 배리어가 깨졌어요! 이제 피해가 들어가요','#c0a8ff'); pushEv(['ash0',1]); } }
+/* 감전 추가 피해 배율: 마법사 감전 +33% (🥨 빼빼로: 30+3×연쇄 번개 Lv %) · 펫 감전 +12% (합연산) */
+const shockF=m=>1+(m.shockT>0?((PPR&&m.shockB)?m.shockB:SHOCKB-1):0)+(m.shockP>0?SHOCKP:0);
 function hitMob(m,r,slow,tn,fx){
   if(m.gob){ gobHit(m,0); return; }
   if((m.shield>0||m.inv>0)&&m.boss&&m.counter>0&&!(fx&&(fx.basic||fx.raw))&&!G.inProc)counterHit(m,r.v);   /* 배리어·무적이어도 반격 태세는 그대로 반사 */
@@ -4090,11 +4100,11 @@ function hitMob(m,r,slow,tn,fx){
   if(!raw&&fx&&fx.basic&&!G.inProc&&me.D&&me.D.sp&&me.D.sp.aw_wpn&&Math.random()<.12){ const v2=r.v*.5, c2=r.crit; later(.12,()=>{ if(m.dead||!G.inGame)return; G.inProc=true; try{ hitMob(m,{v:v2,crit:c2},0,false,{basic:1}); spark(m.x,m.y,'#a68bff',8); }finally{ G.inProc=false; } }); }   /* 각성의 칼날: 분열 베기 */
   if(!raw&&fx&&fx.basic&&!G.inProc&&me.D&&me.D.sp&&(me.D.sp.cs_mace||me.D.sp.cs_sword)&&Math.random()<(m.boss?.005:.05)){ G.inProc=true; try{ const qx=m.x, qy=m.y; for(const q of mobsIn(qx,qy,130)){ if(q.boss&&q!==m&&Math.random()>=.1)continue; hitMob(q,{v:1,crit:false},0,false,{raw:1,stun:1}); } efx.push({k:'ring',x:qx,y:qy,r0:10,r1:130,t:0,life:.35,col:'#f0d29a',w:8}); spark(qx,qy,'#f0d29a',10); }finally{ G.inProc=false; } }   /* 성문 강타(수문장 철퇴·대검): 기본 공격 5% 범위 기절 1초 — 우두머리는 0.5%(맞춘 상대가 우두머리일 때, 다른 적을 때려 터진 범위 안의 우두머리는 그중 10%) */
   if(!raw&&fx&&fx.basic&&!G.inProc&&me.D&&(me.D.cs|0)>=3&&Math.random()<.07){ r=trX(r,3,'잭팟'); addNum(m.x,m.y-m.r-22,'🎰 잭팟!','#ffd34d',true); burst(m.x,m.y,'#ffd34d',16,240); }   /* 행운의 도박꾼 세트 3개: 잭팟 타격 */
-  let shk=false; if(!raw&&!(fx&&fx.basic)&&(m.shockT>0||m.shockP>0)){ r=trX(r,1+(m.shockT>0?SHOCKB-1:0)+(m.shockP>0?SHOCKP:0),'L'); shk=true; } /* 감전된 적이 받는 스킬 피해(기본 공격 제외): 마법사 감전 +33% · 펫 감전 +12% (합연산, 둘 다면 +45%) */
+  let shk=false; if(!raw&&!(fx&&fx.basic)&&(m.shockT>0||m.shockP>0)){ r=trX(r,shockF(m),'L'); shk=true; } /* 감전된 적이 받는 스킬 피해(기본 공격 제외): 마법사 감전 +33% · 펫 감전 +12% (합연산, 둘 다면 +45%) */
   if(!raw&&(m.boss||m.cnD)&&m.counter>0&&!(fx&&fx.basic)&&!G.inProc){ counterHit(m,r.v); } /* 스킬 피해는 보스에게도 그대로 들어가고, 나는 반사 피해를 받음(무적 아님) */
   const dmg=Math.max(1,Math.round(r.v)); if(G.train)trLog(r,dmg,fx); if(r.v>0)dmgTally(fx,m.hp>0?Math.min(dmg,m.hp):dmg); const sp=me.D&&me.D.sp; if(sp&&sp.frost&&Math.random()<.5&&!G.inProc) slow=Math.max(slow||0,5);
   if(fx&&fx.shockP){ m.shockP=Math.max(m.shockP||0,fx.shockP); burst(m.x,m.y,'#8f96ff',4,160); }
-  if(fx&&fx.shock){ m.shockT=Math.max(m.shockT||0,fx.shock); burst(m.x,m.y,'#cfe0ff',6,200); }
+  if(fx&&fx.shock){ if(!(m.shockT>0))m.shockB=0; m.shockB=Math.max(m.shockB||0,fx.shockB||0); m.shockT=Math.max(m.shockT||0,fx.shock); burst(m.x,m.y,'#cfe0ff',6,200); }
   if(shk&&T-(m.shkN||-9)>.5){ m.shkN=T; addNum(m.x+14,m.y-m.r-18,'⚡+33%','#9fd0ff',false); }
   m.flash=.12; addNum(m.x,m.y-m.r-6,dmg,r.crit?'#ffd34d':'#f3eadb',r.crit,m.id);
   m.sq=r.crit?.14:.09; m.sqa=Math.atan2(m.y-me.y,m.x-me.x);   /* 맞은 방향으로 찌그러짐 */
@@ -4180,7 +4190,7 @@ function autoSummon(){ minions.length=0; if(me&&me.cls==='druid')return; /* 드�
 function minionTargets(){ return G.mode==='guest'?[]:minions.filter(q=>q.rez<=0).map(q=>({x:q.x,y:q.y,i:q.i,mn:1})); }
 function minionHit(id,raw){ const mn=minions.find(q=>q.i===id); if(mn)mnTake(mn,raw); }
 function mnTake(mn,raw,direct){ if(mn.rez>0)return; const D=me.D, big=!MNK[mn.k].perm, def=D.def*1.2, red=Math.min(.8,def/(def+50+G.wave*8));
-  const d=direct?raw:raw*lvPen().tk*gearPen().tk*(1-red)*(1-Math.min(.3,.015*skLv(me,'soullink')))*(big?.5:1);
+  const d=direct?raw:raw*lvPen().tk*gearPen().tk*(1-red)*(1-Math.min(.3,.015*skLv(me,'soullink')))*(big?(PPR?(mn.k==='fusion'?.95:mn.k==='colossus'?.9:.5):.5):1);   /* 🥨 빼빼로: 융합 영혼 -5% · 고대 거인 -10% */
   mn.hp-=d; mn.flash=.12; if(d>=1)addNum(mn.x,mn.y-mn.r-8,Math.round(d),'#8fe6ff',false,'n'+mn.i); if(mn.hp<=0)mnDie(mn); }
 function mnDie(mn){ if(mn.k==='fusion'){ splitFusion(mn,'death'); return; } const K=MNK[mn.k]; spark(mn.x,mn.y,K.col,18); burst(mn.x,mn.y,K.col,26,240); efx.push({k:'ring',x:mn.x,y:mn.y,r0:6,r1:50,t:0,life:.4,col:K.col,w:6}); const i=minions.indexOf(mn); if(i>=0)minions.splice(i,1); if(K.perm)toast(`${K.n}이(가) 쓰러졌어요 — 다시 소환하세요`,'#8fe6d0'); }
 function mnHealAll(p){ for(const m of minions) if(m.rez<=0)m.hp=Math.min(m.mh,m.hp+m.mh*p); }
@@ -4428,10 +4438,10 @@ function necroCast(o,key,real,lv,tgt){
    기본 공격: 인간=가시 투사체 / 곰=범위 근접(주 대상 BRB(곰 변신 Lv), 주변은 그 80%)
    스킬은 모두 castSkill → druidCast. 변신 필요 스킬은 형태(formOf)에 따라 효과가 달라요. 동료 화면에서는 real=false라 연출만 나와요. */
 function druidAtk(o,real,ang,dx,dy){ const f=formOf(o), col=f==='bear'?'#d9a46a':'#9bd06a';
-  if(!f){ proj({x:o.x+dx*14,y:o.y+dy*14,vx:dx*540,vy:dy*540,r:6,life:.42,col,kind:'leaf',trail:'150,220,110',real,hit:m=>hitMob(m,physDmg((1+me.D.ene/150)*ATKM),0,false,BASICFX)}); return; }
+  if(!f){ proj({x:o.x+dx*14,y:o.y+dy*14,vx:dx*540,vy:dy*540,r:6,life:.42,col,kind:'leaf',trail:'150,220,110',real,hit:m=>hitMob(m,physDmg(rngM()*atkM(),1),0,false,BASICFX)}); return; }
   efx.push({k:'swing',o,a:ang,t:0,life:.2,col}); if(!real)return;
   const m=nearestMob(o.x,o.y,112); if(!m)return;
-  { const bm=BRB(Math.max(1,skLv(me,'bearform'))); hitMob(m,physDmg(bm*ATKM),0,false,BASICFX); const R=75; efx.push({k:'ring',x:m.x,y:m.y,r0:10,r1:R,t:0,life:.25,col,w:6}); for(const q of mobsIn(m.x,m.y,R)) if(q!==m) hitMob(q,physDmg(bm*BRS*ATKM),0,false,BASICFX); } }
+  { const bm=BRB(Math.max(1,skLv(me,'bearform'))); hitMob(m,physDmg(bm*atkM(),1),0,false,BASICFX); const R=75; efx.push({k:'ring',x:m.x,y:m.y,r0:10,r1:R,t:0,life:.25,col,w:6}); for(const q of mobsIn(m.x,m.y,R)) if(q!==m) hitMob(q,physDmg(bm*BRS*atkM(),1),0,false,BASICFX); } }
 function druidCast(o,key,real,lv,tgt,tx,ty,ang){
   const s=SKBY[key], col=s.el, f=formOf(o), dx=Math.cos(ang), dy=Math.sin(ang), rbm=((o===me&&me.D&&me.D.rng>0)?1+me.D.rng/100:1)*((o===me&&me.buffs.rage&&me.buffs.rage.t>0)?1.25:1), RS=RS0(lv)*rbm;
   switch(key){
@@ -4490,7 +4500,9 @@ function druidCast(o,key,real,lv,tgt,tx,ty,ang){
     break;
   }
 }
-const ATKM=.6, BASICFX={basic:1};
+const BASICFX={basic:1};
+const atkM=()=>PPR?.5+3/Math.abs(Math.min(me.lvl|0,99)-99.5):.6;   /* 기본 공격 배율 (빼빼로: 0.5 + 3/|min(Lv,99) − 99.5|) */
+const rngM=()=>PPR?Math.max(1+me.D.ene/350,1.2):1+me.D.ene/150;   /* 원거리 기본 공격 보정 (빼빼로: max(1+에너지/350, 1.2)) */
 const HFR=l=>Math.min(112,46+4*l); /* 성화 오라 범위: 레벨 올려도 112까지 */
 const hfMul=l=>l<=10?.55+.045*l:1+.05*(l-10);
 function giveBless(big){ const v=big?30:10; me.buffs.bless={t:10,m:10,v}; reBless(); toast(big?'✨ 축복! 10초간 올스탯 +30':'올스탯 +10 (10초)',big?'#ffe27a':'#ffd9a0');
@@ -4519,9 +4531,9 @@ function castSkill(o,key,real,tx,ty,lv,tgt){
   case 'atk':
     if(o.cls==='druid'){ druidAtk(o,real,ang,dx,dy); break; }
     if(C.melee){ efx.push({k:'swing',o,a:ang,t:0,life:.2,col:C.col});
-      if(real){const m=nearestMob(o.x,o.y,105); if(m){ const hf=(o===me&&me.aura==='holyfire'), hl=hf?skLv(me,'holyfire'):0, am=hf?hfMul(hl):1; hitMob(m,physDmg(am*ATKM),0,false,BASICFX); if(hf){ const R=HFR(hl); efx.push({k:'ring',x:m.x,y:m.y,r0:10,r1:R,t:0,life:.25,col:'#ffb347',w:6}); for(const q of mobsIn(m.x,m.y,R).filter(q=>q!==m)) hitMob(q,physDmg(am*.6*ATKM),0,false,BASICFX); } }} }
+      if(real){const m=nearestMob(o.x,o.y,105); if(m){ const hf=(o===me&&me.aura==='holyfire'), hl=hf?skLv(me,'holyfire'):0, am=hf?hfMul(hl):1; hitMob(m,physDmg(am*atkM(),1),0,false,BASICFX); if(hf){ const R=HFR(hl); efx.push({k:'ring',x:m.x,y:m.y,r0:10,r1:R,t:0,life:.25,col:'#ffb347',w:6}); for(const q of mobsIn(m.x,m.y,R).filter(q=>q!==m)) hitMob(q,physDmg(am*.6*atkM(),1),0,false,BASICFX); } }} }
     else proj({x:o.x+dx*14,y:o.y+dy*14,vx:dx*560,vy:dy*560,r:6,life:o.cls==='necro'?.5*NRM:.5,col:'#c9b8ff',kind:'bolt',trail:'170,150,255',real,
-      hit:m=>hitMob(m,physDmg((1+me.D.ene/150)*ATKM),0,false,BASICFX)});
+      hit:m=>hitMob(m,physDmg(rngM()*atkM(),1),0,false,BASICFX)});
     break;
   case 'bash': case 'smite':
     if(key==='bash'&&warAtlas()){ const bx=o.x+dx*72, by=o.y+dy*58+8; wfx(1,0,7,bx,by,Math.min(200,150*RS(lv)),.45); wfx(0,0,7,bx,by-6,Math.min(190,135*RS(lv)),.42); burst(bx,by,'#9a7a56',G.lowFx?4:8,190); }
@@ -4607,9 +4619,9 @@ function castSkill(o,key,real,tx,ty,lv,tgt){
       if(px===undefined){ const a=rand(0,6.283), d=rand(40,320); px=clamp(o.x+Math.cos(a)*d,20,WW-20); py=clamp(o.y+Math.sin(a)*d,20,WH-20); }
       const fxm=fxMeteor(px,py,90,lv,.7); if(!fxm){ efx.push({k:'tele',x:px,y:py,r:90,t:0,life:.7,col:'#ff5a1f'}); efx.push({k:'meteor',x:px,y:py,t:0,life:.7}); }
       later(.7,()=>{ if(fxm){ fxSpr(6,3,7,px,py,150,.5); sfx('slam'); } else { slamFx(px,py,95,'#ff5a1f'); impact(px,py,'255,120,30',180); efx.push({k:'ring',x:px,y:py,r0:20,r1:130,t:0,life:.5,col:'#ffd08a',w:9}); } burst(px,py,'#ffb04a',34,380); G.shake=Math.max(G.shake,.4);
-        if(real) for(const m of mobsIn(px,py,95)){ const rr=spellDmg(150+45*lv); hitMob(m,rr,0,false,{stun:1.5,burn:.8,bd:rr.v*.3,el:'fire'}); } }); });
+        if(real) for(const m of mobsIn(px,py,95)){ const rr=spellDmg(150+45*lv); hitMob(m,rr,0,false,{stun:1.5,burn:PPR?5:.8,bd:rr.v*.3,el:'fire'}); } }); });
     break;
-  case 'fireball':{ const fn=HMN(lv), ff=HMF(fn);
+  case 'fireball':{ const fn=HMN(lv), ff=HMFM(fn);
     for(let i=0;i<fn;i++) later(i*.16,()=>{ if(o===me&&me.dead)return; let a2=ang; if(real&&i>0){ const t2=nearestMob(o.x,o.y,NRG(320)); if(t2)a2=Math.atan2(t2.y-o.y,t2.x-o.x); } const ddx=Math.cos(a2), ddy=Math.sin(a2); if(i>0)sfx('fire');
       proj({x:o.x+ddx*14,y:o.y+ddy*14,vx:ddx*430,vy:ddy*430,r:9,life:.75,col:'#ff7a2e',kind:'fire',real,trail:'255,130,40',
         boom:(x,y)=>{ if(!fxSpr(1,3,7,x,y,Math.min(170,110*RS(lv)),.45)){ efx.push({k:'boom',x,y,r:60*RS(lv),t:0,life:.45,col:'#ff7a2e'}); impact(x,y,'255,140,40',110); } burst(x,y,'#ffb04a',26,260); G.shake=Math.max(G.shake,.15);
@@ -4617,15 +4629,15 @@ function castSkill(o,key,real,tx,ty,lv,tgt){
     break;
   case 'frostnova':
     if(fxSpr(2,0,7,o.x,o.y,200,.7)){ efx.push({k:'ring',x:o.x,y:o.y,r0:20,r1:160*RS(lv)*FNR,t:0,life:.45,col:'#8fdcff',w:3}); } else { efx.push({k:'ring',x:o.x,y:o.y,r0:20,r1:160*RS(lv)*FNR,t:0,life:.5,col:'#8fdcff',w:14}); efx.push({k:'shards',x:o.x,y:o.y,r:160*RS(lv)*FNR,t:0,life:.6}); impact(o.x,o.y,'150,220,255',170); } burst(o.x,o.y,'#dff6ff',36,420);
-    { const fn=HMN(lv), ff=HMF(fn), FR=160*RS(lv)*FNR; /* 서리 고리: 범위 +30%, 피해 +30%, 7레벨 2연타 · 14레벨 3연타 */
+    { const fn=HMN(lv), ff=HMFM(fn), FR=160*RS(lv)*FNR; /* 서리 고리: 범위 +30%, 피해 +30%, 7레벨 2연타 · 14레벨 3연타 */
       const hitRing=first=>{ if(!first){ sfx('ice'); if(!fxSpr(2,0,7,o.x,o.y,200,.5)) efx.push({k:'ring',x:o.x,y:o.y,r0:20,r1:FR,t:0,life:.4,col:'#8fdcff',w:10}); burst(o.x,o.y,'#dff6ff',20,360); }
         if(real) for(const m of mobsIn(o.x,o.y,FR)){ const r=spellDmg((14+10*lv)*FND); r.v*=ff; hitMob(m,r,first?3:0,false,{el:'ice'}); } };
       hitRing(true); for(let i=1;i<fn;i++) later(i*.28,()=>{ if(o===me&&me.dead)return; hitRing(false); }); }
     break;
-  case 'chain':{ const fn=HMN(lv), ff=HMF(fn), n=3+Math.floor(lv/4), br=[];
+  case 'chain':{ const fn=HMN(lv), ff=HMFM(fn), n=3+Math.floor(lv/4), br=[];
     if(real){ const sk=new Set(); const first=tgt&&!tgt.dead?tgt:nearestMob(o.x,o.y,280);
       for(let b=0;b<fn;b++){ let cur=b===0?first:nearestMob(o.x,o.y,300,sk); if(!cur)break; const pts=[{x:o.x,y:o.y}]; let f=1;
-        for(let i=0;i<n&&cur;i++){ sk.add(cur); pts.push({x:cur.x,y:cur.y}); hitMob(cur,spellDmg((22+16*lv)*f*ff),0,false,{shock:SHK(lv)}); f*=.9; cur=nearestMob(cur.x,cur.y,170,sk); }
+        for(let i=0;i<n&&cur;i++){ sk.add(cur); pts.push({x:cur.x,y:cur.y}); hitMob(cur,spellDmg((22+16*lv)*f*ff),0,false,{shock:SHK(lv),shockB:(30+3*lv)/100}); f*=.9; cur=nearestMob(cur.x,cur.y,170,sk); }
         br.push(pts); }
       if(!br.length) br.push([{x:o.x,y:o.y},{x:tx,y:ty}]); }
     else br.push([{x:o.x,y:o.y},{x:tx,y:ty}]);
@@ -4652,13 +4664,13 @@ function castSkill(o,key,real,tx,ty,lv,tgt){
     burst(o.x,o.y,'#c9a8ff',20,200); burst(tx,ty,'#c9a8ff',20,200); impact(tx,ty,'185,140,255',70);
     if(real){me.x=tx;me.y=ty;me.pickT=null;me.god=Math.max(me.god||0,.4);}
     break;
-  case 'meteor':{ const mn=HMN(lv), mf=HMF(mn);
+  case 'meteor':{ const mn=HMN(lv), mf=HMFM(mn);
     for(let q=0;q<mn;q++){ const a=q*2.4+.6, ox=q?Math.cos(a)*(95+25*q):0, oy=q?Math.sin(a)*(95+25*q)*.75:0, mx=tx+ox, my=ty+oy;
       later(q*.3,()=>{
       const fxm=fxMeteor(mx,my,90,lv,.9); if(!fxm){ efx.push({k:'tele',x:mx,y:my,r:90,t:0,life:.9,col:'#ff5a1f'});
       efx.push({k:'meteor',x:mx,y:my,t:0,life:.9}); }
       later(.9,()=>{ if(fxm)fxSpr(6,3,7,mx,my,Math.min(180,100*RS(lv)*1.6),.5); else { slamFx(mx,my,100,'#ff5a1f'); impact(mx,my,'255,120,30',200); efx.push({k:'ring',x:mx,y:my,r0:30,r1:170,t:0,life:.6,col:'#ffd08a',w:10}); } sfx('slam'); burst(mx,my,'#ffb04a',50,420); burst(mx,my,'#ff5a1f',30,260); G.shake=Math.max(G.shake,.7);
-        if(real){ for(const m of mobsIn(mx,my,100*RS(lv))){ const rr=spellDmg((80+40*lv)*mf); hitMob(m,rr,0,false,{stun:.5+.02*lv,burn:.9,bd:rr.v*.5,el:'fire'}); }
+        if(real){ for(const m of mobsIn(mx,my,100*RS(lv))){ const rr=spellDmg((80+40*lv)*mf); hitMob(m,rr,0,false,{stun:.5+.02*lv,burn:PPR?4:.9,bd:rr.v*.5,el:'fire'}); }
           zones.push({x:mx,y:my,r:80*RS(lv),life:2.5,t:0,tick:0,iv:.5,real,col:'#ff5a1f',kind:'fire',fn:m=>hitMob(m,spellDmg((12+8*lv)*mf),0,false,{el:'fire'})}); }
         else zones.push({x:mx,y:my,r:70,life:2,t:0,tick:9,iv:9,real:false,col:'#ff5a1f',kind:'fire'}); }); }); }
     break; }
@@ -4927,6 +4939,7 @@ $('#bBas').addEventListener('pointerdown',e=>{ e.preventDefault(); if(!G.train)r
 $('#trHome').onclick=()=>{ if(G.train)quitToTitle(); };
 $('#trPet').onclick=()=>{ if(!G.train)return; const L=[0,3,7,10,15], cur=G.trPet?G.trPet.lv:0, nx=L[(L.indexOf(cur)+1)%L.length]; G.trPet=nx?{id:'trio',xp:petT('trio')[nx-1],lv:nx}:null; G.trNoPet=false; PET.on=false; petStart(); sfx('ui'); toast(nx?`🐾 삼남매 펫 Lv${nx} (훈련장 전용 · 저장 안 됨)`:'🐾 삼남매 펫 해제','#c8a8ff'); };
 $('#trMn').onclick=()=>{ if(!G.train)return; const n=minions.length; minions.length=0; G.trNoPet=true; PET.on=false; sfx('ui'); toast(`💨 소환수 ${n}마리와 펫을 없앴어요`,'#e0c080'); };
+$('#trPp').onclick=()=>{ if(!G.train)return; sfx('ui'); pprSet(PPR?0:1); toast(PPR?'🥨 빼빼로 적용 ON':'🥨 빼빼로 적용 OFF','#e0c080'); };
 $('#trCd').onclick=()=>{ if(!G.train||!me)return; for(const k in me.cds)me.cds[k]=0; sfx('ui'); toast('⏱️ 재사용 대기시간을 모두 초기화했어요','#e0c080'); };
 $('#trAn').onclick=()=>{ if(G.train){ sfx('ui'); trOpen(!$('#trDr').classList.contains('on')); } };
 document.body.appendChild($('#trDr'));   /* 드로어는 화면 맨 위 층(우측 아이콘·하단 메뉴보다 위) — 가방·창을 열면 자동으로 닫혀요 */
@@ -6064,9 +6077,9 @@ function cmpMini(it){ let t=`<div style="color:${RARC[it.rar]};font-weight:700">
    항목: [스킬키, 1회 시전 피해(레벨→기본치), 재사용 대기(초), 종류 s=마법(에너지 계수)/p=물리(힘 계수)] */
 const CPSKW=.5, CPCW={war:1,sorc:.75,pal:1.2,necro:.8,druid:.9}; /* 스킬을 전부 동시에 못 쓰고 마나도 한정이라서 곱하는 보정(.5) · 클래스별 균형 보정(마법사는 원거리 이점, 팔라딘은 오라 등 비공격 스킬이 많아서) */
 const CPSK={
- sorc:[['fireball',l=>(18+13*l)*HMN(l)*HMF(HMN(l)),1,'s'],['frostnova',l=>(14+10*l)*FND*HMN(l)*HMF(HMN(l)),6,'s'],
-  ['chain',l=>(22+16*l)*HMN(l)*HMF(HMN(l))*(1-Math.pow(.9,Math.min(3,3+Math.floor(l/4))))/.1,4,'s'],
-  ['meteor',l=>((80+40*l)+4*(12+8*l))*HMN(l)*HMF(HMN(l)),10,'s'],['blizzard',l=>(22+13*l)*8,17,'s'],['armageddon',l=>14*(150+45*l)*.5,75,'s']],
+ sorc:[['fireball',l=>(18+13*l)*HMN(l)*HMFM(HMN(l)),1,'s'],['frostnova',l=>(14+10*l)*FND*HMN(l)*HMFM(HMN(l)),6,'s'],
+  ['chain',l=>(22+16*l)*HMN(l)*HMFM(HMN(l))*(1-Math.pow(.9,Math.min(3,3+Math.floor(l/4))))/.1,4,'s'],
+  ['meteor',l=>((80+40*l)+4*(12+8*l))*HMN(l)*HMFM(HMN(l)),10,'s'],['blizzard',l=>(22+13*l)*8,17,'s'],['armageddon',l=>14*(150+45*l)*.5,75,'s']],
  necro:[['soulbolt',l=>(14+10*l)*HMN(l)*HMF(HMN(l)),.8,'s'],['guardian',l=>(14+10*l)/1.2*(1+.04*l),1,'m'],['spiritcaster',l=>(18+12*l)*HMN(l)*HMF(HMN(l))/1.8*(1+.04*l),1,'m'],['soulburst',l=>(100+40*l)*1.6,12,'s'],['execute',l=>0,18,'s'],['colossus',l=>(120+45*l)/1.5*(18+.5*l)*(1+.04*l),45,'m'],['lord',l=>(100+30*l)*2*15*(1+.04*l),90,'m'],['fusion',l=>((6+4*l)/.5+(16+10*l)*FZB(l)/2+(50+22*l)/4)*(10+.3*l)*(1+.04*l),40,'m']],
  druid:[['raven',l=>(12+9*l)*RVN(l)*RVF(RVN(l))/1.1,1,'m'],['bite',l=>3.5+.55*l,3,'p'],['hunt',l=>(18+3*l)*.5,12,'p'],['bears',l=>(110+55*l)*BEAR_T(l)/3,80,'m']],
  war:[['bash',l=>3+.5*l,2,'p'],['rend',l=>4.5+.7*l+Math.floor((1.5+.12*l)/.5)*(.5+.05*l),5,'p'],['whirl',l=>1.8+.3*l,5,'p'],['leap',l=>2.8+.45*l,8,'p'],['quake',l=>4+.65*l,13,'p'],['ragnarok',l=>(14+l)*.6+8,90,'p']],
@@ -6141,14 +6154,14 @@ function psSwitch(n){
 function renderStat(){
   const SKM=sheetMode==='skill'||sheetMode==='passive', PAS=sheetMode==='passive'; markTabs(); sheetHead();
   const D=me.D, S=[['str','힘','물리 피해 +1% · 무거운 장비 착용'],['dex','민첩','공격 속도 +0.25% · 치명타 +0.12% · 방어력 +0.5'],['vit','체력',`생명력 +4 · 받는 피해 -0.12% (체력으로 얻는 감소는 최대 ${VITDR}%)`],['ene','에너지',`마나 +1 · 마법 피해 +0.3% · 쿨감 0.1% (에너지로 얻는 쿨감은 최대 ${ENECD}%)`]];
-  const mult=1+(D.str+D.dmgPct)/100, aMin=Math.round((D.wmn+D.dmg)*mult*(me.cls==='sorc'||me.cls==='necro'?1+D.ene/150:1)), aMax=Math.round((D.wmx+D.dmg)*mult*(me.cls==='sorc'||me.cls==='necro'?1+D.ene/150:1)), aAvg=(aMin+aMax)/2, cr=D.crit/100;
+  const mult=1+(D.str+D.dmgPct)/100, aMin=Math.round((D.wmn+D.dmg)*mult*(me.cls==='sorc'||me.cls==='necro'?rngM():1)), aMax=Math.round((D.wmx+D.dmg)*mult*(me.cls==='sorc'||me.cls==='necro'?rngM():1)), aAvg=(aMin+aMax)/2, cr=D.crit/100;
   const k1=SK[me.cls][0], l1=Math.max(1,skLv(me,k1.k)); let s1=aAvg;
   if(k1.k==='bash')s1=aAvg*(3+.5*l1); else if(k1.k==='smite')s1=aAvg*(2.6+.4*l1)+8+7*l1; else if(k1.k==='fireball')s1=(18+13*l1)*(1+D.ene*ENEM+D.dmgPct/100);
   else if(k1.k==='raven')s1=(12+9*l1)*RVF(RVN(l1))*mnMul()*(1+D.ene*ENEM)*(1+(D.wmn+D.wmx)/70)*(D.sp.tome?1.2:1); /* 까마귀: 스킬 설명의 기본 피해에 에너지·피해 보너스·무기 보정을 곱한 마리당 1타 (치명타·버프·레벨/장비 보정 제외) */
   /* 드루이드 기본 공격은 형태마다 달라요: 인간=에너지 보정(1+에너지/150) · 곰=곰 변신 Lv 배율(+주변 적은 80%) */
-  const dru=me.cls==='druid', dF=dru?(me.form||''):'', dK=!dru?1:dF==='bear'?BRB(Math.max(1,skLv(me,'bearform'))):1+D.ene/150;
-  const dpsT=Math.round(aAvg*dK*ATKM*(1+cr*.5)/D.atkInt);
-  let h=''; if(!SKM) h+=`<div class="box"><h3>⚔️ 실제 데미지</h3><div class="row"><span class="k">기본 공격 피해${dru?` (${dF==='bear'?'🐻 곰':'🧑 인간'})`:''}</span><span><b style="color:#ffd84a;font-size:17px">${Math.round(aMin*dK*ATKM)}–${Math.round(aMax*dK*ATKM)}</b></span></div>${dF==='bear'?`<div class="row"><span class="k">└ 주변 적 (주 대상의 80%)</span><span>${Math.round(aMin*dK*BRS*ATKM)}–${Math.round(aMax*dK*BRS*ATKM)}</span></div>`:''}<div class="row"><span class="k">치명타 시 (${D.crit}%)</span><span>${Math.round(aMin*dK*1.5*ATKM)}–${Math.round(aMax*dK*1.5*ATKM)}</span></div><div class="row"><span class="k">${esc(k1.n)} (1번 스킬 Lv ${l1})</span><span>${Math.round(s1)}${k1.k==='raven'?` <small style="color:#9aa0aa">마리당 · ${RVN(l1)}마리</small>`:''}</span></div><div class="row"><span class="k">초당 피해 (기본 공격)</span><span><b style="color:#ffd84a">${dpsT}</b></span></div></div>`;
+  const dru=me.cls==='druid', dF=dru?(me.form||''):'', dK=!dru?1:dF==='bear'?BRB(Math.max(1,skLv(me,'bearform'))):rngM();
+  const dpsT=Math.round(aAvg*dK*atkM()*(1+cr*.5)/D.atkInt);
+  let h=''; if(!SKM) h+=`<div class="box"><h3>⚔️ 실제 데미지</h3><div class="row"><span class="k">기본 공격 피해${dru?` (${dF==='bear'?'🐻 곰':'🧑 인간'})`:''}</span><span><b style="color:#ffd84a;font-size:17px">${Math.round(aMin*dK*atkM())}–${Math.round(aMax*dK*atkM())}</b></span></div>${dF==='bear'?`<div class="row"><span class="k">└ 주변 적 (주 대상의 80%)</span><span>${Math.round(aMin*dK*BRS*atkM())}–${Math.round(aMax*dK*BRS*atkM())}</span></div>`:''}<div class="row"><span class="k">치명타 시 (${D.crit}%)</span><span>${Math.round(aMin*dK*1.5*atkM())}–${Math.round(aMax*dK*1.5*atkM())}</span></div><div class="row"><span class="k">${esc(k1.n)} (1번 스킬 Lv ${l1})</span><span>${Math.round(s1)}${k1.k==='raven'?` <small style="color:#9aa0aa">마리당 · ${RVN(l1)}마리</small>`:''}</span></div><div class="row"><span class="k">초당 피해 (기본 공격)</span><span><b style="color:#ffd84a">${dpsT}</b></span></div></div>`;
 if(!SKM){
   { const ML=townStatBonus(), base=CLASSES[me.cls].base, tots=S.map(([k])=>Math.floor(D[k])), mx=Math.max(60,...tots)*1.06;
     const R0=S.map(([k,n,ds],i)=>{ const tot=tots[i], b0=base[k], pt=Math.max(0,me.stats[k]-b0), gr=Math.max(0,tot-me.stats[k]-ML); return {k,n,ds,tot,b0,pt,gr,ml:ML}; });   /* 장비 몫에서 마을 각성 풍차(올스탯) 몫은 빼서 따로 보여줘요 */
@@ -6192,7 +6205,10 @@ if(SKM){
 }
 /* ===== 연구실 (관리자 전용 공간) — 계정 전체에 적용: 켜짐 여부(dkdef2.lab)는 클라우드 저장에 함께 실려요. 비밀번호·전송 대기열(dkdef2.cl.*)은 이 기기에만 ===== */
 const RS_KEY='dkdef2.lab', RS_PW='dkdef2.cl.labpw', RS_Q='dkdef2.cl.labq', RS_H=1529703320, RS_WD=['일','월','화','수','목','금','토'];
-const rsOn=()=>lsGet(RS_KEY)==='1';
+const rsOn=()=>lsGet(RS_KEY)==='1', PPR_KEY='dkdef2.cl.ppr';
+const pprSync=()=>{ PPR=rsOn()&&lsGet(PPR_KEY)==='1'?1:0; };   /* 🥨 빼빼로 적용은 이 기기에서 연구실이 켜진 동안만 */
+const pprSet=v=>{ if(v)lsSet(PPR_KEY,'1'); else lsDel(PPR_KEY); pprSync(); const b=document.getElementById('trPp'); if(b)b.textContent=PPR?'🥨 빼빼로 ON':'🥨 빼빼로 OFF'; if(G.train){ TR.dirty=true; trRender(true); } };
+pprSync();
 const rsStamp=t=>{ const d=t instanceof Date?t:new Date(t), p=n=>String(n).padStart(2,'0'); return isNaN(d)?'-':`${d.getFullYear()}/${RKMON[d.getMonth()]}/${p(d.getDate())}(${RS_WD[d.getDay()]}) ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`; };   /* yyyy/MMM/dd(aaa) HH:mm:ss */
 const rsNames=()=>charIds().map(loadChar).filter(Boolean).map(c=>dispName(c)).join(', ');
 const rsPwOk=v=>typeof v==='string'&&v.length>0&&hashStr(v)===RS_H;
@@ -6213,7 +6229,7 @@ function rsGrant(pw){ lsSet(RS_PW,pw); rsLogAdd('in',pw); lsSet(RS_KEY,'1'); clo
 function rsExit(){
   modal(`<h3>🚪 나가기</h3><p style="margin:0 0 12px;font-size:14px;line-height:1.5">관리자 권한을 반납하고 연구실을 닫을까요?</p><div class="row2"><button class="btn" id="rxNo">취소</button><button class="btn primary" id="rxGo">반납하고 나가기</button></div>`,m=>{
     m.querySelector('#rxNo').onclick=closeModal;
-    m.querySelector('#rxGo').onclick=()=>rsPw(pw=>{ rsLogAdd('out',pw); lsDel(RS_KEY); lsDel(RS_PW); closeModal(); rerender(); sheetToast('🚪 관리자 권한을 반납했어요'); }); }); }
+    m.querySelector('#rxGo').onclick=()=>rsPw(pw=>{ rsLogAdd('out',pw); lsDel(RS_KEY); lsDel(RS_PW); pprSet(0); closeModal(); rerender(); sheetToast('🚪 관리자 권한을 반납했어요'); }); }); }
 const rsPre='white-space:pre-wrap;word-break:break-word;font:12px/1.55 ui-monospace,Menlo,monospace;max-height:58vh;overflow:auto;margin:0 0 8px;padding:8px;background:#0a0807;border:1px solid var(--line2);border-radius:8px;touch-action:pan-y';
 function rsNotes(){
   modal(`<h3>📔 관리자 노트</h3><pre id="rsT" style="${rsPre}">불러오는 중…</pre><div class="row2"><button class="btn" id="rnRe">🔄 새로고침</button><button class="btn primary" id="rnX">닫기</button></div>`,m=>{
@@ -6250,9 +6266,9 @@ function renderShop(){
   markTabs(); sheetHead(); sellAskIt=null;
   selItem=null;   /* 상점에는 판매창이 없음 — 판매·일괄 판매는 가방에서 */
   let h=`<div class="box"><h3>🛍️ 구매</h3>${shopRow('potion')}${shopAuto('potion')}${me.hc?'':shopRow('rev')+shopAuto('rev')}<div class="smsg">${esc(buyMsg)}</div></div>`;
-  if(rsOn())h+=`<div class="box" id="rsBox"><h3>📚 연구실</h3><p style="margin:0 0 10px;font-size:14px;line-height:1.5">어서오세요, 관리자님 환영합니다.</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button class="btn" id="rsNote">📔 관리자 노트</button><button class="btn" id="rsLog">📜 출입 기록</button></div>${G.inGame?'':'<button class="btn primary" id="rsTrain" style="width:100%;margin-top:8px">🏋️ 훈련장 입장</button>'}<button class="btn" id="rsExit" style="width:100%;margin-top:8px">🚪 나가기</button></div>`;
+  if(rsOn())h+=`<div class="box" id="rsBox"><h3>📚 연구실</h3><p style="margin:0 0 10px;font-size:14px;line-height:1.5">어서오세요, 관리자님 환영합니다.</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button class="btn" id="rsNote">📔 관리자 노트</button><button class="btn" id="rsLog">📜 출입 기록</button></div>${G.inGame?'':'<button class="btn primary" id="rsTrain" style="width:100%;margin-top:8px">🏋️ 훈련장 입장</button>'}<button class="btn" id="rsPpr" aria-pressed="${PPR?'true':'false'}" style="width:100%;margin-top:8px">🥨 빼빼로 적용 : ${PPR?'ON':'OFF'}</button><button class="btn" id="rsExit" style="width:100%;margin-top:8px">🚪 나가기</button></div>`;
   const b=$('#sheetB'); b.className='sbody stats'; b.innerHTML=h; fitGo(b);
-  { const q=id=>b.querySelector(id); if(q('#rsNote'))q('#rsNote').onclick=rsNotes; if(q('#rsLog'))q('#rsLog').onclick=rsLogView; if(q('#rsExit'))q('#rsExit').onclick=rsExit; if(q('#rsTrain'))q('#rsTrain').onclick=startTraining; }
+  { const q=id=>b.querySelector(id); if(q('#rsNote'))q('#rsNote').onclick=rsNotes; if(q('#rsLog'))q('#rsLog').onclick=rsLogView; if(q('#rsExit'))q('#rsExit').onclick=rsExit; if(q('#rsTrain'))q('#rsTrain').onclick=startTraining; if(q('#rsPpr'))q('#rsPpr').onclick=()=>{ pprSet(PPR?0:1); sfx('ui'); sheetToast(PPR?'🥨 빼빼로 적용 ON':'🥨 빼빼로 적용 OFF'); rerender(); }; }
   b.querySelectorAll('[data-atg]').forEach(el=>el.onclick=()=>{ const f=AUTOK[el.dataset.atg]; me[f]=me[f]?0:1; saveChar(); sfx('ui'); renderShop(); });
   b.querySelectorAll('[data-q]').forEach(el=>el.onclick=()=>{ const [k,a]=el.dataset.q.split(':'), have=k==='potion'?me.potBuy:me.rev, space=Math.max(1,shopMax(k)-have), o=SHOP[k];
     if(a==='max')shopQty[k]=Math.max(1,Math.min(Math.floor(aGold()/o.p),space)); else shopQty[k]=clamp((shopQty[k]|0)+(+a),1,space); buyMsg=''; renderShop(); });
@@ -6886,7 +6902,7 @@ const TR_CN=[0,-480];   /* 반격 허수아비: 중심에서 위로 480 */
 const TR_D=45.25, TR_POS=[[-320,0],[320,0],[320-TR_D,-TR_D],[320+TR_D,-TR_D],[320-TR_D,TR_D],[320+TR_D,TR_D]];   /* 왼쪽 1기 · 오른쪽 X자 5기(반경 64) */
 function startTraining(){
   if(!rsOn()||G.inGame||!selId)return; if(hcDead(loadChar(selId)))return;
-  closeModal(); G.mode='solo'; prepMe(); ally=null; resetWorld(); G.train=1; TR.log=[]; TR.sk='기본공격'; TR.dirty=true; TR.sum={}; TR.ev=[]; TR.dps=0; TR.dpsAt=0;
+  closeModal(); G.mode='solo'; prepMe(); ally=null; resetWorld(); G.train=1; { const pb=$('#trPp'); if(pb)pb.textContent=PPR?'🥨 빼빼로 ON':'🥨 빼빼로 OFF'; } TR.log=[]; TR.sk='기본공격'; TR.dirty=true; TR.sum={}; TR.ev=[]; TR.dps=0; TR.dpsAt=0;
   dmgReset(); G.firstClr=false; G.potN=0; G.stageIdx=selStage; G.stg=TRAIN_STG; G.TW=0; setTheme(0); G.castle=null; G.gts=[];
   G.allMode=false; G.allQ=[]; G.fires=[]; G.freeRev=me.hc?0:1; G.hcWhy=''; me.rvGiven=0; me.seenRg=0; me.out=false; me.rvT=0;
   G.gemDone=true; G.wave=0; G.skipUsed=true; G.phase='train'; G.timer=0; G.mobs.length=0; G.ev=[]; G.spawnQ=0; G.lastSq=-1; G.endShown=false; G.coop=false;
@@ -6911,7 +6927,7 @@ function trMk(r,k,p){ const tr={k,p}; let v=r.v; Object.defineProperty(r,'v',{ge
 function trX(r,f,k){ const o={v:r.v*f,crit:r.crit}; if(r.tr){ r.tr.p.push([k,f]); o.tr=r.tr; } return o; }
 function trLog(r,dmg,fx){ const pe=petNow(), nm=fx&&fx.mk&&MNK[fx.mk]?MNK[fx.mk].n:fx&&fx.pet?('펫 · '+(fx.pn||(pe&&PETS[pe.id]&&PETS[pe.id].an)||'펫')):TR.sk; trAcc(nm,dmg);
   TR.log.unshift({t:G.runT||0,n:nm,d:dmg,v:r.v,c:fx&&fx.mk?'mn':(nm==='기본공격'?'atk':''),tr:r.tr?{...r.tr,p:r.tr.p.slice()}:null}); if(TR.log.length>500)TR.log.length=500; TR.dirty=true; }
-function trLogBurn(bd){ trAcc('화상',Math.max(1,Math.round(bd*.3))); TR.log.unshift({t:G.runT||0,n:'화상',d:Math.max(1,Math.round(bd*.3)),burn:bd}); if(TR.log.length>500)TR.log.length=500; TR.dirty=true; }
+function trLogBurn(bd,sf){ sf=sf||1; trAcc('화상',Math.max(1,Math.round(bd*.3*sf))); TR.log.unshift({t:G.runT||0,n:'화상',d:Math.max(1,Math.round(bd*.3*sf)),burn:bd,sf}); if(TR.log.length>500)TR.log.length=500; TR.dirty=true; }
 const trN=v=>{ if(v==null||!isFinite(v))return String(v); const a=Math.abs(v); const s=a>=1000?v.toFixed(1):a>=1?v.toFixed(4):v.toFixed(5); return s.replace(/\.?0+$/,''); };
 function trConsts(){ const D=me.D, b=buffDmg(), P=gearPen(), L=lvPen(), wa=(D.wmn+D.wmx)/2, bs=b?` + 버프 ${trN(b)}`:'', C={};
   C.W={n:'무기 공격력',e:`${D.wmn} ~ ${D.wmx} (때릴 때마다 굴림 → 로그에는 굴린 숫자)`,v:null};
@@ -6921,16 +6937,19 @@ function trConsts(){ const D=me.D, b=buffDmg(), P=gearPen(), L=lvPen(), wa=(D.wm
   C.D={n:'마법 배율(피해% 미적용)',e:`(1 + 에너지 ${D.ene}×0.003${bs})`,v:1+D.ene*ENEM+b};
   C.E={n:'무기 마법 보정',e:`(1 + 무기 평균 ${trN(wa)}/35)`,v:1+wa/35};
   C.F={n:'마도서',e:D.sp&&D.sp.tome?'1.3':'1 (없음)',v:D.sp&&D.sp.tome?1.3:1};
-  C.G={n:'기본 공격 배율',e:'0.6',v:ATKM};
-  C.H={n:'원거리 기본 공격 보정',e:`(1 + 에너지 ${D.ene}/150)`,v:1+D.ene/150};
+  C.G={n:'기본 공격 배율',e:PPR?`0.5 + 3/|min(Lv ${me.lvl},99) − 99.5|`:'0.6',v:atkM()};
+  C.H={n:'원거리 기본 공격 보정',e:PPR?`max(1 + 에너지 ${D.ene}/350, 1.2)`:`(1 + 에너지 ${D.ene}/150)`,v:rngM()};
   if(me.cls==='necro')C.I={n:'소환수 배율',e:`(1+0.04×영혼 연결 ${skLv(me,'soullink')})×(1+0.04×교감 ${skLv(me,'communion')})×(1+소환수 피해 ${D.sm||0}/100)${lordOn()?'×군주 1.4':''}`,v:mnMul()};
   C.J={n:'장비 보정',e:`장비 Lv 합 ${P.sum} (권장 ${P.need}↑)`,v:P.wm};
   C.K={n:'레벨 보정',e:`Lv ${me.lvl} (Lv90↑ 패널티 없음)`,v:L.dm};
-  C.L={n:'감전 추가 피해(스킬)',e:'4/3',v:SHOCKB};
+  C.L={n:'감전 추가 피해(스킬)',e:PPR?`1 + (30 + 3×연쇄 번개 Lv)/100 (화상 틱에도 적용)`:'4/3',v:PPR?null:SHOCKB};
+  C.T={n:'무기 기술 보정(스킬)',e:`(1 + 무기 평균 ${trN(wa)}/350)`+(PPR?'':' — 꺼짐'),v:PPR?1+wa/350:1};
+  C.U={n:'곱연산 버프',e:PPR?'(1+전투 함성)×(1+광폭화)×(1+폭주)×(1+광란)×(1+영혼 정령)':'꺼짐 (합연산)',v:buffMul()};
+  C.P={n:'🥨 빼빼로 적용',e:PPR?'ON':'OFF',v:null};
   C.M={n:'치명타',e:'훈련장에서는 항상 실패',v:null};
   return C; }
 function trFmt(e,C){
-  if(e.burn!=null){ const ok=Math.max(1,Math.round(e.burn*.3))===e.d; return {ok,s:`round(${trN(e.burn)} × 0.3)`}; }
+  if(e.burn!=null){ const sf=e.sf||1, ok=Math.max(1,Math.round(e.burn*.3*sf))===e.d; return {ok,s:`round(${trN(e.burn)} × 0.3${sf!==1?' × 감전 '+trN(sf):''})`}; }
   if(!e.tr)return {ok:false,s:`? (계산 출처 미추적 · 최종 ${trN(e.v)})`};
   const tok=(k,v)=>(k&&C[k]&&C[k].v!=null&&Math.abs(C[k].v-v)<1e-9)?k:(k&&!C[k]?`${trN(v)}(${k})`:trN(v));
   const cands=e.c==='atk'?[['G','H'],['G']]:e.c==='mn'?[['I']]:[];
@@ -6940,7 +6959,7 @@ function trFmt(e,C){
   if(e.tr.k==='p'){ prod=p[0][1]+p[1][1]; s=`(${p[0][1]} + ${tok('A',p[1][1])})`; for(const [k,v] of p.slice(2)){ prod*=v; if(Math.abs(v-1)<1e-12)continue; s+=' × '+(k==='m'?dec(v):tok(k,v)); } }
   else { prod=p[0][1]; s=dec(p[0][1]); for(const [k,v] of p.slice(1)){ prod*=v; if(Math.abs(v-1)<1e-12)continue; s+=' × '+tok(k,v); } }
   return {ok:Math.max(1,Math.round(prod))===e.d,s:`round(${s})`}; }
-const trMs=t=>{ t=Math.max(0,t|0); return String(t/60|0).padStart(2,'0')+':'+String(t%60).padStart(2,'0'); };
+const trMs=t=>{ const ms=Math.max(0,Math.round(t*1000)), sec=ms/1000|0; return String(sec/60|0).padStart(2,'0')+':'+String(sec%60).padStart(2,'0')+"'"+String(ms%1000).padStart(3,'0'); };   /* 전투 로그 시간: mm:ss'ms (밀리초) */
 function trRender(force){ const dr=$('#trDr'); if(!dr||!dr.classList.contains('on'))return; if(!force&&!TR.dirty)return; TR.dirty=false; if(!me||!me.D)return;
   const C=trConsts(); $('#trCs').innerHTML=Object.entries(C).map(([k,c])=>`<div><b>${k}.</b> ${esc(c.n)} = ${esc(c.e)}${c.v!=null&&String(c.e)!==trN(c.v)?` <i>= ${trN(c.v)}</i>`:''}</div>`).join('');
   const L=TR.log.slice(0,300); $('#trLg').innerHTML=L.length?L.map(e=>{ const f=trFmt(e,C); return `<div class="${f.ok?'':'bad'}">${f.ok?'':'**'}${trMs(e.t)} ${esc(e.n)}: ${e.d} == ${esc(f.s)}</div>`; }).join(''):'<p class="meta">아직 기록이 없어요 — 허수아비를 때려 보세요</p>';
