@@ -329,7 +329,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 .cs-fx{position:absolute;left:0;top:0;pointer-events:none;z-index:6}
 .tmapw{position:relative;width:100%;max-width:440px;min-width:0;margin:0 auto}
 .twrap{min-width:0;max-width:100%}
-.tmapv{touch-action:pan-x pan-y;position:relative;width:100%;aspect-ratio:848/1264;overflow:auto;border-radius:12px;border:1px solid #2a2240;overscroll-behavior:contain;scrollbar-width:none;-webkit-overflow-scrolling:touch;cursor:grab;background:#0a0710}
+.tmapv{touch-action:none;position:relative;width:100%;aspect-ratio:848/1264;overflow:auto;border-radius:12px;border:1px solid #2a2240;overscroll-behavior:contain;scrollbar-width:none;-webkit-overflow-scrolling:touch;cursor:grab;background:#0a0710}
 .tmapv::-webkit-scrollbar{display:none}.tmapv.drg{cursor:grabbing;user-select:none}
 .tmap{position:relative;flex:none;width:800px;height:1200px;background:url(img/town_bg.webp) center/100% 100% no-repeat,radial-gradient(ellipse at 50% 30%,#2a1f42 0%,#140e20 58%,#0a0710 100%);overflow:hidden}   /* 큰 마을 지도: 800×1200 안을 위·아래·좌·우로 끌어서 둘러봐요 */
 .tmhint{position:absolute;left:50%;top:10px;transform:translateX(-50%);z-index:7;pointer-events:none;padding:4px 10px;border-radius:12px;background:rgba(14,12,20,.62);border:1px solid rgba(255,255,255,.14);color:#e6dcff;font-size:11.5px;font-weight:700;white-space:nowrap;animation:tmh 4.5s ease forwards}
@@ -1459,7 +1459,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0640</div>
+    <div class="ver" id="verT">v0.6.5.0641</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -7198,6 +7198,14 @@ function renderTown(){ townUpTick(); const S=getStore(), now=Date.now(); let ch=
     let dn=null, mv0=false;    /* 마우스(PC)는 끌어서 이동 — 터치는 기본 스크롤을 써요 */
     mv.addEventListener('pointerdown',e=>{ if(e.pointerType!=='mouse'||e.button!==0)return; dn={x:e.clientX,y:e.clientY,sx:mv.scrollLeft,sy:mv.scrollTop,id:e.pointerId}; mv0=false; });
     mv.addEventListener('pointermove',e=>{ if(!dn)return; const dx=e.clientX-dn.x, dy=e.clientY-dn.y; if(!mv0){ if(Math.abs(dx)+Math.abs(dy)<6)return; mv0=true; mv.classList.add('drg'); try{ mv.setPointerCapture(dn.id); }catch(_){} } mv.scrollLeft=dn.sx-dx; mv.scrollTop=dn.sy-dy; },{passive:true});
+    /* 터치 한 손가락 이동: 손가락보다 느긋하게(TPAN배) 움직이고 놓으면 살짝 미끄러져요 (두 손가락은 위의 확대·축소) */
+    const TPAN=.5; let pn=null, inr=0;
+    mv.addEventListener('touchstart',e=>{ cancelAnimationFrame(inr); mv0=false; pn=e.touches.length===1?{x:e.touches[0].clientX,y:e.touches[0].clientY,sx:mv.scrollLeft,sy:mv.scrollTop,mv:false,vx:0,vy:0,t:performance.now(),lx:0,ly:0}:null; if(pn){ pn.lx=pn.x; pn.ly=pn.y; } },{passive:true});
+    mv.addEventListener('touchmove',e=>{ if(!pn)return; if(e.touches.length!==1){ pn=null; return; } e.preventDefault(); const t=e.touches[0], dx=t.clientX-pn.x, dy=t.clientY-pn.y; if(!pn.mv){ if(Math.abs(dx)+Math.abs(dy)<6)return; pn.mv=true; mv0=true; }
+      const n=performance.now(), dt=Math.max(1,n-pn.t); pn.vx=(pn.lx-t.clientX)*TPAN/dt; pn.vy=(pn.ly-t.clientY)*TPAN/dt; pn.lx=t.clientX; pn.ly=t.clientY; pn.t=n;
+      mv.scrollLeft=pn.sx-dx*TPAN; mv.scrollTop=pn.sy-dy*TPAN; },{passive:false});
+    const tend=()=>{ const q=pn; pn=null; if(!q||!q.mv||performance.now()-q.t>80)return; let vx=q.vx, vy=q.vy, last=performance.now(); const step=now=>{ const d=Math.min(40,now-last); last=now; mv.scrollLeft+=vx*d; mv.scrollTop+=vy*d; const f=Math.pow(.93,d/16); vx*=f; vy*=f; if(Math.abs(vx)+Math.abs(vy)>.02)inr=requestAnimationFrame(step); }; inr=requestAnimationFrame(step); };
+    mv.addEventListener('touchend',tend,{passive:true}); mv.addEventListener('touchcancel',()=>{ pn=null; },{passive:true});
     const up=()=>{ dn=null; mv.classList.remove('drg'); }; mv.addEventListener('pointerup',up); mv.addEventListener('pointercancel',up);
     mv.addEventListener('click',e=>{ if(mv0){ e.stopPropagation(); e.preventDefault(); mv0=false; } },true); } }
   townMsg=''; try{ window.__townFx&&window.__townFx.mount(b.querySelector('.tmap')); }catch(e){}
