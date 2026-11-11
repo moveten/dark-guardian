@@ -1459,7 +1459,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0638</div>
+    <div class="ver" id="verT">v0.6.5.0639</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -7170,9 +7170,16 @@ function townCatPart(){
     return {css,html:'<div class="tcw" aria-hidden="true"><div class="tcf"><i class="tcsh"></i><i class="tcl"></i><i class="tcs"></i></div></div>'};
   }catch(e){ return null; }
 }
+/* 마을 올빼미: 왼쪽 큰 나무 가지에 앉아 가끔 눈을 깜빡이고 고개를 돌려요 (3칸 시트 · CSS 애니메이션만 사용) */
+const TOWL={x:84,y:408,w:66,cw:150,ch:126};   /* x,y = 가지 아래 가운데 (지도 px) */
+function townOwlPart(){
+  const w=TOWL.w, h=Math.round(w*TOWL.ch/TOWL.cw);
+  const css=`.tow{position:absolute;left:${TOWL.x-w/2}px;top:${TOWL.y-h}px;width:${w}px;height:${h}px;z-index:1;pointer-events:none;background:url(img/town_owl.webp) 0 0/300% 100% no-repeat;filter:drop-shadow(0 2px 2px rgba(0,0,0,.45));animation:towa 11s step-end infinite}@keyframes towa{0%{background-position:0 0}34%{background-position:50% 0}36%{background-position:0 0}56%{background-position:100% 0}74%{background-position:0 0}86%{background-position:50% 0}88%{background-position:0 0}}@media(prefers-reduced-motion:reduce){.tow{animation:none}}`;
+  return {css,html:'<div class="tow" aria-hidden="true"></div>'};
+}
 function townPetHtml(){
-  const a=townPetPart(), c=townCatPart(); let css='', h='';
-  if(a){ css+=a.css; h+=a.html; } if(c){ css+=c.css; h+=c.html; }
+  const a=townPetPart(), c=townCatPart(), o=townOwlPart(); let css='', h='';
+  if(a){ css+=a.css; h+=a.html; } if(c){ css+=c.css; h+=c.html; } css+=o.css; h+=o.html;
   try{ let st=document.getElementById('tpetCss'); if(!st){ st=document.createElement('style'); st.id='tpetCss'; document.head.appendChild(st); } if(st.textContent!==css)st.textContent=css; }catch(e){}
   return h;
 }
