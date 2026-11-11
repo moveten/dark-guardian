@@ -1449,7 +1449,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0628</div>
+    <div class="ver" id="verT">v0.6.5.0629</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -2193,7 +2193,8 @@ function dexOk(k){ if(!DEXOK){ DEXOK=new Set(); DEX_SP.forEach(g=>g[2].forEach(x
 const dexN=(p,keys)=>dexKeysOf(keys,p).filter(k=>(p.dx&&p.dx[k]|0)>0).length;
 const dexSpN=p=>dexN(p,DEX_SP.flatMap(g=>g[2])), dexStN=p=>dexN(p,DEX_ST.flatMap(g=>g[2]));
 const DEX_TOT=DEX_SP.reduce((n,g)=>n+g[2].length,0)+DEX_ST.reduce((n,g)=>n+g[2].length,0);   /* 도감 전체 칸 수(유니크 + 세트) */
-const dexTot=p=>dexSpN(p)+dexStN(p), dexNew=p=>!!p&&(p.dxs===undefined||dexTot(p)>(p.dxs|0)||dexNewN(p)>0), dexNewN=p=>p&&p.dxn?Object.keys(p.dxn).length:0;   /* 시작화면 도감 버튼 NEW: 처음 한 번 + 도감을 연 뒤 새로 채워졌을 때 */
+const dexTot=p=>dexSpN(p)+dexStN(p), dexNew=p=>!!p&&(p.dxs===undefined||dexTot(p)>(p.dxs|0)||dexNewN(p)>0||dexPetReady(p)),
+  dexPetReady=p=>!!p&&Object.values(DEX_PET).some(g=>!(p.tpt&&p.tpt[g.id])&&dexPetDone(g.id,p)),   /* 도감 세트를 완성했는데 아직 안 받은 펫 보상이 있으면 도감 버튼에 NEW */ dexNewN=p=>p&&p.dxn?Object.keys(p.dxn).length:0;   /* 시작화면 도감 버튼 NEW: 처음 한 번 + 도감을 연 뒤 새로 채워졌을 때 */
 function dexAdd(p,it){ if(!p||!it||it.mat||!it.sp||!dexOk(it.sp))return; const had=dexSpN(p); if(!p.dx)p.dx={}; if(!(p.dx[it.sp]|0)){ if(!p.dxn)p.dxn={}; p.dxn[it.sp]=1; } p.dx[it.sp]=Math.min(9999,(p.dx[it.sp]|0)+1);   /* 처음 얻은 칸은 dxn에 표시 → 도감 안에서 NEW */
  
   if(p===me)ttfAuto(p);
@@ -5649,7 +5650,7 @@ function renderPet(){
   let cells=''; for(let i=0;i<PET_SLOTS;i++){ const id=ids[i];
     if(!id){ cells+='<div class="cell" style="border-style:dashed;opacity:.4"></div>'; continue; }
     const P=PETS[id], e=petEntry(id), sel=id===petSel, on=id===act, col=id==='trio'?'#6a4aa0':P.col;
-    cells+=`<div class="cell${sel?' sel':''}" data-ps="${id}" style="cursor:pointer;border-color:${on||sel?P.col:col};${id==='trio'?'background:#150f1e;':''}"><img alt="" src="img/${P.im}.png" style="max-width:${id==='trio'?92:86}%;max-height:${id==='trio'?80:86}%;object-fit:contain" onerror="this.style.visibility='hidden'">${on?`<em style="position:absolute;top:2px;left:2px;font:800 9px/1 sans-serif;background:${P.col};color:#1b0f2e;border-radius:99px;padding:2px 5px">동행</em>`:''}<i style="position:absolute;bottom:2px;right:4px;font:800 10px/1 sans-serif;color:#ffd84a;font-style:normal">Lv${e.lv||petLvOf(e.xp,id)}</i></div>`; }
+    cells+=`<div class="cell${sel?' sel':''}" data-ps="${id}" style="cursor:pointer;overflow:hidden;border-color:${on||sel?P.col:col};${id==='trio'?'background:#150f1e;':''}"><img alt="" src="img/${P.im}.png" style="position:absolute;inset:0;margin:auto;width:auto;height:auto;max-width:84%;max-height:84%;object-fit:contain" onerror="this.style.visibility='hidden'">${on?`<em style="position:absolute;top:2px;left:2px;font:800 9px/1 sans-serif;background:${P.col};color:#1b0f2e;border-radius:99px;padding:2px 5px">동행</em>`:''}<i style="position:absolute;bottom:2px;right:4px;font:800 10px/1 sans-serif;color:#ffd84a;font-style:normal">Lv${e.lv||petLvOf(e.xp,id)}</i></div>`; }
   const e=petEntry(petSel), isAct=petSel===act;
   b.innerHTML=`<div class="pt-card"><div style="display:flex;justify-content:space-between;align-items:center"><b style="font-size:15px;color:#ffe9b0">🐾 펫 보관함</b><span style="font-size:12.5px;color:#c9b99a">${ids.length} / ${PET_SLOTS}칸</span></div><div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:10px">${cells}</div><div class="pt-sm" style="margin-top:8px">칸을 누르면 아래에 정보가 나와요 · 함께 다니는 펫만 경험치를 얻고 스킬을 써요</div></div>`
    +petDetailHtml(e)
@@ -5658,7 +5659,7 @@ function renderPet(){
   b.querySelectorAll('[data-ps]').forEach(c=>c.onclick=()=>{ petSel=c.dataset.ps; const y=b.scrollTop; renderPet(); b.scrollTop=y; });
   b.querySelectorAll('[data-pw]').forEach(c=>c.onclick=()=>{ petSwap(c.dataset.pw); petSel=c.dataset.pw; renderPet(); }); }
 let dexTab='sp'; const dexClosed=new Set();
-function dexSeen(){ const q=me; if(!q||!q.id)return; if(q.dxs!==dexTot(q)||dexNewN(q)){ q.dxs=dexTot(q); delete q.dxn; saveChar(); } for(const e of document.querySelectorAll('#cDex,#bDexL'))e.classList.remove('new'); }   /* 도감을 닫으면(또는 다른 화면으로 가면) 확인한 것으로 보고 NEW 모두 해제 */
+function dexSeen(){ const q=me; if(!q||!q.id)return; if(q.dxs!==dexTot(q)||dexNewN(q)){ q.dxs=dexTot(q); delete q.dxn; saveChar(); } if(!dexPetReady(q))for(const e of document.querySelectorAll('#cDex,#bDexL'))e.classList.remove('new'); }   /* 도감을 닫으면(또는 다른 화면으로 가면) 확인한 것으로 보고 NEW 모두 해제 */
 function dexOpen(){ flushSortedNew(); sheetMode='dex'; selItem=null; bagSel=null; rerender(); $('#sheetB').scrollTop=0; }
 function dexCell(k,p,tone){ const S=SPFX[k], n=(p.dx&&p.dx[k])|0, im=UNQIMG[S.n];
   return `<div class="dxc ${tone}${n?' got':''}${p.dxn&&p.dxn[k]?' nw':''}" data-dk="${k}">${p.dxn&&p.dxn[k]?'<em class="dxnew">NEW</em>':''}${n>1?`<i class="dxn">×${n}</i>`:''}<div class="dxi">${im?`<img alt="" src="img/${im}.png" onerror="this.style.visibility='hidden'">`:''}</div><b>${n?esc(S.n):'???'}</b></div>`; }
