@@ -1352,7 +1352,7 @@ body.land #bBas{position:absolute;width:calc(var(--u) + 4px);height:calc(var(--u
 .mapbar .row2{display:flex;gap:8px;margin-top:2px}.mapbar .row2 .btn{flex:1}.mapbar .row2 .btn:disabled{opacity:.5}
 /* 마을 연출(Phaser) 레이어: 건물 버튼 뒤, 화면 합성(screen)이라 검은 부분은 투명하게 보임 */
 .tmap .tfx{position:absolute;left:0;top:0;width:50%;height:50%;transform:scale(2);transform-origin:0 0;z-index:0;pointer-events:none;mix-blend-mode:screen;overflow:hidden}   /* 지도가 커져도 그리기 부담이 늘지 않게 절반 크기로 그려서 2배로 늘려 보여줘요 */
-.tmap .tfx canvas{display:block}
+.tmap .tfx canvas{display:block;width:400px!important;height:600px!important}   /* 지도 확대(zoom)와 상관없이 고정 크기 → 연출 위치가 어긋나지 않아요 */
 /* 소리 설정: 효과음·음성·음악 볼륨 슬라이더 */
 .vol{width:100%;display:flex;flex-direction:column;gap:8px;margin:2px 0 4px}
 .vol .vr{display:flex;align-items:center;gap:10px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:6px 10px 6px 6px}
@@ -1459,7 +1459,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0639</div>
+    <div class="ver" id="verT">v0.6.5.0640</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -7139,7 +7139,7 @@ function casinoModal(){
 /* 마을 안내: 지도 아래 한 줄 배너(Info Banner)를 누르면 아래에서 올라오는 패널(Bottom Sheet)로 전체 설명을 보여줘요 */
 function townInfoSheet(){
   modal(`<div class="bshg"></div><h3>🏘️ 마을 안내</h3><ul class="bshl"><li>건물을 누르면 <b>자세히</b> 볼 수 있어요.</li><li>모든 비용은 <b>캐릭터 → 공유창고</b> 순서로 차감 되어요.</li><li>그림자 연구소와 각성 풍차의 건설과 Lv.5까지는 <b>골드</b>를, Lv.6부터는 각각의 <b>조각</b>을 사용해요.</li><li>말풍선을 누르면 만든 조각이 바로 <b>공유보관함</b>으로 들어가요.</li></ul><button class="btn bshx" id="bshX" type="button">닫기</button>`,m=>{ m.classList.add('bsh'); m.querySelector('#bshX').onclick=closeModal; }); }
-let townZ=1;   /* 마을 지도 확대 배율 (다시 그려도 유지) */
+let townZ=0;   /* 마을 지도 확대 배율 (다시 그려도 유지 · 0이면 처음 열 때 지도 가로가 꽉 차게 맞춤) */
 /* 마을 산책 펫: 착용한 펫이 가운데 길을 따라 왔다 갔다 해요 (CSS 애니메이션만 써서 가벼워요 · 걷기 그림이 없는 펫은 통통 뛰어요) */
 const TPET={dealer:{im:'pet_dealer_walk',w:231,h:318,hh:58,n:6},azazel:{im:'pet_azazel_walk',w:370,h:318,hh:62,n:6},trio:{im:'pet_trio',w:680,h:239,hh:34,n:1}};
 const TPATH=[[404,470],[396,600],[412,740],[398,880],[406,1010]];
@@ -8721,8 +8721,8 @@ function start(){
     }
   }
   try{
-    game=new P.Game({type:P.AUTO,parent:host,width:host.clientWidth||340,height:host.clientHeight||507,transparent:true,banner:false,
-      scale:{mode:P.Scale.RESIZE},scene:[Town],render:{antialias:true},fps:{target:60,smoothStep:true},audio:{noAudio:true},input:{keyboard:false,mouse:false,touch:false,gamepad:false}});
+    game=new P.Game({type:P.AUTO,parent:host,width:400,height:600,transparent:true,banner:false,
+      scale:{mode:P.Scale.NONE},scene:[Town],render:{antialias:true},fps:{target:60,smoothStep:true},audio:{noAudio:true},input:{keyboard:false,mouse:false,touch:false,gamepad:false}});
     if(window.ResizeObserver){ ro=new ResizeObserver(()=>{ try{ if(game)game.scale.refresh(); }catch(e){} }); ro.observe(host); }
   }catch(err){ destroy(); }
 }
