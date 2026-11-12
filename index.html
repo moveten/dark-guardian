@@ -1460,7 +1460,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0656</div>
+    <div class="ver" id="verT">v0.6.5.0657</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -6577,9 +6577,14 @@ function openRank(mode0){
     };
     const setTab=k=>{ mode=k; rkKeep=null; want=null; box.scrollTop=0; m.querySelectorAll('.rktabs button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===k)); load(); };
     m.querySelectorAll('.rktabs button').forEach(b=>b.onclick=()=>setTab(b.dataset.m)); const reB=m.querySelector('#rkRe'); let reEnd=0, reTm=0;
-    const reTick=()=>{ if(!reB.isConnected){ clearInterval(reTm); return; } const left=reEnd-Date.now(); if(left>0){ reB.disabled=true; reB.textContent=`🔄 새로고침(${Math.ceil(left/1000)-1}s)`; } else { clearInterval(reTm); reB.disabled=false; reB.textContent='🔄 새로고침'; } };   /* 진입·새로고침 직후 1분간 비활성: 59s → 0s, 끝나면 활성 */
+    const reTick=()=>{ if(!reB.isConnected){ clearInterval(reTm); return; } const left=reEnd-Date.now(); if(left>0){ const lb=`🔄 새로고침(${Math.ceil(left/1000)-1}s)`; reB.disabled=true; if(reB.textContent!==lb)reB.textContent=lb; }   /* 글자가 바뀔 때만 갱신 (0.25초마다 버튼 안을 다시 쓰면 아이폰에서 옆 버튼 터치가 끊길 수 있어요) */ else { clearInterval(reTm); reB.disabled=false; reB.textContent='🔄 새로고침'; } };   /* 진입·새로고침 직후 1분간 비활성: 59s → 0s, 끝나면 활성 */
     const reCool=()=>{ reEnd=Date.now()+60000; clearInterval(reTm); reTick(); reTm=setInterval(reTick,250); };
-    reB.onclick=()=>{ if(reB.disabled)return; rkKeep=null; load(true); reCool(); }; reCool(); m.querySelector('#rkNo').onclick=()=>{ rkKeep=null; closeModal(); }; load(); });
+    reB.onclick=()=>{ if(reB.disabled)return; rkKeep=null; load(true); reCool(); }; reCool();
+    const shut=()=>{ rkKeep=null; closeModal(); }; m.querySelector('#rkNo').onclick=shut;
+    /* 아이폰에서 click 이 안 오는 경우를 대비: 손가락을 뗄 때(많이 안 움직였으면)도 닫아요 — 이때 click 은 막아서 아래 버튼이 눌리지 않게 함 */
+    let tx=0,ty=0,tg=null; m.ontouchstart=e=>{ const t=e.touches[0]; tx=t.clientX; ty=t.clientY; tg=e.touches.length===1?e.target:null; };
+    m.ontouchend=e=>{ if(!tg||!m.querySelector('#rkBox'))return; const el=tg; tg=null; const t=e.changedTouches[0]; if(Math.hypot(t.clientX-tx,t.clientY-ty)>10)return; if(el===m||el.closest('#rkNo')){ if(e.cancelable)e.preventDefault(); shut(); } };
+    load(); });
 }
 $('#bRank').onclick=()=>{ rkKeep=null; openRank(); };
 let carTm=null, carLock=0;
