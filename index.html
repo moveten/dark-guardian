@@ -388,11 +388,9 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 .tbd{background:none;border:0;padding:0;line-height:0;filter:drop-shadow(0 0 7px #8a5cffaa)}
 .tbd svg{width:104px;height:126px;max-width:100%}
 .tbd .tmill{display:block;position:relative}.tbd .tmill .mb{display:block;width:100%;height:100%}
-.tbd .tmill .ml{position:absolute;max-width:none;max-height:none;transform:translate(-50%,-50%);pointer-events:none;animation:millspin 18s linear infinite}
-@keyframes millspin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+.tbd .tmill .ml{position:absolute;max-width:none;max-height:none;transform:translate(-50%,-50%);pointer-events:none;aspect-ratio:1/1;will-change:transform}
 .tbd .mfb{display:none}.tbd.mbad .tmill{display:none}.tbd.mbad .mfb{display:block}
 .tmap .tbd .labimg{display:block;width:104px;height:auto;max-width:none}.tbd.lbad .labimg{display:none}.tbd.lbad .mfb{display:block}
-@media(prefers-reduced-motion:reduce){.tbd .tmill .ml{animation:none}}
 .tbd .labw{display:block;position:relative;width:104px}.tbd.lbad .labw{display:none}
 .tbd .twimg{display:block;max-width:none;max-height:none}.tbd.tbad .twimg{display:none}.tbd.tbad .mfb{display:block}   /* 그림자 타워 그림(img/town_tower_1~5.webp), 없으면 기본 SVG */
 /* 그림자 연구소 연출(A안): 연기·플라스크 불빛·룬 마법진은 늘 잔잔하게, 연구 중(.busy)이면 거품·반짝임이 더해지고 불빛이 세져요. 좌표는 그림 크기(360×407) 대비 % */
@@ -1459,7 +1457,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0646</div>
+    <div class="ver" id="verT">v0.6.5.0647</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -7010,7 +7008,7 @@ function townBub(k){ const B=getTown()[k], D=TOWN_B[k], lv=B.lv|0; if(lv<1)retur
 /* 각성 풍차 그림: 레벨 단계(Lv.1~2·3~4·5~6·7~8·9~10)마다 몸체가 발전하고, 날개 그림이 축을 중심으로 천천히 돌아요. [몸체 가로·세로, 축 x·y, 날개 한 변] (그림 픽셀, 화면에는 1/3로 보여줘요) · 그림이 없으면 기본 SVG */
 const MILL_ST=[[165,281,82,85,268],[167,352,83,132,268],[182,404,94,142,298],[209,427,105,140,324],[200,436,100,147,392]];
 function millArt(lv){ const st=Math.max(1,Math.min(5,Math.ceil(lv/2))), [w,h,hx,hy,cw]=MILL_ST[st-1], f=n=>(n/3).toFixed(1), oh=Math.max(0,Math.round((cw/2-hy)/3)), bad=`this.closest('.tbd').classList.add('mbad')`;
-  return `<span class="tmill" style="width:${f(w)}px;height:${f(h)}px;margin-top:${oh}px"><img class="mb" src="img/town_mill_body_${st}.webp" alt="" draggable="false" onerror="${bad}"><img class="ml" src="img/town_mill_blades_${st}.webp" alt="" draggable="false" style="left:${f(hx)}px;top:${f(hy)}px;width:${f(cw)}px;height:${f(cw)}px;animation-duration:${22-2*st}s" onerror="${bad}"></span>`; }
+  return `<span class="tmill" style="width:${f(w)}px;height:${f(h)}px;margin-top:${oh}px"><img class="mb" src="img/town_mill_body_${st}.webp" alt="" draggable="false" onerror="${bad}"><img class="ml" src="img/town_mill_blades_${st}.webp" alt="" draggable="false" data-p="${22-2*st}" style="left:${(hx/w*100).toFixed(2)}%;top:${(hy/h*100).toFixed(2)}%;width:${(cw/w*100).toFixed(2)}%" onerror="${bad}"></span>`; }
 /* 그림자 타워 그림: 레벨(1~5)마다 모양이 발전하고 크기도 조금씩 커져요. [그림 가로·세로] (그림 픽셀, 화면에는 1/3로 보여줘요) · 그림이 없으면 기본 SVG */
 const TW_ST=[[130,257],[164,309],[176,349],[216,393],[245,440]];
 function twArt(lv){ const st=Math.max(1,Math.min(5,lv|0)), [w,h]=TW_ST[st-1], f=n=>(n/3).toFixed(1);
@@ -7172,6 +7170,13 @@ function townOwlPart(){
     const q=(ms%11000)/11000, k=q<.34?0:q<.36?1:q<.56?0:q<.74?2:q<.86?0:q<.88?1:0; if(k!==lk){ lk=k; E.style.backgroundPositionX=(k*50)+'%'; } };
   return {css,html:'<div class="tow" aria-hidden="true"></div>',tick};
 }
+/* 각성 풍차 날개: CSS 애니메이션은 지도 확대(zoom)가 바뀔 때 어긋나는 기기가 있어서 같은 시계로 직접 돌려요 (날개 위치·크기는 몸체 대비 %) */
+const MILL_RM=(window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches);
+let millEls=[], millLp=[];
+function townMillTick(ms){
+  if(!millEls.length||!millEls[0].isConnected){ millEls=[...document.querySelectorAll('.tbd .tmill .ml')]; millLp=millEls.map(()=>''); }
+  for(let i=0;i<millEls.length;i++){ const e=millEls[i], a=MILL_RM?0:((ms/1000)/(+e.dataset.p||18)%1*360).toFixed(1), t=`translate(-50%,-50%) rotate(${a}deg)`; if(t!==millLp[i]){ millLp[i]=t; e.style.transform=t; } }
+}
 let TCRIT=[], townCritRaf=0;
 function townCritLoop(ms){
   townCritRaf=0;
@@ -7181,7 +7186,7 @@ function townCritLoop(ms){
 }
 function townPetHtml(){
   const parts=[townCatPart(),townOwlPart()].filter(Boolean); let css='', h=''; TCRIT=[];
-  for(const p of parts){ css+=p.css; h+=p.html; TCRIT.push(p.tick); }
+  for(const p of parts){ css+=p.css; h+=p.html; TCRIT.push(p.tick); } TCRIT.push(townMillTick); millEls=[];
   try{ let st=document.getElementById('tpetCss'); if(!st){ st=document.createElement('style'); st.id='tpetCss'; document.head.appendChild(st); } if(st.textContent!==css)st.textContent=css; }catch(e){}
   if(!townCritRaf)townCritRaf=requestAnimationFrame(townCritLoop);
   return h;
