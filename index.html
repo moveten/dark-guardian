@@ -1458,7 +1458,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0648</div>
+    <div class="ver" id="verT">v0.6.5.0649</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -7572,6 +7572,7 @@ function rbTint(im,mode){ let o=RBT.get(im); if(!o){ o={}; RBT.set(im,o); } if(o
       g.restore(); } }
   if(mode==='dark'){ g.globalCompositeOperation='source-atop'; g.fillStyle='rgba(120,40,190,.12)'; g.fillRect(0,0,c.width,c.height*.45); }
   o[mode]=c; return c; }
+for(const k of ['boss_6_hurt1','boss_6_hurt2'])SPR[k+'_atk2']={ok:false,bad:true,im:null}; /* 카스텔 일반공격 시트는 1페이즈만 있음 → 없는 그림 404 요청 생략 */
 for(const k of ['hero_war','hero_sorc','boss_shadow'])for(const q of ['_atk','_sk','_wu'])if(!SPR[k+q])SPR[k+q]={ok:false,bad:true,im:null}; /* 레이드 보스는 포즈 그림 없음 → 404 요청 생략 */
 /* 광전사 폭주: 기존 그림에 붉은 색조를 입힌 복사본(캐시) + 눈 광채 */
 function rageTint(im){ if(!im||!im.width)return im; if(im._rt&&im._rt.width===im.width)return im._rt; const c=document.createElement('canvas'); c.width=im.width; c.height=im.height; const g=c.getContext('2d'); g.drawImage(im,0,0); g.globalCompositeOperation='source-atop'; g.fillStyle='rgba(200,8,8,.30)'; g.fillRect(0,0,c.width,c.height); im._rt=c; return c; }
@@ -7617,7 +7618,7 @@ function heroAnim(o,t,melee,wk){ wk=wk===undefined?1:wk;  /* wk: 걷기 시트�
 }
 const mobSfx=()=>{ const id=G.stg&&G.stg.id; return id?({'2':'_s2','3':'_s3'}[id[0]]||''):''; };  /* 스테이지별 일반 몹 이미지: mob_<이름>_s2 / _s3 (없으면 스테이지 1 이미지) */
 const mobKey=t=>{ const sf=mobSfx(), k='mob_'+SPRN[t]; return (sf&&sprGet(k+sf))?k+sf:k; };
-const preBoss=()=>{ try{ if(G.stg&&G.stg.raid===3){ for(const p of ['','_hurt1','_hurt2'])for(const q of ['','_atk','_sk','_cast'])sprGet('boss_6'+p+q); sprGet('boss_6_gate'); } if(G.stg&&G.stg.raid===2){ for(const p of ['','2','3'])for(const q of ['','_atk','_sk','_cast'])sprGet('boss_awake'+p+q); } if(G.stg&&G.stg.raid===1){ for(const k of ['hero_war','hero_sorc']){ sprGet(k); sprGet(k+'_walk'); } sprGet('boss_shadow'); sprGet('boss_shadow_walk'); } const bt=G.stg&&G.stg.boss; if(bt!=null&&!(G.stg&&G.stg.raid)){ const bk=G.stg.bs||'mob_'+SPRN[bt]; sprGet(bk); sprGet(bk+'_atk'); sprGet(bk+'_sk'); if(BWALKS[bk])sprGet(bk+'_walk'); if(BWU[bk])sprGet(bk+'_wu'); }
+const preBoss=()=>{ try{ if(G.stg&&G.stg.raid===3){ for(const p of ['','_hurt1','_hurt2'])for(const q of ['','_atk','_sk','_cast'])sprGet('boss_6'+p+q); sprGet('boss_6_gate'); sprGet('boss_6_atk2'); } if(G.stg&&G.stg.raid===2){ for(const p of ['','2','3'])for(const q of ['','_atk','_sk','_cast'])sprGet('boss_awake'+p+q); } if(G.stg&&G.stg.raid===1){ for(const k of ['hero_war','hero_sorc']){ sprGet(k); sprGet(k+'_walk'); } sprGet('boss_shadow'); sprGet('boss_shadow_walk'); } const bt=G.stg&&G.stg.boss; if(bt!=null&&!(G.stg&&G.stg.raid)){ const bk=G.stg.bs||'mob_'+SPRN[bt]; sprGet(bk); sprGet(bk+'_atk'); sprGet(bk+'_sk'); if(BWALKS[bk])sprGet(bk+'_walk'); if(BWU[bk])sprGet(bk+'_wu'); }
   const sf=mobSfx(); for(const t of [0,1,2,6,9,10,11]){ const k='mob_'+SPRN[t]; sprGet(k+sf); sprGet(k+sf+'_atk'); if(sf){ sprGet(k); sprGet(k+'_atk'); } } }catch(e){} };
 /* 몹 걸음·방향 상태: 실제로 움직인 거리만큼만 걸음 진행 · 좌우 반전은 부드럽게 돌아서기 · 공격 자세도 서서히 */
 function mobGait(m,t){
@@ -7689,11 +7690,13 @@ function drawMob(m,t){
     const BH=RK==='awk'?78*1.75:RK==='cas'?78*3.1:RK?78*1.3:r*3.2;   /* 레이드 보스: 일반 캐릭터(78)의 1.3배 */
     let cur={im:SI,h:(GSP?.8:1)*(m.boss?BH:r*3.4)*(m.boss&&bps&&!GSP?SI.height/(sprGet(bk)||SI).height:1)};   /* 포즈 그림 캔버스 높이가 달라도 같은 배율로 */
     if(useWK){ const cw=WK.width/BW.n, fi=Math.floor((((GT.wp*1.8/(Math.PI*BW.cyc))%1)+1)%1*BW.n); cur={im:WK,fr:[fi*cw,cw,WK.height],h:BH*(WK.height/BW.k)/sprGet(bk).height}; }
+    if(RK==='cas'){ const nb=!m.tel&&!(m.inv>0)&&!m.charge&&!(m.gt>0); if(nb&&m.atk>(m._aP||0)+.001)m._aT0=t; m._aP=m.atk||0;   /* 카스텔 일반공격 시트(boss_6_atk2, 6칸): 치켜듦→내려침→타격→반동→복귀. 그림 자체에 동작이 있어 코드 흔들림은 끔 */
+      const CA=(nb&&m._aT0!==undefined&&t-m._aT0<.42)?sprGet(bk+'_atk2'):null; if(CA){ const ap=(t-m._aT0)/.42, fi=ap<.12?2:ap<.5?3:ap<.75?4:5, cw=CA.width/6; cur={im:CA,fr:[fi*cw,cw,CA.height],h:BH*(CA.height/.454)/sprGet(bk).height,dy:24.4}; } }
     let PV=null,pq=1; if(m.boss){ if(m._pc&&m._pc.im!==cur.im){ m._pv=m._pc; m._pt=t; } m._pc=cur; if(m._pv){ pq=clamp((t-m._pt)/.1,0,1); if(pq<1)PV=m._pv; } }   /* 보스 포즈 교체: 0.1초 크로스페이드 */
-    const dr=(c,al)=>{ if(GSP)al*=.42; const ga=ctx.globalAlpha; if(al<1)ctx.globalAlpha=ga*al; const o=c.fr?{...SO,fr:c.fr}:SO;
-      if(RK&&(G.sib||0)>0){ const pu=.55+.3*Math.sin(t*6+(m.id||0)); ctx.globalAlpha=ga*al*pu; ctx.save(); ctx.globalCompositeOperation='lighter'; sprDraw(rbTint(c.im,'glow'),X,Y+r*.5+c.h*.02,c.h*1.08,fa,o); ctx.restore(); ctx.globalAlpha=ga*(al<1?al:1); }   /* 형제가 쓰러지면 붉은 테두리 빛 */
-      sprDraw(RK&&RK!=='awk'&&RK!=='cas'?(RK==='shd'&&!m.awk?c.im:rbTint(c.im,RK==='shd'?'red':'dark')):c.im,X,Y+r*.5,c.h,fa,o);
-      if(m.flash>0){ ctx.globalAlpha=ga*al*Math.min(.75,m.flash*7); sprDraw(rbTint(c.im,'white'),X,Y+r*.5,c.h,fa,o); silDone=true; }   /* 맞은 순간 몸 모양 그대로 하얗게 번쩍 (색 입힌 그림은 처음 한 번만 만들어 재사용) */
+    const dr=(c,al)=>{ if(GSP)al*=.42; const ga=ctx.globalAlpha; if(al<1)ctx.globalAlpha=ga*al; const o=c.fr?(c.dy!==undefined?{...SO,fr:c.fr,rot:SO.rot-ak*.25,fx:0}:{...SO,fr:c.fr}):SO, YY=Y+r*.5+(c.dy||0)*c.h/c.im.height;
+      if(RK&&(G.sib||0)>0){ const pu=.55+.3*Math.sin(t*6+(m.id||0)); ctx.globalAlpha=ga*al*pu; ctx.save(); ctx.globalCompositeOperation='lighter'; sprDraw(rbTint(c.im,'glow'),X,YY+c.h*.02,c.h*1.08,fa,o); ctx.restore(); ctx.globalAlpha=ga*(al<1?al:1); }   /* 형제가 쓰러지면 붉은 테두리 빛 */
+      sprDraw(RK&&RK!=='awk'&&RK!=='cas'?(RK==='shd'&&!m.awk?c.im:rbTint(c.im,RK==='shd'?'red':'dark')):c.im,X,YY,c.h,fa,o);
+      if(m.flash>0){ ctx.globalAlpha=ga*al*Math.min(.75,m.flash*7); sprDraw(rbTint(c.im,'white'),X,YY,c.h,fa,o); silDone=true; }   /* 맞은 순간 몸 모양 그대로 하얗게 번쩍 (색 입힌 그림은 처음 한 번만 만들어 재사용) */
       ctx.globalAlpha=ga; };
     if(PV)dr(PV,1);
     dr(cur,pq); }
