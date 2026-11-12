@@ -665,6 +665,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 .ttc .ttn{overflow:hidden;text-overflow:ellipsis}
 .ttnw{position:absolute;top:-8px;right:-8px;padding:0 6px;border-radius:9px;background:#e0483c;color:#fff;font:800 10px/1.5 sans-serif;font-style:normal;letter-spacing:.4px;box-shadow:0 0 8px rgba(224,72,60,.7);pointer-events:none}
 .ttc.sm{display:inline-flex;margin:0 0 0 6px;min-height:0;padding:0 7px;font-size:10.5px;vertical-align:middle;overflow:hidden;max-width:none}
+.ttrate{margin:-2px 0 10px}.ttrate>div{display:flex;justify-content:space-between;font:700 12px/1 'Noto Sans KR',sans-serif;color:#d8c58a;margin-bottom:5px}.ttrate b{color:#ffd84a}.ttrate i{display:block;height:6px;border-radius:99px;background:#1a130c;border:1px solid #5a4524;overflow:hidden}.ttrate u{display:block;height:100%;background:linear-gradient(90deg,#c9a24a,#ffd84a)}
 .ttlist{display:flex;flex-direction:column;gap:8px;margin:0 0 12px;max-height:52vh;overflow:auto}
 .tto{flex:0 0 auto;display:flex;align-items:center;gap:12px;width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid #3a2e26;border-radius:12px;background:#14100d;color:var(--ink);text-align:left;font-family:inherit;min-height:56px}
 .tto .trd{width:22px;height:22px;border-radius:50%;border:2px solid #7a6a56;flex:none;display:grid;place-items:center}
@@ -1458,7 +1459,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0651</div>
+    <div class="ver" id="verT">v0.6.5.0652</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -6598,7 +6599,7 @@ function openTtSheet(id){
   const row=t=>{ const own=ttOwn(c).some(x=>x.id===t.id);
     return own?`<button type="button" class="tto${sel===t.id?' on':''}" role="radio" aria-checked="${sel===t.id}" data-t="${t.id}"><span class="trd"></span><div class="ttx"><b>${esc(t.n)}${fresh.has(t.id)?'<span class="tnw">NEW</span>':''}</b><small>조건: ${esc(t.cond)} ✔<br>효과: <em>${esc(t.eff)}</em></small></div></button>`
     :`<div class="tto tlk" aria-disabled="true"><span class="trd"></span><div class="ttx"><b>🔒 ${esc(t.n)}</b><small>조건: ${t.hid?'???':esc(t.cond)+' ('+t.prog(c)+')'}<br>효과: ${esc(t.eff)}</small></div></div>`; };
-  const html=()=>`<div class="bshg"></div><h3>🏅 칭호 선택</h3><div class="ttlist" role="radiogroup" aria-label="칭호">${TITLES.map(row).join('')}<button type="button" class="tto${sel===''?' on':''}" role="radio" aria-checked="${sel===''}" data-t=""><span class="trd"></span><div class="ttx"><b>칭호 없음</b><small>효과 없음</small></div></button></div><button class="btn primary bshx" id="ttOk" type="button">${sel===(ttCur(c)?c.tt:'')?'닫기':'장착하기'}</button>`;
+  const html=()=>{ const no=ttOwn(c).length, nt=TITLES.length, pc=Math.floor(no/nt*100); return `<div class="bshg"></div><h3>🏅 칭호 선택</h3><div class="ttrate"><div><span>획득률 <b>${pc}%</b></span><span>${no} / ${nt}</span></div><i><u style="width:${pc}%"></u></i></div><div class="ttlist" role="radiogroup" aria-label="칭호">${TITLES.map(row).join('')}<button type="button" class="tto${sel===''?' on':''}" role="radio" aria-checked="${sel===''}" data-t=""><span class="trd"></span><div class="ttx"><b>칭호 없음</b><small>효과 없음</small></div></button></div><button class="btn primary bshx" id="ttOk" type="button">${sel===(ttCur(c)?c.tt:'')?'닫기':'장착하기'}</button>`; };
   modal(html(),m=>{ m.classList.add('bsh'); const draw=()=>{ const cd=m.querySelector('.card'), l0=cd.querySelector('.ttlist'), st=l0?l0.scrollTop:0, sc=cd.scrollTop; cd.innerHTML=html(); const l1=cd.querySelector('.ttlist'); if(l1)l1.scrollTop=st; cd.scrollTop=sc; bind(); };   /* 칭호를 골라도 스크롤 위치 유지 */
     const bind=()=>{ m.querySelectorAll('.tto[data-t]').forEach(b=>b.onclick=()=>{ sel=b.dataset.t; sfx('ui'); draw(); });
       m.querySelector('#ttOk').onclick=()=>{ const cur=ttCur(c)?c.tt:''; if(sel!==cur){ c.tt=sel; save(); renderTitle(); try{ rkSubmitAll(true); }catch(e){} } closeModal(); }; };
