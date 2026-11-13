@@ -1492,7 +1492,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.1.0674</div>
+    <div class="ver" id="verT">v0.7.1.0675</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -2478,7 +2478,7 @@ const ORES={   /* 광석: 이름 · 레벨(광부 레벨 기준) · 색 · g = �
 const ORE_OLD={stone:'ash',copper:'rust',iron:'grave',coal:'coal',silver:'silver',amethyst:'blood',mithril:'frost',obsidian:'lava'};   /* 시범 1차 조각 키 → 새 키 */
 const MINE_FL=[   /* 층: 지상 ↔ 입구(거점) ↔ 지하 — lvl = 들어갈 수 있는 광부 레벨 · 위층에서 가장 높은 광석이 다음 층에도 나와요 */
   {id:'f1',n:'지상 · 잿빛 채석장',lvl:1,ores:['ash','rust'],th:0,bg:'mine_f1'},
-  {id:'hub',n:'갱도 입구',lvl:1,ores:[],hub:1,th:3},
+  {id:'hub',n:'갱도 입구',lvl:1,ores:[],hub:1,th:3,bg:'mine_hub'},
   {id:'b1',n:'지하 1층 · 무너진 갱도',lvl:10,ores:['rust','grave','coal'],th:6},
   {id:'b2',n:'지하 2층 · 달빛 동굴',lvl:20,ores:['coal','silver'],th:9},
   {id:'b3',n:'지하 3층 · 핏빛 광맥',lvl:30,ores:['silver','blood','frost'],th:11},
@@ -7060,7 +7060,7 @@ function startMine(){
   G.mine={fi:1,slots:[],got:{},pc:0,t0:performance.now(),xpGot:0,brk:0}; mineFloor(1,null); mineHud();
   if(!isPick(me.eq.weapon))later(1.2,()=>{ if(G.mine)toast('⛏️ 곡괭이를 장착해야 광석을 캘 수 있어요','#e0a070'); }); }
 function mineFloor(fi,from){ const M=G.mine, F=MINE_FL[fi]; M.fi=fi; M.slots=[]; G.mobs.length=0; projs.length=zones.length=ground.length=0;
-  setTheme(F.th|0);
+  setTheme(F.bg?0:(F.th|0));   /* 광산 배경 그림이 있으면 기본 테마(바닥 효과 최소) */
   const st=from==='dn'?[MINE_PT.up[0],MINE_PT.up[1]+80]:from==='up'?[MINE_PT.dn[0],MINE_PT.dn[1]-80]:[VX,VY];
   me.x=st[0]; me.y=st[1]; me.kx=me.ky=0;
   if(!F.hub){ const n=F.cnt||12, pts=[], far=(x,y,d)=>pts.every(p=>hyp(p[0]-x,p[1]-y)>=d);
