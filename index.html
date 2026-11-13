@@ -1424,6 +1424,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
 .mres .mrw{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.04);margin-top:6px;font-size:14px}
 .mres .mrw b{margin-left:auto;color:#ffe08a}.mres .mrw s{text-decoration:none;color:#a8957a;font-size:12px;min-width:56px;text-align:right}
 .mres .mbar{height:8px;border-radius:5px;background:#1a1410;border:1px solid #5a4630;overflow:hidden;margin-top:4px}.mres .mbar>i{display:block;height:100%;background:linear-gradient(90deg,#c9a04a,#ffe08a)}
+body.mining #skills{display:none!important}   /* 광산: 스킬 버튼 숨김 */
 </style>
 
 <nav id="dock" hidden>
@@ -1492,7 +1493,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.1.0683</div>
+    <div class="ver" id="verT">v0.7.1.0684</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1681,7 +1682,7 @@ const CLASSES={
    변신 필요 스킬(물어뜯기·포효·광란)은 곰으로 변신해야 써요. 궁극기 '곰세마리'는 어떤 형태에서도 쓸 수 있어요. */
 const FORMN={'':'인간',bear:'곰'};
 const formOf=o=>o===me?(me.form||''):(o&&o.fm)||'';
-const meleeOf=o=>o.cls==='druid'?!!formOf(o):CLASSES[o.cls].melee;
+const meleeOf=o=>(typeof G!=='undefined'&&G.mine&&o===me)?true:o.cls==='druid'?!!formOf(o):CLASSES[o.cls].melee;
 const RVN=l=>l>=14?3:l>=7?2:1, RVF=n=>[1,.8,.7][n-1]||.7, RVHP=l=>.2+.02*l; /* 까마귀 수 / 마리당 피해 배율 / 생명력(내 최대 생명력 대비) */
 const isRv=k=>k.charCodeAt(0)===114&&k.charCodeAt(1)===118; /* 'rv1'~'rv3' = 까마귀 */
 const NRM=.8, NRG=v=>Math.round(v*NRM); /* 강령술사 사정거리 배율 (일반공격·스킬 사거리에 곱함) */
@@ -1785,7 +1786,8 @@ const SYN={
 function synBonus(p,key){ let n=0; const m=SYN[p.cls]; if(!m)return 0; for(const src in m) if(m[src].includes(key)) n+=Math.floor((p.skills[src]||0)/3); return n; }
 const ATKRG={sorc:250,war:100,pal:100,necro:NRG(240),druid:210};
 function atkRg(o){ if(o===me&&me.buffs&&me.buffs.rage&&me.buffs.rage.t>0)return atkRg0(o)*1.25; return atkRg0(o); }
-function atkRg0(o){ if(o.cls==='druid'){ const f=formOf(o); return f==='bear'?112:210; } return ATKRG[o.cls]; } /* 드루이드는 형태에 따라 기본 공격 사거리가 달라요 */
+function atkRg0(o){ if(G.mine&&o===me)return 100;   /* 광산: 모든 직업이 근접 거리에서 채굴 */
+  if(o.cls==='druid'){ const f=formOf(o); return f==='bear'?112:210; } return ATKRG[o.cls]; } /* 드루이드는 형태에 따라 기본 공격 사거리가 달라요 */
 /* ===== 6스테이지 수문장 카스텔 설정표 — 수치는 여기서만 고쳐요 (미공개 · 관리자 전용) ===== */
 const CAS_CFG={
   hp:2.3e8, hpC:3.51e8, rdm:3.211, spd:65,                       /* 체력(솔로/협동) · 기본 피해 배율 · 이동 속도 */
@@ -4620,6 +4622,7 @@ function castSkill(o,key,real,tx,ty,lv,tgt){
   if(o.cls==='sorc'&&key!=='atk'&&key!=='fireball'&&key!=='armageddon')fxSpr(9,0,7,o.x,o.y+16,88,.5);
   switch(key){
   case 'atk':
+    if(G.mine&&o===me){ efx.push({k:'swing',o,a:ang,t:0,life:.2,col:'#c9b48a'}); if(real){ const m=nearestMob(o.x,o.y,105); if(m)hitMob(m,{v:1},0,false,BASICFX); } break; }   /* 광산: 원거리 직업도 투사체 없이 가까이서 채굴 */
     if(o.cls==='druid'){ druidAtk(o,real,ang,dx,dy); break; }
     if(C.melee){ efx.push({k:'swing',o,a:ang,t:0,life:.2,col:C.col});
       if(real){const m=nearestMob(o.x,o.y,105); if(m){ const hf=(o===me&&me.aura==='holyfire'), hl=hf?skLv(me,'holyfire'):0, am=hf?hfMul(hl):1; hitMob(m,physDmg(am*atkM(),1),0,false,BASICFX); if(hf){ const R=HFR(hl); efx.push({k:'ring',x:m.x,y:m.y,r0:10,r1:R,t:0,life:.25,col:'#ffb347',w:6}); for(const q of mobsIn(m.x,m.y,R).filter(q=>q!==m)) hitMob(q,physDmg(am*.6*atkM(),1),0,false,BASICFX); } }} }
@@ -7023,7 +7026,7 @@ function noticeShow(){ if(lsGet(NT_KEY)===ntDay())return;
 window.__noticeShow=noticeShow;
 function prepMe(){ me=loadChar(selId); me.D=derive(me); spawnMe(); }
 function resetWorld(){
-  G.mine=null; { const mh=$('#mineHud'); if(mh)mh.hidden=true; } GB=null; G.gobRoll=false; G.train=0; G.trNoAtk=false; G.trNoPet=false; G.trPet=null; trUi();
+  G.mine=null; { const mh=$('#mineHud'); if(mh)mh.hidden=true; document.body.classList.remove('mining'); } GB=null; G.gobRoll=false; G.train=0; G.trNoAtk=false; G.trNoPet=false; G.trPet=null; trUi();
   storyStop(); G.stZ=0; G.aim=null; G.lostBoss=false; G.castle=null; G.lostCastle=false; G.awz=null; G.awc=null; { const ac=$('#awCut'); if(ac)ac.classList.remove('on'); for(const q of ['#casAl','#casMs']){ const z=$(q); if(z)z.classList.remove('on'); } const hc=$('#hCastle'); if(hc)hc.classList.remove('atk'); } if(me){ me.erode=me.hblk=me.mblk=me.hbStrict=me.bleed=me.bleedN=0; me.hpLk=me.mpLk=null; }
   projs.length=zones.length=timers.length=parts.length=nums.length=ground.length=efx.length=0; G.casWreck=[]; G.casDvLv={};   /* 6스테이지 공성탑 잔해는 다른 스테이지로 넘어가지 않게 */
   G.mobs=[]; G.mobMap=new Map(); G.gemDone=false; G.stKills=0; G.stDrops=0; G.stCap=0; G.runT=0; G.stGot=[0,0,0,0,0]; G.stGem=null; G.sib=0; G.endShown=false; G.clrDone=false; alClear(); G.stRev=0; G.stTaken=0; G.stGold0=me?(me.gold|0):0; G.paused=false; G.bt=null; G.shake=0;
@@ -7100,7 +7103,7 @@ function oreBreak(m){ const O=ORES[m.ore], M=G.mine; if(!M||m.dead)return; m.dea
 function mineAddXp(x){ const s=me.mine; s.xp+=x; if(G.mine)G.mine.xpGot=(G.mine.xpGot|0)+x; addNum(me.x,me.y-52,`+${x} 광부 경험치`,'#9fd0ff',false); let up=0;
   while(s.lv<MINE_MAXLV&&s.xp>=mineNeed(s.lv)){ s.xp-=mineNeed(s.lv); s.lv++; up=1; }
   if(s.lv>=MINE_MAXLV)s.xp=0; if(up){ banner('⛏️ 광부 레벨 업!',`광부 Lv ${s.lv}`); sfx('lvl'); efx.push({k:'ring',x:me.x,y:me.y,r0:10,r1:70,t:0,life:.5,col:'#e0c080',w:8}); } }
-function mineHud(){ const el=$('#mineHud'), M=G.mine; if(!el)return; if(!M||!me){ el.hidden=true; return; } el.hidden=false;   /* 광산 안 오른쪽 카드 (값이 바뀔 때만 다시 그림) */
+function mineHud(){ const el=$('#mineHud'), M=G.mine; document.body.classList.toggle('mining',!!M); if(!el)return; if(!M||!me){ el.hidden=true; return; } el.hidden=false;   /* 광산 안 오른쪽 카드 (값이 바뀔 때만 다시 그림) */
   el.style.top=Math.round((LAND?8:4)+mmW()*WH/WW+8)+'px';
   const L=minerLv(me), p=L>=MINE_MAXLV?100:Math.min(99,Math.floor(me.mine.xp/mineNeed(L)*100)), got=Object.keys(M.got).filter(k=>M.got[k]>0);
   el.firstElementChild.innerHTML=`<div class="mhr"><div class="mhg" style="background:conic-gradient(#ffd060 ${p*3.6}deg,#2a2018 0)"><b>${L}</b></div><div style="font-size:11px;line-height:1.3"><b style="font-size:12px">광부</b><br><span style="color:#c9b48a">${p}%</span></div></div>
@@ -7585,7 +7588,7 @@ $('#bStart').onclick=()=>{ if(G.mode!=='host')return; ally=null; const gp=others
 $('#bLeave').onclick=()=>quitToTitle();
 function startGuestGame(pr){ dmgReset(); G.potN=0; resetWorld(); G.phase=pr.ph; toast('게임이 시작됐어요'); }
 async function quitToTitle(){
-  G.mine=null; { const mh=$('#mineHud'); if(mh)mh.hidden=true; } G.train=0; G.trNoAtk=false; G.trNoPet=false; G.trPet=null; trUi(); storyStop(); if(autoMode)setAuto(0,true); setSpd(false); G.inGame=false; G.phase='title'; G.aim=null; saveChar(); ally=null; autoBuyShop(); if(me){ const pl=G.mode==='guest'?-1:(G.stageIdx|0); selStage=Math.max(0,Math.min(STAGES.length-1,G.firstClr?(me.clear|0):pl>=0?Math.min(pl,me.clear|0):(me.clear|0)-1)); G.firstClr=false; }   /* 방금 처음 깼다면 다음 스테이지, 이미 깬 스테이지(또는 진 판)면 했던 스테이지 그대로, 손님은 가장 높이 깬 스테이지 */
+  G.mine=null; { const mh=$('#mineHud'); if(mh)mh.hidden=true; document.body.classList.remove('mining'); } G.train=0; G.trNoAtk=false; G.trNoPet=false; G.trPet=null; trUi(); storyStop(); if(autoMode)setAuto(0,true); setSpd(false); G.inGame=false; G.phase='title'; G.aim=null; saveChar(); ally=null; autoBuyShop(); if(me){ const pl=G.mode==='guest'?-1:(G.stageIdx|0); selStage=Math.max(0,Math.min(STAGES.length-1,G.firstClr?(me.clear|0):pl>=0?Math.min(pl,me.clear|0):(me.clear|0)-1)); G.firstClr=false; }   /* 방금 처음 깼다면 다음 스테이지, 이미 깬 스테이지(또는 진 판)면 했던 스테이지 그대로, 손님은 가장 높이 깬 스테이지 */
   if(R){try{R.presence({role:null,pl:null,m:null,ev:null,h:null,bt:null}).catch(()=>{}); await R.leave();}catch(e){} R=null;}
   show('#sTitle'); renderClassCards(); rkSubmitAll();
 }
