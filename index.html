@@ -1478,7 +1478,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.1.0670</div>
+    <div class="ver" id="verT">v0.7.1.0671</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -2456,11 +2456,11 @@ const ORES={   /* 광석: 이름 · 레벨(광부 레벨 기준) · 체력 · �
   silver:{n:'은',lv:20,hp:180,c:'#d0d6de'}, amethyst:{n:'자수정',lv:26,hp:250,c:'#a070e0'},
   mithril:{n:'미스릴',lv:30,hp:300,c:'#7fd8e8'}, obsidian:{n:'흑요석',lv:38,hp:420,c:'#3a2a4e'} };
 const MINE_FL=[   /* 층: 지상 ↔ 입구(거점) ↔ 지하 — lvl = 들어갈 수 있는 광부 레벨 */
-  {id:'f1',n:'지상 · 잿빛 채석장',lvl:1,ores:['stone','copper']},
-  {id:'hub',n:'갱도 입구',lvl:1,ores:[],hub:1},
-  {id:'b1',n:'지하 1층 · 무너진 갱도',lvl:10,ores:['iron','coal']},
-  {id:'b2',n:'지하 2층 · 수정 동굴',lvl:20,ores:['silver','amethyst']},
-  {id:'b3',n:'지하 3층 · 용암 갱',lvl:30,ores:['mithril','obsidian']} ];
+  {id:'f1',n:'지상 · 잿빛 채석장',lvl:1,ores:['stone','copper'],th:0},
+  {id:'hub',n:'갱도 입구',lvl:1,ores:[],hub:1,th:3},
+  {id:'b1',n:'지하 1층 · 무너진 갱도',lvl:10,ores:['iron','coal'],th:6},
+  {id:'b2',n:'지하 2층 · 수정 동굴',lvl:20,ores:['silver','amethyst'],th:10},
+  {id:'b3',n:'지하 3층 · 용암 갱',lvl:30,ores:['mithril','obsidian'],th:13} ];   /* th = 임시 배경(스테이지 필드 번호) — 광산 배경 그림이 오면 교체 */
 const MINE_GRAY=15;   /* 광부 레벨이 광석 레벨 + 15 이상이면 회색 광석(경험치 0) */
 const isPick=it=>!!(it&&it.slot==='weapon'&&(it.pk|0)>0);
 const minerLv=p=>Math.max(1,(p&&p.mine&&p.mine.lv)|0);   /* 광부 레벨: 캐릭터별 */
@@ -2641,7 +2641,7 @@ function migrateChars(){
 }
 function createChar(cls,name,nid,hc){ const ids=charIds(); if(ids.length>=MAXCHAR||!CLASSES[cls])return null; if(nameTaken(name))return null; const p=newChar(cls,name,nid); if(hc)p.hc=1; p.ms=MAILQ.map(q=>q.id); lsSet(charKey(p.id),JSON.stringify(packChar(p))); ids.push(p.id); setIds(ids); selId=p.id; lsSet('dkdef2.sel',selId); return p; }
 function deleteChar(id){ setIds(charIds().filter(x=>x!==id)); lsDel(charKey(id)); lsDel('dkdef2.rk.'+id); lsDel('dkdef2.nmv.'+id); if(selId===id){selId='';lsSet('dkdef2.sel','');} rkQueueDel(id); nameQueueRel(id); }
-function packChar(p){ const {apb,arv,id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear,as,sy,gs,au,sp,ct,cts,cat,dv4,shard,ashard,cshard,misc,mail,ms,tut,cc,eq2,es,pet,pets,dx,dxs,dxn,gas,sd,bs,hc,hd,hs,tt,tts,tf,tpt,mine}=p; return {mine:mine&&((mine.lv|0)>1||(mine.xp|0)>0)?{lv:mine.lv|0,xp:Math.floor(mine.xp)||0}:undefined,apb:apb?1:undefined,arv:arv?1:undefined,tf:tf&&Object.keys(tf).length?tf:undefined,tpt:tpt&&Object.keys(tpt).length?tpt:undefined,tt:tt&&TT_BY[tt]?tt:undefined,tts:Array.isArray(tts)&&tts.length?tts:undefined,hc:hc?1:undefined,hd:hc&&hd>0?hd:undefined,hs:hc&&hs>0?hs|0:undefined,bs:Array.isArray(bs)?bs:undefined,sd:sd===1?1:undefined,dxn:dxn&&Object.keys(dxn).length?dxn:undefined,gas:gas===undefined?undefined:Math.max(-1,Math.min(2,gas|0)),dx:dx&&Object.keys(dx).length?dx:undefined,dxs:dxs===undefined?undefined:Math.max(0,dxs|0),id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear:clear|0,au:Math.max(0,Math.min(2,au|0)),sp:sp?1:0,ct:ct>0?ct|0:0,cts:cts>0?cts|0:undefined,cat:cat>0?cat|0:0,as:as===undefined?-1:as,sy:sy===undefined?-1:sy,gs:gs?1:undefined,dv4:dv4?1:0,shard:shard|0,ashard:(ashard|0)||undefined,cshard:(cshard|0)||undefined,misc:Array.isArray(misc)?misc:undefined,mail:Array.isArray(mail)?mail:undefined,ms:Array.isArray(ms)?ms:undefined,tut:tut||undefined,cc:cc&&Object.keys(cc).length?cc:undefined,eq2:eq2&&Object.values(eq2).some(Boolean)?eq2:undefined,es:es===1?1:undefined,pets:pets&&Object.keys(pets).length?pets:undefined,pet:pet&&PETS[pet.id]?{id:pet.id,xp:Math.floor(pet.xp)||0}:undefined}; }
+function packChar(p){ const {apb,arv,id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear,as,sy,gs,au,sp,ct,cts,cat,dv4,shard,ashard,cshard,misc,mail,ms,tut,cc,eq2,es,pet,pets,dx,dxs,dxn,gas,sd,bs,hc,hd,hs,tt,tts,tf,tpt,mine,ore}=p; return {ore:ore&&Object.keys(ore).length?ore:undefined,mine:mine&&((mine.lv|0)>1||(mine.xp|0)>0)?{lv:mine.lv|0,xp:Math.floor(mine.xp)||0}:undefined,apb:apb?1:undefined,arv:arv?1:undefined,tf:tf&&Object.keys(tf).length?tf:undefined,tpt:tpt&&Object.keys(tpt).length?tpt:undefined,tt:tt&&TT_BY[tt]?tt:undefined,tts:Array.isArray(tts)&&tts.length?tts:undefined,hc:hc?1:undefined,hd:hc&&hd>0?hd:undefined,hs:hc&&hs>0?hs|0:undefined,bs:Array.isArray(bs)?bs:undefined,sd:sd===1?1:undefined,dxn:dxn&&Object.keys(dxn).length?dxn:undefined,gas:gas===undefined?undefined:Math.max(-1,Math.min(2,gas|0)),dx:dx&&Object.keys(dx).length?dx:undefined,dxs:dxs===undefined?undefined:Math.max(0,dxs|0),id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear:clear|0,au:Math.max(0,Math.min(2,au|0)),sp:sp?1:0,ct:ct>0?ct|0:0,cts:cts>0?cts|0:undefined,cat:cat>0?cat|0:0,as:as===undefined?-1:as,sy:sy===undefined?-1:sy,gs:gs?1:undefined,dv4:dv4?1:0,shard:shard|0,ashard:(ashard|0)||undefined,cshard:(cshard|0)||undefined,misc:Array.isArray(misc)?misc:undefined,mail:Array.isArray(mail)?mail:undefined,ms:Array.isArray(ms)?ms:undefined,tut:tut||undefined,cc:cc&&Object.keys(cc).length?cc:undefined,eq2:eq2&&Object.values(eq2).some(Boolean)?eq2:undefined,es:es===1?1:undefined,pets:pets&&Object.keys(pets).length?pets:undefined,pet:pet&&PETS[pet.id]?{id:pet.id,xp:Math.floor(pet.xp)||0}:undefined}; }
 function saveChar(){ if(!me||!me.id)return; try{ ttfAutoT(); }catch(e){} lsSet(charKey(me.id),JSON.stringify(packChar(me))); }
 const dispName=p=>(p&&p.name)||CLASSES[p.cls].n;
 const isHc=p=>!!(p&&p.hc), hcDead=p=>!!(p&&p.hc&&p.hd>0);   /* 하드코어 캐릭터 · 사망한 하드코어 캐릭터 */
@@ -3359,6 +3359,7 @@ function allSpawn(){ const w0=G.wave, ph=G.phase; let n0=ph==='wave'?G.spawnQ:0;
   const k=tot>ALL_CAP?ALL_CAP/tot:1; for(const [w,n] of ws){ const c=Math.max(1,Math.round(n*k)); G.wave=w; for(let i=0;i<c;i++)waveMob(waveXf(w)*n/c); }
   G.wave=G.TW; G.phase='wave'; G.spawnQ=0; G.spawnT=0; pushEv(['w',G.wave]); me.pot=3; banner(`🚨 습격 ${G.TW} / ${G.TW}`,'모든 언데드가 한꺼번에 몰려옵니다'); }
 function updateWaves(dt){
+  if(G.mine){ mineTick(dt); return; }   /* 광산: 습격 없음 · 리젠·자동 채굴·포탈 */
   if(G.train)return;   /* 훈련장: 습격·우두머리·환경 피해 없음 */
   gimmick(dt); allFires(dt);
   if(G.phase==='prep'){
@@ -3719,6 +3720,7 @@ function applyDmg(m,dmg,slow,fx){
   if(m.hp<=0) killMob(m);
 }
 function killMob(m){
+  if(m.ore){ if(!m.dead)oreBreak(m); return; }
   if(m.scare){ m.dead=false; m.hp=m.max; return; }   /* 허수아비는 쓰러지지 않아요 (드랍 없음) */
   if(m.gob)return;
   if(m.dev){ casDevKill(m); return; }
@@ -4059,6 +4061,7 @@ function tryUse(key,hold){
   if(me.dead||me.leap||!G.inGame||G.paused)return;
   if(me.stun>0){ if(!hold)toast('기절 중!','#ffd84a'); return; }
   if(me.fear>0){ if(!hold)toast('😱 공포! 공격할 수 없어요 (물약은 OK)','#ffb070'); return; }
+  if(G.mine&&key!=='atk'){ if(!hold&&T-(G.mine.ts||-9)>2){ G.mine.ts=T; toast('⛏️ 광산에서는 기본 공격(채굴)만 쓸 수 있어요','#e0c080'); } return; }
   if(key==='atk'){
     if(me.atkCd>0)return;
     const sb=spiritBuff(), fb=me.buffs.fury&&me.buffs.fury.t>0&&me.buffs.fury.ias?1+me.buffs.fury.ias:1, b=(me.buffs.awk&&me.buffs.awk.t>0?1.2:1)*(me.buffs.berserk?1.4:1)*(me.buffs.rage&&me.buffs.rage.t>0?1+me.buffs.rage.ias:1)*fb*(sb?1+sb.ias:1)*casDevAs(); me.atkCd=me.D.atkInt/b;
@@ -4151,6 +4154,7 @@ function awkShieldHit(m,host){ if(host){ m.shield--; m.shF=.2; } addNum(m.x,m.y-
 /* 감전 추가 피해 배율: 마법사 감전 +33% (🥨 빼빼로: 30+3×연쇄 번개 Lv %) · 펫 감전 +12% (합연산) */
 const shockF=m=>1+(m.shockT>0?((PPR&&m.shockB)?m.shockB:SHOCKB-1):0)+(m.shockP>0?SHOCKP:0);
 function hitMob(m,r,slow,tn,fx){
+  if(m.ore){ oreHit(m,fx); return; }   /* 광산 광석: 채굴력으로만 깎여요 */
   if(m.gob){ gobHit(m,0); return; }
   if((m.shield>0||m.inv>0)&&m.boss&&m.counter>0&&!(fx&&(fx.basic||fx.raw))&&!G.inProc)counterHit(m,r.v);   /* 배리어·무적이어도 반격 태세는 그대로 반사 */
   if(m.shield>0){ awkShieldHit(m,G.mode!=='guest'); return; }   /* 각성 그림자 1페이즈 배리어 */
@@ -5655,7 +5659,7 @@ function updateHud(){
   { const xr=me.lvl>=99?1:clamp(me.xp/need(me.lvl),0,1); $('#hXp').style.transform=`scaleX(${xr})`; const xt=(xr*100).toFixed(1)+'%'; const xe=$('#hXpT'); if(xe.textContent!==xt)xe.textContent=xt; }
   { const rg=!!(me.buffs.rage&&me.buffs.rage.t>0&&!me.dead&&G.inGame), rv=$('#rageV'); if(rv.classList.contains('on')!==rg)rv.classList.toggle('on',rg); }
   const ph=G.phase;
-  $('#hWave').textContent= ph==='train'?'🏋️ 훈련장':ph==='prep'?(G.wave>=G.TW?`우두머리 출현까지 ${Math.max(0,Math.ceil(G.timer))}초`:`${G.stg.id} · 습격 ${G.wave+1}/${G.TW} 까지 ${Math.max(0,Math.ceil(G.timer))}초`)
+  $('#hWave').textContent= ph==='train'?(G.mine?`⛏️ ${MINE_FL[G.mine.fi].n} · 광부 Lv ${minerLv(me)}`:'🏋️ 훈련장'):ph==='prep'?(G.wave>=G.TW?`우두머리 출현까지 ${Math.max(0,Math.ceil(G.timer))}초`:`${G.stg.id} · 습격 ${G.wave+1}/${G.TW} 까지 ${Math.max(0,Math.ceil(G.timer))}초`)
     : ph==='wave'?`${G.stg.id} · 습격 ${G.wave}/${G.TW}` : ph==='boss'?(G.stg&&G.stg.raid?(G.stg.raid===3?'🏰 수문장 레이드':G.stg.raid===2?'🌑 각성 그림자 레이드':'⚔️ 삼남매 레이드'):'우두머리 토벌') : ph==='clear'?(G.mode==='guest'?'전리품 줍기':`전리품 줍기 ${Math.max(0,Math.ceil(G.clearT||0))}초`) : ph==='win'?'승리':'함락';
   { const c=G.castle, e=$('#hCastle'), on=!!(c&&G.inGame); if(e.hidden===on)e.hidden=!on; if(on){ const r=clamp(c.hp/c.max,0,1); $('#hCastleHp').style.transform=`scaleX(${r})`; const tx=Math.ceil(r*100)+'%'; const te=$('#hCastleT'); if(te.textContent!==tx)te.textContent=tx; e.classList.toggle('low',r<=.3); } }
   { const dd=!!(me.dead&&G.inGame&&['prep','wave','boss'].includes(G.phase)); $('#bSkip').hidden=!(G.phase==='clear'||dd); $('#bSkip').disabled=gobBusy(); $('#bRevBig').hidden=!dd; if(dd){ const rn=revItems(); $('#revBigN').textContent=rn; $('#bRevBig').classList.toggle('z',rn<=0); } }   /* 쓰러졌을 때: 승리 때와 같은 자리에 나가기 + 그 위에 부활 버튼 */
@@ -6350,9 +6354,9 @@ function renderShop(){
   markTabs(); sheetHead(); sellAskIt=null;
   selItem=null;   /* 상점에는 판매창이 없음 — 판매·일괄 판매는 가방에서 */
   let h=`<div class="box"><h3>🛍️ 구매</h3>${shopRow('potion')}${shopAuto('potion')}${me.hc?'':shopRow('rev')+shopAuto('rev')}<div class="smsg">${esc(buyMsg)}</div></div>`;
-  if(rsOn())h+=`<div class="box" id="rsBox"><h3>📚 연구실</h3><p style="margin:0 0 10px;font-size:14px;line-height:1.5">어서오세요, 관리자님 환영합니다.</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button class="btn" id="rsNote">📔 관리자 노트</button><button class="btn" id="rsLog">📜 출입 기록</button></div>${G.inGame?'':'<button class="btn primary" id="rsTrain" style="width:100%;margin-top:8px">🏋️ 훈련장 입장</button>'}<button class="btn" id="rsPpr" aria-pressed="${PPR?'false':'true'}" style="width:100%;margin-top:8px">🥨 빼빼로 미적용 : ${PPR?'OFF':'ON'}</button><button class="btn" id="rsExit" style="width:100%;margin-top:8px">🚪 나가기</button></div>`;
+  if(rsOn())h+=`<div class="box" id="rsBox"><h3>📚 연구실</h3><p style="margin:0 0 10px;font-size:14px;line-height:1.5">어서오세요, 관리자님 환영합니다.</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button class="btn" id="rsNote">📔 관리자 노트</button><button class="btn" id="rsLog">📜 출입 기록</button></div>${G.inGame?'':'<button class="btn primary" id="rsTrain" style="width:100%;margin-top:8px">🏋️ 훈련장 입장</button><button class="btn" id="rsMine" style="width:100%;margin-top:8px">⛏️ 광산 입장 (시범)</button>'}<button class="btn" id="rsPpr" aria-pressed="${PPR?'false':'true'}" style="width:100%;margin-top:8px">🥨 빼빼로 미적용 : ${PPR?'OFF':'ON'}</button><button class="btn" id="rsExit" style="width:100%;margin-top:8px">🚪 나가기</button></div>`;
   const b=$('#sheetB'); b.className='sbody stats'; b.innerHTML=h; fitGo(b);
-  { const q=id=>b.querySelector(id); if(q('#rsNote'))q('#rsNote').onclick=rsNotes; if(q('#rsLog'))q('#rsLog').onclick=rsLogView; if(q('#rsExit'))q('#rsExit').onclick=rsExit; if(q('#rsTrain'))q('#rsTrain').onclick=startTraining; if(q('#rsPpr'))q('#rsPpr').onclick=()=>{ pprSet(PPR?1:0); sfx('ui'); sheetToast(PPR?'🥨 빼빼로 미적용 OFF (새 밸런스)':'🥨 빼빼로 미적용 ON (패치 이전)'); rerender(); }; }
+  { const q=id=>b.querySelector(id); if(q('#rsNote'))q('#rsNote').onclick=rsNotes; if(q('#rsLog'))q('#rsLog').onclick=rsLogView; if(q('#rsExit'))q('#rsExit').onclick=rsExit; if(q('#rsTrain'))q('#rsTrain').onclick=startTraining; if(q('#rsMine'))q('#rsMine').onclick=startMine; if(q('#rsPpr'))q('#rsPpr').onclick=()=>{ pprSet(PPR?1:0); sfx('ui'); sheetToast(PPR?'🥨 빼빼로 미적용 OFF (새 밸런스)':'🥨 빼빼로 미적용 ON (패치 이전)'); rerender(); }; }
   b.querySelectorAll('[data-atg]').forEach(el=>el.onclick=()=>{ const f=AUTOK[el.dataset.atg]; me[f]=me[f]?0:1; saveChar(); sfx('ui'); renderShop(); });
   b.querySelectorAll('[data-q]').forEach(el=>el.onclick=()=>{ const [k,a]=el.dataset.q.split(':'), have=k==='potion'?me.potBuy:me.rev, space=Math.max(1,shopMax(k)-have), o=SHOP[k];
     if(a==='max')shopQty[k]=Math.max(1,Math.min(Math.floor(aGold()/o.p),space)); else shopQty[k]=clamp((shopQty[k]|0)+(+a),1,space); buyMsg=''; renderShop(); });
@@ -6979,7 +6983,7 @@ function noticeShow(){ if(lsGet(NT_KEY)===ntDay())return;
 window.__noticeShow=noticeShow;
 function prepMe(){ me=loadChar(selId); me.D=derive(me); spawnMe(); }
 function resetWorld(){
-  GB=null; G.gobRoll=false; G.train=0; G.trNoAtk=false; G.trNoPet=false; G.trPet=null; trUi();
+  G.mine=null; GB=null; G.gobRoll=false; G.train=0; G.trNoAtk=false; G.trNoPet=false; G.trPet=null; trUi();
   storyStop(); G.stZ=0; G.aim=null; G.lostBoss=false; G.castle=null; G.lostCastle=false; G.awz=null; G.awc=null; { const ac=$('#awCut'); if(ac)ac.classList.remove('on'); for(const q of ['#casAl','#casMs']){ const z=$(q); if(z)z.classList.remove('on'); } const hc=$('#hCastle'); if(hc)hc.classList.remove('atk'); } if(me){ me.erode=me.hblk=me.mblk=me.hbStrict=me.bleed=me.bleedN=0; me.hpLk=me.mpLk=null; }
   projs.length=zones.length=timers.length=parts.length=nums.length=ground.length=efx.length=0; G.casWreck=[]; G.casDvLv={};   /* 6스테이지 공성탑 잔해는 다른 스테이지로 넘어가지 않게 */
   G.mobs=[]; G.mobMap=new Map(); G.gemDone=false; G.stKills=0; G.stDrops=0; G.stCap=0; G.runT=0; G.stGot=[0,0,0,0,0]; G.stGem=null; G.sib=0; G.endShown=false; G.clrDone=false; alClear(); G.stRev=0; G.stTaken=0; G.stGold0=me?(me.gold|0):0; G.paused=false; G.bt=null; G.shake=0;
@@ -7011,8 +7015,74 @@ function trSpawn(){ if(!G.inGame||!G.train)return;
   { const m=spawnMob(0,VX+TR_CN[0],VY+TR_CN[1],false); m.scare=1; m.cnD=1; m.hx=m.x; m.hy=m.y; m.hp=m.max=1e8; m.dmg=0; m.xp=0; m.spd=70; m.fa=m.f0=Math.PI/2; m.scLast=-99; m.cd=99; m.counter=TR_CN_DUR; m.cnW=0;   /* 소환되자마자 반격 태세 → 끝나면 1초 뒤 다시 */
     efx.push({k:'ring',x:m.x,y:m.y,r0:6,r1:50,t:0,life:.4,col:'#ffb347',w:6}); burst(m.x,m.y,'#ffb347',12,200); }
   sfx('boss'); toast('🎯 허수아비 7기가 나타났어요 (위쪽 1기는 반격 태세)','#e0c080'); }
+/* ===== 광산 모드 (관리자 시범) — 훈련장처럼 웨이브 없는 맵. 광석 = 움직이지 않는 몬스터(m.ore) ===== */
+const MINE_RESP=25, MINE_MAXLV=100, MINE_PT={up:[VX,92],dn:[VX,908]};   /* 다 캔 광석 리젠(초) · 광부 최대 레벨 · 위(지상 쪽)/아래(지하 쪽) 포탈 위치 */
+const mineNeed=L=>Math.round(40*Math.pow(L,1.6));   /* 다음 광부 레벨까지 필요한 경험치 */
+const minePow=p=>Math.round(5*(1+.08*(minerLv(p)-1)));   /* 한 번 때릴 때 깎는 양 (광부 레벨로 상승) */
+function mineXp(O,p){ const d=minerLv(p)-O.lv; if(d>=MINE_GRAY)return 0; const b=5+O.lv*5; return Math.max(1,Math.round(b*(d<=5?1:1-(d-5)/(MINE_GRAY-5)*.9))); }   /* 레벨 차이 5까지 그대로 → 15에서 0(회색) */
+const oreTone=(O,p)=>{ const d=minerLv(p)-O.lv; return d<0?'#ff5a4a':d>=MINE_GRAY?'#8a8a8a':d>=8?'#7ad04a':d>=3?'#ffd84a':'#ff9a3a'; };   /* 빨강(못 캠) 주황 노랑 초록 회색(경험치 0) */
+function startMine(){
+  if(!rsOn()||G.inGame||!selId)return; const c=loadChar(selId); if(!c||hcDead(c))return;
+  if(!mineCanEnter(c)){ sheetToast('⛏️ 곡괭이를 가지고 있어야 광산에 들어갈 수 있어요','#ff8a7a'); return; }
+  closeModal(); G.mode='solo'; prepMe(); ally=null; resetWorld(); if(!me.mine)me.mine={lv:1,xp:0}; if(!me.ore)me.ore={};
+  minions.length=0; dmgReset(); G.firstClr=false; G.potN=0; G.stageIdx=selStage; G.stg=TRAIN_STG; G.TW=0; G.castle=null; G.gts=[];
+  G.allMode=false; G.allQ=[]; G.fires=[]; G.freeRev=1; G.hcWhy=''; me.rvGiven=0; me.seenRg=0; me.out=false; me.rvT=0;
+  G.gemDone=true; G.wave=0; G.skipUsed=true; G.phase='train'; G.timer=0; G.mobs.length=0; G.ev=[]; G.spawnQ=0; G.lastSq=-1; G.endShown=false; G.coop=false;
+  G.waveSides=[]; G.nextSides=[]; G.laneShow=[];
+  G.mine={fi:1,slots:[],got:{},pc:0}; mineFloor(1,null);
+  if(!isPick(me.eq.weapon))later(1.2,()=>{ if(G.mine)toast('⛏️ 곡괭이를 장착해야 광석을 캘 수 있어요','#e0a070'); }); }
+function mineFloor(fi,from){ const M=G.mine, F=MINE_FL[fi]; M.fi=fi; M.slots=[]; G.mobs.length=0; projs.length=zones.length=ground.length=0;
+  setTheme(F.th|0);
+  const st=from==='dn'?[MINE_PT.up[0],MINE_PT.up[1]+80]:from==='up'?[MINE_PT.dn[0],MINE_PT.dn[1]-80]:[VX,VY];
+  me.x=st[0]; me.y=st[1]; me.kx=me.ky=0;
+  if(!F.hub){ const n=F.cnt||12, pts=[], far=(x,y,d)=>pts.every(p=>hyp(p[0]-x,p[1]-y)>=d);
+    for(let i=0,g=0;i<n&&g<600;g++){ const x=rand(110,890), y=rand(170,830); if(!far(x,y,105)||hyp(x-st[0],y-st[1])<120||hyp(x-MINE_PT.up[0],y-MINE_PT.up[1])<150||hyp(x-MINE_PT.dn[0],y-MINE_PT.dn[1])<150)continue;
+      pts.push([x,y]); const sl={k:F.ores[i%F.ores.length],x,y,t:0,m:null}; M.slots.push(sl); mineSpawn(sl,true); i++; } }
+  M.pc=1.2; banner('⛏️ '+F.n,F.hub?'위·아래 포탈로 층을 옮길 수 있어요':'광석: '+F.ores.map(k=>`${ORES[k].n}(Lv${ORES[k].lv})`).join(' · ')); }
+function mineSpawn(sl,quiet){ const O=ORES[sl.k], m=spawnMob(0,sl.x,sl.y,false); Object.assign(m,{ore:sl.k,slot:sl,scare:1,hx:sl.x,hy:sl.y,x:sl.x,y:sl.y,hp:O.hp,max:O.hp,dmg:0,xp:0,spd:0,cd:99,r:24,elite:0,boss:0,seed:Math.random()*1000,flash:0});
+  sl.m=m; sl.t=0; if(!quiet){ efx.push({k:'ring',x:sl.x,y:sl.y,r0:6,r1:40,t:0,life:.35,col:O.c,w:5}); } }
+function oreHit(m,fx){ if(m.dead||(fx&&(fx.mk||fx.pet||fx.sm)))return; const O=ORES[m.ore], M=G.mine||{};
+  if(!isPick(me.eq.weapon)){ if(T-(M.tw||-9)>2.5){ M.tw=T; toast('⛏️ 곡괭이를 장착해야 광석을 캘 수 있어요','#e0a070'); } return; }
+  if(minerLv(me)<O.lv){ if(T-(M.tl||-9)>1.2){ M.tl=T; addNum(m.x,m.y-m.r-10,`광부 Lv${O.lv} 필요`,'#ff8a7a',false); } return; }
+  const d=minePow(me); m.hp-=d; m.flash=.1; spark(m.x,m.y,O.c,4); addNum(m.x,m.y-m.r-6,d,'#e8dcc0',false);
+  if(m.hp<=0)oreBreak(m); }
+function oreBreak(m){ const O=ORES[m.ore], M=G.mine; if(!M||m.dead)return; m.dead=true; m.hp=0;
+  const P=PICKS[(me.eq.weapon&&me.eq.weapon.pk)|0]||PICKS[1], n=Math.max(1,Math.round(ri(1,3)*P.y));
+  me.ore[m.ore]=(me.ore[m.ore]|0)+n; M.got[m.ore]=(M.got[m.ore]|0)+n;
+  burst(m.x,m.y,O.c,14,220); burst(m.x,m.y,'#8a8478',10,180); sfx('kill'); addNum(m.x,m.y-34,`+${n} ${O.n} 조각`,O.c,true);
+  const xp=mineXp(O,me); if(xp>0)mineAddXp(xp); else if(T-(M.tg||-9)>4){ M.tg=T; addNum(me.x,me.y-52,'회색 광석 · 경험치 없음','#9a9a9a',false); }
+  if(m.slot){ m.slot.m=null; m.slot.t=MINE_RESP; } saveChar(); }
+function mineAddXp(x){ const s=me.mine; s.xp+=x; addNum(me.x,me.y-52,`+${x} 광부 경험치`,'#9fd0ff',false); let up=0;
+  while(s.lv<MINE_MAXLV&&s.xp>=mineNeed(s.lv)){ s.xp-=mineNeed(s.lv); s.lv++; up=1; }
+  if(s.lv>=MINE_MAXLV)s.xp=0; if(up){ banner('⛏️ 광부 레벨 업!',`광부 Lv ${s.lv}`); sfx('lvl'); efx.push({k:'ring',x:me.x,y:me.y,r0:10,r1:70,t:0,life:.5,col:'#e0c080',w:8}); } }
+function mineTick(dt){ const M=G.mine; if(!M||!me)return;
+  for(const sl of M.slots)if(!sl.m&&sl.t>0){ sl.t-=dt; if(sl.t<=0)mineSpawn(sl); }   /* 다 캔 자리는 25초 뒤 다시 생겨요 */
+  if(!me.dead&&me.atkCd<=0&&isPick(me.eq.weapon)){ let o=null,bd=1e9; for(const m of G.mobs){ if(m.dead||!m.ore||minerLv(me)<ORES[m.ore].lv)continue; const d=hyp(m.x-me.x,m.y-me.y)-m.r; if(d<bd){bd=d;o=m;} } if(o&&bd<=atkRg(me)+6)tryUse('atk',true); }   /* 자동 채굴: 캘 수 있는 광석이 닿으면 기본 공격 */
+  if(M.pc>0){ M.pc-=dt; return; }
+  for(const dir of ['up','dn']){ const to=M.fi+(dir==='up'?-1:1), P=MINE_PT[dir]; if(to<0||to>=MINE_FL.length||hyp(me.x-P[0],me.y-P[1])>=44)continue; const F2=MINE_FL[to];
+    if(minerLv(me)<F2.lvl){ if(T-(M.tp||-9)>2){ M.tp=T; toast(`🔒 ${F2.n} — 광부 Lv ${F2.lvl}부터 들어갈 수 있어요`,'#ff8a7a'); } continue; }
+    sfx('ui'); mineFloor(to,dir); return; } }
+function drawOre(m,t){ const O=ORES[m.ore], x=m.x, y=m.y, r=m.r, hp=m.hp/m.max, sd=m.seed||0, c=ctx;
+  c.save(); c.fillStyle='rgba(0,0,0,.38)'; c.beginPath(); c.ellipse(x,y+r*.55,r*1.15,r*.38,0,0,6.283); c.fill();
+  c.beginPath(); for(let i=0;i<8;i++){ const a=i/8*6.283+sd, k=.78+.22*Math.sin(sd*3+i*1.7); c.lineTo(x+Math.cos(a)*r*1.05*k,y-r*.25+Math.sin(a)*r*.85*k); } c.closePath();
+  const g=c.createLinearGradient(x,y-r,x,y+r); g.addColorStop(0,'#7a7268'); g.addColorStop(1,'#3e3a34'); c.fillStyle=g; c.fill(); c.strokeStyle='#22201c'; c.lineWidth=2; c.stroke();
+  for(let i=0;i<3;i++){ const a=sd*2+i*2.1, cx=x+Math.cos(a)*r*.42, cy=y-r*.3+Math.sin(a)*r*.32, s=r*(.28+.08*i);
+    c.beginPath(); c.moveTo(cx,cy-s); c.lineTo(cx+s*.55,cy); c.lineTo(cx,cy+s*.6); c.lineTo(cx-s*.55,cy); c.closePath(); c.fillStyle=O.c; c.fill(); c.strokeStyle='rgba(0,0,0,.45)'; c.lineWidth=1; c.stroke();
+    c.fillStyle='rgba(255,255,255,.45)'; c.beginPath(); c.moveTo(cx,cy-s); c.lineTo(cx+s*.2,cy-s*.2); c.lineTo(cx-s*.25,cy-s*.1); c.closePath(); c.fill(); }
+  if(hp<.67){ c.strokeStyle='rgba(15,12,10,.85)'; c.lineWidth=1.6; c.beginPath(); c.moveTo(x-r*.5,y-r*.7); c.lineTo(x-r*.15,y-r*.25); c.lineTo(x-r*.35,y+r*.15); if(hp<.34){ c.moveTo(x+r*.55,y-r*.55); c.lineTo(x+r*.2,y-r*.1); c.lineTo(x+r*.45,y+r*.25); } c.stroke(); }
+  if(m.flash>0){ c.globalAlpha=Math.min(.6,m.flash*6); c.fillStyle='#fff'; c.beginPath(); c.arc(x,y-r*.25,r*.9,0,6.283); c.fill(); c.globalAlpha=1; }
+  c.fillStyle=oreTone(O,me); c.strokeStyle='#120e0a'; c.lineWidth=1.5; c.beginPath(); c.arc(x+r*.85,y-r*.95,4.5,0,6.283); c.fill(); c.stroke();   /* 난이도 색 점 */
+  if(hp<1){ c.fillStyle='rgba(0,0,0,.6)'; c.fillRect(x-r,y-r*1.45,r*2,4); c.fillStyle=O.c; c.fillRect(x-r,y-r*1.45,r*2*Math.max(0,hp),4); }
+  c.restore(); }
+function mineDraw(t){ const M=G.mine; if(!M)return; const c=ctx;
+  for(const dir of ['up','dn']){ const to=M.fi+(dir==='up'?-1:1); if(to<0||to>=MINE_FL.length)continue; const P=MINE_PT[dir], F2=MINE_FL[to], lk=minerLv(me)<F2.lvl, col=lk?'#8a6a6a':dir==='up'?'#9fe0ff':'#e0a060';
+    c.save(); c.translate(P[0],P[1]); c.globalAlpha=.85; c.fillStyle='rgba(0,0,0,.45)'; c.beginPath(); c.ellipse(0,6,46,16,0,0,6.283); c.fill();
+    for(let i=0;i<3;i++){ c.strokeStyle=col; c.globalAlpha=.35+.2*i; c.lineWidth=3; c.beginPath(); c.ellipse(0,0,40-i*9,14-i*3,0,t*(1.5+i*.6)*(dir==='up'?1:-1),t*(1.5+i*.6)*(dir==='up'?1:-1)+4.4); c.stroke(); }
+    c.globalAlpha=1; c.font='bold 13px sans-serif'; c.textAlign='center'; c.fillStyle='#000'; const lb=`${dir==='up'?'▲':'▼'} ${F2.n.split(' · ')[0]}${lk?` 🔒Lv${F2.lvl}`:''}`; c.fillText(lb,1,(dir==='up'?34:-22)+1); c.fillStyle=lk?'#d8a8a8':'#f1e3c4'; c.fillText(lb,0,dir==='up'?34:-22);
+    c.restore(); } }
 const TR_CN_DUR=2.3, TR_CN_GAP=1;   /* 반격 태세 지속 시간(보스와 같음) · 끝난 뒤 다시 쓰기까지 */
-function trScareTick(m,dt){ if(m.cnD){ if(m.counter>0){ m.counter-=dt; if(m.counter<=0){ m.counter=0; m.cnW=TR_CN_GAP; } } else { m.cnW-=dt; if(m.cnW<=0){ m.counter=TR_CN_DUR; addNum(m.x,m.y-m.r-30,'⚔️ 반격 태세!','#ffb347',true); sfx('block'); } } }
+function trScareTick(m,dt){ if(m.ore){ m.stunT=0; m.slowT=0; m.taunt=null; m.kx=m.ky=0; m.x=m.hx; m.y=m.hy; if(m.flash>0)m.flash-=dt; return; }   /* 광석: 제자리 고정 · 회복 없음 */
+  if(m.cnD){ if(m.counter>0){ m.counter-=dt; if(m.counter<=0){ m.counter=0; m.cnW=TR_CN_GAP; } } else { m.cnW-=dt; if(m.cnW<=0){ m.counter=TR_CN_DUR; addNum(m.x,m.y-m.r-30,'⚔️ 반격 태세!','#ffb347',true); sfx('block'); } } }
   m.stunT=0; m.slowT=0; m.taunt=null; m.cd=99; mobKb(m,dt);
   const dx=m.hx-m.x, dy=m.hy-m.y, d=hyp(dx,dy);
   if(d>2){ const st=Math.min(d,(m.spd||70)*dt); m.x+=dx/d*st; m.y+=dy/d*st; m.fa=Math.atan2(dy,dx); m.anim+=dt; }   /* 밀려나면 제자리로 걸어서 돌아가요 */
@@ -7449,7 +7519,7 @@ $('#bStart').onclick=()=>{ if(G.mode!=='host')return; ally=null; const gp=others
 $('#bLeave').onclick=()=>quitToTitle();
 function startGuestGame(pr){ dmgReset(); G.potN=0; resetWorld(); G.phase=pr.ph; toast('게임이 시작됐어요'); }
 async function quitToTitle(){
-  G.train=0; G.trNoAtk=false; G.trNoPet=false; G.trPet=null; trUi(); storyStop(); if(autoMode)setAuto(0,true); setSpd(false); G.inGame=false; G.phase='title'; G.aim=null; saveChar(); ally=null; autoBuyShop(); if(me){ const pl=G.mode==='guest'?-1:(G.stageIdx|0); selStage=Math.max(0,Math.min(STAGES.length-1,G.firstClr?(me.clear|0):pl>=0?Math.min(pl,me.clear|0):(me.clear|0)-1)); G.firstClr=false; }   /* 방금 처음 깼다면 다음 스테이지, 이미 깬 스테이지(또는 진 판)면 했던 스테이지 그대로, 손님은 가장 높이 깬 스테이지 */
+  G.mine=null; G.train=0; G.trNoAtk=false; G.trNoPet=false; G.trPet=null; trUi(); storyStop(); if(autoMode)setAuto(0,true); setSpd(false); G.inGame=false; G.phase='title'; G.aim=null; saveChar(); ally=null; autoBuyShop(); if(me){ const pl=G.mode==='guest'?-1:(G.stageIdx|0); selStage=Math.max(0,Math.min(STAGES.length-1,G.firstClr?(me.clear|0):pl>=0?Math.min(pl,me.clear|0):(me.clear|0)-1)); G.firstClr=false; }   /* 방금 처음 깼다면 다음 스테이지, 이미 깬 스테이지(또는 진 판)면 했던 스테이지 그대로, 손님은 가장 높이 깬 스테이지 */
   if(R){try{R.presence({role:null,pl:null,m:null,ev:null,h:null,bt:null}).catch(()=>{}); await R.leave();}catch(e){} R=null;}
   show('#sTitle'); renderClassCards(); rkSubmitAll();
 }
@@ -7738,6 +7808,7 @@ function casTelDraw(tl){ const k=tl.kind, p=tl.p||0, pu=.5+.5*Math.sin(T*(10+p*1
   circle(tl.x,tl.y,tl.r,`rgba(${C},.14)`); circle(tl.x,tl.y,tl.r*p,`rgba(${C},.3)`); ctx.strokeStyle=`rgba(${C},${.6+.35*pu})`; ctx.lineWidth=4; ctx.setLineDash([14,9]); ctx.beginPath(); ctx.arc(tl.x,tl.y,tl.r,0,6.283); ctx.stroke(); ctx.setLineDash([]);
   const msg=k==='cas_horn'?'📯 공성 나팔 · 밖으로!':'🚪 성문 닫기'; ctx.font='800 16px "Noto Sans KR",sans-serif'; ctx.textAlign='center'; ctx.lineWidth=4; ctx.strokeStyle='#000'; ctx.strokeText(msg,tl.x,tl.y-tl.r-10); ctx.fillStyle='#ffe0b0'; ctx.fillText(msg,tl.x,tl.y-tl.r-10); }
 function drawMob(m,t){
+  if(m.ore){ drawOre(m,t); return; }
   if(m.dev){ drawDev(m,t); return; }
   if(m.leg){ drawLeg(m,t); return; }
   if(m.hide){ casHideDraw(m,t); return; }
@@ -8277,7 +8348,7 @@ function drawAllyArrow(t){
 }
 function drawOffscreen(t){
   const cx=VW/2, cy=VH/2, pad=14;
-  for(const m of G.mobs){ if(m.dead)continue;
+  for(const m of G.mobs){ if(m.dead||m.ore)continue;   /* 광석은 화면 밖 표시 안 함 */
     const sx=(m.x-camX)*ZOOM, sy=(m.y-camY)*ZOOM, rr=m.r*ZOOM;
     if(sx>-rr&&sx<VW+rr&&sy>-rr&&sy<VH+rr)continue;
     const dx=sx-cx, dy=sy-cy, k=Math.min((VW/2-pad)/Math.max(.001,Math.abs(dx)),(VH/2-pad)/Math.max(.001,Math.abs(dy)));
@@ -8367,6 +8438,7 @@ function render(t){
   { const em=$('#emg'); em.hidden=!(G.inGame&&G.allMode&&(G.phase==='prep'||G.phase==='wave')); }
   drawWorld(t); ctx.save(); ctx.globalCompositeOperation='screen'; ctx.fillStyle='rgba(255,238,215,.13)'; ctx.fillRect(camX-10,camY-10,VW/ZOOM+20,VH/ZOOM+20); ctx.restore(); drawLanesWorld(t); drawDark(t,1); drawZones(t); drawFires(t); drawPetFx(t); drawAuras(t); drawBossTel(); drawItemsWorld(t);
   drawWrecks();   /* 부서진 공성장치 잔해는 몹·캐릭터 아래(바닥)에 */
+  if(G.mine)mineDraw(t);   /* 광산 포탈 */
   const actors=[...G.mobs.filter(m=>!m.dead).map(m=>({y:m.y,o:m,f:()=>drawMob(m,t)})),{y:me.y,o:me,f:()=>drawPlayer(me,true,t)}];
   if(ally&&!ally.lobby)actors.push({y:ally.y,o:ally,f:()=>drawPlayer(ally,false,t)});
   for(const q of minions)if(q.rez<=0)actors.push({y:q.y,o:q,f:()=>drawMinion(q,t)});
