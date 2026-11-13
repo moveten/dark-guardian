@@ -1478,7 +1478,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.1.0667</div>
+    <div class="ver" id="verT">v0.7.1.0668</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -6156,7 +6156,12 @@ function calcCP(p0){ let p=p0; if(p.cls==='druid'&&(p.skills&&p.skills.bearform|
     if(ls){ const u=cpUp((14+.4*ls)*(1+.02*skLv(pp,'communion')),36,D); offAdd+=u*(10+1.5*ls)/100; iasAdd+=u*(8+ls)/100; } }
   else if(p.cls==='war'){ const lb=skLv(pp,'berserk'); if(lb){ const u=cpUp(8,32,D); offAdd+=u*(30+5*lb)/100; iasAdd+=u*.4; } }
   const dps=(basic*(1+CPBW*iasAdd)+sk)*(1+CPBW*offAdd/pool)+extra;
-  return Math.round(dps*8+D.maxHp*.6*(1+CPBW*drAdd)+D.maxMp*.2+D.def*3+D.blk*8+D.crit*5+D.ms*6+D.ls*10+(D.dr||0)*300+(D.cdr||0)*150); }
+  /* 전투력 = k × √(공격력 × 생존력) × 이동보정 × 마나보정  (k=ceil(레벨÷5))
+     공격력 = 초당 피해 × (1+치명타%×.5) · 생존력 = 최대HP×(1+.08+min(.6,흡혈%×.025)) ÷(1−방어감소[웨이브8 기준]) ÷(1−받는피해감소) ÷(1−막기%×.15) */
+  const A=Math.max(1,dps)*(1+Math.min(100,D.crit||0)/100*.5), red=Math.min(.8,D.def/(D.def+50+8*8)), dr=Math.min(.9,D.dr||0), blk=Math.min(100,D.blk||0)/100;
+  const S=D.maxHp*(1+CPBW*drAdd)*(1+.08+Math.min(.6,(D.ls||0)*.025))/(1-red)/(1-dr)/(1-blk*.15);
+  const mv=Math.max(.5,1+(D.ms||0)*.002), M=D.maxMp+30*(D.maxMp*.009+.2)*(1+(D.mr||0)/100)*(D.mrx||1), mana=1+.1*M/(M+15*Math.max(1,p.lvl|0));
+  return Math.round(Math.ceil(Math.max(1,p.lvl|0)/5)*Math.sqrt(A*S)*mv*mana); }
 let stT=null;
 function sheetToast(msg,col){ const e=$('#stoast'); e.textContent=msg; e.style.color=col||'#eadfcc'; e.classList.add('on'); clearTimeout(stT); stT=setTimeout(()=>e.classList.remove('on'),2600); }
 function cpMsg(a,b){ const d=b-a; sheetToast(`전투력 ${a.toLocaleString()} → ${b.toLocaleString()} (${d>0?'▲ +':d<0?'▼ ':'± '}${d})`,d>0?'#9fd18b':d<0?'#ff8a7a':'#eadfcc'); }
