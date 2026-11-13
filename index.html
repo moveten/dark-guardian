@@ -1493,7 +1493,7 @@ body.mining #skills{display:none!important}   /* 광산: 스킬 버튼 숨김 */
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.1.0684</div>
+    <div class="ver" id="verT">v0.7.1.0685</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -8534,8 +8534,10 @@ function render(t){
   // screen space
   ctx.setTransform(DPR,0,0,DPR,0,0);
   const px=(me.x-camX)*ZOOM, py=(me.y-camY)*ZOOM;
-  const vg=ctx.createRadialGradient(px,py,Math.min(VW,VH)*.35,px,py,Math.max(VW,VH)*.75);
-  vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(0,0,0,.45)'); ctx.fillStyle=vg; ctx.fillRect(0,0,VW,VH); { const tn=TH().tint; if(tn){ ctx.fillStyle=tn; ctx.fillRect(0,0,VW,VH); } }
+  if(G.mine){ const ly=py-20, vg=ctx.createRadialGradient(px,ly,0,px,ly,300);   /* 광산: 캐릭터를 따라다니는 은은한 등불빛 + 바깥은 어둡게 */
+    vg.addColorStop(0,'rgba(255,190,110,.07)'); vg.addColorStop(.4,'rgba(0,0,0,0)'); vg.addColorStop(.78,'rgba(0,0,0,.25)'); vg.addColorStop(1,'rgba(0,0,0,.45)'); ctx.fillStyle=vg; ctx.fillRect(0,0,VW,VH); }
+  else { const vg=ctx.createRadialGradient(px,py,Math.min(VW,VH)*.35,px,py,Math.max(VW,VH)*.75);
+  vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(0,0,0,.45)'); ctx.fillStyle=vg; ctx.fillRect(0,0,VW,VH); } { const tn=TH().tint; if(tn){ ctx.fillStyle=tn; ctx.fillRect(0,0,VW,VH); } }
   if(G.aim){ const sx=(me.x-camX)*ZOOM, sy=(me.y-camY)*ZOOM, rr=(240+4*G.aim.lv)*ZOOM; ctx.save(); ctx.strokeStyle='rgba(185,139,255,.9)'; ctx.lineWidth=2.5; ctx.setLineDash([10,8]); ctx.lineDashOffset=-t*40; ctx.beginPath(); ctx.arc(sx,sy,rr,0,6.283); ctx.stroke(); ctx.fillStyle='rgba(185,139,255,.08)'; ctx.fill(); ctx.restore(); }
   drawItemsScreen(t); drawNums(); drawGobHud(t); drawOffscreen(t); drawAllyArrow(t); drawLanesEdge(t); drawBossBar(); drawMinimap();
   if(G.castle&&G.castle.hp>0&&G.inGame&&G.castle.hp/G.castle.max<=.2){ const a=.1+.08*Math.sin(t*6), g=ctx.createRadialGradient(VW/2,VH/2,Math.min(VW,VH)*.45,VW/2,VH/2,Math.max(VW,VH)*.75); g.addColorStop(0,'rgba(255,40,30,0)'); g.addColorStop(1,`rgba(255,40,30,${a*2})`); ctx.fillStyle=g; ctx.fillRect(0,0,VW,VH); }   /* 성 체력 20% 이하 */
