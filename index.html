@@ -1424,9 +1424,9 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
 .mres .mrw{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.04);margin-top:6px;font-size:14px}
 .mres .mrw b{margin-left:auto;color:#ffe08a}.mres .mrw s{text-decoration:none;color:#a8957a;font-size:12px;min-width:56px;text-align:right}
 .mres .mbar{height:8px;border-radius:5px;background:#1a1410;border:1px solid #5a4630;overflow:hidden;margin-top:4px}.mres .mbar>i{display:block;height:100%;background:linear-gradient(90deg,#c9a04a,#ffe08a)}
-body.mining #skills,body.mining #hud .meRow,body.mining #hGold,body.mining #bPot,body.mining #bRev{display:none!important}   /* 광산: 스킬·레벨·골드·상단 제목·물약·부활 숨김 */
-body.mining #mineHud{left:10px;right:auto;width:150px}
-body.mining .tc{left:calc(50% + 22px)} body.mining #hWave{font-size:12.5px;letter-spacing:0}   /* 광산 층 이름: 좌상단 카드와 미니맵 사이 */
+body.mining #skills,body.mining #hGold,body.mining #bPot,body.mining #bRev,body.mining #toasts,#mineHud .mhr{display:none!important}   /* 광산: 스킬·골드·물약·부활·알림기록 숨김 (좌상단 레벨 칸은 광부 레벨로) */
+#mineHud .mhs{border-top:0!important;margin-top:0!important;padding-top:0!important}
+body.mining #mineOut{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(max(14px,env(safe-area-inset-bottom)) + 74px);width:auto;margin:0;padding:10px 20px;font-size:14px;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.6)}   /* 나가기: 물약·부활 자리 */
 #mineHud .mfl{font-size:12px;font-weight:800;color:#f1e3c4;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 </style>
 
@@ -1496,7 +1496,7 @@ body.mining .tc{left:calc(50% + 22px)} body.mining #hWave{font-size:12.5px;lette
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.1.0690</div>
+    <div class="ver" id="verT">v0.7.1.0691</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -5699,10 +5699,10 @@ function buildSkills(){
 }
 function updateHud(){
   const D=me.D;
-  $('#hLv').textContent=me.lvl;
+  $('#hLv').textContent=G.mine?minerLv(me):me.lvl;   /* 광산에서는 광부 레벨 */
   $('#hHp').style.transform=`scaleY(${clamp(me.hp/D.maxHp,0,1)})`; $('#hHpT').textContent=me.dead?`쓰러짐 ${Math.ceil(Math.max(0,me.respawn))}`:`${Math.ceil(me.hp)}/${D.maxHp}`;
   $('#hMp').style.transform=`scaleY(${clamp(me.mp/D.maxMp,0,1)})`; $('#hMpT').textContent=`${Math.floor(me.mp)}/${D.maxMp}`;
-  { const xr=me.lvl>=99?1:clamp(me.xp/need(me.lvl),0,1); $('#hXp').style.transform=`scaleX(${xr})`; const xt=(xr*100).toFixed(1)+'%'; const xe=$('#hXpT'); if(xe.textContent!==xt)xe.textContent=xt; }
+  { const ml=G.mine?minerLv(me):0, xr=G.mine?(ml>=MINE_MAXLV?1:clamp(me.mine.xp/mineNeed(ml),0,1)):(me.lvl>=99?1:clamp(me.xp/need(me.lvl),0,1)); $('#hXp').style.transform=`scaleX(${xr})`; const xt=(G.mine?'⛏️ ':'')+(xr*100).toFixed(1)+'%'; const xe=$('#hXpT'); if(xe.textContent!==xt)xe.textContent=xt; }
   { const rg=!!(me.buffs.rage&&me.buffs.rage.t>0&&!me.dead&&G.inGame), rv=$('#rageV'); if(rv.classList.contains('on')!==rg)rv.classList.toggle('on',rg); }
   const ph=G.phase;
   $('#hWave').textContent= ph==='train'?(G.mine?`⛏️ ${MINE_FL[G.mine.fi].n}`:'🏋️ 훈련장'):ph==='prep'?(G.wave>=G.TW?`우두머리 출현까지 ${Math.max(0,Math.ceil(G.timer))}초`:`${G.stg.id} · 습격 ${G.wave+1}/${G.TW} 까지 ${Math.max(0,Math.ceil(G.timer))}초`)
@@ -7115,7 +7115,7 @@ function mineAddXp(x){ const s=me.mine; s.xp+=x; if(G.mine)G.mine.xpGot=(G.mine.
   while(s.lv<MINE_MAXLV&&s.xp>=mineNeed(s.lv)){ s.xp-=mineNeed(s.lv); s.lv++; up=1; }
   if(s.lv>=MINE_MAXLV)s.xp=0; if(up){ banner('⛏️ 광부 레벨 업!',`광부 Lv ${s.lv}`); sfx('lvl'); efx.push({k:'ring',x:me.x,y:me.y,r0:10,r1:70,t:0,life:.5,col:'#e0c080',w:8}); } }
 function mineHud(){ const el=$('#mineHud'), M=G.mine; document.body.classList.toggle('mining',!!M); if(!el)return; if(!M||!me){ el.hidden=true; return; } el.hidden=false;   /* 광산 안 오른쪽 카드 (값이 바뀔 때만 다시 그림) */
-  el.style.top='10px';   /* 좌상단 (레벨·골드 자리) */
+  el.style.top=Math.round((LAND?8:4)+mmW()*WH/WW+14)+'px';   /* 미니맵 아래 (겹치지 않게) */
   const L=minerLv(me), p=L>=MINE_MAXLV?100:Math.min(99,Math.floor(me.mine.xp/mineNeed(L)*100)), got=Object.keys(M.got).filter(k=>M.got[k]>0);
   el.firstElementChild.innerHTML=`<div class="mhr"><div class="mhg" style="background:conic-gradient(#ffd060 ${p*3.6}deg,#2a2018 0)"><b>${L}</b></div><div style="font-size:11px;line-height:1.3"><b style="font-size:12px">광부</b><br><span style="color:#c9b48a">${p}%</span></div></div>
    <div class="mhs">이번 획득</div>${got.length?got.map(k=>`<div class="mhi"><img class="mfr" src="img/frag_${k}.webp" alt="">${ORES[k].n}<b>+${M.got[k]}</b></div>`).join(''):'<div class="mhi" style="color:#6a5a48">아직 없어요</div>'}`; }
@@ -8189,7 +8189,7 @@ function drawPlayer(o,isMe,t){
   ctx.restore();
   }
   // 이름 · 레벨 · 생명/마나 바
-  const nm=(isMe?me.name:(o.name||'동료'))||'', label=`Lv${lv} ${nm}`;
+  const nm=(isMe?me.name:(o.name||'동료'))||'', label=`${isMe&&G.mine?'⛏️':''}Lv${isMe&&G.mine?minerLv(me):lv} ${nm}`;   /* 광산: 광부 레벨 */
   ctx.font='700 11px "Noto Sans KR",sans-serif'; ctx.textAlign='center'; ctx.lineJoin='round'; ctx.lineWidth=3.5; ctx.strokeStyle='rgba(0,0,0,.9)'; ctx.strokeText(label,x,y-45); ctx.fillStyle=isMe?'#fff3dc':C.col; ctx.fillText(label,x,y-45);
   { const ic=[];
     if(isMe){ const b=me.buffs; if(b.shout&&b.shout.t>0)ic.push(['📣',clamp(1-b.shout.t/(b.shout.m||10),0,1),Math.ceil(b.shout.t),true]); if(b.pcry&&b.pcry.t>0)ic.push(['📣',clamp(1-b.pcry.t/(b.pcry.m||8),0,1),Math.ceil(b.pcry.t),true]); if(b.barrier&&b.barrier.t>0)ic.push(['🔷',clamp(1-b.barrier.t/10,0,1),Math.ceil(b.barrier.t),true]); if(me.stun>0)ic.push(['💫',0,Math.ceil(me.stun),true]); if(me.sil>0)ic.push(['🚫',0,Math.ceil(me.sil),true]); if(me.fear>0)ic.push(['😱',0,Math.ceil(me.fear),true]); if(me.slowP>0)ic.push(['🐌',0,Math.ceil(me.slowP),true]); if(me.poison>0)ic.push(['☠️',0,Math.ceil(me.poison),true]); if(me.erode>0)ic.push(['🌑',0,Math.ceil(me.erode),true]); if(me.bleed>0)ic.push(['🩸',0,Math.ceil(me.bleed),true]); if(me.hblk>0)ic.push(['💔',0,Math.ceil(me.hblk),true]); if(me.mblk>0)ic.push(['💧',0,Math.ceil(me.mblk),true]); if(b.berserk&&b.berserk.t>0)ic.push(['😡',clamp(1-b.berserk.t/8,0,1),Math.ceil(b.berserk.t),true]); for(const [bk,be] of [['roar','📢'],['fury','💢'],['hunt','🌕'],['rage','🔥']]){ const bb=b[bk]; if(bb&&bb.t>0)ic.push([be,clamp(1-bb.t/(bb.m||8),0,1),Math.ceil(bb.t),true]); } if(me.spirit&&me.spirit.t>0)ic.push(['👻',clamp(1-me.spirit.t/me.spirit.m,0,1),Math.ceil(me.spirit.t),true]); if(me.aura)ic.push([SKBY[me.aura].e,0,'',true]); }
