@@ -1476,7 +1476,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0664</div>
+    <div class="ver" id="verT">v0.7.1.0665</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1690,7 +1690,7 @@ const SK={
   {k:'mshield',lb:['마나분담','피해당마나'],e:'🔮',n:'에너지 실드',s:'실드',req:9,mp:0,cd:0,el:'#7fb4ff',passive:1,d:l=>`패시브: 받는 피해의 ${V(Math.round(Math.min(.65,.2+.02*l)*100))}%를 마나가 대신 받음 · 피해 1당 마나 ${V(Math.max(.25,.9-.02*l).toFixed(2))} 소모`},
   {k:'frostnova',lb:['연타','반경','피해'],e:'❄️',n:'서리 고리',s:'서리',req:6,mp:10,cd:6,el:'#8fdcff',d:l=>`${V(HMN(l))}연타, 반경 ${RR(160*FNR,l)} · 기본 피해 ${V(Math.round((14+10*l)*FND*HMFM(HMN(l))))} · 3초간 감속`},
   {k:'teleport',lb:['거리'],e:'🌀',n:'순간이동',s:'이동',req:9,mp:12,cd:5,el:'#b98bff',d:l=>`누른 곳으로 순간이동, 최대 거리 ${V(240+4*l)} · 도착 직후 0.4초 무적`},
-  {k:'chain',lb:['튕김','갈래','피해','감전'],e:'⚡',n:'연쇄 번개',s:'번개',req:12,mp:9,cd:4,el:'#dfe7ff',rg:280,d:l=>`적 사이를 ${V(3+Math.floor(l/4))}번 튀는 번개 ${V(HMN(l))}갈래 · 기본 피해 ${V(Math.round((22+16*l)*HMFM(HMN(l))))} · 맞은 적은 ${V(SHK(l).toFixed(1))}초간 ⚡감전, 감전된 적이 받는 스킬 피해 +${VG(PPR?30+2*l:Math.round((SHOCKB-1)*100))}%`},
+  {k:'chain',lb:['튕김','갈래','피해','감전','감전피해'],e:'⚡',n:'연쇄 번개',s:'번개',req:12,mp:9,cd:4,el:'#dfe7ff',rg:280,d:l=>`적 사이를 ${V(3+Math.floor(l/4))}번 튀는 번개 ${V(HMN(l))}갈래 · 기본 피해 ${V(Math.round((22+16*l)*HMFM(HMN(l))))} · 맞은 적은 ${V(SHK(l).toFixed(1))}초간 ⚡감전, 감전된 적이 받는 스킬 피해 +${V(PPR?30+2*l:Math.round((SHOCKB-1)*100))}%`},
   {k:'barrier',lb:['지속시간','받는피해'],e:'🔷',n:'마력 방벽',s:'방벽',req:18,mp:14,cd:22,el:'#8fb6ff',d:l=>`${V(6+Math.floor(l/3))}초간 받는 피해 -${V(Math.min(70,30+2*l))}%`},
   {k:'meteor',lb:['유성','반경','피해','기절'],e:'☄️',n:'유성',s:'유성',req:24,mp:18,cd:10,el:'#ff5a1f',rg:300,d:l=>`잠시 뒤 유성 ${V(HMN(l))}개 낙하, 폭발 반경 ${RR(100,l)} · 기본 피해 ${V(Math.round((80+40*l)*HMFM(HMN(l))))} · ${V((.5+.02*l).toFixed(1))}초 기절 후 0.9초간 화상`},
   {k:'armageddon',lb:['피해'],e:'🌠',n:'대재앙',s:'재앙',req:90,mp:60,cd:75,el:'#ff5a1f',rg:420,d:l=>`[궁극기] 4초간 하늘에서 유성 14개가 쏟아져요. 반경 95 범위 피해 ${V(150+45*l)}, 1.5초 기절`},
@@ -1750,7 +1750,7 @@ const GZM=1.3, BSKM=1.3; /* 바닥 장판(용암·불길) 피해 배율 / 시전
 const FNR=1.3, FND=1.3, SHOCKB=4/3, SHOCKP=.12, SHK=l=>4+.15*l; /* 서리 고리 범위·피해 배율 / 감전 상태에서 화·수 속성 피해 배율(+1/3) / 감전 지속시간 */
 const FZB=l=>3+Math.min(3,Math.floor(l/8)); /* 융합 영혼 영혼탄 발수 */
 var gcdT=0;   /* 🥨 글쿨 남은 시간 */
-var PPR=0;   /* 🥨 빼빼로 적용(연구실 on/off · 관리자 전용 테스트): 켜면 아래 PPR 분기의 새 계산식, 끄면 기존 계산식 */
+var PPR=1;   /* 캐릭터 밸런스패치(v0.7.1) 적용 여부: 1이면 아래 PPR 분기의 새 계산식(전체 공개), 0이면 패치 이전 계산식 — 0은 관리자가 연구실 '빼빼로 미적용 : ON'으로 비교할 때만 */
 const HMN=l=>l>=14?3:l>=7?2:1,
   HMF=n=>PPR?([1,.7,.55,.47,.42,.38][n-1]||.35):([1,.7,.55][n-1]||.55),      /* 망치 개수/개당 피해 배율 (빼빼로: 4발 이상 구간 추가) */
   HMFM=n=>PPR?([1,.95,.92,.9,.88,.86][n-1]||.85):HMF(n);                      /* 마법사(화염구·서리 고리·연쇄 번개·유성) 연타 보정 (빼빼로: 2발 .95 · 3발 .92) */
@@ -4986,7 +4986,7 @@ $('#bBas').addEventListener('pointerdown',e=>{ e.preventDefault(); if(!G.train)r
 $('#trHome').onclick=()=>{ if(G.train)quitToTitle(); };
 $('#trPet').onclick=()=>{ if(!G.train)return; const L=[0,3,7,10,15], cur=G.trPet?G.trPet.lv:0, nx=L[(L.indexOf(cur)+1)%L.length]; G.trPet=nx?{id:'trio',xp:petT('trio')[nx-1],lv:nx}:null; G.trNoPet=false; PET.on=false; petStart(); sfx('ui'); toast(nx?`🐾 삼남매 펫 Lv${nx} (훈련장 전용 · 저장 안 됨)`:'🐾 삼남매 펫 해제','#c8a8ff'); };
 $('#trMn').onclick=()=>{ if(!G.train)return; const n=minions.length; minions.length=0; G.trNoPet=true; PET.on=false; sfx('ui'); toast(`💨 소환수 ${n}마리와 펫을 없앴어요`,'#e0c080'); };
-$('#trPp').onclick=()=>{ if(!G.train)return; sfx('ui'); pprSet(PPR?0:1); toast(PPR?'🥨 빼빼로 적용 ON':'🥨 빼빼로 적용 OFF','#e0c080'); };
+$('#trPp').onclick=()=>{ if(!G.train)return; sfx('ui'); pprSet(PPR?1:0); toast(PPR?'🥨 빼빼로 미적용 OFF (새 밸런스)':'🥨 빼빼로 미적용 ON (패치 이전)','#e0c080'); };
 $('#trCd').onclick=()=>{ if(!G.train||!me)return; for(const k in me.cds)me.cds[k]=0; sfx('ui'); toast('⏱️ 재사용 대기시간을 모두 초기화했어요','#e0c080'); };
 $('#trAn').onclick=()=>{ if(G.train){ sfx('ui'); trOpen(!$('#trDr').classList.contains('on')); } };
 document.body.appendChild($('#trDr'));   /* 드로어는 화면 맨 위 층(우측 아이콘·하단 메뉴보다 위) — 가방·창을 열면 자동으로 닫혀요 */
@@ -6256,9 +6256,9 @@ if(SKM){
 }
 /* ===== 연구실 (관리자 전용 공간) — 계정 전체에 적용: 켜짐 여부(dkdef2.lab)는 클라우드 저장에 함께 실려요. 비밀번호·전송 대기열(dkdef2.cl.*)은 이 기기에만 ===== */
 const RS_KEY='dkdef2.lab', RS_PW='dkdef2.cl.labpw', RS_Q='dkdef2.cl.labq', RS_H=1529703320, RS_WD=['일','월','화','수','목','금','토'];
-const rsOn=()=>lsGet(RS_KEY)==='1', PPR_KEY='dkdef2.cl.ppr';
-const pprSync=()=>{ PPR=rsOn()&&lsGet(PPR_KEY)==='1'?1:0; };   /* 🥨 빼빼로 적용은 이 기기에서 연구실이 켜진 동안만 */
-const pprSet=v=>{ if(v)lsSet(PPR_KEY,'1'); else lsDel(PPR_KEY); pprSync(); const b=document.getElementById('trPp'); if(b)b.textContent=PPR?'🥨 빼빼로 ON':'🥨 빼빼로 OFF'; if(G.train){ TR.dirty=true; trRender(true); } };
+const rsOn=()=>lsGet(RS_KEY)==='1', PPR_KEY='dkdef2.cl.pprOff';
+const pprSync=()=>{ PPR=(rsOn()&&lsGet(PPR_KEY)==='1')?0:1; };   /* 패치 이전 상태 비교(미적용 ON)는 이 기기에서 연구실이 켜진 동안만 — 나가면 자동으로 새 밸런스 */
+const pprSet=old=>{ if(old)lsSet(PPR_KEY,'1'); else lsDel(PPR_KEY); pprSync(); const b=document.getElementById('trPp'); if(b)b.textContent=PPR?'🥨 빼빼로 미적용 OFF':'🥨 빼빼로 미적용 ON'; if(G.train){ TR.dirty=true; trRender(true); } };
 pprSync();
 const rsStamp=t=>{ const d=t instanceof Date?t:new Date(t), p=n=>String(n).padStart(2,'0'); return isNaN(d)?'-':`${d.getFullYear()}/${RKMON[d.getMonth()]}/${p(d.getDate())}(${RS_WD[d.getDay()]}) ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`; };   /* yyyy/MMM/dd(aaa) HH:mm:ss */
 const rsNames=()=>charIds().map(loadChar).filter(Boolean).map(c=>dispName(c)).join(', ');
@@ -6317,9 +6317,9 @@ function renderShop(){
   markTabs(); sheetHead(); sellAskIt=null;
   selItem=null;   /* 상점에는 판매창이 없음 — 판매·일괄 판매는 가방에서 */
   let h=`<div class="box"><h3>🛍️ 구매</h3>${shopRow('potion')}${shopAuto('potion')}${me.hc?'':shopRow('rev')+shopAuto('rev')}<div class="smsg">${esc(buyMsg)}</div></div>`;
-  if(rsOn())h+=`<div class="box" id="rsBox"><h3>📚 연구실</h3><p style="margin:0 0 10px;font-size:14px;line-height:1.5">어서오세요, 관리자님 환영합니다.</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button class="btn" id="rsNote">📔 관리자 노트</button><button class="btn" id="rsLog">📜 출입 기록</button></div>${G.inGame?'':'<button class="btn primary" id="rsTrain" style="width:100%;margin-top:8px">🏋️ 훈련장 입장</button>'}<button class="btn" id="rsPpr" aria-pressed="${PPR?'true':'false'}" style="width:100%;margin-top:8px">🥨 빼빼로 적용 : ${PPR?'ON':'OFF'}</button><button class="btn" id="rsExit" style="width:100%;margin-top:8px">🚪 나가기</button></div>`;
+  if(rsOn())h+=`<div class="box" id="rsBox"><h3>📚 연구실</h3><p style="margin:0 0 10px;font-size:14px;line-height:1.5">어서오세요, 관리자님 환영합니다.</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button class="btn" id="rsNote">📔 관리자 노트</button><button class="btn" id="rsLog">📜 출입 기록</button></div>${G.inGame?'':'<button class="btn primary" id="rsTrain" style="width:100%;margin-top:8px">🏋️ 훈련장 입장</button>'}<button class="btn" id="rsPpr" aria-pressed="${PPR?'false':'true'}" style="width:100%;margin-top:8px">🥨 빼빼로 미적용 : ${PPR?'OFF':'ON'}</button><button class="btn" id="rsExit" style="width:100%;margin-top:8px">🚪 나가기</button></div>`;
   const b=$('#sheetB'); b.className='sbody stats'; b.innerHTML=h; fitGo(b);
-  { const q=id=>b.querySelector(id); if(q('#rsNote'))q('#rsNote').onclick=rsNotes; if(q('#rsLog'))q('#rsLog').onclick=rsLogView; if(q('#rsExit'))q('#rsExit').onclick=rsExit; if(q('#rsTrain'))q('#rsTrain').onclick=startTraining; if(q('#rsPpr'))q('#rsPpr').onclick=()=>{ pprSet(PPR?0:1); sfx('ui'); sheetToast(PPR?'🥨 빼빼로 적용 ON':'🥨 빼빼로 적용 OFF'); rerender(); }; }
+  { const q=id=>b.querySelector(id); if(q('#rsNote'))q('#rsNote').onclick=rsNotes; if(q('#rsLog'))q('#rsLog').onclick=rsLogView; if(q('#rsExit'))q('#rsExit').onclick=rsExit; if(q('#rsTrain'))q('#rsTrain').onclick=startTraining; if(q('#rsPpr'))q('#rsPpr').onclick=()=>{ pprSet(PPR?1:0); sfx('ui'); sheetToast(PPR?'🥨 빼빼로 미적용 OFF (새 밸런스)':'🥨 빼빼로 미적용 ON (패치 이전)'); rerender(); }; }
   b.querySelectorAll('[data-atg]').forEach(el=>el.onclick=()=>{ const f=AUTOK[el.dataset.atg]; me[f]=me[f]?0:1; saveChar(); sfx('ui'); renderShop(); });
   b.querySelectorAll('[data-q]').forEach(el=>el.onclick=()=>{ const [k,a]=el.dataset.q.split(':'), have=k==='potion'?me.potBuy:me.rev, space=Math.max(1,shopMax(k)-have), o=SHOP[k];
     if(a==='max')shopQty[k]=Math.max(1,Math.min(Math.floor(aGold()/o.p),space)); else shopQty[k]=clamp((shopQty[k]|0)+(+a),1,space); buyMsg=''; renderShop(); });
@@ -6963,7 +6963,7 @@ const TR_CN=[0,-480];   /* 반격 허수아비: 중심에서 위로 480 */
 const TR_D=45.25, TR_POS=[[-320,0],[320,0],[320-TR_D,-TR_D],[320+TR_D,-TR_D],[320-TR_D,TR_D],[320+TR_D,TR_D]];   /* 왼쪽 1기 · 오른쪽 X자 5기(반경 64) */
 function startTraining(){
   if(!rsOn()||G.inGame||!selId)return; if(hcDead(loadChar(selId)))return;
-  closeModal(); G.mode='solo'; prepMe(); ally=null; resetWorld(); G.train=1; { const pb=$('#trPp'); if(pb)pb.textContent=PPR?'🥨 빼빼로 ON':'🥨 빼빼로 OFF'; } TR.log=[]; TR.sk='기본공격'; TR.dirty=true; TR.sum={}; TR.ev=[]; TR.dps=0; TR.dpsAt=0;
+  closeModal(); G.mode='solo'; prepMe(); ally=null; resetWorld(); G.train=1; { const pb=$('#trPp'); if(pb)pb.textContent=PPR?'🥨 빼빼로 미적용 OFF':'🥨 빼빼로 미적용 ON'; } TR.log=[]; TR.sk='기본공격'; TR.dirty=true; TR.sum={}; TR.ev=[]; TR.dps=0; TR.dpsAt=0;
   dmgReset(); G.firstClr=false; G.potN=0; G.stageIdx=selStage; G.stg=TRAIN_STG; G.TW=0; setTheme(0); G.castle=null; G.gts=[];
   G.allMode=false; G.allQ=[]; G.fires=[]; G.freeRev=me.hc?0:1; G.hcWhy=''; me.rvGiven=0; me.seenRg=0; me.out=false; me.rvT=0;
   G.gemDone=true; G.wave=0; G.skipUsed=true; G.phase='train'; G.timer=0; G.mobs.length=0; G.ev=[]; G.spawnQ=0; G.lastSq=-1; G.endShown=false; G.coop=false;
@@ -7006,7 +7006,7 @@ function trConsts(){ const D=me.D, b=buffDmg(), P=gearPen(), L=lvPen(), wa=(D.wm
   C.L={n:'감전 추가 피해(스킬)',e:PPR?`1 + (30 + 2×연쇄 번개 Lv)/100 (화상 틱에도 적용)`:'4/3',v:PPR?null:SHOCKB};
   C.T={n:'무기 기술 보정(스킬)',e:`(1 + 무기 평균 ${trN(wa)}/450)`+(PPR?'':' — 꺼짐'),v:PPR?1+wa/450:1};
   C.U={n:'곱연산 버프',e:PPR?'(1+전투 함성+광폭화+폭주)×(1+광란+영혼 정령)':'꺼짐 (합연산)',v:buffMul()};
-  C.P={n:'🥨 빼빼로 적용',e:PPR?'ON':'OFF',v:null};
+  C.P={n:'🥨 빼빼로 미적용',e:PPR?'OFF':'ON',v:null};
   C.M={n:'치명타',e:'훈련장에서는 항상 실패',v:null};
   return C; }
 function trFmt(e,C){
