@@ -1492,7 +1492,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.1.0680</div>
+    <div class="ver" id="verT">v0.7.1.0681</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -4059,7 +4059,7 @@ function pickUp(g){
       if(!(k0&&canWear(it0))){ (G.stGot||(G.stGot=[0,0,0,0,0]))[it0.rar|0]++; ground.splice(ground.indexOf(g),1); const v=sellInfo(it0).total; me.gold+=v; sfx('coin'); addNum(me.x,me.y-34,'+'+v+'G','#ffd84a',false); G.asold=(G.asold|0)+v; saveChar(); uiDirty=true; if(sheetMode==='bag')renderBag(); return; } } }
   const i=me.inv.indexOf(null);
   if(i<0){toast('가방이 가득 찼어요','#e07060');return;}
-  const it=g.it; it.isNew=1; me.inv[i]=it; ground.splice(ground.indexOf(g),1); (G.stGot||(G.stGot=[0,0,0,0,0]))[it.rar|0]++;
+  const it=g.it; it.isNew=1; me.inv[i]=it; ground.splice(ground.indexOf(g),1); if(it.pk)later(.4,pickStory);   /* 곡괭이: 그라크 대화 */ (G.stGot||(G.stGot=[0,0,0,0,0]))[it.rar|0]++;
   sfx('pick'); if(it.rar>=((G.coop||G.mode==='guest')?3:2))toast(`획득: ${dn(it)}`,RARC[it.rar],'get',it.rar>=4);   /* 협동 중엔 유니크 이상만 알림 */
   if(it.rar>=3){ annQ.push([++annSeq,it.name.slice(0,16),it.rar]); if(annQ.length>4)annQ.shift(); }   /* 협동: 동료에게 알리는 획득은 유니크 이상만 */
   const key=it.slot==='ring'?(!me.eq.ring1?'ring1':!me.eq.ring2?'ring2':null):(me.eq[it.slot]?null:it.slot);
@@ -5531,6 +5531,22 @@ function storyClose(){ const S=stS; clearInterval(stTm); stS=null; const el=$('#
 let storyRe=null;
 function storyReUi(){ const S=STAGES[selStage], on=!!(S&&storyRe===S.id); if(!on)storyRe=null; const b=$('#bSolo'); if(b)b.innerHTML='▶ 시작하기'+(on?' <span class="newb">NEW</span>':''); }
 function storyStop(){ storyClose(); storyWait=false; }
+const PICK_STORY=[   /* 곡괭이를 처음 주웠을 때 (캐릭터마다 한 번) */
+ ['nar','재가 된 그라크의 자리에 녹슨 곡괭이 하나가 남아 있다. 손잡이를 쥐자, 흩어졌던 재가 다시 웅성거린다.','gk'],
+ ['gk','크르르… 그건… 내 곡괭이다. 무덤을 파던… 내 손의 일부였지.'],
+ ['me','아직 남아 있었나. 이 곡괭이에 무슨 사연이라도 있는 건가?'],
+ ['gk','백 년 동안… 그걸로 묘지를 팠다. 그러다 깊이… 너무 깊이 파 내려갔지. 마을 아래… 버려진 광산과 이어질 때까지.'],
+ ['me','광산? 마을 밑에 그런 곳이 있다고?'],
+ ['gk','잿빛 채석장… 그 아래엔 갱도가… 더 아래엔 핏빛 광맥과 용암이 끓는 굴이 있다. 카스텔의 성벽도… 그곳의 돌로 쌓았다지…'],
+ ['gk','가장 깊은 곳엔… 그림자가 고여 있다. 별에서 떨어진 쇠도… 크르르… 욕심내지 마라, 산 자여.'],
+ ['me','경고는 고맙게 받지. 하지만 쓸모 있는 건 캐 가겠다.'],
+ ['nar','그라크의 재가 바람에 흩어진다. 곡괭이 끝에서 희미하게 갱도의 냉기가 느껴진다.'],
+ ['nar','⛏️ 곡괭이를 얻었어요! 곡괭이를 가지고 있으면 광산에 들어갈 수 있어요.','-'] ];
+function pickStory(){ if(!me||!G.inGame)return; if(!me.tut)me.tut={}; if(!me.tut.sg)me.tut.sg={};
+  if(me.tut.sg.pick){ toast('⛏️ 곡괭이를 또 얻었어요','#e0c080'); return; }
+  if(stS){ later(1,pickStory); return; }   /* 다른 대화 중이면 끝난 뒤에 */
+  me.tut.sg.pick=1; saveChar(); const solo=G.mode==='solo'&&!G.coop; stS={ls:PICK_STORY,i:-1,kind:'pick',solo,pz:false,foe:'gk',full:'',n:0,ch:me};
+  const el=$('#sty'); el.hidden=false; el.classList.toggle('nb',!solo); if(solo){ stS.pz=true; G.paused=true; } for(const k in held)held[k]=false; joy.active=false; storyShow(0); }
 function storyEnd(){ const S=storyClose(); if(S&&S.kind==='pre'){ storyWait=false;
   if(G.mode!=='guest'&&(me.clear|0)>selStage&&!STAGES[selStage].raid&&G.inGame&&!G.allMode&&G.phase==='prep'&&G.wave===0&&G.stageIdx===selStage)startAllOut(); } }   /* 이미 깬 스테이지는 대화 뒤 바로 총공세 */
 $('#sty').addEventListener('click',e=>{ if(e.target.closest('#stSk')){ storySkip(); return; } storyNext(); });
