@@ -1411,6 +1411,17 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
 .lbn2{margin:0 0 10px;padding:8px 10px;border-radius:10px;border:1px solid var(--line2);background:rgba(255,255,255,.03);font-size:12px;line-height:1.65;color:var(--mute,#a89a86);text-align:left}.lbn2>div+div{margin-top:2px;padding-top:2px;border-top:1px dashed rgba(255,255,255,.08)}
 /* 누름 효과(Press-down): 버튼을 누르는 동안만 5% 작아지고 20% 어두워져요 — scale·filter 는 GPU가 처리해서 가볍고, 따로 도는 애니메이션이 없어요. :where 로 감싸서 버튼마다 따로 정한 :active 모양이 있으면 그쪽이 우선해요 (게임 중 HUD 버튼은 제외) */
 :where(button,.btn,[role="button"],.ccard,.tplot,.tinfo,.tcsb):where(:active):where(:not(:disabled)):where(:not(#hud *)){scale:.95;filter:brightness(.8);transition:scale .08s ease-out,filter .08s ease-out}
+#mineHud{position:absolute;right:10px;top:128px;width:132px;pointer-events:none;color:#f1e3c4;z-index:2}
+#mineHud .mhc{padding:8px 10px;border-radius:14px;background:rgba(10,8,6,.8);border:1px solid #6b5536;font-size:12px}
+#mineHud .mhr{display:flex;align-items:center;gap:8px}#mineHud .mhg{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none}
+#mineHud .mhg b{width:32px;height:32px;border-radius:50%;background:#120d09;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900}
+#mineHud .mhs{border-top:1px solid #3a2e20;margin-top:6px;padding-top:4px;font-size:11px;color:#a8957a}
+#mineHud .mhi{display:flex;align-items:center;gap:6px;margin-top:3px}#mineHud .mhi b{margin-left:auto;color:#ffe08a}
+.mdot{display:inline-block;flex:none;width:10px;height:10px;border-radius:3px;transform:rotate(45deg);box-shadow:0 0 4px rgba(0,0,0,.6)}
+#mineOut{pointer-events:auto;width:100%;margin-top:8px;padding:6px;font-size:12px;font-weight:800;border-radius:12px;border:1px solid #c9a04a;background:linear-gradient(#2a1f14,#15100b);color:#f1e3c4}
+.mres .mrw{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.04);margin-top:6px;font-size:14px}
+.mres .mrw b{margin-left:auto;color:#ffe08a}.mres .mrw s{text-decoration:none;color:#a8957a;font-size:12px;min-width:56px;text-align:right}
+.mres .mbar{height:8px;border-radius:5px;background:#1a1410;border:1px solid #5a4630;overflow:hidden;margin-top:4px}.mres .mbar>i{display:block;height:100%;background:linear-gradient(90deg,#c9a04a,#ffe08a)}
 </style>
 
 <nav id="dock" hidden>
@@ -1423,6 +1434,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
   <canvas id="cv"></canvas>
 
   <div id="hud" hidden>
+    <div id="mineHud" hidden><div class="mhc"></div><button type="button" id="mineOut">🚪 광산 나가기</button></div>
     <div class="tl">
       <div class="meRow">
         <div class="lv" id="hLv">1</div>
@@ -1478,7 +1490,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.1.0671</div>
+    <div class="ver" id="verT">v0.7.1.0672</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -5015,6 +5027,7 @@ function cycleSpd(){ if(!G.inGame)return; if(G.mode==='guest'){ toast('배속은
 $('#bSpd').addEventListener('pointerdown',e=>{ e.preventDefault(); cycleSpd(); });
 $('#bBas').addEventListener('pointerdown',e=>{ e.preventDefault(); if(!G.train)return; G.trNoAtk=!G.trNoAtk; sfx('ui'); trUi(); toast(G.trNoAtk?'⚔️ 기본공격 꺼짐 — 스킬만 써요':'⚔️ 기본공격 켜짐','#e0c080'); });
 $('#trHome').onclick=()=>{ if(G.train)quitToTitle(); };
+$('#mineOut').onclick=()=>{ if(G.mine){ sfx('ui'); mineResult(); } };   /* 광산 나가기 → 채굴 결과 창 */
 $('#trPet').onclick=()=>{ if(!G.train)return; const L=[0,3,7,10,15], cur=G.trPet?G.trPet.lv:0, nx=L[(L.indexOf(cur)+1)%L.length]; G.trPet=nx?{id:'trio',xp:petT('trio')[nx-1],lv:nx}:null; G.trNoPet=false; PET.on=false; petStart(); sfx('ui'); toast(nx?`🐾 삼남매 펫 Lv${nx} (훈련장 전용 · 저장 안 됨)`:'🐾 삼남매 펫 해제','#c8a8ff'); };
 $('#trMn').onclick=()=>{ if(!G.train)return; const n=minions.length; minions.length=0; G.trNoPet=true; PET.on=false; sfx('ui'); toast(`💨 소환수 ${n}마리와 펫을 없앴어요`,'#e0c080'); };
 $('#trPp').onclick=()=>{ if(!G.train)return; sfx('ui'); pprSet(PPR?1:0); toast(PPR?'🥨 빼빼로 미적용 OFF (새 밸런스)':'🥨 빼빼로 미적용 ON (패치 이전)','#e0c080'); };
@@ -6983,7 +6996,7 @@ function noticeShow(){ if(lsGet(NT_KEY)===ntDay())return;
 window.__noticeShow=noticeShow;
 function prepMe(){ me=loadChar(selId); me.D=derive(me); spawnMe(); }
 function resetWorld(){
-  G.mine=null; GB=null; G.gobRoll=false; G.train=0; G.trNoAtk=false; G.trNoPet=false; G.trPet=null; trUi();
+  G.mine=null; { const mh=$('#mineHud'); if(mh)mh.hidden=true; } GB=null; G.gobRoll=false; G.train=0; G.trNoAtk=false; G.trNoPet=false; G.trPet=null; trUi();
   storyStop(); G.stZ=0; G.aim=null; G.lostBoss=false; G.castle=null; G.lostCastle=false; G.awz=null; G.awc=null; { const ac=$('#awCut'); if(ac)ac.classList.remove('on'); for(const q of ['#casAl','#casMs']){ const z=$(q); if(z)z.classList.remove('on'); } const hc=$('#hCastle'); if(hc)hc.classList.remove('atk'); } if(me){ me.erode=me.hblk=me.mblk=me.hbStrict=me.bleed=me.bleedN=0; me.hpLk=me.mpLk=null; }
   projs.length=zones.length=timers.length=parts.length=nums.length=ground.length=efx.length=0; G.casWreck=[]; G.casDvLv={};   /* 6스테이지 공성탑 잔해는 다른 스테이지로 넘어가지 않게 */
   G.mobs=[]; G.mobMap=new Map(); G.gemDone=false; G.stKills=0; G.stDrops=0; G.stCap=0; G.runT=0; G.stGot=[0,0,0,0,0]; G.stGem=null; G.sib=0; G.endShown=false; G.clrDone=false; alClear(); G.stRev=0; G.stTaken=0; G.stGold0=me?(me.gold|0):0; G.paused=false; G.bt=null; G.shake=0;
@@ -7029,7 +7042,7 @@ function startMine(){
   G.allMode=false; G.allQ=[]; G.fires=[]; G.freeRev=1; G.hcWhy=''; me.rvGiven=0; me.seenRg=0; me.out=false; me.rvT=0;
   G.gemDone=true; G.wave=0; G.skipUsed=true; G.phase='train'; G.timer=0; G.mobs.length=0; G.ev=[]; G.spawnQ=0; G.lastSq=-1; G.endShown=false; G.coop=false;
   G.waveSides=[]; G.nextSides=[]; G.laneShow=[];
-  G.mine={fi:1,slots:[],got:{},pc:0}; mineFloor(1,null);
+  G.mine={fi:1,slots:[],got:{},pc:0,t0:performance.now(),xpGot:0,brk:0}; mineFloor(1,null); mineHud();
   if(!isPick(me.eq.weapon))later(1.2,()=>{ if(G.mine)toast('⛏️ 곡괭이를 장착해야 광석을 캘 수 있어요','#e0a070'); }); }
 function mineFloor(fi,from){ const M=G.mine, F=MINE_FL[fi]; M.fi=fi; M.slots=[]; G.mobs.length=0; projs.length=zones.length=ground.length=0;
   setTheme(F.th|0);
@@ -7038,7 +7051,7 @@ function mineFloor(fi,from){ const M=G.mine, F=MINE_FL[fi]; M.fi=fi; M.slots=[];
   if(!F.hub){ const n=F.cnt||12, pts=[], far=(x,y,d)=>pts.every(p=>hyp(p[0]-x,p[1]-y)>=d);
     for(let i=0,g=0;i<n&&g<600;g++){ const x=rand(110,890), y=rand(170,830); if(!far(x,y,105)||hyp(x-st[0],y-st[1])<120||hyp(x-MINE_PT.up[0],y-MINE_PT.up[1])<150||hyp(x-MINE_PT.dn[0],y-MINE_PT.dn[1])<150)continue;
       pts.push([x,y]); const sl={k:F.ores[i%F.ores.length],x,y,t:0,m:null}; M.slots.push(sl); mineSpawn(sl,true); i++; } }
-  M.pc=1.2; banner('⛏️ '+F.n,F.hub?'위·아래 포탈로 층을 옮길 수 있어요':'광석: '+F.ores.map(k=>`${ORES[k].n}(Lv${ORES[k].lv})`).join(' · ')); }
+  M.pc=1.2; mineHud(); banner('⛏️ '+F.n,F.hub?'위·아래 포탈로 층을 옮길 수 있어요':'광석: '+F.ores.map(k=>`${ORES[k].n}(Lv${ORES[k].lv})`).join(' · ')); }
 function mineSpawn(sl,quiet){ const O=ORES[sl.k], m=spawnMob(0,sl.x,sl.y,false); Object.assign(m,{ore:sl.k,slot:sl,scare:1,hx:sl.x,hy:sl.y,x:sl.x,y:sl.y,hp:O.hp,max:O.hp,dmg:0,xp:0,spd:0,cd:99,r:24,elite:0,boss:0,seed:Math.random()*1000,flash:0});
   sl.m=m; sl.t=0; if(!quiet){ efx.push({k:'ring',x:sl.x,y:sl.y,r0:6,r1:40,t:0,life:.35,col:O.c,w:5}); } }
 function oreHit(m,fx){ if(m.dead||(fx&&(fx.mk||fx.pet||fx.sm)))return; const O=ORES[m.ore], M=G.mine||{};
@@ -7048,13 +7061,26 @@ function oreHit(m,fx){ if(m.dead||(fx&&(fx.mk||fx.pet||fx.sm)))return; const O=O
   if(m.hp<=0)oreBreak(m); }
 function oreBreak(m){ const O=ORES[m.ore], M=G.mine; if(!M||m.dead)return; m.dead=true; m.hp=0;
   const P=PICKS[(me.eq.weapon&&me.eq.weapon.pk)|0]||PICKS[1], n=Math.max(1,Math.round(ri(1,3)*P.y));
-  me.ore[m.ore]=(me.ore[m.ore]|0)+n; M.got[m.ore]=(M.got[m.ore]|0)+n;
+  me.ore[m.ore]=(me.ore[m.ore]|0)+n; M.got[m.ore]=(M.got[m.ore]|0)+n; M.brk=(M.brk|0)+1;
   burst(m.x,m.y,O.c,14,220); burst(m.x,m.y,'#8a8478',10,180); sfx('kill'); addNum(m.x,m.y-34,`+${n} ${O.n} 조각`,O.c,true);
   const xp=mineXp(O,me); if(xp>0)mineAddXp(xp); else if(T-(M.tg||-9)>4){ M.tg=T; addNum(me.x,me.y-52,'회색 광석 · 경험치 없음','#9a9a9a',false); }
-  if(m.slot){ m.slot.m=null; m.slot.t=MINE_RESP; } saveChar(); }
-function mineAddXp(x){ const s=me.mine; s.xp+=x; addNum(me.x,me.y-52,`+${x} 광부 경험치`,'#9fd0ff',false); let up=0;
+  if(m.slot){ m.slot.m=null; m.slot.t=MINE_RESP; } saveChar(); mineHud(); }
+function mineAddXp(x){ const s=me.mine; s.xp+=x; if(G.mine)G.mine.xpGot=(G.mine.xpGot|0)+x; addNum(me.x,me.y-52,`+${x} 광부 경험치`,'#9fd0ff',false); let up=0;
   while(s.lv<MINE_MAXLV&&s.xp>=mineNeed(s.lv)){ s.xp-=mineNeed(s.lv); s.lv++; up=1; }
   if(s.lv>=MINE_MAXLV)s.xp=0; if(up){ banner('⛏️ 광부 레벨 업!',`광부 Lv ${s.lv}`); sfx('lvl'); efx.push({k:'ring',x:me.x,y:me.y,r0:10,r1:70,t:0,life:.5,col:'#e0c080',w:8}); } }
+function mineHud(){ const el=$('#mineHud'), M=G.mine; if(!el)return; if(!M||!me){ el.hidden=true; return; } el.hidden=false;   /* 광산 안 오른쪽 카드 (값이 바뀔 때만 다시 그림) */
+  el.style.top=Math.round((LAND?8:4)+mmW()*WH/WW+8)+'px';
+  const L=minerLv(me), p=L>=MINE_MAXLV?100:Math.min(99,Math.floor(me.mine.xp/mineNeed(L)*100)), got=Object.keys(M.got).filter(k=>M.got[k]>0);
+  el.firstElementChild.innerHTML=`<div class="mhr"><div class="mhg" style="background:conic-gradient(#ffd060 ${p*3.6}deg,#2a2018 0)"><b>${L}</b></div><div style="font-size:11px;line-height:1.3"><b style="font-size:12px">광부</b><br><span style="color:#c9b48a">${p}%</span></div></div>
+   <div class="mhs">이번 획득</div>${got.length?got.map(k=>`<div class="mhi"><i class="mdot" style="background:${ORES[k].c}"></i>${ORES[k].n}<b>+${M.got[k]}</b></div>`).join(''):'<div class="mhi" style="color:#6a5a48">아직 없어요</div>'}`; }
+function mineResult(){ const M=G.mine; if(!M||!me)return; const F=MINE_FL[M.fi], L=minerLv(me), p=L>=MINE_MAXLV?100:Math.min(99,Math.floor(me.mine.xp/mineNeed(L)*100)), sec=Math.round((performance.now()-M.t0)/1000), got=Object.keys(M.got).filter(k=>M.got[k]>0);
+  modal(`<div class="mres"><h3 style="text-align:center;margin:0">⛏️ 채굴 결과</h3><div style="text-align:center;color:#a8957a;font-size:12px;margin-top:2px">${F.n} · ${sec>=60?Math.floor(sec/60)+'분 ':''}${sec%60}초 · 광석 ${M.brk|0}개</div>
+   <div style="margin-top:12px;font-size:13px;font-weight:800;display:flex"><span>광부 Lv ${L}</span><span style="margin-left:auto;color:#9fd0ff">+${M.xpGot|0} 경험치</span></div><div class="mbar"><i style="width:${p}%"></i></div>
+   <div style="margin-top:12px;font-size:12px;color:#c9b48a;display:flex"><span>얻은 조각</span><span style="margin-left:auto">이번 / 보유</span></div>
+   ${got.length?got.map(k=>`<div class="mrw"><i class="mdot" style="background:${ORES[k].c}"></i>${ORES[k].n} 조각<b>+${M.got[k]}</b><s>${(me.ore&&me.ore[k])|0}개</s></div>`).join(''):'<div class="mrw" style="color:#8a7a68">이번에 얻은 조각이 없어요</div>'}
+   <div class="row2" style="margin-top:16px"><button class="btn" id="mrAgain">🔁 다시 들어가기</button><button class="btn primary" id="mrOut">🏠 나가기</button></div></div>`,m=>{
+    m.querySelector('#mrOut').onclick=()=>{ closeModal(); quitToTitle(); };
+    m.querySelector('#mrAgain').onclick=async()=>{ closeModal(); await quitToTitle(); startMine(); }; }); }
 function mineTick(dt){ const M=G.mine; if(!M||!me)return;
   for(const sl of M.slots)if(!sl.m&&sl.t>0){ sl.t-=dt; if(sl.t<=0)mineSpawn(sl); }   /* 다 캔 자리는 25초 뒤 다시 생겨요 */
   if(!me.dead&&me.atkCd<=0&&isPick(me.eq.weapon)){ let o=null,bd=1e9; for(const m of G.mobs){ if(m.dead||!m.ore||minerLv(me)<ORES[m.ore].lv)continue; const d=hyp(m.x-me.x,m.y-me.y)-m.r; if(d<bd){bd=d;o=m;} } if(o&&bd<=atkRg(me)+6)tryUse('atk',true); }   /* 자동 채굴: 캘 수 있는 광석이 닿으면 기본 공격 */
@@ -7519,7 +7545,7 @@ $('#bStart').onclick=()=>{ if(G.mode!=='host')return; ally=null; const gp=others
 $('#bLeave').onclick=()=>quitToTitle();
 function startGuestGame(pr){ dmgReset(); G.potN=0; resetWorld(); G.phase=pr.ph; toast('게임이 시작됐어요'); }
 async function quitToTitle(){
-  G.mine=null; G.train=0; G.trNoAtk=false; G.trNoPet=false; G.trPet=null; trUi(); storyStop(); if(autoMode)setAuto(0,true); setSpd(false); G.inGame=false; G.phase='title'; G.aim=null; saveChar(); ally=null; autoBuyShop(); if(me){ const pl=G.mode==='guest'?-1:(G.stageIdx|0); selStage=Math.max(0,Math.min(STAGES.length-1,G.firstClr?(me.clear|0):pl>=0?Math.min(pl,me.clear|0):(me.clear|0)-1)); G.firstClr=false; }   /* 방금 처음 깼다면 다음 스테이지, 이미 깬 스테이지(또는 진 판)면 했던 스테이지 그대로, 손님은 가장 높이 깬 스테이지 */
+  G.mine=null; { const mh=$('#mineHud'); if(mh)mh.hidden=true; } G.train=0; G.trNoAtk=false; G.trNoPet=false; G.trPet=null; trUi(); storyStop(); if(autoMode)setAuto(0,true); setSpd(false); G.inGame=false; G.phase='title'; G.aim=null; saveChar(); ally=null; autoBuyShop(); if(me){ const pl=G.mode==='guest'?-1:(G.stageIdx|0); selStage=Math.max(0,Math.min(STAGES.length-1,G.firstClr?(me.clear|0):pl>=0?Math.min(pl,me.clear|0):(me.clear|0)-1)); G.firstClr=false; }   /* 방금 처음 깼다면 다음 스테이지, 이미 깬 스테이지(또는 진 판)면 했던 스테이지 그대로, 손님은 가장 높이 깬 스테이지 */
   if(R){try{R.presence({role:null,pl:null,m:null,ev:null,h:null,bt:null}).catch(()=>{}); await R.leave();}catch(e){} R=null;}
   show('#sTitle'); renderClassCards(); rkSubmitAll();
 }
