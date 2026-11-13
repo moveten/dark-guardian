@@ -1476,7 +1476,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.6.5.0663</div>
+    <div class="ver" id="verT">v0.6.5.0664</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -4905,6 +4905,16 @@ const cv=$('#cv'), ctx=cv.getContext('2d');
 let VW=0,VH=0,DPR=1,ZOOM=1,camX=0,camY=0,_camT=0,_camOk=false;
 let LAND=false;   /* 폰 가로 모드(높이 500px 이하): 하단 메뉴 바를 없애고 버튼을 가장자리로 옮긴 화면 */
 const mmW=()=>LAND?84:Math.min(150,VW<560?VW*.26:VW*.2);   /* 미니맵 너비 */
+/* 터치 위치 어긋남 방지(아이폰): 화면이 몰래 몇 px 밀리거나 살짝 확대되면 손가락 위치와 눌리는 버튼이 어긋나요 — 밀림을 0으로 되돌리고, 앱으로 돌아올 때마다 크기를 다시 맞추고, 두 손가락 확대 제스처는 막아요 */
+(()=>{ const vv=window.visualViewport; let tm=0;
+  const fix=()=>{ try{ if(window.scrollX||window.scrollY||document.documentElement.scrollTop||document.body.scrollTop){ window.scrollTo(0,0); document.documentElement.scrollTop=0; document.body.scrollTop=0; } }catch(e){} };
+  const back=()=>{ fix(); clearTimeout(tm); tm=setTimeout(()=>{ fix(); try{ resize(); }catch(e){} },120); };
+  addEventListener('scroll',fix,{passive:true});
+  if(vv){ vv.addEventListener('scroll',fix); vv.addEventListener('resize',back); }
+  addEventListener('pageshow',back); addEventListener('focus',back); addEventListener('orientationchange',back);
+  document.addEventListener('visibilitychange',()=>{ if(!document.hidden)back(); });
+  ['gesturestart','gesturechange','gestureend'].forEach(t=>document.addEventListener(t,e=>e.preventDefault(),{passive:false}));
+})();
 function resize(){DPR=Math.min(2,window.devicePixelRatio||1); LAND=matchMedia('(orientation:landscape) and (max-height:500px)').matches; document.body.classList.toggle('land',LAND); { const dk=$('#dock'), ap=$('#app'); const hh=(dk.hidden||LAND)?0:dk.offsetHeight; ap.style.bottom=hh+'px'; VW=innerWidth; VH=innerHeight-hh; } try{ const mw=mmW(); $('#toasts').style.top=Math.max(Math.round(mw*WH/WW+4+8),138)+'px';   /* 보스 체력바(제목 바로 아래) 밑에서 시작 */ }catch(e){}
   cv.width=Math.round(VW*DPR); cv.height=Math.round(VH*DPR); ZOOM=clamp(Math.min(VW,VH)/420,.68,1.35);}
 addEventListener('resize',resize); resize();
