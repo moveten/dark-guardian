@@ -1478,7 +1478,7 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.1.0669</div>
+    <div class="ver" id="verT">v0.7.1.0670</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1715,7 +1715,7 @@ const SK={
   {k:'healaura',lb:['초당회복'],e:'💚',n:'치유 오라',s:'치유',req:6,mp:0,cd:.3,el:'#9be38a',aura:1,d:l=>`반경 320 안의 나와 동료가 초당 ${V((1+.6*l).toFixed(1))} 회복`},
   {k:'hammer',lb:['망치','피해'],e:'🔨',n:'축복의 망치',s:'망치',req:12,mp:8,cd:4.5,el:'#ffe08a',d:l=>`나선형으로 도는 망치 4.5초 지속. 망치 ${V(HMN(l))}개 · 기본 피해 ${V(Math.round((16+13*l)*HMF(HMN(l))))}`},
   {k:'might',lb:['주는피해','공격속도','이동속도'],e:'💪',n:'신념의 오라',s:'신념',req:15,mp:0,cd:.3,el:'#ffb86b',aura:1,d:l=>{const b=mightBonus(l);return `반경 320 안의 나와 동료 주는 피해 +${V(b.dmg)}%, 공격 속도 +${V(b.ias)}%, 이동 속도 +${V(b.ms)}%`}},
-  {k:'guard',lb:['방어력'],e:'🛡️',n:'수호 오라',s:'수호',req:18,mp:0,cd:.3,el:'#8fb6ff',aura:1,d:l=>`반경 320 안의 나와 동료 방어력 +${V(30+6*l)}%`},
+  {k:'guard',lb:['받는 피해 감소'],e:'🛡️',n:'수호 오라',s:'수호',req:18,mp:0,cd:.3,el:'#8fb6ff',aura:1,d:l=>`반경 320 안의 나와 동료가 받는 피해 -${V(+(3+.6*l).toFixed(1))}%`},
   {k:'zeal',lb:['스킬피해','지속시간'],e:'🙏',n:'신앙 증폭',s:'증폭',req:24,mp:0,cd:0,el:'#ffd76a',passive:1,d:l=>`패시브: 팔라딘 스킬 피해 +${V(15+5*l)}%, 지속시간 +${V(10+4*l)}%`},
   {k:'divine',lb:['일반몬스터'],e:'🩸',n:'세크리파이스',s:'희생',req:90,mp:0,cd:100,el:'#ff4a4a',rg:400,d:l=>`[궁극기] 생명력과 마나를 절반으로 희생해, 필드 위 모든 적의 현재 생명력을 깎아요. 일반 몬스터 ${V(Math.round(Math.min(.9,.5+.02*(Math.max(1,l)-1))*100))}% · 최대 90%, 우두머리 25~40% 랜덤(페이즈 보스는 현재 페이즈 체력 기준). 35% 이상이면 ✨축복으로 올스탯 +30, 미만이면 올스탯 +10을 10초간 받아요. 내 생명력은 최소 1이 남아요`},
   {k:'judgment',lb:['피해','반경','성역피해'],e:'⚖️',n:'천벌',s:'천벌',req:30,mp:20,cd:15,el:'#fff7d6',rg:380,d:l=>`적 최대 5명에게 빛기둥, 기본 피해 ${V(110+50*l)}. 반경 ${RR(60,l)} 성역이 2초간 남아 0.5초마다 ${V(18+10*l)}`}],
@@ -2231,8 +2231,8 @@ function dexOk(k){ if(!DEXOK){ DEXOK=new Set(); DEX_SP.forEach(g=>g[2].forEach(x
 const dexN=(p,keys)=>dexKeysOf(keys,p).filter(k=>(p.dx&&p.dx[k]|0)>0).length;
 const dexSpN=p=>dexN(p,DEX_SP.flatMap(g=>g[2])), dexStN=p=>dexN(p,DEX_ST.flatMap(g=>g[2]));
 const DEX_TOT=DEX_SP.reduce((n,g)=>n+g[2].length,0)+DEX_ST.reduce((n,g)=>n+g[2].length,0);   /* 도감 전체 칸 수(유니크 + 세트) */
-const dexTot=p=>dexSpN(p)+dexStN(p), dexNew=p=>!!p&&(p.dxs===undefined||dexTot(p)>(p.dxs|0)||dexNewN(p)>0||dexPetReady(p)),
-  dexPetReady=p=>!!p&&Object.values(DEX_PET).some(g=>!(p.tpt&&p.tpt[g.id])&&dexPetDone(g.id,p)),   /* 도감 세트를 완성했는데 아직 안 받은 펫 보상이 있으면 도감 버튼에 NEW */ dexNewN=p=>p&&p.dxn?Object.keys(p.dxn).length:0;   /* 시작화면 도감 버튼 NEW: 처음 한 번 + 도감을 연 뒤 새로 채워졌을 때 */
+const dexTot=p=>dexSpN(p)+dexStN(p), dexNew=p=>!!p&&((p.dxs!==undefined&&dexTot(p)>(p.dxs|0))||dexNewN(p)>0||dexPetReady(p)),   /* 처음(도감을 한 번도 안 연 상태)엔 NEW 안 띄움 */
+  dexPetReady=p=>!!p&&Object.values(DEX_PET).some(g=>!(p.tpt&&p.tpt[g.id])&&dexPetDone(g.id,p)),   /* 도감 세트를 완성했는데 아직 안 받은 펫 보상이 있으면 도감 버튼에 NEW */ dexNewN=p=>p&&p.dxn?Object.keys(p.dxn).length:0;   /* 시작화면 도감 버튼 NEW: 도감을 연 뒤 새로 채워졌을 때 */
 function dexAdd(p,it){ if(!p||!it||it.mat||!it.sp||!dexOk(it.sp))return; const had=dexSpN(p); if(!p.dx)p.dx={}; if(!(p.dx[it.sp]|0)){ if(!p.dxn)p.dxn={}; p.dxn[it.sp]=1; } p.dx[it.sp]=Math.min(9999,(p.dx[it.sp]|0)+1);   /* 처음 얻은 칸은 dxn에 표시 → 도감 안에서 NEW */
  
   if(p===me)ttfAuto(p);
@@ -3781,7 +3781,7 @@ function dropItem(it,x,y){
   if(it.rar>=2&&G.inGame){ const gx=ground[ground.length-1].x, gy=ground[ground.length-1].y, col=RARC[it.rar]; efx.push({k:'ring',x:gx,y:gy+6,r0:6,r1:it.rar>=4?96:it.rar===3?70:46,t:0,life:it.rar>=3?.55:.4,col,w:it.rar>=3?7:4}); if(it.rar>=3){ efx.push({k:'ring',x:gx,y:gy+6,r0:4,r1:it.rar>=4?60:40,t:0,life:.4,col:'#fff4d0',w:3}); impact(gx,gy,it.rar>=4?'255,80,120':'255,190,80',it.rar>=4?150:110); } burst(gx,gy,col,it.rar>=4?26:it.rar===3?16:7,it.rar>=3?240:160); }   /* 레어 이상: 떨어질 때 충격파 고리와 빛 알갱이 */
   if(ground.length>90){const i=ground.findIndex(g=>g.it.rar===0&&!isGem(g.it)); ground.splice(i>=0?i:Math.max(0,ground.findIndex(g=>!isGem(g.it))),1); G.stCap=(G.stCap|0)+1;}
 }
-const gemP=S=>{ const c=Math.max(1,(S&&S.icap)|0); return Math.min(100,Math.max(12,Math.abs(c-79)+3))/100; };   /* 스테이지 우두머리 보석 드롭 확률: max(12, |아이템 레벨 상한 − 79| + 3)% */
+const gemP=S=>{ const c=Math.max(1,(S&&S.icap)|0); return Math.min(100,Math.max(10,Math.abs(c-79))-1)/100; };   /* 스테이지 우두머리 보석 드롭 확률: max(10, |아이템 레벨 상한 − 79|) − 1 % */
 function gemDrop(tier,x,y){ const gk=pick(GEM_KINDS), it=mkGem(gk,tier); dropItem(it,x+rand(-26,26),y+rand(-26,26)); const g=ground[ground.length-1], col=GEM_C[gk];
   toast(`💎 ${it.name}이(가) 떨어졌어요!`,col,'drop'); sfx('rare'); if(G.inGame&&g){ efx.push({k:'ring',x:g.x,y:g.y+6,r0:6,r1:58,t:0,life:.5,col,w:5}); burst(g.x,g.y,col,10,200); } }
 function gainXp(xp){
@@ -3817,8 +3817,8 @@ function critRoll(v){const c=!G.train&&Math.random()*100<me.D.crit;   /* 훈련�
 function physDmg(mult,basic){const D=me.D; const wr=ri(D.wmn,D.wmx), w=wr+D.dmg, pm=1+D.str/100+D.dmgPct/100+buffDmg(), bm=buffMul(), wk=PPR&&!basic?1+(D.wmn+D.wmx)/2/450:1; const r=critRoll(w*pm*mult*bm*wk); if(G.train)trMk(r,'p',[['W',wr],['A',D.dmg],['B',pm],['m',mult],['U',bm],['T',wk]]); return r;}   /* 🥨 빼빼로: 스킬(기본 공격 제외)에 무기 기술 보정 (1+무기 평균/450) */
 const ENEM=.003; /* 에너지 1당 마법 피해 +0.3% */
 function spellDmg(base,noPct){const D=me.D; const sm=1+D.ene*ENEM+(noPct?0:D.dmgPct/100)+buffDmg(), wm=1+((D.wmn+D.wmx)/2)/35, tm=D.sp.tome?1.3:1, bm=buffMul(); const r=critRoll(base*sm*wm*tm*bm); if(G.train)trMk(r,'s',[['b',base],[noPct?'D':'C',sm],['E',wm],['F',tm],['U',bm]]); return r;}
-function guardMul(){let g=0; if(me.aura==='guard')g=Math.max(g,(30+6*skLv(me,'guard'))/100);
-  if(ally&&!ally.lobby&&!ally.dead&&ally.aura==='guard'&&hyp(ally.x-me.x,ally.y-me.y)<320)g=Math.max(g,(30+6*ally.al)/100); return 1+g;}
+function guardRed(){let g=0; if(me.aura==='guard')g=Math.max(g,(3+.6*skLv(me,'guard'))/100);   /* 수호 오라: 받는 피해 -(3+0.6×Lv)% (나·동료 중 높은 쪽 하나) */
+  if(ally&&!ally.lobby&&!ally.dead&&ally.aura==='guard'&&hyp(ally.x-me.x,ally.y-me.y)<320)g=Math.max(g,(3+.6*ally.al)/100); return Math.min(.9,g);}
 /* 방어력·피해감소를 무시하는 고정 피해 (최대 생명력의 pct) */
 const tkAdd=n=>{ if(n>0&&G.inGame)G.stTaken=(G.stTaken||0)+n; };   /* 이번 판에 내가 받은 누적 피해(클리어 화면 표시) */
 function spinHitMe(pct){ fixDmg(pct,'💥','#ff6a3a'); if(me.dead||me.hp<=0||me.god>0)return; const b=CAS_CFG.spin.blk; me.hblk=Math.max(me.hblk||0,b); me.hpLk=me.hp; if(T-(me._sbN||-9)>1){ me._sbN=T; addNum(me.x,me.y-66,'💔 '+b+'초 봉쇄 · 물약·치유 오라만 회복','#ff8ab0',true); } }   /* 방패·철퇴 회전에 맞으면 3초 회복 봉쇄 */
@@ -3846,8 +3846,8 @@ function applyStatus(kind,dur){ if(me.dead||me.god>0)return;
 function takeDmg(raw,fire,rh){
   if(me.dead||G.phase==='win'||G.phase==='clear'||me.god>0)return;
   if(!fire&&me.D.blk>0&&Math.random()*100<me.D.blk){ if(me.cls==='pal'&&skLv(me,'bulwark'))me.mp=Math.min(me.D.maxMp,me.mp+3);  addNum(me.x,me.y-30,'🛡️ 막기!','#9fd0ff',true); spark(me.x,me.y,'#9fd0ff',12); efx.push({k:'ring',x:me.x,y:me.y,r0:8,r1:34,t:0,life:.3,col:'#9fd0ff',w:5}); sfx('block'); if(me.D.sp&&(me.D.sp.hoff_pal||me.D.sp.awoff_pal||me.D.sp.csoff_pal)){ const q=nearestMob(me.x,me.y,160), cs=!!me.D.sp.csoff_pal, aw=!!me.D.sp.awoff_pal; if(q&&raw>0)hitMob(q,{v:raw*(cs?.7:aw?.6:.5),crit:false},0,false,cs?{raw:1,stun:.8}:aw?{raw:1,stun:.5}:{raw:1}); } return; }
-  const def=me.D.def*guardMul(), red=Math.min(rh&&!fire?RAID_RED:.8,def/(def+50+G.wave*8));
-  let d=raw*lvPen().tk*gearPen().tk*(1-red)*(1-(me.D.dr||0))*(me.buffs.barrier&&me.buffs.barrier.t>0?1-me.buffs.barrier.v:1)*drMul(); if(me.D.sp&&me.D.sp.martyr&&me.hp<me.D.maxHp*.5) d*=.6; if(me.erode>0)d*=1.5; if(G.stg&&G.stg.raid===3)d*=casDevDef(); if(me.D.sp&&me.D.sp.hoff_druid&&me.form) d*=.9; if(me.D.sp&&me.D.sp.awoff_druid&&me.form) d*=.88; if(me.D.sp&&me.D.sp.csoff_druid&&me.form) d*=.85;
+  const def=me.D.def, red=Math.min(rh&&!fire?RAID_RED:.8,def/(def+50+G.wave*8));
+  let d=raw*lvPen().tk*gearPen().tk*(1-red)*(1-(me.D.dr||0))*(1-guardRed())*(me.buffs.barrier&&me.buffs.barrier.t>0?1-me.buffs.barrier.v:1)*drMul(); if(me.D.sp&&me.D.sp.martyr&&me.hp<me.D.maxHp*.5) d*=.6; if(me.erode>0)d*=1.5; if(G.stg&&G.stg.raid===3)d*=casDevDef(); if(me.D.sp&&me.D.sp.hoff_druid&&me.form) d*=.9; if(me.D.sp&&me.D.sp.awoff_druid&&me.form) d*=.88; if(me.D.sp&&me.D.sp.csoff_druid&&me.form) d*=.85;
   { const ms=skLv(me,'mshield'); if(ms&&me.mp>0&&d>0){ const sh=Math.min(.65,.2+.02*ms), cost=Math.max(.25,.9-.02*ms), ab=Math.min(d*sh,me.mp/cost); me.mp-=ab*cost; d-=ab; if(ab>=1){ addNum(me.x+10,me.y-38,Math.round(ab),'#6fb0ff',false); efx.push({k:'ring',x:me.x,y:me.y,r0:10,r1:30,t:0,life:.25,col:'#7fb4ff',w:4}); } } }
   if(me.csBar>0&&d>0){ me.csBar--; addNum(me.x,me.y-40,`🏰 방벽 (${me.csBar}회 남음)`,'#f0d29a',true); spark(me.x,me.y,'#f0d29a',10); efx.push({k:'ring',x:me.x,y:me.y,r0:10,r1:40,t:0,life:.3,col:'#f0d29a',w:6}); sfx('block'); if(me.csBar<=0)me.csBar=0; return; }   /* 성채의 갑주 방벽 */
   tkAdd(d); me.hp-=d; me.hurt=.15; sfx('hurt'); voiceHurt(d); G.shake=Math.max(G.shake,.2);
@@ -6605,19 +6605,21 @@ function rkItemDetail(row,k,back){
     <div class="row2" style="margin-top:10px"><button class="btn" id="rkBack">← 장비 보기</button><button class="btn primary" id="rkNo">${back==='close'?'닫기':'랭킹으로'}</button></div>`,m=>{
     m.onclick=e=>{ if(e.target===m)rkGo(back); }; m.querySelector('#rkBack').onclick=()=>rkProfile(row,back); m.querySelector('#rkNo').onclick=()=>rkGo(back); });
 }
+const rkSeen=new Set();   /* 이번에 연 랭킹 창에서 서버로부터 새로 받은 탭 */
 let rkKeep=null;   /* 랭킹에서 프로필을 열기 직전의 탭·스크롤 위치 — '랭킹으로' 돌아오면 보던 자리 그대로 */
 function openRank(mode0){
   let mode=RKMODES[mode0]?mode0:'lvl'; const mine=new Set(charIds()); let want=(rkKeep&&rkKeep.mode===mode)?rkKeep.top:null;
   const TABS=[['lvl','⭐ 레벨'],['ta','⏱️ 타임어택'],['hc','💀 하드코어']], TABS2=[['recent','⏰ 최근활동'],['clr','🏁 클리어']];   /* 3번째 칸은 진행 대신 하드코어, 2번째 줄은 관리자 전용 */
   if((mode==='recent'||mode==='clr')&&!rsOn())mode='lvl'; if(mode==='stage')mode='lvl';
+  if(!rkKeep)rkSeen.clear();   /* 랭킹 창을 새로 열면 탭마다 처음 볼 때 서버에서 새로 받아요 (프로필 보고 돌아온 건 제외) */
   modal(`<h3>🏆 랭킹</h3><div class="rktabs">${TABS.map(([k,l])=>`<button data-m="${k}" aria-pressed="${k===mode}">${l}</button>`).join('')}</div>${rsOn()?`<div class="rktabs">${TABS2.map(([k,l])=>`<button data-m="${k}" aria-pressed="${k===mode}">${l}</button>`).join('')}</div>`:''}<div class="rklist" id="rkBox"><p class="meta">불러오는 중…</p></div><div class="row2"><button class="btn" id="rkRe" disabled>🔄 새로고침(59s)</button><button class="btn" id="rkNo">닫기</button></div><p class="meta" style="margin:8px 0 0;font-size:11.5px">내 캐릭터는 하이라이트 표시 됩니다. 실시간 정보와 일부 오차가 있을 수 있습니다.</p>`,m=>{
     const box=m.querySelector('#rkBox'); let seq=0;
     const rowHtml=(r,i,own)=>{ const c=CLASSES[r.cls]?r.cls:'war'; return `<button class="rkrow${own?' own':''}${i<3&&mode!=='recent'?' top':''}${mode==='hc'&&r.dead_at?' dead':''}" data-i="${i}"><span class="rkn">${i<3&&mode!=='recent'?['🥇','🥈','🥉'][i]:i+1}</span><span class="rke"><img src="img/cls_${c}.png" alt="${CLSE[c]}" loading="lazy" decoding="async"></span><span class="rkm"><b>${mode==='hc'&&r.dead_at?'💀 ':''}${esc(String(r.name||CLASSES[c].n).slice(0,8))}${rkTtChip(r)}</b><small>${rkSub(mode,r)}</small></span><span class="rkv">${mode==='ta'?`<b class="rks">${esc(r.clear>0?STAGES[Math.min(STAGES.length,r.clear)-1].id+' 클리어':'-')}</b><span class="rkt">${esc(rkVal(mode,r))}</span>`:esc(rkVal(mode,r))}</span><span class="rkc">›</span></button>`; };
     const load=async(force)=>{ const my=++seq; rkSubmitAll(false);
-      const c0=rkCacheGet(mode); if(c0&&!force){ show(c0.rows,false,c0.t); if(Date.now()-c0.t<RK_TTL)return; } else if(box.querySelector('.rkrow')){ box.style.opacity='.5'; box.style.pointerEvents='none'; box.style.transition='opacity .15s'; }   /* 🔄: 창·목록은 그대로 두고 흐리게만 → 새 내용이 오면 목록 안쪽만 바꿔요 */
+      const c0=rkCacheGet(mode); if(c0&&!force){ show(c0.rows,false,c0.t); if(rkSeen.has(mode))return; }   /* 이번에 연 창에서 이미 새로 받은 탭이면 저장본 그대로 · 아니면 저장본을 먼저 보여 주고 바로 새로 받아요 */ else if(box.querySelector('.rkrow')){ box.style.opacity='.5'; box.style.pointerEvents='none'; box.style.transition='opacity .15s'; }   /* 🔄: 창·목록은 그대로 두고 흐리게만 → 새 내용이 오면 목록 안쪽만 바꿔요 */
       else box.innerHTML='<p class="meta">불러오는 중…</p>';
       let rows,local=false,t=Date.now();
-      try{ const r=await rkLoad(mode,true); if(my!==seq)return; rows=r.rows; t=r.t; }
+      try{ const r=await rkLoad(mode,true); if(my!==seq)return; rows=r.rows; t=r.t; rkSeen.add(mode); }
       catch(e){ if(my!==seq)return; if(c0&&!force){ box.style.opacity=''; box.style.pointerEvents=''; return; } local=true;
         rows=charIds().map(loadChar).filter(c=>c&&(c.kills|0)>0).map(rkLocal); if(mode!=='recent')rows=rows.filter(x=>mode==='hc'?x.hc:!x.hc); if(mode==='ta')rows=rows.filter(x=>x.clear>0&&rkCt(x)>0); if(mode==='clr')rows=rows.filter(x=>x.clear>0); rows.sort(mode==='recent'?((a,b)=>String(b.updated_at||'').localeCompare(String(a.updated_at||''))):mode==='stage'?rkStageCmp:mode==='ta'?rkTaCmp:(mode==='hc'||mode==='clr')?rkHcCmp:rkLvlCmp); }
       show(rows,local,t); };
@@ -6626,7 +6628,7 @@ function openRank(mode0){
       const y0=want!=null?want:box.scrollTop; want=null;
       if(!rows.length){ box.innerHTML='<p class="meta">아직 등록된 기록이 없어요. 먼저 사냥해 보세요!</p>'; return; }
       const hm=new Date(t||Date.now()), stamp=`${String(hm.getHours()).padStart(2,'0')}:${String(hm.getMinutes()).padStart(2,'0')}`;
-      box.innerHTML=(local?'<p class="meta" style="color:#e0a070">랭킹 서버에 연결하지 못했어요. (준비 중이거나 오프라인) 내 캐릭터만 보여요.</p>':'')+rows.map((r,i)=>rowHtml(r,i,mine.has(r.id))).join('')+(local?'':`<p class="meta" style="font-size:11px;text-align:center;margin:8px 0 0">${mode==='recent'?'열 때마다 새로 불러와요':'10분마다 갱신'} · 마지막 갱신 ${stamp}</p>`);
+      box.innerHTML=(local?'<p class="meta" style="color:#e0a070">랭킹 서버에 연결하지 못했어요. (준비 중이거나 오프라인) 내 캐릭터만 보여요.</p>':'')+rows.map((r,i)=>rowHtml(r,i,mine.has(r.id))).join('')+(local?'':`<p class="meta" style="font-size:11px;text-align:center;margin:8px 0 0">창을 열 때마다 새로 불러와요 · 마지막 갱신 ${stamp}</p>`);
       box.scrollTop=y0;
       box.querySelectorAll('.rkrow').forEach(b=>{ b.onclick=async()=>{ const r=rows[+b.dataset.i]; if(!r)return; rkKeep={mode,top:box.scrollTop};
         if(mine.has(r.id)){ const c=loadChar(r.id); if(c){ rkProfile(rkLocal(c),mode); return; } }
