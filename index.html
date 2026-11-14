@@ -1507,7 +1507,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.1.0717</div>
+    <div class="ver" id="verT">v0.7.1.0718</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1800,7 +1800,7 @@ const SYN={
 function synBonus(p,key){ let n=0; const m=SYN[p.cls]; if(!m)return 0; for(const src in m) if(m[src].includes(key)) n+=Math.floor((p.skills[src]||0)/3); return n; }
 const ATKRG={sorc:250,war:100,pal:100,necro:NRG(240),druid:210};
 function atkRg(o){ if(o===me&&me.buffs&&me.buffs.rage&&me.buffs.rage.t>0)return atkRg0(o)*1.25; return atkRg0(o); }
-function atkRg0(o){ if(G.mine&&o===me)return 100;   /* 광산: 모든 직업이 근접 거리에서 채굴 */
+function atkRg0(o){ if(G.mine&&o===me)return MINE_REACH;   /* 광산: 모든 직업이 근접 거리에서 채굴 */
   if(o.cls==='druid'){ const f=formOf(o); return f==='bear'?112:210; } return ATKRG[o.cls]; } /* 드루이드는 형태에 따라 기본 공격 사거리가 달라요 */
 /* ===== 6스테이지 수문장 카스텔 설정표 — 수치는 여기서만 고쳐요 (미공개 · 관리자 전용) ===== */
 const CAS_CFG={
@@ -3987,6 +3987,7 @@ function updateMe(dt){
   if(ml>0.08){ me.pickT=null; if(ml>1){mx/=ml;my/=ml;ml=1;} }
   else if(me.pickT){ const g=me.pickT; if(!ground.includes(g)){me.pickT=null;} else { const dx=g.x-me.x,dy=g.y-me.y,d=hyp(dx,dy);
       if(d<34){pickUp(g);me.pickT=null;} else {mx=dx/d;my=dy/d;ml=1;} } }
+  else if(autoMode>0&&G.mine&&!(me.stun>0||me.formLock>0)){ const a=mineAutoDir(); if(a){mx=a[0];my=a[1];ml=1;} }   /* 광산 AUTO: 근접 범위 안의 광석에만 다가가요 */
   else if(autoMode>0&&!G.mine&&!autoBlocked()&&!(me.stun>0||me.formLock>0)){ const a=autoDir(); if(a){mx=a[0];my=a[1];ml=1;} }   /* AUTO: 조이스틱·키보드·전리품 터치가 없을 때만 자동 이동 */
   if(hazards.length&&!me.dead){ for(const h of hazards){ if(hyp(me.x-h.x,me.y-h.y)<h.r*.9){ if(h.k==='lava'){ me.lavaT=(me.lavaT||0)-dt; if(me.lavaT<=0){ me.lavaT=.5; takeDmg(me.D.maxHp*.05*GZM,true); me.burn=.4; addNum(me.x,me.y-30,'🔥','#ff8a3a',false); } } else me.slowP=Math.max(me.slowP||0,.3); break; } } }
   { const sp=D.spd*(me.slowP>0?.5:1)*(me.erode>0?.6:1)*(me.buffs.rage&&me.buffs.rage.t>0?1+me.buffs.rage.ms:1)*(me.buffs.fury&&me.buffs.fury.t>0&&me.buffs.fury.ms?1+me.buffs.fury.ms:1)*(me.buffs.hf&&me.buffs.hf.t>0?1+me.buffs.hf.ms:1), kv=1-Math.exp(-dt*(ml>0.08?20:26)); me.vx=(me.vx||0)+((ml>0.08?mx*sp:0)-(me.vx||0))*kv; me.vy=(me.vy||0)+((ml>0.08?my*sp:0)-(me.vy||0))*kv; if(Math.abs(me.vx)<1)me.vx=0; if(Math.abs(me.vy)<1)me.vy=0;
@@ -4680,7 +4681,7 @@ function castSkill(o,key,real,tx,ty,lv,tgt){
   if(o.cls==='sorc'&&key!=='atk'&&key!=='fireball'&&key!=='armageddon')fxSpr(9,0,7,o.x,o.y+16,88,.5);
   switch(key){
   case 'atk':
-    if(G.mine&&o===me){ efx.push({k:'swing',o,a:ang,t:0,life:.2,col:'#c9b48a'}); if(real){ const m=nearestMob(o.x,o.y,105); if(m)hitMob(m,{v:1},0,false,BASICFX); } break; }   /* 광산: 원거리 직업도 투사체 없이 가까이서 채굴 */
+    if(G.mine&&o===me){ efx.push({k:'swing',o,a:ang,t:0,life:.2,col:'#c9b48a'}); if(real){ const m=nearestMob(o.x,o.y,MINE_REACH+8); if(m)hitMob(m,{v:1},0,false,BASICFX); } break; }   /* 광산: 원거리 직업도 투사체 없이 가까이서 채굴 */
     if(o.cls==='druid'){ druidAtk(o,real,ang,dx,dy); break; }
     if(C.melee){ efx.push({k:'swing',o,a:ang,t:0,life:.2,col:C.col});
       if(real){const m=nearestMob(o.x,o.y,105); if(m){ const hf=(o===me&&me.aura==='holyfire'), hl=hf?skLv(me,'holyfire'):0, am=hf?hfMul(hl):1; hitMob(m,physDmg(am*atkM(),1),0,false,BASICFX); if(hf){ const R=HFR(hl); efx.push({k:'ring',x:m.x,y:m.y,r0:10,r1:R,t:0,life:.25,col:'#ffb347',w:6}); for(const q of mobsIn(m.x,m.y,R).filter(q=>q!==m)) hitMob(q,physDmg(am*.6*atkM(),1),0,false,BASICFX); } }} }
@@ -7143,7 +7144,7 @@ function trSpawn(){ if(!G.inGame||!G.train)return;
     efx.push({k:'ring',x:m.x,y:m.y,r0:6,r1:50,t:0,life:.4,col:'#ffb347',w:6}); burst(m.x,m.y,'#ffb347',12,200); }
   sfx('boss'); toast('🎯 허수아비 7기가 나타났어요 (위쪽 1기는 반격 태세)','#e0c080'); }
 /* ===== 광산 모드 (관리자 시범) — 훈련장처럼 웨이브 없는 맵. 광석 = 움직이지 않는 몬스터(m.ore) ===== */
-const MINE_EXTRA=1.5, MINE_RESP=25, MINE_MAXLV=99, MINE_PT={up:[VX,92],dn:[VX,908]};   /* 다 캔 광석 리젠(초) · 광부 최대 레벨 · 위(지상 쪽)/아래(지하 쪽) 포탈 위치 */
+const MINE_REACH=30, MINE_AUTO_R=100, MINE_EXTRA=1.5, MINE_RESP=25, MINE_MAXLV=99, MINE_PT={up:[VX,92],dn:[VX,908]};   /* 다 캔 광석 리젠(초) · 광부 최대 레벨 · 위(지상 쪽)/아래(지하 쪽) 포탈 위치 */
 const mineNeed=L=>need(L);   /* 다음 광부 레벨까지 필요한 경험치 = 캐릭터 레벨업 경험치와 같은 표 */
 const oreHp=O=>Math.round(35*(1+.08*(O.lv-1)));   /* 자기 레벨과 같은 광부가 약 7번 때리면 부서지는 체력 */
 const oreXp0=O=>Math.max(1,Math.round(need(O.lv)/(6+.3*O.lv)));   /* 같은 레벨 광석을 (6 + 0.3×레벨)개 캐면 레벨업 */
@@ -7174,6 +7175,10 @@ function mineFloor(fi,from){ const M=G.mine, F=MINE_FL[fi]; M.fi=fi; if(me&&me.m
       pts.push([x,y]); M.slots.push({k:F.ores[i%F.ores.length],x,y,t:0,m:null}); i++; }
     for(const k of F.ores){ const L=M.slots.filter(q=>q.k===k).sort(()=>Math.random()-.5); L.slice(0,Math.max(1,Math.round(L.length/MINE_EXTRA))).forEach(q=>mineSpawn(q,true)); } }
   M.pc=1.2; mineHud(); banner('⛏️ '+F.n,F.hub?'위·아래 포탈로 층을 옮길 수 있어요':'광석: '+F.ores.map(k=>`${ORES[k].n}(Lv${ORES[k].lv})`).join(' · ')); }
+/* 광산 AUTO: 캘 수 있는 광석이 근접 범위(MINE_AUTO_R, 광석 가장자리 기준) 안에 있으면 그 광석에 붙을 때까지 다가가요 (MINE_REACH 안에서 채굴) */
+function mineAutoDir(){ if(!me||me.dead||!isPick(me.eq.weapon))return null; let o=null,bd=1e9;
+  for(const m of G.mobs){ if(m.dead||!m.ore||minerLv(me)<ORES[m.ore].lv)continue; const d=hyp(m.x-me.x,m.y-me.y)-m.r; if(d<bd){bd=d;o=m;} }
+  if(!o||bd>MINE_AUTO_R||bd<=MINE_REACH*.6)return null; const dx=o.x-me.x, dy=o.y-me.y, d=hyp(dx,dy); return d>1?[dx/d,dy/d]:null; }
 function mineSpawn(sl,quiet){ const O=ORES[sl.k], m=spawnMob(0,sl.x,sl.y,false); Object.assign(m,{ore:sl.k,slot:sl,scare:1,hx:sl.x,hy:sl.y,x:sl.x,y:sl.y,hp:oreHp(O),max:oreHp(O),dmg:0,xp:0,spd:0,cd:99,r:24,elite:0,boss:0,seed:Math.random()*1000,flash:0});
   sl.m=m; sl.t=0; if(!quiet){ efx.push({k:'ring',x:sl.x,y:sl.y,r0:6,r1:40,t:0,life:.35,col:O.c,w:5}); } }
 function oreHit(m,fx){ if(m.dead||(fx&&(fx.mk||fx.pet||fx.sm)))return; const O=ORES[m.ore], M=G.mine||{};
