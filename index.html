@@ -1496,7 +1496,7 @@ body.mining #mineOut{position:fixed;left:50%;transform:translateX(-50%);bottom:c
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.1.0693</div>
+    <div class="ver" id="verT">v0.7.1.0694</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -2641,7 +2641,7 @@ function loadChar(id){
       for(const k of EQSL){ const id=t[k]; if(id==null)continue; const ix=p.inv.findIndex(x=>x&&x.id===id&&!used.has(x)); if(ix>=0){ used.add(p.inv[ix]); e2[k]=p.inv[ix]; p.inv[ix]=null; } }
       p.eq2=e2; p.es=cur; delete p.ps; }
     { const e2=(p.eq2&&typeof p.eq2==='object')?p.eq2:{}, o={}; for(const k of EQSL)o[k]=e2[k]||null; p.eq2=o; p.es=p.es===1?1:0; }
-    miscFix(p); p.shard=p.shard|0; shardAdd(p,0); p.ashard=p.ashard|0; shardAdd(p,0,'ashard'); p.cshard=p.cshard|0; shardAdd(p,0,'cshard'); /* 예전 조각 숫자 → 가방 아이템으로 (각성 조각 포함) */
+    miscFix(p); p.shard=p.shard|0; shardAdd(p,0); p.ashard=p.ashard|0; shardAdd(p,0,'ashard'); p.cshard=p.cshard|0; shardAdd(p,0,'cshard'); if(p.ore)oreFold(p); /* 예전 조각 숫자 → 가방 아이템으로 (각성 조각 포함) */
     const fx=it=>{ if(!it)return; ilCapFix(it); heroFix(it); csFix(it); newOptFix(it); heroSmFix(it); lanternFix(it); if(!Array.isArray(it.aff))it.aff=[]; if(it.rar===3&&it.name==='그림자 망토')it.name='밤의 망토'; /* 영웅 '그림자' 장비와 헷갈리지 않게 개명 */ if(!p.dv4&&it.slot!=='weapon')for(const a of it.aff)if(a&&(a.t==='dmgPct'||a.t==='sm'||a.t==='smhp'))a.v=Math.min(50,Math.max(1,Math.round(a.v/4))); /* v0.3: 무기 외 피해%·소환수 피해%·소환수 생명력% 옵션은 예전 수치를 4로 나눈 값으로(캐릭터마다 1회, p.dv4) */ if(!(it.rar===3&&it.sp))for(const a of it.aff)if(a&&(a.t==='str'||a.t==='dex'||a.t==='vit'||a.t==='ene')&&a.v>10)a.v=10; /* 힘·민첩·체력·에너지 옵션 상한 10(이전에 얻은 더 높은 수치도 10으로) */ if(it.rar===3&&!it.sv){ it.sv=1; const sh=it.slot==='shield'; /* 유니크 스킬 옵션 개편: 직업 스킬→모든 스킬, 개별 스킬→그 직업 스킬, 보조장비→내(보조장비) 직업 스킬 (1회) */
       for(const a of it.aff){ if(!a)continue; const v=Math.min(2,Math.max(1,a.v|0)); if(a.t==='cls'){ if(sh){ a.cls=it.oc||cls; a.v=v; } else { a.t='all'; a.v=v; delete a.cls; } } else if(a.t==='sk'){ a.t='cls'; a.v=v; if(sh)a.cls=it.oc||cls; delete a.key; } }
       if(it.aff.some(a=>a&&a.t==='all'))it.aff=it.aff.filter(a=>!(a&&a.t==='cls')); }
@@ -3996,6 +3996,7 @@ function autoSynth(){ if(syLv<0)return; for(let r=0;r<=syLv;r++){ let g=0; while
 const isShard=it=>!!(it&&(it.mat==='shard'||it.mat==='ashard'||it.mat==='cshard'));
 /* 조각 종류: 그림자 조각(4스테이지) / 각성 그림자 조각(5스테이지) — 같은 방식으로 가방에 쌓임. 넘치면 p.shard / p.ashard 에 보관 */
 const SHDK={shard:{n:'그림자 조각',e:'🌑',N:()=>SHARD_N,src:'삼남매를 쓰러뜨리면',to:'영웅 아이템'},ashard:{n:'각성 그림자 조각',e:'✦',N:()=>ASHARD_N,src:'각성 그림자를 쓰러뜨리면',to:'각성 장비'},cshard:{n:'수문장 조각',e:'🏰',N:()=>CAS_CFG.exch,src:'수문장 카스텔을 쓰러뜨리면',to:'수문장 장비'}};
+const oreKeys=()=>Object.keys(ORES);
 const shMat=it=>(it&&(it.mat==='ashard'||it.mat==='cshard'))?it.mat:'shard';
 /* 그림자 조각 구슬: 평소엔 어두운 구슬, 교환 수량(SHARD_N) 이상이면 진한 보라빛으로 */
 const shardOrb=(n,sz,mat)=>{ const aw=mat==='ashard', cs=mat==='cshard', hot=(n|0)>=SHDK[aw||cs?mat:'shard'].N(), bg=cs?(hot?'radial-gradient(circle at 36% 30%,#fff0c0 0%,#ffb040 40%,#c05a10 75%,#4a1a06 100%)':'radial-gradient(circle at 36% 30%,#e0c8a0 0%,#8a6a48 50%,#2a1a10 100%)'):aw?(hot?'radial-gradient(circle at 36% 30%,#fff4d0 0%,#c8a8ff 40%,#6a3ad0 75%,#24104a 100%)':'radial-gradient(circle at 36% 30%,#d8ccff 0%,#6a5aa8 50%,#1a1240 100%)'):hot?'radial-gradient(circle at 36% 30%,#ffb0f0 0%,#d24bff 38%,#7a18d6 72%,#3a0a78 100%)':'radial-gradient(circle at 36% 30%,#6b7aa0 0%,#2f3758 48%,#0f1328 100%)';
@@ -4010,6 +4011,15 @@ function shardAdd(p,n,mat){ mat=mat||'shard'; if(!Array.isArray(p.misc)||p.misc.
   for(const x of p.misc){ if(left<=0)break; if(x&&x.mat===mat&&x.n<SHARD_MAX){ const a=Math.min(SHARD_MAX-x.n,left); x.n+=a; left-=a; } }
   while(left>0){ const i=p.misc.indexOf(null); if(i<0)break; const a=Math.min(SHARD_MAX,left); p.misc[i]=mkShard(a,mat); left-=a; }
   p[mat]=left; return put-left; }
+/* ===== 광물 조각: 기타 탭에 쌓여요 (it.mat==='ore', ok=광석 키, 한 칸 최대 SHARD_MAX). 칸이 가득 차면 넘친 개수는 p.ore[키]에 보관했다가 자리가 나면 다시 들어가요 ===== */
+const isOreFr=it=>!!(it&&it.mat==='ore');
+function mkOreFr(k,n){ return {id:++ITEMID,slot:'mat',mat:'ore',ok:k,rar:0,name:ORES[k].n+' 조각',base:'',ilvl:0,n:n|0,aff:[]}; }
+function oreCount(p,k){ return (p.misc||[]).reduce((t,x)=>t+(x&&x.mat==='ore'&&x.ok===k?(x.n|0):0),0)+((p.ore&&p.ore[k])|0); }
+function oreAdd(p,n,k){ if(!ORES[k])return 0; if(!Array.isArray(p.misc)||p.misc.length<(p.st?MISC_NS:MISC_N))miscFix(p); if(!p.ore)p.ore={}; let left=Math.max(0,n|0)+(p.ore[k]|0); p.ore[k]=0; const put=left;
+  for(const x of p.misc){ if(left<=0)break; if(x&&x.mat==='ore'&&x.ok===k&&x.n<SHARD_MAX){ const a=Math.min(SHARD_MAX-x.n,left); x.n+=a; left-=a; } }
+  while(left>0){ const i=p.misc.indexOf(null); if(i<0)break; const a=Math.min(SHARD_MAX,left); p.misc[i]=mkOreFr(k,a); left-=a; }
+  p.ore[k]=left; return put-left; }
+function oreFold(p){ if(!p.ore)return; for(const k of Object.keys(p.ore)){ if(ORES[k])oreAdd(p,0,k); } }
 function shardRepack(p){ if(!Array.isArray(p.misc))miscFix(p); for(const mat of ['shard','ashard','cshard']){ let n=0; for(let i=0;i<p.misc.length;i++){ const x=p.misc[i]; if(x&&x.mat===mat){ n+=x.n|0; p.misc[i]=null; } } shardAdd(p,n,mat); } }
 function shardTake(p,n,mat){ mat=mat||'shard'; if(shardCount(p,mat)<n)return false; if(!Array.isArray(p.misc))miscFix(p); let need=n; const ov=Math.min(p[mat]|0,need); p[mat]=(p[mat]|0)-ov; need-=ov;
   const st=p.misc.map((x,i)=>x&&x.mat===mat?i:-1).filter(i=>i>=0).sort((a,b)=>p.misc[a].n-p.misc[b].n);
@@ -4094,7 +4104,7 @@ function tryUse(key,hold){
   if(key==='atk'){
     if(me.atkCd>0)return;
     const sb=spiritBuff(), fb=me.buffs.fury&&me.buffs.fury.t>0&&me.buffs.fury.ias?1+me.buffs.fury.ias:1, b=(me.buffs.awk&&me.buffs.awk.t>0?1.2:1)*(me.buffs.berserk?1.4:1)*(me.buffs.rage&&me.buffs.rage.t>0?1+me.buffs.rage.ias:1)*fb*(sb?1+sb.ias:1)*casDevAs(); me.atkCd=G.mine?MINE_SWING*(me.D.atkInt/.62)/(((PICKS[(me.eq.weapon&&me.eq.weapon.pk)|0]||PICKS[1]).sp)||1):me.D.atkInt/b;   /* 광산: 느린 곡괭이질 (공속 보너스 비례 · 곡괭이 등급 속도) */
-    sfx(meleeOf(me)?'swing':'cast'); doCast('atk',atkRg(me),1); me.mp=Math.min(me.D.maxMp,me.mp+1.6+me.D.maxMp*.02); return;
+    if(!G.mine)sfx(meleeOf(me)?'swing':'cast'); doCast('atk',atkRg(me),1); me.mp=Math.min(me.D.maxMp,me.mp+1.6+me.D.maxMp*.02); return;
   }
   if(me.sil>0){ if(!hold)toast('🚫 침묵! 일반공격만 쓸 수 있어요','#d0a8ff'); return; }
   const s=SKBY[key]; if(!s||s.passive)return; const lv=skLv(me,key); if(!lv)return;
@@ -4822,7 +4832,7 @@ function toast(t,col,kind,keep){ if(kind&&!hudOn(kind))return; alPush(t,col,keep
 const AUDIO_FILES=false;
 const AUD=(()=>{
   let ac=null,master=null,sfxG=null,musG=null,noiseBuf=null,voxG=null;
-  const SFXKEYS=['swing','bolt','hit','crit','kill','boss','hurt','skill','boom','slam','pick','coin','potion','lvl','revive','ui','win','lose','vmagic','block','cast','fire','ice','zap','holy','aura','auraoff','shout','tele','rare'], samples={}; let mood='calm';
+  const SFXKEYS=['swing','mine','mineno','orebrk','bolt','hit','crit','kill','boss','hurt','skill','boom','slam','pick','coin','potion','lvl','revive','ui','win','lose','vmagic','block','cast','fire','ice','zap','holy','aura','auraoff','shout','tele','rare'], samples={}; let mood='calm';
   const vget=k=>{ const v=parseInt(lsGet(k)); return isNaN(v)?100:Math.max(0,Math.min(100,v)); };
   const st={sfx:lsGet('dkdef2.sfx')!=='0',mus:lsGet('dkdef2.mus')!=='0',vib:lsGet('dkdef2.vib')!=='0',vo:lsGet('dkdef2.vo')!=='0',vs:vget('dkdef2.vs'),vm:vget('dkdef2.vm'),vv:vget('dkdef2.vv')};   /* 효과음·음악·음성 볼륨(0~100%) · 음성 켜짐 */
   function init(){
@@ -4879,6 +4889,9 @@ const AUD=(()=>{
     case 'tele': osc('sine',1300,180,.22,.22); osc('sine',180,1300,.22,.2,.2); noise(.3,.2,3000,0,'highpass'); break;
     case 'hit': noise(.09,.5,1200*P); osc('square',180*P,70*P,.08,.18); hitCls(cl,P); break;
     case 'crit': noise(.14,.7,900*P); osc('square',320*P,60*P,.16,.28); osc('sawtooth',900*P,200*P,.1,.12); osc('sine',120,36,.24,.42); hitCls(cl,P,1); break;   /* 낮은 '쿵' 한 겹 추가 */
+    case 'mine': noise(.05,.5,3200*P,0,'highpass'); osc('triangle',1250*P,820*P,.07,.2); osc('sine',150,70,.1,.3); break;   /* 곡괭이가 돌에 맞는 '챙' + 둔탁한 울림 */
+    case 'mineno': noise(.06,.3,900,0,'lowpass'); osc('sine',110,60,.09,.26); break;   /* 아직 못 캐는 단단한 광석: 둔한 '툭' */
+    case 'orebrk': noise(.3,.55,700,0,'lowpass'); noise(.16,.35,2800,.02,'highpass'); osc('sine',120,40,.22,.4); osc('triangle',1500,900,.1,.12,.06); break;   /* 광석이 부서지는 소리 */
     case 'kill': noise(.2,.5,500); osc('sine',160,40,.25,.35); break;
     case 'boss': noise(.7,.7,300); osc('sawtooth',110,30,.8,.4); osc('square',70,35,.9,.3); break;
     case 'hurt': noise(.15,.5,400,0,'lowpass'); osc('sawtooth',200,60,.18,.25); break;
@@ -5843,6 +5856,7 @@ let cellSel=false;   /* 가방 선택 모드: 착용 불가(붉은색·어둡게
 let cellPlain=false;   /* 공유보관함 칸은 현재 캐릭터 기준 착용 불가/비교 표시를 하지 않음 */
 function cellHtml(it,cls,extra){
   if(!it) return `<button class="${cls}" ${extra||''}></button>`;
+  if(isOreFr(it)) return `<button class="${cls}${selItem&&selItem.it===it?' sel':''}" ${extra||''} style="border:2px solid #5a5044;background:#1a1612" aria-label="${esc(it.name)} ${it.n}개"><img src="img/frag_${it.ok}.webp" alt="" style="width:80%;height:80%;object-fit:contain;pointer-events:none;position:absolute;left:10%;top:6%"><i class="en" style="left:0;right:3px;top:auto;bottom:0;text-align:right;color:#fff;font-size:11px">${it.n}</i></button>`;
   if(isShard(it)) return `<button class="${cls}${selItem&&selItem.it===it?' sel':''}" ${extra||''} style="border:2px solid ${RBD[4]};background:${RBG[4]}" aria-label="${SHDK[shMat(it)].n} ${it.n}개"><span style="display:grid;place-items:center;pointer-events:none">${shardOrb(it.n,24,shMat(it))}</span><i class="en" style="left:0;right:3px;top:auto;bottom:0;text-align:right;color:#fff;font-size:11px">${it.n}</i>${it.isNew?'<i class="nw">NEW</i>':''}</button>`;
   if(isGem(it)) return `<button class="${cls}${selItem&&selItem.it===it?' sel':''}" ${extra||''} style="border:2px solid ${RBD[0]};background:${RBG[0]}" aria-label="${esc(it.name)}"><img src="${itemIcon(it).url}" alt="" style="width:86%;height:86%;pointer-events:none">${it.lock?'<i class="lk">🔒</i>':''}${it.isNew?'<i class="nw">NEW</i>':''}</button>`;
   const lock=!cellPlain&&!cellSel&&!canWear(it);
@@ -5875,7 +5889,7 @@ function enableDrag(b){
 }
 function dragDrop(a,b){
   selItem=null;
-  if(a.t==='mi'||b.t==='mi'){ if(a.t==='mi'&&b.t==='mi'&&a.i!==b.i){ const A=me.misc[a.i],B=me.misc[b.i]; if(A&&B&&isShard(A)&&isShard(B)&&A.mat===B.mat){ const mv=Math.min(SHARD_MAX-B.n,A.n); if(mv>0){ B.n+=mv; A.n-=mv; if(A.n<=0)me.misc[a.i]=null; saveChar(); } } else { me.misc[a.i]=B||null; me.misc[b.i]=A||null; saveChar(); } } renderBag(); return; }
+  if(a.t==='mi'||b.t==='mi'){ if(a.t==='mi'&&b.t==='mi'&&a.i!==b.i){ const A=me.misc[a.i],B=me.misc[b.i]; if(A&&B&&((isShard(A)&&isShard(B))||(isOreFr(A)&&isOreFr(B)&&A.ok===B.ok))&&A.mat===B.mat){ const mv=Math.min(SHARD_MAX-B.n,A.n); if(mv>0){ B.n+=mv; A.n-=mv; if(A.n<=0)me.misc[a.i]=null; saveChar(); } } else { me.misc[a.i]=B||null; me.misc[b.i]=A||null; saveChar(); } } renderBag(); return; }
   if(a.t==='inv'&&b.t==='inv'){ if(a.i!==b.i&&isShard(me.inv[a.i])&&isShard(me.inv[b.i])&&me.inv[a.i].mat===me.inv[b.i].mat){ const A=me.inv[a.i],B=me.inv[b.i],mv=Math.min(SHARD_MAX-B.n,A.n); if(mv>0){ B.n+=mv; A.n-=mv; if(A.n<=0)me.inv[a.i]=null; saveChar(); } renderBag(); return; } if(a.i!==b.i){ const t=me.inv[a.i]; me.inv[a.i]=me.inv[b.i]; me.inv[b.i]=t; saveChar(); } renderBag(); return; }
   if(a.t==='inv'&&b.t==='eq'){ const it=me.inv[a.i]; if(!it){renderBag();return;} const sl=it.slot==='ring'?(b.k.startsWith('ring')?b.k:null):it.slot; if(sl!==b.k&&!(it.slot==='ring'&&b.k.startsWith('ring'))){ toast('그 칸에는 착용할 수 없어요','#ff8a7a'); renderBag(); return; } equip(a.i,it.slot==='ring'?b.k:undefined); return; }
   if(a.t==='eq'&&b.t==='inv'){ if(me.inv[b.i]){ renderBag(); return; } unequip(a.k); return; }
@@ -5910,7 +5924,7 @@ function sortStore(mode){ const S=getStore(); shardRepack(S); let mx=0; for(cons
   const its=S.inv.filter(Boolean);
   its.sort(mode==='enh'?((a,b)=>(b.enh|0)-(a.enh|0)||byRar(a,b)):mode==='in'?((a,b)=>a.sat-b.sat):byRar);   /* 강화순: 높은 강화 단계 먼저, 같은 단계 안에서는 등급순 · 입고순: 먼저 넣은 것부터 */
   S.inv=its.concat(Array(Math.max(0,STORE_N-its.length)).fill(null)); selItem=null; saveStore(); renderStore(); sheetToast(mode==='enh'?'강화순으로 정리했어요':mode==='in'?'입고순으로 정리했어요':'등급순으로 정리했어요'); }
-function storeDetail(){ sellAskIt=null; if(!selItem)return ''; const it=selItem.it; let s=itemLines(it,isShard(it)?null:{lk:1,st:1});
+function storeDetail(){ sellAskIt=null; if(!selItem)return ''; if(isOreFr(selItem.it))return itemLines(selItem.it); const it=selItem.it; let s=itemLines(it,isShard(it)?null:{lk:1,st:1});
   if(isGem(it)){ const lk=`<button class="btn lkx" id="aLock" data-lk="1">${it.lock?'🔓 잠금 해제':'🔒 잠금'}</button>`; return s+`<div class="acts iact"><button class="btn primary" disabled style="opacity:.4">💎 소켓에 박기</button>${lk}<button class="btn tlb" id="aGemSell"${it.lock?' style="opacity:.45"':''}><span class="ti ph">💰</span><span class="tx">판매 ${GEM_TIER[gemTier(it)-1].g}G</span></button><button class="btn tlb" id="aSend"><span class="ti">📤</span> <span class="tx">보내기</span></button></div>`; }
   if(isShard(it))return s+`<div class="acts"><button class="btn" id="aShardSell">💰 판매</button><button class="btn" id="aSend">📤 보내기</button></div>`;
   const lk=`<button class="btn lkx" id="aLock" data-lk="1">${it.lock?'🔓 잠금 해제':'🔒 잠금'}</button>`;   /* 패드·PC에서도 잠글 수 있게 (폰은 아이콘 모서리 배지) */
@@ -5979,7 +5993,7 @@ try{ new ResizeObserver(()=>fitInv()).observe($('#sheetB')); }catch(e){}
 const cntNN=a=>a.reduce((t,x)=>t+(x?1:0),0);
 const tabStrip=(inv,misc,tab,chip)=>`<div class="tbs"><button class="tb${tab==='eq'?' on':''}" data-bt="eq"><span class="ic">🎒</span> <span class="tn">장비품</span> <small>${cntNN(inv)}/${inv.length}</small></button><button class="tb${tab==='misc'?' on':''}" data-bt="misc"><span class="ic">💎</span> <span class="tn">기타</span> <small>${cntNN(misc)}/${misc.length}</small>${misc.some(x=>x&&x.isNew)?'<i class="n">NEW</i>':''}</button></div>`;
 /* 기타 탭 정렬(등급순): 조각(그림자→각성) 먼저, 그 다음 보석을 상급→중급→하급, 같은 등급이면 보석 종류 순서 */
-function sortMisc(P){ shardRepack(P); const its=P.misc.filter(Boolean); const key=it=>isShard(it)?[0,it.mat==='cshard'?2:it.mat==='ashard'?1:0,0]:[1,-(it.ilvl|0),Math.max(0,GEM_KINDS.indexOf(it.gk))];
+function sortMisc(P){ shardRepack(P); { const tot={}; for(let i=0;i<P.misc.length;i++){ const x=P.misc[i]; if(x&&x.mat==='ore'){ tot[x.ok]=(tot[x.ok]|0)+(x.n|0); P.misc[i]=null; } } for(const k in tot)oreAdd(P,tot[k],k); } const its=P.misc.filter(Boolean); const key=it=>isShard(it)?[0,it.mat==='cshard'?2:it.mat==='ashard'?1:0,0]:isOreFr(it)?[0,3,oreKeys().indexOf(it.ok)]:[1,-(it.ilvl|0),Math.max(0,GEM_KINDS.indexOf(it.gk))];
   its.sort((a,b)=>{ const x=key(a),y=key(b); return x[0]-y[0]||x[1]-y[1]||x[2]-y[2]; });
   P.misc=its.concat(Array(Math.max(0,(P.st?MISC_NS:MISC_N)-its.length)).fill(null)); selItem=null; saveSrc(P); rerender(); sheetToast('등급순으로 정리했어요'); }
 /* 기타 탭 일괄 판매: 보석만 (조각은 제외) — 하급/중급/상급을 고르면 잠그지 않은 보석이 한꺼번에 팔려요 */
@@ -6106,6 +6120,7 @@ function sendGem(){ const P=selItem&&selItem.store?getStore():me; const it=selIt
       P.misc[ix]=null; delete it.isNew; if(t.k==='s')stamp(it); t.o.misc[j]=it; saveTarget(t); saveSrc(P); selItem=null; closeModal(); sfx('pick'); shopMsg=''; rerender(); toast(`${tgName(t)}에게 보냈어요`,'#9fd18b'); }); }); }
 function sendPick(){
   const it=selItem&&selItem.it; if(!it||(selItem.inv===undefined&&selItem.eq===undefined&&selItem.misc===undefined))return;
+  if(isOreFr(it)){ sheetToast('광물 조각은 아직 보낼 수 없어요','#ffb259'); return; }
   if(isShard(it)){ sendShard(); return; }
   if(isGem(it)){ sendGem(); return; }
   const P=selItem.store?getStore():me, tg=targetsFor(P);
@@ -6184,6 +6199,7 @@ function lockSvg(on){ return on
 const setKind=x=>x&&x.sp&&SPFX[x.sp]?(SPFX[x.sp].cs?'cs6':SPFX[x.sp].aw?'aw':SPFX[x.sp].cas?'cas':SPFX[x.sp].hero?'hero':''):'';
 const ringPair=(a,b,sep)=>itemLines(a)+sep+itemLines(b,setKind(a)&&setKind(a)===setKind(b)?{noSet:1}:undefined);   /* 두 반지가 같은 세트면 세트 효과는 한 번만 */
 function itemLines(it,opt){
+  if(isOreFr(it)){ const O=ORES[it.ok]; return `<div style="display:flex;gap:10px;align-items:center"><div style="width:56px;height:56px;flex:none;display:grid;place-items:center;background:#0a0807;border:1px solid #5a5044;border-radius:8px"><img src="img/frag_${it.ok}.webp" alt="" style="width:48px;height:48px;object-fit:contain"></div><div><div class="in" style="color:${O.c}">${esc(it.name)}</div><div class="meta">수량 <b style="color:#fff">${it.n}</b> / ${SHARD_MAX} (한 칸 최대)</div></div></div><div class="meta" style="margin:6px 0">광산에서 ${esc(O.n)}을(를) 캐면 얻는 조각이에요. 광부 경험치와 레벨업에 쓰이고, 아직 다른 쓰임새는 없어요.</div>`; }
   if(isGem(it)){ const t=gemTier(it), gc=GEM_C[it.gk]||'#fff'; return `<div style="display:flex;gap:10px;align-items:center"><span style="position:relative;flex:none;display:flex"><img src="${itemIcon(it).url}" alt="" style="width:56px;height:56px;flex:none;background:#0a0807;border:1px solid ${gc};border-radius:8px">${opt&&opt.lk?`<button class="lkb${it.lock?' on':''}" data-lk="1" aria-label="${it.lock?'잠금 해제':'잠금'}">${lockSvg(!!it.lock)}</button>`:''}</span><div><div class="in" style="color:${gc}">${esc(it.name)}</div><div class="meta" style="color:#fff">아이템 레벨 ${it.ilvl|0} · ${GEM_TIER[t-1].n}</div></div></div><ul><li style="color:#afeeee">${esc(gemOptText(it))}</li>${opt&&opt.st?'<li style="color:#707070;list-style:none;font-size:12px">가방으로 옮긴 후 사용</li>':''}</ul><div class="meta" style="margin:4px 0">장비의 빈 소켓에 박아서 쓰는 보석이에요. 판매가 ${GEM_TIER[t-1].g.toLocaleString()}G</div>`; }
   if(isShard(it)) return `<div style="display:flex;gap:10px;align-items:center"><div style="width:56px;height:56px;flex:none;display:grid;place-items:center;background:#0a0807;border:1px solid ${RARC[4]};border-radius:8px">${shardOrb(it.n,32,shMat(it))}</div><div><div class="in" style="color:${RARC[4]}">${SHDK[shMat(it)].n}</div><div class="meta">수량 <b style="color:#fff">${it.n}</b> / ${SHARD_MAX} (한 칸 최대)</div></div></div><div class="meta" style="margin:6px 0">${SHDK[shMat(it)].src} 얻는 재료예요. ${SHDK[shMat(it)].N()}개로 ${SHDK[shMat(it)].to} 하나를 교환할 수 있어요. 개당 ${SHARD_SELL.toLocaleString()}G에 판매할 수도 있어요.</div>`;
   let s=`<div style="display:flex;gap:10px;align-items:center"><span style="position:relative;flex:none;display:flex"><img src="${itemIcon(it).url}" alt="" style="width:56px;height:56px;flex:none;background:#0a0807;border:${HSET(it)?'2px solid '+HSET(it).c:'1px solid '+RARC[it.rar]};border-radius:8px">${opt&&opt.lk?`<button class="lkb${it.lock?' on':''}" data-lk="1" aria-label="${it.lock?'잠금 해제':'잠금'}">${lockSvg(!!it.lock)}</button>`:''}</span><div><div class="in" style="color:${RARC[it.rar]}">${nameTag(it.enh>0?'+'+it.enh+' ':'',it.name,it)}</div>${hsetChip(it)}<div class="meta" style="color:#fff">아이템 레벨 ${ilvOf(it)}${it.enh>0?` <span style="color:#ffd84a">(기본 ${it.ilvl} + 강화 ${it.enh})</span>`:''}</div>${ownTag(it)}<div class="meta">${reqHtml(it)}</div></div></div>`+lvCmp(it);
@@ -6247,6 +6263,7 @@ function curCmpHtml(){ if(!selItem||selItem.inv===undefined)return ''; const it=
 function detailHtml(){
   sellAskIt=null;
   if(!selItem) return '';
+  if(isOreFr(selItem.it)) return itemLines(selItem.it);
   const it=selItem.it; let s=itemLines(it,isShard(it)?null:{lk:1});
   if(isGem(it)){ const lk=`<button class="btn lkx" id="aLock" data-lk="1">${it.lock?'🔓 잠금 해제':'🔒 잠금'}</button>`, send=(G.titleSheet&&charIds().length>1&&!(me&&me.hc))?'<button class="btn tlb" id="aSend"><span class="ti">📤</span> <span class="tx">보내기</span></button>':''; return s+`<div class="acts iact"><button class="btn primary" id="aGemSock">💎 소켓에 박기</button>${lk}<button class="btn tlb" id="aGemSell"${it.lock?' style="opacity:.45"':''}><span class="ti ph">💰</span><span class="tx">판매 ${GEM_TIER[gemTier(it)-1].g}G</span></button>${send}</div>`; }
   if(isShard(it)){ s+=`<div class="acts"><button class="btn primary" id="aShardEx">${SHDK[shMat(it)].e} ${SHDK[shMat(it)].to} 교환</button><button class="btn" id="aShardSell">💰 판매</button>${(G.titleSheet&&charIds().length>1&&!(me&&me.hc))?'<button class="btn" id="aSend">📤 보내기</button>':''}</div>`; return s; }
@@ -7075,6 +7092,7 @@ function startMine(){
   if(!mineCanEnter(c)){ sheetToast('⛏️ 곡괭이를 가지고 있어야 광산에 들어갈 수 있어요','#ff8a7a'); return; }
   closeModal(); G.mode='solo'; prepMe(); ally=null; resetWorld(); if(!me.mine)me.mine={lv:1,xp:0}; if(!me.ore)me.ore={};
   for(const k in me.ore)if(!ORES[k]){ const nk=ORE_OLD[k]; if(nk)me.ore[nk]=(me.ore[nk]|0)+(me.ore[k]|0); delete me.ore[k]; }   /* 시범 1차 조각 이름 정리 */
+  oreFold(me);   /* 예전 숫자 보관분 → 기타 칸 */
   me.mine.lv=Math.min(MINE_MAXLV,Math.max(1,me.mine.lv|0));
   minions.length=0; dmgReset(); G.firstClr=false; G.potN=0; G.stageIdx=selStage; G.stg=TRAIN_STG; G.TW=0; G.castle=null; G.gts=[];
   G.allMode=false; G.allQ=[]; G.fires=[]; G.freeRev=1; G.hcWhy=''; me.rvGiven=0; me.seenRg=0; me.out=false; me.rvT=0;
@@ -7094,8 +7112,8 @@ function mineSpawn(sl,quiet){ const O=ORES[sl.k], m=spawnMob(0,sl.x,sl.y,false);
   sl.m=m; sl.t=0; if(!quiet){ efx.push({k:'ring',x:sl.x,y:sl.y,r0:6,r1:40,t:0,life:.35,col:O.c,w:5}); } }
 function oreHit(m,fx){ if(m.dead||(fx&&(fx.mk||fx.pet||fx.sm)))return; const O=ORES[m.ore], M=G.mine||{};
   if(!isPick(me.eq.weapon)){ if(T-(M.tw||-9)>1.2){ M.tw=T; addNum(m.x,m.y-m.r-10,'⛏️ 곡괭이 장착 필요','#ff8a7a',false); } return; }   /* 광석 위 안내 (레벨 부족 안내와 같은 방식) */
-  if(minerLv(me)<O.lv){ m.flash=.1; oreHitFx(m,O); if(T-(M.tl||-9)>1.2){ M.tl=T; addNum(m.x,m.y-m.r-10,`광부 Lv${O.lv} 필요`,'#ff8a7a',false); } return; }   /* 레벨이 모자라도 캐는 이펙트는 나오지만 깎이지 않음 */
-  const d=minePow(me); m.hp-=d; m.flash=.1; oreHitFx(m,O); addNum(m.x,m.y-m.r-6,d,'#e8dcc0',false);
+  if(minerLv(me)<O.lv){ m.flash=.1; oreHitFx(m,O); sfx('mineno'); if(T-(M.tl||-9)>1.2){ M.tl=T; addNum(m.x,m.y-m.r-10,`광부 Lv${O.lv} 필요`,'#ff8a7a',false); } return; }   /* 레벨이 모자라도 캐는 이펙트는 나오지만 깎이지 않음 */
+  const d=minePow(me); m.hp-=d; m.flash=.1; oreHitFx(m,O); sfx('mine',.92+Math.random()*.16); addNum(m.x,m.y-m.r-6,d,'#e8dcc0',false);
   if(m.hp<=0)oreBreak(m); }
 let MINE_FX=1;   /* 채굴 타격 이펙트: 1 = 돌 파편 + 먼지 (A안 확정) · 2 쇳불꽃 · 3 충격 고리 */
 function oreHitFx(m,O){ const dx=me.x-m.x, dy=me.y-m.y, dd=Math.max(1,hyp(dx,dy)), hx=m.x+dx/dd*m.r*.5, hy=m.y-m.r*.4, lf=G.lowFx?.5:1, P=(o)=>parts.push(o);
@@ -7107,8 +7125,8 @@ function oreHitFx(m,O){ const dx=me.x-m.x, dy=me.y-m.y, dd=Math.max(1,hyp(dx,dy)
   else spark(m.x,m.y,O.c,4); }
 function oreBreak(m){ const O=ORES[m.ore], M=G.mine; if(!M||m.dead)return; m.dead=true; m.hp=0;
   const P=PICKS[(me.eq.weapon&&me.eq.weapon.pk)|0]||PICKS[1], n=Math.max(1,Math.round(ri(1,3)*P.y));
-  me.ore[m.ore]=(me.ore[m.ore]|0)+n; M.got[m.ore]=(M.got[m.ore]|0)+n; M.brk=(M.brk|0)+1;
-  burst(m.x,m.y,O.c,14,220); burst(m.x,m.y,'#8a8478',10,180); sfx('kill'); addNum(m.x,m.y-34,`+${n} ${O.n} 조각`,O.c,true);
+  const put=oreAdd(me,n,m.ore); M.got[m.ore]=(M.got[m.ore]|0)+n; M.brk=(M.brk|0)+1; if(put<n&&T-(M.tf||-9)>6){ M.tf=T; later(.3,()=>sheetToast('기타 칸이 가득 차서 조각을 보관 중이에요','#ffb259')); }
+  burst(m.x,m.y,O.c,14,220); burst(m.x,m.y,'#8a8478',10,180); sfx('orebrk'); addNum(m.x,m.y-34,`+${n} ${O.n} 조각`,O.c,true);
   if(O.gem&&Math.random()<O.gem){ gemDrop(1,me.x,me.y); later(.2,()=>announce('💎 하급 보석을 발견했어요!','#9fd0ff')); }   /* 달빛 은: 10% 하급 보석 (내 발밑에 떨어져 바로 주워요) */
   const xp=mineXp(O,me); if(xp>0)mineAddXp(xp); else if(T-(M.tg||-9)>4){ M.tg=T; addNum(me.x,me.y-52,'회색 광석 · 경험치 없음','#9a9a9a',false); }
   if(m.slot){ m.slot.m=null; m.slot.t=MINE_RESP; } saveChar(); mineHud(); }
@@ -7124,7 +7142,7 @@ function mineResult(){ const M=G.mine; if(!M||!me)return; const F=MINE_FL[M.fi],
   modal(`<div class="mres"><h3 style="text-align:center;margin:0">⛏️ 채굴 결과</h3><div style="text-align:center;color:#a8957a;font-size:12px;margin-top:2px">${F.n} · ${sec>=60?Math.floor(sec/60)+'분 ':''}${sec%60}초 · 광석 ${M.brk|0}개</div>
    <div style="margin-top:12px;font-size:13px;font-weight:800;display:flex"><span>광부 Lv ${L}</span><span style="margin-left:auto;color:#9fd0ff">+${M.xpGot|0} 경험치</span></div><div class="mbar"><i style="width:${p}%"></i></div>
    <div style="margin-top:12px;font-size:12px;color:#c9b48a;display:flex"><span>얻은 조각</span><span style="margin-left:auto">이번 / 보유</span></div>
-   ${got.length?got.map(k=>`<div class="mrw"><img class="mfr" src="img/frag_${k}.webp" alt="">${ORES[k].n} 조각<b>+${M.got[k]}</b><s>${(me.ore&&me.ore[k])|0}개</s></div>`).join(''):'<div class="mrw" style="color:#8a7a68">이번에 얻은 조각이 없어요</div>'}
+   ${got.length?got.map(k=>`<div class="mrw"><img class="mfr" src="img/frag_${k}.webp" alt="">${ORES[k].n} 조각<b>+${M.got[k]}</b><s>${oreCount(me,k)}개</s></div>`).join(''):'<div class="mrw" style="color:#8a7a68">이번에 얻은 조각이 없어요</div>'}
    <div class="row2" style="margin-top:16px"><button class="btn" id="mrAgain">🔁 다시 들어가기</button><button class="btn primary" id="mrOut">🏠 나가기</button></div></div>`,m=>{
     m.querySelector('#mrOut').onclick=()=>{ closeModal(); quitToTitle(); };
     m.querySelector('#mrAgain').onclick=async()=>{ closeModal(); await quitToTitle(); startMine(); }; }); }
