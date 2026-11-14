@@ -1496,7 +1496,7 @@ body.mining #mineOut{position:fixed;left:50%;transform:translateX(-50%);bottom:c
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.1.0692</div>
+    <div class="ver" id="verT">v0.7.1.0693</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -8475,7 +8475,8 @@ function drawMinimap0(){
   ctx.fillStyle='rgba(10,8,7,.75)'; ctx.fillRect(x,y,w,h); ctx.strokeStyle='#6b5432'; ctx.lineWidth=1.5; ctx.strokeRect(x+.5,y+.5,w,h); ctx.fillStyle='#2c241c'; ctx.fillRect(x+VX*(w/WW)-2,y,4,VY*(h/WH)); ctx.fillRect(x,y+VY*(h/WH)-2,w,4);
   const sx=w/WW, sy=h/WH;
   ctx.fillStyle='#8a6a3a'; ctx.beginPath(); ctx.arc(x+hzX()*sx,y+hzY()*sy,hzR()*sx,0,6.283); ctx.fill();
-  for(const m of G.mobs){ if(m.dead&&m.gob)continue; if(m.gob||MT[m.type].gob){ const bl=Math.sin(T*10)>0; ctx.fillStyle=bl?'#ffe27a':'#d49a10'; ctx.fillRect(x+m.x*sx-3.5,y+m.y*sy-3.5,7,7); ctx.strokeStyle='#fff'; ctx.lineWidth=1; ctx.strokeRect(x+m.x*sx-3.5,y+m.y*sy-3.5,7,7); continue; } ctx.fillStyle=m.boss?'#ff4a8a':'#c2382e'; const r=m.boss?3:m.elite?2:1.4; ctx.fillRect(x+m.x*sx-r,y+m.y*sy-r,r*2,r*2);}
+  for(const m of G.mobs){ if(m.dead&&m.gob)continue; if(m.ore){ if(m.dead)continue; ctx.fillStyle=oreTone(ORES[m.ore],me); ctx.fillRect(x+m.x*sx-2,y+m.y*sy-2,4,4); continue; }   /* 광산: 광석 난이도 색과 같은 점 */
+    if(m.gob||MT[m.type].gob){ const bl=Math.sin(T*10)>0; ctx.fillStyle=bl?'#ffe27a':'#d49a10'; ctx.fillRect(x+m.x*sx-3.5,y+m.y*sy-3.5,7,7); ctx.strokeStyle='#fff'; ctx.lineWidth=1; ctx.strokeRect(x+m.x*sx-3.5,y+m.y*sy-3.5,7,7); continue; } ctx.fillStyle=m.boss?'#ff4a8a':'#c2382e'; const r=m.boss?3:m.elite?2:1.4; ctx.fillRect(x+m.x*sx-r,y+m.y*sy-r,r*2,r*2);}
   ctx.save(); ctx.beginPath(); ctx.rect(x,y,w,h); ctx.clip();
   for(const g of ground){ const q=g.it.rar, z=q>=2?1.6:1.1, cx=x+g.x*sx, cy=y+g.y*sy, mx=[3,4.5,6.5,9,12][q], ph=((T*.9+(g.it.id||0)*.37)%1); ctx.fillStyle=RBD[q]; ctx.globalAlpha=.7; ctx.fillRect(cx-z,cy-z,z*2,z*2);
     for(let k=0;k<2;k++){ const f=(ph+k*.5)%1; ctx.strokeStyle=RBD[q]; ctx.globalAlpha=(1-f)*.55; ctx.lineWidth=q>=2?1.6:1; ctx.beginPath(); ctx.arc(cx,cy,1+f*mx,0,6.283); ctx.stroke(); } ctx.globalAlpha=1; } ctx.restore();
