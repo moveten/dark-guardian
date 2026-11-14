@@ -1496,7 +1496,7 @@ body.mining #mineOut{position:fixed;left:50%;transform:translateX(-50%);bottom:c
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.1.0696</div>
+    <div class="ver" id="verT">v0.7.1.0697</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -2470,7 +2470,7 @@ const TOWN_FAM=[{e:'🌑',nm:'그림자',mat:'shard',main:'tw',aux:'lab'},{e:'�
 /* ===== 광산 (관리자 시범 · 미공개) — 층·광석·곡괭이는 표에 한 줄씩 추가하면 확장돼요 (지하 10층·광석 20종 이상 예정) ===== */
 const MINE_PICK_P=.02;   /* 1-1 보스(묘지기 그라크) 곡괭이 드랍 확률 */
 const PICKS=[null,{n:'낡은 곡괭이',rar:0,y:1,sp:1}];   /* 곡괭이 등급(1부터): 이름 · 색 등급 · y 채굴량(조각 개수) 배율 · sp 채굴 속도 배율(다음 등급 1.1 → 1.2 …) — 상위 등급은 여기에 추가 */
-const MINE_SWING=1.5;   /* 곡괭이질 기본 간격(초, 낡은 곡괭이 · 공격속도 보너스 0 기준) — 공격속도 옵션·민첩의 영향은 받음 */
+const MINE_SWING=1.3;   /* 곡괭이질 기본 간격(초, 낡은 곡괭이 · 공격속도 보너스 0 기준) — 공격속도 옵션·민첩의 영향은 받음 */
 const ORES={   /* 광석: 이름 · 레벨(광부 레벨 기준) · 색 · g = 조각 1개 판매가 · 체력은 레벨로 자동 계산(oreHp) — 그림: img/ore_키.webp(광석) · img/frag_키.webp(조각) */
   ash:{n:'잿돌',lv:1,c:'#9a948a',g:1},            /* 판매만 (경험치·레벨업용) */
   rust:{n:'녹슨 구리',lv:5,c:'#c87a4a',g:1},       /* 용도 미정 */
@@ -7114,7 +7114,9 @@ function mineSpawn(sl,quiet){ const O=ORES[sl.k], m=spawnMob(0,sl.x,sl.y,false);
 function oreHit(m,fx){ if(m.dead||(fx&&(fx.mk||fx.pet||fx.sm)))return; const O=ORES[m.ore], M=G.mine||{};
   if(!isPick(me.eq.weapon)){ if(T-(M.tw||-9)>1.2){ M.tw=T; addNum(m.x,m.y-m.r-10,'⛏️ 곡괭이 장착 필요','#ff8a7a',false); } return; }   /* 광석 위 안내 (레벨 부족 안내와 같은 방식) */
   if(minerLv(me)<O.lv){ m.flash=.1; oreHitFx(m,O); sfx('mineno'); if(T-(M.tl||-9)>1.2){ M.tl=T; addNum(m.x,m.y-m.r-10,`광부 Lv${O.lv} 필요`,'#ff8a7a',false); } return; }   /* 레벨이 모자라도 캐는 이펙트는 나오지만 깎이지 않음 */
-  const d=Math.max(1,Math.round(minePow(me)*mineEff(O,me))); m.hp-=d; m.flash=.1; oreHitFx(m,O); sfx('mine',.92+Math.random()*.16); addNum(m.x,m.y-m.r-6,d,'#e8dcc0',false);
+  const ef=mineEff(O,me), d=Math.max(1,Math.round(minePow(me)*ef)); m.hp-=d; m.flash=.1; oreHitFx(m,O);
+  if(ef<=.65){ const lf=G.lowFx?.5:1; for(let i=0;i<Math.round(8*lf);i++)parts.push({x:m.x+(me.x-m.x)*.35,y:m.y-m.r*.4,vx:rand(-260,260),vy:-rand(150,380),g:700,dm:.9,t:0,life:rand(.25,.4),col:Math.random()<.5?'#fff3c0':'#ffc455',r:rand(3,5),glow:1});   /* 힘겨운 광석(주황·노랑): 쇳불꽃 + 캐릭터 뒤통수 땀 */
+    if(T-((M.sw&&M.sw.t)||-9)>1.1)M.sw={t:T,d:me.x>=m.x?1:-1}; } sfx('mine',.92+Math.random()*.16); addNum(m.x,m.y-m.r-6,d,'#e8dcc0',false);
   if(m.hp<=0)oreBreak(m); }
 let MINE_FX=1;   /* 채굴 타격 이펙트: 1 = 돌 파편 + 먼지 (A안 확정) · 2 쇳불꽃 · 3 충격 고리 */
 function oreHitFx(m,O){ const dx=me.x-m.x, dy=me.y-m.y, dd=Math.max(1,hyp(dx,dy)), hx=m.x+dx/dd*m.r*.5, hy=m.y-m.r*.4, lf=G.lowFx?.5:1, P=(o)=>parts.push(o);
@@ -8209,6 +8211,8 @@ function drawPlayer(o,isMe,t){
   ctx.restore();
   }
   // 이름 · 레벨 · 생명/마나 바
+  if(isMe&&G.mine&&G.mine.sw){ const sw=G.mine.sw, el=T-sw.t; if(el<.8){ for(let k=0;k<3;k++){ const p=el/.8-k*.12; if(p<=0||p>=1)continue; const px=x+sw.d*(13+(14+k*7)*p), py=y-31-9*Math.sin(p*2.4)+(k-1)*5+24*p*p, vx=sw.d*(14+k*7), vy=-9*2.4*Math.cos(p*2.4)+48*p, an=Math.atan2(vy,vx)+Math.PI/2;
+      ctx.save(); ctx.globalAlpha=Math.min(1,(1-p)*1.6); ctx.translate(px,py); ctx.rotate(an); ctx.beginPath(); ctx.moveTo(0,-5); ctx.quadraticCurveTo(3.6,0,0,3.4); ctx.quadraticCurveTo(-3.6,0,0,-5); ctx.fillStyle='#a8e0ff'; ctx.fill(); ctx.strokeStyle='#4a8ab8'; ctx.lineWidth=1; ctx.stroke(); ctx.restore(); } } }   /* 땀방울: 광석을 마주 보는 캐릭터의 반대쪽(뒤통수)에서 바깥으로 튀어 떨어짐 */
   const nm=(isMe?me.name:(o.name||'동료'))||'', label=`${isMe&&G.mine?'⛏️':''}Lv${isMe&&G.mine?minerLv(me):lv} ${nm}`;   /* 광산: 광부 레벨 */
   ctx.font='700 11px "Noto Sans KR",sans-serif'; ctx.textAlign='center'; ctx.lineJoin='round'; ctx.lineWidth=3.5; ctx.strokeStyle='rgba(0,0,0,.9)'; ctx.strokeText(label,x,y-45); ctx.fillStyle=isMe?'#fff3dc':C.col; ctx.fillText(label,x,y-45);
   { const ic=[];
