@@ -1496,7 +1496,7 @@ body.mining #mineOut{position:fixed;left:50%;transform:translateX(-50%);bottom:c
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.1.0695</div>
+    <div class="ver" id="verT">v0.7.1.0696</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -7084,7 +7084,8 @@ const MINE_RESP=25, MINE_MAXLV=99, MINE_PT={up:[VX,92],dn:[VX,908]};   /* 다 �
 const mineNeed=L=>need(L);   /* 다음 광부 레벨까지 필요한 경험치 = 캐릭터 레벨업 경험치와 같은 표 */
 const oreHp=O=>Math.round(35*(1+.08*(O.lv-1)));   /* 자기 레벨과 같은 광부가 약 7번 때리면 부서지는 체력 */
 const oreXp0=O=>Math.max(1,Math.round(need(O.lv)/(6+.3*O.lv)));   /* 같은 레벨 광석을 (6 + 0.3×레벨)개 캐면 레벨업 */
-const minePow=p=>Math.round(5*(1+.08*(minerLv(p)-1)));   /* 한 번 때릴 때 깎는 양 (광부 레벨로 상승) */
+const minePow=p=>Math.round(5*(1+.08*(minerLv(p)-1)));
+const mineEff=(O,p)=>{ const d=minerLv(p)-O.lv; return d<3?.5:d<8?.65:d<MINE_GRAY?.85:1; };   /* 레벨 여유에 따른 채굴 효율: 주황(0~2) ×0.5 · 노랑(3~7) ×0.65 · 초록(8~14) ×0.85 · 회색(15~) ×1 — 높은 광석일수록 힘겹게 */   /* 한 번 때릴 때 깎는 양 (광부 레벨로 상승) */
 function mineXp(O,p){ const d=minerLv(p)-O.lv; if(d>=MINE_GRAY)return 0; const b=oreXp0(O); return Math.max(1,Math.round(b*(d<=5?1:1-(d-5)/(MINE_GRAY-5)*.9))); }   /* 레벨 차이 5까지 그대로 → 15에서 0(회색) */
 const oreTone=(O,p)=>{ const d=minerLv(p)-O.lv; return d<0?'#ff5a4a':d>=MINE_GRAY?'#8a8a8a':d>=8?'#7ad04a':d>=3?'#ffd84a':'#ff9a3a'; };   /* 빨강(못 캠) 주황 노랑 초록 회색(경험치 0) */
 function startMine(){
@@ -7113,7 +7114,7 @@ function mineSpawn(sl,quiet){ const O=ORES[sl.k], m=spawnMob(0,sl.x,sl.y,false);
 function oreHit(m,fx){ if(m.dead||(fx&&(fx.mk||fx.pet||fx.sm)))return; const O=ORES[m.ore], M=G.mine||{};
   if(!isPick(me.eq.weapon)){ if(T-(M.tw||-9)>1.2){ M.tw=T; addNum(m.x,m.y-m.r-10,'⛏️ 곡괭이 장착 필요','#ff8a7a',false); } return; }   /* 광석 위 안내 (레벨 부족 안내와 같은 방식) */
   if(minerLv(me)<O.lv){ m.flash=.1; oreHitFx(m,O); sfx('mineno'); if(T-(M.tl||-9)>1.2){ M.tl=T; addNum(m.x,m.y-m.r-10,`광부 Lv${O.lv} 필요`,'#ff8a7a',false); } return; }   /* 레벨이 모자라도 캐는 이펙트는 나오지만 깎이지 않음 */
-  const d=minePow(me); m.hp-=d; m.flash=.1; oreHitFx(m,O); sfx('mine',.92+Math.random()*.16); addNum(m.x,m.y-m.r-6,d,'#e8dcc0',false);
+  const d=Math.max(1,Math.round(minePow(me)*mineEff(O,me))); m.hp-=d; m.flash=.1; oreHitFx(m,O); sfx('mine',.92+Math.random()*.16); addNum(m.x,m.y-m.r-6,d,'#e8dcc0',false);
   if(m.hp<=0)oreBreak(m); }
 let MINE_FX=1;   /* 채굴 타격 이펙트: 1 = 돌 파편 + 먼지 (A안 확정) · 2 쇳불꽃 · 3 충격 고리 */
 function oreHitFx(m,O){ const dx=me.x-m.x, dy=me.y-m.y, dd=Math.max(1,hyp(dx,dy)), hx=m.x+dx/dd*m.r*.5, hy=m.y-m.r*.4, lf=G.lowFx?.5:1, P=(o)=>parts.push(o);
