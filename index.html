@@ -1496,7 +1496,7 @@ body.mining #mineOut{position:fixed;left:50%;transform:translateX(-50%);bottom:c
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.1.0704</div>
+    <div class="ver" id="verT">v0.7.1.0705</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -2005,6 +2005,7 @@ const UIMGS={};
 const pickImgKey=it=>'pick_'+Math.max(1,Math.min(5,it.pk|0));   /* 곡괭이 등급 그림: img/pick_1~5.webp */
 function unqImg(it){ if(!it)return null; const f=it.pk?pickImgKey(it):((it.rar===3||it.rar===4)?UNQIMG[it.name]:null); if(!f)return null; let e=UIMGS[f]; if(!e){ e=UIMGS[f]={ok:false,im:new Image()}; e.im.onload=()=>{ e.ok=true; iconCache.clear(); uiDirty=true; }; e.im.onerror=()=>{ e.bad=true; }; e.im.src='img/'+f+(it.pk?'.webp':'.png'); } return e; }
 Object.keys(UNQIMG).forEach(n=>unqImg({rar:/^그림자 /.test(n)?4:3,name:n}));
+for(let g=1;g<=5;g++)unqImg({pk:g});   /* 곡괭이 그림도 미리 불러둠 (처음 볼 때 임시 그림이 보이다가 창을 껐다 켜야 바뀌던 문제) */
 function itemIcon(it){
   if(isGem(it)){ const ge=gemImg(it), key='G|'+it.gk+'|'+gemTier(it); let e=ge.ok?iconCache.get(key):null; if(e)return e;
     const cvs=document.createElement('canvas'); cvs.width=cvs.height=96; const c=cvs.getContext('2d');
