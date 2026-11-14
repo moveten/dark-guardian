@@ -1496,7 +1496,7 @@ body.mining #mineOut{position:fixed;left:50%;transform:translateX(-50%);bottom:c
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.1.0691</div>
+    <div class="ver" id="verT">v0.7.1.0692</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -2469,7 +2469,8 @@ const TOWN_B={tw:{n:'그림자 타워',sy:'tw-tower',mat:'shard',main:1,tower:1,
 const TOWN_FAM=[{e:'🌑',nm:'그림자',mat:'shard',main:'tw',aux:'lab'},{e:'✦',nm:'각성',mat:'ashard',main:'al',aux:'mill'}];
 /* ===== 광산 (관리자 시범 · 미공개) — 층·광석·곡괭이는 표에 한 줄씩 추가하면 확장돼요 (지하 10층·광석 20종 이상 예정) ===== */
 const MINE_PICK_P=.02;   /* 1-1 보스(묘지기 그라크) 곡괭이 드랍 확률 */
-const PICKS=[null,{n:'낡은 곡괭이',rar:0,y:1}];   /* 곡괭이 등급(1부터): 이름 · 색 등급 · 채굴량(조각 개수) 배율 — 상위 등급은 여기에 추가 */
+const PICKS=[null,{n:'낡은 곡괭이',rar:0,y:1,sp:1}];   /* 곡괭이 등급(1부터): 이름 · 색 등급 · y 채굴량(조각 개수) 배율 · sp 채굴 속도 배율(다음 등급 1.1 → 1.2 …) — 상위 등급은 여기에 추가 */
+const MINE_SWING=1.5;   /* 곡괭이질 기본 간격(초, 낡은 곡괭이 · 공격속도 보너스 0 기준) — 공격속도 옵션·민첩의 영향은 받음 */
 const ORES={   /* 광석: 이름 · 레벨(광부 레벨 기준) · 색 · g = 조각 1개 판매가 · 체력은 레벨로 자동 계산(oreHp) — 그림: img/ore_키.webp(광석) · img/frag_키.webp(조각) */
   ash:{n:'잿돌',lv:1,c:'#9a948a',g:1},            /* 판매만 (경험치·레벨업용) */
   rust:{n:'녹슨 구리',lv:5,c:'#c87a4a',g:1},       /* 용도 미정 */
@@ -4092,7 +4093,7 @@ function tryUse(key,hold){
   if(G.mine&&key!=='atk'){ if(!hold&&T-(G.mine.ts||-9)>2){ G.mine.ts=T; toast('⛏️ 광산에서는 기본 공격(채굴)만 쓸 수 있어요','#e0c080'); } return; }
   if(key==='atk'){
     if(me.atkCd>0)return;
-    const sb=spiritBuff(), fb=me.buffs.fury&&me.buffs.fury.t>0&&me.buffs.fury.ias?1+me.buffs.fury.ias:1, b=(me.buffs.awk&&me.buffs.awk.t>0?1.2:1)*(me.buffs.berserk?1.4:1)*(me.buffs.rage&&me.buffs.rage.t>0?1+me.buffs.rage.ias:1)*fb*(sb?1+sb.ias:1)*casDevAs(); me.atkCd=me.D.atkInt/b;
+    const sb=spiritBuff(), fb=me.buffs.fury&&me.buffs.fury.t>0&&me.buffs.fury.ias?1+me.buffs.fury.ias:1, b=(me.buffs.awk&&me.buffs.awk.t>0?1.2:1)*(me.buffs.berserk?1.4:1)*(me.buffs.rage&&me.buffs.rage.t>0?1+me.buffs.rage.ias:1)*fb*(sb?1+sb.ias:1)*casDevAs(); me.atkCd=G.mine?MINE_SWING*(me.D.atkInt/.62)/(((PICKS[(me.eq.weapon&&me.eq.weapon.pk)|0]||PICKS[1]).sp)||1):me.D.atkInt/b;   /* 광산: 느린 곡괭이질 (공속 보너스 비례 · 곡괭이 등급 속도) */
     sfx(meleeOf(me)?'swing':'cast'); doCast('atk',atkRg(me),1); me.mp=Math.min(me.D.maxMp,me.mp+1.6+me.D.maxMp*.02); return;
   }
   if(me.sil>0){ if(!hold)toast('🚫 침묵! 일반공격만 쓸 수 있어요','#d0a8ff'); return; }
@@ -7080,7 +7081,7 @@ function startMine(){
   G.gemDone=true; G.wave=0; G.skipUsed=true; G.phase='train'; G.timer=0; G.mobs.length=0; G.ev=[]; G.spawnQ=0; G.lastSq=-1; G.endShown=false; G.coop=false;
   G.waveSides=[]; G.nextSides=[]; G.laneShow=[];
   G.mine={fi:0,slots:[],got:{},pc:0,t0:performance.now(),xpGot:0,brk:0}; mineFloor(0,null);   /* 지상 채석장에서 바로 시작 */ mineHud();
-  if(!isPick(me.eq.weapon))later(1.2,()=>{ if(G.mine)toast('⛏️ 곡괭이를 장착해야 광석을 캘 수 있어요','#e0a070'); }); }
+  if(!isPick(me.eq.weapon))later(1.2,()=>{ if(G.mine)sheetToast('⛏️ 곡괭이를 장착해야 광석을 캘 수 있어요','#e0a070'); }); }
 function mineFloor(fi,from){ const M=G.mine, F=MINE_FL[fi]; M.fi=fi; M.slots=[]; G.mobs.length=0; projs.length=zones.length=ground.length=0;
   setTheme(F.bg?0:(F.th|0));   /* 광산 배경 그림이 있으면 기본 테마(바닥 효과 최소) */
   const st=from==='dn'?[MINE_PT.up[0],MINE_PT.up[1]+80]:from==='up'?[MINE_PT.dn[0],MINE_PT.dn[1]-80]:[VX,VY];
@@ -7092,7 +7093,7 @@ function mineFloor(fi,from){ const M=G.mine, F=MINE_FL[fi]; M.fi=fi; M.slots=[];
 function mineSpawn(sl,quiet){ const O=ORES[sl.k], m=spawnMob(0,sl.x,sl.y,false); Object.assign(m,{ore:sl.k,slot:sl,scare:1,hx:sl.x,hy:sl.y,x:sl.x,y:sl.y,hp:oreHp(O),max:oreHp(O),dmg:0,xp:0,spd:0,cd:99,r:24,elite:0,boss:0,seed:Math.random()*1000,flash:0});
   sl.m=m; sl.t=0; if(!quiet){ efx.push({k:'ring',x:sl.x,y:sl.y,r0:6,r1:40,t:0,life:.35,col:O.c,w:5}); } }
 function oreHit(m,fx){ if(m.dead||(fx&&(fx.mk||fx.pet||fx.sm)))return; const O=ORES[m.ore], M=G.mine||{};
-  if(!isPick(me.eq.weapon)){ if(T-(M.tw||-9)>2.5){ M.tw=T; toast('⛏️ 곡괭이를 장착해야 광석을 캘 수 있어요','#e0a070'); } return; }
+  if(!isPick(me.eq.weapon)){ if(T-(M.tw||-9)>1.2){ M.tw=T; addNum(m.x,m.y-m.r-10,'⛏️ 곡괭이 장착 필요','#ff8a7a',false); } return; }   /* 광석 위 안내 (레벨 부족 안내와 같은 방식) */
   if(minerLv(me)<O.lv){ m.flash=.1; oreHitFx(m,O); if(T-(M.tl||-9)>1.2){ M.tl=T; addNum(m.x,m.y-m.r-10,`광부 Lv${O.lv} 필요`,'#ff8a7a',false); } return; }   /* 레벨이 모자라도 캐는 이펙트는 나오지만 깎이지 않음 */
   const d=minePow(me); m.hp-=d; m.flash=.1; oreHitFx(m,O); addNum(m.x,m.y-m.r-6,d,'#e8dcc0',false);
   if(m.hp<=0)oreBreak(m); }
