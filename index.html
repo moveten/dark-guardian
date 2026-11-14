@@ -1496,7 +1496,7 @@ body.mining #mineOut{position:fixed;left:50%;transform:translateX(-50%);bottom:c
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.1.0698</div>
+    <div class="ver" id="verT">v0.7.1.0699</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -8137,6 +8137,7 @@ function drawSpirit(o,t,left,max){ const a=t*1.6+(o===me?0:2), x=o.x+Math.cos(a)
   if(SI){ const cw=SI.width/3, fi=Math.floor((((t*1.4+(o===me?0:1))%1)+1)%1*3)%3, h=46, w=h*cw/SI.height; ctx.save(); ctx.translate(x,y); if(Math.sin(a)>0)ctx.scale(-1,1); ctx.drawImage(SI,fi*cw,0,cw,SI.height,-w/2,-h/2,w,h); ctx.restore(); }
   else { cball(x,y-2,9,'#e8fbff',2); ctx.fillStyle='#1b4a5a'; ctx.fillRect(x-3.6,y-4,2.2,3); ctx.fillRect(x+1.4,y-4,2.2,3); cpoly([[x-6,y+3],[x,y+17],[x+6,y+3]],'rgba(220,250,255,.75)',1.4); }
   ctx.restore(); }
+function swDrop(c,px,py,vx,vy,al,sc){ const an=Math.atan2(vy,vx)-Math.PI/2; c.save(); c.globalAlpha=al; c.translate(px,py); c.rotate(an); c.scale(sc,sc); c.beginPath(); c.moveTo(0,-5); c.quadraticCurveTo(3.6,0,0,3.4); c.quadraticCurveTo(-3.6,0,0,-5); c.fillStyle='#a8e0ff'; c.fill(); c.strokeStyle='#4a8ab8'; c.lineWidth=1; c.stroke(); c.restore(); }
 function drawPlayer(o,isMe,t){
   if(o.x===undefined)return;
   const C=CLASSES[o.cls], x=o.x, y=o.y-(o.z||0), PS=1.3;
@@ -8211,8 +8212,8 @@ function drawPlayer(o,isMe,t){
   ctx.restore();
   }
   // 이름 · 레벨 · 생명/마나 바
-  if(isMe&&G.mine&&G.mine.sw){ const sw=G.mine.sw, el=T-sw.t; if(el<.8){ for(let k=0;k<3;k++){ const p=el/.8-k*.12; if(p<=0||p>=1)continue; const px=x+sw.d*(13+(14+k*7)*p), py=y-31-9*Math.sin(p*2.4)+(k-1)*5+24*p*p, vx=sw.d*(14+k*7), vy=-9*2.4*Math.cos(p*2.4)+48*p, an=Math.atan2(vy,vx)-Math.PI/2;   /* 뾰족한 쪽이 머리 방향(날아가는 반대쪽) */
-      ctx.save(); ctx.globalAlpha=Math.min(1,(1-p)*1.6); ctx.translate(px,py); ctx.rotate(an); ctx.beginPath(); ctx.moveTo(0,-5); ctx.quadraticCurveTo(3.6,0,0,3.4); ctx.quadraticCurveTo(-3.6,0,0,-5); ctx.fillStyle='#a8e0ff'; ctx.fill(); ctx.strokeStyle='#4a8ab8'; ctx.lineWidth=1; ctx.stroke(); ctx.restore(); } } }   /* 땀방울: 광석을 마주 보는 캐릭터의 반대쪽(뒤통수)에서 바깥으로 튀어 떨어짐 */
+  if(isMe&&G.mine&&G.mine.sw){ const sw=G.mine.sw, el=T-sw.t; if(el<.95){ const AN=[-1.15,-.7,-.3,.15], SP=[70,95,60,80], DL=[0,.08,.15,.22];   /* 땀방울: 광석 반대쪽 뒤통수에서 4방울이 시간차·각도차로 흩뿌려져 포물선으로 떨어짐(뾰족한 쪽이 머리 방향) */
+    for(let k=0;k<4;k++){ const e=el-DL[k]; if(e<=0||e>.7)continue; const cs=sw.d*Math.cos(AN[k])*SP[k], sn=Math.sin(AN[k])*SP[k]; swDrop(ctx,x+sw.d*13+cs*e,y-31+sn*e+130*e*e,cs,sn+260*e,Math.min(1,(1-e/.7)*1.8),.85); } } }
   const nm=(isMe?me.name:(o.name||'동료'))||'', label=`${isMe&&G.mine?'⛏️':''}Lv${isMe&&G.mine?minerLv(me):lv} ${nm}`;   /* 광산: 광부 레벨 */
   ctx.font='700 11px "Noto Sans KR",sans-serif'; ctx.textAlign='center'; ctx.lineJoin='round'; ctx.lineWidth=3.5; ctx.strokeStyle='rgba(0,0,0,.9)'; ctx.strokeText(label,x,y-45); ctx.fillStyle=isMe?'#fff3dc':C.col; ctx.fillText(label,x,y-45);
   { const ic=[];
