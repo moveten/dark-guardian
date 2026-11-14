@@ -1496,7 +1496,7 @@ body.mining #mineOut{position:fixed;left:50%;transform:translateX(-50%);bottom:c
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.1.0706</div>
+    <div class="ver" id="verT">v0.7.1.0707</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -7132,10 +7132,14 @@ function oreHit(m,fx){ if(m.dead||(fx&&(fx.mk||fx.pet||fx.sm)))return; const O=O
   if(ef<=.65){ const lf=G.lowFx?.5:1; for(let i=0;i<Math.round(8*lf);i++)parts.push({x:m.x+(me.x-m.x)*.35,y:m.y-m.r*.4,vx:rand(-260,260),vy:-rand(150,380),g:700,dm:.9,t:0,life:rand(.25,.4),col:Math.random()<.5?'#fff3c0':'#ffc455',r:rand(3,5),glow:1});   /* 힘겨운 광석(주황·노랑): 쇳불꽃 + 캐릭터 뒤통수 땀 */
     if(T-((M.sw&&M.sw.t)||-9)>1.1)M.sw={t:T,d:me.x>=m.x?1:-1}; } sfx('mine',.92+Math.random()*.16); addNum(m.x,m.y-m.r-6,d,'#e8dcc0',false);
   if(m.hp<=0)oreBreak(m); }
+let _puff=null;
+function puffSpr(){ if(_puff)return _puff; const k=document.createElement('canvas'); k.width=k.height=64; const g=k.getContext('2d'), r=g.createRadialGradient(32,32,0,32,32,32); r.addColorStop(0,'rgba(215,198,170,.9)'); r.addColorStop(.55,'rgba(200,183,155,.5)'); r.addColorStop(1,'rgba(200,183,155,0)'); g.fillStyle=r; g.fillRect(0,0,64,64); return _puff=k; }   /* 흐린 둥근 먼지 그림: 한 번만 만들어 재사용 */
 let MINE_FX=1;   /* 채굴 타격 이펙트: 1 = 돌 파편 + 먼지 (A안 확정) · 2 쇳불꽃 · 3 충격 고리 */
 function oreHitFx(m,O){ const dx=me.x-m.x, dy=me.y-m.y, dd=Math.max(1,hyp(dx,dy)), hx=m.x+dx/dd*m.r*.5, hy=m.y-m.r*.4, lf=G.lowFx?.5:1, P=(o)=>parts.push(o);
   if(MINE_FX===1){ for(let i=0;i<Math.round(8*lf);i++)P({x:hx,y:hy,vx:rand(-170,170),vy:-rand(200,340),g:1100,dm:.99,t:0,life:rand(.5,.75),col:Math.random()<.55?O.c:'#3e3830',r:rand(6,10)});   /* A: 돌 파편이 튀어 떨어짐 + 먼지 */
-    for(let i=0;i<Math.round(5*lf);i++)P({x:hx+rand(-8,8),y:hy+rand(-6,6),vx:rand(-40,40),vy:-rand(20,50),dm:.92,t:0,life:rand(.45,.7),col:'rgba(200,185,160,.5)',r:rand(14,22)}); }
+    /* 먼지(B안): 잔먼지 알갱이가 부채꼴로 흩어지고 큰 퍼프가 뒤따름 · 둥근 흐린 그림으로 그림(네모 아님) */
+    for(let i=0;i<Math.round(9*lf);i++){ const a=rand(-Math.PI*.95,-Math.PI*.05), v=rand(30,95); P({x:hx+rand(-6,6),y:hy+rand(-4,4),vx:Math.cos(a)*v,vy:Math.sin(a)*v*.55-10,g:60,dm:.9,t:0,life:rand(.4,.7),r:rand(4,9),puff:rand(1.4,2.2),pa:.75}); }
+    for(let i=0;i<Math.round(2*lf);i++)P({x:hx+rand(-10,10),y:hy+rand(0,6),vx:rand(-22,22),vy:-rand(8,18),dm:.92,t:0,life:.6,r:rand(12,17),puff:1.7,pa:.55}); }
   else if(MINE_FX===2){ impact(hx,hy,'255,225,150',60); for(let i=0;i<Math.round(12*lf);i++){ const a=-Math.PI/2+rand(-1.4,1.4), v=rand(320,560); P({x:hx,y:hy,vx:Math.cos(a)*v,vy:Math.sin(a)*v,g:500,dm:.9,t:0,life:rand(.22,.38),col:Math.random()<.5?'#fff3c0':'#ffc455',r:rand(3,5),glow:1}); } }   /* B: 쇳불꽃 + 번쩍 */
   else if(MINE_FX===3){ efx.push({k:'ring',x:hx,y:hy,r0:8,r1:70,t:0,life:.3,col:O.c,w:6}); for(let i=0;i<Math.round(7*lf);i++)P({x:hx,y:hy,vx:rand(-160,160),vy:-rand(160,300),g:800,dm:.98,t:0,life:rand(.45,.65),col:O.c,r:rand(5,7),glow:1});   /* C: 충격 고리 + 반짝이는 광석 조각 */
     for(let i=0;i<Math.round(4*lf);i++)P({x:hx,y:hy,vx:rand(-120,120),vy:-rand(120,220),g:900,dm:.98,t:0,life:rand(.45,.6),col:'#6e665a',r:rand(6,8)}); }
@@ -8577,7 +8581,7 @@ function render(t){
     if(gh.length){ ctx.save(); ctx.globalAlpha=.5; for(const a of gh)a.f(); ctx.restore(); } }   /* 성 뒤에 가려진 몹·플레이어는 반투명하게 한 번 더 그려서 보이게 */
   casAimTagsDraw(); drawProjs(); drawEfx(t); drawAmbient(t); if(PET.on&&PET.fx.length)drawPetFxTop();   /* 레벨업·스킬 이름표는 몹·성 위에 그려서 가려지지 않게 */
   drawHealFx(t);
-  for(const p of parts){ if(p.glow)continue; ctx.globalAlpha=1-p.t/p.life; ctx.fillStyle=p.col; ctx.fillRect(p.x-p.r/2,p.y-p.r/2,p.r,p.r);} ctx.globalAlpha=1;
+  for(const p of parts){ if(p.glow)continue; if(p.puff){ const a=p.t/p.life, rr=p.r*(1+a*p.puff); ctx.globalAlpha=Math.pow(1-a,1.3)*p.pa; ctx.drawImage(puffSpr(),p.x-rr,p.y-rr*.8,rr*2,rr*1.6); continue; } ctx.globalAlpha=1-p.t/p.life; ctx.fillStyle=p.col; ctx.fillRect(p.x-p.r/2,p.y-p.r/2,p.r,p.r);} ctx.globalAlpha=1;
   ctx.globalCompositeOperation='lighter';
   for(const p of parts){ if(!p.glow)continue; const a=1-p.t/p.life; ctx.globalAlpha=a; ctx.fillStyle=p.col; ctx.beginPath(); ctx.arc(p.x,p.y,p.r*(.6+a*.6),0,6.283); ctx.fill(); ctx.globalAlpha=a*.25; ctx.beginPath(); ctx.arc(p.x,p.y,p.r*2.6,0,6.283); ctx.fill(); }
   ctx.globalAlpha=1; ctx.globalCompositeOperation='source-over';
