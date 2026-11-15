@@ -1507,7 +1507,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.1.0720</div>
+    <div class="ver" id="verT">v0.7.1.0721</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -6051,6 +6051,7 @@ function bulkSellMisc(P){ const gl=()=>P.misc.filter(it=>isGem(it)&&!it.jw&&!it.
     m.querySelector('#bmGo').onclick=()=>{ let g=0,n=0; P.misc.forEach((it,i)=>{ if(isGem(it)&&!it.jw&&!it.lock){ const k=GEM_TIER.findIndex(t=>t.il===(it.ilvl|0)); if(k>=0&&sel.has(k)){ g+=GEM_TIER[k].g; n++; P.misc[i]=null; } } }); if(!n)return; P.gold=(P.gold|0)+g; selItem=null; shopMsg=`${n}개 판매 +${g}G`; sfx('coin'); saveSrc(P); uiDirty=true; closeModal(); rerender(); sheetToast&&sheetToast(`${n}개 판매 +${g.toLocaleString()}G`); }; }); }
 function psTabs(){ const cur=me.es===1?1:0; return `<div class="hg" role="tablist" aria-label="아이템세팅">${PSN.map((n,i)=>`<b role="tab" data-ps="${i}"${cur===i?' class="on" aria-selected="true"':''}>${n}</b>`).join('')}</div>`; }
 function renderBag(){
+  cpCache.clear();
   shardAdd(me,0); shardAdd(me,0,'ashard'); shardAdd(me,0,'cshard'); markTabs(); sheetHead();
   const eqOrder=['weapon','armor','helm','amulet','ring1','ring2'].concat(['shield']);
   if(gemSock){ bagTab='eq'; cellSel=true; }
@@ -6243,8 +6244,13 @@ const ownOk=(it,cls)=>{ const c=ownCls(it); return !c||c===(cls||me.cls); };
 function ownTag(it){ const c=ownCls(it); if(!c||!CLASSES[c])return ''; const ok=me&&c===me.cls; return `<div class="meta" style="color:${ok?'#ffd84a':'#e07060'};font-weight:700">${ok?'✔ ':'✖ '}${CLASSES[c].n} 전용</div>`; }
 /* 인벤 아이템 선택 시: 장착 중인 아이템보다 레벨이 높은지 낮은지 크게 표시 */
 function cmpCur(it){ if(it.slot==='ring'){ const a=me.eq.ring1,b=me.eq.ring2; return (!a||!b)?null:(ilvOf(a)<=ilvOf(b)?a:b); } return me.eq[it.slot]||null; }
-const isDowngrade=it=>{ if(!me||!me.eq||Object.values(me.eq).includes(it))return false; const c=cmpCur(it); return !!c&&ilvOf(it)<ilvOf(c); };   /* 장착 중인 것보다 레벨이 낮음 → 붉은 ▼ */
-const isUpgrade=it=>{ if(!me||!me.eq||Object.values(me.eq).includes(it))return false; const c=cmpCur(it); return !!c&&ilvOf(it)>ilvOf(c); };
+/* 가방 칸 모서리 ▲▼ = 지금 장비와 바꿨을 때 전투력이 오르는지(▲)/내리는지(▼). 렌더마다 한 번씩만 계산(cpCache)해서 가볍게 */
+const cpCache=new Map();
+function cpDelta(it){ if(!me||!me.eq||!it||!it.slot||it.slot==='mat'||Object.values(me.eq).includes(it))return 0; if(cpCache.has(it))return cpCache.get(it);
+  const c=cmpCur(it); let d=0; if(c){ try{ if(!cpCache.has('base'))cpCache.set('base',calcCP(me)); const k=it.slot==='ring'?(c===me.eq.ring1?'ring1':'ring2'):it.slot; d=calcCP({...me,eq:{...me.eq,[k]:it}})-cpCache.get('base'); }catch(e){ d=0; } }
+  cpCache.set(it,d); return d; }
+const isDowngrade=it=>cpDelta(it)<0, isUpgrade=it=>cpDelta(it)>0;
+const lvArrow=it=>{ if(!me||!me.eq||Object.values(me.eq).includes(it))return ''; const c=cmpCur(it); if(!c)return ''; const a=ilvOf(it),b=ilvOf(c); return a>b?' ▲':a<b?' ▼':''; };   /* 정보창 '아이템 레벨 nn ▲' (흰색) */
 function lvCmp(it){ if(!me||!me.eq||Object.values(me.eq).includes(it)||!it.slot||it.slot==='mat')return '';   /* 아이템 정보창: 레벨 비교 대신 '교체했을 때 전투력' 한 줄만 (가방 칸의 ▲▼는 레벨 차이 그대로) */
   const k=it.slot==='ring'?(me.eq.ring1&&me.eq.ring2?(cmpCur(it)===me.eq.ring1?'ring1':'ring2'):eqKeyFor(it)):it.slot;
   const bx=(bd,bg,t)=>`<div style="margin:6px 0 2px;padding:6px 10px;border-radius:8px;background:${bg};border:1px solid ${bd};max-width:100%;box-sizing:border-box">${t}</div>`;
@@ -6263,7 +6269,7 @@ function itemLines(it,opt){
   if(isOreFr(it)){ const O=ORES[it.ok]; return `<div style="display:flex;gap:10px;align-items:center"><div style="width:56px;height:56px;flex:none;display:grid;place-items:center;background:#0a0807;border:1px solid #5a5044;border-radius:8px"><img src="img/frag_${it.ok}.webp" alt="" style="width:48px;height:48px;object-fit:contain"></div><div><div class="in" style="color:${O.c}">${esc(it.name)}</div><div class="meta">수량 <b style="color:#fff">${it.n}</b> / ${SHARD_MAX} (한 칸 최대)</div></div></div><div class="meta" style="margin:6px 0">광산에서 ${esc(O.n)}을(를) 캐면 얻는 조각이에요. 광부 경험치와 레벨업에 쓰이고, 아직 다른 쓰임새는 없어요.</div>`; }
   if(isGem(it)){ const t=gemTier(it), gc=GEM_C[it.gk]||'#fff'; return `<div style="display:flex;gap:10px;align-items:center"><span style="position:relative;flex:none;display:flex"><img src="${itemIcon(it).url}" alt="" style="width:56px;height:56px;flex:none;background:#0a0807;border:1px solid ${gc};border-radius:8px">${opt&&opt.lk?`<button class="lkb${it.lock?' on':''}" data-lk="1" aria-label="${it.lock?'잠금 해제':'잠금'}">${lockSvg(!!it.lock)}</button>`:''}</span><div><div class="in" style="color:${gc}">${esc(it.name)}</div><div class="meta" style="color:#fff">${it.jw?'주얼 · 옵션 2개':'아이템 레벨 '+(it.ilvl|0)+' · '+GEM_TIER[t-1].n}</div></div></div><ul>${gemOptText(it).split(' / ').map(x=>'<li style="color:#afeeee">'+esc(x)+'</li>').join('')}${opt&&opt.st?'<li style="color:#707070;list-style:none;font-size:12px">가방으로 옮긴 후 사용</li>':''}</ul><div class="meta" style="margin:4px 0">장비의 빈 소켓에 박아서 쓰는 ${it.jw?'주얼':'보석'}이에요. 판매가 ${gemSellV(it).toLocaleString()}G</div>`; }
   if(isShard(it)) return `<div style="display:flex;gap:10px;align-items:center"><div style="width:56px;height:56px;flex:none;display:grid;place-items:center;background:#0a0807;border:1px solid ${RARC[4]};border-radius:8px">${shardOrb(it.n,32,shMat(it))}</div><div><div class="in" style="color:${RARC[4]}">${SHDK[shMat(it)].n}</div><div class="meta">수량 <b style="color:#fff">${it.n}</b> / ${SHARD_MAX} (한 칸 최대)</div></div></div><div class="meta" style="margin:6px 0">${SHDK[shMat(it)].src} 얻는 재료예요. ${SHDK[shMat(it)].N()}개로 ${SHDK[shMat(it)].to} 하나를 교환할 수 있어요. 개당 ${SHARD_SELL.toLocaleString()}G에 판매할 수도 있어요.</div>`;
-  let s=`<div style="display:flex;gap:10px;align-items:center"><span style="position:relative;flex:none;display:flex"><img src="${itemIcon(it).url}" alt="" style="width:56px;height:56px;flex:none;background:#0a0807;border:${HSET(it)?'2px solid '+HSET(it).c:'1px solid '+RARC[it.rar]};border-radius:8px">${opt&&opt.lk?`<button class="lkb${it.lock?' on':''}" data-lk="1" aria-label="${it.lock?'잠금 해제':'잠금'}">${lockSvg(!!it.lock)}</button>`:''}</span><div><div class="in" style="color:${RARC[it.rar]}">${nameTag(it.enh>0?'+'+it.enh+' ':'',it.name,it)}</div>${hsetChip(it)}<div class="meta" style="color:#fff">아이템 레벨 ${ilvOf(it)}${it.enh>0?` <span style="color:#ffd84a">(기본 ${it.ilvl} + 강화 ${it.enh})</span>`:''}</div>${ownTag(it)}<div class="meta">${reqHtml(it)}</div></div></div>`+lvCmp(it);
+  let s=`<div style="display:flex;gap:10px;align-items:center"><span style="position:relative;flex:none;display:flex"><img src="${itemIcon(it).url}" alt="" style="width:56px;height:56px;flex:none;background:#0a0807;border:${HSET(it)?'2px solid '+HSET(it).c:'1px solid '+RARC[it.rar]};border-radius:8px">${opt&&opt.lk?`<button class="lkb${it.lock?' on':''}" data-lk="1" aria-label="${it.lock?'잠금 해제':'잠금'}">${lockSvg(!!it.lock)}</button>`:''}</span><div><div class="in" style="color:${RARC[it.rar]}">${nameTag(it.enh>0?'+'+it.enh+' ':'',it.name,it)}</div>${hsetChip(it)}<div class="meta" style="color:#fff">아이템 레벨 ${ilvOf(it)}${opt&&opt.lk?lvArrow(it):''}${it.enh>0?` <span style="color:#ffd84a">(기본 ${it.ilvl} + 강화 ${it.enh})</span>`:''}</div>${ownTag(it)}<div class="meta">${reqHtml(it)}</div></div></div>`+lvCmp(it);
   const bt=baseText(it); if(bt)s+=`<div>${bt}</div>`;
   if(BASEFX[it.base]&&it.slot==='weapon') s+=`<div class="meta" style="color:#9fd0ff">▪ ${BASEFX[it.base].t}</div>`; s+=wpPenLine(it);
   if(it.pk) s+=`<div class="meta" style="color:#e0c080">⛏️ 광산 채굴 도구 · 채굴 속도 ×${((PICKS[it.pk]||PICKS[1]).sp).toFixed(1)}<br><span style="color:#a89a80">가지고 있어야 광산에 들어갈 수 있어요</span></div>`;
