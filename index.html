@@ -1507,7 +1507,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.1.0740</div>
+    <div class="ver" id="verT">v0.7.1.0741</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -6623,7 +6623,7 @@ try{ for(const id of charIds())for(const k of ['dkdef2.dps.'+id,'dkdef2.rk.dps.'
 const RK_URL=SB_URL+'/rest/v1/dd_rank';
 const RKSL=['weapon','helm','armor','shield','amulet','ring1','ring2'], RKSN={weapon:'무기',helm:'투구',armor:'갑옷',shield:'방패',amulet:'목걸이',ring1:'반지',ring2:'반지'};
 function rkHead(extra){ const h={apikey:SB_KEY,'Content-Type':'application/json'}; if(!/^sb_/.test(SB_KEY))h.Authorization='Bearer '+SB_KEY; return Object.assign(h,extra||{}); }
-function rkItem(it){ if(!it)return null; return {n:String(it.name||'').slice(0,24),r:it.rar|0,b:String(it.base||'').slice(0,16),l:it.ilvl|0,mn:it.mn|0,mx:it.mx|0,df:it.df|0,bk:it.blk|0,dm:it.dm|0,om:it.om|0,oc:it.slot==='shield'?ocOf(it):undefined,e:it.enh|0,sp:it.sp||undefined,rq:it.req|0,sk:it.sk?1:undefined,gm:it.sk&&it.gm?(it.gm.jw?{k:it.gm.gk,l:it.gm.ilvl|0,w:1,t:it.gm.jt|0,c:it.gm.jc,v:it.gm.jv}:{k:it.gm.gk,l:it.gm.ilvl|0}):undefined,a:(it.aff||[]).slice(0,6).map(a=>({t:a.t,v:a.v|0,c:a.cls,k:a.key}))}; }
+function rkItem(it){ if(!it)return null; return {n:String(it.name||'').slice(0,24),r:it.rar|0,b:String(it.base||'').slice(0,16),l:it.ilvl|0,mn:it.mn|0,mx:it.mx|0,df:it.df|0,bk:it.blk|0,dm:it.dm|0,om:it.om|0,oc:it.slot==='shield'?ocOf(it):undefined,e:it.enh|0,sp:it.sp||undefined,pk:it.slot==='weapon'&&it.pk>0?it.pk|0:undefined,rq:it.req|0,sk:it.sk?1:undefined,gm:it.sk&&it.gm?(it.gm.jw?{k:it.gm.gk,l:it.gm.ilvl|0,w:1,t:it.gm.jt|0,c:it.gm.jc,v:it.gm.jv}:{k:it.gm.gk,l:it.gm.ilvl|0}):undefined,a:(it.aff||[]).slice(0,6).map(a=>({t:a.t,v:a.v|0,c:a.cls,k:a.key}))}; }
 function rkSnap(c){ const D=derive(c), eq={}; for(const k of RKSL){ const x=rkItem(c.eq&&c.eq[k]); if(x)eq[k]=x; }
   const rows=[['생명력',D.maxHp],['마나',D.maxMp],['무기 공격력',`${D.wmn+D.dmg}–${D.wmx+D.dmg}`],['피해 보너스',`+${Math.round(D.str+D.dmgPct)}%`],['방어력',Math.round(D.def)]];
   if(c.cls==='pal'||D.blk>0) rows.push(['막기 확률',D.blk>=(D.blkMax||BLKMAX)?`${D.blkMax||BLKMAX}% (MAX)`:`${D.blk}%`]);
@@ -6699,7 +6699,7 @@ function rkGm(g){ if(!g)return null;
   if(g.w&&JW_KINDS.includes(g.k)){ const o={gk:g.k,jw:1,jt:Math.max(1,Math.min(3,(g.t|0)||1))}; o.ilvl=25*o.jt; if(g.k==='obsidian')o.jv=[Math.max(0,Math.min(60,(g.v&&g.v[0])|0)),Math.max(0,Math.min(8,(g.v&&g.v[1])|0))]; else o.jc=CLASSES[g.c]?g.c:'war'; return o; }
   return GEM_KINDS.includes(g.k)?{gk:g.k,ilvl:[25,50,75].includes(g.l|0)?g.l|0:25}:null; }
 function rkBuildItem(k,x){ const rar=Math.max(0,Math.min(4,x.r|0)); const it={id:0,slot:k.replace(/\d/,''),rar,ilvl:x.l|0,base:String(x.b||''),name:String(x.n||'?'),mn:x.mn|0,mx:x.mx|0,df:x.df|0,blk:x.bk|0,dm:x.dm|0,om:x.om|0,enh:x.e|0,req:x.rq|0,aff:[]}; if(x.sk){ it.sk=1; it.gm=rkGm(x.gm); } if(it.slot==='shield')it.oc=OFFN[x.oc]?x.oc:'pal';
-  if(!it.mx){delete it.mn;delete it.mx;} if(!it.df)delete it.df; if(!it.blk)delete it.blk; if(!it.dm)delete it.dm; if(!it.om)delete it.om; if(x.sp&&SPFX[x.sp])it.sp=x.sp;
+  if(!it.mx){delete it.mn;delete it.mx;} if(!it.df)delete it.df; if(!it.blk)delete it.blk; if(!it.dm)delete it.dm; if(!it.om)delete it.om; if(x.sp&&SPFX[x.sp])it.sp=x.sp; if(it.slot==='weapon'&&x.pk>0&&x.pk<=5)it.pk=x.pk|0;   /* 곡괭이 등급 그림 */
   for(const a of (x.a||[])){ if(a&&AFXBY[a.t]) it.aff.push({t:a.t,v:a.v|0,cls:a.c,key:a.k}); } return it; }
 const rkTt=r=>{ const id=(r&&r.data&&r.data.tt)||(r&&r.tt); return id&&TT_BY[id]?TT_BY[id]:null; }, rkTtChip=r=>{ const t=rkTt(r); return t?`<span class="ttc sm">🏅 ${esc(t.n)}</span>`:''; };   /* 랭킹: 상대가 장착한 칭호(표에 있는 id만 인정) */
 function rkHeadHtml(row){ const c=CLASSES[row.cls]?row.cls:'war';
