@@ -1507,7 +1507,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.1.0751</div>
+    <div class="ver" id="verT">v0.7.1.0752</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -2724,7 +2724,9 @@ const need=l=>l<=58?Math.floor(23*Math.pow(l,1.92)):Math.floor(23*Math.pow(58,1.
 /* ===== 펫 (유니크 '아자젤'): 캐릭터마다 따로 · 도박장에서만 · 경험치 = 그 캐릭터가 얻는 경험치와 같은 양 (펫 Lv10 = 캐릭터 Lv99까지의 누적 경험치) ===== */
 const PETS={azazel:{n:'아자젤',rn:'유니크',col:'#ff9a3a',pn:'지옥불의 가호',an:'업화의 낙인',im:'pet_azazel',un:{3:'지옥불의 가호',5:'업화의 낙인'}},
   trio:{n:'그림자 삼남매',rn:'영웅',col:'#b48cff',pn:'전투 함성',an:'그림자 강습',im:'pet_trio',un:{3:'전투 함성',7:'그림자 강습',10:'감전'},max:15,eq:[0,40,55,65,75,82,88,93,97,99,101,104,106,108,110]},
-  dealer:{n:'베이비 딜러',rn:'레어',col:'#e8c04a',pn:'행운의 칩',an:'단골 우대',im:'pet_dealer',pas:1,un:{3:'행운의 칩',5:'단골 우대'}}};   /* 베이비 딜러(패시브 전용): 행운의 칩(Lv3) 드롭률 +30, 레벨당 +10 → Lv10 +100 · 단골 우대(Lv5) 도박장 비용 -10%, 레벨당 -2% → Lv10 -20% (획득: 도감 행운의 도박꾼 세트 완성 보상) */
+  dealer:{n:'베이비 딜러',rn:'레어',col:'#e8c04a',pn:'행운의 칩',an:'단골 우대',im:'pet_dealer',pas:1,un:{3:'행운의 칩',5:'단골 우대'}},
+  kamakun:{n:'까마쿤',rn:'레어',col:'#b9a7ff',pn:'까악 박자',an:'덤으로 한 조각',im:'pet_kamakun',un:{3:'까악 박자',7:'덤으로 한 조각'}}};   /* 까마쿤(광부 레어 펫, 조합법에서 제작): 까악 박자(Lv3 액티브) 공격 속도 +3%, 레벨당 +1% → Lv10 +10% · 25초마다 8초 · 덤으로 한 조각(Lv7 패시브) 광석 조각 +1개 확률 2%, 레벨당 +1% → Lv10 5% */
+const KAMA={ias:l=>l>=3?3+(l-3):0,pr:l=>l>=7?2+(l-7):0,cd:25,dur:8};   /* 베이비 딜러(패시브 전용): 행운의 칩(Lv3) 드롭률 +30, 레벨당 +10 → Lv10 +100 · 단골 우대(Lv5) 도박장 비용 -10%, 레벨당 -2% → Lv10 -20% (획득: 도감 행운의 도박꾼 세트 완성 보상) */
 const DEALER={mf:l=>l>=3?30+10*(l-3):0,cd:l=>l>=5?10+2*(l-5):0};   /* 삼남매: 전사펫 전투 함성(Lv3) · 검은 그림자 강습(Lv7) · 마법사펫 감전(Lv10) */
 const PET_MAXLV=10, PET_LVEQ=[0,40,55,65,75,82,88,93,97,99], PET_DUP_GOLD=500000;   /* PET_LVEQ: 펫 레벨 n에 필요한 누적 경험치 = 캐릭터 Lv(PET_LVEQ[n-1])까지의 누적 경험치 */
 const PET_TC={};
@@ -4148,7 +4150,7 @@ function tryUse(key,hold){
   if(G.mine&&key!=='atk'){ if(!hold&&T-(G.mine.ts||-9)>2){ G.mine.ts=T; toast('⛏️ 광산에서는 기본 공격(채굴)만 쓸 수 있어요','#e0c080'); } return; }
   if(key==='atk'){
     if(me.atkCd>0)return;
-    const sb=spiritBuff(), fb=me.buffs.fury&&me.buffs.fury.t>0&&me.buffs.fury.ias?1+me.buffs.fury.ias:1, b=(me.buffs.awk&&me.buffs.awk.t>0?1.2:1)*(me.buffs.berserk?1.4:1)*(me.buffs.rage&&me.buffs.rage.t>0?1+me.buffs.rage.ias:1)*fb*(sb?1+sb.ias:1)*casDevAs(); me.atkCd=G.mine?MINE_SWING*(me.D.atkInt/.62)/(((PICKS[(me.eq.weapon&&me.eq.weapon.pk)|0]||PICKS[1]).sp)||1):me.D.atkInt/b;   /* 광산: 느린 곡괭이질 (공속 보너스 비례 · 곡괭이 등급 속도) */
+    const sb=spiritBuff(), fb=me.buffs.fury&&me.buffs.fury.t>0&&me.buffs.fury.ias?1+me.buffs.fury.ias:1, b=(me.buffs.awk&&me.buffs.awk.t>0?1.2:1)*(me.buffs.berserk?1.4:1)*(me.buffs.rage&&me.buffs.rage.t>0?1+me.buffs.rage.ias:1)*fb*(sb?1+sb.ias:1)*casDevAs(), kb=me.buffs.kmk&&me.buffs.kmk.t>0?1+me.buffs.kmk.ias:1; me.atkCd=G.mine?MINE_SWING*(me.D.atkInt/.62)/(((PICKS[(me.eq.weapon&&me.eq.weapon.pk)|0]||PICKS[1]).sp)||1)/kb:me.D.atkInt/(b*kb);   /* 광산: 느린 곡괭이질 (공속 보너스 비례 · 곡괭이 등급 속도) */
     if(!G.mine)sfx(meleeOf(me)?'swing':'cast'); doCast('atk',atkRg(me),1); me.mp=Math.min(me.D.maxMp,me.mp+1.6+me.D.maxMp*.02); return;
   }
   if(me.sil>0){ if(!hold)toast('🚫 침묵! 일반공격만 쓸 수 있어요','#d0a8ff'); return; }
@@ -4398,7 +4400,7 @@ function rvFetch(mn,dt,t){
 const petNow=()=>(G.train&&G.trPet)||petOf(me);   /* 훈련장 '🐾 펫' 버튼으로 임시로 붙인 펫(저장 안 됨) */
 const PET={on:false,x:0,y:0,face:0,an:0,fe:null,cd1:0,cd2:0,fx:[],mk:[],mv:0,scan:0,cast:0};
 function petDrop(){ const f=PET.fe; PET.fe=null; if(f&&f.g&&f.g.carry===PET)f.g.carry=null; }
-function petStart(){ const e=petNow(); PET.on=!!e; PET.fe=null; PET.mk.length=0; PET.fx.length=0; PET.lg=null; PET.sq=null; PET.tc={sl:3,sd:5,ek:7}; PET.cast=0; PET.scan=0; PET.mv=0; if(e&&me){ PET.x=me.x-28; PET.y=me.y+8; PET.cd1=3; PET.cd2=5; } }
+function petStart(){ const e=petNow(); PET.on=!!e; PET.fe=null; PET.mk.length=0; PET.fx.length=0; PET.lg=null; PET.sq=null; PET.tc={sl:3,sd:5,ek:7}; PET.cast=0; PET.scan=0; PET.mv=0; PET.kc=3; if(e&&me){ PET.x=me.x-28; PET.y=me.y+8; PET.cd1=3; PET.cd2=5; } }
 function petFind(f){ if(!ground.length)return; let best=null,bd=1e9;
   for(const g of ground){ if(g.carry||g.warned||me.pickT===g)continue; const dm=hyp(g.x-me.x,g.y-me.y); if(dm<70||dm>f.rad)continue;   /* 내가 바로 줍는 거리 안이거나 탐색 반경 밖은 제외 */
     if(lootFull(g.it)||minions.some(q=>q.fe&&q.fe.g===g))continue; const d=hyp(g.x-PET.x,g.y-PET.y); if(d<bd){bd=d;best=g;} }
@@ -4426,6 +4428,12 @@ function trioSkills(lv,dt){ const C=PET.tc||(PET.tc={sl:3,sd:5,ek:7}); C.sl=Math
   if(lv>=10&&C.ek<=0){ const L=trioNear(TRIO.en,480); if(L.length){ C.ek=TRIO.cd.ek; PET.cast=.4; petTag('감전','⚡','#8f96ff',0,-104); let px=PET.x, py=PET.y-18; const pts=[[px,py]];
       for(const m of L){ hitMob(m,physDmg(TRIO.ek(lv)/100),0,false,{pet:1,pn:'감전',stun:.6,shockP:TRIO.sk}); pts.push([m.x,m.y-m.r*.4]); impact(m.x,m.y,'143,150,255',80); burst(m.x,m.y,'#8f96ff',G.lowFx?4:8,200); }
       PET.fx.push({k:'bolt',pts,t:0,life:.35}); sfx('bolt'); } } }
+/* ===== 까마쿤(레어 펫): 까악 박자(Lv3) 공격 속도 버프 · 덤으로 한 조각(Lv7) 채굴 조각 +1 확률 ===== */
+function kamaSkills(lv,dt){ PET.kc=Math.max(0,(PET.kc===undefined?3:PET.kc)-dt); if(lv<3||PET.kc>0||me.dead)return;
+  const act=G.mine?(me.swing>0||me.atkCd>0):(petCombat()&&G.mobs.some(m=>!m.dead&&hyp(m.x-me.x,m.y-me.y)<420)); if(!act)return;   /* 광산: 곡괭이질 중 · 전투: 가까이 적이 있을 때 */
+  PET.kc=KAMA.cd; me.buffs.kmk={ias:KAMA.ias(lv)/100,t:KAMA.dur,m:KAMA.dur}; PET.cast=.5; sfx('rare'); petTag('까악 박자','🎵','#b9a7ff');
+  efx.push({k:'ring',x:me.x,y:me.y+10,r0:8,r1:60,t:0,life:.45,col:'#b9a7ff',w:6}); burst(me.x,me.y+6,'#d8ccff',G.lowFx?6:14,240); }
+function kamaExtra(){ const e=petOf(me); if(!e||e.id!=='kamakun')return 0; const p=KAMA.pr(e.lv||petLvOf(e.xp|0,'kamakun')); if(p>0&&Math.random()*100<p){ later(.15,()=>{ if(G.mine)petTag('덤으로 한 조각','🪨','#b9a7ff'); }); return 1; } return 0; }
 function drawTrio(){ const x=PET.x, y=PET.y, dir=Math.cos(PET.face)>=0?1:-1, mv=PET.mv, an=PET.an, SP={};
   for(const k of ['war','sorc','shd']){ SP[k]=sprGet('pet_trio_'+k); if(!SP[k])return; }
   const F=[['war',-17,3,24],['sorc',0,-5,27],['shd',17,3,23]];
@@ -4448,6 +4456,7 @@ function updatePet(dt){
   if(!go){ tx=me.x+(Math.cos(me.face||0)>=0?-30:30); ty=me.y+10; const d=hyp(tx-PET.x,ty-PET.y); if(d>420){ PET.x=tx; PET.y=ty; } else if(d>14)go=true; }
   PET.mv=0; if(go){ const dx=tx-PET.x, dy=ty-PET.y, d=hyp(dx,dy)||1, st=Math.min(d,sp*dt); PET.x+=dx/d*st; PET.y+=dy/d*st; if(Math.abs(dx)>2)PET.face=dx>0?0:Math.PI; PET.mv=1; }
   if(e.id==='trio'){ trioSkills(e.lv||1,dt); return; }
+  if(e.id==='kamakun'){ kamaSkills(e.lv||1,dt); return; }
   if(PETS[e.id].pas)return;   /* 패시브 전용 펫(베이비 딜러)은 스킬이 없어요 */
   /* 스킬 (자동 발동) */
   if(f.buf){ if(PET.cd1>0)PET.cd1=Math.max(0,PET.cd1-dt); else if(petCombat()&&G.mobs.some(m=>!m.dead&&hyp(m.x-me.x,m.y-me.y)<420))petBuff(f); }
@@ -5794,6 +5803,7 @@ const petN=n=>n>=10000?Math.round(n/1e4).toLocaleString('ko-KR')+'만':Math.roun
 /* ===== 펫 정보 화면 공통 양식 (삼남매 양식이 기본): 머리 카드 · 레벨 로드맵 · 스킬 카드 ===== */
 const PET_TH={azazel:{bd:'#8a4a1a',bg:'#1a0f08',bg2:'#241408',bar:['#ff6a1f','#ffb13a'],on:['#ff7a1f','#ffc04a'],off:'#2a1a10',mk:{3:'🔥',5:'🔥'},mkt:'🔥 Lv3 · 🔥 Lv5',tagc:'#ff9a3a',tagt:'#2a1608'},
   dealer:{bd:'#8a6a1a',bg:'#1a1406',bg2:'#241a08',bar:['#c98a1a','#ffe27a'],on:['#d9a020','#ffe27a'],off:'#2a200c',mk:{3:'🍀',5:'🎰'},mkt:'🍀 Lv3 · 🎰 Lv5',tagc:'#5aa8ff',tagt:'#06142a'},
+  kamakun:{bd:'#5a4a7a',bg:'#120e1c',bg2:'#1a1428',bar:['#6a4cc0','#b9a7ff'],on:['#7a5cd0','#b9a7ff'],off:'#241a34',mk:{3:'🎵',7:'🪨'},mkt:'🎵 Lv3 · 🪨 Lv7',tagc:'#5aa8ff',tagt:'#06142a'},
   trio:{bd:'#6a4aa0',bg:'#150f1e',bg2:'#1a1224',bar:['#7a4cff','#d08cff'],on:['#8a5cff','#d08cff'],off:'#241a2e',mk:{3:'⚔️',7:'🌑',10:'⚡'},mkt:'⚔️ Lv3 · 🌑 Lv7 · ⚡ Lv10',tagc:'#b48cff',tagt:'#1b0f2e'}};
 const TRI_C={war:'#e0708a',shd:'#b48cff',sorc:'#8f96ff'};
 function petHead(id,lv,e,bar,act){ const P=PETS[id], H=PET_TH[id], mx=petMax(id), T=petT(id), max=lv>=mx, lo=T[lv-1], hi=max?T[mx-1]:T[lv], pct=max?100:Math.max(0,Math.min(100,((e?e.xp:lo)-lo)/(hi-lo)*100));
@@ -5806,6 +5816,10 @@ function petSkCard(col,img,nm,un,lv,dsOn,dsOff,bg){ const on=lv>=un, ic=`<img al
   return on?`<div class="pt-card pt-sk" style="border-color:${col};background:${bg}"><h4 style="color:${col};display:flex;align-items:center;gap:8px">${ic}<span>${nm}</span><span class="pt-pill" style="border-color:${col};background:#2a1b3c;color:#fff0dc;margin-left:auto">자동 발동</span></h4>${dsOn}</div>`
    :`<div class="pt-card pt-sk pt-lock" style="border-color:#4a3a5a;background:#150f1e"><h4 style="color:#a898c8;display:flex;align-items:center;gap:8px">${ic}<span>${nm}</span><span class="pt-pill" style="border-color:#6a5a8a;background:#241a30;color:#bfb0dc;margin-left:auto">Lv${un} 해금</span></h4><div class="nm">🔒 Lv${un}에 해금돼요</div><div class="ds">${dsOff}</div></div>`; }
 function petSkHtml(id,lv){
+  if(id==='kamakun'){ const H=PET_TH.kamakun, C='#b9a7ff', bg=H.bg2, nxI=lv<10?`다음 Lv${lv+1} +${KAMA.ias(lv+1)}%`:'최대', nxP=lv<10?`다음 Lv${lv+1} ${KAMA.pr(lv+1)}%`:'최대';
+    const pas=(col,nm,un,on,off)=>{ const ok=lv>=un; return `<div class="pt-card pt-sk${ok?'':' pt-lock'}" style="border-color:${ok?col:'#4a3a5a'};background:${ok?bg:'#150f1e'}"><h4 style="color:${ok?col:'#a898c8'};display:flex;align-items:center;gap:8px"><span>${nm}</span><span class="pt-pill" style="border-color:${ok?col:'#6a5a8a'};background:#241a30;color:#fff0dc;margin-left:auto">${ok?'패시브':'Lv'+un+' 해금'}</span></h4>${ok?on:`<div class="nm">🔒 Lv${un}에 해금돼요</div><div class="ds">${off}</div>`}</div>`; };
+    return petSkCard(C,'pet_kamakun','까악 박자',3,lv,`<div class="nm">${KAMA.dur}초간 공격 속도 증가 (광산에서는 채굴 속도)</div><div class="ds">공격 속도 <b>+${KAMA.ias(lv)}%</b> (${nxI}) · 쿨타임 <b>${KAMA.cd}초</b><br>곡괭이질·전투를 시작하면 자동으로 발동해요</div>`,`공격 속도 +${KAMA.ias(3)}% → Lv10 +${KAMA.ias(10)}% (레벨당 +1%) · ${KAMA.dur}초 · 쿨타임 ${KAMA.cd}초`,bg)
+     +pas(C,'덤으로 한 조각',7,`<div class="nm">광석을 캘 때 <b>${KAMA.pr(lv)}%</b> 확률로 조각 <b>+1개</b></div><div class="ds">레벨이 오를 때마다 +1% (${nxP})</div>`,`조각 +1개 확률 ${KAMA.pr(7)}% → Lv10 ${KAMA.pr(10)}% (레벨당 +1%)`); }
   if(id==='azazel'){ const f=petFx(lv), a=petFx(3), z=petFx(10), n5=petFx(5), n10=petFx(10), H=PET_TH.azazel;
     const nextDur=lv<10?`다음 Lv${lv+1} ${petFx(lv+1).bdur}초`:'최대';
     const nextTn=(()=>{ for(let l=lv+1;l<=PET_MAXLV;l++)if(PET_TN[l-1]>PET_TN[lv-1])return `Lv${l} ${PET_TN[l-1]}마리`; return '최대'; })();
@@ -7207,7 +7221,7 @@ function oreHitFx(m,O){ const dx=me.x-m.x, dy=me.y-m.y, dd=Math.max(1,hyp(dx,dy)
     for(let i=0;i<Math.round(4*lf);i++)P({x:hx,y:hy,vx:rand(-120,120),vy:-rand(120,220),g:900,dm:.98,t:0,life:rand(.45,.6),col:'#6e665a',r:rand(6,8)}); }
   else spark(m.x,m.y,O.c,4); }
 function oreBreak(m){ const O=ORES[m.ore], M=G.mine; if(!M||m.dead)return; m.dead=true; m.hp=0;
-  const gk=Math.max(1,(me.eq.weapon&&me.eq.weapon.pk)|0), n=pickPieces(gk);
+  const gk=Math.max(1,(me.eq.weapon&&me.eq.weapon.pk)|0), n=pickPieces(gk)+kamaExtra();
   const put=oreAdd(me,n,m.ore); M.got[m.ore]=(M.got[m.ore]|0)+n; M.brk=(M.brk|0)+1; if(put<n&&T-(M.tf||-9)>6){ M.tf=T; later(.3,()=>sheetToast('기타 칸이 가득 차서 조각을 보관 중이에요','#ffb259')); }
   burst(m.x,m.y,O.c,14,220); burst(m.x,m.y,'#8a8478',10,180); sfx('orebrk'); addNum(m.x,m.y-34,`+${n} ${O.n} 조각`,O.c,true);
   if(O.gem&&Math.random()<O.gem){ gemDrop(1,me.x,me.y); later(.2,()=>announce('💎 하급 보석을 발견했어요!','#9fd0ff')); }   /* 달빛 은: 10% 하급 보석 (내 발밑에 떨어져 바로 주워요) */
@@ -7251,9 +7265,10 @@ const MINE_SIGN_ON=false;   /* 마을 광산 옆 조합법 안내판 — 업데�
 const MINE_RECIPES=[
   {cat:'pick',n:'곡괭이 2단계',img:'img/pick_2.webp',ds:'채굴 속도 ×1.1 · 조각 3개 확률↑',mat:[['ore','ash',300],['ore','silver',200],['ore','blood',3],['gold',0,100000]],fx:['채굴 속도 ×1.1','조각 2개·3개 나올 확률 증가 (2단계 23.3% / 35.3% / 41.3%)']},
   {cat:'jewel',n:'주얼 합성',img:'img/jewel_diamond.png',ds:'보석 3개 → 주얼 1개',mat:[['gem',0,3],['ore','rust',50],['ore','frost',50],['ore','star',100]],fx:['같은 보석 3개 → 그 보석의 주얼 90%','검은 주얼(공격력·공격속도) 10%','색 주얼: 직업 스킬 +1 · 보석 옵션 1개']},
+  {cat:'pet',n:'까마쿤',img:'img/pet_kamakun.png',ds:'레어 펫 · 조각 +1개 · 공격 속도',pet:'kamakun',mat:[['ore','coal',500],['ore','grave',100],['ore','rust',100],['ore','silver',50]],fx:['레어 펫 (최대 Lv10)','Lv3 까악 박자: 8초간 공격 속도 +3% (레벨당 +1%, 쿨타임 25초)','Lv7 덤으로 한 조각: 조각 +1개 확률 2% (Lv10 5%)','캐릭터마다 1마리 · 만들면 바로 데리고 다녀요']},
   {cat:'pick',n:'곡괭이 3단계',img:'img/pick_3.webp',ds:'준비 중',lock:1},
 ];
-const MINE_RCATS=[['all','전체'],['pick','⛏️ 곡괭이'],['jewel','💠 주얼'],['eq','🔒 장비',1],['etc','🔒 기타',1]];
+const MINE_RCATS=[['all','전체'],['pick','⛏️ 곡괭이'],['jewel','💠 주얼'],['pet','🐾 펫'],['eq','🔒 장비',1],['etc','🔒 기타',1]];
 function mineRecipes(){
   let cat='all', open=-1;
   const have=m=>m[0]==='ore'?oreCount(me,m[1]):m[0]==='gem'?(me.misc||[]).filter(isGem).length:aGold(), nmOf=m=>m[0]==='ore'?ORES[m[1]].n+' 조각':m[0]==='gem'?'보석 (아무 종류)':'골드';
@@ -7263,9 +7278,11 @@ function mineRecipes(){
     (list.length?list.map(([r,i])=>{ const ok=!r.lock&&r.mat.every(x=>have(x)>=x[2]);
       const bd=r.lock?'<span class="bd l">🔒 잠김</span>':ok?'<span class="bd g">가능</span>':'<span class="bd r">재료 부족</span>';
       return `<div class="it ${r.lock?'lkd':''}"><div class="hd" data-i="${i}"><img src="${r.img}" alt=""><div><div class="nm">${r.n}</div><div class="ds">${r.ds}</div></div>${bd}</div>`+
-      (open===i&&!r.lock?`<div class="dt">${r.mat.map(x=>{ const h=have(x),g=h>=x[2]; return `<div class="r"><span>${nmOf(x)}</span><span class="${g?'ok':'no'}">${x[0]==='gold'?h.toLocaleString():h} / ${x[0]==='gold'?x[2].toLocaleString()+'G':x[2]}</span></div>`; }).join('')}${(r.fx||[]).map(t=>`<div class="fx">✦ ${t}</div>`).join('')}</div>`:'')+`</div>`; }).join(''):'<div style="text-align:center;color:#8a7a68;padding:24px 0">아직 준비 중이에요</div>');
+      (open===i&&!r.lock?`<div class="dt">${r.mat.map(x=>{ const h=have(x),g=h>=x[2]; return `<div class="r"><span>${nmOf(x)}</span><span class="${g?'ok':'no'}">${x[0]==='gold'?h.toLocaleString():h} / ${x[0]==='gold'?x[2].toLocaleString()+'G':x[2]}</span></div>`; }).join('')}${(r.fx||[]).map(t=>`<div class="fx">✦ ${t}</div>`).join('')}${r.pet?`<button type="button" class="btn primary" data-mk="${i}" ${ok&&!petHas(me,r.pet)?'':'disabled'} style="width:100%;margin-top:8px">${petHas(me,r.pet)?'이미 가지고 있어요':'🐾 만들기'}</button>`:''}</div>`:'')+`</div>`; }).join(''):'<div style="text-align:center;color:#8a7a68;padding:24px 0">아직 준비 중이에요</div>');
     m.querySelectorAll('.cats button').forEach(b=>b.onclick=()=>{ const c=MINE_RCATS.find(x=>x[0]===b.dataset.c); if(c[2])return toast('아직 준비 중이에요'); cat=b.dataset.c; open=-1; draw(m); });
     m.querySelectorAll('.hd').forEach(h=>h.onclick=()=>{ const i=+h.dataset.i; open=open===i?-1:i; draw(m); });
+    m.querySelectorAll('[data-mk]').forEach(b=>b.onclick=ev=>{ ev.stopPropagation(); const r=MINE_RECIPES[+b.dataset.mk]; if(!r||!r.pet||petHas(me,r.pet)||!r.mat.every(x=>have(x)>=x[2]))return; for(const x of r.mat)if(x[0]==='ore')oreTake(me,x[1],x[2]);
+      const g=petGive(me,r.pet); if(G.inGame)petStart(); recalc(); saveChar(); mineHud(); sfx('rare'); toast(`🐾 ${PETS[r.pet].rn} 펫 「${PETS[r.pet].n}」${g===1?'과(와) 함께 다녀요':'을(를) 만들었어요 (펫 보관함)'}`,PETS[r.pet].col); draw(m); });
   };
   modal(`<h3 style="margin:0 0 10px;text-align:center">📜 조합법</h3><div class="mkr"></div><div style="font-size:11px;color:#8a7a68;margin-top:8px;text-align:center">지금은 조합법만 볼 수 있어요</div>`,m=>draw(m));
 }
