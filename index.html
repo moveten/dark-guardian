@@ -1507,7 +1507,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.1.0758</div>
+    <div class="ver" id="verT">v0.7.1.0759</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -6509,9 +6509,9 @@ function renderShop(){
   markTabs(); sheetHead(); sellAskIt=null;
   selItem=null;   /* 상점에는 판매창이 없음 — 판매·일괄 판매는 가방에서 */
   let h=`<div class="box"><h3>🛍️ 구매</h3>${shopRow('potion')}${shopAuto('potion')}${me.hc?'':shopRow('rev')+shopAuto('rev')}<div class="smsg">${esc(buyMsg)}</div></div>`;
-  if(rsOn())h+=`<div class="box" id="rsBox"><h3>📚 연구실</h3><p style="margin:0 0 10px;font-size:14px;line-height:1.5">어서오세요, 관리자님 환영합니다.</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button class="btn" id="rsNote">📔 관리자 노트</button><button class="btn" id="rsLog">📜 출입 기록</button></div>${G.inGame?'':'<button class="btn primary" id="rsTrain" style="width:100%;margin-top:8px">🏋️ 훈련장 입장</button><button class="btn" id="rsMine" style="width:100%;margin-top:8px">⛏️ 광산 입장 (시범)</button>'}<button class="btn" id="rsJw" style="width:100%;margin-top:8px">💠 주얼 조합하기</button><button class="btn" id="rsPpr" aria-pressed="${PPR?'false':'true'}" style="width:100%;margin-top:8px">🥨 빼빼로 미적용 : ${PPR?'OFF':'ON'}</button><button class="btn" id="rsExit" style="width:100%;margin-top:8px">🚪 나가기</button></div>`;
+  if(rsOn())h+=`<div class="box" id="rsBox"><h3>📚 연구실</h3><p style="margin:0 0 10px;font-size:14px;line-height:1.5">어서오세요, 관리자님 환영합니다.</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button class="btn" id="rsNote">📔 관리자 노트</button><button class="btn" id="rsLog">📜 출입 기록</button></div>${G.inGame?'':'<button class="btn primary" id="rsTrain" style="width:100%;margin-top:8px">🏋️ 훈련장 입장</button><button class="btn" id="rsMine" style="width:100%;margin-top:8px">⛏️ 광산 입장 (시범)</button>'}<button class="btn" id="rsJw" style="width:100%;margin-top:8px">🔨 조합하기</button><button class="btn" id="rsPpr" aria-pressed="${PPR?'false':'true'}" style="width:100%;margin-top:8px">🥨 빼빼로 미적용 : ${PPR?'OFF':'ON'}</button><button class="btn" id="rsExit" style="width:100%;margin-top:8px">🚪 나가기</button></div>`;
   const b=$('#sheetB'); b.className='sbody stats'; b.innerHTML=h; fitGo(b);
-  { const q=id=>b.querySelector(id); if(q('#rsNote'))q('#rsNote').onclick=rsNotes; if(q('#rsLog'))q('#rsLog').onclick=rsLogView; if(q('#rsExit'))q('#rsExit').onclick=rsExit; if(q('#rsTrain'))q('#rsTrain').onclick=startTraining; if(q('#rsMine'))q('#rsMine').onclick=startMine; if(q('#rsJw'))q('#rsJw').onclick=jewelCombine; if(q('#rsPpr'))q('#rsPpr').onclick=()=>{ pprSet(PPR?1:0); sfx('ui'); sheetToast(PPR?'🥨 빼빼로 미적용 OFF (새 밸런스)':'🥨 빼빼로 미적용 ON (패치 이전)'); rerender(); }; }
+  { const q=id=>b.querySelector(id); if(q('#rsNote'))q('#rsNote').onclick=rsNotes; if(q('#rsLog'))q('#rsLog').onclick=rsLogView; if(q('#rsExit'))q('#rsExit').onclick=rsExit; if(q('#rsTrain'))q('#rsTrain').onclick=startTraining; if(q('#rsMine'))q('#rsMine').onclick=startMine; if(q('#rsJw'))q('#rsJw').onclick=combineMenu; if(q('#rsPpr'))q('#rsPpr').onclick=()=>{ pprSet(PPR?1:0); sfx('ui'); sheetToast(PPR?'🥨 빼빼로 미적용 OFF (새 밸런스)':'🥨 빼빼로 미적용 ON (패치 이전)'); rerender(); }; }
   b.querySelectorAll('[data-atg]').forEach(el=>el.onclick=()=>{ const f=AUTOK[el.dataset.atg]; me[f]=me[f]?0:1; saveChar(); sfx('ui'); renderShop(); });
   b.querySelectorAll('[data-q]').forEach(el=>el.onclick=()=>{ const [k,a]=el.dataset.q.split(':'), have=k==='potion'?me.potBuy:me.rev, space=Math.max(1,shopMax(k)-have), o=SHOP[k];
     if(a==='max')shopQty[k]=Math.max(1,Math.min(Math.floor(aGold()/o.p),space)); else shopQty[k]=clamp((shopQty[k]|0)+(+a),1,space); buyMsg=''; renderShop(); });
@@ -7279,13 +7279,13 @@ const MINE_RECIPES=[
   {cat:'pick',n:'곡괭이 3단계',img:'img/pick_3.webp',ds:'준비 중',lock:1},
 ];
 const MINE_RCATS=[['all','전체'],['pick','⛏️ 곡괭이'],['jewel','💠 주얼'],['pet','🐾 펫'],['eq','🔒 장비',1],['etc','🔒 기타',1]];
-function mineRecipes(){
-  let cat='all', open=-1;
+function mineRecipes(o){
+  o=o||{}; let cat=o.only||'all', open=-1;
   const gemOk=(m,x)=>isGem(x)&&(!(m[1]||m[3])||(!x.jw&&!x.lock&&(!m[1]||x.gk===m[1])&&(!m[3]||gemTier(x)===m[3])));   /* ['gem',종류(0=아무),개수,등급(없으면 아무)] — 종류·등급을 정하면 주얼·잠긴 보석은 제외 */
   const have=m=>m[0]==='ore'?oreCount(me,m[1]):m[0]==='gem'?(me.misc||[]).filter(x=>gemOk(m,x)).length:aGold(), nmOf=m=>m[0]==='ore'?ORES[m[1]].n+' 조각':m[0]==='gem'?(m[1]?`${m[3]?GEM_TIER[m[3]-1].n+' ':''}${GEM_N[m[1]]}`:'보석 (아무 종류)'):'골드';
   const draw=m=>{
     const list=MINE_RECIPES.map((r,i)=>[r,i]).filter(([r])=>cat==='all'||r.cat===cat);
-    m.querySelector('.mkr').innerHTML=`<div class="cats">${MINE_RCATS.map(c=>`<button type="button" data-c="${c[0]}" class="${c[0]===cat?'on':''}">${c[1]}</button>`).join('')}</div>`+
+    m.querySelector('.mkr').innerHTML=(o.only?'':`<div class="cats">${MINE_RCATS.map(c=>`<button type="button" data-c="${c[0]}" class="${c[0]===cat?'on':''}">${c[1]}</button>`).join('')}</div>`)+
     (list.length?list.map(([r,i])=>{ const ok=!r.lock&&r.mat.every(x=>have(x)>=x[2]);
       const bd=r.lock?'<span class="bd l">🔒 잠김</span>':ok?'<span class="bd g">가능</span>':'<span class="bd r">재료 부족</span>';
       return `<div class="it ${r.lock?'lkd':''}"><div class="hd" data-i="${i}"><img src="${r.img}" alt=""><div><div class="nm">${r.n}</div><div class="ds">${r.ds}</div></div>${bd}</div>`+
@@ -7298,17 +7298,23 @@ function mineRecipes(){
       for(const x of r.mat)if(x[0]==='gold')aPayGold(x[2]);
       const g=petGive(me,r.pet); if(G.inGame)petStart(); recalc(); saveChar(); mineHud(); sfx('rare'); toast(`🐾 ${PETS[r.pet].rn} 펫 「${PETS[r.pet].n}」${g===1?'과(와) 함께 다녀요':'을(를) 만들었어요 (펫 보관함)'}`,PETS[r.pet].col); draw(m); });
   };
-  modal(`<h3 style="margin:0 0 10px;text-align:center">📜 조합법</h3><div class="mkr"></div><div style="font-size:11px;color:#8a7a68;margin-top:8px;text-align:center">지금은 조합법만 볼 수 있어요</div>`,m=>draw(m));
+  modal(`${o.back?'<button type="button" class="btn" id="mkB" style="margin-bottom:8px">‹ 뒤로</button>':''}<h3 style="margin:0 0 10px;text-align:center">${o.title||'📜 조합법'}</h3><div class="mkr"></div><div style="font-size:11px;color:#8a7a68;margin-top:8px;text-align:center">${o.only?'재료가 모이면 「만들기」를 눌러요':'펫은 바로 만들 수 있고, 곡괭이·주얼은 재료 확인용이에요'}</div>`,m=>{ draw(m); const bb=m.querySelector('#mkB'); if(bb)bb.onclick=()=>{ closeModal(); o.back(); }; });
 }
 /* ===== 주얼 조합 (관리자 모드): 같은 종류 상급 보석 3개 + 광석 조각 → 주얼 1개. 색 주얼 90% / 칠흑 주얼 10%. 재료·확률은 이 표만 고치면 돼요 ===== */
 const JW_MAKE={mat:[['rust',50],['frost',50],['star',100]], black:.10};
 function oreTake(p,k,n){ if(oreCount(p,k)<n)return false; if(!Array.isArray(p.misc))miscFix(p); let need=n; const ov=Math.min((p.ore&&p.ore[k])|0,need); if(ov){ p.ore[k]-=ov; need-=ov; }
   const st=p.misc.map((x,i)=>x&&x.mat==='ore'&&x.ok===k?i:-1).filter(i=>i>=0).sort((a,b)=>p.misc[a].n-p.misc[b].n);
   for(const i of st){ if(need<=0)break; const t=Math.min(p.misc[i].n,need); p.misc[i].n-=t; need-=t; if(p.misc[i].n<=0)p.misc[i]=null; } return true; }
-function jewelCombine(){
+function combineMenu(){
+  const card=(id,img,t,d)=>`<div data-cm="${id}" role="button" tabindex="0" style="display:flex;gap:12px;align-items:center;padding:12px;border:1px solid #6b5536;border-radius:12px;background:#1a150f;cursor:pointer"><img src="${img}" alt="" style="width:56px;height:56px;object-fit:contain"><div style="flex:1"><div style="font-weight:800;font-size:15px;color:#ffd98a">${t}</div><div style="font-size:12px;color:#a99a7e;margin-top:3px">${d}</div></div><span style="color:#e0b860;font-size:18px">›</span></div>`;
+  modal(`<h3 style="margin:0 0 12px;text-align:center">🔨 조합하기</h3><div style="display:flex;flex-direction:column;gap:10px">${card('jw','img/jewel_diamond.png','💠 주얼 합성','상급 보석 3개 → 주얼 1개')}${card('pet','img/pet_kamakun.png','🐾 펫 제작','조각·보석·골드로 펫 만들기')}</div><button type="button" class="btn" id="cmX" style="width:100%;margin-top:12px">닫기</button>`,m=>{
+    m.querySelector('[data-cm=jw]').onclick=()=>{ sfx('ui'); closeModal(); jewelCombine(combineMenu); };
+    m.querySelector('[data-cm=pet]').onclick=()=>{ sfx('ui'); closeModal(); mineRecipes({only:'pet',title:'🐾 펫 제작',back:combineMenu}); };
+    m.querySelector('#cmX').onclick=()=>closeModal(); }); }
+function jewelCombine(back){
   miscFix(me); let pick=[], res=null;
   const cand=()=>(me.misc||[]).filter(x=>isGem(x)&&!x.jw&&gemTier(x)===3&&!x.lock);
-  const draw=m=>{
+  const draw0=m=>{
     const all=cand(), kind=pick.length?(all.find(x=>x.id===pick[0])||{}).gk:null, sel=pick.map(id=>all.find(x=>x.id===id)).filter(Boolean); pick=sel.map(x=>x.id);
     const mats=JW_MAKE.mat.map(([k,n])=>({k,n,h:oreCount(me,k)})), matOk=mats.every(x=>x.h>=x.n), ok=sel.length===3&&matOk;
     if(res){ const j=res; m.querySelector('.mkr').innerHTML=`<h3 style="margin:0 0 10px;text-align:center">💠 조합 성공!</h3><div style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0 12px"><img src="${gemPng(j)}" style="width:80px;height:80px;object-fit:contain"><b style="font-size:16px;color:${GEM_C[j.gk]||'#fff'}">${gemNm(j)}</b><div style="font-size:13px;color:#9fd0ff;text-align:center">${jewelOptText(j)}</div><div style="font-size:12px;color:#8a7a68">기타 칸에 넣었어요</div></div><button class="btn primary" id="jwAgain" style="width:100%">🔁 한 번 더 조합</button><button class="btn" id="jwX" style="width:100%;margin-top:8px">닫기</button>`;
@@ -7329,6 +7335,7 @@ function jewelCombine(){
       const kd=use[0].gk, black=Math.random()<JW_MAKE.black; for(const x of use){ const i=me.misc.indexOf(x); if(i>=0)me.misc[i]=null; } for(const [k,n] of JW_MAKE.mat)oreTake(me,k,n);
       const j=black?mkJewel('obsidian'):mkJewel(kd,{jt:3}); j.isNew=1; const e=me.misc.indexOf(null); if(e<0)me.misc.push(j); else me.misc[e]=j;
       saveChar(); uiDirty=true; sfx(black?'crit':'rare'); res=j; pick=[]; draw(m); }; };
+  const draw=m=>{ draw0(m); if(back){ const k=m.querySelector('.mkr'); k.insertAdjacentHTML('afterbegin','<button type="button" class="btn" id="jwB" style="margin-bottom:8px">‹ 뒤로</button>'); k.querySelector('#jwB').onclick=()=>{ closeModal(); back(); }; } };
   modal('<div class="mkr"></div>',m=>draw(m)); }
 function mineResult(){ const M=G.mine; if(!M||!me)return; const F=MINE_FL[M.fi], L=minerLv(me), p=L>=MINE_MAXLV?100:Math.min(99,Math.floor(me.mine.xp/mineNeed(L)*100)), sec=Math.round((performance.now()-M.t0)/1000), got=Object.keys(M.got).filter(k=>M.got[k]>0);
   modal(`<div class="mres"><h3 style="text-align:center;margin:0">⛏️ 채굴 결과</h3><div style="text-align:center;color:#a8957a;font-size:12px;margin-top:2px">${F.n} · ${sec>=60?Math.floor(sec/60)+'분 ':''}${sec%60}초 · 광석 ${M.brk|0}개</div>
