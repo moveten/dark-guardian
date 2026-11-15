@@ -1507,7 +1507,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.1.0741</div>
+    <div class="ver" id="verT">v0.7.1.0742</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -8375,7 +8375,7 @@ function drawPlayer(o,isMe,t){
   if(isMe&&G.mine&&G.mine.sw){ const sw=G.mine.sw, el=T-sw.t; if(el<.95){ const AN=[-1.15,-.7,-.3,.15], SP=[70,95,60,80], DL=[0,.08,.15,.22];   /* 땀방울: 광석 반대쪽 뒤통수에서 4방울이 시간차·각도차로 흩뿌려져 포물선으로 떨어짐(뾰족한 쪽이 머리 방향) */
     for(let k=0;k<4;k++){ const e=el-DL[k]; if(e<=0||e>.7)continue; const cs=sw.d*Math.cos(AN[k])*SP[k], sn=Math.sin(AN[k])*SP[k]; swDrop(ctx,x+sw.d*13+cs*e,y-31+sn*e+130*e*e,cs,sn+260*e,Math.min(1,(1-e/.7)*1.8),.85); } } }
   const nm=(isMe?me.name:(o.name||'동료'))||'', label=`${isMe&&G.mine?'⛏️':''}Lv${isMe&&G.mine?minerLv(me):lv} ${nm}`;   /* 광산: 광부 레벨 */
-  ctx.font='700 11px "Noto Sans KR",sans-serif'; ctx.textAlign='center'; ctx.lineJoin='round'; ctx.lineWidth=3.5; ctx.strokeStyle='rgba(0,0,0,.9)'; ctx.strokeText(label,x,y-45); ctx.fillStyle=isMe?'#fff3dc':C.col; ctx.fillText(label,x,y-45);
+  ctx.font='700 11px "Noto Sans KR",sans-serif'; ctx.textAlign='center'; ctx.lineJoin='round'; ctx.lineWidth=3.5; ctx.strokeStyle='rgba(0,0,0,.9)'; { const ly=isMe&&G.mine?y-72:y-45; ctx.strokeText(label,x,ly); ctx.fillStyle=isMe?'#fff3dc':C.col; ctx.fillText(label,x,ly); }   /* 광산: 두건이 가려지지 않게 이름표를 위로 */
   { const ic=[];
     if(isMe){ const b=me.buffs; if(b.shout&&b.shout.t>0)ic.push(['📣',clamp(1-b.shout.t/(b.shout.m||10),0,1),Math.ceil(b.shout.t),true]); if(b.pcry&&b.pcry.t>0)ic.push(['📣',clamp(1-b.pcry.t/(b.pcry.m||8),0,1),Math.ceil(b.pcry.t),true]); if(b.barrier&&b.barrier.t>0)ic.push(['🔷',clamp(1-b.barrier.t/10,0,1),Math.ceil(b.barrier.t),true]); if(me.stun>0)ic.push(['💫',0,Math.ceil(me.stun),true]); if(me.sil>0)ic.push(['🚫',0,Math.ceil(me.sil),true]); if(me.fear>0)ic.push(['😱',0,Math.ceil(me.fear),true]); if(me.slowP>0)ic.push(['🐌',0,Math.ceil(me.slowP),true]); if(me.poison>0)ic.push(['☠️',0,Math.ceil(me.poison),true]); if(me.erode>0)ic.push(['🌑',0,Math.ceil(me.erode),true]); if(me.bleed>0)ic.push(['🩸',0,Math.ceil(me.bleed),true]); if(me.hblk>0)ic.push(['💔',0,Math.ceil(me.hblk),true]); if(me.mblk>0)ic.push(['💧',0,Math.ceil(me.mblk),true]); if(b.berserk&&b.berserk.t>0)ic.push(['😡',clamp(1-b.berserk.t/8,0,1),Math.ceil(b.berserk.t),true]); for(const [bk,be] of [['roar','📢'],['fury','💢'],['hunt','🌕'],['rage','🔥']]){ const bb=b[bk]; if(bb&&bb.t>0)ic.push([be,clamp(1-bb.t/(bb.m||8),0,1),Math.ceil(bb.t),true]); } if(me.spirit&&me.spirit.t>0)ic.push(['👻',clamp(1-me.spirit.t/me.spirit.m,0,1),Math.ceil(me.spirit.t),true]); if(me.aura)ic.push([SKBY[me.aura].e,0,'',true]); }
     { const oth=isMe?ally:me; if(!isMe&&o.aura&&SKBY[o.aura])ic.push([SKBY[o.aura].e,0,'',true]); if(oth&&!oth.lobby&&!oth.dead&&oth.aura&&oth.aura!==o.aura&&oth.aura!=='holyfire'&&SKBY[oth.aura]&&oth.x!==undefined&&hyp(oth.x-o.x,oth.y-o.y)<320)ic.push([SKBY[oth.aura].e,0,'받음',false]); }
