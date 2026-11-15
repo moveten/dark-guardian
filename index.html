@@ -1507,7 +1507,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.1.0744</div>
+    <div class="ver" id="verT">v0.7.1.0745</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -7150,7 +7150,7 @@ function trSpawn(){ if(!G.inGame||!G.train)return;
     efx.push({k:'ring',x:m.x,y:m.y,r0:6,r1:50,t:0,life:.4,col:'#ffb347',w:6}); burst(m.x,m.y,'#ffb347',12,200); }
   sfx('boss'); toast('🎯 허수아비 7기가 나타났어요 (위쪽 1기는 반격 태세)','#e0c080'); }
 /* ===== 광산 모드 (관리자 시범) — 훈련장처럼 웨이브 없는 맵. 광석 = 움직이지 않는 몬스터(m.ore) ===== */
-const MINE_REACH=100, MINE_AUTO_R=150, MINE_STOP=55, MINE_EXTRA=1.5, MINE_RESP=25, MINE_MAXLV=99, MINE_PT={up:[VX,92],dn:[VX,908]};   /* 다 캔 광석 리젠(초) · 광부 최대 레벨 · 위(지상 쪽)/아래(지하 쪽) 포탈 위치 */
+const MINE_REACH=100, MINE_AUTO_R=150, MINE_STOP=55, MINE_EXTRA=1.5, MINE_RESP=25, MINE_MAXLV=100, MINE_PT={up:[VX,92],dn:[VX,908]};   /* 다 캔 광석 리젠(초) · 광부 최대 레벨 · 위(지상 쪽)/아래(지하 쪽) 포탈 위치 */
 const mineNeed=L=>need(L);   /* 다음 광부 레벨까지 필요한 경험치 = 캐릭터 레벨업 경험치와 같은 표 */
 const oreHp=O=>Math.round(35*(1+.08*(O.lv-1)));   /* 자기 레벨과 같은 광부가 약 7번 때리면 부서지는 체력 */
 const oreXp0=O=>Math.max(1,Math.round(need(O.lv)/(6+.3*O.lv)));   /* 같은 레벨 광석을 (6 + 0.3×레벨)개 캐면 레벨업 */
@@ -8274,7 +8274,7 @@ function drawSpirit(o,t,left,max){ const a=t*1.6+(o===me?0:2), x=o.x+Math.cos(a)
 function swDrop(c,px,py,vx,vy,al,sc){ const an=Math.atan2(vy,vx)-Math.PI/2; c.save(); c.globalAlpha=al; c.translate(px,py); c.rotate(an); c.scale(sc,sc); c.beginPath(); c.moveTo(0,-5); c.quadraticCurveTo(3.6,0,0,3.4); c.quadraticCurveTo(-3.6,0,0,-5); c.fillStyle='#a8e0ff'; c.fill(); c.strokeStyle='#4a8ab8'; c.lineWidth=1; c.stroke(); c.restore(); }
 /* ===== 광부 외형: 몸(체형 2종·단계별) + 얼굴(직업별) + 머리장비(단계별) + 곡괭이를 겹쳐 그려요. 그림은 img/miner_*.webp (미리 불러 둠)
    단계 표는 MINER_TIERS — 구간(레벨)만 늘리고 그림(MINER_ART 최대 단계)을 추가하면 확장돼요. 그림이 없는 단계는 가장 가까운 이전 단계를 대신 써요. ===== */
-const MINER_TIERS=[1,21,41,61,81,101,121,141,161,181];   /* 단계 시작 레벨 (구간 20레벨) — 6~10단계는 최대 레벨을 늘릴 때 쓰는 자리 */
+const MINER_TIERS=[1,20,40,60,80,100,120,140,160,180];   /* 단계 시작 레벨 (20 단위: 1~19 · 20~39 · 40~59 · 60~79 · 80~99 · 100~) — 6~10단계는 최대 레벨을 늘릴 때 쓰는 자리 */
 const MINER_ART={body:{thick:3,slim:3},gear:3};
 const MINER_GEAR_A={2:[418.9,446.8],3:[401.2,421.8]};   /* 머리장비 그림의 '회색 머리 원' 중심(1단계 두건 그림 픽셀 기준). 비어 있으면 1단계 기준 [427.5,408.8] — 단계별 그림 크기가 달라도 머리 위치에 맞춰요 */   /* 그림이 만들어진 최대 단계 */
 const MINER_FACE={sorc:1,necro:1,war:1,pal:1,druid:1};   /* 얼굴 그림이 있는 직업 (없으면 예전 영웅 그림으로 대신) */
