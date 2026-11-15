@@ -1507,7 +1507,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.1.0752</div>
+    <div class="ver" id="verT">v0.7.1.0753</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -4472,6 +4472,13 @@ function drawPetName(e){ const P=PETS[e.id]; if(!P)return; const xp=e.xp|0, mx=p
 function drawPet(t){ const e=petNow(); if(!e)return; if(e.id==='trio'){ drawTrio(); drawPetName(e); return; } const x=PET.x, y=PET.y, hop=.8+Math.sin(PET.an*4)*.8;
   ctx.save(); ctx.fillStyle='rgba(0,0,0,.28)'; ctx.beginPath(); ctx.ellipse(x,y+10,8,3,0,0,6.283); ctx.fill(); ctx.restore();
   const k=PETS[e.id].im, B=sprGet(k), im=B||sprGet('boss_3_5'); if(!im)return;   /* 전용 그림(img/pet_azazel.png)이 없으면 아자젤 보스 그림을 작게 줄여서 써요 */
+  if(e.id==='kamakun'){   /* 까마쿤: 그림 한 장을 코드로 움직임 — 걸을 땐 통통 튀며 뒤뚱, 서 있을 땐 숨쉬듯 말랑, 곡괭이질에 맞춰 끄덕, 스킬 땐 폴짝 */
+    const an=PET.an, dir=Math.cos(PET.face)>=0?1:-1, sw=G.mine&&me.swing>0?me.swing/.22:0, cu=PET.cast>0?PET.cast/.5:0; let hop,sx=1,sy=1,rot=0;
+    if(cu>0){ const u=1-cu; hop=Math.sin(u*Math.PI)*10; sy=1+Math.sin(u*Math.PI)*.12; sx=1-Math.sin(u*Math.PI)*.08; rot=Math.sin(u*Math.PI*2)*.18; }
+    else if(PET.mv){ hop=Math.abs(Math.sin(an*11))*5; sy=1-Math.abs(Math.cos(an*11))*.07+.03; sx=1/sy; rot=Math.sin(an*11)*.1; }
+    else { hop=.6+Math.sin(an*3.2)*.7; sy=1+Math.sin(an*3.2)*.035; sx=1/sy; rot=Math.sin(an*1.6)*.04; }
+    if(sw>0){ rot+=sw*.22; hop+=sw*2; }
+    sprDraw(im,x,y+10,26,PET.face,{hop,sx,sy,rot}); drawPetName(e); return; }
   const h=26, CA=B?sprGet(k+'_cast'):null, WK=B?sprGet(k+'_walk'):null;
   if(CA&&PET.cast>0)sprDraw(CA,x,y+10,h*(CA.height/B.height),PET.face,{hop});
   else if(WK&&PET.mv){ const cw=WK.width/6, fi=Math.floor(PET.an*9)%6; sprDraw(WK,x,y+10,h*(WK.height/B.height),PET.face,{hop:0,fr:[fi*cw,cw,WK.height]}); }
