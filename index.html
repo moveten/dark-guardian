@@ -1507,7 +1507,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.1.0761</div>
+    <div class="ver" id="verT">v0.7.1.0762</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -2511,7 +2511,7 @@ const TOWN_B={tw:{n:'그림자 타워',sy:'tw-tower',mat:'shard',main:1,tower:1,
 const TOWN_FAM=[{e:'🌑',nm:'그림자',mat:'shard',main:'tw',aux:'lab'},{e:'✦',nm:'각성',mat:'ashard',main:'al',aux:'mill'}];
 /* ===== 광산 (관리자 시범 · 미공개) — 층·광석·곡괭이는 표에 한 줄씩 추가하면 확장돼요 (지하 10층·광석 20종 이상 예정) ===== */
 const MINE_PICK_P=.031;   /* 1-1 보스(묘지기 그라크) 곡괭이 드랍 확률 */
-const PICKS=[null,{n:'낡은 곡괭이',rar:0,sp:1}];   /* 곡괭이 등급(1부터): 이름 · 색 등급 · sp 채굴 속도 배율(다음 등급 1.1 → 1.2 …) — 상위 등급은 여기에 추가 */
+const PICKS=[null,{n:'낡은 곡괭이',rar:0,sp:1},{n:'단련된 곡괭이',rar:1,sp:1.1},{n:'달빛 곡괭이',rar:2,sp:1.2},{n:'서리 곡괭이',rar:3,sp:1.3},{n:'황금 곡괭이',rar:4,sp:1.4}];   /* 곡괭이 등급(1부터): 이름 · 색 등급 · sp 채굴 속도 배율(다음 등급 1.1 → 1.2 …) — 상위 등급은 여기에 추가 */
 const PICK_DECAY=.7;   /* 곡괭이 등급이 오를 때마다 x=0.7^(등급−1) → '조각 1개' 확률 x/3 · 2개 0.4−x/15 · 3개 0.6−4x/15 (3개 쪽이 더 많이 늘어남) */
 const pickPieces=g=>{ const x=Math.pow(PICK_DECAY,Math.max(1,g|0)-1), r=Math.random(), p1=x/3, p2=.4-x/15; return r<p1?1:r<p1+p2?2:3; };   /* 1단계: 33.3 / 33.3 / 33.3% → 2단계: 23.3 / 35.3 / 41.3% → 3단계: 16.3 / 36.7 / 46.9% */
 const MINE_SWING=1.3;   /* 곡괭이질 기본 간격(초, 낡은 곡괭이 · 공격속도 보너스 0 기준) — 공격속도 옵션·민첩의 영향은 받음 */
@@ -7273,12 +7273,15 @@ function mineHud(){ const el=$('#mineHud'), M=G.mine; document.body.classList.to
 /* ── 조합법 (관리자 모드) — 레시피는 이 표에만 추가하면 창에 자동으로 나와요 ── */
 const MINE_SIGN_ON=false;   /* 마을 광산 옆 조합법 안내판 — 업데이트 때 true로 */
 const MINE_RECIPES=[
-  {cat:'pick',n:'곡괭이 2단계',img:'img/pick_2.webp',ds:'채굴 속도 ×1.1 · 조각 3개 확률↑',mat:[['ore','ash',300],['ore','silver',200],['ore','blood',3],['gold',0,300000]],fx:['채굴 속도 ×1.1','조각 2개·3개 나올 확률 증가 (2단계 23.3% / 35.3% / 41.3%)']},
+  {cat:'pick',pk:2,n:'단련된 곡괭이',img:'img/pick_2.webp',ds:'채굴 속도 ×1.1 · 조각 3개 확률↑',mat:[['ore','ash',300],['ore','silver',200],['ore','blood',3],['gold',0,300000]],fx:['채굴 속도 ×1.1','조각 2개·3개 나올 확률 증가 (2단계 23.3% / 35.3% / 41.3%)']},
   {cat:'jewel',n:'주얼 합성',img:'img/jewel_diamond.png',ds:'보석 3개 → 주얼 1개',mat:[['gem',0,3],['ore','rust',50],['ore','frost',50],['ore','star',100]],fx:['같은 보석 3개 → 그 보석의 주얼 90%','검은 주얼(공격력·공격속도) 10%','색 주얼: 직업 스킬 +1 · 보석 옵션 1개']},
   {cat:'pet',n:'까마쿤',img:'img/pet_kamakun.png',ds:'레어 펫 · 조각 +1개 · 공격 속도',pet:'kamakun',mat:[['gem','ruby',3,3],['ore','coal',300],['ore','blood',150],['gold',0,600000]],fx:['레어 펫 (최대 Lv10)','Lv3 까악 박자: 8초간 공격 속도 +3% (레벨당 +1%, 쿨타임 25초)','Lv7 덤으로 한 조각: 조각 +1개 확률 2% (Lv10 5%)','캐릭터마다 1마리 · 만들면 바로 데리고 다녀요']},
-  {cat:'pick',n:'곡괭이 3단계',img:'img/pick_3.webp',ds:'준비 중',lock:1},
+  {cat:'pick',pk:3,n:'달빛 곡괭이',img:'img/pick_3.webp',ds:'준비 중',lock:1},
+  {cat:'pick',pk:4,n:'서리 곡괭이',img:'img/pick_4.webp',ds:'준비 중',lock:1},
+  {cat:'pick',pk:5,n:'황금 곡괭이',img:'img/pick_5.webp',ds:'준비 중',lock:1},
 ];
 const MINE_RCATS=[['all','전체'],['pick','⛏️ 곡괭이'],['jewel','💠 주얼'],['pet','🐾 펫'],['eq','🔒 장비',1],['etc','🔒 기타',1]];
+const pickHas=(p,g)=>{ let f=false; const see=it=>{ if(isPick(it)&&(it.pk|0)===g)f=true; }; see(p.eq&&p.eq.weapon); if(p.eq2)Object.values(p.eq2).forEach(see); (p.inv||[]).forEach(see); return f; };   /* 그 단계 곡괭이를 이미 갖고 있나 (착용·가방) */
 function mineRecipes(o){
   o=o||{}; let cat=o.only||'all', open=-1;
   const gemOk=(m,x)=>isGem(x)&&(!(m[1]||m[3])||(!x.jw&&!x.lock&&(!m[1]||x.gk===m[1])&&(!m[3]||gemTier(x)===m[3])));   /* ['gem',종류(0=아무),개수,등급(없으면 아무)] — 종류·등급을 정하면 주얼·잠긴 보석은 제외 */
@@ -7289,16 +7292,18 @@ function mineRecipes(o){
     (list.length?list.map(([r,i])=>{ const ok=!r.lock&&r.mat.every(x=>have(x)>=x[2]);
       const bd=r.lock?'<span class="bd l">🔒 잠김</span>':ok?'<span class="bd g">가능</span>':'<span class="bd r">재료 부족</span>';
       return `<div class="it ${r.lock?'lkd':''}"><div class="hd" data-i="${i}"><img src="${r.img}" alt=""><div><div class="nm">${r.n}</div><div class="ds">${r.ds}</div></div>${bd}</div>`+
-      (open===i&&!r.lock?`<div class="dt">${r.mat.map(x=>{ const h=have(x),g=h>=x[2]; return `<div class="r"><span>${nmOf(x)}</span><span class="${g?'ok':'no'}">${x[0]==='gold'?h.toLocaleString():h} / ${x[0]==='gold'?x[2].toLocaleString()+'G':x[2]}</span></div>`; }).join('')}${(r.fx||[]).map(t=>`<div class="fx">✦ ${t}</div>`).join('')}${r.pet?`<button type="button" class="btn primary" data-mk="${i}" ${ok&&!petHas(me,r.pet)?'':'disabled'} style="width:100%;margin-top:8px">${petHas(me,r.pet)?'이미 가지고 있어요':'🐾 만들기'}</button>`:''}</div>`:'')+`</div>`; }).join(''):'<div style="text-align:center;color:#8a7a68;padding:24px 0">아직 준비 중이에요</div>');
+      (open===i&&!r.lock?`<div class="dt">${r.mat.map(x=>{ const h=have(x),g=h>=x[2]; return `<div class="r"><span>${nmOf(x)}</span><span class="${g?'ok':'no'}">${x[0]==='gold'?h.toLocaleString():h} / ${x[0]==='gold'?x[2].toLocaleString()+'G':x[2]}</span></div>`; }).join('')}${(r.fx||[]).map(t=>`<div class="fx">✦ ${t}</div>`).join('')}${r.pet?`<button type="button" class="btn primary" data-mk="${i}" ${ok&&!petHas(me,r.pet)?'':'disabled'} style="width:100%;margin-top:8px">${petHas(me,r.pet)?'이미 가지고 있어요':'🐾 만들기'}</button>`:r.pk?`<button type="button" class="btn primary" data-mk="${i}" ${ok&&!pickHas(me,r.pk)?'':'disabled'} style="width:100%;margin-top:8px">${pickHas(me,r.pk)?'이미 가지고 있어요':'⛏️ 만들기'}</button>`:''}</div>`:'')+`</div>`; }).join(''):'<div style="text-align:center;color:#8a7a68;padding:24px 0">아직 준비 중이에요</div>');
     m.querySelectorAll('.cats button').forEach(b=>b.onclick=()=>{ const c=MINE_RCATS.find(x=>x[0]===b.dataset.c); if(c[2])return toast('아직 준비 중이에요'); cat=b.dataset.c; open=-1; draw(m); });
     m.querySelectorAll('.hd').forEach(h=>h.onclick=()=>{ const i=+h.dataset.i; open=open===i?-1:i; draw(m); });
-    m.querySelectorAll('[data-mk]').forEach(b=>b.onclick=ev=>{ ev.stopPropagation(); const r=MINE_RECIPES[+b.dataset.mk]; if(!r||!r.pet||petHas(me,r.pet)||!r.mat.every(x=>have(x)>=x[2]))return; miscFix(me);
+    m.querySelectorAll('[data-mk]').forEach(b=>b.onclick=ev=>{ ev.stopPropagation(); const r=MINE_RECIPES[+b.dataset.mk]; if(!r||!(r.pet||r.pk)||(r.pet&&petHas(me,r.pet))||(r.pk&&pickHas(me,r.pk))||!r.mat.every(x=>have(x)>=x[2]))return; miscFix(me);
+      if(r.pk&&me.inv.indexOf(null)<0)return toast('가방이 가득 찼어요','#e07060');
       for(const x of r.mat)if(x[0]==='gem'){ let n=x[2]; for(let i=0;i<me.misc.length&&n>0;i++){ if(me.misc[i]&&gemOk(x,me.misc[i])){ me.misc[i]=null; n--; } } }
       for(const x of r.mat)if(x[0]==='ore')oreTake(me,x[1],x[2]);
       for(const x of r.mat)if(x[0]==='gold')aPayGold(x[2]);
+      if(r.pk){ const it=mkPick(r.pk), k=me.inv.indexOf(null); it.isNew=1; me.inv[k]=it; recalc(); saveChar(); uiDirty=true; mineHud(); sfx('rare'); toast(`⛏️ 「${it.name}」을(를) 만들었어요 (가방)`,RARC[it.rar]); draw(m); return; }
       const g=petGive(me,r.pet); if(G.inGame)petStart(); recalc(); saveChar(); mineHud(); sfx('rare'); toast(`🐾 ${PETS[r.pet].rn} 펫 「${PETS[r.pet].n}」${g===1?'과(와) 함께 다녀요':'을(를) 만들었어요 (펫 보관함)'}`,PETS[r.pet].col); draw(m); });
   };
-  modal(`${o.back?'<button type="button" class="btn" id="mkB" style="margin-bottom:8px">‹ 뒤로</button>':''}<h3 style="margin:0 0 10px;text-align:center">${o.title||'📜 조합법'}</h3><div class="mkr"></div><div style="font-size:11px;color:#8a7a68;margin-top:8px;text-align:center">${o.only?'재료가 모이면 「만들기」를 눌러요':'펫은 바로 만들 수 있고, 곡괭이·주얼은 재료 확인용이에요'}</div>`,m=>{ draw(m); const bb=m.querySelector('#mkB'); if(bb)bb.onclick=()=>{ closeModal(); o.back(); }; });
+  modal(`${o.back?'<button type="button" class="btn" id="mkB" style="margin-bottom:8px">‹ 뒤로</button>':''}<h3 style="margin:0 0 10px;text-align:center">${o.title||'📜 조합법'}</h3><div class="mkr"></div><div style="font-size:11px;color:#8a7a68;margin-top:8px;text-align:center">${o.only?'재료가 모이면 「만들기」를 눌러요':'펫·곡괭이는 바로 만들 수 있고, 주얼은 재료 확인용이에요'}</div>`,m=>{ draw(m); const bb=m.querySelector('#mkB'); if(bb)bb.onclick=()=>{ closeModal(); o.back(); }; });
 }
 /* ===== 주얼 조합 (관리자 모드): 같은 종류 상급 보석 3개 + 광석 조각 → 주얼 1개. 색 주얼 90% / 칠흑 주얼 10%. 재료·확률은 이 표만 고치면 돼요 ===== */
 const JW_MAKE={mat:[['rust',50],['frost',50],['star',100]], black:.10};
@@ -7307,7 +7312,8 @@ function oreTake(p,k,n){ if(oreCount(p,k)<n)return false; if(!Array.isArray(p.mi
   for(const i of st){ if(need<=0)break; const t=Math.min(p.misc[i].n,need); p.misc[i].n-=t; need-=t; if(p.misc[i].n<=0)p.misc[i]=null; } return true; }
 function combineMenu(){
   const card=(id,img,t,d)=>`<div data-cm="${id}" role="button" tabindex="0" style="display:flex;gap:12px;align-items:center;padding:12px;border:1px solid #6b5536;border-radius:12px;background:#1a150f;cursor:pointer"><img src="${img}" alt="" style="width:56px;height:56px;object-fit:contain"><div style="flex:1"><div style="font-weight:800;font-size:15px;color:#ffd98a">${t}</div><div style="font-size:12px;color:#a99a7e;margin-top:3px">${d}</div></div><span style="color:#e0b860;font-size:18px">›</span></div>`;
-  modal(`<h3 style="margin:0 0 12px;text-align:center">🔨 조합하기</h3><div style="display:flex;flex-direction:column;gap:10px">${card('jw','img/jewel_diamond.png','💠 주얼 합성','상급 보석 3개 → 주얼 1개')}${card('pet','img/pet_kamakun.png','🐾 펫 제작','조각·보석·골드로 펫 만들기')}</div><button type="button" class="btn" id="cmX" style="width:100%;margin-top:12px">닫기</button>`,m=>{
+  modal(`<h3 style="margin:0 0 12px;text-align:center">🔨 조합하기</h3><div style="display:flex;flex-direction:column;gap:10px">${card('pk','img/pick_2.webp','⛏️ 곡괭이 제작','재료를 모아 더 좋은 곡괭이 만들기')}${card('jw','img/jewel_diamond.png','💠 주얼 합성','상급 보석 3개 → 주얼 1개')}${card('pet','img/pet_kamakun.png','🐾 펫 제작','조각·보석·골드로 펫 만들기')}</div><button type="button" class="btn" id="cmX" style="width:100%;margin-top:12px">닫기</button>`,m=>{
+    m.querySelector('[data-cm=pk]').onclick=()=>{ sfx('ui'); closeModal(); mineRecipes({only:'pick',title:'⛏️ 곡괭이 제작',back:combineMenu}); };
     m.querySelector('[data-cm=jw]').onclick=()=>{ sfx('ui'); closeModal(); jewelCombine(combineMenu); };
     m.querySelector('[data-cm=pet]').onclick=()=>{ sfx('ui'); closeModal(); mineRecipes({only:'pet',title:'🐾 펫 제작',back:combineMenu}); };
     m.querySelector('#cmX').onclick=()=>closeModal(); }); }
