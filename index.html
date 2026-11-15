@@ -1507,7 +1507,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.1.0745</div>
+    <div class="ver" id="verT">v0.7.1.0746</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -7213,9 +7213,15 @@ function oreBreak(m){ const O=ORES[m.ore], M=G.mine; if(!M||m.dead)return; m.dea
   if(O.gem&&Math.random()<O.gem){ gemDrop(1,me.x,me.y); later(.2,()=>announce('💎 하급 보석을 발견했어요!','#9fd0ff')); }   /* 달빛 은: 10% 하급 보석 (내 발밑에 떨어져 바로 주워요) */
   const xp=mineXp(O,me); if(xp>0)mineAddXp(xp); else if(T-(M.tg||-9)>4){ M.tg=T; addNum(me.x,me.y-52,'회색 광석 · 경험치 없음','#9a9a9a',false); }
   if(m.slot){ const sl=m.slot, em=G.mine.slots.filter(q=>q!==sl&&q.k===sl.k&&!q.m&&!(q.t>0)), to=em.length?em[(Math.random()*em.length)|0]:sl; sl.m=null; sl.t=0; to.t=MINE_RESP; }   /* 캔 자리는 비고, 같은 종류의 빈자리 중 하나에서 25초 뒤 새 광석 */ saveChar(); mineHud(); }
-function mineAddXp(x){ const s=me.mine; s.xp+=x; if(G.mine)G.mine.xpGot=(G.mine.xpGot|0)+x; addNum(me.x,me.y-52,`+${x} 광부 경험치`,'#9fd0ff',false); let up=0;
+function mineAddXp(x){ const s=me.mine; s.xp+=x; if(G.mine)G.mine.xpGot=(G.mine.xpGot|0)+x; addNum(me.x,me.y-52,`+${x} 광부 경험치`,'#9fd0ff',false); let up=0; const l0=s.lv;
   while(s.lv<MINE_MAXLV&&s.xp>=mineNeed(s.lv)){ s.xp-=mineNeed(s.lv); s.lv++; up=1; }
-  if(s.lv>=MINE_MAXLV)s.xp=0; if(up){ banner('⛏️ 광부 레벨 업!',`광부 Lv ${s.lv}`); sfx('lvl'); efx.push({k:'ring',x:me.x,y:me.y,r0:10,r1:70,t:0,life:.5,col:'#e0c080',w:8}); } }
+  if(s.lv>=MINE_MAXLV)s.xp=0; if(up){ if(minerTier(s.lv)>minerTier(l0))mineTierUp(s.lv); else { banner('⛏️ 광부 레벨 업!',`광부 Lv ${s.lv}`); sfx('lvl'); efx.push({k:'ring',x:me.x,y:me.y,r0:10,r1:70,t:0,life:.5,col:'#e0c080',w:8}); } } }
+/* 착장이 바뀌는 레벨(20·40·60·80·100): 강렬한 레벨업 연출(빛 폭발) + 캐릭터 독백 말풍선 */
+const MINER_QUOTE={20:'오, 모자가 생겼네!\n이제 좀 광부 같은데?',40:'어깨가 으쓱…\n장비가 날 더 멋지게 만드는군.',60:'가방이 무거워졌네.\n행복한 무게야!',80:'이 정도면 광산 사장님 아닌가?\n아직 일꾼이지만.',100:'백 레벨이라니!\n이제 퇴근… 은 아니고, 계속 캔다!'};
+function mineTierUp(lv){ sfx('lvl'); efx.push({k:'lvB',o:me,t:0,life:1.1}); efx.push({k:'ring',x:me.x,y:me.y,r0:10,r1:90,t:0,life:.5,col:'#e0c080',w:8});
+  try{ if(!document.getElementById('mlvCss')){ const st=document.createElement('style'); st.id='mlvCss'; st.textContent='@keyframes mlvPop{0%{opacity:0;transform:scale(.6)}18%{opacity:1;transform:scale(1.12)}32%{transform:scale(1)}78%{opacity:1}100%{opacity:0;transform:scale(1.04)}}@keyframes mlvFlash{0%{opacity:0}15%{opacity:1}100%{opacity:0}}#mlv{position:fixed;inset:0;pointer-events:none;z-index:9000;text-align:center;font-family:"Noto Sans KR",sans-serif;animation:mlvFlash 1.8s ease-out forwards}#mlv .bg{position:absolute;inset:0;background:radial-gradient(circle at 50% 56%,#ffe9a066,#ff9a2a22 45%,transparent 70%)}#mlv .t{position:absolute;left:0;right:0;top:34%;animation:mlvPop 1.8s ease-out forwards}#mlv .a{font-size:58px;font-weight:900;color:#fff3c0;letter-spacing:2px;text-shadow:0 0 22px #ffa22a,0 0 6px #7a3a00,0 4px 0 #7a3a00}#mlv .b{margin-top:8px;font-size:22px;font-weight:900;color:#ffe08a;text-shadow:0 2px 0 #5a3000}'; document.head.appendChild(st); }
+    const old=document.getElementById('mlv'); if(old)old.remove(); const d=document.createElement('div'); d.id='mlv'; d.innerHTML=`<div class="bg"></div><div class="t"><div class="a">LEVEL UP!</div><div class="b">⛏️ 광부 Lv ${lv}</div></div>`; document.body.appendChild(d); setTimeout(()=>{ if(d.parentNode)d.remove(); },1900); }catch(e){}
+  const q=MINER_QUOTE[lv]; if(q)later(.7,()=>{ if(G.mine&&me)efx.push({k:'bub',o:me,tx:q,t:0,life:4.2}); }); }
 function mineHud(){ const el=$('#mineHud'), M=G.mine; document.body.classList.toggle('mining',!!M); if(!el)return; if(!M||!me){ el.hidden=true; return; } el.hidden=false; { const kb=$('#mkBtn'); if(kb){ kb.hidden=!rsOn(); if(!kb._b){ kb._b=1; kb.onclick=()=>{ sfx('ui'); mineRecipes(); }; } } const hc=el.firstElementChild; if(hc&&!hc._b){ hc._b=1; hc.onclick=()=>{ el.classList.toggle('fold'); sfx('ui'); }; } }   /* 카드를 누르면 접기/펴기 */
   /* 광산 안 오른쪽 카드 (값이 바뀔 때만 다시 그림) */
   el.style.top=Math.round((LAND?8:4)+mmW()*WH/WW+14)+'px';   /* 미니맵 아래 (겹치지 않게) */
@@ -8438,6 +8444,17 @@ function drawEfx(t){
     if(e.k==='corpse'){ const m=e.m, q=1-(1-p)*(1-p); if(m.x0===undefined){ m.x0=m.x; m.y0=m.y; } m.x=m.x0+Math.cos(e.a)*q*22; m.y=m.y0+Math.sin(e.a)*q*22; m.flash=.12*(1-Math.min(1,p*2.5)); const s=1-.35*p;   /* 맞은 방향으로 밀리며 작아지고 사라짐 */
       ctx.save(); ctx.globalAlpha=1-p; ctx.translate(m.x,m.y); ctx.scale(s,s); ctx.translate(-m.x,-m.y); drawMob(m,t); ctx.restore(); continue; }
     if(e.k==='swing'){ const o=e.o; if(o.x===undefined)continue; ctx.strokeStyle=e.col; ctx.globalAlpha=1-p; ctx.lineWidth=e.big?7:4; ctx.beginPath(); { const d1=-1.1+p*.3, d2=1.1*(p*2-1)+.3, L=Math.cos(e.a)<0; ctx.arc(o.x,o.y,e.big?52:44,L?e.a-d1:e.a+d1,L?e.a-d2:e.a+d2,L); } ctx.stroke(); ctx.globalAlpha=1; }
+    else if(e.k==='lvB'){ const a=1-p, x=e.o.x, y=e.o.y-10, lo=G.lowFx; ctx.save(); ctx.globalCompositeOperation='lighter';
+      circle(x,y,40+p*260,`rgba(255,180,70,${.5*Math.max(0,1-p*1.6)})`);
+      for(let i=0;i<14;i++){ const an=i/14*6.283+p*.6, L=60+p*340, w2=.07*(1-p*.5); ctx.fillStyle=`rgba(255,215,120,${.55*a})`; ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+Math.cos(an-w2)*L,y+Math.sin(an-w2)*L); ctx.lineTo(x+Math.cos(an+w2)*L,y+Math.sin(an+w2)*L); ctx.closePath(); ctx.fill(); }
+      for(let k=0;k<2;k++){ const q=Math.max(0,p-k*.14)/(1-k*.14); ctx.strokeStyle=`rgba(255,240,190,${(1-q)})`; ctx.lineWidth=14*(1-q)+1; ctx.beginPath(); ctx.arc(x,y,12+q*300,0,6.283); ctx.stroke(); }
+      const np=lo?10:22; for(let i=0;i<np;i++){ const an=i*2.399, d=40+p*(160+(i*29)%160), px=x+Math.cos(an)*d, py=y+Math.sin(an)*d+p*p*120; ctx.fillStyle=`rgba(${i%2?'255,236,170':'255,170,90'},${a})`; ctx.save(); ctx.translate(px,py); ctx.rotate(an+p*6); ctx.fillRect(-4,-2,8,4); ctx.restore(); }
+      ctx.restore(); }
+    else if(e.k==='bub'){ const o=e.o; if(o.x===undefined)continue; const c=ctx; c.save(); c.font='800 13px "Noto Sans KR",sans-serif'; const lines=e.tx.split('\n'), w=Math.max(...lines.map(l=>c.measureText(l).width))+24, h=lines.length*17+16, x=o.x, by=o.y-86, y0=by-h;   /* 독백 말풍선: RPG 대화창(어두운 가죽색 + 금색 테두리) */
+      const pop=Math.min(1,p*10); c.translate(x,by); c.scale(pop,pop); c.translate(-x,-by); c.globalAlpha=Math.min(1,(1-p)*6);
+      c.beginPath(); c.roundRect(x-w/2,y0,w,h,6); c.moveTo(x-7,by); c.lineTo(x,by+9); c.lineTo(x+7,by); c.closePath();
+      const g=c.createLinearGradient(0,y0,0,by); g.addColorStop(0,'#3b2d1a'); g.addColorStop(1,'#1d150a'); c.fillStyle=g; c.fill(); c.strokeStyle='#e0b860'; c.lineWidth=2; c.stroke();
+      c.fillStyle='#fff0c8'; c.textAlign='center'; lines.forEach((l,i)=>{ c.strokeStyle='rgba(0,0,0,.7)'; c.lineWidth=3; c.strokeText(l,x,y0+22+i*17); c.fillText(l,x,y0+22+i*17); }); c.restore(); }
     else if(e.k==='spr'){ const n=e.c1-e.c0+1, f=e.loop?e.c0+Math.floor(t*10)%n:e.c0+Math.min(n-1,Math.floor(p*n)), x=e.o&&e.o.x!==undefined?e.o.x:e.x, y=e.o&&e.o.y!==undefined?e.o.y+(e.dy||0):e.y; fxFrame(e.row,f,x,y,e.sz,e.sz,e.rot,e.fade?Math.min(1,p*6,(1-p)*4):1,e.flip,e.at); }
     else if(e.k==='mfall'){ const h=(1-p)*420, mx=e.x+h*.35, my=e.y-h; fxFrame(6,Math.floor(t*14)%3,mx,my,104,104,0,Math.min(1,p*8),true); }
     else if(e.k==='chainspr'){ for(let i=1;i<e.pts.length;i++){ const a=e.pts[i-1], b=e.pts[i], L=hyp(b.x-a.x,b.y-a.y)||1, ang=Math.atan2(b.y-a.y,b.x-a.x); fxFrame(4,(Math.floor(e.t*24)+i)%4,(a.x+b.x)/2,(a.y+b.y)/2,L*1.04,Math.min(64,Math.max(30,L*.3)),ang,Math.min(1,(1-p)*2.2)); } }
