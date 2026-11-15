@@ -1507,7 +1507,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.1.0747</div>
+    <div class="ver" id="verT">v0.7.1.0748</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -7223,12 +7223,20 @@ function mineTierUp(lv){ sfx('lvl'); efx.push({k:'lvB',o:me,t:0,life:1.1}); efx.
     const old=document.getElementById('mlv'); if(old)old.remove(); const d=document.createElement('div'); d.id='mlv'; d.innerHTML=`<div class="bg"></div><div class="t"><div class="a">LEVEL UP!</div><div class="b">⛏️ 광부 Lv ${lv}</div></div>`; document.body.appendChild(d); setTimeout(()=>{ if(d.parentNode)d.remove(); },1900); }catch(e){}
   const q=MINER_QUOTE[lv]; if(q)later(.9,()=>{ if(G.mine&&me)mineSay(q); }); }
 /* 독백 대화창(아래쪽 Dialogue Box): 얼굴 초상 + 이름표 + 글자가 한 글자씩 나옴 · 약 5초 뒤 사라지고, 터치하면 바로 닫힘 · 채굴·이동은 막지 않음 */
+/* 대화창 초상: 얼굴 + 두건·헬멧을 인게임과 같은 좌표로 합쳐서 한 장으로 (직업·단계별로 한 번만 만들어 재사용) */
+const _mPort={};
+function minerPortrait(cls,lv){ const S=minerSet(cls,lv); if(!S)return 'img/miner_face_'+cls+'.webp'; const key=cls+'_'+S.tg; if(_mPort[key])return _mPort[key];
+  const fw=140, fh=S.face.naturalHeight*fw/S.face.naturalWidth, fx=4, fy=0, GA=MINER_GEAR_A[S.tg]||[427.5,408.8], gk=fw/806, gx=-fw/2+fx+fw*.02+(427.5-GA[0])*gk, gy=fy-6+(408.8-GA[1])*gk, gW=S.gear.naturalWidth*gk, gH=S.gear.naturalHeight*gk;
+  const x0=Math.min(-fw/2+fx,gx), y0=Math.min(fy,gy), x1=Math.max(-fw/2+fx+fw,gx+gW), y1=Math.max(fy+fh,gy+gH), Z=3;
+  const cv=document.createElement('canvas'); cv.width=Math.ceil((x1-x0)*Z); cv.height=Math.ceil((y1-y0)*Z); const g=cv.getContext('2d'); g.scale(Z,Z); g.translate(-x0,-y0);
+  g.drawImage(S.face,-fw/2+fx,fy,fw,fh); g.drawImage(S.gear,gx,gy,gW,gH);
+  let u; try{ u=cv.toDataURL('image/png'); }catch(e){ return 'img/miner_face_'+cls+'.webp'; } return _mPort[key]=u; }
 let _mSay=null;
 function mineSay(tx){ try{
   if(_mSay){ clearInterval(_mSay.iv); clearTimeout(_mSay.to); _mSay.d.remove(); _mSay=null; }
-  if(!document.getElementById('msayCss')){ const st=document.createElement('style'); st.id='msayCss'; st.textContent='@keyframes msIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}@keyframes msOut{to{opacity:0;transform:translateY(8px)}}@keyframes msBlink{50%{opacity:.2}}#msay{position:fixed;left:10px;right:10px;bottom:138px;z-index:8500;display:flex;gap:10px;align-items:flex-end;padding:12px 12px 12px 10px;border:2px solid #e0b860;border-radius:8px;background:linear-gradient(#3b2d1af2,#1d150af2);box-shadow:0 0 0 2px #000a,0 6px 18px #000a;font-family:"Noto Sans KR",sans-serif;animation:msIn .25s ease-out;max-width:460px;margin:0 auto}#msay.out{animation:msOut .35s forwards}#msay .pt{flex:none;width:78px;height:78px;border:2px solid #e0b860;border-radius:6px;background:#2a1f10 center 20%/150% no-repeat}#msay .bd{flex:1;min-width:0}#msay .nm{display:inline-block;margin:-26px 0 6px;padding:2px 10px;border:2px solid #e0b860;border-radius:6px;background:#1d150a;color:#ffd878;font-size:13px;font-weight:800}#msay .tx{color:#fff0c8;font-size:15px;font-weight:700;line-height:1.5;min-height:46px}#msay .nx{color:#e0b860;float:right;animation:msBlink 1s infinite}'; document.head.appendChild(st); }
+  if(!document.getElementById('msayCss')){ const st=document.createElement('style'); st.id='msayCss'; st.textContent='@keyframes msIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}@keyframes msOut{to{opacity:0;transform:translateY(8px)}}@keyframes msBlink{50%{opacity:.2}}#msay{position:fixed;left:10px;right:10px;bottom:138px;z-index:8500;display:flex;gap:10px;align-items:flex-end;padding:12px 12px 12px 10px;border:2px solid #e0b860;border-radius:8px;background:linear-gradient(#3b2d1af2,#1d150af2);box-shadow:0 0 0 2px #000a,0 6px 18px #000a;font-family:"Noto Sans KR",sans-serif;animation:msIn .25s ease-out;max-width:460px;margin:0 auto}#msay.out{animation:msOut .35s forwards}#msay .pt{flex:none;width:84px;height:84px;border:2px solid #e0b860;border-radius:6px;background:radial-gradient(#4a3a22,#1d150a) center/contain no-repeat}#msay .bd{flex:1;min-width:0}#msay .nm{display:inline-block;margin:-26px 0 6px;padding:2px 10px;border:2px solid #e0b860;border-radius:6px;background:#1d150a;color:#ffd878;font-size:13px;font-weight:800}#msay .tx{color:#fff0c8;font-size:15px;font-weight:700;line-height:1.5;min-height:46px}#msay .nx{color:#e0b860;float:right;animation:msBlink 1s infinite}'; document.head.appendChild(st); }
   const d=document.createElement('div'); d.id='msay'; const esc=v=>String(v).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
-  d.innerHTML=`<div class="pt" style="background-image:url(img/miner_face_${me.cls}.webp)"></div><div class="bd"><div class="nm">⛏️ ${esc(me.name||'')}</div><div class="tx"></div></div>`; document.body.appendChild(d);
+  d.innerHTML=`<div class="pt" style="background-image:url(${minerPortrait(me.cls,minerLv(me))})"></div><div class="bd"><div class="nm">⛏️ ${esc(me.name||'')}</div><div class="tx"></div></div>`; document.body.appendChild(d);
   const el=d.querySelector('.tx'); let n=0; const iv=setInterval(()=>{ n++; el.innerHTML=esc(tx.slice(0,n)).replace(/\n/g,'<br>'); if(n>=tx.length){ clearInterval(iv); el.insertAdjacentHTML('beforeend','<span class="nx">▼</span>'); } },38);
   const close=()=>{ if(!_mSay||_mSay.d!==d)return; clearInterval(iv); clearTimeout(_mSay.to); d.classList.add('out'); setTimeout(()=>{ d.remove(); },360); _mSay=null; };
   d.onclick=close; _mSay={d,iv,to:setTimeout(close,5200)}; }catch(e){} }
