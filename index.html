@@ -1507,7 +1507,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.1.0729</div>
+    <div class="ver" id="verT">v0.7.1.0730</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -7161,7 +7161,7 @@ const oreTone=(O,p)=>{ const d=minerLv(p)-O.lv; return d<0?'#ff5a4a':d>=MINE_GRA
 function startMine(){
   if(!rsOn()||G.inGame||!selId)return; const c=loadChar(selId); if(!c||hcDead(c))return;
   if(!mineCanEnter(c)){ sheetToast('⛏️ 곡괭이를 가지고 있어야 광산에 들어갈 수 있어요','#ff8a7a'); return; }
-  closeModal(); G.mode='solo'; prepMe(); ally=null; resetWorld(); if(!me.mine)me.mine={lv:1,xp:0}; if(!me.ore)me.ore={};
+  closeModal(); G.mode='solo'; prepMe(); ally=null; resetWorld(); if(!me.mine)me.mine={lv:1,xp:0}; if(!me.ore)me.ore={}; minerPre();
   for(const k in me.ore)if(!ORES[k]){ const nk=ORE_OLD[k]; if(nk)me.ore[nk]=(me.ore[nk]|0)+(me.ore[k]|0); delete me.ore[k]; }   /* 시범 1차 조각 이름 정리 */
   oreFold(me);   /* 예전 숫자 보관분 → 기타 칸 */
   me.mine.lv=Math.min(MINE_MAXLV,Math.max(1,me.mine.lv|0));
@@ -8242,6 +8242,30 @@ function drawSpirit(o,t,left,max){ const a=t*1.6+(o===me?0:2), x=o.x+Math.cos(a)
   else { cball(x,y-2,9,'#e8fbff',2); ctx.fillStyle='#1b4a5a'; ctx.fillRect(x-3.6,y-4,2.2,3); ctx.fillRect(x+1.4,y-4,2.2,3); cpoly([[x-6,y+3],[x,y+17],[x+6,y+3]],'rgba(220,250,255,.75)',1.4); }
   ctx.restore(); }
 function swDrop(c,px,py,vx,vy,al,sc){ const an=Math.atan2(vy,vx)-Math.PI/2; c.save(); c.globalAlpha=al; c.translate(px,py); c.rotate(an); c.scale(sc,sc); c.beginPath(); c.moveTo(0,-5); c.quadraticCurveTo(3.6,0,0,3.4); c.quadraticCurveTo(-3.6,0,0,-5); c.fillStyle='#a8e0ff'; c.fill(); c.strokeStyle='#4a8ab8'; c.lineWidth=1; c.stroke(); c.restore(); }
+/* ===== 광부 외형: 몸(체형 2종·단계별) + 얼굴(직업별) + 머리장비(단계별) + 곡괭이를 겹쳐 그려요. 그림은 img/miner_*.webp (미리 불러 둠)
+   단계 표는 MINER_TIERS — 구간(레벨)만 늘리고 그림(MINER_ART 최대 단계)을 추가하면 확장돼요. 그림이 없는 단계는 가장 가까운 이전 단계를 대신 써요. ===== */
+const MINER_TIERS=[1,21,41,61,81,101,121,141,161,181];   /* 단계 시작 레벨 (구간 20레벨) — 6~10단계는 최대 레벨을 늘릴 때 쓰는 자리 */
+const MINER_ART={body:{thick:1,slim:1},gear:1};   /* 그림이 만들어진 최대 단계 */
+const MINER_FACE={sorc:1,necro:1};   /* 얼굴 그림이 있는 직업 (없으면 예전 영웅 그림으로 대신) */
+const MINER_BUILD={war:'thick',pal:'thick',druid:'thick',sorc:'slim',necro:'slim'}, MINER_SC={sorc:.9,necro:.9}, MINER_FIST={thick:[.84,.32],slim:[.90,.32]};   /* 체형 · 몸집 배율 · 곡괭이 쥔 주먹 위치(몸 그림 비율) */
+const minerTier=lv=>{ let n=0; for(let i=0;i<MINER_TIERS.length;i++)if(lv>=MINER_TIERS[i])n=i; return n; };
+const MINER_IMG={}; function minerImg(k){ let im=MINER_IMG[k]; if(!im){ im=MINER_IMG[k]=new Image(); im.decoding='async'; im.src='img/miner_'+k+'.webp'; } return im.complete&&im.naturalWidth?im:null; }
+function minerSet(cls,lv){ const bd=MINER_BUILD[cls]; if(!bd||!MINER_FACE[cls])return null; const tn=minerTier(lv)+1, tb=Math.min(tn,MINER_ART.body[bd]), tg=Math.min(tn,MINER_ART.gear);
+  const body=minerImg(`body_${bd}_t${tb}`), face=minerImg('face_'+cls), gear=minerImg('gear_t'+tg); return body&&face&&gear?{body,face,gear,bd}:null; }
+function minerPre(){ for(const cls of Object.keys(MINER_FACE))minerSet(cls,minerLv(me)); }
+const MINER_ON=false;   /* 광부 외형 겹쳐 그리기 — 시안 확정 전이라 꺼 둠(켜려면 true) */
+function drawMiner(o,x,y,t){ if(!MINER_ON||!G.mine||formOf(o))return false; const S=minerSet(o.cls,minerLv(me)); if(!S)return false;
+  const A=heroAnim(o,t,true,1), K=78/420, ms=MINER_SC[o.cls]||1, sb=.49*ms, bw=S.body.naturalWidth*sb, bh=S.body.naturalHeight*sb, fw=140*ms, fh=S.face.naturalHeight*fw/S.face.naturalWidth, gw=fw, gh=S.gear.naturalHeight*gw/S.gear.naturalWidth;
+  const c=ctx; c.save(); c.translate(x,y+16-(A.hop||0)); c.scale(K,K); if(A.flip!==undefined)c.scale(A.flip,1); if(A.fx)c.translate(A.fx*.5/K,0); if(A.rot)c.rotate(A.rot*.45); if(A.sx!==1||A.sy!==1)c.scale(A.sx,A.sy);
+  const by=420*.12-bh;   /* 몸 그림 윗면 (발바닥이 hero 그림과 같은 높이) */
+  c.drawImage(S.body,-bw/2,by,bw,bh);
+  const fx=4*ms, fy=by-fh+22*ms; c.drawImage(S.face,-fw/2+fx,fy,fw,fh);
+  c.drawImage(S.gear,-gw/2+fx+gw*.02,fy-6*ms,gw,gh);
+  if(isPick(me.eq.weapon)){ const pk=unqImg(me.eq.weapon), im=pk&&UIMGS[pickImgKey(me.eq.weapon)]; const PI=im&&im.ok?im.im:null;
+    if(PI){ const F=MINER_FIST[S.bd], hx=-bw/2+bw*F[0], hy=by+bh*F[1], pw=(window.__pw||190)*ms, sw=A.ap<1?atkCurve(A.ap):0;
+      c.save(); c.translate(hx,hy); c.rotate((window.__pa===undefined?-.05:window.__pa)+sw*1.25); c.drawImage(PI,-pw*.18,-pw*.8,pw,pw); c.restore(); } }
+  if(me.hurt>0){ c.fillStyle=`rgba(255,40,30,${me.hurt*2.5})`; c.beginPath(); c.arc(0,by+bh*.55,bw*.55,0,6.283); c.fill(); }
+  c.restore(); return true; }
 function drawPlayer(o,isMe,t){
   if(o.x===undefined)return;
   const C=CLASSES[o.cls], x=o.x, y=o.y-(o.z||0), PS=1.3;
@@ -8254,7 +8278,8 @@ function drawPlayer(o,isMe,t){
   const fm=o.cls==='druid'?formOf(o):'', hk=fm?'druid_'+fm:o.cls, hh=fm==='bear'?104:78;
   const HS=sprGet('hero_'+hk), WC=WALKS[hk], WK=(WC&&HS)?sprGet('hero_'+hk+'_walk'):null, ID=HIDLE[hk], IK=(ID&&HS)?sprGet('hero_'+hk+'_idle'):null;
   const RG=isMe&&me.buffs.rage&&me.buffs.rage.t>0, RGW=[[.5594,.2765],[.56,.2758],[.5628,.2796],[.5588,.2756],[.5613,.2778],[.5603,.2807]];   /* 폭주: 눈 위치(칸별, 그림 비율) */
-  if(HS){ const A=heroAnim(o,t,meleeOf(o),WK?.4:1); if(RG){ ctx.save(); ctx.shadowColor='rgba(255,45,25,.95)'; ctx.shadowBlur=11+4*Math.sin(t*9); }   /* 폭주: 몸 테두리에 붉은 기운 */
+  if(isMe&&G.mine&&drawMiner(o,x,y,t)){ }   /* 광산: 광부 외형으로 겹쳐 그림 (그림이 없으면 아래 예전 방식) */
+  else if(HS){ const A=heroAnim(o,t,meleeOf(o),WK?.4:1); if(RG){ ctx.save(); ctx.shadowColor='rgba(255,45,25,.95)'; ctx.shadowBlur=11+4*Math.sin(t*9); }   /* 폭주: 몸 테두리에 붉은 기운 */
     if(WK){ if(A.wa>.35)o._wkOn=true; else if(A.wa<.15)o._wkOn=false; }   /* 걷기 시트 ↔ 대기 그림 전환 (깜빡임 방지용 히스테리시스) */
     const HA=HATK[hk], AK=(HA&&HS)?sprGet('hero_'+hk+(HA.src||'_atk')):null;
     if(AK&&A.ap<1){ const cw=AK.width/HA.n; let fi=0; while(fi<HA.t.length&&A.ap>=HA.t[fi])fi++; const asc=HA.sc?HA.sc[fi]:1; sprDraw(AK,x,y+16+(HA.dy||0)*hh/(HA.k*HS.height),hh*asc*(AK.height/HA.k)/HS.height,o.face,{flip:A.flip,tint:RG,fx:HA.fx?HA.fx[fi]*hh/78:0,fr:[fi*cw,cw,AK.height]}); }   /* sc/fx: 공격 그림 속 캐릭터가 대기·걷기보다 작게 그려져 있어 칸마다 키우고(얼굴 크기 기준) 가로 위치를 맞춤 */   /* 공격 시트: 그림 자체에 동작이 있어서 코드 흔들림은 끔 */
