@@ -1507,7 +1507,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.1.0730</div>
+    <div class="ver" id="verT">v0.7.1.0731</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -8253,7 +8253,7 @@ const MINER_IMG={}; function minerImg(k){ let im=MINER_IMG[k]; if(!im){ im=MINER
 function minerSet(cls,lv){ const bd=MINER_BUILD[cls]; if(!bd||!MINER_FACE[cls])return null; const tn=minerTier(lv)+1, tb=Math.min(tn,MINER_ART.body[bd]), tg=Math.min(tn,MINER_ART.gear);
   const body=minerImg(`body_${bd}_t${tb}`), face=minerImg('face_'+cls), gear=minerImg('gear_t'+tg); return body&&face&&gear?{body,face,gear,bd}:null; }
 function minerPre(){ for(const cls of Object.keys(MINER_FACE))minerSet(cls,minerLv(me)); }
-const MINER_ON=false;   /* 광부 외형 겹쳐 그리기 — 시안 확정 전이라 꺼 둠(켜려면 true) */
+const MINER_ON=true;   /* 광부 외형 겹쳐 그리기 (끄려면 false) */
 function drawMiner(o,x,y,t){ if(!MINER_ON||!G.mine||formOf(o))return false; const S=minerSet(o.cls,minerLv(me)); if(!S)return false;
   const A=heroAnim(o,t,true,1), K=78/420, ms=MINER_SC[o.cls]||1, sb=.49*ms, bw=S.body.naturalWidth*sb, bh=S.body.naturalHeight*sb, fw=140*ms, fh=S.face.naturalHeight*fw/S.face.naturalWidth, gw=fw, gh=S.gear.naturalHeight*gw/S.gear.naturalWidth;
   const c=ctx; c.save(); c.translate(x,y+16-(A.hop||0)); c.scale(K,K); if(A.flip!==undefined)c.scale(A.flip,1); if(A.fx)c.translate(A.fx*.5/K,0); if(A.rot)c.rotate(A.rot*.45); if(A.sx!==1||A.sy!==1)c.scale(A.sx,A.sy);
@@ -8262,8 +8262,8 @@ function drawMiner(o,x,y,t){ if(!MINER_ON||!G.mine||formOf(o))return false; cons
   const fx=4*ms, fy=by-fh+22*ms; c.drawImage(S.face,-fw/2+fx,fy,fw,fh);
   c.drawImage(S.gear,-gw/2+fx+gw*.02,fy-6*ms,gw,gh);
   if(isPick(me.eq.weapon)){ const pk=unqImg(me.eq.weapon), im=pk&&UIMGS[pickImgKey(me.eq.weapon)]; const PI=im&&im.ok?im.im:null;
-    if(PI){ const F=MINER_FIST[S.bd], hx=-bw/2+bw*F[0], hy=by+bh*F[1], pw=(window.__pw||190)*ms, sw=A.ap<1?atkCurve(A.ap):0;
-      c.save(); c.translate(hx,hy); c.rotate((window.__pa===undefined?-.05:window.__pa)+sw*1.25); c.drawImage(PI,-pw*.18,-pw*.8,pw,pw); c.restore(); } }
+    if(PI){ const F=MINER_FIST[S.bd], hx=-bw/2+bw*F[0], hy=by+bh*F[1], pw=190*ms, sw=A.ap<1?atkCurve(A.ap):0;
+      c.save(); c.translate(hx,hy); c.rotate(-.05+sw*1.25); c.drawImage(PI,-pw*.18,-pw*.8,pw,pw); c.restore(); } }
   if(me.hurt>0){ c.fillStyle=`rgba(255,40,30,${me.hurt*2.5})`; c.beginPath(); c.arc(0,by+bh*.55,bw*.55,0,6.283); c.fill(); }
   c.restore(); return true; }
 function drawPlayer(o,isMe,t){
