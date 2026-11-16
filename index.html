@@ -1201,6 +1201,10 @@ body.land #bBas{position:absolute;width:calc(var(--u) + 4px);height:calc(var(--u
 #sty .sgo{color:var(--gold);font-size:13px;animation:stBl 1s steps(2) infinite}
 #sty .sgo.hid{visibility:hidden}
 #sty #stSk{min-height:34px;padding:0 13px;border-radius:8px;border:1px solid var(--line2);background:#241c16;color:var(--ink);font:inherit;font-size:13px;cursor:pointer}
+#sty #stAsk{display:flex;gap:8px}
+#sty #stAsk[hidden]{display:none}
+#sty #stAsk button{min-height:34px;padding:0 14px;border-radius:8px;border:1px solid var(--line2);background:#241c16;color:var(--ink);font:inherit;font-size:13px;cursor:pointer}
+#sty #stYes{background:#4a3513;border-color:var(--gold);color:#ffe9b0;font-weight:800}   /* 퀘스트 대화: 수락 · 나중에 */
 @keyframes stIn{from{opacity:0}to{opacity:1}}
 @keyframes stBl{50%{opacity:.25}}
 #tq{position:absolute;inset:0;z-index:300;pointer-events:none;overflow:hidden}
@@ -1432,6 +1436,15 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
 body.mining #skillBadge,body.mining #skills,body.mining #hGold,body.mining #bPot,body.mining #bRev,body.mining #toasts,#mineHud .mhr{display:none!important}   /* 광산: 스킬·골드·물약·부활·알림기록 숨김 (좌상단 레벨 칸은 광부 레벨로) */
 #mineHud .mhs{border-top:0!important;margin-top:0!important;padding-top:0!important}
 body.mining #mineOut{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(max(14px,env(safe-area-inset-bottom)) + 74px);width:auto;margin:0;padding:10px 20px;font-size:14px;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.6)}   /* 나가기: 물약·부활 자리 */
+#mqCard{pointer-events:none;margin-top:6px;padding:7px 10px 8px;border-radius:10px;background:rgba(20,15,11,.88);border:1px solid #5a4634;font-size:11.5px;line-height:1.45;color:#f1e3c4}   /* NPC 퀘스트 카드 (이번 획득 아래) */
+#mqCard[hidden]{display:none}
+#mqCard b{display:block;font-size:12px;color:#ffe9b0;margin-bottom:2px}
+#mqCard .bar{height:5px;border-radius:3px;background:#2a2119;margin-top:5px;overflow:hidden}
+#mqCard .bar i{display:block;height:100%;background:#d6aa4e}
+#mqCard.dn{border-color:#d6aa4e}
+body.mining #mqTalk,body.mining #mqNext{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(max(14px,env(safe-area-inset-bottom)) + 130px);pointer-events:auto;padding:9px 20px;border-radius:999px;font-size:14px;font-weight:800;white-space:nowrap;border:1.5px solid #d6aa4e;background:#3a2a10;color:#ffe9b0;box-shadow:0 0 14px rgba(214,170,78,.5)}   /* 말 걸기 · 다음 층으로 (광산 나가기 위) */
+body.mining #mqNext.st{bottom:calc(max(14px,env(safe-area-inset-bottom)) + 178px)}
+#mqTalk[hidden],#mqNext[hidden]{display:none!important}
 #mkBtn{align-self:flex-start;width:fit-content;margin:2px 0 0 2px;padding:5px 11px;border-radius:14px;border:1px solid #6b5536;background:rgba(10,8,6,.78);color:#ffd98a;font:800 12.5px var(--f-body,sans-serif);pointer-events:auto}#mkBtn:active{filter:brightness(1.3)}
 body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리자 모드)에서만 */
 .tmap .tsign{position:absolute;left:var(--x);top:var(--y);transform:translate(-50%,-100%);background:none;border:0;padding:0;z-index:3;cursor:pointer;filter:drop-shadow(0 2px 3px #000a);-webkit-tap-highlight-color:transparent}.tmap .tsign svg{display:block}.tmap .tsign:active{filter:drop-shadow(0 2px 3px #000a) brightness(1.2)}
@@ -1453,7 +1466,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
   <canvas id="cv"></canvas>
 
   <div id="hud" hidden>
-    <div id="mineHud" hidden><div class="mhc"></div><button type="button" id="mineOut">🚪 광산 나가기</button></div>
+    <div id="mineHud" hidden><div class="mhc"></div><div id="mqCard" hidden></div><button type="button" id="mineOut">🚪 광산 나가기</button><button type="button" id="mqTalk" hidden></button><button type="button" id="mqNext" hidden>⬇ 다음 층으로</button></div>
     <div class="tl">
       <div class="meRow">
         <div class="lv" id="hLv">1</div>
@@ -1510,7 +1523,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.1.0774</div>
+    <div class="ver" id="verT">v0.7.1.0775</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1587,7 +1600,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
   <div id="hcDie" hidden role="alertdialog" aria-label="하드코어 캐릭터 사망"><div class="hcd-in"><div class="hcd-t">YOU DIED</div><div class="hcd-s" id="hcDieS"></div><div class="hcd-m" id="hcDieM"></div><button class="btn primary danger" id="hcDieOk" type="button">확인</button></div></div>
   <div class="ipop" id="modal" hidden style="z-index:30"></div>
   <div id="ult" hidden><div class="udim"></div><div class="uwrap"><div class="uband"><div class="ulines"></div></div><div class="ucont"><div class="uface"><img alt=""></div><div class="utx"><small>ULTIMATE</small><b></b><em></em></div></div></div><div class="uflash"></div></div>
-  <div id="sty" hidden><div class="sdim"></div><div class="sps"><div class="sp l"><img alt=""></div><div class="sp r"><img alt=""></div></div><div class="sbox" role="dialog" aria-label="이야기"><div class="snm"><b id="stN"></b><em id="stT"></em></div><p class="stx"><span id="stA"></span><span id="stB"></span></p><div class="sft"><span class="spg" id="stPg"></span><span class="sgo" id="stGo">▼</span><button id="stSk" type="button">건너뛰기</button></div></div></div>
+  <div id="sty" hidden><div class="sdim"></div><div class="sps"><div class="sp l"><img alt=""></div><div class="sp r"><img alt=""></div></div><div class="sbox" role="dialog" aria-label="이야기"><div class="snm"><b id="stN"></b><em id="stT"></em></div><p class="stx"><span id="stA"></span><span id="stB"></span></p><div class="sft"><span class="spg" id="stPg"></span><span class="sgo" id="stGo">▼</span><span id="stAsk" hidden><button type="button" id="stYes">수락</button><button type="button" id="stNo">나중에</button></span><button id="stSk" type="button">건너뛰기</button></div></div></div>
   <div id="tq" hidden><div id="tqM" hidden></div><div id="tqH" hidden></div><div id="tqB" role="dialog" aria-label="튜토리얼"><div class="tqhd"><span id="tqS"></span><span id="tqDots"></span></div><b id="tqT"></b><p id="tqP"></p><div class="tqft"><button id="tqSk">건너뛰기</button><button id="tqOk" hidden>확인</button></div></div></div>
 </div>
 
@@ -2722,7 +2735,7 @@ function migrateChars(){
 }
 function createChar(cls,name,nid,hc){ const ids=charIds(); if(ids.length>=MAXCHAR||!CLASSES[cls])return null; if(nameTaken(name))return null; const p=newChar(cls,name,nid); if(hc)p.hc=1; p.ms=MAILQ.map(q=>q.id); lsSet(charKey(p.id),JSON.stringify(packChar(p))); ids.push(p.id); setIds(ids); selId=p.id; lsSet('dkdef2.sel',selId); return p; }
 function deleteChar(id){ setIds(charIds().filter(x=>x!==id)); lsDel(charKey(id)); lsDel('dkdef2.rk.'+id); lsDel('dkdef2.nmv.'+id); if(selId===id){selId='';lsSet('dkdef2.sel','');} rkQueueDel(id); nameQueueRel(id); }
-function packChar(p){ const {apb,arv,id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear,as,sy,gs,au,sp,ct,cts,cat,dv4,shard,ashard,cshard,misc,mail,ms,tut,cc,eq2,es,pet,pets,dx,dxs,dxn,gas,sd,bs,hc,hd,hs,tt,tts,tf,tpt,mine,ore}=p; return {ore:ore&&Object.keys(ore).length?ore:undefined,mine:mine&&((mine.lv|0)>1||(mine.xp|0)>0)?{lv:mine.lv|0,xp:Math.floor(mine.xp)||0,fl:(mine.fl|0)||undefined}:undefined,apb:apb?1:undefined,arv:arv?1:undefined,tf:tf&&Object.keys(tf).length?tf:undefined,tpt:tpt&&Object.keys(tpt).length?tpt:undefined,tt:tt&&TT_BY[tt]?tt:undefined,tts:Array.isArray(tts)&&tts.length?tts:undefined,hc:hc?1:undefined,hd:hc&&hd>0?hd:undefined,hs:hc&&hs>0?hs|0:undefined,bs:Array.isArray(bs)?bs:undefined,sd:sd===1?1:undefined,dxn:dxn&&Object.keys(dxn).length?dxn:undefined,gas:gas===undefined?undefined:Math.max(-1,Math.min(2,gas|0)),dx:dx&&Object.keys(dx).length?dx:undefined,dxs:dxs===undefined?undefined:Math.max(0,dxs|0),id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear:clear|0,au:Math.max(0,Math.min(2,au|0)),sp:sp?1:0,ct:ct>0?ct|0:0,cts:cts>0?cts|0:undefined,cat:cat>0?cat|0:0,as:as===undefined?-1:as,sy:sy===undefined?-1:sy,gs:gs?1:undefined,dv4:dv4?1:0,shard:shard|0,ashard:(ashard|0)||undefined,cshard:(cshard|0)||undefined,misc:Array.isArray(misc)?misc:undefined,mail:Array.isArray(mail)?mail:undefined,ms:Array.isArray(ms)?ms:undefined,tut:tut||undefined,cc:cc&&Object.keys(cc).length?cc:undefined,eq2:eq2&&Object.values(eq2).some(Boolean)?eq2:undefined,es:es===1?1:undefined,pets:pets&&Object.keys(pets).length?pets:undefined,pet:pet&&PETS[pet.id]?{id:pet.id,xp:Math.floor(pet.xp)||0}:undefined}; }
+function packChar(p){ const {apb,arv,id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear,as,sy,gs,au,sp,ct,cts,cat,dv4,shard,ashard,cshard,misc,mail,ms,tut,cc,eq2,es,pet,pets,dx,dxs,dxn,gas,sd,bs,hc,hd,hs,tt,tts,tf,tpt,mine,ore}=p; return {ore:ore&&Object.keys(ore).length?ore:undefined,mine:mine&&((mine.lv|0)>1||(mine.xp|0)>0||mine.q)?{lv:mine.lv|0,xp:Math.floor(mine.xp)||0,fl:(mine.fl|0)||undefined,q:mine.q&&(mine.q.a||Object.keys(mine.q.d||{}).length||mine.q.o)?{d:mine.q.d||{},a:mine.q.a||undefined,p:(mine.q.p|0)||undefined,o:mine.q.o?1:undefined}:undefined}:undefined,apb:apb?1:undefined,arv:arv?1:undefined,tf:tf&&Object.keys(tf).length?tf:undefined,tpt:tpt&&Object.keys(tpt).length?tpt:undefined,tt:tt&&TT_BY[tt]?tt:undefined,tts:Array.isArray(tts)&&tts.length?tts:undefined,hc:hc?1:undefined,hd:hc&&hd>0?hd:undefined,hs:hc&&hs>0?hs|0:undefined,bs:Array.isArray(bs)?bs:undefined,sd:sd===1?1:undefined,dxn:dxn&&Object.keys(dxn).length?dxn:undefined,gas:gas===undefined?undefined:Math.max(-1,Math.min(2,gas|0)),dx:dx&&Object.keys(dx).length?dx:undefined,dxs:dxs===undefined?undefined:Math.max(0,dxs|0),id,cls,lvl,xp,stats,statPts,skillPts,skills,inv,eq,kills,name,gold,potBuy,rev,clear:clear|0,au:Math.max(0,Math.min(2,au|0)),sp:sp?1:0,ct:ct>0?ct|0:0,cts:cts>0?cts|0:undefined,cat:cat>0?cat|0:0,as:as===undefined?-1:as,sy:sy===undefined?-1:sy,gs:gs?1:undefined,dv4:dv4?1:0,shard:shard|0,ashard:(ashard|0)||undefined,cshard:(cshard|0)||undefined,misc:Array.isArray(misc)?misc:undefined,mail:Array.isArray(mail)?mail:undefined,ms:Array.isArray(ms)?ms:undefined,tut:tut||undefined,cc:cc&&Object.keys(cc).length?cc:undefined,eq2:eq2&&Object.values(eq2).some(Boolean)?eq2:undefined,es:es===1?1:undefined,pets:pets&&Object.keys(pets).length?pets:undefined,pet:pet&&PETS[pet.id]?{id:pet.id,xp:Math.floor(pet.xp)||0}:undefined}; }
 function saveChar(){ if(!me||!me.id)return; try{ ttfAutoT(); }catch(e){} lsSet(charKey(me.id),JSON.stringify(packChar(me))); }
 const dispName=p=>(p&&p.name)||CLASSES[p.cls].n;
 const isHc=p=>!!(p&&p.hc), hcDead=p=>!!(p&&p.hc&&p.hd>0);   /* 하드코어 캐릭터 · 사망한 하드코어 캐릭터 */
@@ -5146,6 +5159,7 @@ function cycleSpd(){ if(!G.inGame)return; if(G.mode==='guest'){ toast('배속은
 $('#bSpd').addEventListener('pointerdown',e=>{ e.preventDefault(); cycleSpd(); });
 $('#bBas').addEventListener('pointerdown',e=>{ e.preventDefault(); if(!G.train)return; G.trNoAtk=!G.trNoAtk; sfx('ui'); trUi(); toast(G.trNoAtk?'⚔️ 기본공격 꺼짐 — 스킬만 써요':'⚔️ 기본공격 켜짐','#e0c080'); });
 $('#trHome').onclick=()=>{ if(G.train)quitToTitle(); };
+$('#mqTalk').onclick=()=>mqTalk(); $('#mqNext').onclick=()=>mqDown();
 $('#mineOut').onclick=()=>{ if(G.mine){ sfx('ui'); mineResult(); } };   /* 광산 나가기 → 채굴 결과 창 */
 $('#trPet').onclick=()=>{ if(!G.train)return; const L=[0,3,7,10,15], cur=G.trPet?G.trPet.lv:0, nx=L[(L.indexOf(cur)+1)%L.length]; G.trPet=nx?{id:'trio',xp:petT('trio')[nx-1],lv:nx}:null; G.trNoPet=false; PET.on=false; petStart(); sfx('ui'); toast(nx?`🐾 삼남매 펫 Lv${nx} (훈련장 전용 · 저장 안 됨)`:'🐾 삼남매 펫 해제','#c8a8ff'); };
 $('#trMn').onclick=()=>{ if(!G.train)return; const n=minions.length; minions.length=0; G.trNoPet=true; PET.on=false; sfx('ui'); toast(`💨 소환수 ${n}마리와 펫을 없앴어요`,'#e0c080'); };
@@ -5307,6 +5321,8 @@ const tutSt=k=>(k===4&&me&&me.hc)?TUTS_HC4:TUTS[k];
    - 대사 정의: [화자키, 내용, (나레이션일 때 오른쪽에 보여줄 화자)] · 화자 me = 내 캐릭터, nar = 나레이션 */
 const STSP={
  gk:{n:'그라크',t:'묘지기',img:'img/mob_grak.png',c:'#c9b48a'},
+ qg:{n:'그라크',t:'묘지기',img:'img/npc_grak_talk.png',c:'#c9b48a'},   /* 광산 NPC (관리자 시범) */
+ qt:{n:'토비',t:'견습 광부',img:'img/npc_tobi_talk.png',c:'#ffd06a'},
  ml:{n:'말렉',t:'역병 사제',img:'img/mob_malek.png',c:'#9fd36a'},
  mg:{n:'모르그',t:'썩은 군주',img:'img/mob_morg.png',c:'#d49a6a'},
  kg:{n:'카르곤',t:'뼈의 군주',img:'img/mob_kargon.png',c:'#8fd6a8'},
@@ -5628,11 +5644,11 @@ function storyShow(i){ const S=stS; if(!S)return; S.i=i; const ln=S.ls[i], sp=ln
   const L=el.querySelector('.sp.l'), R=el.querySelector('.sp.r'), li=L.firstElementChild, ri=R.firstElementChild, ms='img/hero_'+ch.cls+'.png';
   if(li.getAttribute('src')!==ms)li.src=ms; L.classList.toggle('off',!me0);
   const f=S.foe&&STSP[S.foe]; R.classList.toggle('no',!f); if(f){ if(ri.getAttribute('src')!==f.img)ri.src=f.img; ri.style.filter=f.f?f.f+' drop-shadow(0 4px 10px rgba(0,0,0,.7))':''; R.classList.toggle('off',me0||nar&&false); }
-  S.full=ln[1]; S.n=0; $('#stA').textContent=''; $('#stB').textContent=S.full; $('#stGo').classList.add('hid'); $('#stPg').textContent=(i+1)+' / '+S.ls.length;
+  S.full=ln[1]; S.n=0; $('#stA').textContent=''; $('#stB').textContent=S.full; $('#stGo').classList.add('hid'); $('#stAsk').hidden=true; $('#stPg').textContent=(i+1)+' / '+S.ls.length;
   storyBox(); clearInterval(stTm); stTm=setInterval(storyTick,32); }
 function storyBox(){ const b=$('#sty .sbox'); if(b)$('#sty').style.setProperty('--sbh',b.offsetHeight+'px'); }
-function storyTick(){ const S=stS; if(!S){ clearInterval(stTm); return; } S.n=Math.min(S.full.length,S.n+1); $('#stA').textContent=S.full.slice(0,S.n); $('#stB').textContent=S.full.slice(S.n); if(S.n>=S.full.length){ clearInterval(stTm); $('#stGo').classList.remove('hid'); } }
-function storyNext(){ const S=stS; if(!S)return; if(S.n<S.full.length){ S.n=S.full.length; storyTick(); return; } sfx('ui'); if(S.i+1>=S.ls.length)storyEnd(); else storyShow(S.i+1); }
+function storyTick(){ const S=stS; if(!S){ clearInterval(stTm); return; } S.n=Math.min(S.full.length,S.n+1); $('#stA').textContent=S.full.slice(0,S.n); $('#stB').textContent=S.full.slice(S.n); if(S.n>=S.full.length){ clearInterval(stTm); if(S.ask&&S.i>=S.ls.length-1)$('#stAsk').hidden=false; else $('#stGo').classList.remove('hid'); } }
+function storyNext(){ const S=stS; if(!S)return; if(S.n<S.full.length){ S.n=S.full.length; storyTick(); return; } sfx('ui'); if(S.i+1>=S.ls.length){ if(!S.ask)storyEnd(); } else storyShow(S.i+1); }
 function storySkip(){ if(stS){ sfx('ui'); storyEnd(); } }
 function storyClose(){ const S=stS; clearInterval(stTm); stS=null; const el=$('#sty'); if(el){ el.hidden=true; el.classList.remove('nar','nb','rt'); } if(S&&S.pz)G.paused=G.mode==='solo'&&!$('#sheet').hidden; return S; }
 /* 스토리 다시 보기: 버튼을 누르면 '시작하기'에 NEW가 붙고, 그 스테이지를 시작하면 처음처럼 모든 대화(시작·페이즈·끝)가 다시 나와요. 한 번 더 누르면 취소 */
@@ -5655,9 +5671,10 @@ function pickStory(){ if(!me||!G.inGame)return; if(!me.tut)me.tut={}; if(!me.tut
   if(stS){ later(1,pickStory); return; }   /* 다른 대화 중이면 끝난 뒤에 */
   me.tut.sg.pick=1; saveChar(); const solo=G.mode==='solo'&&!G.coop; stS={ls:PICK_STORY,i:-1,kind:'pick',solo,pz:false,foe:'gk',full:'',n:0,ch:me};
   const el=$('#sty'); el.hidden=false; el.classList.toggle('nb',!solo); if(solo){ stS.pz=true; G.paused=true; } for(const k in held)held[k]=false; joy.active=false; storyShow(0); }
-function storyEnd(){ const S=storyClose(); if(S&&S.kind==='pre'){ storyWait=false;
+function storyEnd(){ const S=storyClose(); if(S&&S.kind==='npc'){ if(S.fin)S.fin(!S.ask); return; }   /* 광산 NPC 대화: 끝까지 보면 완료 보고, 건너뛰기는 수락 안 함 */
+  if(S&&S.kind==='pre'){ storyWait=false;
   if(G.mode!=='guest'&&(me.clear|0)>selStage&&!STAGES[selStage].raid&&G.inGame&&!G.allMode&&G.phase==='prep'&&G.wave===0&&G.stageIdx===selStage)startAllOut(); } }   /* 이미 깬 스테이지는 대화 뒤 바로 총공세 */
-$('#sty').addEventListener('click',e=>{ if(e.target.closest('#stSk')){ storySkip(); return; } storyNext(); });
+$('#sty').addEventListener('click',e=>{ if(e.target.closest('#stSk')){ storySkip(); return; } if(e.target.closest('#stYes')||e.target.closest('#stNo')){ const y=!!e.target.closest('#stYes'), S=stS; if(!S||!S.ask)return; sfx('ui'); storyClose(); if(S.fin)S.fin(y); return; } storyNext(); });
 window.addEventListener('keydown',e=>{ if(!stS||!stS.solo)return; if(e.key==='Enter'||e.key===' '){ e.preventDefault(); e.stopPropagation(); storyNext(); } else if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); storySkip(); } },true);
 /* 궁극기 컷인: 내가 궁극기를 쓰면 직업 얼굴 + 스킬 이름 띠가 1.5초간 화면을 가로질러요 (게임은 멈추지 않음 · 메뉴 '화면 표시'에서 끌 수 있음) */
 const ULTK={armageddon:'하늘에서 유성이 쏟아진다',ragnarok:'기를 모아 주변의 모든 적을 벤다',divine:'생명을 바쳐 모든 적을 심판한다',lord:'영혼 용령이 강림해 숨결을 뿜는다',bears:'곰 가족이 달려온다'};
@@ -7235,6 +7252,7 @@ function mineFloor(fi,from){ const M=G.mine, F=MINE_FL[fi]; M.fi=fi; if(me&&me.m
   const st=from==='dn'?[MINE_PT.up[0],MINE_PT.up[1]+80]:from==='up'?[MINE_PT.dn[0],MINE_PT.dn[1]-80]:[VX,VY];
   me.x=st[0]; me.y=st[1]; me.kx=me.ky=0;
   if(!F.hub){ const n=Math.round((F.cnt||16)*MINE_EXTRA), pts=[], far=(x,y,d)=>pts.every(p=>hyp(p[0]-x,p[1]-y)>=d);   /* 자리는 1.5배(⅓은 빈자리) — 캔 광석은 같은 종류의 다른 빈자리에서 다시 생겨요 */
+    { const NP=mqNpcAt(fi); if(NP)pts.push([NP.x,NP.y]); }   /* NPC 자리는 광석이 피해서 생겨요 */
     for(let i=0,g=0;i<n&&g<1500;g++){ const x=rand(110,890), y=rand(170,830); if(!far(x,y,95)||hyp(x-st[0],y-st[1])<120||hyp(x-MINE_PT.up[0],y-MINE_PT.up[1])<150||hyp(x-MINE_PT.dn[0],y-MINE_PT.dn[1])<150)continue;
       pts.push([x,y]); M.slots.push({k:F.ores[i%F.ores.length],x,y,t:0,m:null}); i++; }
     for(const k of F.ores){ const L=M.slots.filter(q=>q.k===k).sort(()=>Math.random()-.5); L.slice(0,Math.max(1,Math.round(L.length/MINE_EXTRA))).forEach(q=>mineSpawn(q,true)); } mineSpSlots(F,pts,st); }
@@ -7266,7 +7284,7 @@ function oreHitFx(m,O){ const dx=me.x-m.x, dy=me.y-m.y, dd=Math.max(1,hyp(dx,dy)
   else spark(m.x,m.y,O.c,4); }
 function oreBreak(m){ const O=OREX(m.ore), M=G.mine; if(!M||m.dead)return; m.dead=true; m.hp=0; if(O.sp){ mineSpBreak(m,O); return; }
   const gk=Math.max(1,(me.eq.weapon&&me.eq.weapon.pk)|0), n=pickPieces(gk)+kamaExtra();
-  const put=oreAdd(me,n,m.ore); M.got[m.ore]=(M.got[m.ore]|0)+n; M.brk=(M.brk|0)+1; if(put<n&&T-(M.tf||-9)>6){ M.tf=T; later(.3,()=>sheetToast('기타 칸이 가득 차서 조각을 보관 중이에요','#ffb259')); }
+  const put=oreAdd(me,n,m.ore); M.got[m.ore]=(M.got[m.ore]|0)+n; M.brk=(M.brk|0)+1; mqMine(m.ore,n); if(put<n&&T-(M.tf||-9)>6){ M.tf=T; later(.3,()=>sheetToast('기타 칸이 가득 차서 조각을 보관 중이에요','#ffb259')); }
   burst(m.x,m.y,O.c,14,220); burst(m.x,m.y,'#8a8478',10,180); sfx('orebrk'); addNum(m.x,m.y-34,`+${n} ${O.n} 조각`,O.c,true);
   if(O.gem&&Math.random()<O.gem){ gemDrop(1,me.x,me.y); later(.2,()=>announce('💎 하급 보석을 발견했어요!','#9fd0ff')); }   /* 달빛 은: 10% 하급 보석 (내 발밑에 떨어져 바로 주워요) */
   const xp=mineXp(O,me); if(xp>0)mineAddXp(xp); else if(T-(M.tg||-9)>4){ M.tg=T; addNum(me.x,me.y-52,'회색 광석 · 경험치 없음','#9a9a9a',false); }
@@ -7298,7 +7316,78 @@ function mineSay(tx){ try{
   const el=d.querySelector('.tx'); let n=0; const iv=setInterval(()=>{ n++; el.innerHTML=esc(tx.slice(0,n)).replace(/\n/g,'<br>'); if(n>=tx.length){ clearInterval(iv); el.insertAdjacentHTML('beforeend','<span class="nx">▼</span>'); } },38);
   const close=()=>{ if(!_mSay||_mSay.d!==d)return; clearInterval(iv); clearTimeout(_mSay.to); d.classList.add('out'); setTimeout(()=>{ d.remove(); },360); _mSay=null; };
   d.onclick=close; _mSay={d,iv,to:setTimeout(close,5200)}; }catch(e){} }
-function mineHud(){ const el=$('#mineHud'), M=G.mine; document.body.classList.toggle('mining',!!M); { const sb=$('#bSkillT'); if(sb&&sb._m!==!!M){ sb._m=!!M; sb.querySelector('.ic').textContent=M?'🐾':'✨'; sb.querySelector('.lb').textContent=M?'펫':'스킬'; sb.setAttribute('aria-label',M?'펫':'스킬'); } }   /* 광산에서는 스킬을 못 쓰니 스킬 칸을 펫 버튼으로 */ if(!el)return; if(!M||!me){ el.hidden=true; return; } el.hidden=false; { const kb=$('#mkBtn'); if(kb){ kb.hidden=!rsOn(); if(!kb._b){ kb._b=1; kb.onclick=()=>{ sfx('ui'); mineRecipes(); }; } } const hc=el.firstElementChild; if(hc&&!hc._b){ hc._b=1; hc.onclick=()=>{ el.classList.toggle('fold'); sfx('ui'); }; } }   /* 카드를 누르면 접기/펴기 */
+/* ===== 광산 NPC 퀘스트 (관리자 시범 · 지상 그라크 / 지하 1층 토비) — NPC·퀘스트·대사는 아래 두 표에만 추가하면 돼요 =====
+   - 층 이동은 퀘스트와 상관없이 언제든 가능(퀘스트를 끝내면 「다음 층으로」 지름길 버튼이 생길 뿐)
+   - 퀘스트는 NPC마다 순서대로, 동시에 한 개만 진행(다른 NPC 퀘스트를 수락하면 지금 것은 그 NPC에게서 다시 받을 수 있어요)
+   - req: ['mine',광석,개수]=수락한 뒤 캔 조각 수 · ['give',광석,개수]=조각 가져다 주기(제출 때 소모) · ['lv',광부레벨] · ['open']=조합법 창 열기
+   - r = 보상 경험치 비율(그 층 권장 레벨 = 입장 Lv+5 의 필요 경험치 × r) · 저장: me.mine.q = {d:{끝낸 id:1}, a:진행 중 id, p:캔 개수, o:조합법 열었나} */
+const MNPC={
+  qg:{n:'그라크',t:'묘지기',fl:0,x:VX+140,y:VY-10,img:'img/npc_grak.png',tk:'img/npc_grak_talk.png',no:'…더 시킬 일은 없네. 아래 갱도는 자네 마음대로 내려가 보게.'},
+  qt:{n:'토비',t:'견습 광부',fl:1,x:VX+150,y:236,img:'img/npc_tobi.png',tk:'img/npc_tobi_talk.png',no:'이제 아래층 소식은 엘리네 누나한테서 들어요. 조심하세요!'},
+};
+const MQ=[
+  {id:'g1',np:'qg',n:'첫 곡괭질',req:[['mine','ash',20]],r:.4,
+   ask:[['qg','…새 얼굴이군. 이 채석장엔 무덤밖에 없는데.'],['qg','곡괭이는 쥘 줄 아나? 손목 말고 허리로 휘둘러라.'],['qg','잿돌 스무 개만 캐 와 봐. 캘 때마다 광부 레벨이 오르는 걸 보게 될 거다.']],
+   rem:[['qg','잿돌 스무 개다. 서두를 건 없어.']],
+   done:[['qg','허, 제법이군. 광부 레벨이 높아야 더 깊은 곳에 들어갈 수 있지.'],['qg','…쓸 만하겠어.']]},
+  {id:'g2',np:'qg',n:'녹슨 기억',req:[['give','rust',10]],r:.6,
+   ask:[['qg','캔 건 전부 조각으로 쌓인다. 오른쪽 「이번 획득」 카드에서 바로 볼 수 있지.'],['qg','녹슨 구리 조각 열 개만 가져오게. 그날 쓰던 것과 같은 쇠라서.']],
+   rem:[['qg','녹슨 구리 조각 열 개일세.']],
+   done:[['qg','…이 냄새. 그날도 이랬지.'],['qg','광산이 무너지던 날, 나는 반장이었다. 사람들을 다 못 데리고 나왔어.'],['qg','그래서 지금은 무덤이나 지키는 신세라네.']]},
+  {id:'g3',np:'qg',n:'갱도의 열쇠',req:[['lv',10]],r:1,
+   ask:[['qg','광부 Lv 10이 되면 아래 갱도가 열린다. 서두를 건 없어, 길은 원래부터 자네 거였으니.'],['qg','아래에 토비라는 애가 있었지. 살아 있다면 만나 보게.']],
+   rem:[['qg','광부 Lv 10일세. 캐다 보면 금방이야.']],
+   done:[['qg','Lv 10인가. 내려가 보겠나? 토비에게 내 안부 좀 전해 주게.']]},
+  {id:'t1',np:'qt',n:'갇힌 자리',req:[['give','grave',30]],r:.4,
+   ask:[['qt','어, 사람이다! 위에서 내려온 거예요? 저 토비예요!'],['qt','그날 여기 갇혔었는데, 무덤철이 길을 막고 있어서… 무덤철 조각 서른 개만 모아 주실래요?'],['qt','아, 무덤철은 상점에서 100G에 팔려요. 용돈벌이로 딱이죠!']],
+   rem:[['qt','무덤철 조각 서른 개예요! 조금만 더요.']],
+   done:[['qt','와, 고마워요! 제 자리가 드러났어요.'],['qt','저, 이 자리에서 이틀을 버텼어요. 그라크 반장님이 꼭 온다고 믿었거든요.']]},
+  {id:'t2',np:'qt',n:'조합의 유산',req:[['open']],r:.6,
+   ask:[['qt','이 갱도엔 「별철 조합」이 쓰던 설계도가 남아 있어요. 왼쪽 위의 「조합법」 버튼을 눌러 보세요.'],['qt','단련된 곡괭이 조합법이 보이죠? 직접 만들 필요는 없고, 열어만 봐도 돼요!']],
+   rem:[['qt','왼쪽 위의 「조합법」 버튼이에요. 열어 보기만 하면 돼요.']],
+   done:[['qt','조각을 모아 장비를 만드는 게 조합 광부들의 방식이었어요.'],['qt','조합장 오르벤 님이 만든 방식인데… 제일 존경했는데 말이죠.']]},
+  {id:'t3',np:'qt',n:'땅속의 노래',req:[['give','coal',50],['lv',20]],r:1,
+   ask:[['qt','붕괴 직전에 아래에서 노랫소리가 들렸어요. 사람 목소리가 아니었어요.'],['qt','그을음 석탄 조각 쉰 개로 등불을 채워 주세요. 광부 Lv 20도 필요해요.'],['qt','아, 퀘스트랑 상관없이 내려가 보셔도 돼요!']],
+   rem:[['qt','석탄 조각 쉰 개, 그리고 광부 Lv 20이에요. 천천히 하세요!']],
+   done:[['qt','…역시 같은 노래네요. 소름 돋아요.'],['qt','아래층엔 조합 은세공사 엘리네 누나가 있어요. 오르벤 님이 부른 분이에요.']]},
+];
+const mqKeyAt=fi=>Object.keys(MNPC).find(k=>MNPC[k].fl===fi), mqNpcAt=fi=>MNPC[mqKeyAt(fi)];
+const mqS=()=>{ const m=me.mine||(me.mine={lv:1,xp:0}); const q=m.q||(m.q={d:{},a:'',p:0,o:0}); if(!q.d)q.d={}; return q; };
+const mqAct=()=>{ const q=me&&me.mine&&me.mine.q; return q&&q.a?(MQ.find(x=>x.id===q.a)||null):null; };
+const mqNext=k=>{ const d=(me&&me.mine&&me.mine.q&&me.mine.q.d)||{}; return MQ.find(q=>q.np===k&&!d[q.id])||null; };
+const mqTg=r=>r[0]==='lv'?r[1]:r[0]==='open'?1:r[2];
+const mqHave=(r,S)=>Math.min(mqTg(r),r[0]==='mine'?(S.p|0):r[0]==='give'?oreCount(me,r[1]):r[0]==='lv'?minerLv(me):(S.o?1:0));
+const mqOk=q=>{ const S=mqS(); return q.req.every(r=>mqHave(r,S)>=mqTg(r)); };
+const mqTx=(r,S)=>{ const h=mqHave(r,S), t=mqTg(r); return r[0]==='mine'?`${ORES[r[1]].n} ${h}/${t}개 캐기`:r[0]==='give'?`${ORES[r[1]].n} 조각 ${h}/${t}`:r[0]==='lv'?`광부 Lv ${h}/${t}`:`조합법 ${h?'확인함':'열어 보기'}`; };
+const mqMark=k=>{ const a=mqAct(); if(a&&a.np===k)return mqOk(a)?'?':''; return mqNext(k)?'!':''; };
+function mqMine(k,n){ const q=mqAct(); if(q&&q.req.some(r=>r[0]==='mine'&&r[1]===k))mqS().p=(mqS().p|0)+n; }
+function mqOpen(){ const q=mqAct(); if(q&&q.req.some(r=>r[0]==='open')&&!mqS().o){ mqS().o=1; saveChar(); if(G.mine)mineHud(); } }
+function mqHud(){ const el=$('#mqCard'); if(!el)return; const q=G.mine&&me?mqAct():null; if(!q){ if(!el.hidden){ el.hidden=true; el._k=''; } return; }
+  const S=mqS(), ok=mqOk(q), key=q.id+'|'+ok+'|'+q.req.map(r=>mqHave(r,S)).join(','); if(el._k===key&&!el.hidden)return; el._k=key;
+  const pr=q.req.reduce((a,r)=>a+mqHave(r,S)/mqTg(r),0)/q.req.length; el.hidden=false; el.classList.toggle('dn',ok);
+  el.innerHTML=`<b>📜 ${q.n}${ok?' · 완료!':''}</b>${ok?`${MNPC[q.np].n}에게 가서 보고하세요`:q.req.map(r=>`<div>${mqTx(r,S)}</div>`).join('')}<div class="bar"><i style="width:${Math.round(pr*100)}%"></i></div>`; }
+function mqTick(){ const M=G.mine, bt=$('#mqTalk'), bn=$('#mqNext'); if(!M||!me||!bt)return; const k=mqKeyAt(M.fi); let near=false, nx=false;
+  if(k&&!stS&&!me.dead){ const N=MNPC[k], L=MQ.filter(q=>q.np===k).pop(); near=hyp(me.x-N.x,me.y-N.y)<=100; nx=!!(L&&me.mine&&me.mine.q&&me.mine.q.d&&me.mine.q.d[L.id]&&MINE_FL[M.fi+1]); }
+  if(near!==M._qn){ M._qn=near; bt.hidden=!near; if(near)bt.textContent='💬 '+MNPC[k].n+'에게 말 걸기'; }
+  if(nx!==M._qx){ M._qx=nx; bn.hidden=!nx; } bn.classList.toggle('st',nx&&near); }
+function mqSay(ls,ask,fin){ const el=$('#sty'); stS={ls,i:-1,kind:'npc',solo:true,pz:true,foe:null,full:'',n:0,ch:me,ask:!!ask,fin}; el.hidden=false; el.classList.remove('nb'); G.paused=true; for(const k in held)held[k]=false; joy.active=false; storyShow(0); }
+function mqTalk(){ const M=G.mine; if(!M||!me||stS)return; const k=mqKeyAt(M.fi); if(!k)return; const N=MNPC[k], act=mqAct(), q=mqNext(k); sfx('ui');
+  if(act&&act.np===k){ if(mqOk(act))mqSay(act.done,0,()=>mqTurn(act)); else mqSay(act.rem,0,null); }
+  else if(q)mqSay(q.ask,1,y=>{ if(y)mqAccept(q); });
+  else mqSay([[k,N.no]],0,null); }
+function mqAccept(q){ const S=mqS(); S.a=q.id; S.p=0; S.o=0; saveChar(); mineHud(); sheetToast('📜 퀘스트 수락 · '+q.n,'#ffd98a'); }
+function mqTurn(q){ const S=mqS(); if(S.a!==q.id||!mqOk(q))return; for(const r of q.req)if(r[0]==='give')oreTake(me,r[1],r[2]);
+  const rl=Math.min(MINE_MAXLV,MINE_FL[MNPC[q.np].fl].lvl+5); S.d[q.id]=1; S.a=''; S.p=0; S.o=0; mineAddXp(Math.max(1,Math.round(mineNeed(rl)*q.r))); saveChar(); mineHud(); sheetToast('📜 퀘스트 완료 · '+q.n,'#ffd98a'); sfx('lvl'); }
+function mqDown(){ const M=G.mine; if(!M||stS||M.fi+1>=MINE_FL.length)return; sfx('ui'); mineFloor(M.fi+1,'dn'); }
+const NPC_IMG={}; const npcImg=k=>{ let im=NPC_IMG[k]; if(!im){ im=NPC_IMG[k]=new Image(); im.decoding='async'; im.onerror=()=>{ if((NPC_IMG[k+'_n']=(NPC_IMG[k+'_n']|0)+1)<=4)setTimeout(()=>{ delete NPC_IMG[k]; npcImg(k); },1500); }; im.src=MNPC[k].img; } return im.complete&&im.naturalWidth?im:null; };
+const npcWarm=()=>{ for(const k in MNPC){ npcImg(k); const t=new Image(); t.src=MNPC[k].tk; } };   /* NPC 그림(서 있는 그림 · 대화 그림) 미리 불러오기 */
+function mqDraw(c,t){ const M=G.mine, k=M&&mqKeyAt(M.fi); if(!k||!me)return; const N=MNPC[k], im=npcImg(k), h=84, x=N.x, y=N.y, top=y+30-h, w=im?h*im.naturalWidth/im.naturalHeight:80;
+  c.save(); c.fillStyle='rgba(0,0,0,.4)'; c.beginPath(); c.ellipse(x,y+30,34,10,0,0,6.283); c.fill();
+  if(im){ c.save(); c.translate(x,0); if(me.x<x-12)c.scale(-1,1); c.drawImage(im,-w/2,top,w,h); c.restore(); }   /* 오른쪽 그림 기준, 내가 왼쪽에 있으면 나를 바라봐요 */
+  c.font='700 12px "Noto Sans KR",sans-serif'; c.textAlign='center'; c.lineWidth=3; c.strokeStyle='rgba(0,0,0,.85)'; const tx=N.n+' · '+N.t; c.strokeText(tx,x,y+47); c.fillStyle='#f1e3c4'; c.fillText(tx,x,y+47);
+  const mk=mqMark(k); if(mk){ const by=top-12+Math.sin(t*4)*3, bx=x+w*.12; c.beginPath(); c.arc(bx,by,13,0,6.283); c.fillStyle=mk==='!'?'#d6aa4e':'#79d6ff'; c.fill(); c.lineWidth=2; c.strokeStyle='#fff3c4'; c.stroke(); c.font='900 18px sans-serif'; c.fillStyle='#2a1c0a'; c.textBaseline='middle'; c.fillText(mk,bx,by+1); c.textBaseline='alphabetic'; }
+  c.restore(); }
+function mineHud(){ mqHud(); const el=$('#mineHud'), M=G.mine; document.body.classList.toggle('mining',!!M); { const sb=$('#bSkillT'); if(sb&&sb._m!==!!M){ sb._m=!!M; sb.querySelector('.ic').textContent=M?'🐾':'✨'; sb.querySelector('.lb').textContent=M?'펫':'스킬'; sb.setAttribute('aria-label',M?'펫':'스킬'); } }   /* 광산에서는 스킬을 못 쓰니 스킬 칸을 펫 버튼으로 */ if(!el)return; if(!M||!me){ el.hidden=true; return; } el.hidden=false; { const kb=$('#mkBtn'); if(kb){ kb.hidden=!rsOn(); if(!kb._b){ kb._b=1; kb.onclick=()=>{ sfx('ui'); mineRecipes(); }; } } const hc=el.firstElementChild; if(hc&&!hc._b){ hc._b=1; hc.onclick=()=>{ el.classList.toggle('fold'); sfx('ui'); }; } }   /* 카드를 누르면 접기/펴기 */
   /* 광산 안 오른쪽 카드 (값이 바뀔 때만 다시 그림) */
   el.style.top=Math.round((LAND?8:4)+mmW()*WH/WW+14)+'px';   /* 미니맵 아래 (겹치지 않게) */
   const L=minerLv(me), p=L>=MINE_MAXLV?100:Math.min(99,Math.floor(me.mine.xp/mineNeed(L)*100)), got=Object.keys(M.got).filter(k=>M.got[k]>0).sort((x,y)=>ORES[y].lv-ORES[x].lv);
@@ -7317,7 +7406,7 @@ const MINE_RECIPES=[
 const MINE_RCATS=[['all','전체'],['pick','⛏️ 곡괭이'],['jewel','💠 주얼'],['pet','🐾 펫'],['eq','🔒 장비',1],['etc','🔒 기타',1]];
 const pickHas=(p,g)=>{ let f=false; const see=it=>{ if(isPick(it)&&(it.pk|0)===g)f=true; }; see(p.eq&&p.eq.weapon); if(p.eq2)Object.values(p.eq2).forEach(see); (p.inv||[]).forEach(see); return f; };   /* 그 단계 곡괭이를 이미 갖고 있나 (착용·가방) */
 function mineRecipes(o){
-  o=o||{}; let cat=o.only||'all', open=-1;
+  mqOpen(); o=o||{}; let cat=o.only||'all', open=-1;
   const gemOk=(m,x)=>isGem(x)&&(!(m[1]||m[3])||(!x.jw&&!x.lock&&(!m[1]||x.gk===m[1])&&(!m[3]||gemTier(x)===m[3])));   /* ['gem',종류(0=아무),개수,등급(없으면 아무)] — 종류·등급을 정하면 주얼·잠긴 보석은 제외 */
   const have=m=>m[0]==='ore'?oreCount(me,m[1]):m[0]==='gem'?gemCnt(me,x=>gemOk(m,x)):aGold(), nmOf=m=>m[0]==='ore'?'Lv'+ORES[m[1]].lv+' '+ORES[m[1]].n+' 조각':m[0]==='gem'?(m[1]?`${m[3]?GEM_TIER[m[3]-1].n+' ':''}${GEM_N[m[1]]}`:'보석 (아무 종류)'):'골드';
   const draw=m=>{
@@ -7388,7 +7477,7 @@ function mineResult(){ const M=G.mine; if(!M||!me)return; const F=MINE_FL[M.fi],
    <div class="row2" style="margin-top:16px"><button class="btn" id="mrAgain">🔁 다시 들어가기</button><button class="btn primary" id="mrOut">🏠 나가기</button></div></div>`,m=>{
     m.querySelector('#mrOut').onclick=()=>{ closeModal(); quitToTitle(); };
     m.querySelector('#mrAgain').onclick=async()=>{ closeModal(); await quitToTitle(); startMine(); }; }); }
-function mineTick(dt){ const M=G.mine; if(!M||!me)return;
+function mineTick(dt){ const M=G.mine; if(!M||!me)return; mqTick();
   if(M.bub){ M.bub.t+=dt; if(M.bub.t>4.6)M.bub=null; }
   for(const sl of M.slots)if(!sl.m&&sl.t>0){ sl.t-=dt; if(sl.t<=0)mineSpawn(sl); }   /* 다 캔 자리는 25초 뒤 다시 생겨요 */
   if(!me.dead&&me.atkCd<=0&&isPick(me.eq.weapon)){ let o=null,bd=1e9; for(const m of G.mobs){ if(m.dead||!m.ore||minerLv(me)<OREX(m.ore).lv)continue; const d=hyp(m.x-me.x,m.y-me.y)-m.r; if(d<bd){bd=d;o=m;} } if(o&&bd<=atkRg(me)+6)tryUse('atk',true); }   /* 자동 채굴: 캘 수 있는 광석이 닿으면 기본 공격 */
@@ -7396,7 +7485,7 @@ function mineTick(dt){ const M=G.mine; if(!M||!me)return;
   for(const dir of ['up','dn']){ const to=M.fi+(dir==='up'?-1:1), P=MINE_PT[dir]; if(to<0||to>=MINE_FL.length||hyp(me.x-P[0],me.y-P[1])>=44)continue; const F2=MINE_FL[to];
     sfx('ui'); mineFloor(to,dir); return; } }
 const ORE_IMG={}, ORE_TRY={}; const oreImg=k=>{ let im=ORE_IMG[k]; if(!im){ im=ORE_IMG[k]=new Image(); im.decoding='async'; im.onerror=()=>{ if((ORE_TRY[k]=(ORE_TRY[k]|0)+1)<=5)setTimeout(()=>{ delete ORE_IMG[k]; oreImg(k); },1500*ORE_TRY[k]); }; im.src='img/ore_'+k+'.webp'; } return im.complete&&im.naturalWidth?im:null; };   /* 불러오기 실패하면 몇 번 다시 시도 */
-const oreWarm=()=>{ Object.keys(ORES).concat(Object.keys(MSP)).forEach(k=>oreImg(k)); };   /* 광석 그림 전부 미리 불러오기 — 광산에 들어가기 전에 준비돼서 처음부터 그림으로 나와요 */
+const oreWarm=()=>{ Object.keys(ORES).concat(Object.keys(MSP)).forEach(k=>oreImg(k)); npcWarm(); };   /* 광석 그림 전부 미리 불러오기 — 광산에 들어가기 전에 준비돼서 처음부터 그림으로 나와요 */
 setTimeout(oreWarm,800);
 function drawOre(m,t){ const O=OREX(m.ore), x=m.x, y=m.y, r=m.r, hp=m.hp/m.max, sd=m.seed||0, c=ctx, im=oreImg(m.ore);
   c.save(); c.fillStyle='rgba(0,0,0,.38)'; c.beginPath(); c.ellipse(x,y+r*.55,r*1.15,r*.38,0,0,6.283); c.fill();
@@ -7471,6 +7560,7 @@ function mineDraw(t){ const M=G.mine; if(!M)return; const c=ctx;
     for(let i=0;i<3;i++){ c.strokeStyle=col; c.globalAlpha=.35+.2*i; c.lineWidth=3; c.beginPath(); c.ellipse(0,0,40-i*9,14-i*3,0,t*(1.5+i*.6)*(dir==='up'?1:-1),t*(1.5+i*.6)*(dir==='up'?1:-1)+4.4); c.stroke(); }
     c.globalAlpha=1; c.font='bold 13px sans-serif'; c.textAlign='center'; c.fillStyle='#000'; const lb=`${F2.n.split(' · ')[0]}${lk?` 🔒Lv${F2.lvl}`:''}`; c.fillText(lb,1,(dir==='up'?34:-22)+1); c.fillStyle=lk?'#d8a8a8':'#f1e3c4'; c.fillText(lb,0,dir==='up'?34:-22);
     c.restore(); }
+  mqDraw(c,t);
   if(me&&me.buffs&&me.buffs.kmk&&me.buffs.kmk.t>0)mineKmkDraw(c,t,me.buffs.kmk);
   if(M.bub)mineBubDraw(c,M); }
 const TR_CN_DUR=2.3, TR_CN_GAP=1;   /* 반격 태세 지속 시간(보스와 같음) · 끝난 뒤 다시 쓰기까지 */
