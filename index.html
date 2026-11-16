@@ -1523,7 +1523,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.1.0775</div>
+    <div class="ver" id="verT">v0.7.1.0776</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -7322,8 +7322,8 @@ function mineSay(tx){ try{
    - req: ['mine',광석,개수]=수락한 뒤 캔 조각 수 · ['give',광석,개수]=조각 가져다 주기(제출 때 소모) · ['lv',광부레벨] · ['open']=조합법 창 열기
    - r = 보상 경험치 비율(그 층 권장 레벨 = 입장 Lv+5 의 필요 경험치 × r) · 저장: me.mine.q = {d:{끝낸 id:1}, a:진행 중 id, p:캔 개수, o:조합법 열었나} */
 const MNPC={
-  qg:{n:'그라크',t:'묘지기',fl:0,x:VX+140,y:VY-10,img:'img/npc_grak.png',tk:'img/npc_grak_talk.png',no:'…더 시킬 일은 없네. 아래 갱도는 자네 마음대로 내려가 보게.'},
-  qt:{n:'토비',t:'견습 광부',fl:1,x:VX+150,y:236,img:'img/npc_tobi.png',tk:'img/npc_tobi_talk.png',no:'이제 아래층 소식은 엘리네 누나한테서 들어요. 조심하세요!'},
+  qg:{n:'그라크',t:'묘지기',fl:0,h:76,x:VX+140,y:VY-10,img:'img/npc_grak.png',tk:'img/npc_grak_talk.png',no:'…더 시킬 일은 없네. 아래 갱도는 자네 마음대로 내려가 보게.'},
+  qt:{n:'토비',t:'견습 광부',fl:1,h:66,x:VX+150,y:236,img:'img/npc_tobi.png',tk:'img/npc_tobi_talk.png',no:'이제 아래층 소식은 엘리네 누나한테서 들어요. 조심하세요!'},
 };
 const MQ=[
   {id:'g1',np:'qg',n:'첫 곡괭질',req:[['mine','ash',20]],r:.4,
@@ -7381,7 +7381,7 @@ function mqTurn(q){ const S=mqS(); if(S.a!==q.id||!mqOk(q))return; for(const r o
 function mqDown(){ const M=G.mine; if(!M||stS||M.fi+1>=MINE_FL.length)return; sfx('ui'); mineFloor(M.fi+1,'dn'); }
 const NPC_IMG={}; const npcImg=k=>{ let im=NPC_IMG[k]; if(!im){ im=NPC_IMG[k]=new Image(); im.decoding='async'; im.onerror=()=>{ if((NPC_IMG[k+'_n']=(NPC_IMG[k+'_n']|0)+1)<=4)setTimeout(()=>{ delete NPC_IMG[k]; npcImg(k); },1500); }; im.src=MNPC[k].img; } return im.complete&&im.naturalWidth?im:null; };
 const npcWarm=()=>{ for(const k in MNPC){ npcImg(k); const t=new Image(); t.src=MNPC[k].tk; } };   /* NPC 그림(서 있는 그림 · 대화 그림) 미리 불러오기 */
-function mqDraw(c,t){ const M=G.mine, k=M&&mqKeyAt(M.fi); if(!k||!me)return; const N=MNPC[k], im=npcImg(k), h=84, x=N.x, y=N.y, top=y+30-h, w=im?h*im.naturalWidth/im.naturalHeight:80;
+function mqDraw(c,t){ const M=G.mine, k=M&&mqKeyAt(M.fi); if(!k||!me)return; const N=MNPC[k], im=npcImg(k), h=N.h||72, x=N.x, y=N.y, top=y+30-h, w=im?h*im.naturalWidth/im.naturalHeight:80;
   c.save(); c.fillStyle='rgba(0,0,0,.4)'; c.beginPath(); c.ellipse(x,y+30,34,10,0,0,6.283); c.fill();
   if(im){ c.save(); c.translate(x,0); if(me.x<x-12)c.scale(-1,1); c.drawImage(im,-w/2,top,w,h); c.restore(); }   /* 오른쪽 그림 기준, 내가 왼쪽에 있으면 나를 바라봐요 */
   c.font='700 12px "Noto Sans KR",sans-serif'; c.textAlign='center'; c.lineWidth=3; c.strokeStyle='rgba(0,0,0,.85)'; const tx=N.n+' · '+N.t; c.strokeText(tx,x,y+47); c.fillStyle='#f1e3c4'; c.fillText(tx,x,y+47);
