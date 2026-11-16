@@ -1444,8 +1444,11 @@ body.mining #mineOut{position:fixed;left:50%;transform:translateX(-50%);bottom:c
 #mqCard .bar{height:5px;border-radius:3px;background:#2a2119;margin-top:5px;overflow:hidden}
 #mqCard .bar i{display:block;height:100%;background:#d6aa4e}
 #mqCard.dn{border-color:#d6aa4e}
-body.mining #mqTalk,body.mining #mqNext{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(max(14px,env(safe-area-inset-bottom)) + 130px);pointer-events:auto;padding:9px 20px;border-radius:999px;font-size:14px;font-weight:800;white-space:nowrap;border:1.5px solid #d6aa4e;background:#3a2a10;color:#ffe9b0;box-shadow:0 0 14px rgba(214,170,78,.5)}   /* 말 걸기 · 다음 층으로 (광산 나가기 위) */
-body.mining #mqNext.st{bottom:calc(max(14px,env(safe-area-inset-bottom)) + 178px)}
+body.mining #mqNext{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(max(14px,env(safe-area-inset-bottom)) + 130px);pointer-events:auto;padding:9px 20px;border-radius:999px;font-size:14px;font-weight:800;white-space:nowrap;border:1.5px solid #d6aa4e;background:#3a2a10;color:#ffe9b0;box-shadow:0 0 14px rgba(214,170,78,.5)}   /* 다음 층으로 (광산 나가기 위) */
+body.mining #mqTalk{position:fixed;left:0;top:0;z-index:5;pointer-events:auto;padding:7px 14px;border-radius:999px;font-size:14px;font-weight:800;white-space:nowrap;border:1.5px solid #d6aa4e;background:#3a2a10;color:#ffe9b0;box-shadow:0 0 14px rgba(214,170,78,.6);will-change:transform}   /* 말 걸기 — NPC 옆에 뜨는 알약 말풍선 (위치는 mqDraw가 매 프레임 따라가요) */
+body.mining #mqTalk:after{content:'';position:absolute;top:50%;width:11px;height:11px;margin-top:-6px;background:#3a2a10;border:1.5px solid #d6aa4e}
+body.mining #mqTalk.fl:after{right:-6px;border-left:0;border-bottom:0;transform:rotate(45deg)}   /* NPC가 오른쪽(말풍선 왼쪽 배치) */
+body.mining #mqTalk.fr:after{left:-6px;border-right:0;border-top:0;transform:rotate(45deg)}
 #mqTalk[hidden],#mqNext[hidden]{display:none!important}
 #mkBtn{align-self:flex-start;width:fit-content;margin:2px 0 0 2px;padding:5px 11px;border-radius:14px;border:1px solid #6b5536;background:rgba(10,8,6,.78);color:#ffd98a;font:800 12.5px var(--f-body,sans-serif);pointer-events:auto}#mkBtn:active{filter:brightness(1.3)}
 body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리자 모드)에서만 */
@@ -1525,7 +1528,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.1.0779</div>
+    <div class="ver" id="verT">v0.7.1.0780</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -7370,10 +7373,10 @@ function mqHud(){ const el=$('#mqCard'); if(!el)return; const q=G.mine&&me?mqAct
   el.innerHTML=`<b>📜 ${q.n}${ok?' · 완료!':''}</b>${ok?`${MNPC[q.np].n}에게 가서 보고하세요`:q.req.map(r=>`<div>${mqTx(r,S)}</div>`).join('')}<div class="bar"><i style="width:${Math.round(pr*100)}%"></i></div>`; }
 function mqTick(){ const M=G.mine, bt=$('#mqTalk'), bn=$('#mqNext'); if(!M||!me||!bt)return; const k=mqKeyAt(M.fi); let near=false, nx=false;
   if(k&&!stS&&!me.dead){ const N=MNPC[k], L=MQ.filter(q=>q.np===k).pop(); near=hyp(me.x-N.x,me.y-N.y)<=100; nx=!!(L&&me.mine&&me.mine.q&&me.mine.q.d&&me.mine.q.d[L.id]&&MINE_FL[M.fi+1]); }
-  if(near!==M._qn){ M._qn=near; bt.hidden=!near; if(near)bt.textContent='💬 '+MNPC[k].n+'에게 말 걸기'; }
-  if(nx!==M._qx){ M._qx=nx; bn.hidden=!nx; } bn.classList.toggle('st',nx&&near); }
+  if(near!==M._qn){ M._qn=near; bt.hidden=!near; if(near)bt.textContent='💬 말 걸기'; }
+  if(nx!==M._qx){ M._qx=nx; bn.hidden=!nx; } }
 function mqSay(ls,ask,fin){ const el=$('#sty'); stS={ls,i:-1,kind:'npc',solo:true,pz:true,foe:null,full:'',n:0,ch:me,ask:!!ask,fin}; el.hidden=false; el.classList.remove('nb'); G.paused=true; for(const k in held)held[k]=false; joy.active=false; storyShow(0); }
-function mqTalk(){ const M=G.mine; if(!M||!me||stS)return; const k=mqKeyAt(M.fi); if(!k)return; const N=MNPC[k], act=mqAct(), q=mqNext(k); sfx('ui');
+function mqTalk(){ const M=G.mine; if(!M||!me||stS)return; const k=mqKeyAt(M.fi); if(!k)return; const N=MNPC[k], act=mqAct(), q=mqNext(k); sfx('ui'); { const tb=$('#mqTalk'); tb.hidden=true; M._qn=false; }
   if(act&&act.np===k){ if(mqOk(act))mqSay(act.done,0,()=>mqTurn(act)); else mqSay(act.rem,0,null); }
   else if(q)mqSay(q.ask,1,y=>{ if(y)mqAccept(q); });
   else mqSay([[k,N.no]],0,null); }
@@ -7383,12 +7386,16 @@ function mqTurn(q){ const S=mqS(); if(S.a!==q.id||!mqOk(q))return; for(const r o
 function mqDown(){ const M=G.mine; if(!M||stS||M.fi+1>=MINE_FL.length)return; sfx('ui'); mineFloor(M.fi+1,'dn'); }
 const NPC_IMG={}; const npcImg=k=>{ let im=NPC_IMG[k]; if(!im){ im=NPC_IMG[k]=new Image(); im.decoding='async'; im.onerror=()=>{ if((NPC_IMG[k+'_n']=(NPC_IMG[k+'_n']|0)+1)<=4)setTimeout(()=>{ delete NPC_IMG[k]; npcImg(k); },1500); }; im.src=MNPC[k].img; } return im.complete&&im.naturalWidth?im:null; };
 const npcWarm=()=>{ for(const k in MNPC){ npcImg(k); const t=new Image(); t.src=MNPC[k].tk; } };   /* NPC 그림(서 있는 그림 · 대화 그림) 미리 불러오기 */
+let fl2=true;
 function mqDraw(c,t){ const M=G.mine, k=M&&mqKeyAt(M.fi); if(!k||!me)return; const N=MNPC[k], im=npcImg(k), h=N.h||72, x=N.x, y=N.y, top=y+30-h, w=im?h*im.naturalWidth/im.naturalHeight:80;
   c.save(); c.fillStyle='rgba(0,0,0,.4)'; c.beginPath(); c.ellipse(x,y+30,34,10,0,0,6.283); c.fill();
   if(im){ c.save(); c.translate(x,0); if(me.x<x-12)c.scale(-1,1); c.drawImage(im,-w/2,top,w,h); c.restore(); }   /* 오른쪽 그림 기준, 내가 왼쪽에 있으면 나를 바라봐요 */
   c.font='700 12px "Noto Sans KR",sans-serif'; c.textAlign='center'; c.lineWidth=3; c.strokeStyle='rgba(0,0,0,.85)'; const tx=N.n+' · '+N.t; c.strokeText(tx,x,y+47); c.fillStyle='#f1e3c4'; c.fillText(tx,x,y+47);
   const mk=mqMark(k); if(mk){ const by=top-12+Math.sin(t*4)*3, bx=x+w*.12; c.beginPath(); c.arc(bx,by,13,0,6.283); c.fillStyle=mk==='!'?'#d6aa4e':'#79d6ff'; c.fill(); c.lineWidth=2; c.strokeStyle='#fff3c4'; c.stroke(); c.font='900 18px sans-serif'; c.fillStyle='#2a1c0a'; c.textBaseline='middle'; c.fillText(mk,bx,by+1); c.textBaseline='alphabetic'; }
-  c.restore(); }
+  c.restore();
+  const bt=$('#mqTalk'); if(bt&&!bt.hidden){ const R=cv.getBoundingClientRect(), Z=ZOOM, fl=me.x<x-12, d=w*.36*Z+12, bw=bt.offsetWidth||96;   /* 플레이어가 있는 쪽(NPC가 바라보는 쪽)에 말풍선 — 퀘스트 마크(머리 위)는 안 가려요 */
+    let sx=R.left+(x-camX)*Z, sy=R.top+(top+h*.4-camY)*Z, left=fl?sx-d-bw:sx+d; if(left<4||left+bw>innerWidth-4){ fl2=!fl; left=fl2?sx-d-bw:sx+d; } else fl2=fl;
+    bt.classList.toggle('fl',fl2); bt.classList.toggle('fr',!fl2); bt.style.transform='translate('+Math.round(left)+'px,'+Math.round(sy)+'px) translateY(-50%)'; } }
 function mineHud(){ mqHud(); const el=$('#mineHud'), M=G.mine; document.body.classList.toggle('mining',!!M); { const sb=$('#bSkillT'); if(sb&&sb._m!==!!M){ sb._m=!!M; sb.querySelector('.ic').textContent=M?'🐾':'✨'; sb.querySelector('.lb').textContent=M?'펫':'스킬'; sb.setAttribute('aria-label',M?'펫':'스킬'); } }   /* 광산에서는 스킬을 못 쓰니 스킬 칸을 펫 버튼으로 */ if(!el)return; if(!M||!me){ el.hidden=true; return; } el.hidden=false; { const kb=$('#mkBtn'); if(kb){ kb.hidden=!rsOn(); if(!kb._b){ kb._b=1; kb.onclick=()=>{ sfx('ui'); mineRecipes(); }; } } const hc=el.firstElementChild; if(hc&&!hc._b){ hc._b=1; hc.onclick=()=>{ el.classList.toggle('fold'); sfx('ui'); }; } }   /* 카드를 누르면 접기/펴기 */
   /* 광산 안 오른쪽 카드 (값이 바뀔 때만 다시 그림) */
   el.style.top=Math.round((LAND?8:4)+mmW()*WH/WW+14)+'px';   /* 미니맵 아래 (겹치지 않게) */
