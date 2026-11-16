@@ -1439,7 +1439,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
 .mkr{color:#e9dcc0}.mkr .cats{display:flex;gap:6px;overflow-x:auto;margin-bottom:10px;padding-bottom:2px}.mkr .cats button{flex:none;padding:6px 12px;border-radius:16px;border:1px solid #4a3d28;background:#1d1812;color:#a99a7e;font-size:13px;font-weight:700}.mkr .cats button.on{background:#3a2d14;border-color:#e0b04a;color:#ffd98a}
 .mkr .it{border:1px solid #3d3322;background:#1a150f;border-radius:12px;margin-bottom:8px;overflow:hidden}.mkr .hd{display:flex;align-items:center;gap:10px;padding:8px 10px;cursor:pointer}.mkr .hd img{width:42px;height:42px;object-fit:contain;flex:none}.mkr .hd .nm{font-weight:800;font-size:14.5px}.mkr .hd .ds{font-size:11.5px;color:#a99a7e;margin-top:1px}
 .mkr .bd{margin-left:auto;font-size:11px;border-radius:8px;padding:2px 8px;border:1px solid;flex:none}.mkr .bd.g{color:#8fe0a0;border-color:#3f7a50;background:#12261a}.mkr .bd.r{color:#ff9a8a;border-color:#7a3f3a;background:#2a1412}.mkr .bd.l{color:#8c8270;border-color:#4a4132;background:#1d1a14}
-.mkr .dt{border-top:1px dashed #3a3022;padding:6px 12px 10px;font-size:13px}.mkr .dt .r{display:flex;justify-content:space-between;padding:3px 0}.mkr .ok{color:#8fe0a0}.mkr .no{color:#ff9a8a}.mkr .fx{font-size:12px;color:#9fd0ff;margin-top:4px}.mkr .lkd{opacity:.6}.mkr .lkd img{filter:grayscale(1) brightness(.7)}
+.mkr .dt{border-top:1px dashed #3a3022;padding:6px 12px 10px;font-size:13px}.mkr .dt .r{display:flex;justify-content:space-between;padding:3px 0}.mkr .ok{color:#8fe0a0}.mkr .no{color:#ff9a8a}.mkr .fx{font-size:12px;color:#9fd0ff;margin-top:4px}.mkr .pib{margin:8px 0 0;padding:6px 14px;border-radius:999px;border:1.5px solid #82afff;background:#18223c;color:#82afff;font-size:13px;font-weight:700;cursor:pointer}.pipop{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.62);display:flex;align-items:center;justify-content:center;padding:20px}.pipop .pic{width:100%;max-width:360px;background:#1a1410;border:2px solid #be9640;border-radius:16px;padding:16px 16px 14px;box-sizing:border-box}.pipop h3{margin:0 0 10px;text-align:center;color:#ffd86a;font-size:17px;padding-bottom:8px;border-bottom:1px solid #3a3022}.pipop .fx{font-size:13.5px;color:#9fd0ff;line-height:1.5;margin:6px 0}.pipop .btn{width:100%;margin-top:12px}.mkr .lkd{opacity:.6}.mkr .lkd img{filter:grayscale(1) brightness(.7)}
 #mineHud .mfl{font-size:12px;font-weight:800;color:#f1e3c4;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 </style>
 
@@ -1510,7 +1510,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.1.0767</div>
+    <div class="ver" id="verT">v0.7.1.0768</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -7216,7 +7216,7 @@ const minePow=p=>Math.round(5*(1+.08*(minerLv(p)-1)));
 const mineEff=(O,p)=>{ const d=minerLv(p)-O.lv; return d<3?.5:d<8?.65:d<MINE_GRAY?.85:1; };   /* 레벨 여유에 따른 채굴 효율: 주황(0~2) ×0.5 · 노랑(3~7) ×0.65 · 초록(8~14) ×0.85 · 회색(15~) ×1 — 높은 광석일수록 힘겹게 */   /* 한 번 때릴 때 깎는 양 (광부 레벨로 상승) */
 function mineXp(O,p){ const d=minerLv(p)-O.lv; if(d>=MINE_GRAY)return 0; const b=oreXp0(O); return Math.max(1,Math.round(b*(d<=5?1:1-(d-5)/(MINE_GRAY-5)*.9))); }   /* 레벨 차이 5까지 그대로 → 15에서 0(회색) */
 const oreTone=(O,p)=>{ if(O.sp)return'#ff5cd0'; const d=minerLv(p)-O.lv; return d<0?'#ff5a4a':d>=MINE_GRAY?'#8a8a8a':d>=8?'#7ad04a':d>=3?'#ffd84a':'#ff9a3a'; };   /* 빨강(못 캠) 주황 노랑 초록 회색(경험치 0) */
-function startMine(){
+function startMine(){ oreWarm();
   if(!rsOn()||G.inGame||!selId)return; const c=loadChar(selId); if(!c||hcDead(c))return;
   if(!mineCanEnter(c)){ sheetToast('⛏️ 곡괭이를 가지고 있어야 광산에 들어갈 수 있어요','#ff8a7a'); return; }
   closeModal(); G.mode='solo'; prepMe(); ally=null; resetWorld(); if(!me.mine)me.mine={lv:1,xp:0}; if(!me.ore)me.ore={}; minerPre();
@@ -7309,7 +7309,7 @@ const MINE_SIGN_ON=false;   /* 마을 광산 옆 조합법 안내판 — 업데�
 const MINE_RECIPES=[
   {cat:'pick',pk:2,n:'단련된 곡괭이',img:'img/pick_2.webp',ds:'채굴 속도 ×1.1 · 조각 3개 확률↑',mat:[['ore','ash',300],['ore','silver',200],['ore','blood',3],['gold',0,300000]],fx:['채굴 속도 ×1.1','조각 2개·3개 나올 확률 증가 (2단계 23.3% / 35.3% / 41.3%)']},
   {cat:'jewel',n:'주얼 합성',img:'img/jewel_diamond.png',ds:'보석 3개 → 주얼 1개',mat:[['gem',0,3],['ore','rust',50],['ore','frost',50],['ore','star',100]],fx:['같은 보석 3개 → 그 보석의 주얼 90%','검은 주얼(공격력·공격속도) 10%','색 주얼: 직업 스킬 +1 · 보석 옵션 1개']},
-  {cat:'pet',n:'까마쿤',img:'img/pet_kamakun.png',ds:'레어 펫 · 조각 +1개 · 공격 속도',pet:'kamakun',mat:[['gem','ruby',3,3],['ore','coal',300],['ore','blood',150],['gold',0,600000]],fx:['레어 펫 (최대 Lv10)','Lv3 까악 박자: 8초간 공격 속도 +3% (레벨당 +1%, 쿨타임 25초)','Lv7 덤으로 한 조각: 조각 +1개 확률 2% (Lv10 5%)','캐릭터마다 1마리 · 만들면 바로 데리고 다녀요']},
+  {cat:'pet',n:'까마쿤',img:'img/pet_kamakun.png',ds:'레어 펫 · 조각 +1개 · 공격 속도',pet:'kamakun',mat:[['gem','ruby',3,3],['ore','coal',300],['ore','blood',150],['gold',0,600000]],fx:['레어 펫 (최대 Lv10)','Lv3 까악 박자: 8초간 공격 속도 +3% (레벨당 +1%, 쿨타임 25초)','Lv7 덤으로 한 조각: 조각 +1개 확률 2% (Lv10 5%)']},
   {cat:'pick',pk:3,n:'달빛 곡괭이',img:'img/pick_3.webp',ds:'준비 중',lock:1},
   {cat:'pick',pk:4,n:'서리 곡괭이',img:'img/pick_4.webp',ds:'준비 중',lock:1},
   {cat:'pick',pk:5,n:'황금 곡괭이',img:'img/pick_5.webp',ds:'준비 중',lock:1},
@@ -7326,9 +7326,12 @@ function mineRecipes(o){
     (list.length?list.map(([r,i])=>{ const ok=!r.lock&&r.mat.every(x=>have(x)>=x[2]);
       const bd=r.lock?'<span class="bd l">🔒 잠김</span>':ok?'<span class="bd g">가능</span>':'<span class="bd r">재료 부족</span>';
       return `<div class="it ${r.lock?'lkd':''}"><div class="hd" data-i="${i}"><img src="${r.img}" alt=""><div><div class="nm">${r.n}</div><div class="ds">${r.ds}</div></div>${bd}</div>`+
-      (open===i&&!r.lock?`<div class="dt">${r.mat.map(x=>{ const h=have(x),g=h>=x[2]; return `<div class="r"><span>${nmOf(x)}</span><span class="${g?'ok':'no'}">${x[0]==='gold'?h.toLocaleString():h} / ${x[0]==='gold'?x[2].toLocaleString()+'G':x[2]}</span></div>`; }).join('')}${(r.fx||[]).map(t=>`<div class="fx">✦ ${t}</div>`).join('')}${r.pet?`<button type="button" class="btn primary" data-mk="${i}" ${ok&&!petHas(me,r.pet)?'':'disabled'} style="width:100%;margin-top:8px">${petHas(me,r.pet)?'이미 가지고 있어요':'🐾 만들기'}</button>`:r.pk?`<button type="button" class="btn primary" data-mk="${i}" ${ok&&!pickHas(me,r.pk)?'':'disabled'} style="width:100%;margin-top:8px">${pickHas(me,r.pk)?'이미 가지고 있어요':'⛏️ 만들기'}</button>`:''}</div>`:'')+`</div>`; }).join(''):'<div style="text-align:center;color:#8a7a68;padding:24px 0">아직 준비 중이에요</div>');
+      (open===i&&!r.lock?`<div class="dt">${r.mat.map(x=>{ const h=have(x),g=h>=x[2]; return `<div class="r"><span>${nmOf(x)}</span><span class="${g?'ok':'no'}">${x[0]==='gold'?h.toLocaleString():h} / ${x[0]==='gold'?x[2].toLocaleString()+'G':x[2]}</span></div>`; }).join('')}${(r.fx||[]).length?`<button type="button" class="pib" data-pi="${i}">ⓘ 펫 정보 보기</button>`:''}${r.pet?`<button type="button" class="btn primary" data-mk="${i}" ${ok&&!petHas(me,r.pet)?'':'disabled'} style="width:100%;margin-top:8px">${petHas(me,r.pet)?'이미 가지고 있어요':'🐾 만들기'}</button>`:r.pk?`<button type="button" class="btn primary" data-mk="${i}" ${ok&&!pickHas(me,r.pk)?'':'disabled'} style="width:100%;margin-top:8px">${pickHas(me,r.pk)?'이미 가지고 있어요':'⛏️ 만들기'}</button>`:''}</div>`:'')+`</div>`; }).join(''):'<div style="text-align:center;color:#8a7a68;padding:24px 0">아직 준비 중이에요</div>');
     m.querySelectorAll('.cats button').forEach(b=>b.onclick=()=>{ const c=MINE_RCATS.find(x=>x[0]===b.dataset.c); if(c[2])return toast('아직 준비 중이에요'); cat=b.dataset.c; open=-1; draw(m); });
     m.querySelectorAll('.hd').forEach(h=>h.onclick=()=>{ const i=+h.dataset.i; open=open===i?-1:i; draw(m); });
+    m.querySelectorAll('[data-pi]').forEach(b=>b.onclick=ev=>{ ev.stopPropagation(); const r=MINE_RECIPES[+b.dataset.pi]; if(!r||!r.fx)return;   /* 펫 정보 팝업 (조합법 위에 겹쳐 뜸 — 확인·바깥을 누르면 닫혀서 조합법 상태가 그대로 유지) */
+      const v=document.createElement('div'); v.className='pipop'; v.innerHTML=`<div class="pic"><h3>${r.n} · ${r.ds.split(' · ')[0]}</h3>${r.fx.map(t=>`<div class="fx">• ${t}</div>`).join('')}<button type="button" class="btn primary">확인</button></div>`;
+      v.onclick=e=>{ if(e.target===v||e.target.tagName==='BUTTON'){ e.stopPropagation(); v.remove(); } }; m.appendChild(v); });
     m.querySelectorAll('[data-mk]').forEach(b=>b.onclick=ev=>{ ev.stopPropagation(); const r=MINE_RECIPES[+b.dataset.mk]; if(!r||!(r.pet||r.pk)||(r.pet&&petHas(me,r.pet))||(r.pk&&pickHas(me,r.pk))||!r.mat.every(x=>have(x)>=x[2]))return; miscFix(me);
       if(r.pk&&me.inv.indexOf(null)<0)return toast('가방이 가득 찼어요','#e07060');
       for(const x of r.mat)if(x[0]==='gem')gemTake(me,y=>gemOk(x,y),x[2]);
@@ -7392,7 +7395,9 @@ function mineTick(dt){ const M=G.mine; if(!M||!me)return;
   if(M.pc>0){ M.pc-=dt; return; }
   for(const dir of ['up','dn']){ const to=M.fi+(dir==='up'?-1:1), P=MINE_PT[dir]; if(to<0||to>=MINE_FL.length||hyp(me.x-P[0],me.y-P[1])>=44)continue; const F2=MINE_FL[to];
     sfx('ui'); mineFloor(to,dir); return; } }
-const ORE_IMG={}; const oreImg=k=>{ let im=ORE_IMG[k]; if(!im){ im=ORE_IMG[k]=new Image(); im.decoding='async'; im.src='img/ore_'+k+'.webp'; } return im.complete&&im.naturalWidth?im:null; };
+const ORE_IMG={}, ORE_TRY={}; const oreImg=k=>{ let im=ORE_IMG[k]; if(!im){ im=ORE_IMG[k]=new Image(); im.decoding='async'; im.onerror=()=>{ if((ORE_TRY[k]=(ORE_TRY[k]|0)+1)<=5)setTimeout(()=>{ delete ORE_IMG[k]; oreImg(k); },1500*ORE_TRY[k]); }; im.src='img/ore_'+k+'.webp'; } return im.complete&&im.naturalWidth?im:null; };   /* 불러오기 실패하면 몇 번 다시 시도 */
+const oreWarm=()=>{ Object.keys(ORES).concat(Object.keys(MSP)).forEach(k=>oreImg(k)); };   /* 광석 그림 전부 미리 불러오기 — 광산에 들어가기 전에 준비돼서 처음부터 그림으로 나와요 */
+setTimeout(oreWarm,800);
 function drawOre(m,t){ const O=OREX(m.ore), x=m.x, y=m.y, r=m.r, hp=m.hp/m.max, sd=m.seed||0, c=ctx, im=oreImg(m.ore);
   c.save(); c.fillStyle='rgba(0,0,0,.38)'; c.beginPath(); c.ellipse(x,y+r*.55,r*1.15,r*.38,0,0,6.283); c.fill();
   if(O.sp){ const gr=c.createRadialGradient(x,y,r*.2,x,y,r*2.1); gr.addColorStop(0,O.c+'aa'); gr.addColorStop(1,O.c+'00'); c.globalAlpha=.55+.25*Math.sin((t||0)*4); c.fillStyle=gr; c.fillRect(x-r*2.1,y-r*2.1,r*4.2,r*4.2); c.globalAlpha=1; if(!im){ drawSpPh(m,O,c); c.restore(); return; } }   /* 특수광석: 숨 쉬듯 빛나는 후광 (그림이 아직 없으면 임시 도형) */
