@@ -1187,6 +1187,8 @@ body.land #bBas{position:absolute;width:calc(var(--u) + 4px);height:calc(var(--u
 #sty .sp img{height:100%;width:auto;max-width:48vw;object-fit:contain;filter:drop-shadow(0 4px 10px rgba(0,0,0,.7));animation:stIn .25s ease-out}
 #sty .sp.off{opacity:.36}
 #sty .sp.no{visibility:hidden}
+#sty.say .sp.r img{animation:stBob .45s ease-in-out infinite}   /* 말하는 그림이 없는 NPC: 글자가 나오는 동안 살짝 들썩 */
+@keyframes stBob{0%,100%{transform:scaleX(-1) translateY(0)}50%{transform:scaleX(-1) translateY(-5px)}}
 #sty .sp.r img{transform:scaleX(-1)}
 #sty .sbox{position:absolute;left:8px;right:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));box-sizing:border-box;background:rgba(24,18,14,.96);border:1px solid var(--gold);border-radius:12px;padding:9px 14px 8px;box-shadow:0 8px 28px rgba(0,0,0,.75);pointer-events:auto}
 #sty .snm{display:flex;align-items:baseline;gap:8px;min-height:21px;margin-bottom:2px}
@@ -1523,7 +1525,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.1.0776</div>
+    <div class="ver" id="verT">v0.7.1.0777</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -5321,8 +5323,8 @@ const tutSt=k=>(k===4&&me&&me.hc)?TUTS_HC4:TUTS[k];
    - 대사 정의: [화자키, 내용, (나레이션일 때 오른쪽에 보여줄 화자)] · 화자 me = 내 캐릭터, nar = 나레이션 */
 const STSP={
  gk:{n:'그라크',t:'묘지기',img:'img/mob_grak.png',c:'#c9b48a'},
- qg:{n:'그라크',t:'묘지기',img:'img/npc_grak_talk.png',c:'#c9b48a'},   /* 광산 NPC (관리자 시범) */
- qt:{n:'토비',t:'견습 광부',img:'img/npc_tobi_talk.png',c:'#ffd06a'},
+ qg:{n:'그라크',t:'묘지기',img:'img/npc_grak.png',c:'#c9b48a',say:1},   /* 광산 NPC (관리자 시범) */
+ qt:{n:'토비',t:'견습 광부',img:'img/npc_tobi_talk.png',c:'#ffd06a'},   /* say:1 = 말하는 그림이 없는(또는 어색한) NPC → 대기 그림이 말하는 동안 살짝 들썩여요 */
  ml:{n:'말렉',t:'역병 사제',img:'img/mob_malek.png',c:'#9fd36a'},
  mg:{n:'모르그',t:'썩은 군주',img:'img/mob_morg.png',c:'#d49a6a'},
  kg:{n:'카르곤',t:'뼈의 군주',img:'img/mob_kargon.png',c:'#8fd6a8'},
@@ -5638,7 +5640,7 @@ function storyRun(kind){ const id=G.stg&&G.stg.id, ls=id&&STORY[id]&&STORY[id][k
   storyShow(0); return true; }
 function storyShow(i){ const S=stS; if(!S)return; S.i=i; const ln=S.ls[i], sp=ln[0], el=$('#sty'), nar=sp==='nar';
   if(sp==='nar'){ S.foe=ln[2]==='-'?null:(ln[2]||S.foe); } else if(sp!=='me')S.foe=sp;
-  el.classList.toggle('nar',nar); el.classList.toggle('rt',!nar&&sp!=='me');   /* 주인공 대사는 왼쪽 · 보스·삼남매 대사는 오른쪽 정렬 */
+  el.classList.toggle('nar',nar); el.classList.toggle('rt',!nar&&sp!=='me'); el.classList.toggle('say',!nar&&sp!=='me'&&!!(STSP[sp]&&STSP[sp].say));   /* 주인공 대사는 왼쪽 · 보스·삼남매 대사는 오른쪽 정렬 */
   const ch=S.ch||me, me0=sp==='me', info=me0?{n:dispName(ch),t:CLASSES[ch.cls].n,c:'#f0d9a0'}:STSP[sp];
   $('#stN').textContent=nar?'':info.n; $('#stN').style.color=nar?'':info.c; $('#stT').textContent=nar?'':(info.t||'');
   const L=el.querySelector('.sp.l'), R=el.querySelector('.sp.r'), li=L.firstElementChild, ri=R.firstElementChild, ms='img/hero_'+ch.cls+'.png';
@@ -5647,10 +5649,10 @@ function storyShow(i){ const S=stS; if(!S)return; S.i=i; const ln=S.ls[i], sp=ln
   S.full=ln[1]; S.n=0; $('#stA').textContent=''; $('#stB').textContent=S.full; $('#stGo').classList.add('hid'); $('#stAsk').hidden=true; $('#stPg').textContent=(i+1)+' / '+S.ls.length;
   storyBox(); clearInterval(stTm); stTm=setInterval(storyTick,32); }
 function storyBox(){ const b=$('#sty .sbox'); if(b)$('#sty').style.setProperty('--sbh',b.offsetHeight+'px'); }
-function storyTick(){ const S=stS; if(!S){ clearInterval(stTm); return; } S.n=Math.min(S.full.length,S.n+1); $('#stA').textContent=S.full.slice(0,S.n); $('#stB').textContent=S.full.slice(S.n); if(S.n>=S.full.length){ clearInterval(stTm); if(S.ask&&S.i>=S.ls.length-1)$('#stAsk').hidden=false; else $('#stGo').classList.remove('hid'); } }
+function storyTick(){ const S=stS; if(!S){ clearInterval(stTm); return; } S.n=Math.min(S.full.length,S.n+1); $('#stA').textContent=S.full.slice(0,S.n); $('#stB').textContent=S.full.slice(S.n); if(S.n>=S.full.length){ clearInterval(stTm); $('#sty').classList.remove('say'); if(S.ask&&S.i>=S.ls.length-1)$('#stAsk').hidden=false; else $('#stGo').classList.remove('hid'); } }
 function storyNext(){ const S=stS; if(!S)return; if(S.n<S.full.length){ S.n=S.full.length; storyTick(); return; } sfx('ui'); if(S.i+1>=S.ls.length){ if(!S.ask)storyEnd(); } else storyShow(S.i+1); }
 function storySkip(){ if(stS){ sfx('ui'); storyEnd(); } }
-function storyClose(){ const S=stS; clearInterval(stTm); stS=null; const el=$('#sty'); if(el){ el.hidden=true; el.classList.remove('nar','nb','rt'); } if(S&&S.pz)G.paused=G.mode==='solo'&&!$('#sheet').hidden; return S; }
+function storyClose(){ const S=stS; clearInterval(stTm); stS=null; const el=$('#sty'); if(el){ el.hidden=true; el.classList.remove('nar','nb','rt','say'); } if(S&&S.pz)G.paused=G.mode==='solo'&&!$('#sheet').hidden; return S; }
 /* 스토리 다시 보기: 버튼을 누르면 '시작하기'에 NEW가 붙고, 그 스테이지를 시작하면 처음처럼 모든 대화(시작·페이즈·끝)가 다시 나와요. 한 번 더 누르면 취소 */
 let storyRe=null;
 function storyReUi(){ const S=STAGES[selStage], on=!!(S&&storyRe===S.id); if(!on)storyRe=null; const b=$('#bSolo'); if(b)b.innerHTML='▶ 시작하기'+(on?' <span class="newb">NEW</span>':''); }
@@ -7322,7 +7324,7 @@ function mineSay(tx){ try{
    - req: ['mine',광석,개수]=수락한 뒤 캔 조각 수 · ['give',광석,개수]=조각 가져다 주기(제출 때 소모) · ['lv',광부레벨] · ['open']=조합법 창 열기
    - r = 보상 경험치 비율(그 층 권장 레벨 = 입장 Lv+5 의 필요 경험치 × r) · 저장: me.mine.q = {d:{끝낸 id:1}, a:진행 중 id, p:캔 개수, o:조합법 열었나} */
 const MNPC={
-  qg:{n:'그라크',t:'묘지기',fl:0,h:76,x:VX+140,y:VY-10,img:'img/npc_grak.png',tk:'img/npc_grak_talk.png',no:'…더 시킬 일은 없네. 아래 갱도는 자네 마음대로 내려가 보게.'},
+  qg:{n:'그라크',t:'묘지기',fl:0,h:76,x:VX+140,y:VY-10,img:'img/npc_grak.png',tk:'img/npc_grak.png',no:'…더 시킬 일은 없네. 아래 갱도는 자네 마음대로 내려가 보게.'},
   qt:{n:'토비',t:'견습 광부',fl:1,h:66,x:VX+150,y:236,img:'img/npc_tobi.png',tk:'img/npc_tobi_talk.png',no:'이제 아래층 소식은 엘리네 누나한테서 들어요. 조심하세요!'},
 };
 const MQ=[
