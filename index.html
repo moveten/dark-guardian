@@ -1205,8 +1205,11 @@ body.land #bBas{position:absolute;width:calc(var(--u) + 4px);height:calc(var(--u
 #sty #stSk{min-height:34px;padding:0 13px;border-radius:8px;border:1px solid var(--line2);background:#241c16;color:var(--ink);font:inherit;font-size:13px;cursor:pointer}
 #sty #stAsk{display:flex;gap:8px}
 #sty #stAsk[hidden]{display:none}
-#sty #stAsk button{min-height:34px;padding:0 14px;border-radius:8px;border:1px solid var(--line2);background:#241c16;color:var(--ink);font:inherit;font-size:13px;cursor:pointer}
-#sty #stYes{background:#4a3513;border-color:var(--gold);color:#ffe9b0;font-weight:800}   /* 퀘스트 대화: 수락 · 나중에 */
+#sty #stAsk{gap:10px}
+#sty #stAsk button{min-width:116px;min-height:48px;padding:0 22px;border-radius:12px;border:1px solid var(--line2);background:#241c16;color:var(--ink);font:inherit;font-size:16px;cursor:pointer}   /* 퀘스트 수락·나중에: 큰 버튼 */
+#sty #stAsk #stYes{background:#4a3513;border-color:var(--gold);color:#ffe9b0;font-weight:800}
+#sty.asking #stSk{display:none}   /* 수락·나중에가 뜨는 마지막 줄에선 건너뛰기를 숨김 */
+#sty.asking .sft{margin-top:8px}   /* 퀘스트 대화: 수락 · 나중에 */
 @keyframes stIn{from{opacity:0}to{opacity:1}}
 @keyframes stBl{50%{opacity:.25}}
 #tq{position:absolute;inset:0;z-index:300;pointer-events:none;overflow:hidden}
@@ -1528,7 +1531,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.1.0780</div>
+    <div class="ver" id="verT">v0.7.1.0781</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -5649,10 +5652,10 @@ function storyShow(i){ const S=stS; if(!S)return; S.i=i; const ln=S.ls[i], sp=ln
   const L=el.querySelector('.sp.l'), R=el.querySelector('.sp.r'), li=L.firstElementChild, ri=R.firstElementChild, ms='img/hero_'+ch.cls+'.png';
   if(li.getAttribute('src')!==ms)li.src=ms; L.classList.toggle('off',!me0);
   const f=S.foe&&STSP[S.foe]; R.classList.toggle('no',!f); if(f){ if(ri.getAttribute('src')!==f.img)ri.src=f.img; ri.style.filter=f.f?f.f+' drop-shadow(0 4px 10px rgba(0,0,0,.7))':''; R.classList.toggle('off',me0||nar&&false); }
-  S.full=ln[1]; S.n=0; $('#stA').textContent=''; $('#stB').textContent=S.full; $('#stGo').classList.add('hid'); $('#stAsk').hidden=true; $('#stPg').textContent=(i+1)+' / '+S.ls.length;
+  S.full=ln[1]; S.n=0; $('#stA').textContent=''; $('#stB').textContent=S.full; $('#stGo').classList.add('hid'); $('#stAsk').hidden=true; $('#sty').classList.remove('asking'); $('#stPg').textContent=(i+1)+' / '+S.ls.length;
   storyBox(); clearInterval(stTm); stTm=setInterval(storyTick,32); }
 function storyBox(){ const b=$('#sty .sbox'); if(b)$('#sty').style.setProperty('--sbh',b.offsetHeight+'px'); }
-function storyTick(){ const S=stS; if(!S){ clearInterval(stTm); return; } S.n=Math.min(S.full.length,S.n+1); $('#stA').textContent=S.full.slice(0,S.n); $('#stB').textContent=S.full.slice(S.n); if(S.n>=S.full.length){ clearInterval(stTm); $('#sty').classList.remove('say'); if(S.ask&&S.i>=S.ls.length-1)$('#stAsk').hidden=false; else $('#stGo').classList.remove('hid'); } }
+function storyTick(){ const S=stS; if(!S){ clearInterval(stTm); return; } S.n=Math.min(S.full.length,S.n+1); $('#stA').textContent=S.full.slice(0,S.n); $('#stB').textContent=S.full.slice(S.n); if(S.n>=S.full.length){ clearInterval(stTm); $('#sty').classList.remove('say'); if(S.ask&&S.i>=S.ls.length-1){ $('#stAsk').hidden=false; $('#sty').classList.add('asking'); } else $('#stGo').classList.remove('hid'); } }
 function storyNext(){ const S=stS; if(!S)return; if(S.n<S.full.length){ S.n=S.full.length; storyTick(); return; } sfx('ui'); if(S.i+1>=S.ls.length){ if(!S.ask)storyEnd(); } else storyShow(S.i+1); }
 function storySkip(){ if(stS){ sfx('ui'); storyEnd(); } }
 function storyClose(){ const S=stS; clearInterval(stTm); stS=null; const el=$('#sty'); if(el){ el.hidden=true; el.classList.remove('nar','nb','rt','say'); } if(S&&S.pz)G.paused=G.mode==='solo'&&!$('#sheet').hidden; return S; }
