@@ -1510,7 +1510,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.1.0772</div>
+    <div class="ver" id="verT">v0.7.1.0773</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -7452,12 +7452,26 @@ function mineBubDraw(c,M){ const B=M.bub; if(!B||!me)return; const a=B.t<.18?B.t
   c.fillRect(-7,-13.5,14,3.5);
   L.forEach((l,i)=>{ let sx=-ws[i]/2; const ty=y0+7+9.5+i*19; for(const q of l){ const sw=c.measureText(q[0]).width; if(q[1]){ const g=c.createLinearGradient(sx,0,sx+sw,0); SP_COLS.forEach((k,j)=>g.addColorStop(j/6,k)); c.strokeStyle='#5a3d12'; c.lineWidth=3; c.strokeText(q[0],sx,ty); c.fillStyle=g; } else c.fillStyle='#3a2608'; c.fillText(q[0],sx,ty); sx+=sw; } });
   c.restore(); }
+/* 까마쿤 까악 박자(공격 속도 버프) 표시: 발밑 빛 고리(박자마다 퍼짐) + 떠오르는 음표 + 캐릭터 옆 버프 칩(원형 남은 시간). 글자·숫자 없이 그림만 — 도형 몇 개라 가벼워요 */
+function mineKmkDraw(c,t,B){ const x=me.x, y=me.y+30, a=B.t<.6?B.t/.6:1, pr=(t*1.6)%1;
+  c.save(); c.globalAlpha=a; c.lineWidth=3;
+  for(let i=0;i<2;i++){ const q=(pr+i*.5)%1, r=26+q*34; c.strokeStyle=`rgba(200,175,255,${(1-q)*.85})`; c.beginPath(); c.ellipse(x,y,r,r*.32,0,0,6.283); c.stroke(); }
+  c.strokeStyle='rgba(185,160,255,.9)'; c.lineWidth=2.5; c.beginPath(); c.ellipse(x,y,24,8,0,0,6.283); c.stroke();
+  const cb=B.m-B.t; if(cb<.5){ const q=cb/.5; c.globalAlpha=a*(1-q); c.strokeStyle='#fff'; c.lineWidth=4; c.beginPath(); c.ellipse(x,y,30+q*60,(30+q*60)*.32,0,0,6.283); c.stroke(); c.globalAlpha=a; }
+  c.font='700 21px "Noto Sans KR",sans-serif'; c.textAlign='center'; c.textBaseline='middle'; c.shadowColor='rgba(170,130,255,.9)'; c.shadowBlur=8;
+  for(let i=0;i<4;i++){ const q=(t*.55+i*.25)%1, nx=x+Math.sin(q*6.283+i*1.7)*(18+i*5)+(i%2?-14:14), ny=y-8-q*74; c.globalAlpha=a*Math.min(1,q*5)*(1-q*q); c.fillStyle='#e6d8ff'; c.fillText(i%2?'♫':'♪',nx,ny); }
+  c.shadowBlur=0; c.globalAlpha=a;
+  const cx=x+34, cy=y+18, r=11; c.fillStyle='rgba(26,18,48,.9)'; c.beginPath(); c.arc(cx,cy,r+3,0,6.283); c.fill(); c.strokeStyle='rgba(70,56,110,.95)'; c.lineWidth=3; c.beginPath(); c.arc(cx,cy,r,0,6.283); c.stroke();
+  c.strokeStyle='#d2c0ff'; c.beginPath(); c.arc(cx,cy,r,-1.5708,-1.5708+6.283*Math.max(0,B.t/B.m)); c.stroke();
+  c.font='700 13px "Noto Sans KR",sans-serif'; c.fillStyle='#efe6ff'; c.fillText('♪',cx,cy+1);
+  c.restore(); }
 function mineDraw(t){ const M=G.mine; if(!M)return; const c=ctx;
   for(const dir of ['up','dn']){ const to=M.fi+(dir==='up'?-1:1); if(to<0||to>=MINE_FL.length)continue; const P=MINE_PT[dir], F2=MINE_FL[to], lk=false, col=lk?'#8a6a6a':dir==='up'?'#9fe0ff':'#e0a060';
     c.save(); c.translate(P[0],P[1]); c.globalAlpha=.85; c.fillStyle='rgba(0,0,0,.45)'; c.beginPath(); c.ellipse(0,6,46,16,0,0,6.283); c.fill();
     for(let i=0;i<3;i++){ c.strokeStyle=col; c.globalAlpha=.35+.2*i; c.lineWidth=3; c.beginPath(); c.ellipse(0,0,40-i*9,14-i*3,0,t*(1.5+i*.6)*(dir==='up'?1:-1),t*(1.5+i*.6)*(dir==='up'?1:-1)+4.4); c.stroke(); }
     c.globalAlpha=1; c.font='bold 13px sans-serif'; c.textAlign='center'; c.fillStyle='#000'; const lb=`${F2.n.split(' · ')[0]}${lk?` 🔒Lv${F2.lvl}`:''}`; c.fillText(lb,1,(dir==='up'?34:-22)+1); c.fillStyle=lk?'#d8a8a8':'#f1e3c4'; c.fillText(lb,0,dir==='up'?34:-22);
     c.restore(); }
+  if(me&&me.buffs&&me.buffs.kmk&&me.buffs.kmk.t>0)mineKmkDraw(c,t,me.buffs.kmk);
   if(M.bub)mineBubDraw(c,M); }
 const TR_CN_DUR=2.3, TR_CN_GAP=1;   /* 반격 태세 지속 시간(보스와 같음) · 끝난 뒤 다시 쓰기까지 */
 function trScareTick(m,dt){ if(m.ore){ m.stunT=0; m.slowT=0; m.taunt=null; m.kx=m.ky=0; m.x=m.hx; m.y=m.hy; if(m.flash>0)m.flash-=dt; return; }   /* 광석: 제자리 고정 · 회복 없음 */
