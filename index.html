@@ -1414,14 +1414,14 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
 .lbn2{margin:0 0 10px;padding:8px 10px;border-radius:10px;border:1px solid var(--line2);background:rgba(255,255,255,.03);font-size:12px;line-height:1.65;color:var(--mute,#a89a86);text-align:left}.lbn2>div+div{margin-top:2px;padding-top:2px;border-top:1px dashed rgba(255,255,255,.08)}
 /* 누름 효과(Press-down): 버튼을 누르는 동안만 5% 작아지고 20% 어두워져요 — scale·filter 는 GPU가 처리해서 가볍고, 따로 도는 애니메이션이 없어요. :where 로 감싸서 버튼마다 따로 정한 :active 모양이 있으면 그쪽이 우선해요 (게임 중 HUD 버튼은 제외) */
 :where(button,.btn,[role="button"],.ccard,.tplot,.tinfo,.tcsb):where(:active):where(:not(:disabled)):where(:not(#hud *)){scale:.95;filter:brightness(.8);transition:scale .08s ease-out,filter .08s ease-out}
-#mineHud{position:absolute;right:10px;top:128px;width:132px;pointer-events:none;color:#f1e3c4;z-index:2}
+#mineHud{position:absolute;right:10px;top:128px;width:162px;pointer-events:none;color:#f1e3c4;z-index:2}
 #mineHud .mhc{padding:8px 10px;border-radius:14px;background:linear-gradient(90deg,rgba(10,8,6,.08),rgba(10,8,6,.3));border:1px solid rgba(107,85,54,.35);font-size:12px;pointer-events:auto;cursor:pointer;-webkit-tap-highlight-color:transparent}   /* 카드 배경을 거의 투명하게(뒤의 광석이 보이게) · 누르면 접고 펴요 */
 #mineHud .mhc *{text-shadow:0 1px 2px #000,0 0 4px #000}
 #mineHud.fold .mhi{display:none}
 #mineHud .mhr{display:flex;align-items:center;gap:8px}#mineHud .mhg{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none}
 #mineHud .mhg b{width:32px;height:32px;border-radius:50%;background:#120d09;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900}
 #mineHud .mhs{border-top:1px solid #3a2e20;margin-top:6px;padding-top:4px;font-size:11px;color:#a8957a}
-#mineHud .mhi{display:flex;align-items:center;gap:6px;margin-top:3px}#mineHud .mhi b{margin-left:auto;color:#ffe08a}
+#mineHud .mhi{display:flex;align-items:center;gap:6px;margin-top:3px;white-space:nowrap}#mineHud .mhi b{margin-left:auto;color:#ffe08a}
 .mfr{width:18px;height:18px;object-fit:contain;flex:none;filter:drop-shadow(0 1px 2px rgba(0,0,0,.7))}
 .mres .mfr{width:24px;height:24px}
 .mdot{display:inline-block;flex:none;width:10px;height:10px;border-radius:3px;transform:rotate(45deg);box-shadow:0 0 4px rgba(0,0,0,.6)}
@@ -1510,7 +1510,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.1.0768</div>
+    <div class="ver" id="verT">v0.7.1.0769</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -7301,7 +7301,7 @@ function mineSay(tx){ try{
 function mineHud(){ const el=$('#mineHud'), M=G.mine; document.body.classList.toggle('mining',!!M); { const sb=$('#bSkillT'); if(sb&&sb._m!==!!M){ sb._m=!!M; sb.querySelector('.ic').textContent=M?'🐾':'✨'; sb.querySelector('.lb').textContent=M?'펫':'스킬'; sb.setAttribute('aria-label',M?'펫':'스킬'); } }   /* 광산에서는 스킬을 못 쓰니 스킬 칸을 펫 버튼으로 */ if(!el)return; if(!M||!me){ el.hidden=true; return; } el.hidden=false; { const kb=$('#mkBtn'); if(kb){ kb.hidden=!rsOn(); if(!kb._b){ kb._b=1; kb.onclick=()=>{ sfx('ui'); mineRecipes(); }; } } const hc=el.firstElementChild; if(hc&&!hc._b){ hc._b=1; hc.onclick=()=>{ el.classList.toggle('fold'); sfx('ui'); }; } }   /* 카드를 누르면 접기/펴기 */
   /* 광산 안 오른쪽 카드 (값이 바뀔 때만 다시 그림) */
   el.style.top=Math.round((LAND?8:4)+mmW()*WH/WW+14)+'px';   /* 미니맵 아래 (겹치지 않게) */
-  const L=minerLv(me), p=L>=MINE_MAXLV?100:Math.min(99,Math.floor(me.mine.xp/mineNeed(L)*100)), got=Object.keys(M.got).filter(k=>M.got[k]>0);
+  const L=minerLv(me), p=L>=MINE_MAXLV?100:Math.min(99,Math.floor(me.mine.xp/mineNeed(L)*100)), got=Object.keys(M.got).filter(k=>M.got[k]>0).sort((x,y)=>ORES[y].lv-ORES[x].lv);
   el.firstElementChild.innerHTML=`<div class="mhr"><div class="mhg" style="background:conic-gradient(#ffd060 ${p*3.6}deg,#2a2018 0)"><b>${L}</b></div><div style="font-size:11px;line-height:1.3"><b style="font-size:12px">광부</b><br><span style="color:#c9b48a">${p}%</span></div></div>
    <div class="mhs">이번 획득</div>${got.length?got.map(k=>`<div class="mhi"><img class="mfr" src="img/frag_${k}.webp" alt="">${ORES[k].n}<b>+${M.got[k]}</b></div>`).join(''):'<div class="mhi" style="color:#6a5a48">아직 없어요</div>'}`; }
 /* ── 조합법 (관리자 모드) — 레시피는 이 표에만 추가하면 창에 자동으로 나와요 ── */
