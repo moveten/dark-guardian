@@ -488,6 +488,8 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 
 .namebox{display:flex;gap:10px;align-items:center;font-size:13px;color:var(--mute)}
 .namebox input{width:170px;background:#0f0b09;border:1px solid var(--line2);border-radius:8px;color:var(--ink);font-size:16px;font-family:var(--f-body);padding:0 10px;min-height:44px;text-align:center}
+.sheet{position:relative}
+#goldPill{position:absolute;right:12px;bottom:66px;z-index:4;display:flex;align-items:center;height:28px;padding:0 12px;border-radius:999px;border:1.5px solid #be9640;background:rgba(14,10,8,.9);color:#ffd84a;font-size:16px;font-weight:800;line-height:1;box-shadow:0 2px 8px rgba(0,0,0,.5);cursor:pointer;white-space:nowrap}#goldPill[hidden]{display:none}
 #sheetTabs{display:flex;gap:0;padding:2px 6px 6px;border-top:1px solid var(--line2);background:#0f0b09}
 #sheetTabs[hidden]{display:none}
 #ptsBar{margin:8px 12px 0;padding:8px 12px;border-radius:10px;border:1px solid #d6aa4e;background:rgba(80,58,16,.55);color:#ffe7a8;font-weight:800;font-size:13px;text-align:left}
@@ -1507,7 +1509,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.1.0764</div>
+    <div class="ver" id="verT">v0.7.1.0765</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1574,6 +1576,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
       <header><h2 id="sheetT">가방</h2><button class="x" id="sheetX" aria-label="닫기">×</button><i class="hxp" id="sheetXp" aria-hidden="true"><b></b></i></header>
       <button id="ptsBar" hidden></button>
       <div class="sbody" id="sheetB"></div>
+      <div id="goldPill" hidden></div>
       <nav id="sheetTabs"><button data-m="bag"><span class="ic">🎒</span><span class="lb">가방</span></button><button data-m="stat"><span class="ic">📊</span><span class="lb">능력</span></button><button data-m="skill"><span class="ic">✨</span><span class="lb">스킬</span></button><button data-m="pet"><span class="ic">🐾</span><span class="lb">펫</span></button><button id="tSend"><span class="ic">📦</span><span class="lb">보관</span></button></nav>
       <div id="selBar" hidden><button id="selNo">취소</button><button id="selGo" class="go" disabled>📦 공유창고로 보내기</button></div>
     </div>
@@ -4107,17 +4110,33 @@ function cshardModal(){ shardAdd(me,0,'cshard'); const N=CAS_CFG.exch, n=shardCo
 /* 보석 자동 합성: 하급 5개 → 중급, 중급 5개 → 상급 (종류 무관, 결과 종류는 랜덤). 상급은 재료가 아님 */
 Object.defineProperty(window,'gsOn',{get(){ try{ return !!(me&&me.gs); }catch(e){ return false; } },set(v){ try{ if(me)me.gs=v?1:0; }catch(e){} }});
 const GEM_SYN_N=5;
+/* ===== 보석 스택: 같은 종류·같은 등급·같은 잠금 상태의 일반 보석은 한 칸에 최대 999개 (n). 새로 얻거나 받을 때만 합쳐지고, 예전 낱개 보석은 그대로 둬요. 주얼은 스택 안 됨 ===== */
+const GEM_MAX=999, gnOf=it=>(it&&it.n>0)?(it.n|0):1;
+const gemSame=(a,b)=>!!a&&!!b&&isGem(a)&&isGem(b)&&!a.jw&&!b.jw&&a.gk===b.gk&&gemTier(a)===gemTier(b)&&!!a.lock===!!b.lock;
+function gemFit(P,it){ if(!Array.isArray(P.misc))miscFix(P); if(it.jw)return P.misc.some(x=>!x)?1:0; let c=0; for(const x of P.misc){ if(!x)c+=GEM_MAX; else if(gemSame(x,it))c+=GEM_MAX-gnOf(x); } return c; }   /* P가 이 보석을 몇 개까지 더 받을 수 있나 */
+function gemPut(P,it,q,own){ if(!Array.isArray(P.misc))miscFix(P); q=Math.max(1,q|0); if(it.jw){ const i=P.misc.indexOf(null); if(i<0)return 0; P.misc[i]=own?it:Object.assign({},it,{id:++ITEMID}); if(P.st)stamp(P.misc[i]); return 1; }
+  let left=q, used=false; for(const x of P.misc){ if(left<=0)break; if(x&&gemSame(x,it)&&gnOf(x)<GEM_MAX){ const a=Math.min(GEM_MAX-gnOf(x),left); x.n=gnOf(x)+a; left-=a; if(it.isNew)x.isNew=1; } }
+  while(left>0){ const i=P.misc.indexOf(null); if(i<0)break; const a=Math.min(GEM_MAX,left), c=(own&&!used)?it:Object.assign({},it,{id:++ITEMID}); c.n=a; used=true; if(P.st)stamp(c); P.misc[i]=c; left-=a; }
+  return q-left; }
+function gemUse(P,ix,q){ const x=P.misc[ix]; if(!x)return; const r=gnOf(x)-q; if(r<=0)P.misc[ix]=null; else x.n=r; }   /* 칸 ix의 보석에서 q개를 씀 (다 쓰면 칸이 비어요) */
+function gemTake(P,pred,q){ let n=q; for(let i=0;i<P.misc.length&&n>0;i++){ const x=P.misc[i]; if(x&&isGem(x)&&pred(x)){ const a=Math.min(gnOf(x),n); gemUse(P,i,a); n-=a; } } return n<=0; }
+const gemCnt=(P,pred)=>(P.misc||[]).reduce((t,x)=>t+(x&&isGem(x)&&pred(x)?gnOf(x):0),0);
+
 /* 보석 자동판매(스마트 정리·기타 탭): me.gas = -1 끄기 · 0 하급 이하 · 1 중급 이하 · 2 모든 보석. 보석 등급 색은 무난하게(채도·명도 낮게) */
 Object.defineProperty(window,'gasLv',{get(){ try{ return me&&me.gas!==undefined?me.gas:-1; }catch(e){ return -1; } },set(v){ try{ if(me)me.gas=v; }catch(e){} }});
 const GASN=['끄기','하급 이하','중급 이하','모든 보석'], GAC=['#7fae8c','#6a8fd6','#b07fd6'];
 const gemAutoSellOk=it=>isGem(it)&&!it.jw&&gasLv>=0&&gemTier(it)-1<=gasLv&&!it.lock;
 function autoGemMerge(quiet){ if(!gsOn||!me||!Array.isArray(me.misc))return 0; let made=0, last=null;
-  for(let t=1;t<=2;t++){ for(let g=0;g<40;g++){ const ix=[]; me.misc.forEach((x,i)=>{ if(x&&isGem(x)&&!x.jw&&!x.lock&&gemTier(x)===t&&ix.length<GEM_SYN_N)ix.push(i); }); if(ix.length<GEM_SYN_N)break;
-    const it=mkGem(pick(GEM_KINDS),t+1); it.isNew=1; for(const i of ix)me.misc[i]=null; me.misc[ix[0]]=it; made++; last=it; } }
+  for(let t=1;t<=2;t++){ const pr=x=>!x.jw&&!x.lock&&gemTier(x)===t, m=Math.floor(gemCnt(me,pr)/GEM_SYN_N); if(m<1)continue;
+    const snap=me.misc.map(x=>x?{x,n:x.n,nw:x.isNew}:null); gemTake(me,pr,m*GEM_SYN_N);
+    const per={}; for(let k=0;k<m;k++){ const gk=pick(GEM_KINDS); per[gk]=(per[gk]|0)+1; } let ok=true, lr=null;
+    for(const gk in per){ const r=mkGem(gk,t+1); r.isNew=1; if(gemPut(me,r,per[gk],true)<per[gk]){ ok=false; break; } lr=r; }
+    if(!ok){ me.misc.forEach((_,i)=>{ const q=snap[i]; if(q){ q.x.n=q.n; q.x.isNew=q.nw; me.misc[i]=q.x; } else me.misc[i]=null; }); continue; }   /* 자리가 모자라면 합성하지 않고 되돌려요 */
+    made+=m; last=lr; }
   if(made){ saveChar(); uiDirty=true; if(!quiet){ sfx('pick'); toast(`💎 보석 합성! → ${last.name}${made>1?' 외 '+(made-1)+'개':''}`,GEM_C[last.gk]); } if(sheetMode==='bag')renderBag(); }
   return made; }
-const lootFull=it=>isGem(it)?(me.misc.indexOf(null)<0&&!gemAutoSellOk(it)):(me.inv.indexOf(null)<0&&!autoSellOk(it));   /* 줍기 불가(자리 없음): 보석은 기타 칸, 나머지는 장비 칸(자동 판매 대상은 예외) */
-function pickGem(g){ const it=g.it; if(gemAutoSellOk(it)){ const v=GEM_TIER[gemTier(it)-1].g; ground.splice(ground.indexOf(g),1); me.gold+=v; sfx('coin'); addNum(me.x,me.y-34,'+'+v+'G','#ffd84a',false); G.asold=(G.asold|0)+v; saveChar(); uiDirty=true; if(sheetMode==='bag')renderBag(); return; } const i=me.misc.indexOf(null); if(i<0){ toast('기타 칸이 가득 찼어요','#e07060'); return; } it.isNew=1; me.misc[i]=it; G.stGem=it; ground.splice(ground.indexOf(g),1); sfx('pick'); toast(`💎 획득: ${it.name}`,GEM_C[it.gk]); saveChar(); uiDirty=true; autoGemMerge(); if(sheetMode==='bag')renderBag(); }
+const lootFull=it=>isGem(it)?(!gemFit(me,it)&&!gemAutoSellOk(it)):(me.inv.indexOf(null)<0&&!autoSellOk(it));   /* 줍기 불가(자리 없음): 보석은 기타 칸, 나머지는 장비 칸(자동 판매 대상은 예외) */
+function pickGem(g){ const it=g.it; if(gemAutoSellOk(it)){ const v=GEM_TIER[gemTier(it)-1].g; ground.splice(ground.indexOf(g),1); me.gold+=v; sfx('coin'); addNum(me.x,me.y-34,'+'+v+'G','#ffd84a',false); G.asold=(G.asold|0)+v; saveChar(); uiDirty=true; if(sheetMode==='bag')renderBag(); return; } if(!gemFit(me,it)){ toast('기타 칸이 가득 찼어요','#e07060'); return; } it.isNew=1; gemPut(me,it,1,true); G.stGem=it; ground.splice(ground.indexOf(g),1); sfx('pick'); toast(`💎 획득: ${it.name}`,GEM_C[it.gk]); saveChar(); uiDirty=true; autoGemMerge(); if(sheetMode==='bag')renderBag(); }
 function autoSellOk(it0){ if(isGem(it0))return false; if(!(asLv>=0&&it0.rar<=asLv&&!it0.lock))return false; const k0=it0.slot==='ring'?(!me.eq.ring1?'ring1':!me.eq.ring2?'ring2':null):(me.eq[it0.slot]?null:it0.slot); return !(k0&&canWear(it0)); }
 function pickUp(g){
   if(isGem(g.it)){ pickGem(g); return; }
@@ -5931,7 +5950,7 @@ function cellHtml(it,cls,extra){
   if(!it) return `<button class="${cls}" ${extra||''}></button>`;
   if(isOreFr(it)) return `<button class="${cls}${selItem&&selItem.it===it?' sel':''}" ${extra||''} style="border:2px solid #5a5044;background:#1a1612" aria-label="${esc(it.name)} ${it.n}개"><img src="img/frag_${it.ok}.webp" alt="" style="width:80%;height:80%;object-fit:contain;pointer-events:none;position:absolute;left:10%;top:6%"><i class="en" style="left:0;right:3px;top:auto;bottom:0;text-align:right;color:#fff;font-size:11px">${it.n}</i></button>`;
   if(isShard(it)) return `<button class="${cls}${selItem&&selItem.it===it?' sel':''}" ${extra||''} style="border:2px solid ${RBD[4]};background:${RBG[4]}" aria-label="${SHDK[shMat(it)].n} ${it.n}개"><span style="display:grid;place-items:center;pointer-events:none">${shardOrb(it.n,24,shMat(it))}</span><i class="en" style="left:0;right:3px;top:auto;bottom:0;text-align:right;color:#fff;font-size:11px">${it.n}</i>${it.isNew?'<i class="nw">NEW</i>':''}</button>`;
-  if(isGem(it)) return `<button class="${cls}${selItem&&selItem.it===it?' sel':''}" ${extra||''} style="border:2px solid ${RBD[0]};background:${RBG[0]}" aria-label="${esc(it.name)}"><img src="${itemIcon(it).url}" alt="" style="width:86%;height:86%;pointer-events:none">${it.lock?'<i class="lk">🔒</i>':''}${it.isNew?'<i class="nw">NEW</i>':''}</button>`;
+  if(isGem(it)) return `<button class="${cls}${selItem&&selItem.it===it?' sel':''}" ${extra||''} style="border:2px solid ${RBD[0]};background:${RBG[0]}" aria-label="${esc(it.name)}${gnOf(it)>1?' '+gnOf(it)+'개':''}"><img src="${itemIcon(it).url}" alt="" style="width:86%;height:86%;pointer-events:none">${gnOf(it)>1?`<i class="en" style="left:0;right:3px;top:auto;bottom:0;text-align:right;color:#fff;font-size:11px;text-shadow:0 0 3px #000,0 0 3px #000">${gnOf(it)}</i>`:''}${it.lock?'<i class="lk">🔒</i>':''}${it.isNew?'<i class="nw">NEW</i>':''}</button>`;
   const lock=!cellPlain&&!cellSel&&!canWear(it);
   return `<button class="${cls}${selItem&&selItem.it===it?' sel':''}${lock?' lock':''}" ${extra||''} style="border:2px solid ${lock?'#a33a30':RBD[it.rar]};background:${RBG[it.rar]};${it.rar===3?'box-shadow:0 0 8px rgba(255,150,50,.5) inset;':it.rar===2?'box-shadow:0 0 6px rgba(255,226,77,.3) inset;':''}" aria-label="${esc(it.name)}"><img src="${itemIcon(it).url}" alt="" style="width:86%;height:86%;pointer-events:none;${lock?'filter:grayscale(.25) brightness(.92)':''}">${lock?`<i class="rq">${!ownOk(it)?'🚫':me.lvl<reqLv(it)?'Lv'+reqLv(it):(()=>{ const L=statLack(it)[0]; return L?STN[L[0]]+L[1]:''; })()}</i>`:''}${it.lock?'<i class="lk">🔒</i>':''}${it.isNew?'<i class="nw">NEW</i>':''}${cellPlain?'':cls==='cell'&&isUpgrade(it)?`<i class="up${lock?' hi':''}">▲</i>`:cls==='cell'&&isDowngrade(it)?`<i class="dwn${lock?' hi':''}">▼</i>`:''}${it.enh>0?`<i class="en">+${it.enh}</i>`:''}${it.enh>=5?`<i class="gl"></i>`:''}</button>`;
 }
@@ -5968,7 +5987,8 @@ function dragDrop(a,b){
   if(a.t==='eq'&&b.t==='inv'){ if(me.inv[b.i]){ renderBag(); return; } unequip(a.k); return; }
   renderBag();
 }
-function sheetHead(){ $('#sheetT').innerHTML=`${clsIc(me.cls,22)} ${esc(dispName(me))} <span style="color:var(--gold)">Lv ${me.lvl}</span> <span id="goldSend" style="color:#ffd84a;margin-left:6px;cursor:pointer;border-bottom:1px dashed #ffd84a88">💰 ${(me.gold|0).toLocaleString('ko-KR')}G</span>`;
+function sheetHead(){ $('#sheetT').innerHTML=`${clsIc(me.cls,22)} ${esc(dispName(me))} <span style="color:var(--gold)">Lv ${me.lvl}</span> ${rsOn()?`<span style="color:#e8c460;margin-left:6px"><img src="img/pick_1.webp" alt="" style="height:17px;vertical-align:-3px;margin-right:2px">광부 Lv ${minerLv(me)}</span>`:''}`;   /* 광부 레벨은 관리자(연구실)만 보여요 */
+  { const gp=$('#goldPill'); if(gp){ gp.hidden=false; gp.style.bottom=$('#sheetTabs').hidden?'10px':'66px';   /* 탭 막대가 있으면 그 위, 없으면(게임 중) 창 아래 */ gp.innerHTML=`<span id="goldSend">💰 ${(me.gold|0).toLocaleString('ko-KR')}G</span>`; } }
   { const xr=me.lvl>=99?1:clamp(me.xp/need(me.lvl),0,1), xb=$('#sheetXp b'); if(xb)xb.style.width=(xr*100).toFixed(1)+'%'; } }   /* 머리말 아랫줄에 경험치바(숫자 없음) */
 /* ===== 공유보관함: 캐릭터와 상관없이 쓰는 계정 공용 창고(100칸) + 골드. 타이틀 하단 '공유보관함' 버튼으로 열어요 ===== */
 const STORE_N=100, STORE_KEY='dkdef2.store', STORE_IC=`<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-4px"><rect x="3" y="4" width="18" height="5" rx="1.2"/><path d="M4.5 9v10.5h15V9"/><path d="M10 13h4"/></svg>`;
@@ -6071,12 +6091,12 @@ function sortMisc(P){ shardRepack(P); { const tot={}; for(let i=0;i<P.misc.lengt
   P.misc=its.concat(Array(Math.max(0,(P.st?MISC_NS:MISC_N)-its.length)).fill(null)); selItem=null; saveSrc(P); rerender(); sheetToast('등급순으로 정리했어요'); }
 /* 기타 탭 일괄 판매: 보석만 (조각은 제외) — 하급/중급/상급을 고르면 잠그지 않은 보석이 한꺼번에 팔려요 */
 function bulkSellMisc(P){ const gl=()=>P.misc.filter(it=>isGem(it)&&!it.jw&&!it.lock); if(!gl().length){ sheetToast('판매할 보석이 없어요','#ffb259'); return; }
-  const sel=new Set(), cnt=t=>gl().filter(x=>(x.ilvl|0)===t.il).length;
+  const sel=new Set(), cnt=t=>gl().filter(x=>(x.ilvl|0)===t.il).reduce((a,x)=>a+gnOf(x),0);
   const draw=m=>{ let n=0,v=0; for(const k of sel){ const t=GEM_TIER[k], c=cnt(t); n+=c; v+=c*t.g; } m.querySelector('#bmSum').innerHTML=n?`선택한 <b>${n}개</b> · <b style="color:#ffd84a">${v.toLocaleString()}G</b>`:'<span class="meta">판매할 등급을 선택하세요</span>'; m.querySelector('#bmGo').disabled=!n; };
   modal(`<h3>🧺 일괄 판매 · 기타</h3><p class="meta" style="margin:0 0 8px">${P===me?'가방':'공유보관함'}의 보석만 팔아요. 🔒잠근 보석은 제외돼요. 조각은 팔리지 않아요.</p><div class="col">${GEM_TIER.map((t,k)=>`<label class="toggle" style="display:flex;gap:8px;align-items:center;font-size:14px;padding:8px;border:1px solid var(--line2);border-radius:8px"><input type="checkbox" data-t="${k}" ${cnt(t)?'':'disabled'}> <span style="font-weight:700">${t.n}</span> <span style="margin-left:auto;color:var(--mute)">${cnt(t)}개 · 개당 ${t.g.toLocaleString()}G</span></label>`).join('')}<div id="bmSum" style="min-height:22px;font-size:14px"></div><div class="row2"><button class="btn" id="bmNo">취소</button><button class="btn primary danger" id="bmGo" disabled>일괄 판매하기</button></div></div>`,m=>{
     m.querySelectorAll('[data-t]').forEach(c=>c.onchange=()=>{ const k=+c.dataset.t; if(c.checked)sel.add(k); else sel.delete(k); draw(m); });
     m.querySelector('#bmNo').onclick=closeModal; draw(m);
-    m.querySelector('#bmGo').onclick=()=>{ let g=0,n=0; P.misc.forEach((it,i)=>{ if(isGem(it)&&!it.jw&&!it.lock){ const k=GEM_TIER.findIndex(t=>t.il===(it.ilvl|0)); if(k>=0&&sel.has(k)){ g+=GEM_TIER[k].g; n++; P.misc[i]=null; } } }); if(!n)return; P.gold=(P.gold|0)+g; selItem=null; shopMsg=`${n}개 판매 +${g}G`; sfx('coin'); saveSrc(P); uiDirty=true; closeModal(); rerender(); sheetToast&&sheetToast(`${n}개 판매 +${g.toLocaleString()}G`); }; }); }
+    m.querySelector('#bmGo').onclick=()=>{ let g=0,n=0; P.misc.forEach((it,i)=>{ if(isGem(it)&&!it.jw&&!it.lock){ const k=GEM_TIER.findIndex(t=>t.il===(it.ilvl|0)); if(k>=0&&sel.has(k)){ const c=gnOf(it); g+=GEM_TIER[k].g*c; n+=c; P.misc[i]=null; } } }); if(!n)return; P.gold=(P.gold|0)+g; selItem=null; shopMsg=`${n}개 판매 +${g}G`; sfx('coin'); saveSrc(P); uiDirty=true; closeModal(); rerender(); sheetToast&&sheetToast(`${n}개 판매 +${g.toLocaleString()}G`); }; }); }
 function psTabs(){ const cur=me.es===1?1:0; return `<div class="hg" role="tablist" aria-label="아이템세팅">${PSN.map((n,i)=>`<b role="tab" data-ps="${i}"${cur===i?' class="on" aria-selected="true"':''}>${n}</b>`).join('')}</div>`; }
 function renderBag(){
   cpCache.clear();
@@ -6139,6 +6159,7 @@ function bagSelUi(b){ const on=!!bagSel, tabs=$('#sheetTabs'), bar=$('#selBar');
     for(const i of [...bagSel].sort((a,c)=>a-c)){ const it=me.inv[i]; if(!selOk(it))continue; const j=S.inv.indexOf(null); if(j<0){ left++; continue; } me.inv[i]=null; delete it.isNew; S.inv[j]=stamp(it); n++; }
     for(const i of [...bagSelM].sort((a,c)=>a-c)){ const it=me.misc[i]; if(!selOk(it))continue;
       if(isShard(it)){ const mt2=shMat(it), q=it.n|0; if(!shardRoom(S,q,mt2)){ left++; continue; } shardAdd(S,q,mt2); me.misc[i]=null; n++; }
+      else if(isGem(it)&&!it.jw){ const q=gnOf(it); if(gemFit(S,it)<q){ left++; continue; } delete it.isNew; gemPut(S,it,q); me.misc[i]=null; n++; }
       else { const j=S.misc.indexOf(null); if(j<0){ left++; continue; } me.misc[i]=null; delete it.isNew; S.misc[j]=stamp(it); n++; } }
     if(!n){ sheetToast('공유보관함이 가득 찼어요','#ff8a7a'); return; }
     saveStore(); saveChar(); selItem=null; bagSel=null; bagSelM=null; sfx('pick'); rerender(); toast(left?`공유보관함에 ${n}개 보냈어요 (가득 차서 ${left}개는 남았어요)`:`공유보관함에 ${n}개 보냈어요`,'#9fd18b'); };
@@ -6184,14 +6205,22 @@ function sellShard(){ const P=selItem&&selItem.store?getStore():me; const it=sel
 }
 function sellGem(){ const P=selItem&&selItem.store?getStore():me; const it=selItem&&selItem.it, ix=selItem&&selItem.misc; if(!isGem(it)||ix===undefined||P.misc[ix]!==it)return;
   if(it.lock){ sheetToast('🔒 잠긴 보석이에요. 잠금을 먼저 풀어 주세요','#ff8a7a'); return; }
-  const v=gemSellV(it); P.misc[ix]=null; P.gold=(P.gold|0)+v; selItem=null; shopMsg=`${it.name} 판매 +${v}G`; sfx('coin'); saveSrc(P); uiDirty=true; rerender(); }
-function sendGem(){ const P=selItem&&selItem.store?getStore():me; const it=selItem&&selItem.it, ix=selItem&&selItem.misc; if(!isGem(it)||ix===undefined)return;
-  const tg=targetsFor(P); tg.forEach(t=>miscFix(t.o));
-  const rows=tg.map(t=>{ const free=t.o.misc.filter(x=>!x).length; return `<button class="btn" data-to="${t.id}" ${free?'':'disabled'} style="text-align:left">${tgLabel(t,free?`(기타 빈 칸 ${free})`:'(기타 가득 참)')}</button>`; }).join('');
-  modal(`<h3>📤 보석 보내기</h3><p style="margin:0 0 10px;font-size:13px;color:${GEM_C[it.gk]}">${esc(it.name)}</p><div class="col">${rows}<button class="btn" id="sX">취소</button></div>`,m=>{
+  const max=gnOf(it), g=gemSellV(it);
+  if(max<=1){ P.misc[ix]=null; P.gold=(P.gold|0)+g; selItem=null; shopMsg=`${it.name} 판매 +${g}G`; sfx('coin'); saveSrc(P); uiDirty=true; rerender(); return; }
+  modal(`<h3>💰 ${esc(it.name)} 판매</h3><p style="margin:0;font-size:13px;color:${GEM_C[it.gk]}">이 칸 보유 ${max}개 · 개당 ${g.toLocaleString()}G${P===me?'':' · 대금은 공유보관함 골드로'}</p>${qtyHtml(max)}<p class="meta" id="ssTot" style="margin:0 0 10px;font-size:15px;color:#ffd84a;text-align:center"></p><div class="row2"><button class="btn" id="ssNo">취소</button><button class="btn primary danger" id="ssGo">판매</button></div>`,m=>{
+    m.querySelector('#ssNo').onclick=closeModal;
+    const get=qtyBind(m,max,v=>{ m.querySelector('#ssTot').textContent=`${v}개 → +${(v*g).toLocaleString()}G`; });
+    m.querySelector('#ssGo').onclick=()=>{ const q=get(); if(P.misc[ix]!==it||q>gnOf(it))return; const v=q*g; gemUse(P,ix,q); P.gold=(P.gold|0)+v; selItem=null; shopMsg=`${it.name} ${q}개 판매 +${v.toLocaleString()}G`; saveSrc(P); uiDirty=true; sfx('coin'); closeModal(); rerender(); };
+  }); }
+function sendGem(){ const P=selItem&&selItem.store?getStore():me; const it=selItem&&selItem.it, ix=selItem&&selItem.misc; if(!isGem(it)||ix===undefined)return; const max=gnOf(it);
+  const tg=targetsFor(P); tg.forEach(t=>miscFix(t.o)); let q=max;
+  const rows=tg.map(t=>`<button class="btn" data-to="${t.id}" style="text-align:left">${tgLabel(t,'<span class="st"></span>')}</button>`).join('');
+  modal(`<h3>📤 보석 보내기</h3><p style="margin:0 0 6px;font-size:13px;color:${GEM_C[it.gk]}">${esc(it.name)}${max>1?` · 이 칸 보유 ${max}개`:''}</p>${max>1?qtyHtml(max):''}<div class="col">${rows}<button class="btn" id="sX">취소</button></div>`,m=>{
     m.querySelector('#sX').onclick=closeModal;
-    m.querySelectorAll('[data-to]').forEach(b=>b.onclick=()=>{ const t=tg.find(o=>o.id===b.dataset.to); if(!t||P.misc[ix]!==it)return; const j=t.o.misc.indexOf(null); if(j<0)return;
-      P.misc[ix]=null; delete it.isNew; if(t.k==='s')stamp(it); t.o.misc[j]=it; saveTarget(t); saveSrc(P); selItem=null; closeModal(); sfx('pick'); shopMsg=''; rerender(); toast(`${tgName(t)}에게 보냈어요`,'#9fd18b'); }); }); }
+    const refresh=v=>{ q=v; m.querySelectorAll('[data-to]').forEach(b=>{ const t=tg.find(o=>o.id===b.dataset.to), ok=t&&gemFit(t.o,it)>=q; b.disabled=!ok; b.style.opacity=ok?'':'.5'; b.querySelector('.st').textContent=ok?'':'(기타 자리 부족)'; }); };
+    if(max>1)qtyBind(m,max,refresh); else refresh(1);
+    m.querySelectorAll('[data-to]').forEach(b=>b.onclick=()=>{ const t=tg.find(o=>o.id===b.dataset.to); if(!t||P.misc[ix]!==it||q>gnOf(it)||gemFit(t.o,it)<q)return;
+      const tpl=Object.assign({},it); delete tpl.isNew; delete tpl.n; gemPut(t.o,tpl,q); gemUse(P,ix,q); saveTarget(t); saveSrc(P); selItem=null; closeModal(); sfx('pick'); shopMsg=''; rerender(); toast(`${tgName(t)}에게 ${q>1?q+'개를 ':''}보냈어요`,'#9fd18b'); }); }); }
 function oreRoom(p,n,k){ if(!Array.isArray(p.misc))miscFix(p); let r=0; for(const x of p.misc){ if(!x)r+=SHARD_MAX; else if(x.mat==='ore'&&x.ok===k)r+=SHARD_MAX-(x.n|0); } return r>=n; }
 function sendOre(){ const P=selItem&&selItem.store?getStore():me; const it=selItem&&selItem.it, ix=selItem&&selItem.misc; if(!isOreFr(it)||ix===undefined)return; const max=it.n|0; if(max<1)return;
   const tg=targetsFor(P); let q=max, k=it.ok, O=ORES[k];
@@ -7289,7 +7318,7 @@ const pickHas=(p,g)=>{ let f=false; const see=it=>{ if(isPick(it)&&(it.pk|0)===g
 function mineRecipes(o){
   o=o||{}; let cat=o.only||'all', open=-1;
   const gemOk=(m,x)=>isGem(x)&&(!(m[1]||m[3])||(!x.jw&&!x.lock&&(!m[1]||x.gk===m[1])&&(!m[3]||gemTier(x)===m[3])));   /* ['gem',종류(0=아무),개수,등급(없으면 아무)] — 종류·등급을 정하면 주얼·잠긴 보석은 제외 */
-  const have=m=>m[0]==='ore'?oreCount(me,m[1]):m[0]==='gem'?(me.misc||[]).filter(x=>gemOk(m,x)).length:aGold(), nmOf=m=>m[0]==='ore'?ORES[m[1]].n+' 조각':m[0]==='gem'?(m[1]?`${m[3]?GEM_TIER[m[3]-1].n+' ':''}${GEM_N[m[1]]}`:'보석 (아무 종류)'):'골드';
+  const have=m=>m[0]==='ore'?oreCount(me,m[1]):m[0]==='gem'?gemCnt(me,x=>gemOk(m,x)):aGold(), nmOf=m=>m[0]==='ore'?ORES[m[1]].n+' 조각':m[0]==='gem'?(m[1]?`${m[3]?GEM_TIER[m[3]-1].n+' ':''}${GEM_N[m[1]]}`:'보석 (아무 종류)'):'골드';
   const draw=m=>{
     const list=MINE_RECIPES.map((r,i)=>[r,i]).filter(([r])=>cat==='all'||r.cat===cat);
     m.querySelector('.mkr').innerHTML=(o.only?'':`<div class="cats">${MINE_RCATS.map(c=>`<button type="button" data-c="${c[0]}" class="${c[0]===cat?'on':''}">${c[1]}</button>`).join('')}</div>`)+
@@ -7301,7 +7330,7 @@ function mineRecipes(o){
     m.querySelectorAll('.hd').forEach(h=>h.onclick=()=>{ const i=+h.dataset.i; open=open===i?-1:i; draw(m); });
     m.querySelectorAll('[data-mk]').forEach(b=>b.onclick=ev=>{ ev.stopPropagation(); const r=MINE_RECIPES[+b.dataset.mk]; if(!r||!(r.pet||r.pk)||(r.pet&&petHas(me,r.pet))||(r.pk&&pickHas(me,r.pk))||!r.mat.every(x=>have(x)>=x[2]))return; miscFix(me);
       if(r.pk&&me.inv.indexOf(null)<0)return toast('가방이 가득 찼어요','#e07060');
-      for(const x of r.mat)if(x[0]==='gem'){ let n=x[2]; for(let i=0;i<me.misc.length&&n>0;i++){ if(me.misc[i]&&gemOk(x,me.misc[i])){ me.misc[i]=null; n--; } } }
+      for(const x of r.mat)if(x[0]==='gem')gemTake(me,y=>gemOk(x,y),x[2]);
       for(const x of r.mat)if(x[0]==='ore')oreTake(me,x[1],x[2]);
       for(const x of r.mat)if(x[0]==='gold')aPayGold(x[2]);
       if(r.pk){ const it=mkPick(r.pk), k=me.inv.indexOf(null); it.isNew=1; me.inv[k]=it; recalc(); saveChar(); uiDirty=true; mineHud(); sfx('rare'); toast(`⛏️ 「${it.name}」을(를) 만들었어요 (가방)`,RARC[it.rar]); draw(m); return; }
@@ -7335,14 +7364,14 @@ function jewelCombine(back){
     <div style="display:flex;gap:8px;justify-content:center;margin-bottom:10px">${[0,1,2].map(slot).join('')}</div>
     <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;font-size:12px;margin-bottom:10px">${mats.map(x=>`<span style="border:1px solid ${x.h>=x.n?'#3f7a50':'#7a3f3a'};border-radius:8px;padding:3px 8px;color:${x.h>=x.n?'#8fe0a0':'#ff9a8a'}">${ORES[x.k].n} ${x.h}/${x.n}</span>`).join('')}</div>
     <div style="border:1px solid #3d3322;background:#1a150f;border-radius:12px;padding:8px 12px;font-size:13px;line-height:1.6;margin-bottom:10px"><div style="color:#9fd0ff">결과 미리보기</div><div style="color:${clr}">${kind?'':'? '}${jn} ${Math.round((1-JW_MAKE.black)*100)}% — 직업 스킬 +1 · 보석 옵션 1개</div><div style="color:${GEM_C.obsidian}">칠흑 주얼 ${Math.round(JW_MAKE.black*100)}% — 공격력·공격속도</div></div>
-    <div style="font-size:12px;color:#a99a7e;margin-bottom:4px">가진 상급 보석 ${all.length}개 <span style="color:#6a5a48">(누르면 올려요)</span></div>
-    <div id="jwL" style="display:flex;gap:6px;flex-wrap:wrap;max-height:112px;overflow-y:auto;margin-bottom:10px">${all.length?all.map(g=>{ const on=pick.includes(g.id), dis=!on&&(sel.length>=3||(kind&&g.gk!==kind)); return `<div data-g="${g.id}" title="${gemNm(g)}" style="width:46px;height:46px;border-radius:10px;border:1px solid ${on?'#b89a5a':'#3d3322'};background:${on?'#2a2214':'#1a150f'};display:flex;align-items:center;justify-content:center;opacity:${dis?.3:1}"><img src="${gemPng(g)}" style="width:34px;height:34px;object-fit:contain"></div>`; }).join(''):'<div style="color:#8a7a68;font-size:12px;padding:6px 0">상급 보석이 없어요 (잠긴 보석은 쓸 수 없어요)</div>'}</div>
+    <div style="font-size:12px;color:#a99a7e;margin-bottom:4px">가진 상급 보석 ${all.reduce((a,x)=>a+gnOf(x),0)}개 <span style="color:#6a5a48">(누르면 올려요)</span></div>
+    <div id="jwL" style="display:flex;gap:6px;flex-wrap:wrap;max-height:112px;overflow-y:auto;margin-bottom:10px">${all.length?all.map(g=>{ const used=pick.filter(x=>x===g.id).length, on=used>0, dis=!on&&(sel.length>=3||(kind&&g.gk!==kind)), gn=gnOf(g); return `<div data-g="${g.id}" title="${gemNm(g)}" style="position:relative;width:46px;height:46px;border-radius:10px;border:1px solid ${on?'#b89a5a':'#3d3322'};background:${on?'#2a2214':'#1a150f'};display:flex;align-items:center;justify-content:center;opacity:${dis?.3:1}"><img src="${gemPng(g)}" style="width:34px;height:34px;object-fit:contain">${gn>1?`<i style="position:absolute;right:3px;bottom:0;font-style:normal;font-size:11px;font-weight:700;color:#fff;text-shadow:0 0 3px #000,0 0 3px #000">${gn-used}</i>`:''}</div>`; }).join(''):'<div style="color:#8a7a68;font-size:12px;padding:6px 0">상급 보석이 없어요 (잠긴 보석은 쓸 수 없어요)</div>'}</div>
     <button class="btn primary" id="jwGo" style="width:100%"${ok?'':' disabled'}>💠 조합하기</button><button class="btn" id="jwX" style="width:100%;margin-top:8px">닫기</button>`;
-    m.querySelectorAll('[data-g]').forEach(el=>el.onclick=()=>{ const id=+el.dataset.g; if(pick.includes(id))pick=pick.filter(x=>x!==id); else { const g=all.find(x=>x.id===id); if(pick.length>=3||(kind&&g.gk!==kind))return; pick.push(id); } sfx('ui'); draw(m); });
-    m.querySelectorAll('[data-s]').forEach(el=>el.onclick=()=>{ const g=sel[+el.dataset.s]; if(!g)return; pick=pick.filter(x=>x!==g.id); sfx('ui'); draw(m); });
+    m.querySelectorAll('[data-g]').forEach(el=>el.onclick=()=>{ const id=+el.dataset.g, g=all.find(x=>x.id===id); if(!g)return; const used=pick.filter(x=>x===id).length; if(used>=gnOf(g)){ pick.splice(pick.lastIndexOf(id),1); } else { if(pick.length>=3||(kind&&g.gk!==kind))return; pick.push(id); } sfx('ui'); draw(m); });   /* 스택은 누를 때마다 1개씩 올려요 (다 올렸으면 다시 눌러 내려요) */
+    m.querySelectorAll('[data-s]').forEach(el=>el.onclick=()=>{ const g=sel[+el.dataset.s]; if(!g)return; pick.splice(+el.dataset.s,1); sfx('ui'); draw(m); });
     m.querySelector('#jwX').onclick=()=>closeModal();
-    m.querySelector('#jwGo').onclick=()=>{ if(!ok)return; const cur=cand(), use=pick.map(id=>cur.find(x=>x.id===id)); if(use.some(x=>!x)||new Set(use.map(x=>x.gk)).size!==1||JW_MAKE.mat.some(([k,n])=>oreCount(me,k)<n)){ toast('재료가 바뀌었어요. 다시 골라 주세요'); pick=[]; draw(m); return; }
-      const kd=use[0].gk, black=Math.random()<JW_MAKE.black; for(const x of use){ const i=me.misc.indexOf(x); if(i>=0)me.misc[i]=null; } for(const [k,n] of JW_MAKE.mat)oreTake(me,k,n);
+    m.querySelector('#jwGo').onclick=()=>{ if(!ok)return; const cur=cand(), use=pick.map(id=>cur.find(x=>x.id===id)); if(use.some(x=>!x)||new Set(use.map(x=>x.gk)).size!==1||use.some(x=>use.filter(y=>y===x).length>gnOf(x))||JW_MAKE.mat.some(([k,n])=>oreCount(me,k)<n)){ toast('재료가 바뀌었어요. 다시 골라 주세요'); pick=[]; draw(m); return; }
+      const kd=use[0].gk, black=Math.random()<JW_MAKE.black; for(const x of use){ const i=me.misc.indexOf(x); if(i>=0)gemUse(me,i,1); } for(const [k,n] of JW_MAKE.mat)oreTake(me,k,n);
       const j=black?mkJewel('obsidian'):mkJewel(kd,{jt:3}); j.isNew=1; const e=me.misc.indexOf(null); if(e<0)me.misc.push(j); else me.misc[e]=j;
       saveChar(); uiDirty=true; sfx(black?'crit':'rare'); res=j; pick=[]; draw(m); }; };
   const draw=m=>{ draw0(m); if(back){ const k=m.querySelector('.mkr'); k.insertAdjacentHTML('afterbegin','<button type="button" class="btn" id="jwB" style="margin-bottom:8px">‹ 뒤로</button>'); k.querySelector('#jwB').onclick=()=>{ closeModal(); back(); }; } };
@@ -7391,7 +7420,7 @@ function mineSpTry(){ const M=G.mine; if(!M||M.sp||!M.sps||!M.sps.length)return;
   Object.assign(m,{ore:S.k,sp:1,slot:null,scare:1,hx:sl.x,hy:sl.y,x:sl.x,y:sl.y,hp:O.hits,max:O.hits,dmg:0,xp:0,spd:0,cd:99,r:36,elite:0,boss:0,seed:Math.random()*1000,flash:0}); M.sp=m;
   efx.push({k:'ring',x:sl.x,y:sl.y,r0:8,r1:60,t:0,life:.5,col:O.c,w:6}); sfx('rare'); later(.5,()=>{ if(G.mine&&G.mine.sp===m&&!m.dead)M.bub={t:0,say:S.say}; }); }
 const SP_COLS=['#ff5a5a','#ffb347','#fff35c','#5cff8a','#5cc8ff','#b05cff','#ff5cd0'];
-function mineGemGive(it){ if(gemAutoSellOk(it)){ me.gold+=GEM_TIER[gemTier(it)-1].g; return; } const i=me.misc.indexOf(null); if(i<0){ dropItem(it,me.x+rand(-30,30),me.y+rand(-30,30)); return; } it.isNew=1; me.misc[i]=it; }
+function mineGemGive(it){ if(gemAutoSellOk(it)){ me.gold+=GEM_TIER[gemTier(it)-1].g; return; } if(!gemFit(me,it)){ dropItem(it,me.x+rand(-30,30),me.y+rand(-30,30)); return; } it.isNew=1; gemPut(me,it,1,true); }
 function mineSpBreak(m,O){ const M=G.mine, rows=[]; if(M.sp===m)M.sp=null; const ri=(a,b)=>a+((Math.random()*(b-a+1))|0);
   if(m.ore==='rainbow'){ const ks=GEM_KINDS.slice().sort(()=>Math.random()-.5); [[3,ri(1,2)],[2,ri(2,4)],[1,ri(4,6)]].forEach(([t,n],i)=>{ const gk=ks[i]; for(let j=0;j<n;j++)mineGemGive(mkGem(gk,t)); rows.push({img:`img/gem_${gk}_${t}.png`,tx:GEM_TIER[t-1].n+' '+GEM_N[gk],n,col:GEM_C[gk]}); }); autoGemMerge(); }
   else{ [['star',ri(30,50)],['blood',ri(30,50)],['rust',ri(100,150)]].forEach(([k,n])=>{ oreAdd(me,n,k); M.got[k]=(M.got[k]|0)+n; rows.push({img:`img/frag_${k}.webp`,tx:ORES[k].n+' 조각',n,col:ORES[k].c}); }); }
@@ -7546,7 +7575,7 @@ function casCharge(){ const S=getStore();
   if(!shardRoom(S,CAS_JP_SHARD,'shard')||!shardRoom(S,CAS_JP_SHARD,'ashard'))return {err:'full'};   /* 어떤 결과든 보관함에 들어갈 자리가 있을 때만 */
   if(S.inv.indexOf(null)<0)return {err:'full'};   /* 장비가 나올 수 있어서 빈 칸 1개는 꼭 필요 */
   if(S.misc.indexOf(null)<0)return {err:'fullm'};   /* 보석이 나올 수 있어서 기타 칸도 1개 필요 */
-  const o=casRoll(); aPayGold(casCost()); if(o.gold)S.gold+=o.gold; else if(o.k==='it'){ o.it=genCas(o.key); S.inv[S.inv.indexOf(null)]=o.it; dexAdd(me,o.it); saveChar(); } else if(o.k==='gem'){ o.it=mkGem(o.gk,o.t); S.misc[S.misc.indexOf(null)]=o.it; } else if(o.k==='pet'){ const c=smChar(); if(c&&petGive(c,'azazel')){ saveChar(); } else { o.dup=1; S.gold+=PET_DUP_GOLD; } } else if(o.n)shardAdd(S,o.n,o.mat); saveStore(); if(o.k==='jpg')ttfSet('jpg'); else if(o.k==='jps')ttfSet('jps'); else if(o.k==='pet'&&!o.dup)ttfPet('azazel'); return {o}; }
+  const o=casRoll(); aPayGold(casCost()); if(o.gold)S.gold+=o.gold; else if(o.k==='it'){ o.it=genCas(o.key); S.inv[S.inv.indexOf(null)]=o.it; dexAdd(me,o.it); saveChar(); } else if(o.k==='gem'){ o.it=mkGem(o.gk,o.t); gemPut(S,o.it,1,true); } else if(o.k==='pet'){ const c=smChar(); if(c&&petGive(c,'azazel')){ saveChar(); } else { o.dup=1; S.gold+=PET_DUP_GOLD; } } else if(o.n)shardAdd(S,o.n,o.mat); saveStore(); if(o.k==='jpg')ttfSet('jpg'); else if(o.k==='jps')ttfSet('jps'); else if(o.k==='pet'&&!o.dup)ttfPet('azazel'); return {o}; }
 const casOwnerSvg=()=>`<svg viewBox="0 0 100 110" aria-hidden="true"><path d="M10 110Q14 78 50 74Q86 78 90 110Z" fill="#1b1426" stroke="#07040a" stroke-width="3"/><path d="M42 76H58L54 98H46Z" fill="#ddd5c2"/><path d="M50 82L38 76V90ZM50 82L62 76V90Z" fill="#b3202f" stroke="#2a0a10" stroke-width="1.5"/><circle cx="50" cy="82" r="3" fill="#7a1420"/>
  <g class="cs-jaw"><path d="M31 56Q31 76 50 76Q69 76 69 56Z" fill="#e9e2cf" stroke="#1a1410" stroke-width="3" stroke-linejoin="round"/><path d="M38 68H62M44 63V73M50 63V74M56 63V73" stroke="#1a1410" stroke-width="2" stroke-linecap="round" fill="none"/></g>
  <ellipse cx="50" cy="46" rx="22" ry="22" fill="#e9e2cf" stroke="#1a1410" stroke-width="3"/><ellipse cx="41" cy="46" rx="6.5" ry="7.5" fill="#120d18"/><ellipse cx="59" cy="46" rx="6.5" ry="7.5" fill="#120d18"/><circle class="cs-eyeg" cx="41" cy="47" r="2.4" fill="#7dffd6"/><circle class="cs-eyeg" cx="59" cy="47" r="2.4" fill="#7dffd6"/><path d="M50 52L47 59H53Z" fill="#1a1410"/>
@@ -7792,7 +7821,7 @@ function gemSockUi(b){ if(!gemSock)return; const g=gemSock.it;
     el.onclick=()=>{ if(!it)return; if(ok)gemSockConfirm(it); else toast(!SMITH_SLOTS.includes(it.slot)?'무기·갑옷·투구만 박을 수 있어요':it.sk?'이미 보석이 박혀 있어요':'소켓이 없는 장비예요','#ffb259'); }; }); }
 /* 장비 상세의 [소켓박기]: 가방 기타 칸의 보석 중 하나를 고르면 확인창으로 이어져요 */
 function gemPick(it){ if(!it||!gemTgt(it))return;
-  const L=[], seen={}; me.misc.forEach((g,i)=>{ if(!g||!isGem(g))return; const k=(g.jw?'j'+JSON.stringify([g.jt,g.jc,g.jv]):'')+g.gk+'_'+gemTier(g); if(seen[k]){ seen[k].n++; return; } seen[k]={g,i,n:1}; L.push(seen[k]); }); L.sort((a,b)=>gemTier(b.g)-gemTier(a.g));   /* 같은 종류·등급 보석은 한 줄로 (개수만 표시) */
+  const L=[], seen={}; me.misc.forEach((g,i)=>{ if(!g||!isGem(g))return; const k=(g.jw?'j'+JSON.stringify([g.jt,g.jc,g.jv]):'')+g.gk+'_'+gemTier(g); if(seen[k]){ seen[k].n+=gnOf(g); return; } seen[k]={g,i,n:gnOf(g)}; L.push(seen[k]); }); L.sort((a,b)=>gemTier(b.g)-gemTier(a.g));   /* 같은 종류·등급 보석은 한 줄로 (개수만 표시) */
   if(!L.length){ sheetToast('가방 기타 칸에 보석이 없어요','#ffb259'); return; }
   modal(`<h3>💎 박을 보석 고르기</h3><p class="meta" style="margin:0 0 8px;font-size:12.5px">→ <b style="color:${RARC[it.rar]}">${esc(it.name)}</b></p><div class="col" style="max-height:52vh;overflow-y:auto;touch-action:pan-y">${L.map((o,n)=>`<button class="btn" data-gi="${n}" style="text-align:left;display:flex;align-items:center;gap:10px;padding:8px 10px"><img src="${gemPng(o.g)}" alt="" width="36" height="36" style="flex:none"><span style="min-width:0"><b style="color:${GEM_C[o.g.gk]}">${esc(o.g.name)}</b>${o.n>1?` <span style="color:#a89a84;font-size:12px">×${o.n}</span>`:''}<br><small style="color:#afeeee">${esc(gemOptText(o.g))}</small></span></button>`).join('')}<button class="btn" id="gpX">취소</button></div>`,m=>{
     m.querySelector('#gpX').onclick=closeModal;
@@ -7801,7 +7830,7 @@ function gemSockConfirm(it,fromPick){ const g=gemSock&&gemSock.it; if(!g||!gemTg
   modal(`<h3>💎 소켓에 박기</h3><p style="margin:0 0 6px;font-size:13px"><b style="color:${GEM_C[g.gk]}">${esc(g.name)}</b> <span style="color:#afeeee">${esc(gemOptText(g))}</span></p><p style="margin:0 0 8px;font-size:13px">→ <b style="color:${RARC[it.rar]}">${esc(it.name)}</b>${Object.values(me.eq).includes(it)?' <span class="meta">(착용 중)</span>':''}</p><p class="meta" style="margin:0 0 10px;font-size:12px">박은 보석은 뺄 수 없어요. 장인의 집에서 소켓을 비우면 보석이 사라져요.</p><div class="row2"><button class="btn" id="gcNo">취소</button><button class="btn primary" id="gcGo">박기</button></div>`,m=>{
     m.querySelector('#gcNo').onclick=()=>{ if(fromPick)gemSock=null; closeModal(); }; if(fromPick)m.onclick=e=>{ if(e.target===m){ gemSock=null; closeModal(); } };
     m.querySelector('#gcGo').onclick=()=>{ if(!gemSock||me.misc[gemSock.ix]!==g||!gemTgt(it)){ closeModal(); return; }
-      const cp0=calcCP(me), worn=Object.values(me.eq).includes(it); it.gm=gmOf(g); me.misc[gemSock.ix]=null; gemSock=null; selItem=null;
+      const cp0=calcCP(me), worn=Object.values(me.eq).includes(it); it.gm=gmOf(g); gemUse(me,gemSock.ix,1); gemSock=null; selItem=null;
       if(worn){ const hr=me.hp/me.D.maxHp, mr=me.mp/me.D.maxMp; me.D=derive(me); me.hp=me.D.maxHp*hr; me.mp=me.D.maxMp*mr; buildSkills(); }
       saveChar(); uiDirty=true; closeModal(); sfx('rare'); rerender(); if(worn)cpMsg(cp0,calcCP(me)); else sheetToast('💎 소켓에 박았어요'); }; }); }
 /* 마을 건물 움직임: 화면 밖(스크롤로 안 보이는) 건물은 애니메이션을 멈춰 건물이 많아져도 가볍게 */
