@@ -1538,7 +1538,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0805</div>
+    <div class="ver" id="verT">v0.7.2.0806</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -7451,7 +7451,8 @@ function mqGem(n){ const q=mqAct(); if(q&&q.req.some(r=>r[0]==='gem'))mqS().p=(m
 function mqOpen(){ const q=mqAct(); if(q&&q.req.some(r=>r[0]==='open')&&!mqS().o){ mqS().o=1; saveChar(); if(G.mine)mineHud(); } }
 let mqCol=false;   /* 퀘스트 카드를 접어 둠 (탭하면 접고 펼침) · 새 퀘스트가 시작되거나 완료되면 자동으로 펼쳐요 */
 function mqHud(){ const el=$('#mqCard'); if(!el)return; const q=G.mine&&me?mqAct():null; if(!q){ if(!el.hidden){ el.hidden=true; el._k=''; } return; }
-  if(!el._ck){ el._ck=1; el.onclick=()=>{ mqCol=!mqCol; sfx('ui'); el._k=''; mqHud(); }; }
+  if(!el._ck){ el._ck=1; const tog=()=>{ mqCol=!mqCol; sfx('ui'); el._k=''; mqHud(); };   /* 손가락을 대는 순간(pointerdown) 바로 반응 — 다른 게임 버튼들과 같은 방식. click은 마우스·키보드용 보조(같은 탭에서 두 번 처리되지 않게 막아요) */
+    el.addEventListener('pointerdown',e=>{ e.stopPropagation(); el._pd=performance.now(); tog(); }); el.addEventListener('click',()=>{ if(performance.now()-(el._pd||-9e3)<700)return; tog(); }); }
   const S=mqS(), ok=mqOk(q); if(el._q!==q.id||el._ok!==ok){ if(el._q!==undefined)mqCol=false; el._q=q.id; el._ok=ok; }
   const key=q.id+'|'+ok+'|'+mqCol+'|'+q.req.map(r=>mqHave(r,S)).join(','); if(el._k===key&&!el.hidden)return; el._k=key;
   const pr=Math.min(1,q.req.reduce((a,r)=>a+Math.min(1,mqHave(r,S)/mqTg(r)),0)/q.req.length); el.hidden=false; el.classList.toggle('dn',ok); el.classList.toggle('col',mqCol);
