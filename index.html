@@ -1538,7 +1538,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0807</div>
+    <div class="ver" id="verT">v0.7.2.0808</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -6122,10 +6122,10 @@ function fitInv(){ const b=$('#sheetB'); if(!b)return; const inv=b.querySelector
 try{ new ResizeObserver(()=>fitInv()).observe($('#sheetB')); }catch(e){}
 const cntNN=a=>a.reduce((t,x)=>t+(x?1:0),0);
 const tabStrip=(inv,misc,tab,chip)=>`<div class="tbs"><button class="tb${tab==='eq'?' on':''}" data-bt="eq"><span class="ic">🎒</span> <span class="tn">장비품</span> <small>${cntNN(inv)}/${inv.length}</small></button><button class="tb${tab==='misc'?' on':''}" data-bt="misc"><span class="ic">💎</span> <span class="tn">기타</span> <small>${cntNN(misc)}/${misc.length}</small>${misc.some(x=>x&&x.isNew)?'<i class="n">NEW</i>':''}</button></div>`;
-/* 기타 탭 정렬(등급순): 조각(그림자→각성) 먼저, 광석 조각은 레벨 높은 것부터, 그 다음 보석을 상급→중급→하급, 같은 등급이면 보석 종류 순서 */
+/* 기타 탭 정렬(등급순): 조각(그림자→각성) 먼저, 광석 조각은 레벨 높은 것부터, 그 다음 주얼(상급→중급→하급, 같은 등급이면 주얼 종류 순서), 마지막에 보석을 상급→중급→하급, 같은 등급이면 보석 종류 순서 */
 function gemRepack(P){ if(!Array.isArray(P.misc))return; const gs=[]; for(let i=0;i<P.misc.length;i++){ const x=P.misc[i]; if(!x||!isGem(x)||x.jw)continue; let g=gs.find(o=>gemSame(o.t,x)); if(!g)gs.push(g={t:x,n:0,nw:0}); g.n+=gnOf(x); if(x.isNew)g.nw=1; P.misc[i]=null; }
   for(const g of gs){ if(g.nw)g.t.isNew=1; gemPut(P,g.t,g.n,true); } }   /* 정렬할 때 흩어진 같은 보석(예전 낱개 포함)을 999개 단위 스택으로 합쳐요 */
-function sortMisc(P){ shardRepack(P); gemRepack(P); { const tot={}; for(let i=0;i<P.misc.length;i++){ const x=P.misc[i]; if(x&&x.mat==='ore'){ tot[x.ok]=(tot[x.ok]|0)+(x.n|0); P.misc[i]=null; } } for(const k in tot)oreAdd(P,tot[k],k); } const its=P.misc.filter(Boolean); const key=it=>isShard(it)?[0,it.mat==='cshard'?2:it.mat==='ashard'?1:0,0]:isOreFr(it)?[0,3,-((ORES[it.ok]&&ORES[it.ok].lv)|0)]:[1,-(it.ilvl|0),Math.max(0,GEM_KINDS.indexOf(it.gk))];
+function sortMisc(P){ shardRepack(P); gemRepack(P); { const tot={}; for(let i=0;i<P.misc.length;i++){ const x=P.misc[i]; if(x&&x.mat==='ore'){ tot[x.ok]=(tot[x.ok]|0)+(x.n|0); P.misc[i]=null; } } for(const k in tot)oreAdd(P,tot[k],k); } const its=P.misc.filter(Boolean); const key=it=>isShard(it)?[0,it.mat==='cshard'?2:it.mat==='ashard'?1:0,0]:isOreFr(it)?[0,3,-((ORES[it.ok]&&ORES[it.ok].lv)|0)]:it.jw?[1,-(it.jt|0),Math.max(0,JW_KINDS.indexOf(it.gk))]:[2,-(it.ilvl|0),Math.max(0,GEM_KINDS.indexOf(it.gk))];
   its.sort((a,b)=>{ const x=key(a),y=key(b); return x[0]-y[0]||x[1]-y[1]||x[2]-y[2]; });
   P.misc=its.concat(Array(Math.max(0,(P.st?MISC_NS:MISC_N)-its.length)).fill(null)); selItem=null; saveSrc(P); rerender(); sheetToast('등급순으로 정리했어요'); }
 /* 기타 탭 일괄 판매: 보석만 (조각은 제외) — 하급/중급/상급을 고르면 잠그지 않은 보석이 한꺼번에 팔려요 */
