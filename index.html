@@ -1538,7 +1538,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0803</div>
+    <div class="ver" id="verT">v0.7.2.0804</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -7338,7 +7338,7 @@ function mineSay(tx){ try{
 /* ===== 광산 NPC 퀘스트 (관리자 시범 · 지상 그라크 / 지하 1층 토비) — NPC·퀘스트·대사는 아래 두 표에만 추가하면 돼요 =====
    - 층 이동은 퀘스트와 상관없이 언제든 가능(퀘스트를 끝내면 「다음 층으로」 지름길 버튼이 생길 뿐)
    - 퀘스트는 NPC마다 순서대로, 동시에 한 개만 진행(다른 NPC 퀘스트를 수락하면 지금 것은 그 NPC에게서 다시 받을 수 있어요)
-   - req: ['mine',광석,개수]=수락한 뒤 캔 조각 수 · ['give',광석,개수]=조각 가져다 주기(제출 때 소모) · ['lv',광부레벨] · ['open']=조합법 창 열기
+   - req: ['mine',광석,개수]=수락한 뒤 캔 조각 수 · ['give',광석,개수]=수락한 뒤 캔 조각을 가져다 주기(수락 전에 가지고 있던 조각은 안 세요 · 제출 때 소모) · ['lv',광부레벨] · ['open']=조합법 창 열기
    - r = 보상 경험치 비율(그 층 권장 레벨 = 입장 Lv+5 의 필요 경험치 × r) · 저장: me.mine.q = {d:{끝낸 id:1}, a:진행 중 id, p:캔 개수, o:조합법 열었나} */
 const MNPC={
   qg:{n:'그라크',t:'묘지기',fl:0,h:102,x:VX+140,y:VY-10,img:'img/npc_grak.png',tk:'img/npc_grak_talk.png',no:'…더 시킬 일은 없네. 아래 갱도는 마음대로 내려가 보게.'},
@@ -7427,11 +7427,13 @@ const MQ=[
    done:[['qs','…복원되었습니다. 읽어 드리겠습니다.'],['qs','별은 이 땅에 떨어진 것이 아닙니다. 무언가를 눌러 두려고 올려놓은 뚜껑이었습니다.'],['qs','오르벤은 그 뚜껑을 깨뜨렸습니다. 사고가 아니라 의도였습니다.'],['qs','그는 아직 더 아래에 있습니다. 이 기록은 아직 끝나지 않았습니다.']]},
 ];
 const mqKeyAt=fi=>Object.keys(MNPC).find(k=>MNPC[k].fl===fi), mqNpcAt=fi=>MNPC[mqKeyAt(fi)];
-const mqS=()=>{ const m=me.mine||(me.mine={lv:1,xp:0}); const q=m.q||(m.q={d:{},a:'',p:0,o:0}); if(!q.d)q.d={}; return q; };
+const mqS=()=>{ const m=me.mine||(me.mine={lv:1,xp:0}); const q=m.q||(m.q={d:{},a:'',p:0,o:0}); if(!q.d)q.d={};
+  if(!q.g){ q.g={}; const a=q.a&&MQ.find(x=>x.id===q.a); if(a)for(const r of a.req)if(r[0]==='give')q.g[r[1]]=Math.min(r[2],oreCount(me,r[1])); }   /* g = 수락한 뒤 캔 조각 수(광석별) · 예전 저장(진행 중 퀘스트)은 지금 가진 만큼으로 이어받아요 */
+  return q; };
 const mqAct=()=>{ const q=me&&me.mine&&me.mine.q; return q&&q.a?(MQ.find(x=>x.id===q.a)||null):null; };
 const mqNext=k=>{ const d=(me&&me.mine&&me.mine.q&&me.mine.q.d)||{}; return MQ.find(q=>q.np===k&&!d[q.id])||null; };
 const mqTg=r=>r[0]==='lv'||r[0]==='gem'?r[1]:r[0]==='open'?1:r[2];
-const mqHave=(r,S)=>Math.min(mqTg(r),r[0]==='mine'||r[0]==='gem'?(S.p|0):r[0]==='give'?oreCount(me,r[1]):r[0]==='lv'?minerLv(me):(S.o?1:0));
+const mqHave=(r,S)=>Math.min(mqTg(r),r[0]==='mine'||r[0]==='gem'?(S.p|0):r[0]==='give'?(mqS().g[r[1]]|0):r[0]==='lv'?minerLv(me):(S.o?1:0));
 const mqOk=q=>{ const S=mqS(); return q.req.every(r=>mqHave(r,S)>=mqTg(r)); };
 const mqTx=(r,S)=>{ const h=mqHave(r,S), t=mqTg(r); return r[0]==='mine'?`${OREX(r[1]).n} ${h}/${t}개 캐기`:r[0]==='gem'?`하급 보석 ${h}/${t}개 얻기`:r[0]==='give'?`${ORES[r[1]].n} 조각 ${h}/${t}`:r[0]==='lv'?`광부 Lv ${h}/${t}`:`조합법 ${h?'확인함':'열어 보기'}`; };
 const MQ_ORD=['qg','qt','qe','qc','qb','qs'];
@@ -7443,7 +7445,8 @@ const MQ_LK={   /* 이전 층 퀘스트를 다 끝내지 않고 찾아왔을 때
   qs:[['qs','…기록에 빈 곳이 있습니다. 위층 브락의 의뢰가 아직 끝나지 않았습니다.'],['qs','순서대로 오십시오. 기록은 순서가 전부입니다.']]};
 const mqLocked=k=>{ const i=MQ_ORD.indexOf(k); return i>0&&!!mqNext(MQ_ORD[i-1]); };   /* 바로 윗층 NPC의 퀘스트가 남아 있으면 잠김 */
 const mqMark=k=>{ const a=mqAct(); if(a&&a.np===k)return mqOk(a)?'?':''; return mqNext(k)&&!mqLocked(k)?'!':''; };
-function mqMine(k,n){ const q=mqAct(); if(q&&q.req.some(r=>r[0]==='mine'&&r[1]===k))mqS().p=(mqS().p|0)+n; }
+function mqMine(k,n){ const q=mqAct(); if(!q)return; if(q.req.some(r=>r[0]==='mine'&&r[1]===k))mqS().p=(mqS().p|0)+n; mqGive(k,n,q); }
+function mqGive(k,n,q){ q=q||mqAct(); if(q&&q.req.some(r=>r[0]==='give'&&r[1]===k)){ const g=mqS().g; g[k]=(g[k]|0)+n; } }   /* 퀘스트를 받은 뒤 캔 조각만 세요 (가방에 있던 건 상관없이) */
 function mqGem(n){ const q=mqAct(); if(q&&q.req.some(r=>r[0]==='gem'))mqS().p=(mqS().p|0)+n; }   /* 달빛 은에서 하급 보석이 나올 때 */
 function mqOpen(){ const q=mqAct(); if(q&&q.req.some(r=>r[0]==='open')&&!mqS().o){ mqS().o=1; saveChar(); if(G.mine)mineHud(); } }
 let mqCol=false;   /* 퀘스트 카드를 접어 둠 (탭하면 접고 펼침) · 새 퀘스트가 시작되거나 완료되면 자동으로 펼쳐요 */
@@ -7463,10 +7466,10 @@ function mqTalk(){ const M=G.mine; if(!M||!me||stS)return; const k=mqKeyAt(M.fi)
   else if(q&&mqLocked(k))mqSay(MQ_LK[k],0,null);   /* 이전 층 퀘스트를 끝내야 받을 수 있어요 */
   else if(q)q.opt?mqSay(q.ask,1,y=>{ if(y)mqAccept(q); else if(y===false)mqSkip(q); },['수락','건너뛰기']):mqSay(q.ask,1,y=>{ if(y)mqAccept(q); });
   else mqSay([[k,N.no]],0,null); }
-function mqAccept(q){ const S=mqS(); S.a=q.id; S.p=0; S.o=0; saveChar(); mineHud(); sheetToast('📜 퀘스트 수락 · '+q.n,'#ffd98a'); }
-function mqSkip(q){ const S=mqS(); S.d[q.id]=1; if(S.a===q.id){ S.a=''; S.p=0; S.o=0; } saveChar(); mineHud(); sheetToast('📜 퀘스트 건너뜀 · '+q.n,'#c9b48a'); }   /* 경험치 없이 다음 퀘스트로 */
-function mqTurn(q){ const S=mqS(); if(S.a!==q.id||!mqOk(q))return; for(const r of q.req)if(r[0]==='give')oreTake(me,r[1],r[2]);
-  const rl=Math.min(MINE_MAXLV,MINE_FL[MNPC[q.np].fl].lvl+5); S.d[q.id]=1; S.a=''; S.p=0; S.o=0; const xp=Math.max(1,Math.round(mineNeed(rl)*q.r)); mineAddXp(xp,true); efx.push({k:'qxp',o:me,t:0,life:2.2,xp}); saveChar(); mineHud(); sfx('lvl'); }   /* 완료 보상은 머리 위에 「퀘스트 완료! +N EXP」 글자로 */
+function mqAccept(q){ const S=mqS(); S.a=q.id; S.p=0; S.o=0; S.g={}; saveChar(); mineHud(); sheetToast('📜 퀘스트 수락 · '+q.n,'#ffd98a'); }
+function mqSkip(q){ const S=mqS(); S.d[q.id]=1; if(S.a===q.id){ S.a=''; S.p=0; S.o=0; S.g={}; } saveChar(); mineHud(); sheetToast('📜 퀘스트 건너뜀 · '+q.n,'#c9b48a'); }   /* 경험치 없이 다음 퀘스트로 */
+function mqTurn(q){ const S=mqS(); if(S.a!==q.id||!mqOk(q))return; for(const r of q.req)if(r[0]==='give')oreTake(me,r[1],Math.min(r[2],oreCount(me,r[1])));   /* 캔 조각을 건네요 (그새 팔아서 모자라면 있는 만큼만) */
+  const rl=Math.min(MINE_MAXLV,MINE_FL[MNPC[q.np].fl].lvl+5); S.d[q.id]=1; S.a=''; S.p=0; S.o=0; S.g={}; const xp=Math.max(1,Math.round(mineNeed(rl)*q.r)); mineAddXp(xp,true); efx.push({k:'qxp',o:me,t:0,life:2.2,xp}); saveChar(); mineHud(); sfx('lvl'); }   /* 완료 보상은 머리 위에 「퀘스트 완료! +N EXP」 글자로 */
 const NPC_IMG={}; const npcImg=k=>{ let im=NPC_IMG[k]; if(!im){ im=NPC_IMG[k]=new Image(); im.decoding='async'; im.onerror=()=>{ if((NPC_IMG[k+'_n']=(NPC_IMG[k+'_n']|0)+1)<=4)setTimeout(()=>{ delete NPC_IMG[k]; npcImg(k); },1500); }; im.src=MNPC[k].img; } return im.complete&&im.naturalWidth?im:null; };
 const npcWarm=()=>{ for(const k in MNPC){ npcImg(k); const t=new Image(); t.src=MNPC[k].tk; } };   /* NPC 그림(서 있는 그림 · 대화 그림) 미리 불러오기 */
 let fl2=true;
@@ -7611,7 +7614,7 @@ const SP_COLS=['#ff5a5a','#ffb347','#fff35c','#5cff8a','#5cc8ff','#b05cff','#ff5
 function mineGemGive(it){ if(gemAutoSellOk(it)){ me.gold+=GEM_TIER[gemTier(it)-1].g; return; } if(!gemFit(me,it)){ dropItem(it,me.x+rand(-30,30),me.y+rand(-30,30)); return; } it.isNew=1; gemPut(me,it,1,true); }
 function mineSpBreak(m,O){ const M=G.mine, rows=[]; if(M.sp===m)M.sp=null; mqMine(m.ore,1); const ri=(a,b)=>a+((Math.random()*(b-a+1))|0);
   if(m.ore==='rainbow'){ const ks=GEM_KINDS.slice().sort(()=>Math.random()-.5); [[3,ri(1,2)],[2,ri(2,4)],[1,ri(4,6)]].forEach(([t,n],i)=>{ const gk=ks[i]; for(let j=0;j<n;j++)mineGemGive(mkGem(gk,t)); rows.push({img:`img/gem_${gk}_${t}.png`,tx:GEM_TIER[t-1].n+' '+GEM_N[gk],n,col:GEM_C[gk]}); }); autoGemMerge(); }
-  else{ [['star',ri(30,50)],['blood',ri(30,50)],['rust',ri(100,150)]].forEach(([k,n])=>{ oreAdd(me,n,k); M.got[k]=(M.got[k]|0)+n; rows.push({img:`img/frag_${k}.webp`,tx:ORES[k].n+' 조각',n,col:ORES[k].c}); }); }
+  else{ [['star',ri(30,50)],['blood',ri(30,50)],['rust',ri(100,150)]].forEach(([k,n])=>{ oreAdd(me,n,k); M.got[k]=(M.got[k]|0)+n; mqGive(k,n); rows.push({img:`img/frag_${k}.webp`,tx:ORES[k].n+' 조각',n,col:ORES[k].c}); }); }
   for(let i=0;i<7;i++){ efx.push({k:'ring',x:m.x,y:m.y,r0:8,r1:70+i*16,t:0,life:.5+i*.05,col:SP_COLS[i],w:6}); burst(m.x,m.y,SP_COLS[i],3,260); } sfx('orebrk'); sfx('rare'); G.flash=Math.max(G.flash||0,.3);
   mineSpToast(m.ore==='rainbow'?'🌈 ':'⛏️ ',O.n+' 발견!',rows); mineHud(); saveChar(); uiDirty=true; if(sheetMode==='bag')renderBag(); }
 let _spT=null;
