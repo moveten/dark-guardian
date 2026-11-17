@@ -1538,7 +1538,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0808</div>
+    <div class="ver" id="verT">v0.7.2.0809</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -7617,6 +7617,7 @@ function mineGemGive(it){ if(gemAutoSellOk(it)){ me.gold+=GEM_TIER[gemTier(it)-1
 function mineSpBreak(m,O){ const M=G.mine, rows=[]; if(M.sp===m)M.sp=null; mqMine(m.ore,1); const ri=(a,b)=>a+((Math.random()*(b-a+1))|0);
   if(m.ore==='rainbow'){ const ks=GEM_KINDS.slice().sort(()=>Math.random()-.5); [[3,ri(1,2)],[2,ri(2,4)],[1,ri(4,6)]].forEach(([t,n],i)=>{ const gk=ks[i]; for(let j=0;j<n;j++)mineGemGive(mkGem(gk,t)); rows.push({img:`img/gem_${gk}_${t}.png`,tx:GEM_TIER[t-1].n+' '+GEM_N[gk],n,col:GEM_C[gk]}); }); autoGemMerge(); }
   else{ [['star',ri(30,50)],['blood',ri(30,50)],['rust',ri(100,150)]].forEach(([k,n])=>{ oreAdd(me,n,k); M.got[k]=(M.got[k]|0)+n; mqGive(k,n); rows.push({img:`img/frag_${k}.webp`,tx:ORES[k].n+' 조각',n,col:ORES[k].c}); }); }
+  { const top=MINE_FL[M.fi].ores.map(k=>ORES[k]).reduce((a,b)=>b.lv>a.lv?b:a), xp=mineXp(top,me)*5; if(xp>0)mineAddXp(xp); }   /* 특수광석을 다 캐면 그 층에서 가장 높은 광석 경험치의 5배 */
   for(let i=0;i<7;i++){ efx.push({k:'ring',x:m.x,y:m.y,r0:8,r1:70+i*16,t:0,life:.5+i*.05,col:SP_COLS[i],w:6}); burst(m.x,m.y,SP_COLS[i],3,260); } sfx('orebrk'); sfx('rare'); G.flash=Math.max(G.flash||0,.3);
   mineSpToast(m.ore==='rainbow'?'🌈 ':'⛏️ ',O.n+' 발견!',rows); mineHud(); saveChar(); uiDirty=true; if(sheetMode==='bag')renderBag(); }
 let _spT=null;
