@@ -1445,9 +1445,12 @@ body.hcrun #bRev,body.hcrun #bRevBig{display:none!important}
 body.mining #skillBadge,body.mining #skills,body.mining #hGold,body.mining #bPot,body.mining #bRev,body.mining #toasts,#mineHud .mhr{display:none!important}   /* 광산: 스킬·골드·물약·부활·알림기록 숨김 (좌상단 레벨 칸은 광부 레벨로) */
 #mineHud .mhs{border-top:0!important;margin-top:0!important;padding-top:0!important}
 body.mining #mineOut{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(max(14px,env(safe-area-inset-bottom)) + 74px);width:auto;margin:0;padding:10px 20px;font-size:14px;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.6)}   /* 나가기: 물약·부활 자리 */
-#mqCard{pointer-events:none;margin:6px 0 0 auto;width:max-content;max-width:100%;padding:7px 10px 8px;border-radius:10px;background:rgba(20,15,11,.22);border:1px solid rgba(214,170,78,.35);font-size:11.5px;line-height:1.45;color:#f1e3c4;white-space:nowrap}   /* 배경은 거의 투명, 글자는 또렷하게(외곽선) · 가로는 글자 길이에 맞춤 */
+#mqCard{pointer-events:auto;cursor:pointer;-webkit-tap-highlight-color:transparent;margin:6px 0 0 auto;width:max-content;max-width:100%;padding:7px 10px 8px;border-radius:10px;background:rgba(20,15,11,.22);border:1px solid rgba(214,170,78,.35);font-size:11.5px;line-height:1.45;color:#f1e3c4;white-space:nowrap}   /* 배경은 거의 투명, 글자는 또렷하게(외곽선) · 가로는 글자 길이에 맞춤 */
 #mqCard,#mqCard b,#mqCard div{text-shadow:-1px 0 #000,1px 0 #000,0 -1px #000,0 1px #000,0 0 4px #000}   /* NPC 퀘스트 카드 (이번 획득 아래) */
 #mqCard[hidden]{display:none}
+#mqCard .fold{display:block;text-align:right;opacity:.75;font-size:10.5px;margin-top:3px}
+#mqCard.col{width:44px;height:44px;padding:0;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;position:relative;text-shadow:none}
+#mqCard.col svg{position:absolute;inset:-1px;width:46px;height:46px;transform:rotate(-90deg);pointer-events:none}   /* 접은 모습: 두루마리 아이콘 + 진행률 링 */
 #mqCard b{display:block;font-size:12px;color:#ffe9b0;margin-bottom:2px}
 #mqCard .bar{height:5px;border-radius:3px;background:#2a2119;margin-top:5px;overflow:hidden}
 #mqCard .bar i{display:block;height:100%;background:#d6aa4e}
@@ -1535,7 +1538,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0802</div>
+    <div class="ver" id="verT">v0.7.2.0803</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -7443,10 +7446,14 @@ const mqMark=k=>{ const a=mqAct(); if(a&&a.np===k)return mqOk(a)?'?':''; return 
 function mqMine(k,n){ const q=mqAct(); if(q&&q.req.some(r=>r[0]==='mine'&&r[1]===k))mqS().p=(mqS().p|0)+n; }
 function mqGem(n){ const q=mqAct(); if(q&&q.req.some(r=>r[0]==='gem'))mqS().p=(mqS().p|0)+n; }   /* 달빛 은에서 하급 보석이 나올 때 */
 function mqOpen(){ const q=mqAct(); if(q&&q.req.some(r=>r[0]==='open')&&!mqS().o){ mqS().o=1; saveChar(); if(G.mine)mineHud(); } }
+let mqCol=false;   /* 퀘스트 카드를 접어 둠 (탭하면 접고 펼침) · 새 퀘스트가 시작되거나 완료되면 자동으로 펼쳐요 */
 function mqHud(){ const el=$('#mqCard'); if(!el)return; const q=G.mine&&me?mqAct():null; if(!q){ if(!el.hidden){ el.hidden=true; el._k=''; } return; }
-  const S=mqS(), ok=mqOk(q), key=q.id+'|'+ok+'|'+q.req.map(r=>mqHave(r,S)).join(','); if(el._k===key&&!el.hidden)return; el._k=key;
-  const pr=q.req.reduce((a,r)=>a+mqHave(r,S)/mqTg(r),0)/q.req.length; el.hidden=false; el.classList.toggle('dn',ok);
-  el.innerHTML=`<b>📜 ${q.n}${ok?' · 완료!':''}</b>${ok?`${MNPC[q.np].n}에게 가서 보고하세요`:q.req.map(r=>`<div>${mqTx(r,S)}</div>`).join('')}<div class="bar"><i style="width:${Math.round(pr*100)}%"></i></div>`; }
+  if(!el._ck){ el._ck=1; el.onclick=()=>{ mqCol=!mqCol; sfx('ui'); el._k=''; mqHud(); }; }
+  const S=mqS(), ok=mqOk(q); if(el._q!==q.id||el._ok!==ok){ if(el._q!==undefined)mqCol=false; el._q=q.id; el._ok=ok; }
+  const key=q.id+'|'+ok+'|'+mqCol+'|'+q.req.map(r=>mqHave(r,S)).join(','); if(el._k===key&&!el.hidden)return; el._k=key;
+  const pr=Math.min(1,q.req.reduce((a,r)=>a+Math.min(1,mqHave(r,S)/mqTg(r)),0)/q.req.length); el.hidden=false; el.classList.toggle('dn',ok); el.classList.toggle('col',mqCol);
+  if(mqCol){ el.innerHTML=`📜<svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="20" fill="none" stroke="#2a2119" stroke-width="3"/><circle cx="22" cy="22" r="20" fill="none" stroke="${ok?'#9be88a':'#d6aa4e'}" stroke-width="3" stroke-dasharray="125.6" stroke-dashoffset="${(125.6*(1-pr)).toFixed(1)}" stroke-linecap="round"/></svg>`; return; }
+  el.innerHTML=`<b>📜 ${q.n}${ok?' · 완료!':''}</b>${ok?`${MNPC[q.np].n}에게 가서 보고하세요`:q.req.map(r=>`<div>${mqTx(r,S)}</div>`).join('')}<div class="bar"><i style="width:${Math.round(pr*100)}%"></i></div><span class="fold">탭하면 접어요 ▴</span>`; }
 function mqTick(){ const M=G.mine, bt=$('#mqTalk'); if(!M||!me||!bt)return; const k=mqKeyAt(M.fi); let near=false;
   if(k&&!stS&&!me.dead){ const N=MNPC[k]; near=hyp(me.x-N.x,me.y-N.y)<=100; }
   if(near!==M._qn){ M._qn=near; bt.hidden=!near; if(near)bt.textContent='💬 말 걸기'; } }
