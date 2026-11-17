@@ -1530,7 +1530,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0786</div>
+    <div class="ver" id="verT">v0.7.2.0787</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -7427,7 +7427,15 @@ const mqTg=r=>r[0]==='lv'||r[0]==='gem'?r[1]:r[0]==='open'?1:r[2];
 const mqHave=(r,S)=>Math.min(mqTg(r),r[0]==='mine'||r[0]==='gem'?(S.p|0):r[0]==='give'?oreCount(me,r[1]):r[0]==='lv'?minerLv(me):(S.o?1:0));
 const mqOk=q=>{ const S=mqS(); return q.req.every(r=>mqHave(r,S)>=mqTg(r)); };
 const mqTx=(r,S)=>{ const h=mqHave(r,S), t=mqTg(r); return r[0]==='mine'?`${OREX(r[1]).n} ${h}/${t}개 캐기`:r[0]==='gem'?`하급 보석 ${h}/${t}개 얻기`:r[0]==='give'?`${ORES[r[1]].n} 조각 ${h}/${t}`:r[0]==='lv'?`광부 Lv ${h}/${t}`:`조합법 ${h?'확인함':'열어 보기'}`; };
-const mqMark=k=>{ const a=mqAct(); if(a&&a.np===k)return mqOk(a)?'?':''; return mqNext(k)?'!':''; };
+const MQ_ORD=['qg','qt','qe','qc','qb','qs'];
+const MQ_LK={   /* 이전 층 퀘스트를 다 끝내지 않고 찾아왔을 때 NPC가 하는 말 */
+  qt:[['qt','어, 새로 오신 분이세요? 위에서 그라크 할아버지 일은 다 끝내셨어요?'],['qt','할아버지 부탁부터 마치고 오세요! 순서대로 해야 저도 제대로 도와드릴 수 있어요.']],
+  qe:[['qe','…아직 위층 일이 남아 있는 것 같네요. 토비의 부탁부터 마무리하고 오세요.'],['qe','차례를 건너뛰면 제 이야기는 이해하기 어려울 거예요.']],
+  qc:[['qc','까악! 위층 은세공 계집애 일을 아직 안 끝냈구먼, 까악.'],['qc','순서 건너뛰는 놈한텐 점도 안 쳐 줘! 끝내고 다시 와, 까악!']],
+  qb:[['qb','크하하! 이제 막 도착한 모양이군! 그런데 위층 할멈 일은 끝내고 온 거냐?'],['qb','끝내고 와라! 그때 제대로 얘기해 주지!']],
+  qs:[['qs','…기록에 빈 곳이 있습니다. 위층 브락의 의뢰가 아직 완료되지 않았습니다.'],['qs','순서대로 오십시오. 기록은 순서가 전부입니다.']]};
+const mqLocked=k=>{ const i=MQ_ORD.indexOf(k); return i>0&&!!mqNext(MQ_ORD[i-1]); };   /* 바로 윗층 NPC의 퀘스트가 남아 있으면 잠김 */
+const mqMark=k=>{ const a=mqAct(); if(a&&a.np===k)return mqOk(a)?'?':''; return mqNext(k)&&!mqLocked(k)?'!':''; };
 function mqMine(k,n){ const q=mqAct(); if(q&&q.req.some(r=>r[0]==='mine'&&r[1]===k))mqS().p=(mqS().p|0)+n; }
 function mqGem(n){ const q=mqAct(); if(q&&q.req.some(r=>r[0]==='gem'))mqS().p=(mqS().p|0)+n; }   /* 달빛 은에서 하급 보석이 나올 때 */
 function mqOpen(){ const q=mqAct(); if(q&&q.req.some(r=>r[0]==='open')&&!mqS().o){ mqS().o=1; saveChar(); if(G.mine)mineHud(); } }
@@ -7441,6 +7449,7 @@ function mqTick(){ const M=G.mine, bt=$('#mqTalk'); if(!M||!me||!bt)return; cons
 function mqSay(ls,ask,fin,lb){ const el=$('#sty'); stS={ls,i:-1,kind:'npc',solo:true,pz:true,foe:null,full:'',n:0,ch:me,ask:!!ask,fin,lb}; el.hidden=false; el.classList.remove('nb'); G.paused=true; for(const k in held)held[k]=false; joy.active=false; storyShow(0); }
 function mqTalk(){ const M=G.mine; if(!M||!me||stS)return; const k=mqKeyAt(M.fi); if(!k)return; const N=MNPC[k], act=mqAct(), q=mqNext(k); sfx('ui'); { const tb=$('#mqTalk'); tb.hidden=true; M._qn=false; }
   if(act&&act.np===k){ if(mqOk(act))mqSay(act.done,0,()=>mqTurn(act)); else if(act.opt)mqSay(act.rem,1,y=>{ if(y===false)mqSkip(act); },['계속하기','건너뛰기']); else mqSay(act.rem,0,null); }   /* 선택 퀘스트(확률): 계속하기 · 건너뛰기 */
+  else if(q&&mqLocked(k))mqSay(MQ_LK[k],0,null);   /* 이전 층 퀘스트를 끝내야 받을 수 있어요 */
   else if(q)q.opt?mqSay(q.ask,1,y=>{ if(y)mqAccept(q); else if(y===false)mqSkip(q); },['수락','건너뛰기']):mqSay(q.ask,1,y=>{ if(y)mqAccept(q); });
   else mqSay([[k,N.no]],0,null); }
 function mqAccept(q){ const S=mqS(); S.a=q.id; S.p=0; S.o=0; saveChar(); mineHud(); sheetToast('📜 퀘스트 수락 · '+q.n,'#ffd98a'); }
