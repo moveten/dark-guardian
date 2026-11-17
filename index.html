@@ -1531,7 +1531,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0790</div>
+    <div class="ver" id="verT">v0.7.2.0791</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -6572,7 +6572,6 @@ function renderShop(){
   markTabs(); sheetHead(); sellAskIt=null;
   selItem=null;   /* 상점에는 판매창이 없음 — 판매·일괄 판매는 가방에서 */
   let h=`<div class="box"><h3>🛍️ 구매</h3>${shopRow('potion')}${shopAuto('potion')}${me.hc?'':shopRow('rev')+shopAuto('rev')}<div class="smsg">${esc(buyMsg)}</div></div>`;
-  h+=`<div class="box"><h3>⛏️ 광산</h3>${G.inGame?'':'<button class="btn primary" id="rsMine" style="width:100%">⛏️ 광산 입장</button>'}<button class="btn" id="rsJw" style="width:100%;margin-top:8px">🔨 조합하기</button></div>`;
   if(rsOn())h+=`<div class="box" id="rsBox"><h3>📚 연구실</h3><p style="margin:0 0 10px;font-size:14px;line-height:1.5">어서오세요, 관리자님 환영합니다.</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button class="btn" id="rsNote">📔 관리자 노트</button><button class="btn" id="rsLog">📜 출입 기록</button></div>${G.inGame?'':'<button class="btn primary" id="rsTrain" style="width:100%;margin-top:8px">🏋️ 훈련장 입장</button>'}<button class="btn" id="rsPpr" aria-pressed="${PPR?'false':'true'}" style="width:100%;margin-top:8px">🥨 빼빼로 미적용 : ${PPR?'OFF':'ON'}</button><button class="btn" id="rsExit" style="width:100%;margin-top:8px">🚪 나가기</button></div>`;
   const b=$('#sheetB'); b.className='sbody stats'; b.innerHTML=h; fitGo(b);
   { const q=id=>b.querySelector(id); if(q('#rsNote'))q('#rsNote').onclick=rsNotes; if(q('#rsLog'))q('#rsLog').onclick=rsLogView; if(q('#rsExit'))q('#rsExit').onclick=rsExit; if(q('#rsTrain'))q('#rsTrain').onclick=startTraining; if(q('#rsMine'))q('#rsMine').onclick=startMine; if(q('#rsJw'))q('#rsJw').onclick=combineMenu; if(q('#rsPpr'))q('#rsPpr').onclick=()=>{ pprSet(PPR?1:0); sfx('ui'); sheetToast(PPR?'🥨 빼빼로 미적용 OFF (새 밸런스)':'🥨 빼빼로 미적용 ON (패치 이전)'); rerender(); }; }
@@ -7302,7 +7301,7 @@ function oreBreak(m){ const O=OREX(m.ore), M=G.mine; if(!M||m.dead)return; m.dea
   if(O.gem&&Math.random()<O.gem){ gemDrop(1,me.x,me.y); mqGem(1); later(.2,()=>announce('💎 하급 보석을 발견했어요!','#9fd0ff')); }   /* 달빛 은: 10% 하급 보석 (내 발밑에 떨어져 바로 주워요) */
   const xp=mineXp(O,me); if(xp>0)mineAddXp(xp); else if(T-(M.tg||-9)>4){ M.tg=T; addNum(me.x,me.y-52,'회색 광석 · 경험치 없음','#9a9a9a',false); }
   if(m.slot){ const sl=m.slot, em=G.mine.slots.filter(q=>q!==sl&&q.k===sl.k&&!q.m&&!(q.t>0)), to=em.length?em[(Math.random()*em.length)|0]:sl; sl.m=null; sl.t=0; to.t=MINE_RESP; }   /* 캔 자리는 비고, 같은 종류의 빈자리 중 하나에서 25초 뒤 새 광석 */ mineSpTry(); saveChar(); mineHud(); }
-function mineAddXp(x){ const s=me.mine; s.xp+=x; if(G.mine)G.mine.xpGot=(G.mine.xpGot|0)+x; addNum(me.x,me.y-52,`+${x} 광부 경험치`,'#9fd0ff',false); let up=0; const l0=s.lv;
+function mineAddXp(x,quiet){ const s=me.mine; s.xp+=x; if(G.mine)G.mine.xpGot=(G.mine.xpGot|0)+x; if(!quiet)addNum(me.x,me.y-52,`+${x} 광부 경험치`,'#9fd0ff',false); let up=0; const l0=s.lv;
   while(s.lv<MINE_MAXLV&&s.xp>=mineNeed(s.lv)){ s.xp-=mineNeed(s.lv); s.lv++; up=1; }
   if(s.lv>=MINE_MAXLV)s.xp=0; if(up){ if(minerTier(s.lv)>minerTier(l0))mineTierUp(s.lv); else { banner('⛏️ 광부 레벨 업!',`광부 Lv ${s.lv}`); sfx('lvl'); efx.push({k:'ring',x:me.x,y:me.y,r0:10,r1:70,t:0,life:.5,col:'#e0c080',w:8}); } } }
 /* 착장이 바뀌는 레벨(20·40·60·80·100): 강렬한 레벨업 연출(빛 폭발) + 캐릭터 독백 말풍선 */
@@ -7356,7 +7355,7 @@ const MQ=[
    rem:[['qg','광부 Lv 10일세. 캐다 보면 금방 올라.']],
    done:[['qg','Lv 10이라… 이제 내려가 보겠나?'],['qg','내려가거든 토비한테 내 안부 좀 전해 주게.']]},
   {id:'t1',np:'qt',n:'갇힌 자리',req:[['give','grave',30]],r:.4,
-   ask:[['qt','어, 사람이다! 위에서 내려오신 거예요? 저 토비예요!'],['qt','그날 여기 갇혔는데, 무덤철이 길을 막고 있어서요. 무덤철 조각 서른 개만 모아 주실래요?'],['qt','아, 무덤철은 상점에 100G에 팔 수 있어요. 용돈벌이로 딱이죠!']],
+   ask:[['qt','어, 사람이다! 위에서 내려오신 거예요? 저 토비예요!'],['qt','그날 여기 갇혔는데, 무덤철이 길을 막고 있어서요. 무덤철 조각 서른 개만 모아 주실래요?'],['qt','아, 무덤철은 가방에서 개당 100G에 팔 수 있어요. 용돈벌이로 딱이죠!']],
    rem:[['qt','무덤철 조각 서른 개예요! 조금만 더 부탁해요.']],
    done:[['qt','와, 고마워요! 이제 제 자리가 드러났어요.'],['qt','저 여기서 이틀을 버텼어요. 그라크 반장님이 꼭 구하러 올 거라고 믿었거든요.']]},
   {id:'t2',np:'qt',n:'조합의 유산',req:[['open']],r:.6,
@@ -7373,7 +7372,7 @@ const MQ=[
    rem:[['qe','달빛 은 조각 마흔 개예요. 천천히 하셔도 괜찮아요.']],
    done:[['qe','고마워요. 결이 참 곱네요. 세공하는 보람이 있겠어요.'],['qe','조합이 있던 시절에는 이런 은으로 광부들의 부적을 만들어 주곤 했어요.']]},
   {id:'e2',np:'qe',n:'보석 감정',req:[['gem',3]],r:.6,
-   ask:[['qe','달빛 은을 캐다 보면 하급 보석이 떨어져요. 발밑에 떨어지면 알아서 주워져요.'],['qe','세 개만 구해 오세요. 감정해 드릴게요.'],['qe','같은 보석 세 개는 조합법 창에서 주얼 하나로 합칠 수 있어요. 알아 두세요.']],
+   ask:[['qe','달빛 은을 캐다 보면 하급 보석이 떨어져요. 발밑에 떨어지면 알아서 주워져요.'],['qe','세 개만 구해 오세요. 감정해 드릴게요.'],['qe','보석은 종류 상관없이 세 개를 모으면 조합법 창에서 주얼 하나로 합칠 수 있어요. 알아 두세요.']],
    rem:[['qe','하급 보석 세 개예요. 달빛 은을 캐다 보면 나올 거예요.']],
    done:[['qe','…좋은 보석이네요. 빛이 곧아요.'],['qe','그런데 좀 이상해요. 이 동굴 보석들은 유난히 맥박처럼 깜빡여요. 누가 아래에서 두드리는 것처럼요.']]},
   {id:'e3',np:'qe',n:'수상한 주문서',req:[['give','coal',60],['give','silver',60],['lv',30]],r:1,
@@ -7386,7 +7385,7 @@ const MQ=[
    rem:[['qc','혈석 조각 마흔 개야, 까악. 손이 꽤 느리구먼?']],
    done:[['qc','까악, 붉기가 좋구먼. 피 냄새는… 안 나는데?'],['qc','소문은 소문일 뿐인가. 그럼 진짜 이유가 뭘까, 까악?']]},
   {id:'c2',np:'qc',n:'까악, 길잡이',req:[['give','frost',20]],r:.6,
-   ask:[['qc','서리 미스릴 조각 스무 개만 줘. 까악이 서리 냄새를 좋아하거든.'],['qc','대신 길잡이 까마귀 얘기를 해 주지. 조합법 창에 까마쿤 펫 조합법이 있어, 까악.'],['qc','루비 보석이랑 석탄, 혈석을 모으면 만들 수 있다더군. 쉽진 않을 거야!']],
+   ask:[['qc','서리 미스릴 조각 스무 개만 줘. 까악이 서리 냄새를 좋아하거든.'],['qc','대신 길잡이 까마귀 얘기를 해 주지. 조합법 창에 까마쿤 펫 조합법이 있어, 까악.'],['qc','상급 루비 보석 세 개에 석탄이랑 혈석, 골드까지 모으면 만들 수 있다더군. 쉽진 않을 거야!']],
    rem:[['qc','서리 미스릴 조각 스무 개야, 까악!']],
    done:[['qc','까악까악, 고맙네! 까악이도 좋아하는구먼.'],['qc','이 녀석이 그러는데, 이 아래 광맥은 별이 지나간 길이라 따뜻하대.']]},
   {id:'c3',np:'qc',n:'진실의 핏자국',req:[['give','blood',80],['lv',40]],r:1,
@@ -7456,7 +7455,7 @@ function mqTalk(){ const M=G.mine; if(!M||!me||stS)return; const k=mqKeyAt(M.fi)
 function mqAccept(q){ const S=mqS(); S.a=q.id; S.p=0; S.o=0; saveChar(); mineHud(); sheetToast('📜 퀘스트 수락 · '+q.n,'#ffd98a'); }
 function mqSkip(q){ const S=mqS(); S.d[q.id]=1; if(S.a===q.id){ S.a=''; S.p=0; S.o=0; } saveChar(); mineHud(); sheetToast('📜 퀘스트 건너뜀 · '+q.n,'#c9b48a'); }   /* 경험치 없이 다음 퀘스트로 */
 function mqTurn(q){ const S=mqS(); if(S.a!==q.id||!mqOk(q))return; for(const r of q.req)if(r[0]==='give')oreTake(me,r[1],r[2]);
-  const rl=Math.min(MINE_MAXLV,MINE_FL[MNPC[q.np].fl].lvl+5); S.d[q.id]=1; S.a=''; S.p=0; S.o=0; mineAddXp(Math.max(1,Math.round(mineNeed(rl)*q.r))); saveChar(); mineHud(); sheetToast('📜 퀘스트 완료 · '+q.n,'#ffd98a'); sfx('lvl'); }
+  const rl=Math.min(MINE_MAXLV,MINE_FL[MNPC[q.np].fl].lvl+5); S.d[q.id]=1; S.a=''; S.p=0; S.o=0; const xp=Math.max(1,Math.round(mineNeed(rl)*q.r)); mineAddXp(xp,true); efx.push({k:'qxp',o:me,t:0,life:2.2,xp}); saveChar(); mineHud(); sfx('lvl'); }   /* 완료 보상은 머리 위에 「퀘스트 완료! +N EXP」 글자로 */
 const NPC_IMG={}; const npcImg=k=>{ let im=NPC_IMG[k]; if(!im){ im=NPC_IMG[k]=new Image(); im.decoding='async'; im.onerror=()=>{ if((NPC_IMG[k+'_n']=(NPC_IMG[k+'_n']|0)+1)<=4)setTimeout(()=>{ delete NPC_IMG[k]; npcImg(k); },1500); }; im.src=MNPC[k].img; } return im.complete&&im.naturalWidth?im:null; };
 const npcWarm=()=>{ for(const k in MNPC){ npcImg(k); const t=new Image(); t.src=MNPC[k].tk; } };   /* NPC 그림(서 있는 그림 · 대화 그림) 미리 불러오기 */
 let fl2=true;
@@ -8774,6 +8773,9 @@ function drawEfx(t){
       for(let k=0;k<2;k++){ const q=Math.max(0,p-k*.14)/(1-k*.14); ctx.strokeStyle=`rgba(255,240,190,${(1-q)})`; ctx.lineWidth=14*(1-q)+1; ctx.beginPath(); ctx.arc(x,y,12+q*300,0,6.283); ctx.stroke(); }
       const np=lo?10:22; for(let i=0;i<np;i++){ const an=i*2.399, d=40+p*(160+(i*29)%160), px=x+Math.cos(an)*d, py=y+Math.sin(an)*d+p*p*120; ctx.fillStyle=`rgba(${i%2?'255,236,170':'255,170,90'},${a})`; ctx.save(); ctx.translate(px,py); ctx.rotate(an+p*6); ctx.fillRect(-4,-2,8,4); ctx.restore(); }
       ctx.restore(); }
+    else if(e.k==='qxp'){ const o=e.o; if(!o||o.x===undefined)continue; const z=1/ZOOM, al=p>.75?(1-p)/.25:1, pop=p<.08?.6+.4*(p/.08):1, y=o.y-76-p*22; ctx.save(); ctx.globalAlpha=al; ctx.translate(o.x,y); ctx.scale(pop,pop); ctx.textAlign='center'; ctx.textBaseline='alphabetic'; ctx.lineJoin='round'; ctx.strokeStyle='#000';
+      ctx.font=`800 ${12*z}px "Noto Sans KR",sans-serif`; ctx.lineWidth=3*z; ctx.strokeText('📜 퀘스트 완료!',0,-24*z); ctx.fillStyle='#ffe9b0'; ctx.fillText('📜 퀘스트 완료!',0,-24*z);
+      ctx.font=`900 ${21*z}px "Noto Sans KR",sans-serif`; ctx.lineWidth=4.5*z; const tx='+'+e.xp.toLocaleString()+' EXP'; ctx.strokeText(tx,0,0); ctx.fillStyle='#9fd0ff'; ctx.fillText(tx,0,0); ctx.restore(); }
     else if(e.k==='spr'){ const n=e.c1-e.c0+1, f=e.loop?e.c0+Math.floor(t*10)%n:e.c0+Math.min(n-1,Math.floor(p*n)), x=e.o&&e.o.x!==undefined?e.o.x:e.x, y=e.o&&e.o.y!==undefined?e.o.y+(e.dy||0):e.y; fxFrame(e.row,f,x,y,e.sz,e.sz,e.rot,e.fade?Math.min(1,p*6,(1-p)*4):1,e.flip,e.at); }
     else if(e.k==='mfall'){ const h=(1-p)*420, mx=e.x+h*.35, my=e.y-h; fxFrame(6,Math.floor(t*14)%3,mx,my,104,104,0,Math.min(1,p*8),true); }
     else if(e.k==='chainspr'){ for(let i=1;i<e.pts.length;i++){ const a=e.pts[i-1], b=e.pts[i], L=hyp(b.x-a.x,b.y-a.y)||1, ang=Math.atan2(b.y-a.y,b.x-a.x); fxFrame(4,(Math.floor(e.t*24)+i)%4,(a.x+b.x)/2,(a.y+b.y)/2,L*1.04,Math.min(64,Math.max(30,L*.3)),ang,Math.min(1,(1-p)*2.2)); } }
