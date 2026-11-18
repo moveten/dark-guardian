@@ -1537,7 +1537,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0810</div>
+    <div class="ver" id="verT">v0.7.2.0812</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -4138,13 +4138,13 @@ function cshardModal(){ shardAdd(me,0,'cshard'); const N=CAS_CFG.exch, n=shardCo
 /* 보석 자동 합성: 하급 5개 → 중급, 중급 5개 → 상급 (종류 무관, 결과 종류는 랜덤). 상급은 재료가 아님 */
 Object.defineProperty(window,'gsOn',{get(){ try{ return !!(me&&me.gs); }catch(e){ return false; } },set(v){ try{ if(me)me.gs=v?1:0; }catch(e){} }});
 const GEM_SYN_N=5;
-/* ===== 보석 스택: 같은 종류·같은 등급·같은 잠금 상태의 일반 보석은 한 칸에 최대 999개 (n). 새로 얻거나 받을 때만 합쳐지고, 예전 낱개 보석은 그대로 둬요. 주얼은 스택 안 됨 ===== */
+/* ===== 보석 스택: 같은 종류·같은 등급·같은 잠금 상태의 보석은 한 칸에 최대 999개 (n). 주얼은 이름·직업·등급·옵션 수치가 모두 같을 때만 합쳐져요. 새로 얻거나 받을 때만 합쳐지고, 예전 낱개 보석은 정렬할 때 합쳐요 ===== */
 const GEM_MAX=999, gnOf=it=>(it&&it.n>0)?(it.n|0):1;
-const gemSame=(a,b)=>!!a&&!!b&&isGem(a)&&isGem(b)&&!a.jw&&!b.jw&&a.gk===b.gk&&gemTier(a)===gemTier(b)&&!!a.lock===!!b.lock;
-function gemFit(P,it){ if(!Array.isArray(P.misc))miscFix(P); if(it.jw)return P.misc.some(x=>!x)?1:0; let c=0; for(const x of P.misc){ if(!x)c+=GEM_MAX; else if(gemSame(x,it))c+=GEM_MAX-gnOf(x); } return c; }   /* P가 이 보석을 몇 개까지 더 받을 수 있나 */
-function gemPut(P,it,q,own){ if(!Array.isArray(P.misc))miscFix(P); q=Math.max(1,q|0); if(it.jw){ const i=P.misc.indexOf(null); if(i<0)return 0; P.misc[i]=own?it:Object.assign({},it,{id:++ITEMID}); if(P.st)stamp(P.misc[i]); return 1; }
+const gemSame=(a,b)=>!!a&&!!b&&isGem(a)&&isGem(b)&&!!a.jw===!!b.jw&&a.gk===b.gk&&gemTier(a)===gemTier(b)&&!!a.lock===!!b.lock&&(!a.jw||(a.jc===b.jc&&JSON.stringify(a.jv||0)===JSON.stringify(b.jv||0)));
+function gemFit(P,it){ if(!Array.isArray(P.misc))miscFix(P); let c=0; for(const x of P.misc){ if(!x)c+=GEM_MAX; else if(gemSame(x,it))c+=GEM_MAX-gnOf(x); } return c; }   /* P가 이 보석을 몇 개까지 더 받을 수 있나 */
+function gemPut(P,it,q,own){ if(!Array.isArray(P.misc))miscFix(P); q=Math.max(1,q|0);
   let left=q, used=false; for(const x of P.misc){ if(left<=0)break; if(x&&gemSame(x,it)&&gnOf(x)<GEM_MAX){ const a=Math.min(GEM_MAX-gnOf(x),left); x.n=gnOf(x)+a; left-=a; if(it.isNew)x.isNew=1; } }
-  while(left>0){ const i=P.misc.indexOf(null); if(i<0)break; const a=Math.min(GEM_MAX,left), c=(own&&!used)?it:Object.assign({},it,{id:++ITEMID}); c.n=a; used=true; if(P.st)stamp(c); P.misc[i]=c; left-=a; }
+  while(left>0){ const i=P.misc.indexOf(null); if(i<0)break; const a=Math.min(GEM_MAX,left), c=(own&&!used)?it:Object.assign({},it,{id:++ITEMID}); if(c!==it&&it.jv)c.jv=it.jv.slice(); c.n=a; used=true; if(P.st)stamp(c); P.misc[i]=c; left-=a; }
   return q-left; }
 function gemUse(P,ix,q){ const x=P.misc[ix]; if(!x)return; const r=gnOf(x)-q; if(r<=0)P.misc[ix]=null; else x.n=r; }   /* 칸 ix의 보석에서 q개를 씀 (다 쓰면 칸이 비어요) */
 function gemTake(P,pred,q){ let n=q; for(let i=0;i<P.misc.length&&n>0;i++){ const x=P.misc[i]; if(x&&isGem(x)&&pred(x)){ const a=Math.min(gnOf(x),n); gemUse(P,i,a); n-=a; } } return n<=0; }
@@ -6122,7 +6122,7 @@ try{ new ResizeObserver(()=>fitInv()).observe($('#sheetB')); }catch(e){}
 const cntNN=a=>a.reduce((t,x)=>t+(x?1:0),0);
 const tabStrip=(inv,misc,tab,chip)=>`<div class="tbs"><button class="tb${tab==='eq'?' on':''}" data-bt="eq"><span class="ic">🎒</span> <span class="tn">장비품</span> <small>${cntNN(inv)}/${inv.length}</small></button><button class="tb${tab==='misc'?' on':''}" data-bt="misc"><span class="ic">💎</span> <span class="tn">기타</span> <small>${cntNN(misc)}/${misc.length}</small>${misc.some(x=>x&&x.isNew)?'<i class="n">NEW</i>':''}</button></div>`;
 /* 기타 탭 정렬(등급순): 조각(그림자→각성) 먼저, 광석 조각은 레벨 높은 것부터, 그 다음 주얼(상급→중급→하급, 같은 등급이면 주얼 종류 순서), 마지막에 보석을 상급→중급→하급, 같은 등급이면 보석 종류 순서 */
-function gemRepack(P){ if(!Array.isArray(P.misc))return; const gs=[]; for(let i=0;i<P.misc.length;i++){ const x=P.misc[i]; if(!x||!isGem(x)||x.jw)continue; let g=gs.find(o=>gemSame(o.t,x)); if(!g)gs.push(g={t:x,n:0,nw:0}); g.n+=gnOf(x); if(x.isNew)g.nw=1; P.misc[i]=null; }
+function gemRepack(P){ if(!Array.isArray(P.misc))return; const gs=[]; for(let i=0;i<P.misc.length;i++){ const x=P.misc[i]; if(!x||!isGem(x))continue; let g=gs.find(o=>gemSame(o.t,x)); if(!g)gs.push(g={t:x,n:0,nw:0}); g.n+=gnOf(x); if(x.isNew)g.nw=1; P.misc[i]=null; }
   for(const g of gs){ if(g.nw)g.t.isNew=1; gemPut(P,g.t,g.n,true); } }   /* 정렬할 때 흩어진 같은 보석(예전 낱개 포함)을 999개 단위 스택으로 합쳐요 */
 function sortMisc(P){ shardRepack(P); gemRepack(P); { const tot={}; for(let i=0;i<P.misc.length;i++){ const x=P.misc[i]; if(x&&x.mat==='ore'){ tot[x.ok]=(tot[x.ok]|0)+(x.n|0); P.misc[i]=null; } } for(const k in tot)oreAdd(P,tot[k],k); } const its=P.misc.filter(Boolean); const key=it=>isShard(it)?[0,it.mat==='cshard'?2:it.mat==='ashard'?1:0,0]:isOreFr(it)?[0,3,-((ORES[it.ok]&&ORES[it.ok].lv)|0)]:it.jw?[1,-(it.jt|0),Math.max(0,JW_KINDS.indexOf(it.gk))]:[2,-(it.ilvl|0),Math.max(0,GEM_KINDS.indexOf(it.gk))];
   its.sort((a,b)=>{ const x=key(a),y=key(b); return x[0]-y[0]||x[1]-y[1]||x[2]-y[2]; });
@@ -6197,7 +6197,7 @@ function bagSelUi(b){ const on=!!bagSel, tabs=$('#sheetTabs'), bar=$('#selBar');
     for(const i of [...bagSel].sort((a,c)=>a-c)){ const it=me.inv[i]; if(!selOk(it))continue; const j=S.inv.indexOf(null); if(j<0){ left++; continue; } me.inv[i]=null; delete it.isNew; S.inv[j]=stamp(it); n++; }
     for(const i of [...bagSelM].sort((a,c)=>a-c)){ const it=me.misc[i]; if(!selOk(it))continue;
       if(isShard(it)){ const mt2=shMat(it), q=it.n|0; if(!shardRoom(S,q,mt2)){ left++; continue; } shardAdd(S,q,mt2); me.misc[i]=null; n++; }
-      else if(isGem(it)&&!it.jw){ const q=gnOf(it); if(gemFit(S,it)<q){ left++; continue; } delete it.isNew; gemPut(S,it,q); me.misc[i]=null; n++; }
+      else if(isGem(it)){ const q=gnOf(it); if(gemFit(S,it)<q){ left++; continue; } delete it.isNew; gemPut(S,it,q); me.misc[i]=null; n++; }
       else { const j=S.misc.indexOf(null); if(j<0){ left++; continue; } me.misc[i]=null; delete it.isNew; S.misc[j]=stamp(it); n++; } }
     if(!n){ sheetToast('공유보관함이 가득 찼어요','#ff8a7a'); return; }
     saveStore(); saveChar(); selItem=null; bagSel=null; bagSelM=null; sfx('pick'); rerender(); toast(left?`공유보관함에 ${n}개 보냈어요 (가득 차서 ${left}개는 남았어요)`:`공유보관함에 ${n}개 보냈어요`,'#9fd18b'); };
@@ -7529,7 +7529,7 @@ function mineRecipes(o){
   modal(`${o.back?'<button type="button" class="btn" id="mkB" style="margin-bottom:8px">‹ 뒤로</button>':''}<h3 style="margin:0 0 10px;text-align:center">${o.title||'📜 조합법'}</h3><div class="mkr"></div><div style="font-size:11px;color:#8a7a68;margin-top:8px;text-align:center">${o.only?'재료가 모이면 「만들기」를 눌러요':'곡괭이·펫·주얼 모두 이 창에서 만들 수 있어요'}</div>`,m=>{ draw(m); const bb=m.querySelector('#mkB'); if(bb)bb.onclick=()=>{ closeModal(); o.back(); }; });
 }
 /* ===== 주얼 조합 (관리자 모드): 같은 종류 상급 보석 3개 + 광석 조각 → 주얼 1개. 색 주얼 90% / 칠흑 주얼 10%. 재료·확률은 이 표만 고치면 돼요 ===== */
-const JW_MAKE={mat:[['rust',50],['frost',50],['star',100]], black:.10};
+const JW_MAKE={same:.40, mat:[['rust',50],['frost',50],['star',100]], black:.10};
 function oreTake(p,k,n){ if(oreCount(p,k)<n)return false; if(!Array.isArray(p.misc))miscFix(p); let need=n; const ov=Math.min((p.ore&&p.ore[k])|0,need); if(ov){ p.ore[k]-=ov; need-=ov; }
   const st=p.misc.map((x,i)=>x&&x.mat==='ore'&&x.ok===k?i:-1).filter(i=>i>=0).sort((a,b)=>p.misc[a].n-p.misc[b].n);
   for(const i of st){ if(need<=0)break; const t=Math.min(p.misc[i].n,need); p.misc[i].n-=t; need-=t; if(p.misc[i].n<=0)p.misc[i]=null; } return true; }
@@ -7553,7 +7553,7 @@ function jewelCombine(back){
     m.querySelector('.mkr').innerHTML=`<h3 style="margin:0 0 4px;text-align:center">💠 주얼 조합</h3><div style="text-align:center;font-size:12px;color:#a99a7e;margin-bottom:10px">같은 종류 상급 보석 3개를 올려 주세요</div>
     <div style="display:flex;gap:8px;justify-content:center;margin-bottom:10px">${[0,1,2].map(slot).join('')}</div>
     <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;font-size:12px;margin-bottom:10px">${mats.map(x=>`<span style="border:1px solid ${x.h>=x.n?'#3f7a50':'#7a3f3a'};border-radius:8px;padding:3px 8px;color:${x.h>=x.n?'#8fe0a0':'#ff9a8a'}">${ORES[x.k].n} ${x.h}/${x.n}</span>`).join('')}</div>
-    <div style="border:1px solid #3d3322;background:#1a150f;border-radius:12px;padding:8px 12px;font-size:13px;line-height:1.6;margin-bottom:10px"><div style="color:#9fd0ff">결과 미리보기</div><div style="color:${clr}">${kind?'':'? '}${jn} ${Math.round((1-JW_MAKE.black)*100)}% — 직업 스킬 +1 · 보석 옵션 1개</div><div style="color:${GEM_C.obsidian}">칠흑 주얼 ${Math.round(JW_MAKE.black*100)}% — 공격력·공격속도</div></div>
+    <div style="border:1px solid #3d3322;background:#1a150f;border-radius:12px;padding:8px 12px;font-size:13px;line-height:1.6;margin-bottom:10px"><div style="color:#9fd0ff">결과 미리보기</div><div style="color:${clr}">${kind?'':'? '}${jn} ${Math.round((1-JW_MAKE.black)*100)}% — 직업 스킬 +1 · 보석 옵션 1개</div><div style="color:${clr};padding-left:12px;font-size:12px">└ 상급 보석과 같은 옵션 ${Math.round(JW_MAKE.same*100)}% · 한 단계 더 좋은 옵션 ${Math.round((1-JW_MAKE.same)*100)}%</div><div style="color:${GEM_C.obsidian}">칠흑 주얼 ${Math.round(JW_MAKE.black*100)}% — 공격력·공격속도</div></div>
     <div style="font-size:12px;color:#a99a7e;margin-bottom:4px">가진 상급 보석 ${all.reduce((a,x)=>a+gnOf(x),0)}개 <span style="color:#6a5a48">(누르면 올려요)</span></div>
     <div id="jwL" style="display:flex;gap:6px;flex-wrap:wrap;max-height:112px;overflow-y:auto;margin-bottom:10px">${all.length?all.map(g=>{ const used=pick.filter(x=>x===g.id).length, on=used>0, dis=!on&&(sel.length>=3||(kind&&g.gk!==kind)), gn=gnOf(g); return `<div data-g="${g.id}" title="${gemNm(g)}" style="position:relative;width:46px;height:46px;border-radius:10px;border:1px solid ${on?'#b89a5a':'#3d3322'};background:${on?'#2a2214':'#1a150f'};display:flex;align-items:center;justify-content:center;opacity:${dis?.3:1}"><img src="${gemPng(g)}" style="width:34px;height:34px;object-fit:contain">${gn>1?`<i style="position:absolute;right:3px;bottom:0;font-style:normal;font-size:11px;font-weight:700;color:#fff;text-shadow:0 0 3px #000,0 0 3px #000">${gn-used}</i>`:''}</div>`; }).join(''):'<div style="color:#8a7a68;font-size:12px;padding:6px 0">상급 보석이 없어요 (잠긴 보석은 쓸 수 없어요)</div>'}</div>
     <button class="btn primary" id="jwGo" style="width:100%"${ok?'':' disabled'}>💠 조합하기</button><button class="btn" id="jwX" style="width:100%;margin-top:8px">닫기</button>`;
@@ -7562,7 +7562,7 @@ function jewelCombine(back){
     m.querySelector('#jwX').onclick=()=>closeModal();
     m.querySelector('#jwGo').onclick=()=>{ if(!ok)return; const cur=cand(), use=pick.map(id=>cur.find(x=>x.id===id)); if(use.some(x=>!x)||new Set(use.map(x=>x.gk)).size!==1||use.some(x=>use.filter(y=>y===x).length>gnOf(x))||JW_MAKE.mat.some(([k,n])=>oreCount(me,k)<n)){ toast('재료가 바뀌었어요. 다시 골라 주세요'); pick=[]; draw(m); return; }
       const kd=use[0].gk, black=Math.random()<JW_MAKE.black; for(const x of use){ const i=me.misc.indexOf(x); if(i>=0)gemUse(me,i,1); } for(const [k,n] of JW_MAKE.mat)oreTake(me,k,n);
-      const j=black?mkJewel('obsidian'):mkJewel(kd,{jt:3}); j.isNew=1; const e=me.misc.indexOf(null); if(e<0)me.misc.push(j); else me.misc[e]=j;
+      const j=black?mkJewel('obsidian'):mkJewel(kd,{jt:Math.random()<JW_MAKE.same?2:3}); j.isNew=1; if(gemFit(me,j)>=1)gemPut(me,j,1,true); else me.misc.push(j);   /* 같은 주얼이 있으면 스택에 쌓여요 */
       saveChar(); uiDirty=true; sfx(black?'crit':'rare'); res=j; pick=[]; draw(m); }; };
   const draw=m=>{ draw0(m); if(back){ const k=m.querySelector('.mkr'); k.insertAdjacentHTML('afterbegin','<button type="button" class="btn" id="jwB" style="margin-bottom:8px">‹ 뒤로</button>'); k.querySelector('#jwB').onclick=()=>{ closeModal(); back(); }; } };
   modal('<div class="mkr"></div>',m=>draw(m)); }
