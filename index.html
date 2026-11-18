@@ -1542,7 +1542,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0822</div>
+    <div class="ver" id="verT">v0.7.2.0823</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -6586,17 +6586,21 @@ const rsClTxt=()=>'☁️ 클라우드 저장본 '+(rsClN==null?'?':rsClN)+'행 
 function rsClLabel(b){ const el=b&&b.querySelector('#rsCl'); if(!el)return; el.textContent=rsClTxt(); if(Date.now()-rsClT<20000)return; rsClT=Date.now();
   const pw=lsGet(RS_PW); if(!pw)return; clRpc('dd_lab_save_count',{p_pw:pw}).then(n=>{ if(typeof n==='number'){ rsClN=n; const e=document.querySelector('#rsCl'); if(e)e.textContent=rsClTxt(); } }).catch(()=>{}); }
 function rsSaveView(){
-  rsPw(pw=>{ modal(`<h3>☁️ 클라우드 저장본</h3><div id="scL" style="max-height:58vh;overflow:auto;margin:0 0 8px;touch-action:pan-y">불러오는 중…</div><div class="row2"><button class="btn" id="scRe">🔄 새로고침</button><button class="btn primary" id="scX">닫기</button></div>`,m=>{
+  rsPw(pw=>{ modal(`<h3>☁️ 클라우드 저장본</h3><div style="font-size:12px;color:var(--mute);margin:-4px 0 8px">행을 펼치면 그 행의 내용이 클립보드에 복사돼요.</div><div id="scL" style="max-height:58vh;overflow:auto;margin:0 0 8px;touch-action:pan-y">불러오는 중…</div><div class="row2"><button class="btn" id="scRe">🔄 새로고침</button><button class="btn primary" id="scX">닫기</button></div>`,m=>{
     m.querySelector('#scX').onclick=closeModal;
     const box=m.querySelector('#scL'), pre='white-space:pre-wrap;word-break:break-all;font:11px/1.5 ui-monospace,Menlo,monospace;max-height:44vh;overflow:auto;margin:6px 0 0;padding:8px;background:#0a0807;border:1px solid var(--line2);border-radius:8px;touch-action:pan-y';
     const load=async()=>{ box.textContent='불러오는 중…';
       try{ const L=await clRpc('dd_lab_save_list',{p_pw:pw}); if(!Array.isArray(L))throw 0; rsClN=L.length; rsClT=Date.now(); const e=document.querySelector('#rsCl'); if(e)e.textContent=rsClTxt();
         box.innerHTML=L.length?'':'저장된 행이 없어요.';
-        L.forEach(o=>{ const d=document.createElement('details'); d.style.cssText='margin:0 0 6px;border:1px solid var(--line2);border-radius:8px;padding:6px 8px;background:#14100d';
+        L.slice().reverse().forEach(o=>{ const d=document.createElement('details');   /* 목록은 최근 행이 위 (번호는 가장 오래된 행이 #1 그대로) */ d.style.cssText='margin:0 0 6px;border:1px solid var(--line2);border-radius:8px;padding:6px 8px;background:#14100d';
           const sm=document.createElement('summary'); sm.style.cssText='cursor:pointer;font-size:13px;line-height:1.5'; sm.textContent=`#${o.n} · ${rsStamp(o.at)} · v${o.ver} · 해시 ${o.h} · ${o.kb}KB`; d.append(sm);
           const pr=document.createElement('pre'); pr.style.cssText=pre; pr.textContent='불러오는 중…'; d.append(pr);
-          let done=false; d.ontoggle=async()=>{ if(!d.open||done)return; done=true;
-            try{ const r=await clRpc('dd_lab_save_row',{p_pw:pw,p_id:o.id}); if(!r)throw 0; pr.textContent=JSON.stringify(r,null,2); }catch(x){ done=false; pr.textContent='불러오지 못했어요. 다시 펼쳐 보세요.'; } };
+          let busy=null;   /* 행을 펼치는 순간 그 행의 JSON을 불러오고(한 번만) 곧바로 클립보드에도 넣어요 */
+          const getTxt=()=>busy||(busy=clRpc('dd_lab_save_row',{p_pw:pw,p_id:o.id}).then(r=>{ if(!r)throw 0; const t=JSON.stringify(r,null,2); pr.textContent=t; return t; }).catch(x=>{ busy=null; pr.textContent='불러오지 못했어요. 다시 펼쳐 보세요.'; throw x; }));
+          sm.addEventListener('click',()=>{ if(d.open)return; const p=getTxt(), ok=()=>sheetToast(`📋 #${o.n} 행을 클립보드에 복사했어요`,'#9be88a'), no=()=>sheetToast('복사하지 못했어요 · 내용을 길게 눌러 복사하세요','#ffb08a');
+            try{ navigator.clipboard.write([new ClipboardItem({'text/plain':p.then(t=>new Blob([t],{type:'text/plain'}))})]).then(ok,()=>p.then(t=>{ clCopy(t); ok(); }).catch(no)); }   /* 손가락을 댄 순간에 복사를 걸어 두면(불러오는 중에도) 막히지 않아요 */
+            catch(e){ p.then(t=>{ clCopy(t); ok(); }).catch(no); } });
+          d.ontoggle=()=>{ if(d.open)getTxt().catch(()=>{}); };
           box.append(d); }); }
       catch(e){ box.textContent='저장본을 불러오지 못했어요. (오프라인이거나 서버 점검 중)'; } };
     m.querySelector('#scRe').onclick=load; load(); }); }); }
@@ -9354,7 +9358,7 @@ function clReuseModal(prev,v){
   modal(`<h3>☁️ 이전에 쓰던 코드가 있어요</h3><p style="margin:0 0 10px;font-size:14px;line-height:1.55">연결을 해제하기 전에 쓰던 복구 코드(끝 <b style="color:#ffe27a">${esc(clTail(prev))}</b>)로 저장된 데이터가 서버에 남아 있어요.<br><span class="meta">마지막 저장 · ${clFmt(v.at)}</span><br>그 코드를 그대로 사용해서 다시 연결할까요?</p><div class="col"><button class="btn primary" id="ruUse">이전 코드 그대로 사용</button><button class="btn" id="ruNew">새 코드 발급</button><button class="btn" id="ruX">취소</button></div>`,m=>{
     m.querySelector('#ruX').onclick=cloudModal; m.querySelector('#ruUse').onclick=()=>clReuse(prev,v); m.querySelector('#ruNew').onclick=()=>clNewWarn(prev,v); }); }
 function clNewWarn(prev,v){
-  modal(`<h3>⚠️ 새 코드를 발급할까요?</h3><p style="margin:0 0 10px;font-size:14px;line-height:1.55">서버에는 이전 코드(끝 <b style="color:#ffe27a">${esc(clTail(prev))}</b>)로 저장된 데이터가 <b>이미 있어요</b>. (마지막 저장 · ${clFmt(v.at)})<br><b style="color:#ff9a8a">새 코드를 발급하면 이 기기는 새 코드로만 저장하고, 이전 저장본은 더 이상 갱신되지 않으며 유효성이 유실되어 저장본을 찾지 못할 수 있어요. 이전 코드를 메모해 두었더라도 새 코드를 발급받으면 기존 코드의 저장본은 관리자가 언제든지 지울 수 있어요.</b></p><div class="col"><button class="btn primary" id="nwUse">이전 코드 그대로 사용</button><button class="btn danger" id="nwNew">그래도 새 코드 발급</button><button class="btn" id="nwX">취소</button></div>`,m=>{
+  modal(`<h3>⚠️ 새 코드를 발급할까요?</h3><p style="margin:0 0 10px;font-size:14px;line-height:1.55">서버에는 이전 코드(끝 <b style="color:#ffe27a">${esc(clTail(prev))}</b>)로 저장된 데이터가 <b>이미 있어요</b>. (마지막 저장 · ${clFmt(v.at)})<br><b style="color:#ff9a8a">새 코드를 발급하면 이 기기는 새 코드로만 저장하고, 이전 저장본은 더 이상 갱신되지 않으며 유효성이 유실되어 저장본을 찾지 못할 수 있어요.</b></p><div class="col"><button class="btn primary" id="nwUse">이전 코드 그대로 사용</button><button class="btn danger" id="nwNew">그래도 새 코드 발급</button><button class="btn" id="nwX">취소</button></div>`,m=>{
     m.querySelector('#nwX').onclick=cloudModal; m.querySelector('#nwUse').onclick=()=>clReuse(prev,v); m.querySelector('#nwNew').onclick=e=>{ e.currentTarget.disabled=true; clStartNew(null); }; }); }
 function cloudModal(){
   const code=clCode();
