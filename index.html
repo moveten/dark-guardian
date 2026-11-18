@@ -1537,7 +1537,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0819</div>
+    <div class="ver" id="verT">v0.7.2.0820</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -6571,6 +6571,26 @@ function rsLogView(){
         el.textContent=L.length?L.map(x=>x.s).join('\n\n'):'아직 기록이 없어요.'; }
       catch(e){ el.textContent='출입 기록을 불러오지 못했어요. (오프라인이거나 서버 점검 중)'; } };
     m.querySelector('#rlRe').onclick=()=>{ m.querySelector('#rsT').textContent='불러오는 중…'; load(); }; load(); }); }); }
+/* 클라우드 저장본 조회: 버튼에는 행 수만 보이고(눌러야 목록을 불러와요), 행을 펼칠 때 그 행의 JSON을 그때 불러와요 */
+let rsClN=null, rsClT=0;
+const rsClTxt=()=>'☁️ 클라우드 저장본 '+(rsClN==null?'?':rsClN)+'행 조회하기';
+function rsClLabel(b){ const el=b&&b.querySelector('#rsCl'); if(!el)return; el.textContent=rsClTxt(); if(Date.now()-rsClT<20000)return; rsClT=Date.now();
+  const pw=lsGet(RS_PW); if(!pw)return; clRpc('dd_lab_save_count',{p_pw:pw}).then(n=>{ if(typeof n==='number'){ rsClN=n; const e=document.querySelector('#rsCl'); if(e)e.textContent=rsClTxt(); } }).catch(()=>{}); }
+function rsSaveView(){
+  rsPw(pw=>{ modal(`<h3>☁️ 클라우드 저장본</h3><div id="scL" style="max-height:58vh;overflow:auto;margin:0 0 8px;touch-action:pan-y">불러오는 중…</div><div class="row2"><button class="btn" id="scRe">🔄 새로고침</button><button class="btn primary" id="scX">닫기</button></div>`,m=>{
+    m.querySelector('#scX').onclick=closeModal;
+    const box=m.querySelector('#scL'), pre='white-space:pre-wrap;word-break:break-all;font:11px/1.5 ui-monospace,Menlo,monospace;max-height:44vh;overflow:auto;margin:6px 0 0;padding:8px;background:#0a0807;border:1px solid var(--line2);border-radius:8px;touch-action:pan-y';
+    const load=async()=>{ box.textContent='불러오는 중…';
+      try{ const L=await clRpc('dd_lab_save_list',{p_pw:pw}); if(!Array.isArray(L))throw 0; rsClN=L.length; rsClT=Date.now(); const e=document.querySelector('#rsCl'); if(e)e.textContent=rsClTxt();
+        box.innerHTML=L.length?'':'저장된 행이 없어요.';
+        L.forEach(o=>{ const d=document.createElement('details'); d.style.cssText='margin:0 0 6px;border:1px solid var(--line2);border-radius:8px;padding:6px 8px;background:#14100d';
+          const sm=document.createElement('summary'); sm.style.cssText='cursor:pointer;font-size:13px;line-height:1.5'; sm.textContent=`#${o.n} · ${rsStamp(o.at)} · v${o.ver} · 해시 ${o.h} · ${o.kb}KB`; d.append(sm);
+          const pr=document.createElement('pre'); pr.style.cssText=pre; pr.textContent='불러오는 중…'; d.append(pr);
+          let done=false; d.ontoggle=async()=>{ if(!d.open||done)return; done=true;
+            try{ const r=await clRpc('dd_lab_save_row',{p_pw:pw,p_id:o.id}); if(!r)throw 0; pr.textContent=JSON.stringify(r,null,2); }catch(x){ done=false; pr.textContent='불러오지 못했어요. 다시 펼쳐 보세요.'; } };
+          box.append(d); }); }
+      catch(e){ box.textContent='저장본을 불러오지 못했어요. (오프라인이거나 서버 점검 중)'; } };
+    m.querySelector('#scRe').onclick=load; load(); }); }); }
 if(rsQ().length)setTimeout(rsFlush,4000);
 const SHOP={potion:{n:'회복 물약',d:'생명력·마나 45% 회복. 습격마다 주는 무료 물약 3개와 별도로 쌓여요.',p:500},rev:{n:'즉시 부활',d:'쓰러졌을 때 그 자리에서 바로 일어나요. (스테이지마다 무료 1회 포함)',p:2000}};
 const SHOPMAXN={potion:20,rev:REV_MAX}, shopMax=k=>SHOPMAXN[k]||20, shopQty={potion:1,rev:1};
@@ -6591,9 +6611,10 @@ function renderShop(){
   markTabs(); sheetHead(); sellAskIt=null;
   selItem=null;   /* 상점에는 판매창이 없음 — 판매·일괄 판매는 가방에서 */
   let h=`<div class="box"><h3>🛍️ 구매</h3>${shopRow('potion')}${shopAuto('potion')}${me.hc?'':shopRow('rev')+shopAuto('rev')}<div class="smsg">${esc(buyMsg)}</div></div>`;
-  if(rsOn())h+=`<div class="box" id="rsBox"><h3>📚 연구실</h3><p style="margin:0 0 10px;font-size:14px;line-height:1.5">어서오세요, 관리자님 환영합니다.</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button class="btn" id="rsNote">📔 관리자 노트</button><button class="btn" id="rsLog">📜 출입 기록</button></div>${G.inGame?'':'<button class="btn primary" id="rsTrain" style="width:100%;margin-top:8px">🏋️ 훈련장 입장</button>'}<button class="btn" id="rsPpr" aria-pressed="${PPR?'false':'true'}" style="width:100%;margin-top:8px">🥨 빼빼로 미적용 : ${PPR?'OFF':'ON'}</button><button class="btn" id="rsExit" style="width:100%;margin-top:8px">🚪 나가기</button></div>`;
+  if(rsOn())h+=`<div class="box" id="rsBox"><h3>📚 연구실</h3><p style="margin:0 0 10px;font-size:14px;line-height:1.5">어서오세요, 관리자님 환영합니다.</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button class="btn" id="rsNote">📔 관리자 노트</button><button class="btn" id="rsLog">📜 출입 기록</button></div>${G.inGame?'':'<button class="btn primary" id="rsTrain" style="width:100%;margin-top:8px">🏋️ 훈련장 입장</button>'}<button class="btn" id="rsPpr" aria-pressed="${PPR?'false':'true'}" style="width:100%;margin-top:8px">🥨 빼빼로 미적용 : ${PPR?'OFF':'ON'}</button><button class="btn" id="rsCl" style="width:100%;margin-top:8px">☁️ 클라우드 저장본 ?행 조회하기</button><button class="btn" id="rsExit" style="width:100%;margin-top:8px">🚪 나가기</button></div>`;
   const b=$('#sheetB'); b.className='sbody stats'; b.innerHTML=h; fitGo(b);
-  { const q=id=>b.querySelector(id); if(q('#rsNote'))q('#rsNote').onclick=rsNotes; if(q('#rsLog'))q('#rsLog').onclick=rsLogView; if(q('#rsExit'))q('#rsExit').onclick=rsExit; if(q('#rsTrain'))q('#rsTrain').onclick=startTraining; if(q('#rsMine'))q('#rsMine').onclick=startMine; if(q('#rsJw'))q('#rsJw').onclick=combineMenu; if(q('#rsPpr'))q('#rsPpr').onclick=()=>{ pprSet(PPR?1:0); sfx('ui'); sheetToast(PPR?'🥨 빼빼로 미적용 OFF (새 밸런스)':'🥨 빼빼로 미적용 ON (패치 이전)'); rerender(); }; }
+  rsClLabel(b);
+  { const q=id=>b.querySelector(id); if(q('#rsCl'))q('#rsCl').onclick=rsSaveView; if(q('#rsNote'))q('#rsNote').onclick=rsNotes; if(q('#rsLog'))q('#rsLog').onclick=rsLogView; if(q('#rsExit'))q('#rsExit').onclick=rsExit; if(q('#rsTrain'))q('#rsTrain').onclick=startTraining; if(q('#rsMine'))q('#rsMine').onclick=startMine; if(q('#rsJw'))q('#rsJw').onclick=combineMenu; if(q('#rsPpr'))q('#rsPpr').onclick=()=>{ pprSet(PPR?1:0); sfx('ui'); sheetToast(PPR?'🥨 빼빼로 미적용 OFF (새 밸런스)':'🥨 빼빼로 미적용 ON (패치 이전)'); rerender(); }; }
   b.querySelectorAll('[data-atg]').forEach(el=>el.onclick=()=>{ const f=AUTOK[el.dataset.atg]; me[f]=me[f]?0:1; saveChar(); sfx('ui'); renderShop(); });
   b.querySelectorAll('[data-q]').forEach(el=>el.onclick=()=>{ const [k,a]=el.dataset.q.split(':'), have=k==='potion'?me.potBuy:me.rev, space=Math.max(1,shopMax(k)-have), o=SHOP[k];
     if(a==='max')shopQty[k]=Math.max(1,Math.min(Math.floor(aGold()/o.p),space)); else shopQty[k]=clamp((shopQty[k]|0)+(+a),1,space); buyMsg=''; renderShop(); });
