@@ -1537,7 +1537,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0816</div>
+    <div class="ver" id="verT">v0.7.2.0817</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -2581,6 +2581,7 @@ const MSP={rainbow:{n:'무지개 보석',lv:1,c:'#c9a6ff',sp:1,hits:15},pile:{n:
 const MINE_SP={b4:{k:'rainbow',pr:.01,say:[[['어? 어디선가 '],['무지갯빛',1],['이']],[['번쩍이는데…!?']]]},   /* pr = 일반 광석 1개 캘 때마다 특수광석이 생길 확률 */
   b5:{k:'pile',pr:.005,say:[[['저 어둠 속에서 묵직한']],[['광석 냄새가… '],['광석더미',1],['다!']]]}};
 const OREX=k=>ORES[k]||MSP[k];
+const MINE_PUB=6, mineFlN=()=>rsOn()?MINE_FL.length:MINE_PUB;   /* 일반 유저에게 열린 층 수(지상+지하 1~5층) — 지하 6층부터는 아직 미공개라 연구실(관리자)을 연 기기에서만 내려가요 */
 const MINE_GRAY=15;   /* 광부 레벨이 광석 레벨 + 15 이상이면 회색 광석(경험치 0) */
 const isPick=it=>!!(it&&it.slot==='weapon'&&(it.pk|0)>0);
 const minerLv=p=>Math.max(1,(p&&p.mine&&p.mine.lv)|0);   /* 광부 레벨: 캐릭터별 */
@@ -7274,7 +7275,7 @@ function startMine(){ oreWarm();
   G.allMode=false; G.allQ=[]; G.fires=[]; G.freeRev=1; G.hcWhy=''; me.rvGiven=0; me.seenRg=0; me.out=false; me.rvT=0;
   G.gemDone=true; G.wave=0; G.skipUsed=true; G.phase='train'; G.timer=0; G.mobs.length=0; G.ev=[]; G.spawnQ=0; G.lastSq=-1; G.endShown=false; G.coop=false;
   G.waveSides=[]; G.nextSides=[]; G.laneShow=[];
-  const fi0=Math.min(MINE_FL.length-1,Math.max(0,me.mine.fl|0));   /* 나갈 때 있던 층에서 다시 시작 */
+  const fi0=Math.min(mineFlN()-1,Math.max(0,me.mine.fl|0));   /* 나갈 때 있던 층에서 다시 시작 */
   G.mine={fi:fi0,slots:[],got:{},pc:0,t0:performance.now(),xpGot:0,brk:0}; mineFloor(fi0,null); mineHud();
   if(!isPick(me.eq.weapon))later(1.2,()=>{ if(G.mine)sheetToast('⛏️ 곡괭이를 장착해야 광석을 캘 수 있어요','#e0a070'); }); }
 function mineFloor(fi,from){ const M=G.mine, F=MINE_FL[fi]; M.fi=fi; if(me&&me.mine&&me.mine.fl!==fi){ me.mine.fl=fi; saveChar(); } M.slots=[]; M.sps=[]; M.sp=null; M.bub=null; G.mobs.length=0; projs.length=zones.length=ground.length=0;
@@ -7592,7 +7593,7 @@ function mineTick(dt){ const M=G.mine; if(!M||!me)return; mqTick();
   for(const sl of M.slots)if(!sl.m&&sl.t>0){ sl.t-=dt; if(sl.t<=0)mineSpawn(sl); }   /* 다 캔 자리는 25초 뒤 다시 생겨요 */
   if(!me.dead&&me.atkCd<=0&&isPick(me.eq.weapon)){ let o=null,bd=1e9; for(const m of G.mobs){ if(m.dead||!m.ore||minerLv(me)<OREX(m.ore).lv)continue; const d=hyp(m.x-me.x,m.y-me.y)-m.r; if(d<bd){bd=d;o=m;} } if(o&&bd<=atkRg(me)+6)tryUse('atk',true); }   /* 자동 채굴: 캘 수 있는 광석이 닿으면 기본 공격 */
   if(M.pc>0){ M.pc-=dt; return; }
-  for(const dir of ['up','dn']){ const to=M.fi+(dir==='up'?-1:1), P=MINE_PT[dir]; if(to<0||to>=MINE_FL.length||hyp(me.x-P[0],me.y-P[1])>=44)continue; const F2=MINE_FL[to];
+  for(const dir of ['up','dn']){ const to=M.fi+(dir==='up'?-1:1), P=MINE_PT[dir]; if(to<0||to>=mineFlN()||hyp(me.x-P[0],me.y-P[1])>=44)continue; const F2=MINE_FL[to];
     sfx('ui'); mineFloor(to,dir); return; } }
 const ORE_IMG={}, ORE_TRY={}; const oreImg=k=>{ let im=ORE_IMG[k]; if(!im){ im=ORE_IMG[k]=new Image(); im.decoding='async'; im.onerror=()=>{ if((ORE_TRY[k]=(ORE_TRY[k]|0)+1)<=5)setTimeout(()=>{ delete ORE_IMG[k]; oreImg(k); },1500*ORE_TRY[k]); }; im.src='img/ore_'+k+'.webp'; } return im.complete&&im.naturalWidth?im:null; };   /* 불러오기 실패하면 몇 번 다시 시도 */
 const oreWarm=()=>{ Object.keys(ORES).concat(Object.keys(MSP)).forEach(k=>oreImg(k)); npcWarm(); };   /* 광석 그림 전부 미리 불러오기 — 광산에 들어가기 전에 준비돼서 처음부터 그림으로 나와요 */
@@ -7666,7 +7667,7 @@ function mineKmkDraw(c,t,B){ const x=me.x, y=me.y+30, a=B.t<.6?B.t/.6:1, pr=(t*1
   c.font='700 13px "Noto Sans KR",sans-serif'; c.fillStyle='#efe6ff'; c.fillText('♪',cx,cy+1);
   c.restore(); }
 function mineDraw(t){ const M=G.mine; if(!M)return; const c=ctx;
-  for(const dir of ['up','dn']){ const to=M.fi+(dir==='up'?-1:1); if(to<0||to>=MINE_FL.length)continue; const P=MINE_PT[dir], F2=MINE_FL[to], lk=false, col=lk?'#8a6a6a':dir==='up'?'#9fe0ff':'#e0a060';
+  for(const dir of ['up','dn']){ const to=M.fi+(dir==='up'?-1:1); if(to<0||to>=mineFlN())continue; const P=MINE_PT[dir], F2=MINE_FL[to], lk=false, col=lk?'#8a6a6a':dir==='up'?'#9fe0ff':'#e0a060';
     c.save(); c.translate(P[0],P[1]); c.globalAlpha=.85; c.fillStyle='rgba(0,0,0,.45)'; c.beginPath(); c.ellipse(0,6,46,16,0,0,6.283); c.fill();
     for(let i=0;i<3;i++){ c.strokeStyle=col; c.globalAlpha=.35+.2*i; c.lineWidth=3; c.beginPath(); c.ellipse(0,0,40-i*9,14-i*3,0,t*(1.5+i*.6)*(dir==='up'?1:-1),t*(1.5+i*.6)*(dir==='up'?1:-1)+4.4); c.stroke(); }
     c.globalAlpha=1; c.font='bold 13px sans-serif'; c.textAlign='center'; c.fillStyle='#000'; const lb=`${F2.n.split(' · ')[0]}${lk?` 🔒Lv${F2.lvl}`:''}`; c.fillText(lb,1,(dir==='up'?34:-22)+1); c.fillStyle=lk?'#d8a8a8':'#f1e3c4'; c.fillText(lb,0,dir==='up'?34:-22);
@@ -8988,7 +8989,7 @@ function drawAllyArrow(t){
 }
 function drawOffscreen(t){
   const cx=VW/2, cy=VH/2, pad=14;
-  if(G.mine){ const M=G.mine; for(const dir of ['up','dn']){ const to=M.fi+(dir==='up'?-1:1); if(to<0||to>=MINE_FL.length)continue; const P=MINE_PT[dir], sx=(P[0]-camX)*ZOOM, sy=(P[1]-camY)*ZOOM;   /* 화면 밖 포털: 빨간 화살표 + 올라가기/내려가기 */
+  if(G.mine){ const M=G.mine; for(const dir of ['up','dn']){ const to=M.fi+(dir==='up'?-1:1); if(to<0||to>=mineFlN())continue; const P=MINE_PT[dir], sx=(P[0]-camX)*ZOOM, sy=(P[1]-camY)*ZOOM;   /* 화면 밖 포털: 빨간 화살표 + 올라가기/내려가기 */
     if(sx>-30&&sx<VW+30&&sy>-30&&sy<VH+30)continue;
     const dx=sx-cx, dy=sy-cy, g2=Math.min((VW/2-36)/Math.max(.001,Math.abs(dx)),(VH/2-96)/Math.max(.001,Math.abs(dy))), ex=clamp(cx+dx*g2,140,VW-140), ey=dy<0?(LAND?70:116):VH-(LAND?60:200), a=Math.atan2(ey-cy,ex-cx), pu=1+Math.sin(t*6)*.1, lk=false;   /* 화면 위·아래 끝에만 작게 (캐릭터를 가리지 않게) · 층 이동 레벨 제한 없음 */
     circle(ex,ey,13*pu,'rgba(60,0,0,.7)'); chevron(ex,ey,a,9.5*pu,lk?'#a05a5a':'#ff3a2e');
