@@ -1537,7 +1537,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0817</div>
+    <div class="ver" id="verT">v0.7.2.0818</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -6550,11 +6550,11 @@ async function rsPost(o){ const r=await fetch(SB_URL+'/rest/v1/rpc/dd_lab_log',{
 let rsBusy=false;
 async function rsFlush(){ if(rsBusy)return; rsBusy=true; try{ const a=rsQ(); while(a.length){ try{ await rsPost(a[0]); }catch(e){ if(String(e.message)!=='denied')break; } a.shift(); lsSet(RS_Q,JSON.stringify(a)); } }finally{ rsBusy=false; } }
 function rsLogAdd(k,pw){ const a=rsQ(); a.push({k,n:rsNames(),t:new Date().toISOString(),pw}); lsSet(RS_Q,JSON.stringify(a.slice(-20))); rsFlush(); }
-function rsGrant(pw){ lsSet(RS_PW,pw); rsLogAdd('in',pw); lsSet(RS_KEY,'1'); closeModal(); buyMsg=''; sfx('rare'); rerender(); sheetToast('📚 연구실이 열렸어요'); }
+function rsGrant(pw){ lsSet(RS_PW,pw); rsLogAdd('in',pw); lsSet(RS_KEY,'1'); verSync(); closeModal(); buyMsg=''; sfx('rare'); rerender(); sheetToast('📚 연구실이 열렸어요'); }
 function rsExit(){
   modal(`<h3>🚪 나가기</h3><p style="margin:0 0 12px;font-size:14px;line-height:1.5">관리자 권한을 반납하고 연구실을 닫을까요?</p><div class="row2"><button class="btn" id="rxNo">취소</button><button class="btn primary" id="rxGo">반납하고 나가기</button></div>`,m=>{
     m.querySelector('#rxNo').onclick=closeModal;
-    m.querySelector('#rxGo').onclick=()=>rsPw(pw=>{ rsLogAdd('out',pw); lsDel(RS_KEY); lsDel(RS_PW); pprSet(0); closeModal(); rerender(); sheetToast('🚪 관리자 권한을 반납했어요'); }); }); }
+    m.querySelector('#rxGo').onclick=()=>rsPw(pw=>{ rsLogAdd('out',pw); lsDel(RS_KEY); lsDel(RS_PW); pprSet(0); verSync(); closeModal(); rerender(); sheetToast('🚪 관리자 권한을 반납했어요'); }); }); }
 const rsPre='white-space:pre-wrap;word-break:break-word;font:12px/1.55 ui-monospace,Menlo,monospace;max-height:58vh;overflow:auto;margin:0 0 8px;padding:8px;background:#0a0807;border:1px solid var(--line2);border-radius:8px;touch-action:pan-y';
 function rsNotes(){
   modal(`<h3>📔 관리자 노트</h3><pre id="rsT" style="${rsPre}">불러오는 중…</pre><div class="row2"><button class="btn" id="rnRe">🔄 새로고침</button><button class="btn primary" id="rnX">닫기</button></div>`,m=>{
@@ -7197,10 +7197,14 @@ function mailRead(cid,i,note,bad){
     m.querySelector('#mDel').onclick=e=>{ if(!ask){ ask=true; const b=e.currentTarget; { const w=b.offsetWidth, h=b.offsetHeight; b.style.flex='none'; b.style.height=h+'px'; b.style.width=w+'px'; } b.style.whiteSpace='nowrap'; b.style.overflow='hidden'; b.style.paddingInline='4px'; b.style.fontSize='14px'; b.textContent=left?'⚠️ 보상도 삭제?':'⚠️ 정말 삭제?'; b.style.background='#a62a22'; b.style.borderColor='#ff6a5a'; return; }   /* 확인 단계에서도 버튼 크기는 그대로 (높이 고정 · 한 줄) */
       const q=loadChar(cid); if(q){ q.mail.splice(i,1); mailSave(q); renderStagePanel(); } mailModal(); }; }); }
 $('#verT').onclick=()=>patchModal(); $('#verT').style.cursor='pointer';
+/* 좌상단 버전 글자: 일반 사용자는 vN.N.N 까지만, 관리자(연구실 열림)는 빌드 번호까지 */
+(()=>{ const v=document.getElementById('verT'); if(v&&!v.dataset.full)v.dataset.full=v.textContent.trim(); })();
+function verSync(){ const v=document.getElementById('verT'); if(!v)return; const f=v.dataset.full||v.textContent.trim(); const t=rsOn()?f:f.replace(/^(v?\d+\.\d+\.\d+)\..*$/,'$1'); v.textContent=t; const s=document.getElementById('spVer'); if(s)s.textContent=t; }
+window.__verSync=verSync; verSync();
 /* 패치노트: 저장소의 patchnotes.txt를 불러와서 보여줌 (원본 파일 링크 포함) */
 const PN_MAX=32767; /* 패치노트 창에는 최신(맨 위)부터 이만큼(바이트)만 보여줘요 */
 function patchModal(){
-  modal(`<h3>📜 패치노트</h3><pre id="pnT" style="white-space:pre-wrap;word-break:break-word;font:12px/1.55 ui-monospace,Menlo,monospace;max-height:58vh;overflow:auto;margin:0 0 8px;padding:8px;background:#0a0807;border:1px solid var(--line2);border-radius:8px;touch-action:pan-y">불러오는 중…</pre><div class="row2"><a class="btn" href="patchnotes.txt" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;text-align:center;text-decoration:none;box-sizing:border-box">원본 파일 열기</a><button class="btn primary" id="pnX">닫기</button></div>`,m=>{
+  modal(`<div class="ntH"><h3>📜 패치노트</h3><button class="ntX" id="pnX" aria-label="닫기">✕</button></div><pre id="pnT" style="white-space:pre-wrap;word-break:break-word;font:12px/1.55 ui-monospace,Menlo,monospace;max-height:58vh;overflow:auto;margin:0 0 8px;padding:8px;background:#0a0807;border:1px solid var(--line2);border-radius:8px;touch-action:pan-y">불러오는 중…</pre>${rsOn()?'<a class="btn" href="patchnotes.txt" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;text-align:center;text-decoration:none;box-sizing:border-box">원본 파일 열기</a>':''}`,m=>{
     m.querySelector('#pnX').onclick=closeModal;
     fetch('patchnotes.txt?'+Date.now(),{cache:'no-store'}).then(r=>{ if(!r.ok)throw 0; return r.text(); }).then(t=>{ const el=m.querySelector('#pnT'); const bytes=new TextEncoder().encode(t);
       if(bytes.length<=PN_MAX){ el.textContent=t; return; }
@@ -7208,7 +7212,7 @@ function patchModal(){
       const lines=h.split('\n'), k=Math.max(0,lines.length-9);
       el.textContent=''; el.append(lines.slice(0,k).join('\n')+'\n');
       const fd=document.createElement('div'); fd.textContent=lines.slice(k).join('\n'); fd.style.cssText='background:linear-gradient(to bottom,#ece3d3 0%,rgba(236,227,211,0) 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent'; el.append(fd);   /* 끝 아홉 줄은 점점 흐려져요 */
-      const nt=document.createElement('div'); nt.textContent='원본 파일에서 상세 내역을 조회하실 수 있습니다.'; nt.style.cssText='margin-top:1.6em;text-align:center;color:var(--mute);font-family:inherit'; el.append(nt); }).catch(()=>{ m.querySelector('#pnT').textContent='패치노트를 불러오지 못했어요. (오프라인이거나 서버 점검 중)'; }); }); }
+    }).catch(()=>{ m.querySelector('#pnT').textContent='패치노트를 불러오지 못했어요. (오프라인이거나 서버 점검 중)'; }); }); }
 /* ===== 공지사항: notice.txt — 맨 위가 최신, 줄 ====== 로 구분, 최근 NT_MAX건만 표시 · '오늘 다시 보지 않기'는 이 기기에만 저장 ===== */
 const NT_MAX=3, NT_KEY='dkdef2.nthide2';
 const ntDay=()=>{ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
@@ -9252,7 +9256,7 @@ function clReuseModal(prev,v){
   modal(`<h3>☁️ 이전에 쓰던 코드가 있어요</h3><p style="margin:0 0 10px;font-size:14px;line-height:1.55">연결을 해제하기 전에 쓰던 복구 코드(끝 <b style="color:#ffe27a">${esc(clTail(prev))}</b>)로 저장된 데이터가 서버에 남아 있어요.<br><span class="meta">마지막 저장 · ${clFmt(v.at)}</span><br>그 코드를 그대로 사용해서 다시 연결할까요?</p><div class="col"><button class="btn primary" id="ruUse">이전 코드 그대로 사용</button><button class="btn" id="ruNew">새 코드 발급</button><button class="btn" id="ruX">취소</button></div>`,m=>{
     m.querySelector('#ruX').onclick=cloudModal; m.querySelector('#ruUse').onclick=()=>clReuse(prev,v); m.querySelector('#ruNew').onclick=()=>clNewWarn(prev,v); }); }
 function clNewWarn(prev,v){
-  modal(`<h3>⚠️ 새 코드를 발급할까요?</h3><p style="margin:0 0 10px;font-size:14px;line-height:1.55">서버에는 이전 코드(끝 <b style="color:#ffe27a">${esc(clTail(prev))}</b>)로 저장된 데이터가 <b>이미 있어요</b>. (마지막 저장 · ${clFmt(v.at)})<br><b style="color:#ff9a8a">새 코드를 발급하면 이 기기는 새 코드로만 저장하고, 이전 저장본은 더 이상 갱신되지 않아요. 이전 코드를 메모해 두지 않았다면 그 저장본은 찾을 수 없게 되어(유실) 복구할 수 없어요.</b></p><div class="col"><button class="btn primary" id="nwUse">이전 코드 그대로 사용</button><button class="btn danger" id="nwNew">그래도 새 코드 발급</button><button class="btn" id="nwX">취소</button></div>`,m=>{
+  modal(`<h3>⚠️ 새 코드를 발급할까요?</h3><p style="margin:0 0 10px;font-size:14px;line-height:1.55">서버에는 이전 코드(끝 <b style="color:#ffe27a">${esc(clTail(prev))}</b>)로 저장된 데이터가 <b>이미 있어요</b>. (마지막 저장 · ${clFmt(v.at)})<br><b style="color:#ff9a8a">새 코드를 발급하면 이 기기는 새 코드로만 저장하고, 이전 저장본은 더 이상 갱신되지 않으며 유효성이 유실되어 저장본을 찾지 못할 수 있어요. 이전 코드를 메모해 두었더라도 새 코드를 발급받으면 기존 코드의 저장본은 관리자가 언제든지 지울 수 있어요.</b></p><div class="col"><button class="btn primary" id="nwUse">이전 코드 그대로 사용</button><button class="btn danger" id="nwNew">그래도 새 코드 발급</button><button class="btn" id="nwX">취소</button></div>`,m=>{
     m.querySelector('#nwX').onclick=cloudModal; m.querySelector('#nwUse').onclick=()=>clReuse(prev,v); m.querySelector('#nwNew').onclick=e=>{ e.currentTarget.disabled=true; clStartNew(null); }; }); }
 function cloudModal(){
   const code=clCode();
