@@ -1625,7 +1625,7 @@ const $=s=>document.querySelector(s);
 const rand=(a,b)=>a+Math.random()*(b-a), ri=(a,b)=>Math.floor(a+Math.random()*(b-a+1)), pick=a=>a[Math.floor(Math.random()*a.length)];
 const clamp=(v,a,b)=>v<a?a:v>b?b:v, hyp=Math.hypot;
 const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
-const CLSKIP=/^dkdef2\.(cl\.|nwf\.|rk\.|rkc\.|rkdel|hud|sel$|stage$|mus$|sfx$|t5$|nthide$)/; let clHook=null;  /* 클라우드 저장 대상 키 변경 감지 — 제외: 랭킹 캐시(rkc, 기기마다 열 때마다 달라져서 서로 충돌을 만들었음)·선택 캐릭터·선택 스테이지·소리 설정 같은 기기별 값 */
+const CLSKIP=/^dkdef2\.(cl\.|nwf\.|rk\.|rkc2?\.|rkdel|hud|sel$|stage$|mus$|sfx$|t5$|nthide$)/; let clHook=null;  /* 클라우드 저장 대상 키 변경 감지 — 제외: 랭킹 캐시(rkc·rkc2, 기기마다 열 때마다 달라져서 서로 충돌을 만들었음)·선택 캐릭터·선택 스테이지·소리 설정 같은 기기별 값 */
 const lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){} if(clHook&&k.indexOf('dkdef2.')===0&&!CLSKIP.test(k))clHook();};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
@@ -3977,7 +3977,7 @@ function goDown(){ if(!me.dead)voice('die',0,true); me.hp=0; me.dead=true; me.le
   me.respawn=me.hc?0:revItems()>0?12:coopAlive?30:1.6;
   toast(revItems()>0?'쓰러졌습니다! 부활 버튼으로 일어나세요':coopAlive?'쓰러졌습니다! 동료가 구해주길 기다려요':'쓰러졌습니다…','#e07060'); if(me.hc)hcDown(); }
 /* 하드코어: 쓰러지면 바로 끝 — 사망 기록을 곧바로 저장하고(앱을 꺼도 유지) 랭킹에 💀 로 올린 뒤 YOU DIED 화면을 보여줘요 */
-function hcDown(why){ if(!me||!me.hc||me.hd>0)return; G.hcWhy=why||''; me.hd=Date.now(); me.hs=(G.stageIdx|0)+1; me.mail=[]; me.out=true; me.respawn=0; me.rvT=0; saveChar();
+function hcDown(why){ if(!me||!me.hc||me.hd>0)return; G.hcWhy=why||''; me.hd=Date.now(); me.hs=(G.stageIdx|0)+1; me.mail=[]; me.out=true; me.respawn=0; me.rvT=0; saveChar(); try{ clUrgent(); }catch(e){}
   if(why==='castle'){ G.endShown=true; G.inGame=false; me.dead=true; me.hp=0; for(const k in held)held[k]=false; }   /* 성이 무너져 패배한 것도 사망과 같음 */
   else if(!(ally&&!ally.lobby&&!ally.dead))G.endShown=true;   /* 혼자일 땐 일반 '쓰러졌습니다' 결과창 대신 YOU DIED 화면 */
   try{ rkSubmitAll(true); }catch(e){}
@@ -7091,7 +7091,7 @@ async function nameSweep(){ if(!NAME_SRV||nmSweepBusy||nmForcing)return; nmSweep
 function nameForce(ids){ nmForcing=true; const id=ids.shift(); if(!id){ nmForcing=false; return; }
   const c=loadChar(id); if(!c){ nameForce(ids); return; }
   if(G.inGame||!$('#modal').hidden){ nmForcing=false; return; }   /* 게임 중이거나 다른 창이 떠 있으면 다음에 타이틀로 돌아왔을 때 다시 물어요 */
-  askName(`⚠️ ${clsIc(c.cls,24)} ${esc(dispName(c))} · 닉네임 변경`,'','✔ 변경',v=>{ const q=loadChar(id); if(q){ q.name=v; lsSet(charKey(id),JSON.stringify(packChar(q))); lsSet(NMV+id,nameKey(v)); try{ rkSubmit([q],true); }catch(e){} toast(`닉네임을 '${v}'(으)로 정했어요`,'#9fe08a'); } renderTitle(); nameForce(ids); },id,null,{claim:id,force:true,note:`'${esc(dispName(c))}' 닉네임을 이미 먼저 만든 캐릭터가 쓰고 있어요. 새 닉네임을 정해 주세요 (무료)`}); }
+  askName(`⚠️ ${clsIc(c.cls,24)} ${esc(dispName(c))} · 닉네임 변경`,'','✔ 변경',v=>{ const q=loadChar(id); if(q){ q.name=v; lsSet(charKey(id),JSON.stringify(packChar(q))); lsSet(NMV+id,nameKey(v)); try{ clUrgent(); }catch(e){} try{ rkSubmit([q],true); }catch(e){} toast(`닉네임을 '${v}'(으)로 정했어요`,'#9fe08a'); } renderTitle(); nameForce(ids); },id,null,{claim:id,force:true,note:`'${esc(dispName(c))}' 닉네임을 이미 먼저 만든 캐릭터가 쓰고 있어요. 새 닉네임을 정해 주세요 (무료)`}); }
 /* opt: {claim:캐릭터 id(서버에 이름 예약), force:true(취소 불가·치트키 없음), note:안내 글} */
 function askName(title,init,okTxt,cb,exceptId,cheat,opt){ opt=opt||{};
   modal(`<h3>${title}</h3>${opt.note?`<p class="meta" style="margin:0 0 8px;font-size:13px;line-height:1.55">${opt.note}</p>`:''}<div class="col"><input type="text" id="nmIn" maxlength="8" placeholder="닉네임 (한글만, 2~8자)" autocomplete="off" value="${esc(init||'')}">${opt.hc?'<label class="hcchk"><input type="checkbox" id="nmHc"><span><b>💀 하드코어 캐릭터</b><small>쓰러지면 끝 · 부활 없음 · 공유보관함 이용 불가<br>죽으면 선택할 수 없고 삭제만 가능해요 (풍차·연구소 효과는 공유)</small></span></label>':''}<div class="err" id="nmErr"></div><div class="row2">${opt.force?'':'<button class="btn" id="nmNo">취소</button>'}<button class="btn primary" id="nmOk">${okTxt}</button></div></div>`,m=>{
@@ -7124,7 +7124,7 @@ function charMenu(id){
   const p=loadChar(id); if(!p)return;
   modal(`<h3>${clsIc(p.cls,26)} ${esc(dispName(p))}<br><small style="color:var(--mute);font-weight:400">Lv ${p.lvl} · ${CLASSES[p.cls].n}</small></h3><div class="col" style="gap:6px"><button class="btn" id="cmRen" style="min-height:38px;padding:7px 14px;font-size:14px">✏️ 이름 변경 (${RENCOST.toLocaleString()}G)</button><button class="btn" id="cmDel" style="min-height:38px;padding:7px 14px;font-size:14px">🗑️ 삭제</button><button class="btn" id="cmX" style="min-height:38px;padding:7px 14px;font-size:14px">닫기</button></div>`,m=>{
     if(hcDead(p))m.querySelector('#cmRen').style.display='none'; m.querySelector('#cmRen').onclick=()=>{ if((p.gold|0)<RENCOST){ warn(`골드가 부족해요. 이름 변경은 ${RENCOST.toLocaleString()}G가 필요해요 (보유 ${(p.gold|0).toLocaleString()}G)`); return; }
-      askName(`✏️ 이름 변경 · ${RENCOST.toLocaleString()}G`,'','✔ 변경',v=>{ const q=loadChar(id); if(!q)return; if((q.gold|0)<RENCOST)return; q.gold-=RENCOST; q.name=v; lsSet(charKey(q.id),JSON.stringify(packChar(q))); renderTitle(); toast(`이름을 '${v}'(으)로 바꿨어요 (-${RENCOST.toLocaleString()}G)`,'#ffd84a'); },id,v=>nameCheat(id,v)||(v===dispName(p)?'현재 이름과 같아요. 다른 이름을 입력해 주세요':null),{claim:id}); };
+      askName(`✏️ 이름 변경 · ${RENCOST.toLocaleString()}G`,'','✔ 변경',v=>{ const q=loadChar(id); if(!q)return; if((q.gold|0)<RENCOST)return; q.gold-=RENCOST; q.name=v; lsSet(charKey(q.id),JSON.stringify(packChar(q))); try{ clUrgent(); }catch(e){} renderTitle(); toast(`이름을 '${v}'(으)로 바꿨어요 (-${RENCOST.toLocaleString()}G)`,'#ffd84a'); },id,v=>nameCheat(id,v)||(v===dispName(p)?'현재 이름과 같아요. 다른 이름을 입력해 주세요':null),{claim:id}); };
     m.querySelector('#cmDel').onclick=()=>modal(`<h3>🗑️ 삭제</h3><p style="margin:0 0 12px;font-size:14px">'${esc(dispName(p))}' (Lv ${p.lvl}) 캐릭터를 삭제할까요?<br>장비와 아이템도 함께 사라지며 되돌릴 수 없어요.${p.hc?'<br><b style="color:#ff8a7a">💀 하드코어 캐릭터는 랭킹과 도감에서도 사라져요.</b>':''}</p><div class="row2"><button class="btn" id="dNo">취소</button><button class="btn primary danger" id="dYes">삭제</button></div>`,m2=>{ m2.querySelector('#dNo').onclick=closeModal; let dAsk=false; m2.querySelector('#dYes').onclick=()=>{ if(!dAsk){ dAsk=true; const y=m2.querySelector('#dYes'); y.textContent='⚠️ 정말 삭제 · 한 번 더 누르면 삭제'; y.style.background='#a62a22'; y.style.borderColor='#ff6a5a'; return; } deleteChar(id); closeModal(); renderTitle(); }; });
     m.querySelector('#cmX').onclick=closeModal; { const cd=m.querySelector('.card'); cd.style.width='220px'; cd.style.position='relative'; cd.style.top='-70px'; } });
 }
@@ -9164,26 +9164,34 @@ function step(now){
 }
 /* ===== 클라우드 저장 (복구 코드 · Supabase RPC dd_save_*) ===== */
 const CLA='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-let clT=0, clBusy=false, clMsg='';
+let clT=0, clFirst=0, clBusy=false, clMsg='', clAgain=false, clGzOff=0;   /* clFirst = 아직 못 올린 변경이 처음 생긴 시각 · clAgain = 올리는 중에 또 올려 달라는 요청이 들어옴 · clGzOff = 압축 업로드가 안 될 때 이 시각까지 예전 방식 사용 */
 const clCode=()=>lsGet('dkdef2.cl.code')||'', clVer=()=>+(lsGet('dkdef2.cl.ver')||0), clAt=()=>lsGet('dkdef2.cl.at')||'';
 function clGen(){ const a=new Uint8Array(20); (window.crypto||window.msCrypto).getRandomValues(a); let t=''; for(let i=0;i<20;i++){ t+=CLA[a[i]%32]; if(i%5===4&&i<19)t+='-'; } return 'DG-'+t; }
 function clNorm(x){ let t=String(x||'').toUpperCase().replace(/[^A-Z0-9]/g,''); if(t.indexOf('DG')===0)t=t.slice(2); if(t.length!==20)return ''; return 'DG-'+t.match(/.{5}/g).join('-'); }
 function clSnap(){ const o={}; try{ for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k&&k.indexOf('dkdef2.')===0&&!CLSKIP.test(k))o[k]=localStorage.getItem(k); } }catch(e){} return o; }
 async function clRpc(fn,args){ const r=await fetch(SB_URL+'/rest/v1/rpc/'+fn,{method:'POST',headers:rkHead(),body:JSON.stringify(args)}); if(!r.ok)throw new Error('http '+r.status); return r.json(); }
+/* 저장 올리기: 내용을 gzip 으로 압축해 서버 함수(dd-save-gz)로 보내요(서버가 풀어서 저장). 압축이 안 되는 기기나 함수 오류일 땐 예전 방식(RPC)으로 올려요 */
+async function clGz(o){ if(typeof CompressionStream==='undefined'||typeof Blob==='undefined')return null; return await new Response(new Blob([JSON.stringify(o)]).stream().pipeThrough(new CompressionStream('gzip'))).arrayBuffer(); }
+async function clSave(code,data,ver){
+  if(Date.now()>=clGzOff){ try{ const buf=await clGz({code,data,ver});
+      if(buf){ const r=await fetch(SB_URL+'/functions/v1/dd-save-gz',{method:'POST',headers:{apikey:SB_KEY,'Content-Type':'application/octet-stream','x-dd-enc':'gzip'},body:buf,keepalive:buf.byteLength<60000}); if(r.ok)return await r.json(); }
+    }catch(e){}
+    clGzOff=Date.now()+600000; }   /* 압축 업로드가 안 되면 10분 동안은 예전 방식으로 */
+  return clRpc('dd_save_put',{p_code:code,p_data:data,p_ver:ver}); }
 const clFmt=iso=>{ try{ const d=new Date(iso); if(isNaN(d))return '-'; const n=new Date(), same=d.toDateString()===n.toDateString(); return (same?'오늘 ':`${d.getMonth()+1}월 ${d.getDate()}일 `)+`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; }catch(e){return '-';} };
 /* 저장 내용의 지문(키 이름순으로 훑은 해시). 서버에 있는 내용이 "이 기기가 방금 올린 것"인지 알아보는 데 써요 */
 function clHash(o){ let h1=0xdeadbeef,h2=0x41c6ce57; for(const k of Object.keys(o).sort()){ const t=k+'\u0001'+o[k]+'\u0002'; for(let i=0;i<t.length;i++){ const c=t.charCodeAt(i); h1=Math.imul(h1^c,2654435761); h2=Math.imul(h2^c,1597334677); } }
   h1=Math.imul(h1^(h1>>>16),2246822507)^Math.imul(h2^(h2>>>13),3266489909); h2=Math.imul(h2^(h2>>>16),2246822507)^Math.imul(h1^(h1>>>13),3266489909); return (4294967296*(2097151&h2)+(h1>>>0)).toString(36); }
 const clPh=()=>(lsGet('dkdef2.cl.ph')||'').split(',').filter(Boolean);
-async function clPut(){  /* 서버에 올리기. 성공 true / 충돌 'conflict' / 실패 false */
-  const code=clCode(); if(!code||clBusy)return false; clBusy=true;
-  try{ const snap=clSnap(), hh=clHash(snap); const phOld=clPh(); lsSet('dkdef2.cl.ph',[hh].concat(phOld.filter(x=>x!==hh)).slice(0,4).join(','));   /* 올리는 중인 내용의 지문(최근 몇 개) — 응답이 끊겨도 서버 내용이 내 것인지 알 수 있음 */
-    const res=await clRpc('dd_save_put',{p_code:code,p_data:snap,p_ver:clVer()});
+async function clPut(force){  /* 서버에 올리기. 성공 true / 충돌 'conflict' / 실패 false · 마지막으로 올린 내용과 똑같으면 올리지 않아요(force 제외) */
+  const code=clCode(); if(!code)return false; if(clBusy){ clAgain=true; return false; } clBusy=true;
+  try{ const snap=clSnap(), hh=clHash(snap); if(!force&&hh===lsGet('dkdef2.cl.h'))return true; const phOld=clPh(); lsSet('dkdef2.cl.ph',[hh].concat(phOld.filter(x=>x!==hh)).slice(0,4).join(','));   /* 올리는 중인 내용의 지문(최근 몇 개) — 응답이 끊겨도 서버 내용이 내 것인지 알 수 있음 */
+    const res=await clSave(code,snap,clVer());
     if(res&&res.ok){ clHook=null; lsSet('dkdef2.cl.h',hh); lsSet('dkdef2.cl.ph',''); lsSet('dkdef2.cl.ver',String(res.ver)); lsSet('dkdef2.cl.at',res.at||new Date().toISOString()); clHook=clDirty; clMsg=''; return true; }
     if(res&&res.conflict){ lsSet('dkdef2.cl.ph',phOld.join(',')); clMsg='conflict'; return 'conflict'; }
     return false; }
   catch(e){ clMsg='fail'; return false; }
-  finally{ clBusy=false; } }
+  finally{ clBusy=false; if(clAgain){ clAgain=false; setTimeout(clUrgent,0); } } }
 /* 서버 버전이 더 높아도 내용이 이 기기와 똑같으면(저장 응답이 끊겨 버전만 못 받은 경우 등) 물어보지 않고 버전만 맞춘다 */
 async function clResolve(v){ if(clBusy)return; clBusy=true; let same=false, sv=v||null, redo=false, fail=false;
   try{ const res=await clRpc('dd_save_get',{p_code:clCode()});
@@ -9192,21 +9200,26 @@ async function clResolve(v){ if(clBusy)return; clBusy=true; let same=false, sv=v
       /* 서버 내용이 이 기기가 올렸던 것과 똑같으면(응답이 끊겨 버전만 못 받은 경우) 다른 기기가 쓴 게 아니라서 묻지 않고 버전만 맞춰요. 그 뒤로 이 기기에서 바뀐 게 있으면 다시 올려요 */
       const sh=clHash(b); if(same||clPh().includes(sh)||sh===lsGet('dkdef2.cl.h')){ redo=!same; same=true; clHook=null; lsSet('dkdef2.cl.h',sh); lsSet('dkdef2.cl.ver',String(res.ver)); lsSet('dkdef2.cl.at',res.at||''); clHook=clDirty; } }
     else fail=true; }
-  catch(e){ fail=true; } finally{ clBusy=false; }
+  catch(e){ fail=true; } finally{ clBusy=false; if(clAgain){ clAgain=false; setTimeout(clUrgent,0); } }
   if(redo)clDirty();
   if(fail||same||G.inGame)return;   /* 서버 내용을 못 가져온 건 충돌이 아니에요 — 묻지 않고 다음에 다시 확인 */
   if(sv&&sv.ver===clLater)return;   /* '나중에'를 누른 같은 서버 버전은 이번 접속 동안 다시 묻지 않음 */
   clConflict(sv); }
-function clDirty(){ if(!clCode()||clT)return; clT=setTimeout(async()=>{ clT=0; const r=await clPut(); if(r==='conflict'&&!G.inGame)clResolve(); },10000); }
+const CL_DEB=60000, CL_MAX=600000;   /* 마지막 변경 후 60초 동안 조용하면 저장(debounce) · 계속 바뀌어도 첫 변경 후 최대 600초 안에는 저장 */
+function clCancel(){ if(clT){ clearTimeout(clT); clT=0; } clFirst=0; }
+async function clRun(){ clT=0; clFirst=0; const r=await clPut(); if(r==='conflict'&&!G.inGame)clResolve(); else if(r===false&&clCode())clT=setTimeout(clRun,30000); }   /* 실패하면 30초 뒤 다시 */
+function clDirty(){ if(!clCode())return; const n=Date.now(); if(!clFirst)clFirst=n; if(clT)clearTimeout(clT); clT=setTimeout(clRun,Math.max(0,Math.min(CL_DEB,clFirst+CL_MAX-n))); }
+function clUrgent(){ if(!clCode())return; clCancel(); clPut().then(r=>{ if(r==='conflict'&&!G.inGame)clResolve(); }); }   /* 하드코어 사망·이름 변경 같은 중요한 순간: 기다리지 않고 바로 올려요 */
 clHook=clDirty;
-function clFlush(){ if(clT){ clearTimeout(clT); clT=0; clPut().then(r=>{ if(r==='conflict'&&!G.inGame)clResolve(); }); } }
+function clFlush(){ if(clT){ clCancel(); clPut().then(r=>{ if(r==='conflict'&&!G.inGame)clResolve(); }); } }
 document.addEventListener('visibilitychange',()=>{ if(document.hidden)clFlush(); else if(!G.inGame&&clCode())clCheck(); });
 let clLater=0;   /* '나중에'를 누른 서버 버전: 같은 버전으론 이번 접속 동안 다시 묻지 않음 */
 async function clCheck(){ const code=clCode(); if(!code||clBusy)return; try{ const v=await clRpc('dd_save_ver',{p_code:code}); if(v&&v.ver>clVer()&&v.ver!==clLater)await clResolve(v); }catch(e){} }
-function clApply(res,code){ clHook=null; if(clT){clearTimeout(clT);clT=0;}
+function clApply(res,code){ clHook=null; clCancel();
   try{ const del=[]; for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k&&k.indexOf('dkdef2.')===0&&!CLSKIP.test(k))del.push(k); } del.forEach(k=>localStorage.removeItem(k));
     for(const k in res.data){ if(k.indexOf('dkdef2.')===0&&!CLSKIP.test(k)&&typeof res.data[k]==='string')localStorage.setItem(k,res.data[k]); }
-    localStorage.setItem('dkdef2.cl.code',code); localStorage.setItem('dkdef2.cl.ver',String(res.ver)); localStorage.setItem('dkdef2.cl.at',res.at||''); }catch(e){}
+    const b={}; for(const k in res.data){ if(k.indexOf('dkdef2.')===0&&!CLSKIP.test(k)&&typeof res.data[k]==='string')b[k]=res.data[k]; }
+    localStorage.setItem('dkdef2.cl.code',code); localStorage.setItem('dkdef2.cl.ver',String(res.ver)); localStorage.setItem('dkdef2.cl.at',res.at||''); localStorage.setItem('dkdef2.cl.h',clHash(b)); localStorage.removeItem('dkdef2.cl.ph'); localStorage.removeItem('dkdef2.cl.prev'); }catch(e){}
   location.reload(); }
 function clConflict(v){ if(!$('#modal').hidden&&G.inGame)return;
   modal(`<h3>☁️ 다른 기기에서 저장한 데이터가 있어요</h3><p style="margin:0 0 12px;font-size:14px;line-height:1.5">서버에 더 최근 데이터가 있어요. 어느 쪽을 쓸까요?</p><div class="col"><button class="btn primary" id="cfSv">서버 데이터 불러오기</button><button class="btn" id="cfMe">이 기기 데이터로 덮어쓰기</button><button class="btn" id="cfNo">나중에</button></div><p class="note" style="margin-top:8px">'불러오기'를 하면 이 기기의 현재 캐릭터는 서버 데이터로 바뀌어요.</p>`,m=>{
@@ -9215,20 +9228,35 @@ function clConflict(v){ if(!$('#modal').hidden&&G.inGame)return;
     m.querySelector('#cfMe').onclick=async()=>{ const b=m.querySelector('#cfMe'); b.disabled=true; b.textContent='저장 중…'; try{ const v=await clRpc('dd_save_ver',{p_code:clCode()}); if(v){ clHook=null; lsSet('dkdef2.cl.ver',String(v.ver)); clHook=clDirty; } const r=await clPut(); if(r===true){ closeModal(); cloudModal(); } else { b.textContent='저장 실패 · 다시 눌러보세요'; b.disabled=false; } }catch(e){ b.textContent='연결 실패 · 다시 눌러보세요'; b.disabled=false; } }; }); }
 function clCopy(t,btn){ const done=()=>{ if(btn){ const o=btn.textContent; btn.textContent='복사됐어요 ✔'; setTimeout(()=>{btn.textContent=o;},1500); } };
   try{ navigator.clipboard.writeText(t).then(done,()=>{}); }catch(e){ try{ const ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); done(); }catch(e2){} } }
+/* 저장 다시 시작: (A) 이전에 쓰던 코드가 서버에 남아 있으면 먼저 '그대로 사용'을 물어요 → (B) 그래도 새 코드를 받겠다면 저장본이 있음과 유실 위험을 한 번 더 알려요 */
+const clTail=c=>String(c||'').slice(-5);
+async function clStartNew(b){ if(b){ b.disabled=true; b.textContent='저장하는 중…'; } const c=clGen(), snap=clSnap();
+  try{ const res=await clSave(c,snap,0); if(res&&res.ok){ clHook=null; lsSet('dkdef2.cl.code',c); lsSet('dkdef2.cl.ver',String(res.ver)); lsSet('dkdef2.cl.at',res.at||new Date().toISOString()); lsSet('dkdef2.cl.h',clHash(snap)); lsSet('dkdef2.cl.ph',''); lsDel('dkdef2.cl.prev'); clHook=clDirty; cloudModal(); clShowNew(c); } else if(b){ b.textContent='저장하지 못했어요 · 다시 눌러보세요'; b.disabled=false; } else cloudModal(); }
+  catch(e){ if(b){ b.textContent='연결 실패 · 다시 눌러보세요'; b.disabled=false; } else cloudModal(); } }
+function clReuse(prev,v){ clHook=null; lsSet('dkdef2.cl.code',prev); lsSet('dkdef2.cl.ver','0'); lsSet('dkdef2.cl.at',v.at||''); lsSet('dkdef2.cl.h',''); lsSet('dkdef2.cl.ph',''); lsDel('dkdef2.cl.prev'); clHook=clDirty; cloudModal(); clResolve({ver:v.ver}); }   /* 버전을 0 으로 두면 서버 내용과 이 기기 내용을 비교해서, 다르면 '서버/이 기기 중 어느 쪽?' 창이 떠요 */
+function clReuseModal(prev,v){
+  modal(`<h3>☁️ 이전에 쓰던 코드가 있어요</h3><p style="margin:0 0 10px;font-size:14px;line-height:1.55">연결을 해제하기 전에 쓰던 복구 코드(끝 <b style="color:#ffe27a">${esc(clTail(prev))}</b>)로 저장된 데이터가 서버에 남아 있어요.<br><span class="meta">마지막 저장 · ${clFmt(v.at)}</span><br>그 코드를 그대로 사용해서 다시 연결할까요?</p><div class="col"><button class="btn primary" id="ruUse">이전 코드 그대로 사용</button><button class="btn" id="ruNew">새 코드 발급</button><button class="btn" id="ruX">취소</button></div>`,m=>{
+    m.querySelector('#ruX').onclick=cloudModal; m.querySelector('#ruUse').onclick=()=>clReuse(prev,v); m.querySelector('#ruNew').onclick=()=>clNewWarn(prev,v); }); }
+function clNewWarn(prev,v){
+  modal(`<h3>⚠️ 새 코드를 발급할까요?</h3><p style="margin:0 0 10px;font-size:14px;line-height:1.55">서버에는 이전 코드(끝 <b style="color:#ffe27a">${esc(clTail(prev))}</b>)로 저장된 데이터가 <b>이미 있어요</b>. (마지막 저장 · ${clFmt(v.at)})<br><b style="color:#ff9a8a">새 코드를 발급하면 이 기기는 새 코드로만 저장하고, 이전 저장본은 더 이상 갱신되지 않아요. 이전 코드를 메모해 두지 않았다면 그 저장본은 찾을 수 없게 되어(유실) 복구할 수 없어요.</b></p><div class="col"><button class="btn primary" id="nwUse">이전 코드 그대로 사용</button><button class="btn danger" id="nwNew">그래도 새 코드 발급</button><button class="btn" id="nwX">취소</button></div>`,m=>{
+    m.querySelector('#nwX').onclick=cloudModal; m.querySelector('#nwUse').onclick=()=>clReuse(prev,v); m.querySelector('#nwNew').onclick=e=>{ e.currentTarget.disabled=true; clStartNew(null); }; }); }
 function cloudModal(){
   const code=clCode();
   if(!code){
     modal(`<h3>☁️ 클라우드 저장</h3><p style="margin:0 0 10px;font-size:14px;line-height:1.55">캐릭터와 아이템을 서버에 자동으로 저장해요. 폰을 바꾸거나 아이콘을 새로 만들어도 <b>복구 코드</b>만 입력하면 그대로 이어서 할 수 있어요.</p><div class="col"><button class="btn primary" id="clStart">☁️ 저장 시작하기 (코드 만들기)</button><button class="btn" id="clLoad">🔑 복구 코드로 불러오기</button><button class="btn" id="clX">닫기</button></div>`,m=>{
       m.querySelector('#clX').onclick=closeModal; m.querySelector('#clLoad').onclick=clLoadModal;
-      m.querySelector('#clStart').onclick=async()=>{ const b=m.querySelector('#clStart'); b.disabled=true; b.textContent='저장하는 중…'; const c=clGen();
-        try{ const res=await clRpc('dd_save_put',{p_code:c,p_data:clSnap(),p_ver:0}); if(res&&res.ok){ clHook=null; lsSet('dkdef2.cl.code',c); lsSet('dkdef2.cl.ver',String(res.ver)); lsSet('dkdef2.cl.at',res.at||new Date().toISOString()); clHook=clDirty; cloudModal(); clShowNew(c); } else { b.textContent='저장하지 못했어요 · 다시 눌러보세요'; b.disabled=false; } }
-        catch(e){ b.textContent='연결 실패 · 다시 눌러보세요'; b.disabled=false; } }; });
+      m.querySelector('#clStart').onclick=async()=>{ const b=m.querySelector('#clStart'); b.disabled=true; b.textContent='확인하는 중…';
+        const prev=lsGet('dkdef2.cl.prev')||''; let v=null;
+        if(prev){ try{ v=await clRpc('dd_save_ver',{p_code:prev}); }catch(e){ b.textContent='연결 실패 · 다시 눌러보세요'; b.disabled=false; return; } if(!v)lsDel('dkdef2.cl.prev'); }   /* 서버에 남아 있는 이전 저장본이 없으면 그냥 새로 시작 */
+        if(v){ clReuseModal(prev,v); return; }
+        clStartNew(b); }; });
     return; }
-  modal(`<h3>☁️ 클라우드 저장</h3><div style="text-align:center;margin:4px 0 10px"><div class="meta">내 복구 코드</div><div id="clCode" style="font-family:ui-monospace,Menlo,monospace;font-size:17px;font-weight:800;letter-spacing:.5px;color:#ffe27a;margin:4px 0;user-select:all;-webkit-user-select:all">${esc(code)}</div><div class="meta" style="font-size:12px">마지막 저장 · ${clFmt(clAt())}${clMsg==='fail'?' · <span style="color:#ff8a7a">연결이 불안정해요. 다시 시도할게요</span>':''}</div></div><div class="col"><button class="btn primary" id="clCp">코드 복사</button><button class="btn" id="clNow">지금 저장</button><button class="btn" id="clLoad">🔑 다른 코드로 불러오기</button><button class="btn" id="clOff">연결 해제</button><button class="btn" id="clX">닫기</button></div><p class="note" style="margin-top:8px">변경은 10초 안에 자동 저장돼요. 코드를 잃어버리면 복구할 수 없으니 메모앱 등에 꼭 적어 두세요.</p>`,m=>{
+  modal(`<h3>☁️ 클라우드 저장</h3><div style="text-align:center;margin:4px 0 10px"><div class="meta">내 복구 코드</div><div id="clCode" style="font-family:ui-monospace,Menlo,monospace;font-size:17px;font-weight:800;letter-spacing:.5px;color:#ffe27a;margin:4px 0;user-select:all;-webkit-user-select:all">${esc(code)}</div><div class="meta" style="font-size:12px">마지막 저장 · ${clFmt(clAt())}${clMsg==='fail'?' · <span style="color:#ff8a7a">연결이 불안정해요. 다시 시도할게요</span>':''}</div></div><div class="col"><button class="btn primary" id="clCp">코드 복사</button><button class="btn" id="clNow">지금 저장</button><button class="btn" id="clLoad">🔑 다른 코드로 불러오기</button><button class="btn" id="clOff">연결 해제</button><button class="btn" id="clX">닫기</button></div><p class="note" style="margin-top:8px">주기적으로 자동저장됩니다. ☆☆코드를 꼭 메모해 두세요☆☆.<br>저장데이터는 60일간 유지됩니다.</p>`,m=>{
     m.querySelector('#clX').onclick=closeModal; m.querySelector('#clLoad').onclick=clLoadModal;
     m.querySelector('#clCp').onclick=e=>clCopy(code,e.currentTarget);
-    m.querySelector('#clNow').onclick=async e=>{ const b=e.currentTarget; b.disabled=true; b.textContent='저장하는 중…'; if(clT){clearTimeout(clT);clT=0;} const r=await clPut(); if(r==='conflict'){ clConflict(); return; } closeModal(); cloudModal(); };
-    m.querySelector('#clOff').onclick=()=>modal(`<h3>연결을 해제할까요?</h3><p style="margin:0 0 12px;font-size:14px;line-height:1.5">이 기기는 더 이상 자동 저장하지 않아요. 서버에 저장된 데이터는 남아 있고, 코드로 다시 불러올 수 있어요.</p><div class="row2"><button class="btn" id="offN">취소</button><button class="btn primary" id="offY">해제</button></div>`,mm=>{ mm.querySelector('#offN').onclick=cloudModal; mm.querySelector('#offY').onclick=()=>{ clHook=null; if(clT){clearTimeout(clT);clT=0;} ['dkdef2.cl.code','dkdef2.cl.ver','dkdef2.cl.at'].forEach(lsDel); clHook=clDirty; cloudModal(); }; }); }); }
+    m.querySelector('#clNow').onclick=async e=>{ const b=e.currentTarget; b.disabled=true; b.textContent='저장하는 중…'; clCancel(); const r=await clPut(true); if(r==='conflict'){ clConflict(); return; } closeModal(); cloudModal(); };
+    m.querySelector('#clOff').onclick=()=>modal(`<h3>연결을 해제할까요?</h3><p style="margin:0 0 12px;font-size:14px;line-height:1.5">이 기기는 더 이상 자동 저장하지 않아요. 서버에 저장된 데이터는 남아 있고, 코드로 다시 불러올 수 있어요.</p><div class="row2"><button class="btn" id="offN">취소</button><button class="btn primary" id="offY">해제</button></div>`,mm=>{ mm.querySelector('#offN').onclick=cloudModal; mm.querySelector('#offY').onclick=()=>{ clHook=null; clCancel(); try{ localStorage.setItem('dkdef2.cl.prev',code); }catch(e){}   /* 다시 시작할 때 '이전 코드 그대로 사용'을 먼저 물어보려고 기억해 둬요 */
+      ['dkdef2.cl.code','dkdef2.cl.ver','dkdef2.cl.at','dkdef2.cl.h','dkdef2.cl.ph'].forEach(lsDel); clHook=clDirty; cloudModal(); }; }); }); }
 function clShowNew(c){ modal(`<h3>✅ 저장을 시작했어요</h3><p style="margin:0 0 8px;font-size:14px;line-height:1.55">아래가 <b>복구 코드</b>예요. 새 폰이나 새 아이콘에서 이 코드를 입력하면 캐릭터를 불러올 수 있어요. <b style="color:#ffb14a">메모앱 등에 꼭 적어 두세요.</b></p><div style="text-align:center;font-family:ui-monospace,Menlo,monospace;font-size:17px;font-weight:800;color:#ffe27a;margin:10px 0;user-select:all;-webkit-user-select:all">${esc(c)}</div><div class="row2"><button class="btn primary" id="ncCp">코드 복사</button><button class="btn" id="ncX">확인</button></div>`,m=>{ m.querySelector('#ncCp').onclick=e=>clCopy(c,e.currentTarget); m.querySelector('#ncX').onclick=closeModal; }); }
 function clLoadModal(){
   modal(`<h3>🔑 복구 코드로 불러오기</h3><p style="margin:0 0 8px;font-size:13.5px;line-height:1.5">저장해 둔 코드를 입력하세요. 불러오면 <b style="color:#ffb14a">이 기기의 현재 캐릭터는 서버 데이터로 바뀌어요.</b></p><input id="clIn" type="text" inputmode="text" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="DG-XXXXX-XXXXX-XXXXX-XXXXX" style="width:100%;box-sizing:border-box;padding:12px;border-radius:10px;border:1px solid var(--line2);background:#120e0b;color:#fff;font-size:15px;text-align:center;font-family:ui-monospace,Menlo,monospace"><div id="clErr" class="meta" style="color:#ff8a7a;min-height:18px;margin:6px 0"></div><div class="row2"><button class="btn" id="lcX">취소</button><button class="btn primary" id="lcGo">불러오기</button></div>`,m=>{

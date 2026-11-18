@@ -3,3 +3,8 @@
 -- dd_save_put(p_code, p_data, p_ver) : 저장 (새 코드는 p_ver=0, 기존은 마지막으로 받은 ver. 다르면 conflict)
 -- dd_save_get(p_code)                : 불러오기 → {ver, at, data}
 -- dd_save_ver(p_code)                : 버전만 확인
+--
+-- [압축 업로드] 저장은 Edge Function "dd-save-gz"(소스: supabase_save_gz.ts)로 gzip 압축해서 올리면 거기서 풀어 dd_save_put 으로 저장해요.
+--   (안 되는 기기·오류일 땐 클라이언트가 예전처럼 dd_save_put RPC 로 직접 올려요. 내려받기는 dd_save_get RPC 그대로.)
+-- [제외 키] 랭킹 캐시 dkdef2.rkc2.* 는 저장 대상이 아니에요(앱의 CLSKIP). 서버에 이미 들어 있던 rkc2 키는 2026-11-18 에 한 번 지웠어요:
+--   update dd_save set data=(select coalesce(jsonb_object_agg(e.key,e.value),'{}'::jsonb) from jsonb_each(dd_save.data) e where e.key not like 'dkdef2.rkc2.%') where exists (select 1 from jsonb_object_keys(dd_save.data) k where k like 'dkdef2.rkc2.%');
