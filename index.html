@@ -1537,7 +1537,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0815</div>
+    <div class="ver" id="verT">v0.7.2.0816</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -2556,7 +2556,15 @@ const ORES={   /* 광석: 이름 · 레벨(광부 레벨 기준) · 색 · g = �
   frost:{n:'서리 미스릴',lv:32,c:'#7fd8f0',g:1},    /* 용도 미정 */
   lava:{n:'용암 흑요석',lv:40,c:'#ff7a2a',g:1},     /* 용도 미정 */
   shadow:{n:'그림자 결정',lv:46,c:'#9a5ad8',g:1},   /* 용도 미정 */
-  star:{n:'별철',lv:52,c:'#ffcc4a',g:1} };          /* 상급 보석과 결합해 새 주얼을 만드는 재료 (결합 기능은 추후) */
+  star:{n:'별철',lv:52,c:'#ffcc4a',g:1},
+  jade:{n:'비취',lv:57,c:'#3fd07a',g:1},             /* 지하 6~9층: 층마다 새 광석 2종 · 5레벨 간격 */
+  amber:{n:'황독호박',lv:62,c:'#c6d83a',g:1},
+  sapphire:{n:'청옥',lv:67,c:'#3a7be0',g:1},
+  bone:{n:'백골석',lv:72,c:'#d8cdb0',g:1},
+  soul:{n:'영혼석',lv:77,c:'#a9c9ff',g:1},
+  thunder:{n:'뇌정석',lv:82,c:'#6ab4e8',g:1},
+  ember:{n:'멸화석',lv:87,c:'#e0442a',g:1},
+  core:{n:'심연핵',lv:92,c:'#c0284a',g:1} };          /* 상급 보석과 결합해 새 주얼을 만드는 재료 (결합 기능은 추후) */
 const ORE_OLD={stone:'ash',copper:'rust',iron:'grave',coal:'coal',silver:'silver',amethyst:'blood',mithril:'frost',obsidian:'lava'};   /* 시범 1차 조각 키 → 새 키 */
 const MINE_FL=[   /* 층: 지상 ↔ 입구(거점) ↔ 지하 — lvl = 들어갈 수 있는 광부 레벨 · 위층에서 가장 높은 광석이 다음 층에도 나와요 */
   {id:'f1',n:'지상 · 잿빛 채석장',lvl:1,ores:['ash','rust'],th:0,bg:'mine_f1'},
@@ -2564,7 +2572,11 @@ const MINE_FL=[   /* 층: 지상 ↔ 입구(거점) ↔ 지하 — lvl = 들어�
   {id:'b2',n:'지하 2층 · 달빛 동굴',lvl:20,ores:['coal','silver'],th:9,bg:'mine_b2'},
   {id:'b3',n:'지하 3층 · 핏빛 광맥',lvl:30,ores:['silver','blood','frost'],th:11,bg:'mine_b3'},
   {id:'b4',n:'지하 4층 · 갈라진 용암 갱',lvl:40,ores:['frost','lava'],th:13,bg:'mine_b4'},
-  {id:'b5',n:'지하 5층 · 그림자 심연',lvl:50,ores:['lava','shadow','star'],th:14,bg:'mine_b5'} ];   /* bg = 광산 배경 그림(img/키.jpg) · 없으면 th(스테이지 필드 번호)를 임시로 씀 */
+  {id:'b5',n:'지하 5층 · 그림자 심연',lvl:50,ores:['lava','shadow','star'],th:14,bg:'mine_b5'},
+  {id:'b6',n:'지하 6층 · 독안개 비취 광맥',lvl:60,ores:['star','jade','amber'],th:14,bg:'mine_b6'},
+  {id:'b7',n:'지하 7층 · 푸른 결정 동굴',lvl:70,ores:['amber','sapphire','bone'],th:14,bg:'mine_b7'},
+  {id:'b8',n:'지하 8층 · 백골의 묘지',lvl:80,ores:['bone','soul','thunder'],th:14,bg:'mine_b8'},
+  {id:'b9',n:'지하 9층 · 뇌전의 균열',lvl:90,ores:['thunder','ember','core'],th:14,bg:'mine_b9'} ];   /* bg = 광산 배경 그림(img/키.jpg) · 없으면 th(스테이지 필드 번호)를 임시로 씀 */
 const MSP={rainbow:{n:'무지개 보석',lv:1,c:'#c9a6ff',sp:1,hits:15},pile:{n:'광석더미',lv:1,c:'#ffcc4a',sp:1,hits:17}};   /* 특수광석(일반 광석 자리와 별도의 '특수 자리'에서만 생김): 고정 타수 · 1.5배 크기 · 조각 대신 보상 묶음 */
 const MINE_SP={b4:{k:'rainbow',pr:.01,say:[[['어? 어디선가 '],['무지갯빛',1],['이']],[['번쩍이는데…!?']]]},   /* pr = 일반 광석 1개 캘 때마다 특수광석이 생길 확률 */
   b5:{k:'pile',pr:.005,say:[[['저 어둠 속에서 묵직한']],[['광석 냄새가… '],['광석더미',1],['다!']]]}};
