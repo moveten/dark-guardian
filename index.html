@@ -1448,6 +1448,11 @@ body.mining #mineOut{position:fixed;left:50%;transform:translateX(-50%);bottom:c
 #mqCard{pointer-events:auto;cursor:pointer;-webkit-tap-highlight-color:transparent;margin:6px 0 0 auto;width:max-content;max-width:100%;padding:7px 10px 8px;border-radius:10px;background:rgba(20,15,11,.22);border:1px solid rgba(214,170,78,.35);font-size:11.5px;line-height:1.45;color:#f1e3c4;white-space:nowrap}   /* 배경은 거의 투명, 글자는 또렷하게(외곽선) · 가로는 글자 길이에 맞춤 */
 #mqCard,#mqCard b,#mqCard div{text-shadow:-1px 0 #000,1px 0 #000,0 -1px #000,0 1px #000,0 0 4px #000}   /* NPC 퀘스트 카드 (이번 획득 아래) */
 #mqCard[hidden]{display:none}
+#mqCard .chip{display:inline-block;padding:0 6px;border-radius:999px;background:#3a2a10;border:1px solid #d6aa4e;color:#ffe9b0;font-weight:800}
+#mqCard .loc{color:#bfa77a}
+#mqCard .rd{pointer-events:auto;margin-top:6px;padding:3px 10px;border-radius:999px;border:1px solid #d6aa4e;background:#3a2a10;color:#ffe9b0;font-size:11.5px;font-weight:800;text-shadow:none}
+.mqLt{padding:18px 18px 14px;background:linear-gradient(#e9d9b4,#d8c18f);color:#3a2a14;border:2px solid #8a6a2e;border-radius:6px;box-shadow:inset 0 0 40px rgba(120,80,20,.25);font-family:serif}
+.mqLt h4{margin:0 0 10px;font-size:15px;color:#6a4a1a;border-bottom:1px dashed #8a6a2e;padding-bottom:6px}.mqLt p{margin:0 0 8px;font-size:15px;line-height:1.65;color:#3a2a14}.mqLt .sg{text-align:right;font-size:14px;color:#6a4a1a;margin-top:10px}
 #mqCard.col{width:44px;height:44px;padding:0;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;position:relative;text-shadow:none}
 #mqCard.col svg{position:absolute;inset:-1px;width:46px;height:46px;transform:rotate(-90deg);pointer-events:none}   /* 접은 모습: 두루마리 아이콘 + 진행률 링 */
 #mqCard b{display:block;font-size:12px;color:#ffe9b0;margin-bottom:2px}
@@ -1537,7 +1542,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0821</div>
+    <div class="ver" id="verT">v0.7.2.0822</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -5353,6 +5358,10 @@ const STSP={
  qe:{n:'엘리네',t:'은세공사',img:'img/npc_eline_talk.png',c:'#cfe0f2'},
  qc:{n:'크로우 할멈',t:'까마귀 점쟁이',img:'img/npc_crow_talk.png',c:'#c58cff'},
  qb:{n:'브락',t:'대장장이',img:'img/npc_brak_talk.png',c:'#ff9a5a'},
+ qh:{n:'하엘',t:'의무관',img:'img/npc_haell_talk.png',c:'#b8e08a'},   /* 지하 6~9층 NPC (관리자 전용) */
+ qk:{n:'카이',t:'측량사',img:'img/npc_kai_talk.png',c:'#8fb8ff'},
+ qm:{n:'마리엔',t:'장례 사제',img:'img/npc_marien_talk.png',c:'#e8e0c8'},
+ qv:{n:'벨가르',t:'공명 장치 기술자',img:'img/npc_belgar_talk.png',c:'#ffb15a'},
  qs:{n:'세라핀',t:'기록관의 망령',img:'img/npc_serafin_talk.png',c:'#9fd0ff'},   /* say:1 = 말하는 그림이 없는(또는 어색한) NPC → 대기 그림이 말하는 동안 살짝 들썩여요 */
  ml:{n:'말렉',t:'역병 사제',img:'img/mob_malek.png',c:'#9fd36a'},
  mg:{n:'모르그',t:'썩은 군주',img:'img/mob_morg.png',c:'#d49a6a'},
@@ -7384,6 +7393,10 @@ const MNPC={
   qc:{n:'크로우 할멈',t:'까마귀 점쟁이',fl:3,h:94,x:VX+160,y:250,img:'img/npc_crow.png',tk:'img/npc_crow_talk.png',no:'까악! 내 얘기는 끝났어. 용암 쪽에 가서 대장장이나 찾아봐, 까악.'},
   qb:{n:'브락',t:'대장장이',fl:4,h:86,x:VX-150,y:250,img:'img/npc_brak.png',tk:'img/npc_brak_talk.png',no:'크하하! 더 시킬 일은 없다! 밑에 있는 기록관한테 내 안부나 전해 줘라!'},
   qs:{n:'세라핀',t:'기록관의 망령',fl:5,h:102,x:VX+140,y:240,img:'img/npc_serafin.png',tk:'img/npc_serafin_talk.png',no:'…기록은 여기까지입니다. 이 아래는 아직 아무도 적지 않았습니다.'},
+  qh:{n:'하엘',t:'의무관',fl:6,h:96,x:VX-150,y:250,img:'img/npc_haell.png',tk:'img/npc_haell_talk.png',no:'…해독제는 모자라지 않아요. 아래층의 카이를 부탁해요. 그 사람, 나침반만 보다가 쓰러질 거예요.'},
+  qk:{n:'카이',t:'측량사',fl:7,h:96,x:VX+150,y:250,img:'img/npc_kai.png',tk:'img/npc_kai_talk.png',no:'도면은 거의 완성됐어요! 아래층에 마리엔 할머니가 계세요. 무덤 자리를 아시는 분이에요!'},
+  qm:{n:'마리엔',t:'장례 사제',fl:8,h:104,x:VX-150,y:250,img:'img/npc_marien.png',tk:'img/npc_marien_talk.png',no:'노래는 계속될 거란다. 아래층의 벨가르를 만나 보렴. 성질은 급해도 마음은 따뜻한 사람이야.'},
+  qv:{n:'벨가르',t:'공명 장치 기술자',fl:9,h:100,x:VX+140,y:250,img:'img/npc_belgar.png',tk:'img/npc_belgar_talk.png',no:'장치는 울고 있다. 이 아래는… 아직 열리지 않았다. 문이 열릴 때를 기다려라.'},
 };
 const MQ=[
   {id:'g1',np:'qg',n:'첫 곡괭질',req:[['mine','ash',20]],r:.4,
@@ -7462,6 +7475,60 @@ const MQ=[
    ask:[['qs','마지막 장을 복원하려면 별철 백오십 개와 그림자 결정 백오십 개가 필요합니다.'],['qs','두 광석은 같은 곳에서 나옵니다. 그 이유는 마지막 장에 적혀 있습니다.']],
    rem:[['qs','별철 조각 백오십 개, 그림자 결정 조각 백오십 개. 복원을 기다리고 있습니다.']],
    done:[['qs','…복원되었습니다. 읽어 드리겠습니다.'],['qs','별은 이 땅에 떨어진 것이 아닙니다. 무언가를 눌러 두려고 올려놓은 뚜껑이었습니다.'],['qs','오르벤은 그 뚜껑을 깨뜨렸습니다. 사고가 아니라 의도였습니다.'],['qs','그는 아직 더 아래에 있습니다. 이 기록은 아직 끝나지 않았습니다.']]},
+  /* ── 지하 6층 · 하엘 (차분하고 지친 의료인 말투) ── */
+  {id:'h1',np:'qh',n:'독안개 시료',req:[['give','jade',100]],r:.4,
+   ask:[['qh','…숨, 쉬고 계신가요? 이 아래는 독안개가 떠 있어요. 마스크 끈을 단단히 매세요.'],['qh','저는 하엘, 광산 의무대 소속이에요. 붕괴 뒤에 사람들을 찾으러 내려왔다가 이 층에서 발이 묶였어요.'],['qh','이 층 비취는 독을 빨아들여요. 비취 조각 백 개만 모아 주세요. 시료로 쓸게요.']],
+   rem:[['qh','비취 조각 백 개예요. 숨은 얕게, 천천히 쉬면서 하세요.']],
+   done:[['qh','…고맙습니다. 안개 속 독이 비취에 스며드는 게 보이죠?'],['qh','이 독은 원래 이 땅에 없던 거예요. 별이 깨질 때 새어 나온 거예요.'],['qh','세라핀 기록관의 말이 사실이라면… 독의 흐름이 위에서 아래가 아니라, 아래에서 위로 올라오는 것도 이해가 돼요.']]},
+  {id:'h2',np:'qh',n:'해독 약초',req:[['mine','amber',80]],r:.6,
+   ask:[['qh','해독제를 만들려면 황독호박 가루가 필요해요. 독이 든 호박인데, 독으로 독을 눌러요.'],['qh','황독호박을 여든 개만 캐 주세요. 캘 때 가루를 들이마시지 마세요.']],
+   rem:[['qh','황독호박 여든 개예요. 마스크, 꼭 쓰시고요.']],
+   done:[['qh','…충분해요. 이걸로 해독제를 스무 병은 만들 수 있어요.'],['qh','숨이 붙어 있는 사람이 아래에 더 있을지도 몰라요. 아니… 있어야 해요.']]},
+  {id:'h3',np:'qh',n:'해독제 배달',req:[['carry']],r:1,to:'qk',ow:1,ic:'🧪',iv:'해독제 상자',
+   ask:[['qh','해독제가 완성됐어요. 한 상자를 아래층의 카이에게 전해 주시겠어요? 측량사인데, 독안개를 마시면서도 나침반만 보고 있대요.'],['qh','제 부탁이라고 하시면 마스크부터 쓰라고 해 주세요. 그리고 아직 숨 쉬는 게 놀랍다고 전해 주세요.'],['qh','상자는 지하 7층의 카이에게 직접 건네주세요.']],
+   rem:[['qh','해독제 상자는 지하 7층의 카이에게 전해 주세요. 병이 깨지지 않게 조심해서요.']],
+   dl:[['qk','어? 그건… 하엘 씨가 보낸 거예요? 해독제? 저를 위해서요?'],['qk','…솔직히 며칠째 머리가 어지러웠어요. 나침반 바늘이 자꾸 흔들려서 제가 흔들리는 줄 알았는데!'],['qk','고맙다고 전해 주세요. 마스크는 쓰고 있었다고요! …반만요.']]},
+  /* ── 지하 7층 · 카이 (젊고 호기심 많은, 조금 허둥대는 말투) ── */
+  {id:'k1',np:'qk',n:'무너진 측량점',req:[['give','sapphire',100]],r:.4,
+   ask:[['qk','아, 새로 오셨어요? 저는 카이, 측량사예요! 조합이 남긴 지도를 다시 그리고 있어요.'],['qk','그런데 이 동굴 청옥이 이상해요. 나침반이 청옥 근처에서만 같은 방향으로 돌거든요. 청옥 조각 백 개만 모아 주세요!']],
+   rem:[['qk','청옥 조각 백 개예요! 이 푸른 결정이 방향을 알려 주는 것 같거든요!']],
+   done:[['qk','역시! 청옥 조각을 모아 놓으면 바늘이 전부 한 방향을 가리켜요. …아래쪽이요.'],['qk','별이 깨진 자리로요. 그 아래엔 뭔가 있어요. 조합이 일부러 파고 내려간 길이 있다는 뜻이에요.']]},
+  {id:'k2',np:'qk',n:'측량사의 안부',req:[['carry']],r:.6,to:'qh',ic:'✉️',iv:'카이의 편지',
+   lt:{h:'카이 → 하엘',p:['하엘 씨에게.','해독제 잘 마셨어요. 머리가 맑아지니 지도의 빈 곳이 보이기 시작했어요.','마스크는 이제 전부 쓸게요. 약속해요. 그러니 하엘 씨도 쉬엄쉬엄 하세요. 아래에서는 하엘 씨 같은 사람이 제일 먼저 쓰러지거든요.'],s:'— 카이'},
+   ask:[['qk','부탁이 하나 있어요. 위층의 하엘 씨한테 편지를 전해 주세요. 직접 가고 싶은데 지도를 그리는 중이라…'],['qk','해독제 고마웠다는 인사예요. 글씨가 엉망이니까 읽어 보고 웃지 마세요!']],
+   rem:[['qk','하엘 씨는 지하 6층에 있어요. 편지는 구겨지지 않게요!']],
+   dl:[['qh','…편지? 카이가요?'],['qh','…글씨가 엉망이네요. 하지만 마스크를 전부 쓴다는 건 믿어 볼게요.'],['qh','답장은 말로 전해 주세요. 「약속 지켜요」라고요. 그리고 쉬엄쉬엄 못 한다는 것도 알고 있다고요.']],
+   done:[['qk','어, 전해 주셨어요? 하엘 씨가 뭐래요?'],['qk','…「약속 지켜요」? 아하하, 이런, 저 마스크를 또 벗었는데 어떻게 알았지!'],['qk','쓸게요, 쓸게요! 고마워요. 심부름 값은 제가 아는 가장 좋은 지름길로 대신할게요!']]},
+  {id:'k3',np:'qk',n:'측량 도면 전하기',req:[['carry']],r:1,to:'qm',ow:1,ic:'🗺️',iv:'측량 도면 두루마리',
+   ask:[['qk','마지막 부탁이에요. 제가 그린 도면이에요. 아래층의 장례 사제 마리엔 할머니한테 가져다주세요.'],['qk','도면에 무덤 자리가 전부 표시돼 있어요. 조합이 묻어 둔 사람들이 어디 있는지요. 그분이 오랫동안 찾던 거예요.'],['qk','지하 8층이에요. 할머니는 느리게 말씀하시니까 끝까지 들어 드리세요!']],
+   rem:[['qk','도면은 지하 8층의 마리엔 할머니에게 전해 주세요. 두루마리는 접지 마세요!']],
+   dl:[['qm','…이 종이 냄새. 사람 손때가 묻었구나. 젊은 측량사가 그렸니?'],['qm','아…… 여기. 이 점. 내 남편 이름이 적혀 있던 자리야.'],['qm','…고맙구나. 오래 걸렸어. 아주 오래. 노래를 부르며 기다린 보람이 있어.'],['qm','젊은 측량사에게 전해 주렴. 부끄러워하지 말고 어깨를 펴라고.']]},
+  /* ── 지하 8층 · 마리엔 (느리고 다정한 노인 말투) ── */
+  {id:'m1',np:'qm',n:'뼈의 이름',req:[['give','bone',100]],r:.4,
+   ask:[['qm','…어서 오렴. 발밑 조심하고, 여기는 사람들이 쉬는 곳이란다.'],['qm','나는 마리엔. 장례를 맡던 사제야. 이름 없이 묻힌 이들의 뼈를 하나씩 거두고 있어.'],['qm','백골석 조각 백 개만 모아 주렴. 뼈가 돌이 된 것인데, 그 안에 이름이 남아 있단다.']],
+   rem:[['qm','백골석 조각 백 개란다. 서두르지 말고, 마음으로 모으렴.']],
+   done:[['qm','고맙구나. 들어 보렴, 돌 속에서 아주 작은 소리가 나지?'],['qm','이름들이야. 별이 깨지던 날 아래로 내려간 사람들의 이름. 조합 광부 스물세 명이 돌아오지 못했단다.']]},
+  {id:'m2',np:'qm',n:'영혼의 등불',req:[['mine','soul',80]],r:.6,
+   ask:[['qm','영혼석은 죽은 이를 떠나보낼 때 등불로 쓴단다. 영혼석을 여든 개만 캐 주렴.'],['qm','캐는 동안 노래가 들려도 놀라지 말고. 두려워할 소리가 아니야.']],
+   rem:[['qm','영혼석 여든 개란다. 노래가 들려도 괜찮아.']],
+   done:[['qm','…이제 등불을 켤 수 있겠구나. 오늘 밤은 조금 덜 외롭겠어.'],['qm','그 노래를 들었다고 했지? 땅속의 노래. 그건 노래가 아니란다.'],['qm','누군가 두드리는 소리야. 아주 오랫동안, 같은 박자로.']]},
+  {id:'m3',np:'qm',n:'악보 배달',req:[['carry']],r:1,to:'qv',ow:1,ic:'🎼',iv:'땅속의 노래 악보',
+   ask:[['qm','부탁이 하나 있구나. 내가 받아 적은 노래의 악보란다. 아래층의 벨가르에게 전해 주렴.'],['qm','그 기술자는 장치로 소리를 만지는 사람이야. 같은 박자를 장치로 만들면, 이 소리가 어디서 들려오는지 알 수 있을지도 몰라.'],['qm','지하 9층이란다. 성질이 급한 사람이지만, 마음은 따뜻해.']],
+   rem:[['qm','악보는 지하 9층의 벨가르에게 전해 주렴. 번개 소리에 놀라지 말고.']],
+   dl:[['qv','흥, 마리엔 할멈이 보냈다고? 이리 내 봐라.'],['qv','…이 박자. 이건 두드리는 박자다. 오 초에 세 번, 쉬고 한 번.'],['qv','엘리네 도면에 적힌 공명 박자와 똑같다. 우연일 리가 없지.'],['qv','할멈한테 전해라. 고맙다고. 아니, 그냥 「받았다」고만 해라. 낯간지럽다.']]},
+  /* ── 지하 9층 · 벨가르 (거칠고 투박한 기술자 말투) ── */
+  {id:'v1',np:'qv',n:'뇌정석 시험',req:[['give','thunder',100]],r:.4,
+   ask:[['qv','왔나? 이 번개가 안 무섭나? 흥, 보기보단 배짱이 있군.'],['qv','나는 벨가르다. 공명 장치를 만드는 기술자지. 이 균열의 번개를 장치 동력으로 쓴다.'],['qv','뇌정석 조각 백 개 가져와라. 시험할 게 있다.']],
+   rem:[['qv','뇌정석 조각 백 개다! 감전되지 않게 장갑 끼고 해라!']],
+   done:[['qv','좋아, 전류가 안정적이다. 이 돌은 두드린 박자를 기억한다.'],['qv','마리엔 할멈이 준 박자를 넣어 보니… 돌이 같이 울리는군. 아래에서 누가 두드리고 있는 게 맞다.']]},
+  {id:'v2',np:'qv',n:'불씨 점화',req:[['mine','ember',80]],r:.6,
+   ask:[['qv','다음은 멸화석이다. 불을 꺼도 안에서 계속 타는 돌이지. 장치 심지로 쓴다.'],['qv','여든 개만 캐 와라. 불이 옮겨붙지 않게 조심하고!']],
+   rem:[['qv','멸화석 여든 개다! 불씨 튀기지 마라!']],
+   done:[['qv','좋아, 심지는 됐다. 엘리네한테 도면을 받아 간 게 나다. 이 장치를 설계한 것도.'],['qv','…오르벤이 주문했다. 별을 깨뜨리는 장치를. 나는 이유를 묻지 않았다. 지금도 그게 후회된다.']]},
+  {id:'v3',np:'qv',n:'마지막 공명',req:[['give','core',120],['give','ember',120]],r:1,
+   ask:[['qv','마지막이다. 장치를 다시 완성한다. 심연핵 백이십 개와 멸화석 백이십 개.'],['qv','이번엔 부수려고 만드는 게 아니다. 열려고 만드는 거다. 아래의 문을.'],['qv','…내가 만든 장치로 깨진 별이다. 끝까지 책임진다.']],
+   rem:[['qv','심연핵 백이십 개, 멸화석 백이십 개다. 한 개라도 모자라면 장치는 안 운다.']],
+   done:[['qv','…울린다. 들리나? 장치가 아래의 박자에 맞춰 울고 있다.'],['qv','더 아래에 문이 있다. 오르벤이 지키고 있는 문이. 조합장은 아직 거기 있다.'],['qv','가서 전해라. 장치를 완성했다고. 그리고… 벨가르가 아직도 미안해한다고.']]},
 ];
 const mqKeyAt=fi=>Object.keys(MNPC).find(k=>MNPC[k].fl===fi), mqNpcAt=fi=>MNPC[mqKeyAt(fi)];
 const mqS=()=>{ const m=me.mine||(me.mine={lv:1,xp:0}); const q=m.q||(m.q={d:{},a:'',p:0,o:0}); if(!q.d)q.d={};
@@ -7469,19 +7536,23 @@ const mqS=()=>{ const m=me.mine||(me.mine={lv:1,xp:0}); const q=m.q||(m.q={d:{},
   return q; };
 const mqAct=()=>{ const q=me&&me.mine&&me.mine.q; return q&&q.a?(MQ.find(x=>x.id===q.a)||null):null; };
 const mqNext=k=>{ const d=(me&&me.mine&&me.mine.q&&me.mine.q.d)||{}; return MQ.find(q=>q.np===k&&!d[q.id])||null; };
-const mqTg=r=>r[0]==='lv'||r[0]==='gem'?r[1]:r[0]==='open'?1:r[2];
-const mqHave=(r,S)=>Math.min(mqTg(r),r[0]==='mine'||r[0]==='gem'?(S.p|0):r[0]==='give'?(mqS().g[r[1]]|0):r[0]==='lv'?minerLv(me):(S.o?1:0));
+const mqTg=r=>r[0]==='lv'||r[0]==='gem'?r[1]:r[0]==='open'||r[0]==='carry'?1:r[2];
+const mqHave=(r,S)=>Math.min(mqTg(r),r[0]==='mine'||r[0]==='gem'?(S.p|0):r[0]==='give'?(mqS().g[r[1]]|0):r[0]==='lv'?minerLv(me):r[0]==='carry'?(S.v?1:0):(S.o?1:0));
 const mqOk=q=>{ const S=mqS(); return q.req.every(r=>mqHave(r,S)>=mqTg(r)); };
-const mqTx=(r,S)=>{ const h=mqHave(r,S), t=mqTg(r); return r[0]==='mine'?`${OREX(r[1]).n} ${h}/${t}개 캐기`:r[0]==='gem'?`하급 보석 ${h}/${t}개 얻기`:r[0]==='give'?`${ORES[r[1]].n} 조각 ${h}/${t}`:r[0]==='lv'?`광부 Lv ${h}/${t}`:`조합법 ${h?'확인함':'열어 보기'}`; };
-const MQ_ORD=['qg','qt','qe','qc','qb','qs'];
+const mqTx=(r,S)=>{ const h=mqHave(r,S), t=mqTg(r); return r[0]==='mine'?`${OREX(r[1]).n} ${h}/${t}개 캐기`:r[0]==='gem'?`하급 보석 ${h}/${t}개 얻기`:r[0]==='give'?`${ORES[r[1]].n} 조각 ${h}/${t}`:r[0]==='lv'?`광부 Lv ${h}/${t}`:r[0]==='carry'?(q=>`${q.iv} → ${MNPC[q.to].n}에게 ${h?'전함':'전하기'}`)(mqAct()||MQ.find(x=>x.to&&x.req.includes(r))||{iv:'',to:'qg'}):`조합법 ${h?'확인함':'열어 보기'}`; };
+const MQ_ORD=['qg','qt','qe','qc','qb','qs','qh','qk','qm','qv'];
 const MQ_LK={   /* 이전 층 퀘스트를 다 끝내지 않고 찾아왔을 때 NPC가 하는 말 */
   qt:[['qt','어, 새로 오셨어요? 위에서 그라크 반장님 일은 다 끝내고 오신 거예요?'],['qt','반장님 부탁부터 마치고 오세요! 순서대로 하셔야 저도 제대로 도와드릴 수 있어요.']],
   qe:[['qe','…위층에 아직 할 일이 남아 있는 것 같네요. 토비의 부탁부터 마무리하고 오세요.'],['qe','순서를 건너뛰면 제 이야기를 이해하기 어려울 거예요.']],
   qc:[['qc','까악! 위층 은세공 아가씨 일을 아직 안 끝냈구먼, 까악.'],['qc','순서 건너뛰는 사람한텐 점도 안 쳐 줘! 끝내고 다시 와, 까악!']],
   qb:[['qb','크하하! 이제 막 도착한 모양이군! 그런데 위층 할멈 일은 끝내고 온 거냐?'],['qb','끝내고 와라! 그때 제대로 얘기해 주지!']],
-  qs:[['qs','…기록에 빈 곳이 있습니다. 위층 브락의 의뢰가 아직 끝나지 않았습니다.'],['qs','순서대로 오십시오. 기록은 순서가 전부입니다.']]};
+  qs:[['qs','…기록에 빈 곳이 있습니다. 위층 브락의 의뢰가 아직 끝나지 않았습니다.'],['qs','순서대로 오십시오. 기록은 순서가 전부입니다.']],
+  qh:[['qh','…위층의 세라핀 기록관 일이 아직 남은 것 같네요. 마무리하고 오세요.'],['qh','독안개는 기다려 줘요. 사람은 기다려 주지 못하지만요.']],
+  qk:[['qk','어, 하엘 씨 일을 아직 안 끝내셨네요? 해독제부터 전해 주세요!'],['qk','순서를 건너뛰면 제 지도가 엉망이 돼요!']],
+  qm:[['qm','…위층에서 아직 할 일이 남았구나. 젊은 측량사의 부탁부터 마치고 오렴.'],['qm','서두르지 않아도 돼. 죽은 이들은 기다리는 데 익숙하단다.']],
+  qv:[['qv','흥, 위층 할멈의 일이 끝나지 않았군. 그거부터 하고 와라.'],['qv','순서를 어기면 장치가 안 운다. 기술자는 순서를 어기는 걸 제일 싫어한다.']]};
 const mqLocked=k=>{ const i=MQ_ORD.indexOf(k); return i>0&&!!mqNext(MQ_ORD[i-1]); };   /* 바로 윗층 NPC의 퀘스트가 남아 있으면 잠김 */
-const mqMark=k=>{ const a=mqAct(); if(a&&a.np===k)return mqOk(a)?'?':''; return mqNext(k)&&!mqLocked(k)?'!':''; };
+const mqMark=k=>{ const a=mqAct(); if(a&&a.to===k&&!mqS().v)return '?'; if(a&&a.np===k)return mqOk(a)?'?':''; return mqNext(k)&&!mqLocked(k)?'!':''; };
 function mqMine(k,n){ const q=mqAct(); if(!q)return; if(q.req.some(r=>r[0]==='mine'&&r[1]===k))mqS().p=(mqS().p|0)+n; mqGive(k,n,q); }
 function mqGive(k,n,q){ q=q||mqAct(); if(q&&q.req.some(r=>r[0]==='give'&&r[1]===k)){ const g=mqS().g; g[k]=(g[k]|0)+n; } }   /* 퀘스트를 받은 뒤 캔 조각만 세요 (가방에 있던 건 상관없이) */
 function mqGem(n){ const q=mqAct(); if(q&&q.req.some(r=>r[0]==='gem'))mqS().p=(mqS().p|0)+n; }   /* 달빛 은에서 하급 보석이 나올 때 */
@@ -7491,23 +7562,29 @@ function mqHud(){ const el=$('#mqCard'); if(!el)return; const q=G.mine&&me?mqAct
   if(!el._ck){ el._ck=1; const tog=()=>{ mqCol=!mqCol; sfx('ui'); el._k=''; mqHud(); };   /* 손가락을 대는 순간(pointerdown) 바로 반응 — 다른 게임 버튼들과 같은 방식. click은 마우스·키보드용 보조(같은 탭에서 두 번 처리되지 않게 막아요) */
     el.addEventListener('pointerdown',e=>{ e.stopPropagation(); el._pd=performance.now(); tog(); }); el.addEventListener('click',()=>{ if(performance.now()-(el._pd||-9e3)<700)return; tog(); }); }
   const S=mqS(), ok=mqOk(q); if(el._q!==q.id||el._ok!==ok){ if(el._q!==undefined)mqCol=false; el._q=q.id; el._ok=ok; }
-  const key=q.id+'|'+ok+'|'+mqCol+'|'+q.req.map(r=>mqHave(r,S)).join(','); if(el._k===key&&!el.hidden)return; el._k=key;
+  const key=q.id+'|'+ok+'|'+mqCol+'|'+(G.mine?G.mine.fi:'')+'|'+q.req.map(r=>mqHave(r,S)).join(','); if(el._k===key&&!el.hidden)return; el._k=key;
   const pr=Math.min(1,q.req.reduce((a,r)=>a+Math.min(1,mqHave(r,S)/mqTg(r)),0)/q.req.length); el.hidden=false; el.classList.toggle('dn',ok); el.classList.toggle('col',mqCol);
   if(mqCol){ el.innerHTML=`📜<svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="20" fill="none" stroke="#2a2119" stroke-width="3"/><circle cx="22" cy="22" r="20" fill="none" stroke="${ok?'#9be88a':'#d6aa4e'}" stroke-width="3" stroke-dasharray="125.6" stroke-dashoffset="${(125.6*(1-pr)).toFixed(1)}" stroke-linecap="round"/></svg>`; return; }
-  el.innerHTML=`<b>📜 ${q.n}${ok?' · 완료!':''}</b>${ok?`${MNPC[q.np].n}에게 가서 보고하세요`:q.req.map(r=>`<div>${mqTx(r,S)}</div>`).join('')}<div class="bar"><i style="width:${Math.round(pr*100)}%"></i></div>`; }
+  if(q.to&&!ok){ const tf=MNPC[q.to].fl, dd=tf-(G.mine?G.mine.fi:tf);   /* 배달 퀘스트 카드: 무엇을 누구에게 · 어느 층 */
+    el.innerHTML=`<b>${q.ic||'📦'} ${q.n}</b><div>${q.iv} → <span class="chip">${MNPC[q.to].n}</span></div><div class="loc">📍 지하 ${tf}층 · ${dd===0?'이 층에 있어요':dd>0?dd+'층 아래':(-dd)+'층 위'}</div><div class="bar"><i style="width:0%"></i></div>${q.lt?'<button type="button" class="rd">📖 편지 읽기</button>':''}`;
+    const rb=el.querySelector('.rd'); if(rb){ rb.addEventListener('pointerdown',e=>e.stopPropagation()); rb.addEventListener('click',e=>{ e.stopPropagation(); mqLetter(q); }); } return; }
+  el.innerHTML=`<b>${q.to?(q.ic||'📦'):'📜'} ${q.n}${ok?' · 완료!':''}</b>${ok?`${MNPC[q.np].n}에게 가서 보고하세요`:q.req.map(r=>`<div>${mqTx(r,S)}</div>`).join('')}<div class="bar"><i style="width:${Math.round(pr*100)}%"></i></div>`; }
 function mqTick(){ const M=G.mine, bt=$('#mqTalk'); if(!M||!me||!bt)return; const k=mqKeyAt(M.fi); let near=false;
   if(k&&!stS&&!me.dead){ const N=MNPC[k]; near=hyp(me.x-N.x,me.y-N.y)<=100; }
   if(near!==M._qn){ M._qn=near; bt.hidden=!near; if(near)bt.textContent='💬 말 걸기'; } }
 function mqSay(ls,ask,fin,lb){ const el=$('#sty'); stS={ls,i:-1,kind:'npc',solo:true,pz:true,foe:null,full:'',n:0,ch:me,ask:!!ask,fin,lb}; el.hidden=false; el.classList.remove('nb'); G.paused=true; for(const k in held)held[k]=false; joy.active=false; storyShow(0); }
 function mqTalk(){ const M=G.mine; if(!M||!me||stS)return; const k=mqKeyAt(M.fi); if(!k)return; const N=MNPC[k], act=mqAct(), q=mqNext(k); sfx('ui'); { const tb=$('#mqTalk'); tb.hidden=true; M._qn=false; }
+  if(act&&act.to===k&&!mqS().v){ mqSay(act.dl,0,()=>mqDeliver(act)); return; }   /* 배달 퀘스트: 받는 사람에게 말을 걸면 전달 */
   if(act&&act.np===k){ if(mqOk(act))mqSay(act.done,0,()=>mqTurn(act)); else if(act.opt)mqSay(act.rem,1,y=>{ if(y===false)mqSkip(act); },['계속하기','건너뛰기']); else mqSay(act.rem,0,null); }   /* 선택 퀘스트(확률): 계속하기 · 건너뛰기 */
   else if(q&&mqLocked(k))mqSay(MQ_LK[k],0,null);   /* 이전 층 퀘스트를 끝내야 받을 수 있어요 */
   else if(q)q.opt?mqSay(q.ask,1,y=>{ if(y)mqAccept(q); else if(y===false)mqSkip(q); },['수락','건너뛰기']):mqSay(q.ask,1,y=>{ if(y)mqAccept(q); });
   else mqSay([[k,N.no]],0,null); }
-function mqAccept(q){ const S=mqS(); S.a=q.id; S.p=0; S.o=0; S.g={}; saveChar(); mineHud(); sheetToast('📜 퀘스트 수락 · '+q.n,'#ffd98a'); }
-function mqSkip(q){ const S=mqS(); S.d[q.id]=1; if(S.a===q.id){ S.a=''; S.p=0; S.o=0; S.g={}; } saveChar(); mineHud(); sheetToast('📜 퀘스트 건너뜀 · '+q.n,'#c9b48a'); }   /* 경험치 없이 다음 퀘스트로 */
+function mqAccept(q){ const S=mqS(); S.a=q.id; S.p=0; S.o=0; S.v=0; S.g={}; saveChar(); mineHud(); sheetToast(q.to?`${q.ic||'📦'} ${q.iv} 받음 · ${MNPC[q.to].n}에게 전하세요`:'📜 퀘스트 수락 · '+q.n,'#ffd98a'); }
+function mqDeliver(q){ const S=mqS(); if(S.a!==q.id||S.v)return; S.v=1; saveChar(); sheetToast(`${q.ic||'📦'} ${q.iv} 전달 완료 · ${MNPC[q.to].n}`,'#9be88a'); if(q.ow)mqTurn(q); else mineHud(); }
+function mqLetter(q){ const L=q&&q.lt; if(!L)return; sfx('ui'); modal(`<div class="mqLt"><h4>✉️ ${esc(L.h)}</h4>${L.p.map(t=>`<p>${esc(t)}</p>`).join('')}<div class="sg">${esc(L.s)}</div></div><button class="btn primary" id="ltX" style="width:100%;margin-top:10px">닫기</button>`,m=>{ m.querySelector('#ltX').onclick=closeModal; }); }
+function mqSkip(q){ const S=mqS(); S.d[q.id]=1; if(S.a===q.id){ S.a=''; S.p=0; S.o=0; S.v=0; S.g={}; } saveChar(); mineHud(); sheetToast('📜 퀘스트 건너뜀 · '+q.n,'#c9b48a'); }   /* 경험치 없이 다음 퀘스트로 */
 function mqTurn(q){ const S=mqS(); if(S.a!==q.id||!mqOk(q))return; for(const r of q.req)if(r[0]==='give')oreTake(me,r[1],Math.min(r[2],oreCount(me,r[1])));   /* 캔 조각을 건네요 (그새 팔아서 모자라면 있는 만큼만) */
-  const rl=Math.min(MINE_MAXLV,MINE_FL[MNPC[q.np].fl].lvl+5); S.d[q.id]=1; S.a=''; S.p=0; S.o=0; S.g={}; const xp=Math.max(1,Math.round(mineNeed(rl)*q.r)); mineAddXp(xp,true); efx.push({k:'qxp',o:me,t:0,life:2.2,xp}); saveChar(); mineHud(); sfx('lvl'); }   /* 완료 보상은 머리 위에 「퀘스트 완료! +N EXP」 글자로 */
+  const rl=Math.min(MINE_MAXLV,MINE_FL[MNPC[q.np].fl].lvl+5); S.d[q.id]=1; S.a=''; S.p=0; S.o=0; S.v=0; S.g={}; const xp=Math.max(1,Math.round(mineNeed(rl)*q.r)); mineAddXp(xp,true); efx.push({k:'qxp',o:me,t:0,life:2.2,xp}); saveChar(); mineHud(); sfx('lvl'); }   /* 완료 보상은 머리 위에 「퀘스트 완료! +N EXP」 글자로 */
 const NPC_IMG={}; const npcImg=k=>{ let im=NPC_IMG[k]; if(!im){ im=NPC_IMG[k]=new Image(); im.decoding='async'; im.onerror=()=>{ if((NPC_IMG[k+'_n']=(NPC_IMG[k+'_n']|0)+1)<=4)setTimeout(()=>{ delete NPC_IMG[k]; npcImg(k); },1500); }; im.src=MNPC[k].img; } return im.complete&&im.naturalWidth?im:null; };
 const npcWarm=()=>{ for(const k in MNPC){ npcImg(k); const t=new Image(); t.src=MNPC[k].tk; } };   /* NPC 그림(서 있는 그림 · 대화 그림) 미리 불러오기 */
 let fl2=true;
