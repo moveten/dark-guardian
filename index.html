@@ -1545,7 +1545,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0825</div>
+    <div class="ver" id="verT">v0.7.2.0826</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -8192,6 +8192,7 @@ function smithModal(st){
   if(!S.smith){ modal(`<h3>🏗️ 장인의 집</h3><p style="margin:0 0 8px;font-size:13px;line-height:1.6">장인의 집을 지으면 장비에 <b>소켓</b>을 만들 수 있어요.<br>🔨 <b>소켓 뚫기</b>: 무기·갑옷·투구에 빈 소켓 1개<br>♻ <b>소켓 비우기</b>: 박힌 보석을 빼요 (보석은 사라지고 빈 소켓이 남아요)</p><p class="meta" style="margin:0 0 8px;font-size:13px">건설 비용 <b style="color:#ffd34d">💰 ${f(SMITH_BUILD)}G</b> · 보유 <b style="color:${gold>=SMITH_BUILD?'#9fe08a':'#ff8a7a'}">${f(gold)}G</b></p><div class="row2"><button class="btn" id="smX">닫기</button><button class="btn primary" id="smGo"${gold>=SMITH_BUILD?'':' disabled style="opacity:.5"'}>${gold>=SMITH_BUILD?'🏗️ 건설':'골드 부족'}</button></div>`,m=>{
       m.querySelector('#smX').onclick=closeModal; m.querySelector('#smGo').onclick=()=>{ const r=smithBuild(); closeModal(); if(r==='ok'){ sfx('rare'); townMsg='🏗️ 장인의 집 완공!'; } else townMsg=r==='lack'?'골드가 부족해요':'이미 지었어요'; renderTown(); }; }); return; }
   const P=smChar(); st=st||{tab:'dig',sel:null,ask:false};
+  if(st.tab==='swp'){ smSwap(P); return; }
   const worn=it=>Object.values(P.eq).includes(it);
   const gear=[...Object.values(P.eq).filter(it=>it&&SMITH_SLOTS.includes(it.slot)),...P.inv.filter(it=>it&&SMITH_SLOTS.includes(it.slot)&&!it.mat).sort((a,b)=>(b.rar|0)-(a.rar|0)||(b.ilvl|0)-(a.ilvl|0))];
   if(st.sel&&(!gear.includes(st.sel)||!smOk(st.sel,st.tab)))st.sel=null;
@@ -8200,7 +8201,7 @@ function smithModal(st){
   let cells=''; cellPlain=true; try{ cells=gear.map((it,i)=>{ const ok=smOk(it,tab); return `<div data-gi="${i}" style="position:relative;${ok?'':'opacity:.28;filter:grayscale(.6);'}${it===sel?'outline:2px solid #ffd84a;outline-offset:1px;border-radius:9px;':''}">${cellHtml(it,'cell','style="width:100%"')}${worn(it)?'<i style="position:absolute;left:3px;top:2px;font-size:9px;font-style:normal;background:#2a5a8a;color:#fff;border-radius:3px;padding:0 3px;pointer-events:none">착용</i>':''}${it.sk?`<i style="position:absolute;right:3px;bottom:2px;font-size:11px;font-style:normal;pointer-events:none">${it.gm?'💎':'◇'}</i>`:''}</div>`; }).join(''); }finally{ cellPlain=false; }
   const tb=(k,t)=>`<button class="btn sm" data-tab="${k}" style="flex:1;${tab===k?'border-color:#c9a24a;background:rgba(201,162,74,.18);font-weight:800':''}">${t}</button>`;
   const ask=st.ask&&can&&tab==='clr';
-  modal(`<h3>🔨 장인의 집</h3><p class="meta" style="margin:0 0 6px;font-size:12px">보유 골드 <b style="color:#ffd34d">💰 ${f(gold)}G</b> · ${esc(dispName(P))}의 가방·착용 장비</p><div style="display:flex;gap:4px;margin:0 0 8px">${tb('dig','소켓 뚫기')}${tb('clr','소켓 비우기')}</div>
+  modal(`<h3>🔨 장인의 집</h3><p class="meta" style="margin:0 0 6px;font-size:12px">보유 골드 <b style="color:#ffd34d">💰 ${f(gold)}G</b> · ${esc(dispName(P))}의 가방·착용 장비</p><div style="display:flex;gap:4px;margin:0 0 8px">${tb('dig','소켓 뚫기')}${tb('clr','소켓 비우기')}${tb('swp','보석 바꾸기')}</div>
     ${gear.length?`<div class="smg" style="display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin:0 0 8px;padding:3px;max-height:196px;overflow-y:auto;overscroll-behavior:contain">${cells}</div>`:'<p class="meta" style="margin:0 0 8px">무기·갑옷·투구가 없어요</p>'}
     <div class="smd" style="border:1px solid var(--line2);border-radius:9px;background:#14100d;padding:8px 10px;font-size:12.5px;min-height:48px">${sel?itemLines(sel,tab==='dig'?{skNew:1}:{skTag:' <b style="color:#ff8a7a;font-size:11px">'+'보석 사라짐'+'</b>'}):`<span class="meta">${tab==='dig'?'소켓을 뚫을 장비가 없어요 (이미 소켓이 있거나 대상이 아니에요)':'보석이 박힌 장비가 없어요'}</span>`}</div>
     <div class="row2" style="margin-top:10px"><button class="btn" id="smX">닫기</button><button class="btn primary" id="smGo"${can?'':' disabled style="opacity:.5"'}${ask?' style="background:#a62a22;border-color:#ff6a5a;color:#fff"':''}>${!sel?'대상 없음':!can?'골드 부족 💰 '+f(cost)+'G':ask?'⚠️ 한 번 더 누르면 비워요':(tab==='dig'?'🔨 소켓 뚫기':'♻ 소켓 비우기')+' 💰 '+f(cost)+'G'}</button></div>`,m=>{
@@ -8214,6 +8215,37 @@ function smithModal(st){
       if(tab==='dig'){ sel.sk=1; sel.gm=null; } else { sel.gm=null; }   /* 비우기: 보석만 제거, 빈 소켓은 남음 */
       if(worn(sel)){ const hr=P.hp/P.D.maxHp, mr=P.mp/P.D.maxMp; P.D=derive(P); P.hp=P.D.maxHp*hr; P.mp=P.D.maxMp*mr; }
       saveSrc(P); sfx('rare'); toast(tab==='dig'?`🔨 소켓을 뚫었어요: ${sel.name}`:`♻ 보석을 뺐어요 (보석은 사라지고 빈 소켓이 남았어요): ${sel.name}`,'#ffd84a'); smithModal({tab,sel:null,ask:false}); renderTown(); }; }); }
+/* ===== 보석 바꾸기(장인의 집 3번째 탭): 상급 보석 1개를 다른 종류의 상급 보석 1개로 교체 — 100,000G. 주얼·잠긴 보석은 제외.
+   고른 보석(내어줄/받을)은 바꾼 뒤에도 그대로 남아요(smSw) — 내어줄 보석이 다 떨어졌을 때만 내어줄 칸이 비어요 ===== */
+const SM_SWAP=100000; let smSw={give:null,get:null};
+function smSwap(P){
+  const f=n=>n.toLocaleString('ko-KR'), gold=aGold(); miscFix(P);
+  const okG=x=>x&&isGem(x)&&!x.jw&&gemTier(x)===3&&!x.lock;
+  const have={}; for(const x of P.misc)if(okG(x))have[x.gk]=(have[x.gk]|0)+gnOf(x);
+  if(smSw.give&&!have[smSw.give])smSw.give=null;   /* 다 바꿔서 없어지면 내어줄 칸만 비워요 */
+  if(smSw.get&&smSw.get===smSw.give)smSw.get=null;
+  const total=GEM_KINDS.reduce((a,k)=>a+(have[k]|0),0), gi=smSw.give?mkGem(smSw.give,3):null, ge=smSw.get?mkGem(smSw.get,3):null, can=!!(gi&&ge&&gold>=SM_SWAP);
+  const tb=(k,t)=>`<button class="btn sm" data-tab="${k}" style="flex:1;${k==='swp'?'border-color:#c9a24a;background:rgba(201,162,74,.18);font-weight:800':''}">${t}</button>`;
+  const slot=(g,lbl)=>`<div style="text-align:center"><div style="width:76px;height:76px;border-radius:12px;border:1px ${g?'solid #b89a5a':'dashed #6a5a3c'};background:#1a150f;display:flex;align-items:center;justify-content:center;margin:0 auto">${g?`<img src="${gemPng(g)}" style="width:56px;height:56px;object-fit:contain">`:'<span style="font-size:28px;color:#6a5a48">+</span>'}</div><div style="font-size:11.5px;margin-top:4px;color:${g?GEM_C[g.gk]:'#8a7a68'};font-weight:700">${g?'상급 '+GEM_N[g.gk]:lbl}</div></div>`;
+  const chips=GEM_KINDS.map(k=>{ const dis=k===smSw.give, on=k===smSw.get; return `<div data-get="${k}" style="position:relative;width:46px;height:46px;border-radius:10px;border:1px solid ${on?'#b89a5a':'#3d3322'};background:${on?'#2a2214':'#1a150f'};display:flex;align-items:center;justify-content:center;opacity:${dis?.3:1};filter:${dis?'grayscale(1)':'none'};cursor:pointer"><img src="${gemPng(mkGem(k,3))}" style="width:34px;height:34px;object-fit:contain">${dis?'<i style="position:absolute;right:2px;top:-1px;font-style:normal;font-size:12px;color:#ff8a7a">✕</i>':''}</div>`; }).join('');
+  const bag=GEM_KINDS.filter(k=>have[k]).map(k=>{ const on=k===smSw.give; return `<div data-give="${k}" style="position:relative;width:46px;height:46px;border-radius:10px;border:1px solid ${on?'#b89a5a':'#3d3322'};background:${on?'#2a2214':'#1a150f'};display:flex;align-items:center;justify-content:center;cursor:pointer"><img src="${gemPng(mkGem(k,3))}" style="width:34px;height:34px;object-fit:contain">${have[k]>1?`<i style="position:absolute;right:3px;bottom:0;font-style:normal;font-size:11px;font-weight:700;color:#fff;text-shadow:0 0 3px #000,0 0 3px #000">${have[k]}</i>`:''}</div>`; }).join('');
+  modal(`<h3>🔨 장인의 집</h3><p class="meta" style="margin:0 0 6px;font-size:12px">보유 골드 <b style="color:#ffd34d">💰 ${f(gold)}G</b></p><div style="display:flex;gap:4px;margin:0 0 8px">${tb('dig','소켓 뚫기')}${tb('clr','소켓 비우기')}${tb('swp','보석 바꾸기')}</div>
+    <div style="text-align:center;font-size:12px;color:#a99a7e;margin-bottom:10px">상급 보석 1개를 다른 종류의 상급 보석 1개로 바꿔요</div>
+    <div style="display:flex;gap:10px;justify-content:center;align-items:flex-start;margin-bottom:10px">${slot(gi,'내어줄 보석')}<div style="align-self:center;font-size:24px;color:#e0b860;margin-top:-14px">➜</div>${slot(ge,'받을 보석')}</div>
+    <div style="font-size:12px;color:#a99a7e;margin-bottom:4px">받을 보석 고르기 <span style="color:#6a5a48">(내어줄 종류는 선택 불가)</span></div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:10px">${chips}</div>
+    <div style="border:1px solid #3d3322;background:#1a150f;border-radius:12px;padding:8px 12px;font-size:13px;line-height:1.6;margin-bottom:10px">${gi&&ge?`<div style="color:#9fd0ff">바꾸면</div><div style="color:${GEM_C[gi.gk]}">상급 ${GEM_N[gi.gk]} <span style="color:#afeeee">${esc(gemOptText(gi))}</span></div><div style="text-align:center;color:#8a7a68;line-height:1">▼</div><div style="color:${GEM_C[ge.gk]}">상급 ${GEM_N[ge.gk]} <span style="color:#afeeee">${esc(gemOptText(ge))}</span></div>`:'<div class="meta">내어줄 보석과 받을 보석을 고르면 효과가 어떻게 바뀌는지 보여 줘요</div>'}</div>
+    <div style="font-size:12px;color:#a99a7e;margin-bottom:4px">가진 상급 보석 ${total}개 <span style="color:#6a5a48">(눌러서 내어줄 보석 고르기 · 잠긴 보석 제외)</span></div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">${bag||'<div style="color:#8a7a68;font-size:12px;padding:6px 0">바꿀 수 있는 상급 보석이 없어요 (잠긴 보석·주얼은 제외)</div>'}</div>
+    <div class="row2"><button class="btn" id="smX">닫기</button><button class="btn primary" id="smGo"${can?'':' disabled style="opacity:.5"'}>${!gi?'내어줄 보석을 골라요':!ge?'받을 보석을 골라요':gold<SM_SWAP?'골드 부족 💰 '+f(SM_SWAP)+'G':'💎 바꾸기 💰 '+f(SM_SWAP)+'G'}</button></div>`,m=>{
+    m.classList.add('smm');
+    m.querySelector('#smX').onclick=closeModal;
+    m.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{ if(b.dataset.tab!=='swp')smithModal({tab:b.dataset.tab,sel:null,ask:false}); });
+    m.querySelectorAll('[data-give]').forEach(d=>d.onclick=()=>{ const k=d.dataset.give; smSw.give=smSw.give===k?null:k; if(smSw.get===smSw.give)smSw.get=null; sfx('ui'); smSwap(P); });
+    m.querySelectorAll('[data-get]').forEach(d=>d.onclick=()=>{ const k=d.dataset.get; if(k===smSw.give){ toast('내어줄 보석과 같은 종류로는 바꿀 수 없어요','#ffb259'); return; } smSw.get=smSw.get===k?null:k; sfx('ui'); smSwap(P); });
+    const go=m.querySelector('#smGo'); if(go)go.onclick=()=>{ if(!can)return;
+      const i=P.misc.findIndex(x=>okG(x)&&x.gk===smSw.give);
+      if(i<0||aGold()<SM_SWAP){ toast('보석이나 골드가 바뀌었어요. 다시 골라 주세요','#ffb259'); smSwap(P); return; }
+      aPayGold(SM_SWAP); gemUse(P,i,1); const ng=mkGem(smSw.get,3); ng.isNew=1; if(gemFit(P,ng)>=1)gemPut(P,ng,1,true); else P.misc.push(ng);
+      saveSrc(P); uiDirty=true; sfx('rare'); toast(`💎 상급 ${GEM_N[smSw.give]} → 상급 ${GEM_N[smSw.get]}로 바꿨어요`,'#ffd84a'); smSwap(P); renderTown(); }; }); }
 /* ===== 소켓에 보석 박기: 가방 기타 탭에서 보석 → [소켓에 박기] → 장비품 화면에서 빈 소켓이 있는 장비를 고르면 확인 후 박혀요 (박은 보석은 되돌릴 수 없음, 소켓을 비우면 보석은 사라짐) ===== */
 const gemTgt=it=>!!(it&&it.sk&&!it.gm&&SMITH_SLOTS.includes(it.slot)&&!it.mat);
 const gemSockN=()=>me.inv.filter(gemTgt).length+Object.values(me.eq).filter(gemTgt).length;
