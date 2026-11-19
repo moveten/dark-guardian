@@ -1465,6 +1465,7 @@ body.mining #mqTalk:after{content:'';position:absolute;top:50%;width:11px;height
 body.mining #mqTalk.fl:after{right:-6px;border-left:0;border-bottom:0;transform:rotate(45deg)}   /* NPC가 오른쪽(말풍선 왼쪽 배치) */
 body.mining #mqTalk.fr:after{left:-6px;border-right:0;border-top:0;transform:rotate(45deg)}
 #mqTalk[hidden]{display:none!important}
+.mkr.more{-webkit-mask-image:linear-gradient(#000 calc(100% - 26px),transparent);mask-image:linear-gradient(#000 calc(100% - 26px),transparent)}.mkr .cats{position:sticky;top:0;z-index:2;background:var(--panel);padding-top:2px;padding-bottom:8px;margin-bottom:2px}   /* 조합법 창: 크기를 고정하고 목록만 안쪽에서 스크롤 — 카테고리 칩은 위에 붙어 있고, 아래에 더 있으면 흐려짐 */
 body.mining #drBtn{position:fixed;left:0;top:0;z-index:5;pointer-events:auto;padding:7px 14px;border-radius:999px;font-size:14px;font-weight:800;white-space:nowrap;border:1.5px solid #ff9a4a;background:#3a1c10;color:#ffe2c0;box-shadow:0 0 14px rgba(255,138,58,.6);will-change:transform}   /* 별의 문: 멸화석 바치기 버튼 (문 앞에 뜸) */
 #drBtn[hidden],#drLook[hidden]{display:none!important}
 body.mining #drLook{position:fixed;left:0;top:0;z-index:5;pointer-events:auto;padding:5px 12px;border-radius:999px;font-size:12px;font-weight:800;white-space:nowrap;border:1.5px solid #8a7a58;background:#2a2218;color:#e8d8b0;will-change:transform}   /* 문양 힌트 보기 */
@@ -1547,7 +1548,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0838</div>
+    <div class="ver" id="verT">v0.7.2.0839</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -7665,15 +7666,17 @@ function mineRecipes(o){
   mqOpen(); o=o||{}; let cat=o.only||'all', open=-1;
   const gemOk=(m,x)=>isGem(x)&&(!(m[1]||m[3])||(!x.jw&&!x.lock&&(!m[1]||x.gk===m[1])&&(!m[3]||gemTier(x)===m[3])));   /* ['gem',종류(0=아무),개수,등급(없으면 아무)] — 종류·등급을 정하면 주얼·잠긴 보석은 제외 */
   const have=m=>m[0]==='ore'?oreCount(me,m[1]):m[0]==='gem'?gemCnt(me,x=>gemOk(m,x)):aGold(), nmOf=m=>m[0]==='ore'?'Lv'+ORES[m[1]].lv+' '+ORES[m[1]].n+' 조각':m[0]==='gem'?(m[1]?`${m[3]?GEM_TIER[m[3]-1].n+' ':''}${GEM_N[m[1]]}`:`${m[3]?GEM_TIER[m[3]-1].n+' ':''}보석 (같은 종류)`):'골드';
-  const draw=m=>{
+  const mkMore=k=>k.classList.toggle('more',k.scrollHeight-k.scrollTop-k.clientHeight>6);   /* 아래에 더 있으면 아래쪽이 흐려져요 */
+  const draw=m=>{ const k0=m.querySelector('.mkr'), st0=k0.scrollTop;
     const list=MINE_RECIPES.map((r,i)=>[r,i]).filter(([r])=>cat==='all'||r.cat===cat);
     m.querySelector('.mkr').innerHTML=(o.only?'':`<div class="cats">${MINE_RCATS.map(c=>`<button type="button" data-c="${c[0]}" class="${c[0]===cat?'on':''}">${c[1]}</button>`).join('')}</div>`)+
     (list.length?list.map(([r,i])=>{ const ok=!r.lock&&r.mat.every(x=>have(x)>=x[2]);
       const bd=r.lock?'<span class="bd l">🔒 잠김</span>':ok?'<span class="bd g">가능</span>':'<span class="bd r">재료 부족</span>';
       return `<div class="it ${r.lock?'lkd':''}"><div class="hd" data-i="${i}"><img src="${r.img}" alt=""><div><div class="nm">${r.n}</div><div class="ds">${r.ds}</div></div>${bd}</div>`+
       (open===i&&!r.lock?`<div class="dt">${r.mat.map(x=>{ const h=have(x),g=h>=x[2]; return `<div class="r"><span>${nmOf(x)}</span><span class="${g?'ok':'no'}">${x[0]==='gold'?h.toLocaleString():h} / ${x[0]==='gold'?x[2].toLocaleString()+'G':x[2]}</span></div>`; }).join('')}${(r.fx||[]).length?`<button type="button" class="pib" data-pi="${i}">ⓘ ${r.pet?'🐾 펫':r.cat==='jewel'?'💠 주얼':'⛏️ 곡괭이'} 정보 보기</button>`:''}${r.cat==='jewel'?`<button type="button" class="btn primary" data-jw="1" style="width:100%;margin-top:8px">💠 주얼 합성하기</button>`:''}${r.pet?`<button type="button" class="btn primary" data-mk="${i}" ${ok&&!petHas(me,r.pet)?'':'disabled'} style="width:100%;margin-top:8px">${petHas(me,r.pet)?'이미 가지고 있어요':'🐾 만들기'}</button>`:r.pk?`<button type="button" class="btn primary" data-mk="${i}" ${ok&&!pickHas(me,r.pk)?'':'disabled'} style="width:100%;margin-top:8px">${pickHas(me,r.pk)?'이미 가지고 있어요':'⛏️ 만들기'}</button>`:''}</div>`:'')+`</div>`; }).join(''):'<div style="text-align:center;color:#8a7a68;padding:24px 0">아직 준비 중이에요</div>');
+    k0.scrollTop=st0; mkMore(k0); if(!k0._mm){ k0._mm=1; k0.addEventListener('scroll',()=>mkMore(k0),{passive:true}); }
     m.querySelectorAll('.cats button').forEach(b=>b.onclick=()=>{ const c=MINE_RCATS.find(x=>x[0]===b.dataset.c); if(c[2])return toast('아직 준비 중이에요'); cat=b.dataset.c; open=-1; draw(m); });
-    m.querySelectorAll('.hd').forEach(h=>h.onclick=()=>{ const i=+h.dataset.i; open=open===i?-1:i; draw(m); });
+    m.querySelectorAll('.hd').forEach(h=>h.onclick=()=>{ const i=+h.dataset.i; open=open===i?-1:i; draw(m); if(open===i){ const e=m.querySelector('.mkr .hd[data-i="'+i+'"]'); if(e)e.closest('.it').scrollIntoView({block:'nearest'}); } });
     m.querySelectorAll('[data-jw]').forEach(b=>b.onclick=ev=>{ ev.stopPropagation(); sfx('ui'); closeModal(); jewelCombine(()=>mineRecipes(o)); });   /* 주얼은 같은 종류 상급 보석 3개를 고르는 창에서 합성 */
     m.querySelectorAll('[data-pi]').forEach(b=>b.onclick=ev=>{ ev.stopPropagation(); const r=MINE_RECIPES[+b.dataset.pi]; if(!r||!r.fx)return;   /* 펫 정보 팝업 (조합법 위에 겹쳐 뜸 — 확인·바깥을 누르면 닫혀서 조합법 상태가 그대로 유지) */
       const v=document.createElement('div'); v.className='pipop'; v.innerHTML=`<div class="pic"><h3>${r.n} · ${r.ds.split(' · ')[0]}</h3>${r.fx.map(t=>`<div class="fx">• ${t}</div>`).join('')}<button type="button" class="btn primary">확인</button></div>`;
@@ -7686,7 +7689,8 @@ function mineRecipes(o){
       if(r.pk){ const it=mkPick(r.pk), k=me.inv.indexOf(null); it.isNew=1; me.inv[k]=it; recalc(); saveChar(); uiDirty=true; mineHud(); sfx('rare'); toast(`⛏️ 「${it.name}」을(를) 만들었어요 (가방)`,RARC[it.rar]); draw(m); return; }
       const g=petGive(me,r.pet); if(G.inGame)petStart(); recalc(); saveChar(); mineHud(); sfx('rare'); toast(`🐾 ${PETS[r.pet].rn} 펫 「${PETS[r.pet].n}」${g===1?'과(와) 함께 다녀요':'을(를) 만들었어요 (펫 보관함)'}`,PETS[r.pet].col); draw(m); });
   };
-  modal(`${o.back?'<button type="button" class="btn" id="mkB" style="margin-bottom:8px">‹ 뒤로</button>':''}<h3 style="margin:0 0 10px;text-align:center">${o.title||'📜 조합법'}</h3><div class="mkr"></div><div style="font-size:11px;color:#8a7a68;margin-top:8px;text-align:center">${o.only?'재료가 모이면 「만들기」를 눌러요':'곡괭이·펫·주얼 모두 이 창에서 만들 수 있어요'}</div>`,m=>{ draw(m); const bb=m.querySelector('#mkB'); if(bb)bb.onclick=()=>{ closeModal(); o.back(); }; });
+  modal(`${o.back?'<button type="button" class="btn" id="mkB" style="margin-bottom:8px">‹ 뒤로</button>':''}<h3 style="margin:0 0 10px;text-align:center">${o.title||'📜 조합법'}</h3><div class="mkr"></div><div style="font-size:11px;color:#8a7a68;margin-top:8px;text-align:center">${o.only?'재료가 모이면 「만들기」를 눌러요':'곡괭이·펫·주얼 모두 이 창에서 만들 수 있어요'}</div>`,m=>{ draw(m); { const cd=m.querySelector('.card'), h=Math.min(cd.offsetHeight,innerHeight-28); cd.style.cssText+=`;height:${h}px;max-height:${h}px;display:flex;flex-direction:column;overflow:hidden`; const k=cd.querySelector('.mkr'); k.style.cssText+=';flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain'; mkMore(k); }   /* 펼쳐도 창 크기는 그대로 → 바깥을 눌러 닫을 수 있어요 */
+    const bb=m.querySelector('#mkB'); if(bb)bb.onclick=()=>{ closeModal(); o.back(); }; });
 }
 /* ===== 주얼 조합 (관리자 모드): 같은 종류 상급 보석 3개 + 광석 조각 → 주얼 1개. 색 주얼 90% / 칠흑 주얼 10%. 재료·확률은 이 표만 고치면 돼요 ===== */
 const JW_MAKE={same:.40, mat:[['rust',50],['frost',50],['star',100]], black:.10};
