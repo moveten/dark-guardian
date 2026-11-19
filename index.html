@@ -1547,7 +1547,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0832</div>
+    <div class="ver" id="verT">v0.7.2.0833</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -6566,7 +6566,6 @@ function rsAsk(onOk,onNo){
     const inp=m.querySelector('#rsPw'); setTimeout(()=>{ try{ inp.focus(); }catch(e){} },60);
     const go=()=>{ const v=inp.value.trim(); if(!rsPwOk(v)){ m.querySelector('#rsMsg').textContent='비밀번호가 올바르지 않아요'; inp.value=''; return; } onOk(v); };
     m.querySelector('#rsGo').onclick=go; inp.onkeydown=e=>{ if(e.key==='Enter')go(); }; m.querySelector('#rsNo').onclick=()=>{ closeModal(); if(onNo)onNo(); }; }); }
-const rsPw=cb=>{ const pw=lsGet(RS_PW); if(rsPwOk(pw))cb(pw); else rsAsk(v=>{ lsSet(RS_PW,v); cb(v); }); };   /* 다른 기기에서 클라우드로 이어받은 경우엔 한 번 더 물어봐요 */
 /* 출입 기록: charlogs.txt 는 서버(Supabase dd_charlog)에 쌓이고 [출입 기록]에서 그 형식 그대로 보여줘요. 못 보낸 기록은 기기에 남겨 뒀다가 나중에 다시 보내요 */
 const rsQ=()=>{ try{ const a=JSON.parse(lsGet(RS_Q)||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } };
 async function rsPost(o){ const r=await fetch(SB_URL+'/rest/v1/rpc/dd_lab_log',{method:'POST',headers:rkHead(),body:JSON.stringify({p_pw:o.pw,p_kind:o.k,p_names:String(o.n||'').slice(0,380),p_at:o.t})}); if(!r.ok)throw new Error('http '+r.status); const v=await r.json(); if(v!=='ok')throw new Error(String(v)); }
@@ -6577,15 +6576,16 @@ function rsGrant(pw){ lsSet(RS_PW,pw); rsLogAdd('in',pw); lsSet(RS_KEY,'1'); ver
 function rsExit(){
   modal(`<h3>🚪 나가기</h3><p style="margin:0 0 12px;font-size:14px;line-height:1.5">관리자 권한을 반납하고 연구실을 닫을까요?</p><div class="row2"><button class="btn" id="rxNo">취소</button><button class="btn primary" id="rxGo">반납하고 나가기</button></div>`,m=>{
     m.querySelector('#rxNo').onclick=closeModal;
-    m.querySelector('#rxGo').onclick=()=>rsPw(pw=>{ rsLogAdd('out',pw); lsDel(RS_KEY); lsDel(RS_PW); pprSet(0); verSync(); closeModal(); rerender(); sheetToast('🚪 관리자 권한을 반납했어요'); }); }); }
+    m.querySelector('#rxGo').onclick=()=>{ const pw=lsGet(RS_PW); if(rsPwOk(pw))rsLogAdd('out',pw);   /* 나가기는 비밀번호를 묻지 않아요 · 이 기기에 비밀번호가 없으면(복구 코드로 이어받은 경우) 반납 기록은 남기지 못해요 */
+      lsDel(RS_KEY); lsDel(RS_PW); pprSet(0); verSync(); closeModal(); rerender(); sheetToast('🚪 관리자 권한을 반납했어요'); }; }); }
 const rsPre='white-space:pre-wrap;word-break:break-word;font:12px/1.55 ui-monospace,Menlo,monospace;max-height:58vh;overflow:auto;margin:0 0 8px;padding:8px;background:#0a0807;border:1px solid var(--line2);border-radius:8px;touch-action:pan-y';
 function rsNotes(){
-  modal(`<h3>📔 관리자 노트</h3><pre id="rsT" style="${rsPre}">불러오는 중…</pre><div class="row2"><button class="btn" id="rnRe">🔄 새로고침</button><button class="btn primary" id="rnX">닫기</button></div>`,m=>{
+  rsAsk(pw=>{ lsSet(RS_PW,pw); modal(`<h3>📔 관리자 노트</h3><pre id="rsT" style="${rsPre}">불러오는 중…</pre><div class="row2"><button class="btn" id="rnRe">🔄 새로고침</button><button class="btn primary" id="rnX">닫기</button></div>`,m=>{
     m.querySelector('#rnX').onclick=closeModal;
     const load=()=>fetch('adminnotes.txt?'+Date.now(),{cache:'no-store'}).then(r=>{ if(!r.ok)throw 0; return r.text(); }).then(t=>{ m.querySelector('#rsT').textContent=t||'(비어 있어요)'; }).catch(()=>{ m.querySelector('#rsT').textContent='관리자 노트를 불러오지 못했어요. (오프라인이거나 서버 점검 중)'; });
-    m.querySelector('#rnRe').onclick=()=>{ m.querySelector('#rsT').textContent='불러오는 중…'; load(); }; load(); }); }
+    m.querySelector('#rnRe').onclick=()=>{ m.querySelector('#rsT').textContent='불러오는 중…'; load(); }; load(); }); }); }
 function rsLogView(){
-  rsPw(pw=>{ modal(`<h3>📜 출입 기록</h3><pre id="rsT" style="${rsPre}">불러오는 중…</pre><div class="row2"><button class="btn" id="rlRe">🔄 새로고침</button><button class="btn primary" id="rlX">닫기</button></div>`,m=>{
+  rsAsk(pw=>{ lsSet(RS_PW,pw); modal(`<h3>📜 출입 기록</h3><pre id="rsT" style="${rsPre}">불러오는 중…</pre><div class="row2"><button class="btn" id="rlRe">🔄 새로고침</button><button class="btn primary" id="rlX">닫기</button></div>`,m=>{
     m.querySelector('#rlX').onclick=closeModal;
     const line=(k,names,t,wait)=>k==='in'?`${rsStamp(t)}, 새로운 관리자가 권한을 획득하였습니다 - ${names}${wait?' (전송 대기)':''}`:`${rsStamp(t)}, ${names} - 관리자 권한을 반납했습니다.${wait?' (전송 대기)':''}`;
     const load=async()=>{ const el=m.querySelector('#rsT'); await rsFlush();
@@ -6600,9 +6600,9 @@ const rsClTxt=()=>'☁️ 클라우드 저장본 '+(rsClN==null?'?':rsClN)+'행 
 function rsClLabel(b){ const el=b&&b.querySelector('#rsCl'); if(!el)return; el.textContent=rsClTxt(); if(Date.now()-rsClT<20000)return; rsClT=Date.now();
   const pw=lsGet(RS_PW); if(!pw)return; clRpc('dd_lab_save_count',{p_pw:pw}).then(n=>{ if(typeof n==='number'){ rsClN=n; const e=document.querySelector('#rsCl'); if(e)e.textContent=rsClTxt(); } }).catch(()=>{}); }
 function rsSaveView(){
-  rsPw(pw=>{ modal(`<h3>☁️ 클라우드 저장본</h3><div style="font-size:12px;color:var(--mute);margin:-4px 0 8px">행을 펼치면 그 행의 내용이 클립보드에 복사돼요.</div><div id="scL" style="max-height:58vh;overflow:auto;margin:0 0 8px;touch-action:pan-y">불러오는 중…</div><div class="row2"><button class="btn" id="scRe">🔄 새로고침</button><button class="btn primary" id="scX">닫기</button></div>`,m=>{
+  rsAsk(pw=>{ lsSet(RS_PW,pw); modal(`<h3>☁️ 클라우드 저장본</h3><div style="font-size:12px;color:var(--mute);margin:-4px 0 8px">행을 펼치면 그 행의 내용이 클립보드에 복사돼요.</div><div id="scL" style="max-height:58vh;overflow:auto;margin:0 0 8px;touch-action:pan-y">불러오는 중…</div><div class="row2"><button class="btn" id="scRe">🔄 새로고침</button><button class="btn primary" id="scX">닫기</button></div>`,m=>{
     m.querySelector('#scX').onclick=closeModal;
-    const box=m.querySelector('#scL'), pre='white-space:pre-wrap;word-break:break-all;font:11px/1.5 ui-monospace,Menlo,monospace;max-height:44vh;overflow:auto;margin:6px 0 0;padding:8px;background:#0a0807;border:1px solid var(--line2);border-radius:8px;touch-action:pan-y';
+    const box=m.querySelector('#scL'), pre='white-space:pre-wrap;word-break:break-all;font:11px/1.5 ui-monospace,Menlo,monospace;max-height:33vh;overflow:auto;margin:6px 0 0;padding:8px;background:#0a0807;border:1px solid var(--line2);border-radius:8px;touch-action:pan-y';
     const load=async()=>{ box.textContent='불러오는 중…';
       try{ const L=await clRpc('dd_lab_save_list',{p_pw:pw}); if(!Array.isArray(L))throw 0; rsClN=L.length; rsClT=Date.now(); const e=document.querySelector('#rsCl'); if(e)e.textContent=rsClTxt();
         box.innerHTML=L.length?'':'저장된 행이 없어요.';
@@ -6614,7 +6614,7 @@ function rsSaveView(){
           sm.addEventListener('click',()=>{ if(d.open)return; const p=getTxt(), ok=()=>sheetToast(`📋 #${o.n} 행을 클립보드에 복사했어요`,'#9be88a'), no=()=>sheetToast('복사하지 못했어요 · 내용을 길게 눌러 복사하세요','#ffb08a');
             try{ navigator.clipboard.write([new ClipboardItem({'text/plain':p.then(t=>new Blob([t],{type:'text/plain'}))})]).then(ok,()=>p.then(t=>{ clCopy(t); ok(); }).catch(no)); }   /* 손가락을 댄 순간에 복사를 걸어 두면(불러오는 중에도) 막히지 않아요 */
             catch(e){ p.then(t=>{ clCopy(t); ok(); }).catch(no); } });
-          d.ontoggle=()=>{ if(d.open)getTxt().catch(()=>{}); };
+          d.ontoggle=()=>{ if(d.open){ getTxt().catch(()=>{}); requestAnimationFrame(()=>{ try{ d.scrollIntoView({block:'start',behavior:'smooth'}); }catch(e){ d.scrollIntoView(); } }); } };   /* 펼친 행이 보이도록 목록을 그 행 위치로 스크롤 */
           box.append(d); }); }
       catch(e){ box.textContent='저장본을 불러오지 못했어요. (오프라인이거나 서버 점검 중)'; } };
     m.querySelector('#scRe').onclick=load; load(); }); }); }
@@ -9422,6 +9422,7 @@ function step(now){
 }
 /* ===== 클라우드 저장 (복구 코드 · Supabase RPC dd_save_*) ===== */
 const CLA='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+let clNowAt=0;   /* '지금 저장'을 마지막으로 성공한 시각 — 300초 동안은 다시 못 눌러요 */
 let clT=0, clFirst=0, clBusy=false, clMsg='', clAgain=false, clGzOff=0;   /* clFirst = 아직 못 올린 변경이 처음 생긴 시각 · clAgain = 올리는 중에 또 올려 달라는 요청이 들어옴 · clGzOff = 압축 업로드가 안 될 때 이 시각까지 예전 방식 사용 */
 const clCode=()=>lsGet('dkdef2.cl.code')||'', clVer=()=>+(lsGet('dkdef2.cl.ver')||0), clAt=()=>lsGet('dkdef2.cl.at')||'';
 function clGen(){ const a=new Uint8Array(20); (window.crypto||window.msCrypto).getRandomValues(a); let t=''; for(let i=0;i<20;i++){ t+=CLA[a[i]%32]; if(i%5===4&&i<19)t+='-'; } return 'DG-'+t; }
@@ -9512,7 +9513,9 @@ function cloudModal(){
   modal(`<h3>☁️ 클라우드 저장</h3><div style="text-align:center;margin:4px 0 10px"><div class="meta">내 복구 코드</div><div id="clCode" style="font-family:ui-monospace,Menlo,monospace;font-size:17px;font-weight:800;letter-spacing:.5px;color:#ffe27a;margin:4px 0;user-select:all;-webkit-user-select:all">${esc(code)}</div><div class="meta" style="font-size:12px">마지막 저장 · ${clFmt(clAt())}${clMsg==='fail'?' · <span style="color:#ff8a7a">연결이 불안정해요. 다시 시도할게요</span>':''}</div></div><div class="col"><button class="btn primary" id="clCp">코드 복사</button><button class="btn" id="clNow">지금 저장</button><button class="btn" id="clLoad">🔑 다른 코드로 불러오기</button><button class="btn" id="clOff">연결 해제</button><button class="btn" id="clX">닫기</button></div><p class="note" style="margin-top:8px">주기적으로 자동저장됩니다. ☆☆코드를 꼭 메모해 두세요☆☆.<br>저장데이터는 60일간 유지됩니다.</p>`,m=>{
     m.querySelector('#clX').onclick=closeModal; m.querySelector('#clLoad').onclick=clLoadModal;
     m.querySelector('#clCp').onclick=e=>clCopy(code,e.currentTarget);
-    m.querySelector('#clNow').onclick=async e=>{ const b=e.currentTarget; b.disabled=true; b.textContent='저장하는 중…'; clCancel(); const r=await clPut(true); if(r==='conflict'){ clConflict(); return; } closeModal(); cloudModal(); };
+    m.querySelector('#clNow').onclick=async e=>{ const b=e.currentTarget; b.disabled=true; b.textContent='저장하는 중…'; clCancel(); const r=await clPut(true); if(r==='conflict'){ clConflict(); return; } if(r===true)clNowAt=Date.now(); closeModal(); cloudModal(); };
+    { const nb=m.querySelector('#clNow'), tick=()=>{ const left=299-Math.floor((Date.now()-clNowAt)/1000); if(!clNowAt||left<0){ clNowAt=0; nb.disabled=false; nb.textContent='지금 저장'; return false; } nb.disabled=true; nb.textContent=`지금 저장(${left}s)`; return true; };   /* 눌러서 저장하면 '지금 저장(299s)'로 바뀌고 1초마다 줄어들어요 */
+      if(tick()){ const iv=setInterval(()=>{ if(!nb.isConnected||!tick())clearInterval(iv); },1000); } }
     m.querySelector('#clOff').onclick=()=>modal(`<h3>연결을 해제할까요?</h3><p style="margin:0 0 12px;font-size:14px;line-height:1.5">이 기기는 더 이상 자동 저장하지 않아요. 서버에 저장된 데이터는 남아 있고, 코드로 다시 불러올 수 있어요.</p><div class="row2"><button class="btn" id="offN">취소</button><button class="btn primary" id="offY">해제</button></div>`,mm=>{ mm.querySelector('#offN').onclick=cloudModal; mm.querySelector('#offY').onclick=()=>{ clHook=null; clCancel(); try{ localStorage.setItem('dkdef2.cl.prev',code); }catch(e){}   /* 다시 시작할 때 '이전 코드 그대로 사용'을 먼저 물어보려고 기억해 둬요 */
       ['dkdef2.cl.code','dkdef2.cl.ver','dkdef2.cl.at','dkdef2.cl.h','dkdef2.cl.ph'].forEach(lsDel); clHook=clDirty; cloudModal(); }; }); }); }
 function clShowNew(c){ modal(`<h3>✅ 저장을 시작했어요</h3><p style="margin:0 0 8px;font-size:14px;line-height:1.55">아래가 <b>복구 코드</b>예요. 새 폰이나 새 아이콘에서 이 코드를 입력하면 캐릭터를 불러올 수 있어요. <b style="color:#ffb14a">메모앱 등에 꼭 적어 두세요.</b></p><div style="text-align:center;font-family:ui-monospace,Menlo,monospace;font-size:17px;font-weight:800;color:#ffe27a;margin:10px 0;user-select:all;-webkit-user-select:all">${esc(c)}</div><div class="row2"><button class="btn primary" id="ncCp">코드 복사</button><button class="btn" id="ncX">확인</button></div>`,m=>{ m.querySelector('#ncCp').onclick=e=>clCopy(c,e.currentTarget); m.querySelector('#ncX').onclick=closeModal; }); }
