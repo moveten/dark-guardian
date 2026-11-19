@@ -1547,7 +1547,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0837</div>
+    <div class="ver" id="verT">v0.7.2.0838</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -7845,6 +7845,14 @@ function b10Bg(){ const D=me&&me.mine&&me.mine.dr||{n:0}, key=D.n>=4?'o':String(
   if(D.n<4)for(let i=0;i<D.n;i++){ q.save(); q.beginPath(); q.arc(DOOR_GL[i][0],DOOR_GL[i][1],46,0,6.283); q.clip(); q.drawImage(B10.im.c,0,0,1000,1000); q.restore(); }   /* 밝힌 문양만 '열린 문' 그림에서 오려 붙여요 */
   q.globalCompositeOperation='destination-in'; const gr=q.createLinearGradient(0,0,0,150); gr.addColorStop(0,'rgba(0,0,0,0)'); gr.addColorStop(1,'#000'); q.fillStyle=gr; q.fillRect(0,0,1000,1000);   /* (destination-in은 칠한 곳 밖을 지우므로 한 번에 전체를 칠해요 — 그라데이션 끝색이 아래로 이어져요) */   /* 위쪽 그림과 150px 겹쳐서 서서히 이어요 */
   g.drawImage(t,0,DOOR_Y0); B10.key=key; return cv; }
+/* 10층 문 앞 레이어: 문 윗부분(아치)을 캐릭터 앞쪽에 한 번 더 겹쳐 그려서 '문 위로 올라선' 것처럼 보이지 않고 '문 뒤에 선' 것처럼 보이게 해요 (윗선은 거의 투명 → 아래로 갈수록 진해짐). 문 그림을 오려 둔 것은 문양이 바뀔 때만 다시 만들어요 */
+const B10F={cv:null,key:'',BX:240,BY:1290,W:520,H:400};
+function b10Front(){ const M=G.mine; if(!M||M.fi!==10||!me||me.y<1150||Math.abs(me.x-500)>330||!B10.cv)return;
+  const F=B10F; if(!F.cv||F.key!==B10.key){ const cv=F.cv||(F.cv=document.createElement('canvas')); cv.width=F.W; cv.height=F.H; const c=cv.getContext('2d'); c.globalCompositeOperation='source-over'; c.clearRect(0,0,F.W,F.H); c.drawImage(B10.cv,F.BX,F.BY,F.W,F.H,0,0,F.W,F.H);
+    const m=document.createElement('canvas'); m.width=F.W; m.height=F.H; const q=m.getContext('2d');
+    for(let x=0;x<F.W;x+=6){ const y0=1294+80*Math.pow((x+F.BX-500)/250,2)-F.BY, gr=q.createLinearGradient(0,y0,0,y0+110); gr.addColorStop(0,'rgba(0,0,0,.12)'); gr.addColorStop(1,'rgba(0,0,0,.8)'); q.fillStyle=gr; q.fillRect(x,y0,6.5,F.H-y0); }
+    c.globalCompositeOperation='destination-in'; c.drawImage(m,0,0); F.key=B10.key; }
+  ctx.drawImage(F.cv,F.BX,F.BY); }
 function drLight(i){ const x=DOOR_GL[i][0], y=DOOR_Y0+DOOR_GL[i][1], col=DOOR_COL[i];
   for(let k=0;k<4;k++)efx.push({k:'ring',x,y,r0:10,r1:80+k*26,t:0,life:.6+k*.08,col,w:6}); burst(x,y,col,26,300); sfx('rare'); G.flash=Math.max(G.flash||0,i===3?.6:.3);
   const n=i+1; banner(n>=4?'🚪 별의 문이 열렸어요!':'✨ 문양이 빛났어요',n>=4?'오랜 세월 닫혀 있던 문이…':`${n} / 4 · 다음: ${ORES[DOOR_ORE[n]].n}`); }
@@ -9392,7 +9400,7 @@ function render(t){
   if(ally&&!ally.lobby&&ally.mnv)for(const q of ally.mnv)actors.push({y:q.y,f:()=>drawMinion(q,t)});
   actors.sort((a,b)=>a.y-b.y); { let past=false; const gh=[]; for(const a of actors){ if(a.cas){ past=true; a.f(); continue; } a.f(); if(!past&&G.castle&&a.o&&a.o.x!==undefined&&Math.abs(a.o.x-VX)<CAS_W*.5+8&&a.y>VY-128)gh.push(a); }
     if(gh.length){ ctx.save(); ctx.globalAlpha=.5; for(const a of gh)a.f(); ctx.restore(); } }   /* 성 뒤에 가려진 몹·플레이어는 반투명하게 한 번 더 그려서 보이게 */
-  casAimTagsDraw(); drawProjs(); drawEfx(t); drawAmbient(t); if(PET.on&&PET.fx.length)drawPetFxTop();   /* 레벨업·스킬 이름표는 몹·성 위에 그려서 가려지지 않게 */
+  b10Front(); casAimTagsDraw(); drawProjs(); drawEfx(t); drawAmbient(t); if(PET.on&&PET.fx.length)drawPetFxTop();   /* 레벨업·스킬 이름표는 몹·성 위에 그려서 가려지지 않게 */
   drawHealFx(t);
   for(const p of parts){ if(p.glow)continue; if(p.puff){ const a=p.t/p.life, rr=p.r*(1+a*p.puff); ctx.globalAlpha=Math.pow(1-a,1.3)*p.pa; ctx.drawImage(puffSpr(),p.x-rr,p.y-rr*.8,rr*2,rr*1.6); continue; } ctx.globalAlpha=1-p.t/p.life; ctx.fillStyle=p.col; ctx.fillRect(p.x-p.r/2,p.y-p.r/2,p.r,p.r);} ctx.globalAlpha=1;
   ctx.globalCompositeOperation='lighter';
