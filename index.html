@@ -1547,7 +1547,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0834</div>
+    <div class="ver" id="verT">v0.7.2.0835</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -8208,7 +8208,7 @@ function smithModal(st){
   const S=getStore(), f=n=>n.toLocaleString('ko-KR'), gold=aGold();
   if(!S.smith){ modal(`<h3>🏗️ 장인의 집</h3><p style="margin:0 0 8px;font-size:13px;line-height:1.6">장인의 집을 지으면 장비에 <b>소켓</b>을 만들 수 있어요.<br>🔨 <b>소켓 뚫기</b>: 무기·갑옷·투구에 빈 소켓 1개<br>♻ <b>소켓 비우기</b>: 박힌 보석을 빼요 (보석은 사라지고 빈 소켓이 남아요)</p><p class="meta" style="margin:0 0 8px;font-size:13px">건설 비용 <b style="color:#ffd34d">💰 ${f(SMITH_BUILD)}G</b> · 보유 <b style="color:${gold>=SMITH_BUILD?'#9fe08a':'#ff8a7a'}">${f(gold)}G</b></p><div class="row2"><button class="btn" id="smX">닫기</button><button class="btn primary" id="smGo"${gold>=SMITH_BUILD?'':' disabled style="opacity:.5"'}>${gold>=SMITH_BUILD?'🏗️ 건설':'골드 부족'}</button></div>`,m=>{
       m.querySelector('#smX').onclick=closeModal; m.querySelector('#smGo').onclick=()=>{ const r=smithBuild(); closeModal(); if(r==='ok'){ sfx('rare'); townMsg='🏗️ 장인의 집 완공!'; } else townMsg=r==='lack'?'골드가 부족해요':'이미 지었어요'; renderTown(); }; }); return; }
-  const P=smChar(); if(!st)smSw={give:null,get:null};   /* 장인의 집을 새로 열면 고른 보석 초기화 */
+  const P=smChar(); if(!st){ smSw={give:null,get:null}; smNew=null; }   /* 장인의 집을 새로 열면 고른 보석 초기화 */
   st=st||{tab:'dig',sel:null,ask:false};
   if(st.tab==='swp'){ smSwap(P); return; }
   const worn=it=>Object.values(P.eq).includes(it);
@@ -8235,7 +8235,7 @@ function smithModal(st){
       saveSrc(P); sfx('rare'); toast(tab==='dig'?`🔨 소켓을 뚫었어요: ${sel.name}`:`♻ 보석을 뺐어요 (보석은 사라지고 빈 소켓이 남았어요): ${sel.name}`,'#ffd84a'); smithModal({tab,sel:null,ask:false}); renderTown(); }; }); }
 /* ===== 보석 바꾸기(장인의 집 3번째 탭): 같은 종류의 상급 보석 3개를 원하는 다른 종류의 상급 보석 1개로 교체 — 100,000G. 주얼·잠긴 보석은 제외.
    같은 상급 보석이 3개 이상 있을 때만 탭이 열려요. 고른 보석(내어줄/받을)은 바꾼 뒤에도 남지만, 탭을 옮기거나 장인의 집을 나가면 초기화돼요 ===== */
-const SM_SWAP=100000, SM_N=3; let smSw={give:null,get:null};
+const SM_SWAP=100000, SM_N=3; let smSw={give:null,get:null}, smNew=null, smFxT=[];   /* smNew: 방금 바꿔서 받은 보석 종류(목록에서 NEW 표시) */
 const smSwG=x=>!!(x&&isGem(x)&&!x.jw&&gemTier(x)===3&&!x.lock);
 const smSwHave=P=>{ miscFix(P); const h={}; for(const x of P.misc)if(smSwG(x))h[x.gk]=(h[x.gk]|0)+gnOf(x); return h; };
 const smSwCan=P=>Object.values(smSwHave(P)).some(n=>n>=SM_N);
@@ -8249,7 +8249,7 @@ function smSwap(P){
   const X3=` <span style="color:#ffd84a;font-weight:800">ⅹ${SM_N}</span>`;
   const slot=(g,lbl,w,x3)=>`<div ${g?`data-clr="${w}" `:''}style="text-align:center${g?';cursor:pointer':''}"><div style="width:76px;height:76px;border-radius:12px;border:1px ${g?'solid #b89a5a':'dashed #6a5a3c'};background:#1a150f;display:flex;align-items:center;justify-content:center;margin:0 auto">${g?`<img src="${gemPng(g)}" style="width:56px;height:56px;object-fit:contain">`:'<span style="font-size:28px;color:#6a5a48">+</span>'}</div><div style="font-size:11.5px;margin-top:4px;color:${g?GEM_C[g.gk]:'#8a7a68'};font-weight:700">${g?'상급 '+GEM_N[g.gk]+(x3?X3:''):lbl}</div></div>`;
   const chips=GEM_KINDS.map(k=>{ const on=k===smSw.get; return `<div data-get="${k}" style="position:relative;width:46px;height:46px;border-radius:10px;border:1px solid ${on?'#b89a5a':'#3d3322'};background:${on?'#2a2214':'#1a150f'};display:flex;align-items:center;justify-content:center;cursor:pointer"><img src="${gemPng(mkGem(k,3))}" style="width:34px;height:34px;object-fit:contain"></div>`; }).join('');
-  const bag=GEM_KINDS.filter(k=>have[k]).map(k=>{ const on=k===smSw.give, want=k===smSw.get, dis=want||!ok(k); return `<div data-give="${k}" style="position:relative;width:46px;height:46px;border-radius:10px;border:1px solid ${on?'#b89a5a':'#3d3322'};background:${on?'#2a2214':'#1a150f'};display:flex;align-items:center;justify-content:center;opacity:${dis?.3:1};filter:${dis?'grayscale(1)':'none'};cursor:pointer"><img src="${gemPng(mkGem(k,3))}" style="width:34px;height:34px;object-fit:contain">${have[k]>1?`<i style="position:absolute;right:3px;bottom:0;font-style:normal;font-size:11px;font-weight:700;color:#fff;text-shadow:0 0 3px #000,0 0 3px #000">${have[k]}</i>`:''}${want?'<i style="position:absolute;right:2px;top:-1px;font-style:normal;font-size:12px;color:#ff8a7a">✕</i>':''}</div>`; }).join('');
+  const bag=GEM_KINDS.filter(k=>have[k]).map(k=>{ const on=k===smSw.give, want=k===smSw.get, nw=k===smNew, dis=!nw&&(want||!ok(k)); return `<div data-give="${k}" style="position:relative;width:46px;height:46px;border-radius:10px;border:1px solid ${nw?'#ffe27a':on?'#b89a5a':'#3d3322'};background:${nw?'#2e2412':on?'#2a2214':'#1a150f'};display:flex;align-items:center;justify-content:center;opacity:${dis?.3:1};filter:${dis?'grayscale(1)':'none'};cursor:pointer${nw?';box-shadow:0 0 10px rgba(255,224,120,.55)':''}"><img src="${gemPng(mkGem(k,3))}" style="width:34px;height:34px;object-fit:contain">${have[k]>1?`<i style="position:absolute;right:3px;bottom:0;font-style:normal;font-size:11px;font-weight:700;color:#fff;text-shadow:0 0 3px #000,0 0 3px #000">${have[k]}</i>`:''}${want&&!nw?'<i style="position:absolute;right:2px;top:-1px;font-style:normal;font-size:12px;color:#ff8a7a">✕</i>':''}${nw?'<i style="position:absolute;left:-5px;top:-7px;font-style:normal;font-size:10px;font-weight:800;color:#fff;background:#e0412f;padding:1px 5px;border-radius:8px;box-shadow:0 0 8px rgba(255,80,60,.8)">NEW</i>':''}</div>`; }).join('');
   const BOXH='height:100px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;overflow:hidden';
   modal(`<h3>🔨 장인의 집</h3><p class="meta" style="margin:0 0 6px;font-size:12px">보유 골드 <b style="color:#ffd34d">💰 ${f(gold)}G</b></p><div style="display:flex;gap:4px;margin:0 0 8px">${tb('dig','소켓 뚫기')}${tb('clr','소켓 비우기')}${tb('swp','보석 바꾸기')}</div>
     <div style="text-align:center;font-size:12px;color:#a99a7e;margin-bottom:10px">같은 상급 보석 ${SM_N}개 + ${SM_SWAP/10000}만G → 원하는 상급 보석 1개</div>
@@ -8259,8 +8259,8 @@ function smSwap(P){
     <div style="font-size:12px;color:#a99a7e;margin-bottom:4px">받을 보석 고르기</div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:10px">${chips}</div>
     <div class="row2"><button class="btn" id="smX" style="min-height:46px">닫기</button><button class="btn primary" id="smGo" style="min-height:46px;display:flex;align-items:center;justify-content:center;line-height:1.2${can?'':';opacity:.5'}"${can?'':' disabled'}>${!gi?'내어줄 보석을 골라요':!ge?'받을 보석을 골라요':gold<SM_SWAP?'골드 부족 💰 '+f(SM_SWAP)+'G':'💎 바꾸기 💰 '+f(SM_SWAP)+'G'}</button></div>`,m=>{
     m.classList.add('smm');
-    m.querySelector('#smX').onclick=()=>{ smSw={give:null,get:null}; closeModal(); };
-    m.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{ if(b.dataset.tab!=='swp'){ smSw={give:null,get:null}; smithModal({tab:b.dataset.tab,sel:null,ask:false}); } });
+    m.querySelector('#smX').onclick=()=>{ smSw={give:null,get:null}; smNew=null; closeModal(); };
+    m.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{ if(b.dataset.tab!=='swp'){ smSw={give:null,get:null}; smNew=null; smithModal({tab:b.dataset.tab,sel:null,ask:false}); } });
     m.querySelectorAll('[data-clr]').forEach(d=>d.onclick=()=>{ smSw[d.dataset.clr]=null; sfx('ui'); smSwap(P); });   /* []→[] 칸의 보석을 누르면 선택 취소 */
     m.querySelectorAll('[data-give]').forEach(d=>d.onclick=()=>{ const k=d.dataset.give;
       if(k===smSw.get){ toast('원하는 보석은 내어줄 수 없어요','#ffb259'); return; }
@@ -8272,7 +8272,45 @@ function smSwap(P){
       if((h[smSw.give]|0)<SM_N||aGold()<SM_SWAP){ toast('보석이나 골드가 바뀌었어요. 다시 골라 주세요','#ffb259'); smSwap(P); return; }
       aPayGold(SM_SWAP); let need=SM_N; for(let i=0;i<P.misc.length&&need>0;i++){ const x=P.misc[i]; if(smSwG(x)&&x.gk===smSw.give){ const a=Math.min(need,gnOf(x)); gemUse(P,i,a); need-=a; } }
       const ng=mkGem(smSw.get,3); ng.isNew=1; if(gemFit(P,ng)>=1)gemPut(P,ng,1,true); else P.misc.push(ng);
-      saveSrc(P); uiDirty=true; sfx('rare'); toast(`💎 상급 ${GEM_N[smSw.give]} ⅹ${SM_N} → 상급 ${GEM_N[smSw.get]}로 바꿨어요`,'#ffd84a'); smSwap(P); renderTown(); }; }); }
+      saveSrc(P); uiDirty=true; smNew=smSw.get; const ha=smSwHave(P); renderTown(); smFx(P,smSw.give,smSw.get,h,ha); }; }); }
+/* 보석 바꾸기 연출: 재료 3개가 모여 섬광 → 새 보석 등장 → 결과 팝업. 데이터는 누르는 즉시 저장돼 있고 연출은 transform/opacity 애니메이션만 써서 가벼워요(화면을 누르면 건너뜀) */
+function smFx(P,gv,gt,hb,ha){
+  smFxT.forEach(clearTimeout); smFxT=[]; const old=document.getElementById('smFx'); if(old)old.remove();
+  if(!document.getElementById('smFxCss')){ const st=document.createElement('style'); st.id='smFxCss'; st.textContent=
+   '#smFx{position:fixed;inset:0;z-index:100001;display:flex;align-items:center;justify-content:center;flex-direction:column;background:rgba(0,0,0,.78);animation:smFxIn .2s ease-out;touch-action:manipulation}'+
+   '@keyframes smFxIn{from{opacity:0}to{opacity:1}}'+
+   '#smFx .xstg{position:relative;width:300px;height:300px}#smFx .xstg>*{position:absolute}'+
+   '#smFx .xgm{left:108px;top:108px;width:84px;height:84px;object-fit:contain;animation:smFly .75s cubic-bezier(.5,0,.8,.6) forwards;will-change:transform,opacity}'+
+   '@keyframes smFly{0%{transform:translate(var(--x),var(--y)) rotate(var(--r)) scale(1);opacity:.95}75%{transform:translate(0,0) rotate(0deg) scale(.85);opacity:1}100%{transform:translate(0,0) scale(.15);opacity:0}}'+
+   '#smFx .xaura{left:50px;top:50px;width:200px;height:200px;border-radius:50%;animation:smAura .75s ease-in forwards}'+
+   '@keyframes smAura{0%{transform:scale(.3);opacity:0}100%{transform:scale(1);opacity:1}}'+
+   '#smFx .xring{left:100px;top:100px;width:100px;height:100px;border-radius:50%;border:2px solid rgba(255,230,150,.85);box-shadow:0 0 22px rgba(255,216,74,.7);animation:smRing .75s ease-in forwards}'+
+   '@keyframes smRing{0%{transform:scale(2.2);opacity:0}60%{opacity:1}100%{transform:scale(.8);opacity:.6}}'+
+   '#smFx .xfl{left:-60px;top:-300px;width:420px;height:900px;background:radial-gradient(circle at 50% 50%,rgba(255,250,225,.98) 0,rgba(255,226,140,.8) 16%,rgba(255,226,140,0) 52%);opacity:0;animation:smFl .6s ease-out .72s forwards}'+
+   '@keyframes smFl{0%{opacity:0;transform:scale(.4)}30%{opacity:1}100%{opacity:.0;transform:scale(1.6)}}'+
+   '#smFx .xrays{left:0;top:0;width:300px;height:300px;opacity:0;animation:smRays 1.2s ease-out .72s forwards}'+
+   '@keyframes smRays{0%{opacity:0;transform:rotate(0) scale(.5)}25%{opacity:1}100%{opacity:0;transform:rotate(40deg) scale(1.2)}}'+
+   '#smFx .xrays i{position:absolute;left:148.5px;top:20px;width:3px;height:130px;transform-origin:50% 100%;background:linear-gradient(to top,rgba(255,240,180,.9),rgba(255,240,180,0))}'+
+   '#smFx .xnw{left:70px;top:70px;width:160px;height:160px;object-fit:contain;opacity:0;filter:drop-shadow(0 0 18px #fff) drop-shadow(0 0 8px #8fd8ff);animation:smNw .5s cubic-bezier(.2,1.4,.4,1) .78s forwards}'+
+   '@keyframes smNw{0%{opacity:0;transform:scale(.2)}100%{opacity:1;transform:scale(1)}}'+
+   '#smFx .xsp{color:#ffe9a0;text-shadow:0 0 8px #ffd84a;opacity:0;animation:smSp .9s ease-out .8s forwards}'+
+   '@keyframes smSp{0%{opacity:0;transform:scale(.3)}40%{opacity:1}100%{opacity:0;transform:scale(1.4)}}'+
+   '#smFx .xcap{color:#ffe9a0;font-weight:800;font-size:17px;margin-top:6px;text-shadow:0 0 8px #000}'+
+   '#smFx .xrc{width:310px;max-width:92vw;box-sizing:border-box;background:#1a150f;border:1.5px solid #c9a24a;border-radius:16px;padding:20px 18px 16px;text-align:center;box-shadow:0 0 40px rgba(255,216,74,.25);animation:smRc .28s cubic-bezier(.2,1.3,.4,1)}'+
+   '@keyframes smRc{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}';
+   document.head.appendChild(st); }
+  const o=document.createElement('div'); o.id='smFx';
+  const img=g=>gemPng(mkGem(g,3)), rays=Array.from({length:12},(_,i)=>`<i style="transform:rotate(${i*30}deg)"></i>`).join('');
+  const pos=[['-96px','-70px','-14deg'],['92px','-80px','12deg'],['-6px','110px','4deg']];
+  o.innerHTML=`<div class="xstg"><div class="xaura" style="background:radial-gradient(circle,${GEM_C[gv]}88,${GEM_C[gv]}00 70%)"></div>${pos.map(q=>`<img class="xgm" src="${img(gv)}" style="--x:${q[0]};--y:${q[1]};--r:${q[2]}">`).join('')}<div class="xring"></div><div class="xfl"></div><div class="xrays">${rays}</div><img class="xnw" src="${img(gt)}"><span class="xsp" style="left:24px;top:60px;font-size:18px">✦</span><span class="xsp" style="left:256px;top:84px;font-size:14px">✦</span><span class="xsp" style="left:236px;top:236px;font-size:13px">✧</span><span class="xsp" style="left:40px;top:226px;font-size:13px">✧</span><span class="xsp" style="left:150px;top:6px;font-size:22px">✦</span></div><div class="xcap">상급 ${GEM_N[gv]} <span style="color:#ffd84a">ⅹ${SM_N}</span> 를 합치는 중…</div>`;
+  document.body.appendChild(o);
+  let shown=false; const card=()=>{ if(shown)return; shown=true; smFxT.forEach(clearTimeout); smFxT=[]; const ng=mkGem(gt,3);
+    const d=(k)=>{ const a=hb[k]|0, b=ha[k]|0; return `<div style="background:#241d12;border:1px solid #3d3322;border-radius:10px;padding:6px 10px;color:#a99a7e">${GEM_N[k]} <b style="color:#fff">${a}</b> → <b style="color:${b>a?'#8ee07a':'#ff8a7a'}">${b}</b></div>`; };
+    o.style.background='rgba(0,0,0,.72)';
+    o.innerHTML=`<div class="xrc"><div style="color:#ffd84a;font-weight:800;font-size:17px;letter-spacing:1px">✨ 교환 완료!</div><div style="position:relative;width:140px;height:140px;margin:10px auto 4px"><div style="position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle,${GEM_C[gt]}b0,${GEM_C[gt]}00 68%)"></div><img src="${img(gt)}" style="position:absolute;left:20px;top:20px;width:100px;height:100px;object-fit:contain;filter:drop-shadow(0 0 12px ${GEM_C[gt]})"><span style="position:absolute;right:-6px;top:6px;background:#e0412f;color:#fff;font-size:11px;font-weight:800;padding:2px 7px;border-radius:9px;box-shadow:0 0 8px rgba(255,80,60,.7)">NEW</span></div><div style="color:${GEM_C[gt]};font-weight:800;font-size:18px">상급 ${GEM_N[gt]}</div><div style="color:#afeeee;font-size:13px;margin:2px 0 10px">${esc(gemOptText(ng))}</div><div style="display:flex;gap:8px;justify-content:center;font-size:12.5px;margin-bottom:14px">${d(gv)}${d(gt)}</div><button class="btn primary" id="smFxOk" style="width:100%;min-height:46px;font-weight:800;font-size:15px">확인</button></div>`;
+    o.onclick=null; o.querySelector('#smFxOk').onclick=()=>{ o.remove(); sfx('ui'); if(!$('#modal').hidden&&smSw)smSwap(P); }; };
+  o.onclick=card;   /* 연출 중 화면을 누르면 바로 결과로 */
+  smFxT.push(setTimeout(()=>sfx('rare'),700), setTimeout(card,1500)); }
 /* ===== 소켓에 보석 박기: 가방 기타 탭에서 보석 → [소켓에 박기] → 장비품 화면에서 빈 소켓이 있는 장비를 고르면 확인 후 박혀요 (박은 보석은 되돌릴 수 없음, 소켓을 비우면 보석은 사라짐) ===== */
 const gemTgt=it=>!!(it&&it.sk&&!it.gm&&SMITH_SLOTS.includes(it.slot)&&!it.mat);
 const gemSockN=()=>me.inv.filter(gemTgt).length+Object.values(me.eq).filter(gemTgt).length;
