@@ -1545,7 +1545,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0824</div>
+    <div class="ver" id="verT">v0.7.2.0825</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -7815,6 +7815,7 @@ function mineKmkDraw(c,t,B){ const x=me.x, y=me.y+30, a=B.t<.6?B.t/.6:1, pr=(t*1
    지금 밝혀야 할 광석이 아닌 광석을 캐면 그 광석의 모은 수가 0으로 돌아가요. 한 번 밝힌 문양은 꺼지지 않고, 문이 열린 뒤에도 캐릭터마다 계속 열려 있어요. (me.mine.dr = {n:밝힌 문양 수, c:지금 모으는 수}) */
 const DOOR_ORE=['ember','core','nebula','adamant'], DOOR_COL=['#ff8a3a','#e0306a','#4a7cff','#ffd25a'], DOOR_NEED=150, DOOR_Y0=850;
 const DOOR_GL=[[338,572],[439,548],[565,539],[674,566]], DOOR_BLK={x0:260,x1:740,y0:1330,y1:1640}, DOOR_PT=[420,1715];   /* 문양 자리(아래쪽 그림 기준) · 문 몸체(막힘) · 멸화석 바치는 자리 */
+const drOn=()=>{ const S=mqS(); return S.a==='o5'||!!S.d.o5||drS().n>0; };   /* 문 장치는 마지막 퀘스트 '네 개의 문양'을 받은 뒤(광부 Lv100 이후)부터 움직여요 — 이미 밝힌 문양이 있으면 계속 */
 const drS=()=>{ const m=me.mine||(me.mine={lv:1,xp:0}); return m.dr||(m.dr={n:0,c:0}); };
 const B10={im:{},cv:null,key:''};
 function b10Bg(){ const D=me&&me.mine&&me.mine.dr||{n:0}, key=D.n>=4?'o':String(D.n|0); if(B10.cv&&B10.key===key)return B10.cv;
@@ -7827,27 +7828,27 @@ function b10Bg(){ const D=me&&me.mine&&me.mine.dr||{n:0}, key=D.n>=4?'o':String(
 function drLight(i){ const x=DOOR_GL[i][0], y=DOOR_Y0+DOOR_GL[i][1], col=DOOR_COL[i];
   for(let k=0;k<4;k++)efx.push({k:'ring',x,y,r0:10,r1:80+k*26,t:0,life:.6+k*.08,col,w:6}); burst(x,y,col,26,300); sfx('rare'); G.flash=Math.max(G.flash||0,i===3?.6:.3);
   const n=i+1; banner(n>=4?'🚪 별의 문이 열렸어요!':'✨ 문양이 빛났어요',n>=4?'오랜 세월 닫혀 있던 문이…':`${n} / 4 · 다음: ${ORES[DOOR_ORE[n]].n}`); }
-function drMine(k,n){ const M=G.mine; if(!M||M.fi!==10||!me)return; const D=drS(); if(D.n<1||D.n>=4)return; const need=DOOR_ORE[D.n];
+function drMine(k,n){ const M=G.mine; if(!M||M.fi!==10||!me||!drOn())return; const D=drS(); if(D.n<1||D.n>=4)return; const need=DOOR_ORE[D.n];
   if(k!==need){ if(D.c>0){ D.c=0; addNum(me.x,me.y-78,'🚪 문양의 빛이 흩어졌어요','#ff9a8a',true); sfx('mineno'); } return; }   /* 순서가 다른 광석을 캐면 모은 수가 0 */
   D.c+=n; if(D.c>=DOOR_NEED){ D.c=0; drLight(D.n); D.n++; if(D.n>=4)mqDoorOpen(); } }
 function mqDoorOpen(){ saveChar(); if(G.mine)mineHud(); }
-function drHandIn(){ const M=G.mine; if(!M||!me||M.fi!==10||stS)return; const D=drS(); if(D.n!==0)return; const have=oreCount(me,'ember'); sfx('ui');
+function drHandIn(){ const M=G.mine; if(!M||!me||M.fi!==10||stS||!drOn())return; const D=drS(); if(D.n!==0)return; const have=oreCount(me,'ember'); sfx('ui');
   if(have<DOOR_NEED){ sheetToast(`🔥 멸화석 조각이 모자라요 (${have}/${DOOR_NEED}) · 지하 9층에서 캐 오세요`,'#ffb259'); return; }
   oreTake(me,'ember',DOOR_NEED); D.n=1; D.c=0; drLight(0); saveChar(); mineHud(); uiDirty=true; if(sheetMode==='bag')renderBag(); }
-function drHud(){ const D=drS(), dots=DOOR_COL.map((c,i)=>`<i style="background:${i<D.n?c:'#3a342c'};box-shadow:${i<D.n?'0 0 6px '+c:'none'}"></i>`).join('');
+function drHud(){ if(!drOn())return ''; const D=drS(), dots=DOOR_COL.map((c,i)=>`<i style="background:${i<D.n?c:'#3a342c'};box-shadow:${i<D.n?'0 0 6px '+c:'none'}"></i>`).join('');
   const cur=D.n>=4?'<div class="mhi" style="color:#9be88a">문이 열렸어요</div>':D.n===0?'<div class="mhi">🔥 멸화석 바치기</div>':`<div class="mhi"><img class="mfr" src="img/frag_${DOOR_ORE[D.n]}.webp" alt="">${ORES[DOOR_ORE[D.n]].n}<b>${D.c}/${DOOR_NEED}</b></div>`;
   return `<div class="mhs" style="margin-top:6px!important;border-top:1px solid #3a2e20!important;padding-top:4px!important">🚪 별의 문</div><div class="mhd">${dots}</div>${cur}`; }
 const mineNoSpot=(fi,x,y)=>fi===10&&y>DOOR_BLK.y0+10&&x>180&&x<820;   /* 문 앞 공간에는 광석이 생기지 않아요 */
 function drTick(){ const M=G.mine, bt=$('#drBtn'); if(!M||!me||!bt)return; if(M.fi!==10){ if(!bt.hidden)bt.hidden=true; return; }
   const B=DOOR_BLK; if(me.x>B.x0-14&&me.x<B.x1+14&&me.y>B.y0&&me.y<B.y1+14){ const dl=me.x-(B.x0-14), dr=(B.x1+14)-me.x, dt2=me.y-B.y0, db=(B.y1+14)-me.y, m=Math.min(dl,dr,dt2,db);   /* 문 몸체는 지나갈 수 없어요 */
     if(m===db)me.y=B.y1+14; else if(m===dt2)me.y=B.y0; else if(m===dl)me.x=B.x0-14; else me.x=B.x1+14; }
-  const near=drS().n===0&&!stS&&!me.dead&&hyp(me.x-DOOR_PT[0],me.y-DOOR_PT[1])<=110; if(near===bt.hidden){ bt.hidden=!near; if(near)bt.textContent=`🔥 멸화석 바치기 ${Math.min(DOOR_NEED,oreCount(me,'ember'))}/${DOOR_NEED}`; } }
+  const near=drOn()&&drS().n===0&&!stS&&!me.dead&&hyp(me.x-DOOR_PT[0],me.y-DOOR_PT[1])<=110; if(near===bt.hidden){ bt.hidden=!near; if(near)bt.textContent=`🔥 멸화석 바치기 ${Math.min(DOOR_NEED,oreCount(me,'ember'))}/${DOOR_NEED}`; } }
 function drDraw(c,t){ const M=G.mine; if(!M||M.fi!==10||!me)return; const D=drS();
   c.save(); c.globalCompositeOperation='lighter';
-  for(let i=0;i<4;i++){ const lit=i<D.n, nx=i===D.n&&D.n>=1&&D.n<4; if(!lit&&!nx)continue; const x=DOOR_GL[i][0], y=DOOR_Y0+DOOR_GL[i][1], pu=.5+.5*Math.sin(t*(lit?2.2:3.4)+i), gr=c.createRadialGradient(x,y,6,x,y,lit?78:60);
+  for(let i=0;i<4;i++){ const lit=i<D.n, nx=i===D.n&&D.n>=1&&D.n<4&&drOn(); if(!lit&&!nx)continue; const x=DOOR_GL[i][0], y=DOOR_Y0+DOOR_GL[i][1], pu=.5+.5*Math.sin(t*(lit?2.2:3.4)+i), gr=c.createRadialGradient(x,y,6,x,y,lit?78:60);
     gr.addColorStop(0,DOOR_COL[i]+(lit?'88':'44')); gr.addColorStop(1,DOOR_COL[i]+'00'); c.globalAlpha=lit?.45+.3*pu:.25+.35*pu; c.fillStyle=gr; c.fillRect(x-80,y-80,160,160); }   /* 밝힌 문양은 숨 쉬듯 빛나고, 다음 차례 문양은 깜빡여요 */
   c.restore();
-  if(D.n===0){ const x=DOOR_PT[0], y=DOOR_PT[1], pu=.5+.5*Math.sin(t*3); c.save(); c.strokeStyle='#ff8a3a'; c.globalAlpha=.4+.4*pu; c.lineWidth=3; c.beginPath(); c.ellipse(x,y,58,20,0,0,6.283); c.stroke(); c.globalAlpha=1;
+  if(D.n===0&&drOn()){ const x=DOOR_PT[0], y=DOOR_PT[1], pu=.5+.5*Math.sin(t*3); c.save(); c.strokeStyle='#ff8a3a'; c.globalAlpha=.4+.4*pu; c.lineWidth=3; c.beginPath(); c.ellipse(x,y,58,20,0,0,6.283); c.stroke(); c.globalAlpha=1;
     c.font='700 12px "Noto Sans KR",sans-serif'; c.textAlign='center'; c.lineWidth=3; c.strokeStyle='rgba(0,0,0,.85)'; c.strokeText('🔥 멸화석을 바치는 자리',x,y+38); c.fillStyle='#ffd9b0'; c.fillText('🔥 멸화석을 바치는 자리',x,y+38); c.restore(); }
   const bt=$('#drBtn'); if(bt&&!bt.hidden){ const R=cv.getBoundingClientRect(), Z=ZOOM, bw=bt.offsetWidth||150, sx=R.left+(DOOR_PT[0]-camX)*Z, sy=R.top+(DOOR_PT[1]-70-camY)*Z; bt.style.transform='translate('+Math.round(sx-bw/2)+'px,'+Math.round(sy)+'px) translateY(-50%)'; } }
 function mineDraw(t){ const M=G.mine; if(!M)return; const c=ctx;
