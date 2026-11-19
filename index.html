@@ -1467,6 +1467,7 @@ body.mining #mqTalk.fr:after{left:-6px;border-right:0;border-top:0;transform:rot
 #mqTalk[hidden]{display:none!important}
 body.mining #drBtn{position:fixed;left:0;top:0;z-index:5;pointer-events:auto;padding:7px 14px;border-radius:999px;font-size:14px;font-weight:800;white-space:nowrap;border:1.5px solid #ff9a4a;background:#3a1c10;color:#ffe2c0;box-shadow:0 0 14px rgba(255,138,58,.6);will-change:transform}   /* 별의 문: 멸화석 바치기 버튼 (문 앞에 뜸) */
 #drBtn[hidden]{display:none!important}
+body.mining #drBtn.rdy{background:#4a2410;box-shadow:0 0 18px rgba(255,170,80,.95)}   /* 조각이 다 모였을 때 더 밝게 */
 #mkBtn{align-self:flex-start;width:fit-content;margin:2px 0 0 2px;padding:5px 11px;border-radius:14px;border:1px solid #6b5536;background:rgba(10,8,6,.78);color:#ffd98a;font:800 12.5px var(--f-body,sans-serif);pointer-events:auto}#mkBtn:active{filter:brightness(1.3)}
 body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리자 모드)에서만 */
 .tmap .tsign{position:absolute;left:var(--x);top:var(--y);transform:translate(-50%,-100%);background:none;border:0;padding:0;z-index:3;cursor:pointer;filter:drop-shadow(0 2px 3px #000a);-webkit-tap-highlight-color:transparent}.tmap .tsign svg{display:block}.tmap .tsign:active{filter:drop-shadow(0 2px 3px #000a) brightness(1.2)}
@@ -1545,7 +1546,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0826</div>
+    <div class="ver" id="verT">v0.7.2.0827</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -7365,7 +7366,7 @@ function oreHitFx(m,O){ const dx=me.x-m.x, dy=me.y-m.y, dd=Math.max(1,hyp(dx,dy)
   else spark(m.x,m.y,O.c,4); }
 function oreBreak(m){ const O=OREX(m.ore), M=G.mine; if(!M||m.dead)return; m.dead=true; m.hp=0; if(O.sp){ mineSpBreak(m,O); return; }
   const gk=Math.max(1,(me.eq.weapon&&me.eq.weapon.pk)|0), n=pickPieces(gk)+kamaExtra();
-  const put=oreAdd(me,n,m.ore); M.got[m.ore]=(M.got[m.ore]|0)+n; M.brk=(M.brk|0)+1; mqMine(m.ore,n); drMine(m.ore,n); if(put<n&&T-(M.tf||-9)>6){ M.tf=T; later(.3,()=>sheetToast('기타 칸이 가득 차서 조각을 보관 중이에요','#ffb259')); }
+  const put=oreAdd(me,n,m.ore); M.got[m.ore]=(M.got[m.ore]|0)+n; M.brk=(M.brk|0)+1; mqMine(m.ore,n); if(put<n&&T-(M.tf||-9)>6){ M.tf=T; later(.3,()=>sheetToast('기타 칸이 가득 차서 조각을 보관 중이에요','#ffb259')); }
   burst(m.x,m.y,O.c,14,220); burst(m.x,m.y,'#8a8478',10,180); sfx('orebrk'); addNum(m.x,m.y-34,`+${n} ${O.n} 조각`,O.c,true);
   if(O.gem&&Math.random()<O.gem){ gemDrop(1,me.x,me.y); mqGem(1); later(.2,()=>announce('💎 하급 보석을 발견했어요!','#9fd0ff')); }   /* 달빛 은: 10% 하급 보석 (내 발밑에 떨어져 바로 주워요) */
   const xp=mineXp(O,me); if(xp>0)mineAddXp(xp); else if(T-(M.tg||-9)>4){ M.tg=T; addNum(me.x,me.y-52,'회색 광석 · 경험치 없음','#9a9a9a',false); }
@@ -7566,8 +7567,8 @@ const MQ=[
    done:[['qo','…이제 말할 수 있겠군. 별이 깨진 날의 일을.'],['qo','처음 내려간 광부 스물세 명이 별 아래 갱도에서 나오지 못했다. 내 아들도 그 안에 있었다.'],['qo','구할 방법은 하나, 별의 뚜껑을 깨는 것뿐이었다. 그래서 깼다. 내 손으로, 벨가르의 장치로.'],['qo','…늦었다. 뚜껑이 깨지자 별빛이 아래를 삼켰다. 나는 문을 닫았다. 더는 아무도 내려가지 못하게.']]},
   {id:'o5',np:'qo',n:'네 개의 문양',rl:100,lv:100,req:[['door']],r:1.2,
    nl:[['qo','…문을 열 때가 되었지만, 네 곡괭이는 아직 가볍구나.'],['qo','광부로서 백 번째 단계에 이르거든 다시 오너라. 이 문은 그만한 무게를 요구한다.']],
-   ask:[['qo','왔구나. 이제 문의 문양에 불을 밝힐 수 있겠다.'],['qo','문에는 네 개의 문양이 있다. 멸화석, 심연핵, 성운석, 천공 금강석. 이 순서대로 돌의 기억을 채워야 한다.'],['qo','멸화석 조각 백오십 개는 문에 직접 바쳐라. 나머지 셋은 이 층에서 캐면 된다. 각각 백오십 개씩.'],['qo','순서가 어긋나면, 모으던 빛이 흩어진다. …내가 닫은 문이다. 이번엔 네가 열어 다오.']],
-   rem:[['qo','문양 네 개다. 멸화석, 심연핵, 성운석, 천공 금강석. 순서를 잊지 마라.']],
+   ask:[['qo','왔구나. 이제 문의 문양에 불을 밝힐 수 있겠다.'],['qo','문에는 네 개의 문양이 있다. 멸화석, 심연핵, 성운석, 천공 금강석. 이 순서대로 돌의 기억을 채워야 한다.'],['qo','문양마다 조각 백오십 개를 문 앞 자리에서 바쳐라. 멸화석은 위층에서, 나머지 셋은 이 층에서 캐면 된다.'],['qo','앞의 문양이 켜져야 다음 문양이 돌을 받는다. …내가 닫은 문이다. 이번엔 네가 열어 다오.']],
+   rem:[['qo','문양 네 개다. 멸화석, 심연핵, 성운석, 천공 금강석. 조각 백오십 개씩, 문 앞 자리에서 바쳐라.']],
    done:[['qo','…열렸구나. 오랜 세월 닫혀 있던 문이.'],['qo','고맙다. 이 문 너머가 어떻든, 이제 누군가에게 맡길 수 있게 되었다.'],['qo','내 아들에게 인사는 하지 않으마. 그 애는 여전히 나를 기다리고 있겠지. …그래도 좋다.']]},
 ];
 const mqKeyAt=fi=>Object.keys(MNPC).find(k=>MNPC[k].fl===fi), mqNpcAt=fi=>MNPC[mqKeyAt(fi)];
@@ -7811,12 +7812,12 @@ function mineKmkDraw(c,t,B){ const x=me.x, y=me.y+30, a=B.t<.6?B.t/.6:1, pr=(t*1
   c.font='700 13px "Noto Sans KR",sans-serif'; c.fillStyle='#efe6ff'; c.fillText('♪',cx,cy+1);
   c.restore(); }
 /* ── 지하 10층 · 별의 문 ──
-   문양 4개를 차례로 밝혀요: ① 멸화석(9층에서 캔 조각 150개를 문에 바침) → ② 심연핵 → ③ 성운석 → ④ 천공 금강석(이 층에서 캔 조각 150개씩).
-   지금 밝혀야 할 광석이 아닌 광석을 캐면 그 광석의 모은 수가 0으로 돌아가요. 한 번 밝힌 문양은 꺼지지 않고, 문이 열린 뒤에도 캐릭터마다 계속 열려 있어요. (me.mine.dr = {n:밝힌 문양 수, c:지금 모으는 수}) */
-const DOOR_ORE=['ember','core','nebula','adamant'], DOOR_COL=['#ff8a3a','#e0306a','#4a7cff','#ffd25a'], DOOR_NEED=150, DOOR_Y0=850;
+   문양 4개를 차례로 밝혀요: ① 멸화석(9층에서 캠) → ② 심연핵 → ③ 성운석 → ④ 천공 금강석(10층에서 캠). 문양마다 조각 150개를 문 앞 '바치는 자리'에서 [바치기]로 내면 그 문양이 켜져요(조각은 사라짐).
+   앞 문양이 켜져야 다음 문양에 바칠 수 있어요(순서 고정). 한 번 밝힌 문양은 꺼지지 않고, 문이 열린 뒤에도 캐릭터마다 계속 열려 있어요. (me.mine.dr = {n:밝힌 문양 수}) 마지막 퀘스트를 받은 뒤부터 작동 */
+const DOOR_ORE=['ember','core','nebula','adamant'], DOOR_COL=['#ff8a3a','#e0306a','#4a7cff','#ffd25a'], DOOR_IC=['🔥','🔴','🔵','⭐'], DOOR_NEED=150, DOOR_Y0=850;
 const DOOR_GL=[[338,572],[439,548],[565,539],[674,566]], DOOR_BLK={x0:260,x1:740,y0:1330,y1:1640}, DOOR_PT=[420,1715];   /* 문양 자리(아래쪽 그림 기준) · 문 몸체(막힘) · 멸화석 바치는 자리 */
 const drOn=()=>{ const S=mqS(); return S.a==='o5'||!!S.d.o5||drS().n>0; };   /* 문 장치는 마지막 퀘스트 '네 개의 문양'을 받은 뒤(광부 Lv100 이후)부터 움직여요 — 이미 밝힌 문양이 있으면 계속 */
-const drS=()=>{ const m=me.mine||(me.mine={lv:1,xp:0}); return m.dr||(m.dr={n:0,c:0}); };
+const drS=()=>{ const m=me.mine||(me.mine={lv:1,xp:0}); return m.dr||(m.dr={n:0}); };
 const B10={im:{},cv:null,key:''};
 function b10Bg(){ const D=me&&me.mine&&me.mine.dr||{n:0}, key=D.n>=4?'o':String(D.n|0); if(B10.cv&&B10.key===key)return B10.cv;
   for(const k of ['a','b','c']){ let im=B10.im[k]; if(!im){ im=B10.im[k]=new Image(); im.decoding='async'; im.src='img/mine_b10'+k+'.jpg'; } if(!(im.complete&&im.naturalWidth))return B10.cv&&B10.key?B10.cv:null; }
@@ -7828,28 +7829,26 @@ function b10Bg(){ const D=me&&me.mine&&me.mine.dr||{n:0}, key=D.n>=4?'o':String(
 function drLight(i){ const x=DOOR_GL[i][0], y=DOOR_Y0+DOOR_GL[i][1], col=DOOR_COL[i];
   for(let k=0;k<4;k++)efx.push({k:'ring',x,y,r0:10,r1:80+k*26,t:0,life:.6+k*.08,col,w:6}); burst(x,y,col,26,300); sfx('rare'); G.flash=Math.max(G.flash||0,i===3?.6:.3);
   const n=i+1; banner(n>=4?'🚪 별의 문이 열렸어요!':'✨ 문양이 빛났어요',n>=4?'오랜 세월 닫혀 있던 문이…':`${n} / 4 · 다음: ${ORES[DOOR_ORE[n]].n}`); }
-function drMine(k,n){ const M=G.mine; if(!M||M.fi!==10||!me||!drOn())return; const D=drS(); if(D.n<1||D.n>=4)return; const need=DOOR_ORE[D.n];
-  if(k!==need){ if(D.c>0){ D.c=0; addNum(me.x,me.y-78,'🚪 문양의 빛이 흩어졌어요','#ff9a8a',true); sfx('mineno'); } return; }   /* 순서가 다른 광석을 캐면 모은 수가 0 */
-  D.c+=n; if(D.c>=DOOR_NEED){ D.c=0; drLight(D.n); D.n++; if(D.n>=4)mqDoorOpen(); } }
 function mqDoorOpen(){ saveChar(); if(G.mine)mineHud(); }
-function drHandIn(){ const M=G.mine; if(!M||!me||M.fi!==10||stS||!drOn())return; const D=drS(); if(D.n!==0)return; const have=oreCount(me,'ember'); sfx('ui');
-  if(have<DOOR_NEED){ sheetToast(`🔥 멸화석 조각이 모자라요 (${have}/${DOOR_NEED}) · 지하 9층에서 캐 오세요`,'#ffb259'); return; }
-  oreTake(me,'ember',DOOR_NEED); D.n=1; D.c=0; drLight(0); saveChar(); mineHud(); uiDirty=true; if(sheetMode==='bag')renderBag(); }
+function drHandIn(){ const M=G.mine; if(!M||!me||M.fi!==10||stS||!drOn())return; const D=drS(); if(D.n>=4)return; const k=DOOR_ORE[D.n], have=oreCount(me,k); sfx('ui');
+  if(have<DOOR_NEED){ sheetToast(`${DOOR_IC[D.n]} ${ORES[k].n} 조각이 모자라요 (${have}/${DOOR_NEED})${D.n===0?' · 지하 9층에서 캐 오세요':' · 이 층에서 캐 오세요'}`,'#ffb259'); return; }
+  oreTake(me,k,DOOR_NEED); drLight(D.n); D.n++; if(D.n>=4)mqDoorOpen(); saveChar(); mineHud(); uiDirty=true; if(sheetMode==='bag')renderBag(); }
 function drHud(){ if(!drOn())return ''; const D=drS(), dots=DOOR_COL.map((c,i)=>`<i style="background:${i<D.n?c:'#3a342c'};box-shadow:${i<D.n?'0 0 6px '+c:'none'}"></i>`).join('');
-  const cur=D.n>=4?'<div class="mhi" style="color:#9be88a">문이 열렸어요</div>':D.n===0?'<div class="mhi">🔥 멸화석 바치기</div>':`<div class="mhi"><img class="mfr" src="img/frag_${DOOR_ORE[D.n]}.webp" alt="">${ORES[DOOR_ORE[D.n]].n}<b>${D.c}/${DOOR_NEED}</b></div>`;
-  return `<div class="mhs" style="margin-top:6px!important;border-top:1px solid #3a2e20!important;padding-top:4px!important">🚪 별의 문</div><div class="mhd">${dots}</div>${cur}`; }
+  const k=DOOR_ORE[D.n], cur=D.n>=4?'<div class="mhi" style="color:#9be88a">문이 열렸어요</div>':`<div class="mhi"><img class="mfr" src="img/frag_${k}.webp" alt="">${ORES[k].n}<b style="${oreCount(me,k)>=DOOR_NEED?'color:#9be88a':''}">${Math.min(DOOR_NEED,oreCount(me,k))}/${DOOR_NEED}</b></div>`;
+  return `<div class="mhs" style="margin-top:6px!important;border-top:1px solid #3a2e20!important;padding-top:4px!important">🚪 별의 문 · 바치기</div><div class="mhd">${dots}</div>${cur}`; }
 const mineNoSpot=(fi,x,y)=>fi===10&&y>DOOR_BLK.y0+10&&x>180&&x<820;   /* 문 앞 공간에는 광석이 생기지 않아요 */
 function drTick(){ const M=G.mine, bt=$('#drBtn'); if(!M||!me||!bt)return; if(M.fi!==10){ if(!bt.hidden)bt.hidden=true; return; }
   const B=DOOR_BLK; if(me.x>B.x0-14&&me.x<B.x1+14&&me.y>B.y0&&me.y<B.y1+14){ const dl=me.x-(B.x0-14), dr=(B.x1+14)-me.x, dt2=me.y-B.y0, db=(B.y1+14)-me.y, m=Math.min(dl,dr,dt2,db);   /* 문 몸체는 지나갈 수 없어요 */
     if(m===db)me.y=B.y1+14; else if(m===dt2)me.y=B.y0; else if(m===dl)me.x=B.x0-14; else me.x=B.x1+14; }
-  const near=drOn()&&drS().n===0&&!stS&&!me.dead&&hyp(me.x-DOOR_PT[0],me.y-DOOR_PT[1])<=110; if(near===bt.hidden){ bt.hidden=!near; if(near)bt.textContent=`🔥 멸화석 바치기 ${Math.min(DOOR_NEED,oreCount(me,'ember'))}/${DOOR_NEED}`; } }
+  const D=drS(), near=drOn()&&D.n<4&&!stS&&!me.dead&&hyp(me.x-DOOR_PT[0],me.y-DOOR_PT[1])<=110; if(near===bt.hidden)bt.hidden=!near;
+  if(near){ const k=DOOR_ORE[D.n], tx=`${DOOR_IC[D.n]} ${ORES[k].n} 바치기 ${Math.min(DOOR_NEED,oreCount(me,k))}/${DOOR_NEED}`; if(bt.textContent!==tx)bt.textContent=tx; bt.classList.toggle('rdy',oreCount(me,k)>=DOOR_NEED); } }
 function drDraw(c,t){ const M=G.mine; if(!M||M.fi!==10||!me)return; const D=drS();
   c.save(); c.globalCompositeOperation='lighter';
-  for(let i=0;i<4;i++){ const lit=i<D.n, nx=i===D.n&&D.n>=1&&D.n<4&&drOn(); if(!lit&&!nx)continue; const x=DOOR_GL[i][0], y=DOOR_Y0+DOOR_GL[i][1], pu=.5+.5*Math.sin(t*(lit?2.2:3.4)+i), gr=c.createRadialGradient(x,y,6,x,y,lit?78:60);
+  for(let i=0;i<4;i++){ const lit=i<D.n, nx=i===D.n&&D.n<4&&drOn(); if(!lit&&!nx)continue; const x=DOOR_GL[i][0], y=DOOR_Y0+DOOR_GL[i][1], pu=.5+.5*Math.sin(t*(lit?2.2:3.4)+i), gr=c.createRadialGradient(x,y,6,x,y,lit?78:60);
     gr.addColorStop(0,DOOR_COL[i]+(lit?'88':'44')); gr.addColorStop(1,DOOR_COL[i]+'00'); c.globalAlpha=lit?.45+.3*pu:.25+.35*pu; c.fillStyle=gr; c.fillRect(x-80,y-80,160,160); }   /* 밝힌 문양은 숨 쉬듯 빛나고, 다음 차례 문양은 깜빡여요 */
   c.restore();
-  if(D.n===0&&drOn()){ const x=DOOR_PT[0], y=DOOR_PT[1], pu=.5+.5*Math.sin(t*3); c.save(); c.strokeStyle='#ff8a3a'; c.globalAlpha=.4+.4*pu; c.lineWidth=3; c.beginPath(); c.ellipse(x,y,58,20,0,0,6.283); c.stroke(); c.globalAlpha=1;
-    c.font='700 12px "Noto Sans KR",sans-serif'; c.textAlign='center'; c.lineWidth=3; c.strokeStyle='rgba(0,0,0,.85)'; c.strokeText('🔥 멸화석을 바치는 자리',x,y+38); c.fillStyle='#ffd9b0'; c.fillText('🔥 멸화석을 바치는 자리',x,y+38); c.restore(); }
+  if(D.n<4&&drOn()){ const x=DOOR_PT[0], y=DOOR_PT[1], pu=.5+.5*Math.sin(t*3), k=DOOR_ORE[D.n], tx=`${DOOR_IC[D.n]} ${ORES[k].n}을(를) 바치는 자리`; c.save(); c.strokeStyle=DOOR_COL[D.n]; c.globalAlpha=.4+.4*pu; c.lineWidth=3; c.beginPath(); c.ellipse(x,y,58,20,0,0,6.283); c.stroke(); c.globalAlpha=1;
+    c.font='700 12px "Noto Sans KR",sans-serif'; c.textAlign='center'; c.lineWidth=3; c.strokeStyle='rgba(0,0,0,.85)'; c.strokeText(tx,x,y+38); c.fillStyle='#ffe9d0'; c.fillText(tx,x,y+38); c.restore(); }
   const bt=$('#drBtn'); if(bt&&!bt.hidden){ const R=cv.getBoundingClientRect(), Z=ZOOM, bw=bt.offsetWidth||150, sx=R.left+(DOOR_PT[0]-camX)*Z, sy=R.top+(DOOR_PT[1]-70-camY)*Z; bt.style.transform='translate('+Math.round(sx-bw/2)+'px,'+Math.round(sy)+'px) translateY(-50%)'; } }
 function mineDraw(t){ const M=G.mine; if(!M)return; const c=ctx;
   for(const dir of ['up','dn']){ const to=M.fi+(dir==='up'?-1:1); if(to<0||to>=mineFlN())continue; const P=MINE_PT[dir], F2=MINE_FL[to], lk=false, col=lk?'#8a6a6a':dir==='up'?'#9fe0ff':'#e0a060';
