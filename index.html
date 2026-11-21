@@ -1548,7 +1548,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0847</div>
+    <div class="ver" id="verT">v0.7.2.0848</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -6802,13 +6802,21 @@ function rkSnap(c){ const D=derive(c), eq={}; for(const k of RKSL){ const x=rkIt
 const rkLocal=c=>({id:c.id,name:dispName(c),cls:c.cls,lvl:c.lvl,kills:c.kills|0,clear:c.clear|0,cp:calcCP(c),hc:!!c.hc,dead_at:c.hd>0?new Date(c.hd).toISOString():null,data:rkSnap(c),updated_at:lsGet('dkdef2.rkt.'+c.id)||null});
 function rkRow(c){ const sn=rkSnap(c), cp=calcCP(c); return {hc:!!c.hc,dead_at:c.hd>0?new Date(c.hd).toISOString():null,id:String(c.id).slice(0,40),name:dispName(c).slice(0,8),cls:c.cls,lvl:Math.max(1,c.lvl|0),kills:Math.max(0,c.kills|0),clear:Math.max(0,Math.min(STAGES.length,c.clear|0)),cp:Math.max(0,Math.min(999999999,cp|0)),data:sn,updated_at:new Date().toISOString()}; }
 let rkFailT=0; const RK_UP_GAP=3*60*1000;
-async function rkSubmit(list,force){
+/* 랭킹 올리기는 한 줄로 세워요: 올리는 중에 또 요청이 오면 끝난 뒤 이어서 하고(무시하지 않음), 같은 순간의 요청은 하나로 합쳐요(강제가 하나라도 있으면 강제로).
+   이어서 하는 쪽은 그 시점의 최신 캐릭터 값으로 다시 만들어 올려서, 예전 값이 나중에 도착해 덮어쓰는 일이 없어요 */
+let rkChain=Promise.resolve(), rkQ=null;
+function rkSubmit(list,force,all){
+  if(!rkQ){ const q=rkQ={m:new Map(),force:false,all:false,p:null};
+    q.p=rkChain.then(()=>{ rkQ=null; const l=q.all?rkAllList():[...q.m.values()]; return rkRun(l,q.force); }).catch(()=>{}); rkChain=q.p; }
+  const q=rkQ; if(force)q.force=true; if(all)q.all=true; else if(list)for(const c of list)if(c&&c.id)q.m.set(c.id,c);
+  return q.p; }
+async function rkRun(list,force){
   if(!force&&Date.now()<rkFailT)return;
   try{
     const rows=[]; for(const c of list){ if(!c||!c.id||!CLASSES[c.cls]||(c.kills|0)<=0)continue; if(!force){ const lt=Date.parse(lsGet('dkdef2.rkt.'+c.id)||''); if(lt>0&&Date.now()-lt<RK_UP_GAP)continue; }   /* 이벤트로 올릴 때: 최근 3분 안에 올렸으면 건너뜀 (강제 올림은 항상) */
       const r=rkRow(c); const sig=[r.lvl,r.kills,r.clear,r.name,r.cp,r.hc?1:0,c.hd|0,hashStr(JSON.stringify(r.data))].join('|'); if(!force&&lsGet('dkdef2.rk.'+c.id)===sig)continue; rows.push({r,sig}); }
     if(!rows.length)return;
-    const send=async body=>fetch(RK_URL+'?on_conflict=id',{method:'POST',headers:rkHead({Prefer:'resolution=merge-duplicates,return=minimal'}),body:JSON.stringify(body)});
+    const send=async body=>{ const ac=new AbortController(), tm=setTimeout(()=>ac.abort(),15000); try{ return await fetch(RK_URL+'?on_conflict=id',{method:'POST',headers:rkHead({Prefer:'resolution=merge-duplicates,return=minimal'}),body:JSON.stringify(body),signal:ac.signal}); } finally{ clearTimeout(tm); } };   /* 15초 안에 끝나지 않으면 접어서 줄이 막히지 않게 */
     let r=await send(rows.map(x=>x.r));
     if(r.status===400||r.status===404){ const r2=await send(rows.map(x=>{const {cp,data,...o}=x.r; return o;})); if(r2.ok){ rkFailT=Date.now()+60000; return; } }
     if(r.ok) for(const x of rows){ lsSet('dkdef2.rk.'+x.r.id,x.sig); lsSet('dkdef2.rkt.'+x.r.id,x.r.updated_at); } else rkFailT=Date.now()+60000;
@@ -6822,7 +6830,8 @@ async function rkFlushDel(){ if(rkDelBusy)return; const a=rkDelList(); if(!a.len
   try{ const left=[]; for(const id of a){ if(charIds().includes(id))continue; /* 다시 살아난(복원된) 캐릭터는 건드리지 않음 */
       try{ const r=await fetch(RK_URL+'?id=eq.'+encodeURIComponent(id),{method:'DELETE',headers:rkHead({Prefer:'return=minimal'})}); if(!r.ok)left.push(id); }catch(e){ left.push(id); } }
     lsSet('dkdef2.rkdel',JSON.stringify(left)); }finally{ rkDelBusy=false; } }
-function rkSubmitAll(force){ rkFlushDel(); const chars=charIds().map(loadChar).filter(Boolean); if(me&&me.id){ const i=chars.findIndex(c=>c.id===me.id); if(i>=0)chars[i]=me; } return rkSubmit(chars,force); }
+function rkAllList(){ const chars=charIds().map(loadChar).filter(Boolean); if(me&&me.id){ const i=chars.findIndex(c=>c.id===me.id); if(i>=0)chars[i]=me; } return chars; }
+function rkSubmitAll(force){ rkFlushDel(); return rkSubmit(null,force,true); }
 const RKMODES={stage:{o:'clear.desc,lvl.desc,kills.desc',f:'&kills=gt.0&clear=gt.0&hc=is.false'},lvl:{o:'lvl.desc,cp.desc,kills.desc',f:'&kills=gt.0&hc=is.false'},ta:{o:'clear.desc,lvl.desc,kills.desc',f:'&kills=gt.0&clear=gt.0&hc=is.false'},recent:{o:'updated_at.desc',f:'&kills=gt.0'},hc:{o:'clear.desc,lvl.desc,kills.desc',f:'&kills=gt.0&hc=is.true'},clr:{o:'clear.desc,lvl.desc,kills.desc',f:'&kills=gt.0&clear=gt.0&hc=is.false'}};   /* hc: 관리자 전용 하드코어 — 높은 스테이지 → 레벨 → 클리어 횟수 (죽은 캐릭터도 삭제 전까지 💀 로 남음) */   /* recent: 관리자 전용 — 마지막으로 랭킹에 기록된 시각 순 */   /* clr: 관리자 전용 클리어 — 순위는 하드코어와 같고(높은 스테이지 → 레벨 → 클리어 횟수 → 처치) 일반 캐릭터만 */
 const rkCt=r=>+(r&&r.data&&r.data.ct)||0;   /* 클리어 시간(초) — 표시용 */
 /* 클리어 시각(초): 그 클리어 수에 처음 도달한 때. 기록이 없는 예전 캐릭터는 id로 정한 '2026-10-13 10~22시(KST)' 사이의 고정 시각 */
@@ -8454,9 +8463,10 @@ function showEnd(msg){
   sfx(G.phase==='win'?'win':'lose');
   if(G.endShown)return;
   if(!msg&&G.phase==='lose'&&G.lostCastle&&me&&me.hc&&!(me.hd>0)){ hcDown('castle'); return; }   /* 하드코어: 성이 100% 무너져 패배하면 쓰러진 것과 같이 사망 */
-  G.endShown=true; storyStop(); G.inGame=false; saveChar(); rkSubmitAll(); closeSheet(); for(const k in held)held[k]=false;
+  G.endShown=true; storyStop(); G.inGame=false; saveChar(); closeSheet(); for(const k in held)held[k]=false;
   const win=G.phase==='win';
-  if(win&&!msg&&!G.clrDone){ G.clrDone=true; markClear(); }   /* 돌아갔다 다시 끝나도 기록은 처음 한 번만 */
+  if(win&&!msg&&!G.clrDone){ G.clrDone=true; markClear(); }
+  rkSubmitAll();   /* 클리어 기록(markClear)이 반영된 뒤에 한 번 — 예전엔 그 전에도 한 번 더 올려 두 번 연달아 올라갔어요 */   /* 돌아갔다 다시 끝나도 기록은 처음 한 번만 */
   $('#bBack').hidden=!(win&&!msg&&G.mode==='solo'&&G.clearT>.5);   /* 전리품 시간이 남았을 때만: 게임화면으로 돌아가기 */
   $('#bRetry').hidden=!(G.mode==='solo'&&!msg);   /* 혼자 하기일 때만: 같은 스테이지 다시하기 */
   $('#endTitle').textContent=msg?'연결 끊김':(win?'스테이지를 정복했습니다':'쓰러졌습니다');
