@@ -1548,7 +1548,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0850</div>
+    <div class="ver" id="verT">v0.7.2.0851</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1792,7 +1792,7 @@ const SK={
   {k:'judgment',lb:['피해','반경','성역피해'],e:'⚖️',n:'천벌',s:'천벌',req:30,mp:20,cd:15,el:'#fff7d6',rg:380,d:l=>`적 최대 5명에게 빛기둥, 기본 피해 ${V(110+50*l)}. 반경 ${RR(60,l)} 성역이 2초간 남아 0.5초마다 ${V(18+10*l)}`}],
  necro:[
   {k:'soulbolt',lb:['혼불','피해'],e:'🔵',n:'혼불',s:'혼불',req:1,mp:3,cd:.8,el:'#6fe0c0',rg:NRG(300),d:l=>`영혼의 불꽃 ${V(HMN(l))}발 · 기본 피해 ${V(Math.round((14+10*l)*HMFM(HMN(l))))}, 맞히면 소환수 생명력 2% 회복`},
-  {k:'soullink',lb:['소환수피해','받는피해'],e:'🔗',n:'영혼 연결',s:'연결',req:3,mp:0,cd:0,el:'#8fe6d0',passive:1,d:l=>`패시브: 소환수 피해 +${V(4*l)}%, 소환수가 받는 피해 -${V(Math.min(30,(1.5*l).toFixed(1)))}%`},
+  {k:'soullink',get lb(){ return def2On()?['받는피해감소','받는피해']:['소환수피해','받는피해']; },e:'🔗',n:'영혼 연결',s:'연결',req:3,mp:0,cd:0,el:'#8fe6d0',passive:1,d:l=>`패시브: ${def2On()?`내가 받는 피해 -${V((1+.3*l).toFixed(1))}%`:`소환수 피해 +${V(4*l)}%`}, 소환수가 받는 피해 -${V(Math.min(30,(1.5*l).toFixed(1)))}%`},
   {k:'guardian',lb:['생명력','피해'],e:'🛡️',n:'수호 영혼',s:'수호',req:6,mp:12,cd:8,el:'#6fe0c0',d:l=>`[소환수·영구] 근접 탱커. 생명력은 내 최대 생명력의 ${V(80+5*l)}%, 1.2초마다 기본 피해 ${V(14+10*l)}. 4초마다 반경 170 적을 3초간 도발. 스테이지 시작 시 무료 소환`},
   {k:'spiritcaster',lb:['생명력','마법탄','피해'],e:'🔮',n:'포격 영혼',s:'포격',req:9,mp:14,cd:8,el:'#a98bff',d:l=>`[소환수·영구] 원거리 딜러. 생명력은 내 최대 생명력의 ${V(50+3*l)}%, 1.8초마다 마법탄 ${V(HMN(l))}발 · 기본 피해 ${V(Math.round((18+12*l)*HMF(HMN(l))))}. 스테이지 시작 시 무료 소환`},
   {k:'resonance',lb:['공격속도','생명력회복'],e:'💠',n:'영혼 공명',s:'공명',req:12,mp:0,cd:0,el:'#7dffd8',passive:1,d:l=>`패시브: 소환수 공격 속도 +${V(Math.min(40,2*l))}%, 소환수가 준 피해의 ${V((3+.2*l).toFixed(1))}%만큼 내 생명력 회복`},
@@ -2842,7 +2842,7 @@ function derive(p,nm){   /* nm=true: 마을 풍차 보너스를 빼고 계산 (�
   if(p.pet&&p.pet.id==='dealer'){ const l=p.pet.lv||petLvOf(p.pet.xp|0,'dealer'); d.mf+=DEALER.mf(l); d.casD=DEALER.cd(l); }   /* 베이비 딜러(동행 중): 드롭률 · 도박장 비용 할인(%) */
   const C=CLASSES[p.cls];
   const pen=wpPen(p); if(pen){ d.ms-=pen.ms; d.blkMax=pen.blk||BLKMAX; d.mrx=pen.mr||1; }   /* 대검·도끼 패널티 */
-  { const pl=k=>{ if(pen&&pen.sk.includes(k))return 0; const b=(p.skills&&p.skills[k])||0; return b>0?b+d.cls+(d.sk[k]||0):0;}; const a1=pl('ironbody'),a2=pl('bulwark'),a3=pl('arcane'),a4=pl('swift'); if(a4)d.ms+=10+2*a4; d.dr+=a1*.012; d.regen+=a1*.0015; d.mr+=a3*3; d.cdr+=a3*.01; d.blk+=a2; }
+  { const pl=k=>{ if(pen&&pen.sk.includes(k))return 0; const b=(p.skills&&p.skills[k])||0; return b>0?b+d.cls+(d.sk[k]||0):0;}; const a1=pl('ironbody'),a2=pl('bulwark'),a3=pl('arcane'),a4=pl('swift'), a5=p.cls==='necro'?pl('soullink'):0; if(a4)d.ms+=10+2*a4; if(a5&&def2On())d.dr+=(1+.3*a5)/100;   /* 새 방어 공식(연구실): 영혼 연결 = 소환수 피해 대신 강령술사 받는 피해 -(1+0.3×Lv)% */ d.dr+=a1*.012; d.regen+=a1*.0015; d.mr+=a3*3; d.cdr+=a3*.01; d.blk+=a2; }
   if(p.cls==='druid'){ /* 드루이드: 야생의 혈통(모든 형태) + 곰 형태 보정 */
     const sl=k=>{ const b=(p.skills&&p.skills[k])||0; return b>0?b+d.cls+(d.sk[k]||0)+synBonus(p,k):0; }, wb=sl('wildblood'), fm=p.form||'';
     if(wb){ d._hpm=(d._hpm||1)*(1+.02*wb); d.regen+=.001*wb; }
@@ -4427,7 +4427,7 @@ const MNIDX=['guard','caster','colossus','dragon','fusion','rv1','rv2','rv3','pa
 const SMF={}; for(const k of MNIDX)SMF[k]={basic:1,sm:1,mk:k}; /* mk = 어떤 소환수가 때렸는지 (데미지 랭크 집계용) */
 const SMFX={basic:1,sm:1}; /* 소환수 타격: 반격 태세 면제, 흡혈·특수효과 제외 */
 const lordOn=()=>!!(me&&me.buffs&&me.buffs.lord&&me.buffs.lord.t>0);
-const mnMul=()=>(1+.04*skLv(me,'soullink'))*(1+.04*skLv(me,'communion'))*(1+(me.D.sm||0)/100)*(lordOn()?1.4:1);
+const mnMul=()=>(def2On()?1:1+.04*skLv(me,'soullink'))*(1+.04*skLv(me,'communion'))*(1+(me.D.sm||0)/100)*(lordOn()?1.4:1);
 const mnAS=()=>(skLv(me,'resonance')>0?1+Math.min(.4,.02*skLv(me,'resonance')):1)*(me.buffs.exec&&me.buffs.exec.t>0?1.3:1)*(()=>{ const sb=spiritBuff(); return sb?1+sb.ias:1; })();
 function mnMaxHp(k,lv){ const mh=me.D.maxHp, hm=1+((me.D.smhp||0)+2*skLv(me,'communion'))/100, rv=RVHP(lv); return Math.round(mh*({guard:.8+.05*lv,caster:.5+.03*lv,colossus:3+.15*lv,dragon:4+.2*lv,fusion:2.2+.1*lv,rv1:rv,rv2:rv,rv3:rv,papa:2.2+.1*lv,mama:(2.2+.1*lv)*.6,baby:(2.2+.1*lv)*.4}[k])*hm); }
 function summonMinion(k,lv,free,px,py,grp){
@@ -7964,7 +7964,7 @@ function trConsts(){ const D=me.D, b=buffDmg(), P=gearPen(), L=lvPen(), wa=(D.wm
   C.F={n:'마도서',e:D.sp&&D.sp.tome?'1.3':'1 (없음)',v:D.sp&&D.sp.tome?1.3:1};
   C.G={n:'기본 공격 배율',e:PPR?`0.5 + 3/|min(Lv ${me.lvl},99) − 99.9|`:'0.6',v:atkM()};
   C.H={n:'원거리 기본 공격 보정',e:PPR?`max(1 + 에너지 ${D.ene}/250, 1.2)`:`(1 + 에너지 ${D.ene}/150)`,v:rngM()};
-  if(me.cls==='necro')C.I={n:'소환수 배율',e:`(1+0.04×영혼 연결 ${skLv(me,'soullink')})×(1+0.04×교감 ${skLv(me,'communion')})×(1+소환수 피해 ${D.sm||0}/100)${lordOn()?'×군주 1.4':''}`,v:mnMul()};
+  if(me.cls==='necro')C.I={n:'소환수 배율',e:`${def2On()?'':`(1+0.04×영혼 연결 ${skLv(me,'soullink')})×`}(1+0.04×교감 ${skLv(me,'communion')})×(1+소환수 피해 ${D.sm||0}/100)${lordOn()?'×군주 1.4':''}`,v:mnMul()};
   C.J={n:'장비 보정',e:`장비 Lv 합 ${P.sum} (권장 ${P.need}↑)`,v:P.wm};
   C.K={n:'레벨 보정',e:`Lv ${me.lvl} (Lv90↑ 패널티 없음)`,v:L.dm};
   C.L={n:'감전 추가 피해(스킬)',e:PPR?`1 + (30 + 2×연쇄 번개 Lv)/100 (화상 틱에도 적용)`:'4/3',v:PPR?null:SHOCKB};
