@@ -1548,7 +1548,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0854</div>
+    <div class="ver" id="verT">v0.7.2.0855</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1760,7 +1760,7 @@ const SK={
  sorc:[
   {k:'fireball',lb:['발수','반경','피해'],e:'🔥',n:'화염구',s:'화염',req:1,mp:4,cd:1,el:'#ff7a2e',rg:300,d:l=>`${V(HMN(l))}발 발사, 폭발 반경 ${RR(60,l)} · 기본 피해 ${V(Math.round((18+13*l)*HMFM(HMN(l))))}`},
   {k:'arcane',lb:['마나회복','재사용대기'],e:'🔷',n:'비전 집중',s:'비전',req:3,mp:0,cd:0,el:'#8fb0ff',passive:1,d:l=>`패시브: 마나 회복 +${V(3*l)}%, 스킬 재사용 대기시간 -${V(Math.min(25,l))}%`},
-  {k:'mshield',lb:['마나분담','피해당마나'],e:'🔮',n:'에너지 실드',s:'실드',req:9,mp:0,cd:0,el:'#7fb4ff',passive:1,d:l=>`패시브: 받는 피해의 ${V(Math.round(Math.min(.65,.2+.02*l)*100))}%를 마나가 대신 받음 · 피해 1당 마나 ${V(Math.max(.25,.9-.02*l).toFixed(2))} 소모`},
+  {k:'mshield',lb:['마나분담','피해당마나'],e:'🔮',n:'에너지 실드',s:'실드',req:9,mp:0,cd:0,el:'#7fb4ff',passive:1,d:l=>`패시브: 받는 피해의 ${V(Math.round(Math.min(.65,.2+.02*l)*100))}%를 마나가 대신 받음 · 피해 1당 마나 ${V(msCost(l).toFixed(2))} 소모`},
   {k:'frostnova',lb:['연타','반경','피해'],e:'❄️',n:'서리 고리',s:'서리',req:6,mp:10,cd:6,el:'#8fdcff',d:l=>`${V(HMN(l))}연타, 반경 ${RR(160*FNR,l)} · 기본 피해 ${V(Math.round((14+10*l)*FND*HMFM(HMN(l))))} · 3초간 감속`},
   {k:'teleport',lb:['거리'],e:'🌀',n:'순간이동',s:'이동',req:9,mp:12,cd:5,el:'#b98bff',d:l=>`누른 곳으로 순간이동, 최대 거리 ${V(240+4*l)} · 도착 직후 0.4초 무적`},
   {k:'chain',lb:['튕김','갈래','피해','감전','감전피해'],e:'⚡',n:'연쇄 번개',s:'번개',req:12,mp:9,cd:4,el:'#dfe7ff',rg:280,d:l=>`적 사이를 ${V(3+Math.floor(l/4))}번 튀는 번개 ${V(HMN(l))}갈래 · 기본 피해 ${V(Math.round((22+16*l)*HMFM(HMN(l))))} · 맞은 적은 ${V(SHK(l).toFixed(1))}초간 ⚡감전, 감전된 적이 받는 스킬 피해 +${V(PPR?30+2*l:Math.round((SHOCKB-1)*100))}%`},
@@ -4012,6 +4012,7 @@ function def2Sum(){ const D=me.D, b=me.buffs, on=k=>b[k]&&b[k].t>0, sp=D.sp||{};
   return Math.max(0,s*100); }
 function def2Mul(rh,fire){ const b=me.buffs, S=def2Sum(); let m=(1-def2Red(rh,fire))*(DEF2_R/(DEF2_R+S));
   if(b.rage&&b.rage.t>0)m*=1+b.rage.pen; if(me.erode>0)m*=1.5; if(G.stg&&G.stg.raid===3)m*=casDevDef(); return m; }
+function msCost(l){ return Math.max(.25,def2On()?.95-.015*l:.9-.02*l); }   /* 에너지 실드 피해 1당 마나: 새 방어 공식(연구실) ON이면 0.95-0.015×Lv, 아니면 0.9-0.02×Lv (최저 0.25) */
 function takeDmg(raw,fire,rh){
   if(me.dead||G.phase==='win'||G.phase==='clear'||me.god>0)return;
   if(!fire&&me.D.blk>0&&Math.random()*100<me.D.blk){ if(me.cls==='pal'&&skLv(me,'bulwark'))me.mp=Math.min(me.D.maxMp,me.mp+3);  addNum(me.x,me.y-30,'🛡️ 막기!','#9fd0ff',true); spark(me.x,me.y,'#9fd0ff',12); efx.push({k:'ring',x:me.x,y:me.y,r0:8,r1:34,t:0,life:.3,col:'#9fd0ff',w:5}); sfx('block'); if(me.D.sp&&(me.D.sp.hoff_pal||me.D.sp.awoff_pal||me.D.sp.csoff_pal)){ const q=nearestMob(me.x,me.y,160), cs=!!me.D.sp.csoff_pal, aw=!!me.D.sp.awoff_pal; if(q&&raw>0)hitMob(q,{v:raw*(cs?.7:aw?.6:.5),crit:false},0,false,cs?{raw:1,stun:.8}:aw?{raw:1,stun:.5}:{raw:1}); } return; }
@@ -4019,7 +4020,7 @@ function takeDmg(raw,fire,rh){
   if(def2On()){ d=raw*lvPen().tk*gearPen().tk*def2Mul(rh,fire); }   /* 🛡️ 새 방어 공식 (연구실에서 켰을 때만) */
   else { const red=Math.min(rh&&!fire?RAID_RED:.8,def/(def+50+G.wave*8));
   d=raw*lvPen().tk*gearPen().tk*(1-red)*(1-(me.D.dr||0))*(1-guardRed())*(me.buffs.barrier&&me.buffs.barrier.t>0?1-me.buffs.barrier.v:1)*drMul(); if(me.D.sp&&me.D.sp.martyr&&me.hp<me.D.maxHp*.5) d*=.6; if(me.erode>0)d*=1.5; if(G.stg&&G.stg.raid===3)d*=casDevDef(); if(me.D.sp&&me.D.sp.hoff_druid&&me.form) d*=.9; if(me.D.sp&&me.D.sp.awoff_druid&&me.form) d*=.88; if(me.D.sp&&me.D.sp.csoff_druid&&me.form) d*=.85; }
-  { const ms=skLv(me,'mshield'); if(ms&&me.mp>0&&d>0){ const sh=Math.min(.65,.2+.02*ms), cost=Math.max(.25,.9-.02*ms), ab=Math.min(d*sh,me.mp/cost); me.mp-=ab*cost; d-=ab; if(ab>=1){ addNum(me.x+10,me.y-38,Math.round(ab),'#6fb0ff',false); efx.push({k:'ring',x:me.x,y:me.y,r0:10,r1:30,t:0,life:.25,col:'#7fb4ff',w:4}); } } }
+  { const ms=skLv(me,'mshield'); if(ms&&me.mp>0&&d>0){ const sh=Math.min(.65,.2+.02*ms), cost=msCost(ms), ab=Math.min(d*sh,me.mp/cost); me.mp-=ab*cost; d-=ab; if(ab>=1){ addNum(me.x+10,me.y-38,Math.round(ab),'#6fb0ff',false); efx.push({k:'ring',x:me.x,y:me.y,r0:10,r1:30,t:0,life:.25,col:'#7fb4ff',w:4}); } } }
   if(me.csBar>0&&d>0){ me.csBar--; addNum(me.x,me.y-40,`🏰 방벽 (${me.csBar}회 남음)`,'#f0d29a',true); spark(me.x,me.y,'#f0d29a',10); efx.push({k:'ring',x:me.x,y:me.y,r0:10,r1:40,t:0,life:.3,col:'#f0d29a',w:6}); sfx('block'); if(me.csBar<=0)me.csBar=0; return; }   /* 성채의 갑주 방벽 */
   tkAdd(d); me.hp-=d; me.hurt=.15; sfx('hurt'); voiceHurt(d); G.shake=Math.max(G.shake,.2);
   addNum(me.x,me.y-24,Math.round(d),'#ff5a4a',false);
