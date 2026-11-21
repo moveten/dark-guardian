@@ -1548,7 +1548,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0846</div>
+    <div class="ver" id="verT">v0.7.2.0847</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3987,10 +3987,11 @@ function applyStatus(kind,dur){ if(me.dead||me.god>0)return; let noImm=0; if(kin
   else if(kind==='halve'){ const loss=Math.floor(me.D.maxHp*(me.D.sp&&me.D.sp.hhelm?.5:HALVE_PCT)); /* 현재가 아니라 '최대 생명력'의 70%가 고정 피해 — 남은 체력이 70% 이하면 즉사 */ if(loss>0){ tkAdd(loss); me.hp-=loss; me.hurt=.3; addNum(me.x,me.y-44,'☠️ -'+loss,'#e070ff',true); spark(me.x,me.y,'#c040e0',24); sfx('hurt'); G.shake=Math.max(G.shake,.5); if(me.hp<=0)goDown(); else { me.hblk=Math.max(me.hblk||0,HALVE_BLK); me.hpLk=me.hp; addNum(me.x,me.y-66,'💔 '+HALVE_BLK+'초 봉쇄 · 물약·치유 오라만 회복','#ff8ab0',true); } } }
   else if(kind==='mdrain'){ if(me.mp>0){ me.mp=Math.max(0,me.mp-me.D.maxMp*dur*Math.max(.3,1/(1+(me.D.ene||0)/120))); me.drainT=.4; if(!(me.dnT>0)){ me.dnT=.7; addNum(me.x,me.y-44,'🌀 마나 흡수','#b070ff',false); } if(!G.mdw){ G.mdw=1; announce('🌀 마나 흡수 정예! 마나가 빨려나가요. 거리를 벌리거나 처치하세요','#c090ff'); } } }
   else if(kind==='poison'){ me.poison=Math.max(me.poison||0,dur); addNum(me.x,me.y-40,'☠️ 중독','#7ad04a',false); } }
-/* 🛡️ 새 방어 공식 (연구실 전용 시험): ① 방어 감소 = 방어력 ÷ (방어력 + 5×(스테이지 아이템레벨+10)), 최대 80%(레이드 70%)
+/* 🛡️ 새 방어 공식 (연구실 전용 시험): ① 방어 감소 = 방어력 ÷ (방어력 + 5×(스테이지 아이템레벨+10)×장비 등급 배율), 최대 80%(레이드 70%)
    ② 피해 감소 합계(아이템·체력·칭호·버프 스킬, %p) → 실제 = 합계 ÷ (합계+60) · 받는 피해 증가(분노·침식·공성장치)는 따로 곱함 */
 const DEF2_K=5, DEF2_R=60;
-function def2Base(){ const S=G.stg, il=(S&&S.icap)||Math.max(8,(me&&me.lvl)|0); return DEF2_K*(il+10); }
+function def2Gm(){ const S=G.stg, r=S&&S.raid; return r===1?HERO_M:r===2?AW_M:r===3?CS_M:1; }   /* 장비 등급 배율: 영웅(4스테이지)·각성(5)·수문장(6) 장비 기본 성능 배율 — 새 등급이 나오면 여기에 추가 */
+function def2Base(){ const S=G.stg, il=(S&&S.icap)||Math.max(8,(me&&me.lvl)|0); return DEF2_K*(il+10)*def2Gm(); }
 function def2Red(rh,fire){ const def=me.D.def; return Math.min(rh&&!fire?RAID_RED:.8,def/(def+def2Base())); }
 function def2Sum(){ const D=me.D, b=me.buffs, on=k=>b[k]&&b[k].t>0, sp=D.sp||{}; let s=(D.drRaw!=null?D.drRaw:D.dr||0)+guardRed();
   if(on('barrier'))s+=b.barrier.v; if(on('fury')&&b.fury.dr)s+=b.fury.dr; if(on('roar'))s+=b.roar.v; if(on('hunt'))s+=b.hunt.dr;
