@@ -1,4 +1,4 @@
--- 클라우드 저장본 정리 (작성됨 · 아직 Supabase 에 적용 전 — 적용하면 migration: dd_save_invalid_audit)
+-- 클라우드 저장본 정리 (Supabase 에 적용됨 · migration: dd_save_invalid_audit, 11/22)
 --  · dd_save.invalid_at      : 같은 캐릭터(dkdef2.c.<id>)를 가진 더 새로운 행이 생겨서 '무효'가 된 시각 (null = 유효)
 --  · 새 행 INSERT 시 트리거   : 지금 들어온 행의 dkdef2.c.<id> 와 같은 키를 가진 기존 행(아직 무효가 아닌 것)에 invalid_at = now() 기록
 --  · dd_save_audit            : 행이 삭제될 때 남기는 기록 (id · reason · target · names · trig_at · created_at)

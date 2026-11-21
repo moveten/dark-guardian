@@ -1548,7 +1548,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0853</div>
+    <div class="ver" id="verT">v0.7.2.0854</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -6026,7 +6026,7 @@ function renderDex(){
   b.querySelectorAll('[data-dt]').forEach(e=>e.onclick=()=>{ dexTab=e.dataset.dt; renderDex(); b.scrollTop=0; });
   b.querySelectorAll('[data-dg]').forEach(e=>e.onclick=()=>{ const id=e.dataset.dg, y=b.scrollTop; if(dexClosed.has(id))dexClosed.delete(id); else dexClosed.add(id); renderDex(); b.scrollTop=y; }); }
 let dexWas=false;
-function rerender(){ if(dexWas&&sheetMode!=='dex')dexSeen(); dexWas=sheetMode==='dex'; if(sheetMode!=='bag'){ gemSock=null; bagSel=null; $('#sheetTabs').classList.remove('selhide'); $('#selBar').hidden=true; } $('#sheet').classList.toggle('isstore',sheetMode==='store'||sheetMode==='town'); if(sheetMode==='store')renderStore(); else if(sheetMode==='town')renderTown(); else if(sheetMode==='bag')renderBag(); else if(sheetMode==='stat'||sheetMode==='skill'||sheetMode==='passive')renderStat(); else if(sheetMode==='shop')renderShop(); else if(sheetMode==='pet')renderPet(); else if(sheetMode==='dex')renderDex(); else renderMenu(); }
+function rerender(){ if(sheetMode!=='shop')rsShopIn=false; if(dexWas&&sheetMode!=='dex')dexSeen(); dexWas=sheetMode==='dex'; if(sheetMode!=='bag'){ gemSock=null; bagSel=null; $('#sheetTabs').classList.remove('selhide'); $('#selBar').hidden=true; } $('#sheet').classList.toggle('isstore',sheetMode==='store'||sheetMode==='town'); if(sheetMode==='store')renderStore(); else if(sheetMode==='town')renderTown(); else if(sheetMode==='bag')renderBag(); else if(sheetMode==='stat'||sheetMode==='skill'||sheetMode==='passive')renderStat(); else if(sheetMode==='shop')renderShop(); else if(sheetMode==='pet')renderPet(); else if(sheetMode==='dex')renderDex(); else renderMenu(); }
 function markTabs(){ $('#itemPop').hidden=true; $('#ptsBar').hidden=true; const t=$('#sheetTabs'), cm=sheetMode==='passive'?'skill':sheetMode; { const ts=$('#tSend'); if(ts)ts.style.display=(me&&me.hc)?'none':''; } t.hidden=sheetMode==='menu'||sheetMode==='store'||sheetMode==='dex'||!!G.inGame; /* 게임 중에는 하단 독 하나만 사용 */ for(const [id,m] of [['bBag','bag'],['bStat','stat'],['bSkillT','skill'],['bMenu','menu']]){ const e=$('#'+id); if(e)e.setAttribute('aria-pressed',cm===m); } t.querySelectorAll('button').forEach(b=>{b.setAttribute('aria-pressed',b.dataset.m===cm); if(b.dataset.m==='shop')b.hidden=!!G.inGame&&sheetMode!=='shop'; const n=b.dataset.m==='bag'?newCnt(me):b.dataset.m==='stat'?(me.statPts|0):b.dataset.m==='skill'?(me.skillPts|0):0; let bd=b.querySelector('.pl'); if(!bd){bd=document.createElement('span');bd.className='pl';b.appendChild(bd);} bd.classList.toggle('dotn',b.dataset.m==='bag'); bd.textContent=n>0&&b.dataset.m!=='bag'?'+'+n:''; bd.hidden=!(n>0); }); }
 $('#ptsBar').onclick=()=>{ sheetMode='stat'; selItem=null; rerender(); };
 $('#sheetTabs').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; if(b.id==='tSend'){ if(me&&me.hc){ sheetToast('하드코어 캐릭터는 공유보관함을 이용할 수 없어요','#ff8a7a'); return; } sheetMode='bag'; selItem=null; bagSel=new Set(); bagSelM=new Set(); rerender(); $('#sheetB').scrollTop=0; return; }   /* 📦 창고로: 가방을 열고 선택 모드로 */
@@ -6598,7 +6598,7 @@ function rsAsk(onOk,onNo){
     const inp=m.querySelector('#rsPw'); setTimeout(()=>{ try{ inp.focus(); }catch(e){} },60);
     const go=()=>{ const v=inp.value.trim(); if(!rsPwOk(v)){ m.querySelector('#rsMsg').textContent='비밀번호가 올바르지 않아요'; inp.value=''; return; } onOk(v); };
     m.querySelector('#rsGo').onclick=go; inp.onkeydown=e=>{ if(e.key==='Enter')go(); }; m.querySelector('#rsNo').onclick=()=>{ closeModal(); if(onNo)onNo(); }; }); }
-/* 출입 기록: charlogs.txt 는 서버(Supabase dd_charlog)에 쌓이고 [출입 기록]에서 그 형식 그대로 보여줘요. 못 보낸 기록은 기기에 남겨 뒀다가 나중에 다시 보내요 */
+/* 캐릭터 로그: charlogs.txt 는 서버(Supabase dd_charlog)에 쌓이고 [캐릭터 로그]에서 그 형식 그대로 보여줘요. 못 보낸 기록은 기기에 남겨 뒀다가 나중에 다시 보내요 */
 const rsQ=()=>{ try{ const a=JSON.parse(lsGet(RS_Q)||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } };
 async function rsPost(o){ const r=await fetch(SB_URL+'/rest/v1/rpc/dd_lab_log',{method:'POST',headers:rkHead(),body:JSON.stringify({p_pw:o.pw,p_kind:o.k,p_names:String(o.n||'').slice(0,380),p_at:o.t})}); if(!r.ok)throw new Error('http '+r.status); const v=await r.json(); if(v!=='ok')throw new Error(String(v)); }
 let rsBusy=false;
@@ -6617,29 +6617,38 @@ function rsNotes(){
     const load=()=>fetch('adminnotes.txt?'+Date.now(),{cache:'no-store'}).then(r=>{ if(!r.ok)throw 0; return r.text(); }).then(t=>{ m.querySelector('#rsT').textContent=t||'(비어 있어요)'; }).catch(()=>{ m.querySelector('#rsT').textContent='관리자 노트를 불러오지 못했어요. (오프라인이거나 서버 점검 중)'; });
     m.querySelector('#rnRe').onclick=()=>{ m.querySelector('#rsT').textContent='불러오는 중…'; load(); }; load(); }); }); }
 function rsLogView(){
-  rsAsk(pw=>{ lsSet(RS_PW,pw); modal(`<h3>📜 출입 기록</h3><pre id="rsT" style="${rsPre}">불러오는 중…</pre><div class="row2"><button class="btn" id="rlRe">🔄 새로고침</button><button class="btn primary" id="rlX">닫기</button></div>`,m=>{
+  rsAsk(pw=>{ lsSet(RS_PW,pw); modal(`<h3>📜 캐릭터 로그</h3><pre id="rsT" style="${rsPre}">불러오는 중…</pre><div class="row2"><button class="btn" id="rlRe">🔄 새로고침</button><button class="btn primary" id="rlX">닫기</button></div>`,m=>{
     m.querySelector('#rlX').onclick=closeModal;
     const line=(k,names,t,wait)=>k==='in'?`${rsStamp(t)}, 새로운 관리자가 권한을 획득하였습니다 - ${names}${wait?' (전송 대기)':''}`:`${rsStamp(t)}, ${names} - 관리자 권한을 반납했습니다.${wait?' (전송 대기)':''}`;
     const load=async()=>{ const el=m.querySelector('#rsT'); await rsFlush();
       try{ const rows=await clRpc('dd_lab_list',{p_pw:pw,p_limit:200}); if(!Array.isArray(rows))throw 0;
         const L=rsQ().map(o=>({t:o.t,s:line(o.k,o.n,o.t,1)})).concat(rows.map(o=>({t:o.created_at,s:line(o.kind,o.names,o.created_at)}))).sort((a,b)=>new Date(b.t)-new Date(a.t));
         el.textContent=L.length?L.map(x=>x.s).join('\n\n'):'아직 기록이 없어요.'; }
-      catch(e){ el.textContent='출입 기록을 불러오지 못했어요. (오프라인이거나 서버 점검 중)'; } };
+      catch(e){ el.textContent='캐릭터 로그를 불러오지 못했어요. (오프라인이거나 서버 점검 중)'; } };
     m.querySelector('#rlRe').onclick=()=>{ m.querySelector('#rsT').textContent='불러오는 중…'; load(); }; load(); }); }); }
 /* 클라우드 저장본 조회: 버튼에는 행 수만 보이고(눌러야 목록을 불러와요), 행을 펼칠 때 그 행의 JSON을 그때 불러와요 */
-let rsClN=null, rsClT=0;
+let rsClN=null, rsShopIn=false;   /* rsShopIn: 상점에 들어와 행 수를 확인했는지 (다른 탭으로 나가면 다시 false) */
 const rsClTxt=()=>'☁️ 클라우드 저장본 '+(rsClN==null?'?':rsClN)+'행 조회하기';
-function rsClLabel(b){ const el=b&&b.querySelector('#rsCl'); if(!el)return; el.textContent=rsClTxt(); if(Date.now()-rsClT<20000)return; rsClT=Date.now();
-  const pw=lsGet(RS_PW); if(!pw)return; clRpc('dd_lab_save_count',{p_pw:pw}).then(n=>{ if(typeof n==='number'){ rsClN=n; const e=document.querySelector('#rsCl'); if(e)e.textContent=rsClTxt(); } }).catch(()=>{}); }
+function rsClLabel(b){ const el=b&&b.querySelector('#rsCl'); if(!el)return; el.textContent=rsClTxt(); if(rsShopIn)return; rsShopIn=true;   /* 상점에 들어와 버튼을 처음 그릴 때 한 번만 행 수를 확인 (주기적 새로고침 없음) */
+  const pw=lsGet(RS_PW); if(!pw)return; clRpc('dd_lab_save_count',{p_pw:pw}).then(n=>{ if(typeof n==='number'){ rsClN=n; const e=document.querySelector('#rsCl'); if(e)e.textContent=rsClTxt(); } }).catch(()=>{ rsShopIn=false; }); }
+/* 클라우드 정리하기: ① 같은 캐릭터(dkdef2.c.<id>) 행끼리 가장 최근 행만 남기고 나머지에 invalid_at 기록(이미 무효인 행은 그대로) ② 무효 48시간 지난 행 삭제 ③ 마지막 저장 61일 지난 행 삭제 — 삭제된 행은 dd_save_audit 에 남아요 */
+function rsSaveClean(){
+  rsAsk(pw=>{ lsSet(RS_PW,pw); modal(`<h3>🧹 클라우드 정리하기</h3><p style="margin:0 0 10px;font-size:14px;line-height:1.6">다음 순서로 정리해요.<br>① 같은 캐릭터가 겹치는 행은 가장 최근 행만 두고 나머지를 <b>무효</b>로 표시 (이미 무효인 행은 그대로)<br>② 무효가 된 지 <b>48시간</b> 넘은 행 <b style="color:#ff9a8a">삭제</b><br>③ 마지막 저장이 <b>61일</b> 넘은 행 <b style="color:#ff9a8a">삭제</b><br><span class="meta">삭제된 행은 되돌릴 수 없어요 (기록은 dd_save_audit 에 남아요).</span></p><div id="clrMsg" class="meta" style="min-height:18px;margin:0 0 8px"></div><div class="row2"><button class="btn" id="clrNo">취소</button><button class="btn danger" id="clrGo">정리하기</button></div>`,m=>{
+    m.querySelector('#clrNo').onclick=closeModal;
+    m.querySelector('#clrGo').onclick=async e=>{ const b=e.currentTarget, msg=m.querySelector('#clrMsg'); b.disabled=true; b.textContent='정리하는 중…'; msg.textContent='';
+      try{ const r=await clRpc('dd_lab_save_clean',{p_pw:pw}); if(!r||typeof r!=='object')throw 0; rsClN=r.rows; const el=document.querySelector('#rsCl'); if(el)el.textContent=rsClTxt();
+        modal(`<h3>🧹 정리했어요</h3><p style="margin:0 0 12px;font-size:14px;line-height:1.7">새로 무효 표시 <b>${r.invalidated|0}</b>행<br>무효 48시간 경과로 삭제 <b>${r.deleted_invalid|0}</b>행<br>61일 경과로 삭제 <b>${r.deleted_old|0}</b>행<br>남은 행 <b>${r.rows|0}</b>행</p><button class="btn primary" id="clrOk" style="width:100%">확인</button>`,mm=>{ mm.querySelector('#clrOk').onclick=closeModal; }); }
+      catch(x){ msg.style.color='#ff8a7a'; msg.textContent='정리하지 못했어요. (비밀번호 오류이거나 서버 점검 중)'; b.disabled=false; b.textContent='다시 시도'; } }; }); }); }
 function rsSaveView(){
   rsAsk(pw=>{ lsSet(RS_PW,pw); modal(`<h3>☁️ 클라우드 저장본</h3><div style="font-size:12px;color:var(--mute);margin:-4px 0 8px">행을 펼치면 그 행의 내용이 클립보드에 복사돼요.</div><div id="scL" style="max-height:58vh;overflow:auto;margin:0 0 8px;touch-action:pan-y">불러오는 중…</div><div class="row2"><button class="btn" id="scRe">🔄 새로고침</button><button class="btn primary" id="scX">닫기</button></div>`,m=>{
     m.querySelector('#scX').onclick=closeModal;
     const box=m.querySelector('#scL'), pre='white-space:pre-wrap;word-break:break-all;font:11px/1.5 ui-monospace,Menlo,monospace;max-height:33vh;overflow:auto;margin:6px 0 0;padding:8px;background:#0a0807;border:1px solid var(--line2);border-radius:8px;touch-action:pan-y';
     const load=async()=>{ box.textContent='불러오는 중…';
-      try{ const L=await clRpc('dd_lab_save_list',{p_pw:pw}); if(!Array.isArray(L))throw 0; rsClN=L.length; rsClT=Date.now(); const e=document.querySelector('#rsCl'); if(e)e.textContent=rsClTxt();
+      try{ const L=await clRpc('dd_lab_save_list',{p_pw:pw}); if(!Array.isArray(L))throw 0; rsClN=L.length; const e=document.querySelector('#rsCl'); if(e)e.textContent=rsClTxt();
         box.innerHTML=L.length?'':'저장된 행이 없어요.';
         L.slice().reverse().forEach(o=>{ const d=document.createElement('details');   /* 목록은 최근 행이 위 (번호는 가장 오래된 행이 #1 그대로) */ d.style.cssText='margin:0 0 6px;border:1px solid var(--line2);border-radius:8px;padding:6px 8px;background:#14100d';
-          const sm=document.createElement('summary'); sm.style.cssText='cursor:pointer;font-size:13px;line-height:1.5'; sm.textContent=`#${o.n} · ${rsStamp(o.at)} · v${o.ver} · 해시 ${o.h} · ${o.kb}KB`; d.append(sm);
+          const sm=document.createElement('summary'); sm.style.cssText='cursor:pointer;font-size:13px;line-height:1.5'; const nmL=(o.fn||'(이름 없음)')+((o.cn|0)>1?` 외 ${(o.cn|0)-1}명`:''); sm.style.whiteSpace='pre-line';   /* 펼치기 전에도 첫 캐릭터 이름 + 외 N명(전체 캐릭터 수-1) */
+          sm.textContent=`#${o.n} · ${rsStamp(o.at)} · v${o.ver} · 해시 ${o.h} · ${o.kb}KB\n👤 ${nmL}${o.inv?`\n⛔ 무효 · ${rsStamp(o.inv)}`:''}`; if(o.inv)d.style.opacity='.6'; d.append(sm);
           const pr=document.createElement('pre'); pr.style.cssText=pre; pr.textContent='불러오는 중…'; d.append(pr);
           let busy=null;   /* 행을 펼치는 순간 그 행의 JSON을 불러오고(한 번만) 곧바로 클립보드에도 넣어요 */
           const getTxt=()=>busy||(busy=clRpc('dd_lab_save_row',{p_pw:pw,p_id:o.id}).then(r=>{ if(!r)throw 0; const t=JSON.stringify(r,null,2); pr.textContent=t; return t; }).catch(x=>{ busy=null; pr.textContent='불러오지 못했어요. 다시 펼쳐 보세요.'; throw x; }));
@@ -6670,10 +6679,10 @@ function renderShop(){
   markTabs(); sheetHead(); sellAskIt=null;
   selItem=null;   /* 상점에는 판매창이 없음 — 판매·일괄 판매는 가방에서 */
   let h=`<div class="box"><h3>🛍️ 구매</h3>${shopRow('potion')}${shopAuto('potion')}${me.hc?'':shopRow('rev')+shopAuto('rev')}<div class="smsg">${esc(buyMsg)}</div></div>`;
-  if(rsOn())h+=`<div class="box" id="rsBox"><h3>📚 연구실</h3><p style="margin:0 0 10px;font-size:14px;line-height:1.5">어서오세요, 관리자님 환영합니다.</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button class="btn" id="rsNote">📔 관리자 노트</button><button class="btn" id="rsLog">📜 출입 기록</button></div>${G.inGame?'':'<button class="btn primary" id="rsTrain" style="width:100%;margin-top:8px">🏋️ 훈련장 입장</button>'}<button class="btn" id="rsPpr" aria-pressed="${PPR?'false':'true'}" style="width:100%;margin-top:8px">🥨 빼빼로 미적용 : ${PPR?'OFF':'ON'}</button><button class="btn" id="rsDef2" aria-pressed="${def2On()?'true':'false'}" style="width:100%;margin-top:8px">🛡️ 새 방어 공식 : ${def2On()?'ON':'OFF'}</button><button class="btn" id="rsCl" style="width:100%;margin-top:8px">☁️ 클라우드 저장본 ?행 조회하기</button><button class="btn" id="rsExit" style="width:100%;margin-top:8px">🚪 나가기</button></div>`;
+  if(rsOn())h+=`<div class="box" id="rsBox"><h3>📚 연구실</h3><p style="margin:0 0 10px;font-size:14px;line-height:1.5">어서오세요, 관리자님 환영합니다.</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button class="btn" id="rsNote">📔 관리자 노트</button><button class="btn" id="rsLog">📜 캐릭터 로그</button></div>${G.inGame?'':'<button class="btn primary" id="rsTrain" style="width:100%;margin-top:8px">🏋️ 훈련장 입장</button>'}<button class="btn" id="rsPpr" aria-pressed="${PPR?'false':'true'}" style="width:100%;margin-top:8px">🥨 빼빼로 미적용 : ${PPR?'OFF':'ON'}</button><button class="btn" id="rsDef2" aria-pressed="${def2On()?'true':'false'}" style="width:100%;margin-top:8px">🛡️ 새 방어 공식 : ${def2On()?'ON':'OFF'}</button><button class="btn" id="rsCl" style="width:100%;margin-top:8px">☁️ 클라우드 저장본 ?행 조회하기</button><button class="btn" id="rsClr" style="width:100%;margin-top:8px">🧹 클라우드 정리하기</button><button class="btn" id="rsExit" style="width:100%;margin-top:8px">🚪 나가기</button></div>`;
   const b=$('#sheetB'); b.className='sbody stats'; b.innerHTML=h; fitGo(b);
   rsClLabel(b);
-  { const q=id=>b.querySelector(id); if(q('#rsCl'))q('#rsCl').onclick=rsSaveView; if(q('#rsNote'))q('#rsNote').onclick=rsNotes; if(q('#rsLog'))q('#rsLog').onclick=rsLogView; if(q('#rsExit'))q('#rsExit').onclick=rsExit; if(q('#rsTrain'))q('#rsTrain').onclick=startTraining; if(q('#rsMine'))q('#rsMine').onclick=startMine; if(q('#rsJw'))q('#rsJw').onclick=combineMenu; if(q('#rsDef2'))q('#rsDef2').onclick=()=>{ if(def2On())lsDel(DEF2_KEY); else lsSet(DEF2_KEY,'1'); def2Sync(); try{ if(me&&me.D)recalc(); }catch(e){} sfx('ui'); sheetToast(def2On()?'🛡️ 새 방어 공식 ON (이 기기·연구실 전용)':'🛡️ 새 방어 공식 OFF (기존 공식)'); rerender(); }; if(q('#rsPpr'))q('#rsPpr').onclick=()=>{ pprSet(PPR?1:0); sfx('ui'); sheetToast(PPR?'🥨 빼빼로 미적용 OFF (새 밸런스)':'🥨 빼빼로 미적용 ON (패치 이전)'); rerender(); }; }
+  { const q=id=>b.querySelector(id); if(q('#rsCl'))q('#rsCl').onclick=rsSaveView; if(q('#rsClr'))q('#rsClr').onclick=rsSaveClean; if(q('#rsNote'))q('#rsNote').onclick=rsNotes; if(q('#rsLog'))q('#rsLog').onclick=rsLogView; if(q('#rsExit'))q('#rsExit').onclick=rsExit; if(q('#rsTrain'))q('#rsTrain').onclick=startTraining; if(q('#rsMine'))q('#rsMine').onclick=startMine; if(q('#rsJw'))q('#rsJw').onclick=combineMenu; if(q('#rsDef2'))q('#rsDef2').onclick=()=>{ if(def2On())lsDel(DEF2_KEY); else lsSet(DEF2_KEY,'1'); def2Sync(); try{ if(me&&me.D)recalc(); }catch(e){} sfx('ui'); sheetToast(def2On()?'🛡️ 새 방어 공식 ON (이 기기·연구실 전용)':'🛡️ 새 방어 공식 OFF (기존 공식)'); rerender(); }; if(q('#rsPpr'))q('#rsPpr').onclick=()=>{ pprSet(PPR?1:0); sfx('ui'); sheetToast(PPR?'🥨 빼빼로 미적용 OFF (새 밸런스)':'🥨 빼빼로 미적용 ON (패치 이전)'); rerender(); }; }
   b.querySelectorAll('[data-atg]').forEach(el=>el.onclick=()=>{ const f=AUTOK[el.dataset.atg]; me[f]=me[f]?0:1; saveChar(); sfx('ui'); renderShop(); });
   b.querySelectorAll('[data-q]').forEach(el=>el.onclick=()=>{ const [k,a]=el.dataset.q.split(':'), have=k==='potion'?me.potBuy:me.rev, space=Math.max(1,shopMax(k)-have), o=SHOP[k];
     if(a==='max')shopQty[k]=Math.max(1,Math.min(Math.floor(aGold()/o.p),space)); else shopQty[k]=clamp((shopQty[k]|0)+(+a),1,space); buyMsg=''; renderShop(); });
@@ -6885,7 +6894,6 @@ function rkCacheGet(mode){ if(mode==='recent')return null; try{ const o=JSON.par
 function rkCacheSet(mode,rows){ if(mode==='recent')return; try{ lsSet('dkdef2.rkc2.'+mode,JSON.stringify({t:Date.now(),rows})); }catch(e){} }
 async function rkLoad(mode,force){ const c=rkCacheGet(mode); if(!force&&c&&Date.now()-c.t<RK_TTL)return {rows:c.rows,t:c.t,cached:true};
   const rows=await rkFetch(mode); rkCacheSet(mode,rows); return {rows,t:Date.now(),cached:false}; }
-function rkPrefetch(){ ['lvl','ta','hc'].forEach((m,i)=>{ const c=rkCacheGet(m); if(c&&Date.now()-c.t<RK_TTL)return; setTimeout(()=>rkLoad(m,true).catch(()=>{}),i*1500); }); }   /* 시작하고 잠시 뒤 세 순위를 미리 받아 둬요 → 랭킹을 열면 바로 보임 */
 const hcStg=r=>{ const h=+(r&&r.data&&r.data.hs)||0; return h>0&&STAGES[h-1]?STAGES[h-1].id:''; };   /* 하드코어: 사망한 스테이지 */
 function rkVal(mode,r){ return mode==='stage'||mode==='hc'||mode==='clr'?(r.clear>0?STAGES[Math.min(STAGES.length,r.clear)-1].id+' 클리어':'-'):mode==='ta'?'⏱ '+fmtCt(rkCt(r)):'Lv '+(r.lvl|0); }
 const rkDate=t=>{ const d=new Date(t*1000); return (d.getMonth()+1)+'/'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); };
@@ -7155,7 +7163,7 @@ function renderTitle(){
   if(!chars.find(c=>c.id===selId)){ selId=chars[0]?chars[0].id:''; lsSet('dkdef2.sel',selId); }
   buildCarousel(chars); renderStagePanel(); try{ getStore(); }catch(e){}   /* 공유보관함 아이템 보정을 시작할 때 한 번 적용 */
   if(!chars.length) showNew(false);
-  rkSubmit(chars,false); setTimeout(rkPrefetch,1200); setTimeout(nameSweep,900);
+  rkSubmit(chars,false); setTimeout(nameSweep,900);   /* 홈 화면에서는 dd_rank 를 읽지 않아요 — 랭킹 탭을 처음 열 때 불러와요 */
 }
 function renderClassCards(){ renderTitle(); }
 setInterval(()=>{ try{ const tb=$('#tTownB'); if(tb&&!document.hidden)tb.hidden=!townFull(); }catch(e){} },30000);   /* 마을 NEW 표시: 타이틀을 켜 둔 채로 조각이 차도 따라가게 */
@@ -9599,15 +9607,16 @@ async function clStartNew(b){ if(b){ b.disabled=true; b.textContent='저장하�
   catch(e){ if(b){ b.textContent='연결 실패 · 다시 눌러보세요'; b.disabled=false; } else cloudModal(); } }
 function clReuse(prev,v){ clHook=null; lsSet('dkdef2.cl.code',prev); lsSet('dkdef2.cl.ver','0'); lsSet('dkdef2.cl.at',v.at||''); lsSet('dkdef2.cl.h',''); lsSet('dkdef2.cl.ph',''); lsDel('dkdef2.cl.prev'); clHook=clDirty; cloudModal(); clResolve({ver:v.ver}); }   /* 버전을 0 으로 두면 서버 내용과 이 기기 내용을 비교해서, 다르면 '서버/이 기기 중 어느 쪽?' 창이 떠요 */
 function clReuseModal(prev,v){
-  modal(`<h3>☁️ 이전에 쓰던 코드가 있어요</h3><p style="margin:0 0 10px;font-size:14px;line-height:1.55">연결을 해제하기 전에 쓰던 복구 코드(끝 <b style="color:#ffe27a">${esc(clTail(prev))}</b>)로 저장된 데이터가 서버에 남아 있어요.<br><span class="meta">마지막 저장 · ${clFmt(v.at)}</span><br>그 코드를 그대로 사용해서 다시 연결할까요?</p><div class="col"><button class="btn primary" id="ruUse">이전 코드 그대로 사용</button><button class="btn" id="ruNew">새 코드 발급</button><button class="btn" id="ruX">취소</button></div>`,m=>{
-    m.querySelector('#ruX').onclick=cloudModal; m.querySelector('#ruUse').onclick=()=>clReuse(prev,v); m.querySelector('#ruNew').onclick=()=>clNewWarn(prev,v); }); }
+  modal(`<h3>☁️ 이전에 쓰던 코드가 있어요</h3><p style="margin:0 0 10px;font-size:14px;line-height:1.55">연결을 해제하기 전에 쓰던 복구 코드(끝 <b style="color:#ffe27a">${esc(clTail(prev))}</b>)로 저장된 데이터가 서버에 남아 있어요.<br><span class="meta">마지막 저장 · ${clFmt(v.at)}</span><br>그 코드를 그대로 사용해서 다시 연결할까요?</p><div class="col"><button class="btn primary" id="ruUse">연결 재개하기</button>${rsOn()?'<button class="btn" id="ruNew">새 코드 발급</button>':''}<button class="btn" id="ruX">취소</button></div>`,m=>{
+    m.querySelector('#ruX').onclick=cloudModal; m.querySelector('#ruUse').onclick=()=>clReuse(prev,v); if(m.querySelector('#ruNew'))m.querySelector('#ruNew').onclick=()=>clNewWarn(prev,v); }); }
 function clNewWarn(prev,v){
-  modal(`<h3>⚠️ 새 코드를 발급할까요?</h3><p style="margin:0 0 10px;font-size:14px;line-height:1.55">서버에는 이전 코드(끝 <b style="color:#ffe27a">${esc(clTail(prev))}</b>)로 저장된 데이터가 <b>이미 있어요</b>. (마지막 저장 · ${clFmt(v.at)})<br><b style="color:#ff9a8a">새 코드를 발급하면 이 기기는 새 코드로만 저장하고, 이전 저장본은 더 이상 갱신되지 않으며 유효성이 유실되어 저장본을 찾지 못할 수 있어요.</b></p><div class="col"><button class="btn primary" id="nwUse">이전 코드 그대로 사용</button><button class="btn danger" id="nwNew">그래도 새 코드 발급</button><button class="btn" id="nwX">취소</button></div>`,m=>{
-    m.querySelector('#nwX').onclick=cloudModal; m.querySelector('#nwUse').onclick=()=>clReuse(prev,v); m.querySelector('#nwNew').onclick=e=>{ e.currentTarget.disabled=true; clStartNew(null); }; }); }
+  if(!rsOn()){ clReuseModal(prev,v); return; }   /* 새 코드 발급은 관리자(연구실)만 — 화면에서도 막아요 (서버 RPC 자체는 막지 않는 화면 쪽 제한) */
+  modal(`<h3>⚠️ 새 코드를 발급할까요?</h3><p style="margin:0 0 10px;font-size:14px;line-height:1.55">서버에는 이전 코드(끝 <b style="color:#ffe27a">${esc(clTail(prev))}</b>)로 저장된 데이터가 <b>이미 있어요</b>. (마지막 저장 · ${clFmt(v.at)})<br><b style="color:#ff9a8a">새 코드를 발급하면 이 기기는 새 코드로만 저장하고, 이전 저장본은 더 이상 갱신되지 않으며 유효성이 유실되어 저장본을 찾지 못할 수 있어요.</b></p><div class="col"><button class="btn primary" id="nwUse">연결 재개하기</button><button class="btn danger" id="nwNew">그래도 새 코드 발급</button><button class="btn" id="nwX">취소</button></div>`,m=>{
+    m.querySelector('#nwX').onclick=cloudModal; m.querySelector('#nwUse').onclick=()=>clReuse(prev,v); m.querySelector('#nwNew').onclick=e=>{ if(!rsOn())return; e.currentTarget.disabled=true; clStartNew(null); }; }); }
 function cloudModal(){
   const code=clCode();
   if(!code){
-    modal(`<h3>☁️ 클라우드 저장</h3><p style="margin:0 0 10px;font-size:14px;line-height:1.55">캐릭터와 아이템을 서버에 자동으로 저장해요. 폰을 바꾸거나 아이콘을 새로 만들어도 <b>복구 코드</b>만 입력하면 그대로 이어서 할 수 있어요.</p><div class="col"><button class="btn primary" id="clStart">☁️ 저장 시작하기 (코드 만들기)</button><button class="btn" id="clLoad">🔑 복구 코드로 불러오기</button><button class="btn" id="clX">닫기</button></div>`,m=>{
+    modal(`<h3>☁️ 클라우드 저장</h3><p style="margin:0 0 10px;font-size:14px;line-height:1.55">캐릭터와 아이템을 서버에 자동으로 저장해요. 폰을 바꾸거나 아이콘을 새로 만들어도 <b>복구 코드</b>만 입력하면 그대로 이어서 할 수 있어요.</p><div class="col"><button class="btn primary" id="clStart">☁️ 클라우드 연결하기(Upload)</button><button class="btn" id="clLoad">🔑 복구 코드로 불러오기(Download)</button><button class="btn" id="clX">닫기</button></div>`,m=>{
       m.querySelector('#clX').onclick=closeModal; m.querySelector('#clLoad').onclick=clLoadModal;
       m.querySelector('#clStart').onclick=async()=>{ const b=m.querySelector('#clStart'); b.disabled=true; b.textContent='확인하는 중…';
         const prev=lsGet('dkdef2.cl.prev')||''; let v=null;
