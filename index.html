@@ -1548,7 +1548,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0848</div>
+    <div class="ver" id="verT">v0.7.2.0849</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3989,10 +3989,22 @@ function applyStatus(kind,dur){ if(me.dead||me.god>0)return; let noImm=0; if(kin
   else if(kind==='poison'){ me.poison=Math.max(me.poison||0,dur); addNum(me.x,me.y-40,'☠️ 중독','#7ad04a',false); } }
 /* 🛡️ 새 방어 공식 (연구실 전용 시험): ① 방어 감소 = 방어력 ÷ (방어력 + 5×(스테이지 아이템레벨+10)×장비 등급 배율), 최대 80%(레이드 70%)
    ② 피해 감소 합계(아이템·체력·칭호·버프 스킬, %p) → 실제 = 합계 ÷ (합계+60) · 받는 피해 증가(분노·침식·공성장치)는 따로 곱함 */
-const DEF2_K=5, DEF2_R=60;
-function def2Gm(){ const S=G.stg, r=S&&S.raid; return r===1?HERO_M:r===2?AW_M:r===3?CS_M:1; }   /* 장비 등급 배율: 영웅(4스테이지)·각성(5)·수문장(6) 장비 기본 성능 배율 — 새 등급이 나오면 여기에 추가 */
-function def2Base(){ const S=G.stg, il=(S&&S.icap)||Math.max(8,(me&&me.lvl)|0); return DEF2_K*(il+10)*def2Gm(); }
-function def2Red(rh,fire){ const def=me.D.def; return Math.min(rh&&!fire?RAID_RED:.8,def/(def+def2Base())); }
+const DEF2_K=5, DEF2_K2=.7, DEF2_R=60;   /* DEF2_K2: 기준값 = 스테이지 풀세트 방어력 × 0.7 → 그 장비를 맞춘 상태의 방어 감소 ≈ 59% */
+let DEF2_REF={};   /* 스테이지별 기준 방어력 캐시 */
+function def2Ref(S){ const id=S&&S.id; if(!id)return 0; if(DEF2_REF[id]!=null)return DEF2_REF[id];
+  const keep=ITEMID, N=60, raid=S.raid|0, rnd=Math.random; let tot=0, cnt=0;
+  try{ Math.random=mulberry(hashStr('def2|'+id));   /* 같은 값이 나오도록 고정된 난수 */
+    const cls=(me&&me.cls)||'war';
+    const mk=slot=>{ if(raid===1)return genHero(slot==='shield'?'hoff_'+cls:HERO_PART[slot]);
+      if(raid===2)return genHero(slot==='shield'?'awoff_'+cls:AW_PART[slot]);
+      if(raid===3)return genHero(slot==='shield'?'csoff_'+cls:slot==='weapon'?'cs_sword':CS_PART[slot]);
+      return genItem(3,S.icap,slot); };
+    for(let n=0;n<N;n++){ let t=0; for(const sl of ['weapon','helm','armor','amulet','ring','ring','shield']){ const it=mk(sl); if(!it)continue; t+=it.df|0; for(const a of it.aff||[])if(a.t==='def')t+=a.v|0; } tot+=t; cnt++; }
+  }catch(e){} finally{ ITEMID=keep; Math.random=rnd; }
+  return DEF2_REF[id]=cnt?tot/cnt:0; }
+/* 방어 기준값 = 해당 스테이지 아이템(그 스테이지 풀세트의 평균 방어력)에 비례 — 아이템 생성식(레벨 비례 · 영웅/각성/수문장 배율)에서 자동으로 구하므로 새 스테이지·새 등급이 생겨도 손볼 게 없어요 */
+function def2Base(){ const S=G.stg, r=S&&def2Ref(S); return r>0?DEF2_K2*r:DEF2_K*(((S&&S.icap)||Math.max(8,(me&&me.lvl)|0))+10); }
+function def2Red(rh,fire){ const def=me.D.def; return def/(def+def2Base()); }   /* 방어 감소 상한 없음 (방어력이 아무리 높아도 100%에는 닿지 않아요) */
 function def2Sum(){ const D=me.D, b=me.buffs, on=k=>b[k]&&b[k].t>0, sp=D.sp||{}; let s=(D.drRaw!=null?D.drRaw:D.dr||0)+guardRed();
   if(on('barrier'))s+=b.barrier.v; if(on('fury')&&b.fury.dr)s+=b.fury.dr; if(on('roar'))s+=b.roar.v; if(on('hunt'))s+=b.hunt.dr;
   if(sp.martyr&&me.hp<D.maxHp*.5)s+=.4; if(me.form){ if(sp.hoff_druid)s+=.1; if(sp.awoff_druid)s+=.12; if(sp.csoff_druid)s+=.15; }
