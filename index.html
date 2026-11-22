@@ -1549,7 +1549,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0864</div>
+    <div class="ver" id="verT">v0.7.2.0865</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -2043,7 +2043,7 @@ const GEM_OPT={ruby:k=>`생명력 흡수 +${k}%`,sapphire:k=>`최대 마나 +${4
 const isGem=it=>!!(it&&it.mat==='gem');
 const gemTier=it=>Math.max(1,Math.min(3,Math.round((it.ilvl|0)/25)||1));   /* 1=하급 2=중급 3=상급 */
 const gemName=(gk,t)=>(t===1?'하급 ':t===3?'상급 ':'')+GEM_N[gk];
-const gemOptText=it=>it.jw?jewelOptText(it):GEM_OPT[it.gk]?GEM_OPT[it.gk](gemTier(it)):'';
+const gemOptText=it=>it.cd?cardOptText(it):it.jw?jewelOptText(it):GEM_OPT[it.gk]?GEM_OPT[it.gk](gemTier(it)):'';
 /* ===== 주얼: 보석과 같은 기타 칸 아이템(mat:'gem', jw:1) — 소켓에 박아 쓰고 판매·보내기·잠금은 보석과 똑같아요.
    jk=종류(보석 6종 + obsidian=칠흑), jt=1~3(옵션 단계 하·중·상), jc=직업 스킬 +1 대상(색 주얼), jv=[공격력,공격속도%](칠흑). 박으면 it.gm={gk,ilvl,jw:1,jt,jc,jv} ===== */
 const JW_N={ruby:'루비 주얼',sapphire:'사파이어 주얼',topaz:'토파즈 주얼',emerald:'에메랄드 주얼',amethyst:'자수정 주얼',diamond:'다이아몬드 주얼',obsidian:'칠흑 주얼'}, JW_KINDS=Object.keys(JW_N), JW_SELL=5000;   /* JW_SELL = 판매가(G) */
@@ -2057,14 +2057,28 @@ function jewelApply(d,g,p){ const k=gemTier(g)-1, v=JW_V[g.gk]&&JW_V[g.gk][k];
   switch(g.gk){ case 'ruby':d.ls+=v; break; case 'sapphire':d.mana+=v; break; case 'topaz':d.mf+=v; break; case 'emerald':d.ms+=v; break; case 'amethyst':d.crit+=v; break; case 'diamond':d.str+=v; d.dex+=v; d.vit+=v; d.ene+=v; break;
     case 'obsidian':{ const j=g.jv||[30,3]; d.dmg+=j[0]; d.ias+=j[1]; } break; }
   if(g.jc&&p&&p.cls===g.jc)d.cls+=1; }
-const gmOf=g=>g.jw?{gk:g.gk,ilvl:g.ilvl,jw:1,jt:g.jt,jc:g.jc,jv:g.jv}:{gk:g.gk,ilvl:g.ilvl};
-const gemNm=g=>g.jw?JW_N[g.gk]:GEM_N[g.gk], gemSellV=it=>it.jw?JW_SELL:GEM_TIER[gemTier(it)-1].g, gemPng=g=>g.jw?'img/jewel_'+g.gk+'.png':'img/gem_'+g.gk+'_'+gemTier(g)+'.png';
+const gmOf=g=>g.cd?{gk:g.gk,ilvl:25,jw:1,jt:1,cd:1}:g.jw?{gk:g.gk,ilvl:g.ilvl,jw:1,jt:g.jt,jc:g.jc,jv:g.jv}:{gk:g.gk,ilvl:g.ilvl};
+const gemNm=g=>g.cd?(CARD_DEF[g.gk]||{}).n:g.jw?JW_N[g.gk]:GEM_N[g.gk], gemSellV=it=>it.cd?0:it.jw?JW_SELL:GEM_TIER[gemTier(it)-1].g, gemPng=g=>g.cd?'img/card_'+g.gk+'.png':g.jw?'img/jewel_'+g.gk+'.png':'img/gem_'+g.gk+'_'+gemTier(g)+'.png';
 GEM_C.obsidian='#a58bd0';
 function mkGem(gk,t){ t=Math.max(1,Math.min(3,t|0)); return {id:++ITEMID,slot:'mat',mat:'gem',gk,rar:0,name:gemName(gk,t),base:'',ilvl:25*t,aff:[]}; }
 const GEMIMG={};
-function gemImg(it){ const f=it.jw?'jewel_'+it.gk:'gem_'+it.gk+'_'+gemTier(it); let e=GEMIMG[f]; if(!e){ e=GEMIMG[f]={ok:false,im:new Image()}; e.im.onload=()=>{ e.ok=true; iconCache.clear(); uiDirty=true; gemIconRedraw(); }; e.im.onerror=()=>{ e.bad=true; }; e.im.src='img/'+f+'.png'; } return e; }
+function gemImg(it){ const f=it.cd?'card_'+it.gk:it.jw?'jewel_'+it.gk:'gem_'+it.gk+'_'+gemTier(it); let e=GEMIMG[f]; if(!e){ e=GEMIMG[f]={ok:false,im:new Image()}; e.im.onload=()=>{ e.ok=true; iconCache.clear(); uiDirty=true; gemIconRedraw(); }; e.im.onerror=()=>{ e.bad=true; }; e.im.src='img/'+f+'.png'; } return e; }
 let gemRdT=0;
 for(const k of JW_KINDS)gemImg({jw:1,gk:k});   /* 주얼 그림 미리 불러오기 */
+/* ===== 곡괭이 카드 (관리자 시범 · 미공개): 영웅 보스(삼남매·각성 그림자·수문장)가 0.1%로 떨구는 카드. 주얼과 같은 기타 칸 아이템(mat:'gem', jw:1, cd:1)이고
+   곡괭이의 카드칸(소켓 1칸)에만 박을 수 있어요 — 박으면 채굴 때 p% 확률로 한 번 더 타격(같은 피해). 카드를 빼면(장인의 집 소켓 비우기) 사라져요. 판매 불가 ===== */
+const CARD_DEF={trio:{n:'삼남매 카드',p:5,c:'#c9a0ff',b:'그림자 삼남매',ds:'세 갈래 길을 지키던 그림자 남매의 힘이 깃든 카드예요.'},
+  awk:{n:'각성 그림자 카드',p:10,c:'#7f8cff',b:'각성 그림자',ds:'봉인의 심연에서 깨어난 첫 수호자의 그림자가 깃든 카드예요.'},
+  cas:{n:'수문장 카드',p:15,c:'#e0b070',b:'수문장 카스텔',ds:'움직이는 성채, 수문장 카스텔의 군기가 깃든 카드예요.'}};
+const CARD_P=.001;   /* 영웅 보스 처치 카드 드랍 확률: 삼남매는 보스 한 마리마다 · 각성 그림자·수문장은 처치 때 한 번 */
+for(const k in CARD_DEF)GEM_C[k]=CARD_DEF[k].c;
+const cardOptText=g=>`곡괭이질 때 ${(CARD_DEF[g.gk]||{p:0}).p}% 확률로 한 번 더 타격`;
+function mkCard(ck){ const D=CARD_DEF[ck]; return {id:++ITEMID,slot:'mat',mat:'gem',jw:1,cd:1,gk:ck,rar:0,name:D.n,base:'',ilvl:25,jt:1,aff:[],lock:true}; }
+for(const k in CARD_DEF)gemImg({cd:1,jw:1,gk:k});   /* 카드 그림 미리 불러오기 (img/card_trio·awk·cas.png) */
+const cardP=p=>{ const w=p&&p.eq&&p.eq.weapon; if(!w||!w.pk||!w.sk||!w.gm||!w.gm.cd||!rsOn())return 0; const D=CARD_DEF[w.gm.gk]; return D?D.p/100:0; };   /* 지금 든 곡괭이의 카드가 주는 '한 번 더 타격' 확률 */
+function cardRoll(ck,x,y){ if(!me||G.mode==='guest'||!rsOn()||Math.random()>=CARD_P)return; const it=mkCard(ck); it.isNew=1;
+  if(gemFit(me,it)>=1)gemPut(me,it,1,true); else dropItem(it,x+rand(-20,20),y+rand(-20,20));
+  later(.5,()=>{ announce(`🃏 ${CARD_DEF[ck].n}를 얻었어요!`,CARD_DEF[ck].c); sfx('rare'); }); saveChar(); uiDirty=true; }
 let rkRe=null;   /* 지금 열린 랭킹 장비 창을 다시 그리는 함수 */
 function gemIconRedraw(){ clearTimeout(gemRdT); gemRdT=setTimeout(()=>{ try{ const sh=$('#sheet'); if(sh&&!sh.hidden&&(sheetMode==='bag'||sheetMode==='store'))rerender(); if(rkRe&&document.querySelector('.rkpb,.rkit'))rkRe(); }catch(e){} },60); }   /* 보석 그림이 늦게 도착하면 열려 있는 가방·보관함의 소켓 보석 그림을 다시 그림 */
 /* 유니크 전용 그림: 이름이 정확히 같은 유니크는 img/ 의 그림을 쓰고(그림이 없거나 아직 불러오는 중이면 기존 그림) — 새 이름 그림은 여기에 한 줄만 추가 */
@@ -2080,7 +2094,7 @@ for(let g=1;g<=5;g++)unqImg({pk:g});   /* 곡괭이 그림도 미리 불러둠 (
 function itemIcon(it){
   if(isGem(it)){ const ge=gemImg(it), key=(it.jw?'J|':'G|')+it.gk+'|'+gemTier(it); let e=ge.ok?iconCache.get(key):null; if(e)return e;
     const cvs=document.createElement('canvas'); cvs.width=cvs.height=96; const c=cvs.getContext('2d');
-    if(ge.ok){ c.imageSmoothingQuality='high'; const gz=(!it.jw&&gemTier(it)===1)?77:96, go=(96-gz)/2; c.drawImage(ge.im,go,go,gz,gz); }   /* 하급 보석은 20% 작게 */ else { c.fillStyle=GEM_C[it.gk]||'#ccc'; c.globalAlpha=.7; c.beginPath(); c.arc(48,48,20,0,6.283); c.fill(); }
+    if(it.cd){ cardIcon(c,it,ge); } else if(ge.ok){ c.imageSmoothingQuality='high'; const gz=(!it.jw&&gemTier(it)===1)?77:96, go=(96-gz)/2; c.drawImage(ge.im,go,go,gz,gz); }   /* 하급 보석은 20% 작게 */ else { c.fillStyle=GEM_C[it.gk]||'#ccc'; c.globalAlpha=.7; c.beginPath(); c.arc(48,48,20,0,6.283); c.fill(); }
     e={cv:cvs,url:cvs.toDataURL()}; if(ge.ok)iconCache.set(key,e); return e; }   /* 그림이 아직 안 왔으면 임시 구슬(저장 안 함) → 도착하면 다시 그려요 */
   const ue=unqImg(it), uk=ue&&ue.ok?'U|'+(it.pk?pickImgKey(it):UNQIMG[it.name]):null;
   const sge=it.sk&&it.gm?gemImg(it.gm):null, key=(uk||(it.slot+'|'+it.base+'|'+it.rar+(it.slot==='shield'?'|'+(it.oc||''):'')))+(it.sk?'|k'+(it.gm?(it.gm.jw?'j':'')+it.gm.gk+gemTier(it.gm):'0'):'');
@@ -2095,9 +2109,11 @@ function itemIcon(it){
   if(it.sk){ c.save(); c.setTransform(1,0,0,1,0,0); drawSock(c,it.gm,sge); c.restore(); }   /* 소켓: 아이템 가운데 어둡고 투명한 원 + 어두운 금빛 테두리, 박힌 보석은 반투명(빛나지 않게) */
   e={cv:cvs,url:cvs.toDataURL()}; if(!sge||sge.ok)iconCache.set(key,e); return e;   /* 보석 그림이 아직 안 왔으면 저장 안 함 → 도착하면 다시 그려요 */
 }
+function cardIcon(c,it,ge){ if(ge.ok){ c.imageSmoothingQuality='high'; const h=92, w=Math.min(92,h*ge.im.width/ge.im.height); c.drawImage(ge.im,(96-w)/2,2,w,h); return; }
+  const col=GEM_C[it.gk]||'#ccc'; c.fillStyle='#14100c'; c.strokeStyle=col; c.lineWidth=3; c.beginPath(); c.roundRect(18,6,60,84,7); c.fill(); c.stroke(); c.fillStyle=col; c.globalAlpha=.8; c.font='bold 30px sans-serif'; c.textAlign='center'; c.textBaseline='middle'; c.fillText('★',48,48); c.globalAlpha=1; }   /* 그림 파일이 아직 없을 때 임시 카드 모양 */
 function drawSock(c,gm,ge){ const R=24, g=c.createRadialGradient(44,43,2,48,48,R); g.addColorStop(0,'rgba(30,22,12,.45)'); g.addColorStop(1,'rgba(0,0,0,.8)');
   c.beginPath(); c.arc(48,48,R,0,6.283); c.fillStyle=g; c.fill();
-  if(gm&&ge&&ge.ok){ c.save(); c.beginPath(); c.arc(48,48,R-2,0,6.283); c.clip(); c.globalAlpha=.72; c.imageSmoothingQuality='high'; c.drawImage(ge.im,48-19.2,48-19.2,38.4,38.4); c.restore(); c.beginPath(); c.arc(48,48,R-3.5,0,6.283); c.lineWidth=1.5; c.strokeStyle=GEM_C[gm.gk]||'#ccc'; c.globalAlpha=.3; c.stroke(); c.globalAlpha=1; }
+  if(gm&&ge&&ge.ok){ c.save(); c.beginPath(); c.arc(48,48,R-2,0,6.283); c.clip(); c.globalAlpha=.72; c.imageSmoothingQuality='high'; if(gm.cd){ const h=46, w=Math.min(46,h*ge.im.width/ge.im.height); c.drawImage(ge.im,48-w/2,48-h/2,w,h); } else c.drawImage(ge.im,48-19.2,48-19.2,38.4,38.4); c.restore(); c.beginPath(); c.arc(48,48,R-3.5,0,6.283); c.lineWidth=1.5; c.strokeStyle=GEM_C[gm.gk]||'#ccc'; c.globalAlpha=.3; c.stroke(); c.globalAlpha=1; }
   c.beginPath(); c.arc(48,48,R-1,0,6.283); c.lineWidth=4; c.strokeStyle='#6e5420'; c.stroke();
   c.beginPath(); c.arc(48,48,R-3,0,6.283); c.lineWidth=1; c.strokeStyle='rgba(214,170,78,.35)'; c.stroke(); }
 function drawIconBody(c,it){
@@ -2622,7 +2638,7 @@ const minerLv=p=>Math.max(1,(p&&p.mine&&p.mine.lv)|0);   /* 광부 레벨: 캐�
 function pickOwned(p){ p=p||me; if(!p)return null; let best=null; const see=it=>{ if(isPick(it)&&(!best||(it.pk|0)>(best.pk|0)))best=it; };   /* 지금 착용 중이거나(아이템세팅 포함) 가방에 있는 곡괭이 중 가장 좋은 것 */
   see(p.eq&&p.eq.weapon); if(p.eq2)Object.values(p.eq2).forEach(see); (p.inv||[]).forEach(see); return best; }
 const mineCanEnter=p=>!!pickOwned(p);   /* 곡괭이를 지금 가지고 있어야만 입장 (팔거나 보관함으로 옮기면 광부 레벨이 높아도 입장 불가) */
-function mkPick(g){ const P=PICKS[g]||PICKS[1]; const it=genItem(-1,1,'weapon','곡괭이'); it.rar=P.rar; it.aff=[]; it.pk=PICKS[g]?g:1; it.name=P.n; it.req=1; it.lock=true; return it; }   /* 처음부터 잠금 → 자동판매·일괄판매·합성에 안 들어가요 */
+function mkPick(g){ const P=PICKS[g]||PICKS[1]; const it=genItem(-1,1,'weapon','곡괭이'); it.rar=P.rar; it.aff=[]; it.pk=PICKS[g]?g:1; it.name=P.n; it.req=1; it.lock=true; if(rsOn()){ it.sk=1; it.gm=null; } return it; }   /* 연구실: 곡괭이엔 카드칸(소켓 1칸)이 처음부터 있어요 */   /* 처음부터 잠금 → 자동판매·일괄판매·합성에 안 들어가요 */
 var TOWNC=null;
 function townLoad(){ let o=null; try{ o=JSON.parse(lsGet(TOWN_KEY)||'null'); }catch(e){} if(!o||typeof o!=='object')o={};
   const t={}, save=[]; for(const k in TOWN_B){ const q=o[k]||{}, D=TOWN_B[k]; t[k]={lv:Math.max(0,Math.min(D.main?TOWN_MAIN_MAXLV:TOWN_MAXLV,q.lv|0)),n:Math.max(0,q.n|0),t:+q.t>0?+q.t:0,u:+q.u>0?+q.u:0};
@@ -2768,7 +2784,7 @@ function loadChar(id){
       p.eq2=e2; p.es=cur; delete p.ps; }
     { const e2=(p.eq2&&typeof p.eq2==='object')?p.eq2:{}, o={}; for(const k of EQSL)o[k]=e2[k]||null; p.eq2=o; p.es=p.es===1?1:0; }
     miscFix(p); p.shard=p.shard|0; shardAdd(p,0); p.ashard=p.ashard|0; shardAdd(p,0,'ashard'); p.cshard=p.cshard|0; shardAdd(p,0,'cshard'); if(p.ore)oreFold(p); /* 예전 조각 숫자 → 가방 아이템으로 (각성 조각 포함) */
-    const fx=it=>{ if(!it)return; ilCapFix(it); heroFix(it); csFix(it); newOptFix(it); heroSmFix(it); lanternFix(it); if(!Array.isArray(it.aff))it.aff=[]; if(it.rar===3&&it.name==='그림자 망토')it.name='밤의 망토'; /* 영웅 '그림자' 장비와 헷갈리지 않게 개명 */ if(!p.dv4&&it.slot!=='weapon')for(const a of it.aff)if(a&&(a.t==='dmgPct'||a.t==='sm'||a.t==='smhp'))a.v=Math.min(50,Math.max(1,Math.round(a.v/4))); /* v0.3: 무기 외 피해%·소환수 피해%·소환수 생명력% 옵션은 예전 수치를 4로 나눈 값으로(캐릭터마다 1회, p.dv4) */ if(!(it.rar===3&&it.sp))for(const a of it.aff)if(a&&(a.t==='str'||a.t==='dex'||a.t==='vit'||a.t==='ene')&&a.v>10)a.v=10; /* 힘·민첩·체력·에너지 옵션 상한 10(이전에 얻은 더 높은 수치도 10으로) */ if(it.rar===3&&!it.sv){ it.sv=1; const sh=it.slot==='shield'; /* 유니크 스킬 옵션 개편: 직업 스킬→모든 스킬, 개별 스킬→그 직업 스킬, 보조장비→내(보조장비) 직업 스킬 (1회) */
+    const fx=it=>{ if(!it)return; if(it.pk&&it.slot==='weapon'&&!it.sk&&rsOn()){ it.sk=1; it.gm=null; } ilCapFix(it); heroFix(it); csFix(it); newOptFix(it); heroSmFix(it); lanternFix(it); if(!Array.isArray(it.aff))it.aff=[]; if(it.rar===3&&it.name==='그림자 망토')it.name='밤의 망토'; /* 영웅 '그림자' 장비와 헷갈리지 않게 개명 */ if(!p.dv4&&it.slot!=='weapon')for(const a of it.aff)if(a&&(a.t==='dmgPct'||a.t==='sm'||a.t==='smhp'))a.v=Math.min(50,Math.max(1,Math.round(a.v/4))); /* v0.3: 무기 외 피해%·소환수 피해%·소환수 생명력% 옵션은 예전 수치를 4로 나눈 값으로(캐릭터마다 1회, p.dv4) */ if(!(it.rar===3&&it.sp))for(const a of it.aff)if(a&&(a.t==='str'||a.t==='dex'||a.t==='vit'||a.t==='ene')&&a.v>10)a.v=10; /* 힘·민첩·체력·에너지 옵션 상한 10(이전에 얻은 더 높은 수치도 10으로) */ if(it.rar===3&&!it.sv){ it.sv=1; const sh=it.slot==='shield'; /* 유니크 스킬 옵션 개편: 직업 스킬→모든 스킬, 개별 스킬→그 직업 스킬, 보조장비→내(보조장비) 직업 스킬 (1회) */
       for(const a of it.aff){ if(!a)continue; const v=Math.min(2,Math.max(1,a.v|0)); if(a.t==='cls'){ if(sh){ a.cls=it.oc||cls; a.v=v; } else { a.t='all'; a.v=v; delete a.cls; } } else if(a.t==='sk'){ a.t='cls'; a.v=v; if(sh)a.cls=it.oc||cls; delete a.key; } }
       if(it.aff.some(a=>a&&a.t==='all'))it.aff=it.aff.filter(a=>!(a&&a.t==='cls')); }
     if(it.rar===3&&it.aff.some(a=>a&&a.t==='all'))it.aff=it.aff.filter(a=>!(a&&a.t==='sk')); it.aff=it.aff.filter(a=>a&&AFXBY[a.t]&&!(it.slot==='armor'&&a.t==='ms')&&!(a.cls&&!CLASSES[a.cls])&&!(a.t==='sk'&&!(SKBY[a.key]&&SK[a.cls]&&SK[a.cls].includes(SKBY[a.key])))); }; p.inv.forEach(fx); p.eq=p.eq||{}; for(const k in p.eq)fx(p.eq[k]); for(const k in p.eq2)fx(p.eq2[k]); p.dv4=1;
@@ -3911,10 +3927,10 @@ function onKill(x,y,xp,tier,ilvl,type,lf){
   me.kills=(me.kills||0)+1; G.stKills=(G.stKills||0)+1; bumpCombo();
   { const sp=me.D&&me.D.sp; if(sp&&!me.dead){ if(sp.bloodoath)me.mp=Math.min(me.D.maxMp,me.mp+10); if(sp.hring)me.hp=Math.min(me.D.maxHp,me.hp+me.D.maxHp*.02*sp.hring); if(sp.necro)me.mp=Math.min(me.D.maxMp,me.mp+15); if(sp.rvoid)me.mp=Math.min(me.D.maxMp,me.mp+15); if(sp.adeath)me.mp=Math.min(me.D.maxMp,me.mp+8); } }
   gainXp(Math.round(xp*comboMul()));
-  { const RK=MT[type].raid; if(RK==='awk'){ const n=ri(3,7); shardAdd(me,n,'ashard'); later(.4,()=>toast(`✦ 각성 그림자 조각 +${n} (보유 ${shardCount(me,'ashard')})${(me.ashard|0)>0?' · 기타 칸이 가득 차서 일부는 보관 중':''}`,'#d8b0ff')); if(Math.random()<AW_P){ const hit=genHero(awKey(pick(['weapon','helm','armor','amulet','ring','shield']))); if(hit)dropItem(hit,x+rand(-20,20),y+rand(-20,20)); } saveChar(); }
-    if(RK==='cas'){ { const n=ri(CAS_CFG.shard[0],CAS_CFG.shard[1]); shardAdd(me,n,'cshard'); later(.4,()=>toast(`🏰 수문장 조각 +${n} (보유 ${shardCount(me,'cshard')})${(me.cshard|0)>0?' · 기타 칸이 가득 차서 일부는 보관 중':''}`,'#ffc870')); saveChar(); } if(Math.random()<CAS_CFG.heroDrop()){ const hit=genHero(csKey(pick(['weapon','helm','armor','amulet','ring','shield']))); if(hit)dropItem(hit,x+rand(-20,20),y+rand(-20,20)); saveChar(); } }   /* 수문장 세트: 처치 시 영웅 장비 확률 드랍(부위 무작위) */
+  { const RK=MT[type].raid; if(RK==='awk'){ const n=ri(3,7); shardAdd(me,n,'ashard'); later(.4,()=>toast(`✦ 각성 그림자 조각 +${n} (보유 ${shardCount(me,'ashard')})${(me.ashard|0)>0?' · 기타 칸이 가득 차서 일부는 보관 중':''}`,'#d8b0ff')); if(Math.random()<AW_P){ const hit=genHero(awKey(pick(['weapon','helm','armor','amulet','ring','shield']))); if(hit)dropItem(hit,x+rand(-20,20),y+rand(-20,20)); } cardRoll('awk',x,y); saveChar(); }
+    if(RK==='cas'){ { const n=ri(CAS_CFG.shard[0],CAS_CFG.shard[1]); shardAdd(me,n,'cshard'); later(.4,()=>toast(`🏰 수문장 조각 +${n} (보유 ${shardCount(me,'cshard')})${(me.cshard|0)>0?' · 기타 칸이 가득 차서 일부는 보관 중':''}`,'#ffc870')); saveChar(); } if(Math.random()<CAS_CFG.heroDrop()){ const hit=genHero(csKey(pick(['weapon','helm','armor','amulet','ring','shield']))); if(hit)dropItem(hit,x+rand(-20,20),y+rand(-20,20)); saveChar(); } cardRoll('cas',x,y); }   /* 수문장 세트: 처치 시 영웅 장비 확률 드랍(부위 무작위) */
     if(RK&&RK!=='awk'&&RK!=='cas'){ const n=ri(1,3); shardAdd(me,n); later(.4,()=>toast(`🌑 그림자 조각 +${n} (보유 ${shardCount(me)})${(me.shard|0)>0?' · 기타 칸이 가득 차서 일부는 보관 중':''}`,'#c9a0ff'));
-      if(Math.random()<HERO_P){ const hit=genHero(heroKey(pick(HDROP[RK]))); if(hit)dropItem(hit,x+rand(-20,20),y+rand(-20,20)); } saveChar(); } }
+      if(Math.random()<HERO_P){ const hit=genHero(heroKey(pick(HDROP[RK]))); if(hit)dropItem(hit,x+rand(-20,20),y+rand(-20,20)); } cardRoll('trio',x,y); saveChar(); } }
   lf=lf>1?lf:1; const rolls=(tier>=2?4:tier>=1?2:1)+(tier<2?(Math.floor(lf-1)+(Math.random()<(lf-1)%1?1:0)):0);
   const cap0=tier<1?1-Math.pow(1-Math.min(1,DROP_BASE+(me.D.mf||0)/1000),1/rolls):1;   /* 일반 몹: 몇 번을 굴리든 '한 마리가 아이템을 하나라도 떨굴 확률' = 17.8% + 드롭률÷10 %p (상한 없음) */
   for(let i=0;i<rolls;i++){
@@ -6116,7 +6132,7 @@ let STORE=null, satSeq=0;
 function loadStore(){ let o=null; try{ o=JSON.parse(lsGet(STORE_KEY)||'null'); }catch(e){} if(!o||typeof o!=='object')o={};
   const inv=Array.isArray(o.inv)?o.inv.slice(0,STORE_N):[]; while(inv.length<STORE_N)inv.push(null);
   let ch=false; for(const it of inv){ if(it){ if(!Array.isArray(it.aff))it.aff=[]; try{ if(ilCapFix(it))ch=true; heroFix(it); if(csFix(it))ch=true; newOptFix(it); if(heroSmFix(it))ch=true; lanternFix(it); if(sumFix(it))ch=true; if(optFix2(it))ch=true; if(itemMig(it,me&&me.cls))ch=true; if(baseFix(it))ch=true; if(nameFix(it))ch=true; }catch(e){} } }
-  const S={inv,gold:Math.max(0,o.gold|0),shard:0,st:1,smith:o.smith?1:0,misc:Array.isArray(o.misc)?o.misc.slice(0,MISC_NS):[]}; const had=inv.some(x=>x&&isShard(x)); miscFix(S);
+  const S={inv,gold:Math.max(0,o.gold|0),shard:0,st:1,smith:o.smith?1:0,misc:Array.isArray(o.misc)?o.misc.slice(0,MISC_NS):[]}; const had=inv.some(x=>x&&isShard(x)); inv.forEach(x=>{ if(x&&x.pk&&x.slot==='weapon'&&!x.sk&&rsOn()){ x.sk=1; x.gm=null; } }); miscFix(S);
   if(ch||had){ try{ lsSet(STORE_KEY,JSON.stringify({inv:S.inv,misc:S.misc,gold:S.gold,smith:S.smith})); }catch(e){} }
   return S; }
 function getStore(){ if(!STORE)STORE=loadStore(); return STORE; }
@@ -6138,7 +6154,7 @@ function sortStore(mode){ const S=getStore(); shardRepack(S); let mx=0; for(cons
   its.sort(mode==='enh'?((a,b)=>(b.enh|0)-(a.enh|0)||byRar(a,b)):mode==='in'?((a,b)=>a.sat-b.sat):byRar);   /* 강화순: 높은 강화 단계 먼저, 같은 단계 안에서는 등급순 · 입고순: 먼저 넣은 것부터 */
   S.inv=its.concat(Array(Math.max(0,STORE_N-its.length)).fill(null)); selItem=null; saveStore(); renderStore(); sheetToast(mode==='enh'?'강화순으로 정리했어요':mode==='in'?'입고순으로 정리했어요':'등급순으로 정리했어요'); }
 function storeDetail(){ sellAskIt=null; if(!selItem)return ''; if(isOreFr(selItem.it))return itemLines(selItem.it)+`<div class="acts"><button class="btn" id="aOreSell">💰 판매</button><button class="btn" id="aSend">📤 보내기</button></div>`; const it=selItem.it; let s=itemLines(it,isShard(it)?null:{lk:1,st:1});
-  if(isGem(it)){ const lk=`<button class="btn lkx" id="aLock" data-lk="1">${it.lock?'🔓 잠금 해제':'🔒 잠금'}</button>`; return s+`<div class="acts iact"><button class="btn primary" disabled style="opacity:.4">💎 소켓에 박기</button>${lk}<button class="btn tlb" id="aGemSell"${it.lock?' style="opacity:.45"':''}><span class="ti ph">💰</span><span class="tx">판매 ${gemSellV(it)}G</span></button><button class="btn tlb" id="aSend"><span class="ti">📤</span> <span class="tx">보내기</span></button></div>`; }
+  if(isGem(it)){ const lk=`<button class="btn lkx" id="aLock" data-lk="1">${it.lock?'🔓 잠금 해제':'🔒 잠금'}</button>`; return s+`<div class="acts iact"><button class="btn primary" disabled style="opacity:.4">💎 소켓에 박기</button>${lk}${gemSellBtn(it)}<button class="btn tlb" id="aSend"><span class="ti">📤</span> <span class="tx">보내기</span></button></div>`; }
   if(isShard(it))return s+`<div class="acts"><button class="btn" id="aShardSell">💰 판매</button><button class="btn" id="aSend">📤 보내기</button></div>`;
   const lk=`<button class="btn lkx" id="aLock" data-lk="1">${it.lock?'🔓 잠금 해제':'🔒 잠금'}</button>`;   /* 패드·PC에서도 잠글 수 있게 (폰은 아이콘 모서리 배지) */
   return s+`<div class="acts iact">${lk}<button class="btn tlb" id="aSell"${it.lock?' style="opacity:.45"':''}><span class="ti ph">💰</span><span class="tx">판매 ${sellInfo(it).total}G</span></button><button class="btn tlb" id="aSend"><span class="ti">📤</span> <span class="tx">보내기</span></button></div>`; }
@@ -6325,7 +6341,8 @@ function sellShard(){ const P=selItem&&selItem.store?getStore():me; const it=sel
     m.querySelector('#ssGo').onclick=()=>{ const q=get(); if(P.misc[ix]!==it||q>(it.n|0))return; const v=q*SHARD_SELL; it.n-=q; if(it.n<=0)P.misc[ix]=null; P.gold=(P.gold|0)+v; selItem=null; shopMsg=`${K.n} ${q}개 판매 +${v.toLocaleString()}G`; saveSrc(P); uiDirty=true; sfx('coin'); closeModal(); rerender(); };
   });
 }
-function sellGem(){ const P=selItem&&selItem.store?getStore():me; const it=selItem&&selItem.it, ix=selItem&&selItem.misc; if(!isGem(it)||ix===undefined||P.misc[ix]!==it)return;
+const gemSellBtn=it=>it.cd?'':`<button class="btn tlb" id="aGemSell"${it.lock?' style="opacity:.45"':''}><span class="ti ph">💰</span><span class="tx">판매 ${gemSellV(it)}G</span></button>`;
+function sellGem(){ const P=selItem&&selItem.store?getStore():me; const it=selItem&&selItem.it, ix=selItem&&selItem.misc; if(!isGem(it)||it.cd||ix===undefined||P.misc[ix]!==it)return;
   if(it.lock){ sheetToast('🔒 잠긴 보석이에요. 잠금을 먼저 풀어 주세요','#ff8a7a'); return; }
   const max=gnOf(it), g=gemSellV(it);
   if(max<=1){ P.misc[ix]=null; P.gold=(P.gold|0)+g; selItem=null; shopMsg=`${it.name} 판매 +${g}G`; sfx('coin'); saveSrc(P); uiDirty=true; rerender(); return; }
@@ -6444,7 +6461,7 @@ const setKind=x=>x&&x.sp&&SPFX[x.sp]?(SPFX[x.sp].cs?'cs6':SPFX[x.sp].aw?'aw':SPF
 const ringPair=(a,b,sep)=>itemLines(a)+sep+itemLines(b,setKind(a)&&setKind(a)===setKind(b)?{noSet:1}:undefined);   /* 두 반지가 같은 세트면 세트 효과는 한 번만 */
 function itemLines(it,opt){
   if(isOreFr(it)){ const O=ORES[it.ok]; return `<div style="display:flex;gap:10px;align-items:center"><div style="width:56px;height:56px;flex:none;display:grid;place-items:center;background:#0a0807;border:1px solid #5a5044;border-radius:8px"><img src="img/frag_${it.ok}.webp" alt="" style="width:48px;height:48px;object-fit:contain"></div><div><div class="in" style="color:${O.c}">${esc(it.name)}</div><div class="meta">수량 <b style="color:#fff">${it.n}</b> / ${SHARD_MAX} (한 칸 최대)</div></div></div><div class="meta" style="margin:6px 0">광산에서 ${esc(O.n)}을(를) 캐면 얻는 조각이에요. 광부 경험치와 레벨업에 쓰이고, 아직 다른 쓰임새는 없어요.</div>`; }
-  if(isGem(it)){ const t=gemTier(it), gc=GEM_C[it.gk]||'#fff'; return `<div style="display:flex;gap:10px;align-items:center"><span style="position:relative;flex:none;display:flex"><img src="${itemIcon(it).url}" alt="" style="width:56px;height:56px;flex:none;background:#0a0807;border:1px solid ${gc};border-radius:8px">${opt&&opt.lk?`<button class="lkb${it.lock?' on':''}" data-lk="1" aria-label="${it.lock?'잠금 해제':'잠금'}">${lockSvg(!!it.lock)}</button>`:''}</span><div><div class="in" style="color:${gc}">${esc(it.name)}</div><div class="meta" style="color:#fff">${it.jw?'주얼 · 옵션 2개':'아이템 레벨 '+(it.ilvl|0)+' · '+GEM_TIER[t-1].n}</div></div></div><ul>${gemOptText(it).split(' / ').map(x=>'<li style="color:#afeeee">'+esc(x)+'</li>').join('')}${opt&&opt.st?'<li style="color:#707070;list-style:none;font-size:12px">가방으로 옮긴 후 사용</li>':''}</ul><div class="meta" style="margin:4px 0">장비의 빈 소켓에 박아서 쓰는 ${it.jw?'주얼':'보석'}이에요. 판매가 ${gemSellV(it).toLocaleString()}G</div>`; }
+  if(isGem(it)){ const t=gemTier(it), gc=GEM_C[it.gk]||'#fff'; return `<div style="display:flex;gap:10px;align-items:center"><span style="position:relative;flex:none;display:flex"><img src="${itemIcon(it).url}" alt="" style="width:56px;height:56px;flex:none;background:#0a0807;border:1px solid ${gc};border-radius:8px">${opt&&opt.lk?`<button class="lkb${it.lock?' on':''}" data-lk="1" aria-label="${it.lock?'잠금 해제':'잠금'}">${lockSvg(!!it.lock)}</button>`:''}</span><div><div class="in" style="color:${gc}">${esc(it.name)}</div><div class="meta" style="color:#fff">${it.cd?'영웅 보스 카드 · 곡괭이 전용':it.jw?'주얼 · 옵션 2개':'아이템 레벨 '+(it.ilvl|0)+' · '+GEM_TIER[t-1].n}</div></div></div><ul>${gemOptText(it).split(' / ').map(x=>'<li style="color:#afeeee">'+esc(x)+'</li>').join('')}${opt&&opt.st?'<li style="color:#707070;list-style:none;font-size:12px">가방으로 옮긴 후 사용</li>':''}</ul><div class="meta" style="margin:4px 0">${it.cd?esc(CARD_DEF[it.gk].ds)+'<br>곡괭이의 카드칸에 박아서 써요. 한 번 박으면 빼지 못하고, 장인의 집에서 카드칸을 비우면 사라져요. 판매 불가':`장비의 빈 소켓에 박아서 쓰는 ${it.jw?'주얼':'보석'}이에요. 판매가 ${gemSellV(it).toLocaleString()}G`}</div>`; }
   if(isShard(it)) return `<div style="display:flex;gap:10px;align-items:center"><div style="width:56px;height:56px;flex:none;display:grid;place-items:center;background:#0a0807;border:1px solid ${RARC[4]};border-radius:8px">${shardOrb(it.n,32,shMat(it))}</div><div><div class="in" style="color:${RARC[4]}">${SHDK[shMat(it)].n}</div><div class="meta">수량 <b style="color:#fff">${it.n}</b> / ${SHARD_MAX} (한 칸 최대)</div></div></div><div class="meta" style="margin:6px 0">${SHDK[shMat(it)].src} 얻는 재료예요. ${SHDK[shMat(it)].N()}개로 ${SHDK[shMat(it)].to} 하나를 교환할 수 있어요. 개당 ${SHARD_SELL.toLocaleString()}G에 판매할 수도 있어요.</div>`;
   let s=`<div style="display:flex;gap:10px;align-items:center"><span style="position:relative;flex:none;display:flex"><img src="${itemIcon(it).url}" alt="" style="width:56px;height:56px;flex:none;background:#0a0807;border:${HSET(it)?'2px solid '+HSET(it).c:'1px solid '+RARC[it.rar]};border-radius:8px">${opt&&opt.lk?`<button class="lkb${it.lock?' on':''}" data-lk="1" aria-label="${it.lock?'잠금 해제':'잠금'}">${lockSvg(!!it.lock)}</button>`:''}</span><div><div class="in" style="color:${RARC[it.rar]}">${nameTag(it.enh>0?'+'+it.enh+' ':'',it.name,it)}</div>${hsetChip(it)}<div class="meta" style="color:#fff">아이템 레벨 ${ilvOf(it)}${opt&&(opt.lk||opt.lv)?lvArrow(it):''}${it.enh>0?` <span style="color:#ffd84a">(기본 ${it.ilvl} + 강화 ${it.enh})</span>`:''}</div>${ownTag(it)}<div class="meta">${reqHtml(it)}</div></div></div>`+(opt&&opt.noCmp?'':lvCmp(it));   /* noCmp: 장인의 집처럼 장비를 바꾸는 화면이 아니면 '교체했을 때 전투력' 줄을 숨김 */
   const bt=baseText(it); if(bt)s+=`<div>${bt}</div>`;
@@ -6457,7 +6474,7 @@ function itemLines(it,opt){
   else if(it.sp&&SPFX[it.sp]&&SPFX[it.sp].cas){ const n=(me&&me.D&&me.D.cs)|0, on=c=>c?'#d9c6ff':'#8a8a8a'; s+=`<div style="margin:4px 0;font-size:12px;line-height:1.55"><span style="color:${on(n>=2)}">2개: 드롭률 +20, 치명타 확률 +5%</span><br><span style="color:${on(n>=3)}">3개: 잭팟 타격(기본 공격이 7% 확률로 피해 3배) · 모든 스킬 +3 · 이동 속도 +30%</span></div>`; }
   else if(it.rar===4&&it.sp&&SPFX[it.sp]&&SPFX[it.sp].hero){ const n=(me.D&&me.D.hc)|0, on=(c,a)=>c?'#d9c6ff':'#8a8a8a'; s+=`<div style="margin:4px 0;font-size:12px;line-height:1.55"><span style="color:${on(n>=2)}">2개: 최대 마나 +200</span><br><span style="color:${on(n>=3)}">3개: 레이드 보스에게 주는 피해 +15%</span><br><span style="color:${on(n>=7)}">7개: 레이드 보스에게 주는 피해 추가 +15% (합계 +30%) · 모든 스킬 +3</span></div>`; }
   const ex=enhOptText(it);
-  const SK1='', skL=it.sk?`<li style="color:${it.gm?'#afeeee':'#707070'}">${SK1}${it.gm?esc(gemOptText(it.gm)):'비어 있음'} <span class="meta">(${it.gm?gemNm(it.gm):'소켓'})</span>${opt&&opt.skTag||''}</li>`:(opt&&opt.skNew?'<li style="color:#707070;list-style:none">'+SK1+'비어 있음 <span class="meta">(소켓 뚫림)</span> <b style="color:#ffd84a;font-size:11px">NEW</b></li>':'');
+  const SK1='', skL=it.sk?`<li style="color:${it.gm?'#afeeee':'#707070'}">${SK1}${it.gm?esc(gemOptText(it.gm)):'비어 있음'} <span class="meta">(${it.gm?gemNm(it.gm):(it.pk?'카드칸':'소켓')})</span>${opt&&opt.skTag||''}</li>`:(opt&&opt.skNew?'<li style="color:#707070;list-style:none">'+SK1+'비어 있음 <span class="meta">(소켓 뚫림)</span> <b style="color:#ffd84a;font-size:11px">NEW</b></li>':'');
   if(it.aff.length||ex||skL) s+='<ul>'+affSorted(it).map(a=>affLi(it,a,(a.cls&&a.cls!==me.cls)?' <span class="meta">(효과 없음)</span>':'')).join('')+(ex?`<li style="color:#ffe27a">${ex}</li>`:'')+skL+'</ul>';
   return s;
 }
@@ -6509,13 +6526,13 @@ function detailHtml(){
   if(!selItem) return '';
   if(isOreFr(selItem.it)) return itemLines(selItem.it)+`<div class="acts"><button class="btn" id="aOreSell">💰 판매</button>${(G.titleSheet&&charIds().length>1&&!(me&&me.hc))?'<button class="btn" id="aSend">📤 보내기</button>':''}</div>`;
   const it=selItem.it; let s=itemLines(it,isShard(it)?null:{lk:1});
-  if(isGem(it)){ const lk=`<button class="btn lkx" id="aLock" data-lk="1">${it.lock?'🔓 잠금 해제':'🔒 잠금'}</button>`, send=(G.titleSheet&&charIds().length>1&&!(me&&me.hc))?'<button class="btn tlb" id="aSend"><span class="ti">📤</span> <span class="tx">보내기</span></button>':''; return s+`<div class="acts iact"><button class="btn primary" id="aGemSock">💎 소켓에 박기</button>${lk}<button class="btn tlb" id="aGemSell"${it.lock?' style="opacity:.45"':''}><span class="ti ph">💰</span><span class="tx">판매 ${gemSellV(it)}G</span></button>${send}</div>`; }
+  if(isGem(it)){ const lk=`<button class="btn lkx" id="aLock" data-lk="1">${it.lock?'🔓 잠금 해제':'🔒 잠금'}</button>`, send=(G.titleSheet&&charIds().length>1&&!(me&&me.hc))?'<button class="btn tlb" id="aSend"><span class="ti">📤</span> <span class="tx">보내기</span></button>':''; return s+`<div class="acts iact"><button class="btn primary" id="aGemSock">💎 소켓에 박기</button>${lk}${gemSellBtn(it)}${send}</div>`; }
   if(isShard(it)){ s+=`<div class="acts"><button class="btn primary" id="aShardEx">${SHDK[shMat(it)].e} ${SHDK[shMat(it)].to} 교환</button><button class="btn" id="aShardSell">💰 판매</button>${(G.titleSheet&&charIds().length>1&&!(me&&me.hc))?'<button class="btn" id="aSend">📤 보내기</button>':''}</div>`; return s; }
   /* 폰 화면(560px 이하)에서는 장착/해제가 한 줄 전체, 강화·판매·보내기는 아이콘 타일 한 줄, 잠금은 아이콘 모서리 배지. 패드·PC는 예전 그대로 */
   const lk=`<button class="btn lkx" id="aLock" data-lk="1">${it.lock?'🔓 잠금 해제':'🔒 잠금'}</button>`,
     enh=canEnh(it)?`<button class="btn tlb" id="aEnh"><span class="ti">⚒</span> <span class="tx">강화${it.enh>0?' +'+it.enh:''}</span></button>`:'',
     send=(G.titleSheet&&charIds().length>1&&!(me&&me.hc))?'<button class="btn tlb" id="aSend"><span class="ti">📤</span> <span class="tx">보내기</span></button>':'',
-    sock=gemTgt(it)?'<button class="btn tlb" id="aSock"><span class="ti">💎</span> <span class="tx">소켓박기</span></button>':'',
+    sock=gemTgt(it)?`<button class="btn tlb" id="aSock"><span class="ti">${it.pk?'🃏':'💎'}</span> <span class="tx">${it.pk?'카드박기':'소켓박기'}</span></button>`:'',
     shx=(selItem.inv!==undefined&&!selItem.store&&canShEx(it))?'<button class="btn tlb" id="aShEx" style="border-color:#c9a0ff;color:#d9b8ff"><span class="ti">🔮</span> <span class="tx">조각 교환</span></button>':'';
   if(selItem.inv!==undefined){
     s+=`<div class="acts iact"><button class="btn primary" id="aEquip"${!canWear(it)?' style="opacity:.5"':''}>장착</button>${lk}${enh}${sock}${shx}<button class="btn tlb" id="aSell"${it.lock?' style="opacity:.45"':''}><span class="ti ph">💰</span><span class="tx">판매 ${sellInfo(it).total}G</span></button>${send}</div>`;
@@ -7418,6 +7435,7 @@ function oreHit(m,fx){ if(m.dead||(fx&&(fx.mk||fx.pet||fx.sm)))return; const O=O
   const ef=O.sp?1:mineEff(O,me), d=O.sp?1:Math.max(1,Math.round(minePow(me)*ef));   /* 특수광석: 곡괭이 위력과 상관없이 맞은 횟수만 셈 */ m.hp-=d; m.flash=.1; oreHitFx(m,O);
   if(ef<=.65){ const lf=G.lowFx?.5:1; for(let i=0;i<Math.round(8*lf);i++)parts.push({x:m.x+(me.x-m.x)*.35,y:m.y-m.r*.4,vx:rand(-260,260),vy:-rand(150,380),g:700,dm:.9,t:0,life:rand(.25,.4),col:Math.random()<.5?'#fff3c0':'#ffc455',r:rand(3,5),glow:1});   /* 힘겨운 광석(주황·노랑): 쇳불꽃 + 캐릭터 뒤통수 땀 */
     if(T-((M.sw&&M.sw.t)||-9)>1.1)M.sw={t:T,d:me.x>=m.x?1:-1}; } sfx('mine',.92+Math.random()*.16); addNum(m.x,m.y-m.r-6,d,'#e8dcc0',false);
+  if(m.hp>0){ const cp=cardP(me); if(cp>0&&Math.random()<cp){ m.hp-=d; m.flash=.1; sfx('mine',1.12); addNum(m.x+rand(-12,12),m.y-m.r-24,d,'#ffe27a',false); addNum(m.x,m.y-m.r-42,'🃏 한 번 더!',(CARD_DEF[me.eq.weapon.gm.gk]||{}).c||'#ffe27a',false); } }   /* 곡괭이 카드: 확률로 같은 피해를 한 번 더 (특수광석은 맞은 횟수 +1) */
   if(m.hp<=0)oreBreak(m); }
 let _puff=null;
 function puffSpr(){ if(_puff)return _puff; const k=document.createElement('canvas'); k.width=k.height=64; const g=k.getContext('2d'), r=g.createRadialGradient(32,32,0,32,32,32); r.addColorStop(0,'rgba(215,198,170,.9)'); r.addColorStop(.55,'rgba(200,183,155,.5)'); r.addColorStop(1,'rgba(200,183,155,0)'); g.fillStyle=r; g.fillRect(0,0,64,64); return _puff=k; }   /* 흐린 둥근 먼지 그림: 한 번만 만들어 재사용 */
@@ -7729,7 +7747,7 @@ const MINE_RCATS=[['all','전체'],['pick','⛏️ 곡괭이'],['jewel','💠 �
 const pickHas=(p,g)=>{ let f=false; const see=it=>{ if(isPick(it)&&(it.pk|0)===g)f=true; }; see(p.eq&&p.eq.weapon); if(p.eq2)Object.values(p.eq2).forEach(see); (p.inv||[]).forEach(see); return f; };   /* 그 단계 곡괭이를 이미 갖고 있나 (착용·가방) */
 function mineRecipes(o){
   mqOpen(); o=o||{}; let cat=o.only||'all', open=-1;
-  const gemOk=(m,x)=>isGem(x)&&(!(m[1]||m[3])||(!x.jw&&!x.lock&&(!m[1]||x.gk===m[1])&&(!m[3]||gemTier(x)===m[3])));   /* ['gem',종류(0=아무),개수,등급(없으면 아무)] — 종류·등급을 정하면 주얼·잠긴 보석은 제외 */
+  const gemOk=(m,x)=>isGem(x)&&!x.cd&&(!(m[1]||m[3])||(!x.jw&&!x.lock&&(!m[1]||x.gk===m[1])&&(!m[3]||gemTier(x)===m[3])));   /* ['gem',종류(0=아무),개수,등급(없으면 아무)] — 종류·등급을 정하면 주얼·잠긴 보석은 제외 */
   const have=m=>m[0]==='ore'?oreCount(me,m[1]):m[0]==='gem'?gemCnt(me,x=>gemOk(m,x)):aGold(), nmOf=m=>m[0]==='ore'?'Lv'+ORES[m[1]].lv+' '+ORES[m[1]].n+' 조각':m[0]==='gem'?(m[1]?`${m[3]?GEM_TIER[m[3]-1].n+' ':''}${GEM_N[m[1]]}`:`${m[3]?GEM_TIER[m[3]-1].n+' ':''}보석 (같은 종류)`):'골드';
   const mkMore=k=>k.classList.toggle('more',k.scrollHeight-k.scrollTop-k.clientHeight>6);   /* 아래에 더 있으면 아래쪽이 흐려져요 */
   const draw=m=>{ const k0=m.querySelector('.mkr'), st0=k0.scrollTop;
@@ -8319,7 +8337,7 @@ function smithModal(st){
       aPayGold(cost); const had=sel.gm;
       if(tab==='dig'){ sel.sk=1; sel.gm=null; } else { sel.gm=null; }   /* 비우기: 보석만 제거, 빈 소켓은 남음 */
       if(worn(sel)){ const hr=P.hp/P.D.maxHp, mr=P.mp/P.D.maxMp; P.D=derive(P); P.hp=P.D.maxHp*hr; P.mp=P.D.maxMp*mr; }
-      saveSrc(P); sfx('rare'); toast(tab==='dig'?`🔨 소켓을 뚫었어요: ${sel.name}`:`♻ 보석을 뺐어요 (보석은 사라지고 빈 소켓이 남았어요): ${sel.name}`,'#ffd84a'); smithModal({tab,sel:null,ask:false}); renderTown(); }; }); }
+      saveSrc(P); sfx('rare'); toast(tab==='dig'?`🔨 소켓을 뚫었어요: ${sel.name}`:(had&&had.cd?`♻ 카드를 뺐어요 (카드는 사라지고 빈 카드칸이 남았어요): ${sel.name}`:`♻ 보석을 뺐어요 (보석은 사라지고 빈 소켓이 남았어요): ${sel.name}`),'#ffd84a'); smithModal({tab,sel:null,ask:false}); renderTown(); }; }); }
 /* ===== 보석 바꾸기(장인의 집 3번째 탭): 같은 종류의 상급 보석 3개를 원하는 다른 종류의 상급 보석 1개로 교체 — 100,000G. 주얼·잠긴 보석은 제외.
    같은 상급 보석이 3개 이상 있을 때만 탭이 열려요. 고른 보석(내어줄/받을)은 바꾼 뒤에도 남지만, 탭을 옮기거나 장인의 집을 나가면 초기화돼요 ===== */
 const SM_SWAP=100000, SM_N=3; let smSw={give:null,get:null}, smNew=null, smFxT=[];   /* smNew: 방금 바꿔서 받은 보석 종류(목록에서 NEW 표시) */
@@ -8402,32 +8420,32 @@ function smFx(P,gv,gt,hb,ha){
   o.onclick=card;   /* 연출 중 화면을 누르면 바로 결과로 */
   smFxT.push(setTimeout(()=>sfx('rare'),700), setTimeout(card,1500)); }
 /* ===== 소켓에 보석 박기: 가방 기타 탭에서 보석 → [소켓에 박기] → 장비품 화면에서 빈 소켓이 있는 장비를 고르면 확인 후 박혀요 (박은 보석은 되돌릴 수 없음, 소켓을 비우면 보석은 사라짐) ===== */
-const gemTgt=it=>!!(it&&it.sk&&!it.gm&&SMITH_SLOTS.includes(it.slot)&&!it.mat);
-const gemSockN=()=>me.inv.filter(gemTgt).length+Object.values(me.eq).filter(gemTgt).length;
-function gemApply(d,g,p){ if(g.jw){ jewelApply(d,g,p); return; } const k=gemTier(g); switch(g.gk){ case 'ruby':d.ls+=k; break; case 'sapphire':d.mana+=40*k; break; case 'topaz':d.mf+=10*k; break; case 'emerald':d.ms+=2*k; break; case 'amethyst':d.crit+=k+1; break; case 'diamond':{ const v=k+1; d.str+=v; d.dex+=v; d.vit+=v; d.ene+=v; } break; } }
+const gemTgt=(it,g)=>!!(it&&it.sk&&!it.gm&&SMITH_SLOTS.includes(it.slot)&&!it.mat&&(!g||!!g.cd===!!it.pk));   /* g(박을 것)를 주면 카드는 곡괭이에만, 보석·주얼은 곡괭이 말고 다른 장비에만 */
+const gemSockN=g=>me.inv.filter(x=>gemTgt(x,g)).length+Object.values(me.eq).filter(x=>gemTgt(x,g)).length;
+function gemApply(d,g,p){ if(g.cd)return; if(g.jw){ jewelApply(d,g,p); return; } const k=gemTier(g); switch(g.gk){ case 'ruby':d.ls+=k; break; case 'sapphire':d.mana+=40*k; break; case 'topaz':d.mf+=10*k; break; case 'emerald':d.ms+=2*k; break; case 'amethyst':d.crit+=k+1; break; case 'diamond':{ const v=k+1; d.str+=v; d.dex+=v; d.vit+=v; d.ene+=v; } break; } }
 function gemSockStart(){ const it=selItem&&selItem.it; if(!isGem(it)||selItem.store||selItem.misc===undefined||me.misc[selItem.misc]!==it)return;
-  if(!gemSockN()){ sheetToast('빈 소켓이 있는 장비가 없어요 · 마을의 장인의 집에서 소켓을 뚫어 주세요','#ffb259'); return; }
+  if(!gemSockN(it)){ sheetToast(it.cd?'카드칸이 빈 곡괭이가 없어요':'빈 소켓이 있는 장비가 없어요 · 마을의 장인의 집에서 소켓을 뚫어 주세요','#ffb259'); return; }
   gemSock={it,ix:selItem.misc}; selItem=null; bagTab='eq'; rerender(); }
-const gemSockBar=()=>{ const g=gemSock.it; return `<div class="gsb"><span style="flex:1;min-width:0;font-size:12.5px;line-height:1.4">💎 <b style="color:${GEM_C[g.gk]}">${esc(g.name)}</b> <span style="color:#afeeee">${esc(gemOptText(g))}</span><br><span class="meta">박을 장비를 고르세요 (빈 소켓이 있는 장비만)</span></span><button class="btn sm" id="gsNo" style="flex:none;padding:8px 14px">취소</button></div>`; };
+const gemSockBar=()=>{ const g=gemSock.it; return `<div class="gsb"><span style="flex:1;min-width:0;font-size:12.5px;line-height:1.4">💎 <b style="color:${GEM_C[g.gk]}">${esc(g.name)}</b> <span style="color:#afeeee">${esc(gemOptText(g))}</span><br><span class="meta">${g.cd?'박을 곡괭이를 고르세요 (카드칸이 빈 곡괭이만)':'박을 장비를 고르세요 (빈 소켓이 있는 장비만)'}</span></span><button class="btn sm" id="gsNo" style="flex:none;padding:8px 14px">취소</button></div>`; };
 function gemSockUi(b){ if(!gemSock)return; const g=gemSock.it;
   if(me.misc[gemSock.ix]!==g){ gemSock=null; rerender(); return; }
   b.querySelector('#gsNo').onclick=()=>{ gemSock=null; rerender(); };
-  b.querySelectorAll('[data-inv],[data-eq]').forEach(el=>{ const it=el.dataset.inv!==undefined?me.inv[+el.dataset.inv]:me.eq[el.dataset.eq], ok=gemTgt(it); el.classList.add(ok?'gtg':'gdim');
-    el.onclick=()=>{ if(!it)return; if(ok)gemSockConfirm(it); else toast(!SMITH_SLOTS.includes(it.slot)?'무기·갑옷·투구만 박을 수 있어요':it.sk?'이미 보석이 박혀 있어요':'소켓이 없는 장비예요','#ffb259'); }; }); }
+  b.querySelectorAll('[data-inv],[data-eq]').forEach(el=>{ const it=el.dataset.inv!==undefined?me.inv[+el.dataset.inv]:me.eq[el.dataset.eq], ok=gemTgt(it,g); el.classList.add(ok?'gtg':'gdim');
+    el.onclick=()=>{ if(!it)return; if(ok)gemSockConfirm(it); else toast(g.cd&&!it.pk?'카드는 곡괭이에만 박을 수 있어요':!g.cd&&it.pk?'곡괭이에는 카드만 박을 수 있어요':!SMITH_SLOTS.includes(it.slot)?'무기·갑옷·투구만 박을 수 있어요':it.sk?(it.pk?'이미 카드가 박혀 있어요':'이미 보석이 박혀 있어요'):'소켓이 없는 장비예요','#ffb259'); }; }); }
 /* 장비 상세의 [소켓박기]: 가방 기타 칸의 보석 중 하나를 고르면 확인창으로 이어져요 */
 function gemPick(it){ if(!it||!gemTgt(it))return;
-  const L=[], seen={}; me.misc.forEach((g,i)=>{ if(!g||!isGem(g))return; const k=(g.jw?'j'+JSON.stringify([g.jt,g.jc,g.jv]):'')+g.gk+'_'+gemTier(g); if(seen[k]){ seen[k].n+=gnOf(g); return; } seen[k]={g,i,n:gnOf(g)}; L.push(seen[k]); }); L.sort((a,b)=>gemTier(b.g)-gemTier(a.g));   /* 같은 종류·등급 보석은 한 줄로 (개수만 표시) */
-  if(!L.length){ sheetToast('가방 기타 칸에 보석이 없어요','#ffb259'); return; }
-  modal(`<h3>💎 박을 보석 고르기</h3><p class="meta" style="margin:0 0 8px;font-size:12.5px">→ <b style="color:${RARC[it.rar]}">${esc(it.name)}</b></p><div class="col" style="max-height:52vh;overflow-y:auto;touch-action:pan-y">${L.map((o,n)=>`<button class="btn" data-gi="${n}" style="text-align:left;display:flex;align-items:center;gap:10px;padding:8px 10px"><img src="${gemPng(o.g)}" alt="" width="36" height="36" style="flex:none"><span style="min-width:0"><b style="color:${GEM_C[o.g.gk]}">${esc(o.g.name)}</b>${o.n>1?` <span style="color:#a89a84;font-size:12px">×${o.n}</span>`:''}<br><small style="color:#afeeee">${esc(gemOptText(o.g))}</small></span></button>`).join('')}<button class="btn" id="gpX">취소</button></div>`,m=>{
+  const L=[], seen={}; me.misc.forEach((g,i)=>{ if(!g||!isGem(g)||!!g.cd!==!!it.pk)return; const k=(g.jw?'j'+JSON.stringify([g.jt,g.jc,g.jv]):'')+g.gk+'_'+gemTier(g); if(seen[k]){ seen[k].n+=gnOf(g); return; } seen[k]={g,i,n:gnOf(g)}; L.push(seen[k]); }); L.sort((a,b)=>gemTier(b.g)-gemTier(a.g));   /* 같은 종류·등급 보석은 한 줄로 (개수만 표시) */
+  if(!L.length){ sheetToast(it.pk?'가방 기타 칸에 카드가 없어요':'가방 기타 칸에 보석이 없어요','#ffb259'); return; }
+  modal(`<h3>${it.pk?'🃏 박을 카드 고르기':'💎 박을 보석 고르기'}</h3><p class="meta" style="margin:0 0 8px;font-size:12.5px">→ <b style="color:${RARC[it.rar]}">${esc(it.name)}</b></p><div class="col" style="max-height:52vh;overflow-y:auto;touch-action:pan-y">${L.map((o,n)=>`<button class="btn" data-gi="${n}" style="text-align:left;display:flex;align-items:center;gap:10px;padding:8px 10px"><img src="${gemPng(o.g)}" alt="" width="36" height="36" style="flex:none;object-fit:contain"><span style="min-width:0"><b style="color:${GEM_C[o.g.gk]}">${esc(o.g.name)}</b>${o.n>1?` <span style="color:#a89a84;font-size:12px">×${o.n}</span>`:''}<br><small style="color:#afeeee">${esc(gemOptText(o.g))}</small></span></button>`).join('')}<button class="btn" id="gpX">취소</button></div>`,m=>{
     m.querySelector('#gpX').onclick=closeModal;
     m.querySelectorAll('[data-gi]').forEach(b=>b.onclick=()=>{ const o=L[+b.dataset.gi]; if(me.misc[o.i]!==o.g)return; gemSock={it:o.g,ix:o.i}; gemSockConfirm(it,1); }); }); }
-function gemSockConfirm(it,fromPick){ const g=gemSock&&gemSock.it; if(!g||!gemTgt(it))return;
-  modal(`<h3>💎 소켓에 박기</h3><p style="margin:0 0 6px;font-size:13px"><b style="color:${GEM_C[g.gk]}">${esc(g.name)}</b> <span style="color:#afeeee">${esc(gemOptText(g))}</span></p><p style="margin:0 0 8px;font-size:13px">→ <b style="color:${RARC[it.rar]}">${esc(it.name)}</b>${Object.values(me.eq).includes(it)?' <span class="meta">(착용 중)</span>':''}</p><p class="meta" style="margin:0 0 10px;font-size:12px">박은 보석은 뺄 수 없어요. 장인의 집에서 소켓을 비우면 보석이 사라져요.</p><div class="row2"><button class="btn" id="gcNo">취소</button><button class="btn primary" id="gcGo">박기</button></div>`,m=>{
+function gemSockConfirm(it,fromPick){ const g=gemSock&&gemSock.it; if(!g||!gemTgt(it,g))return;
+  modal(`<h3>💎 소켓에 박기</h3><p style="margin:0 0 6px;font-size:13px"><b style="color:${GEM_C[g.gk]}">${esc(g.name)}</b> <span style="color:#afeeee">${esc(gemOptText(g))}</span></p><p style="margin:0 0 8px;font-size:13px">→ <b style="color:${RARC[it.rar]}">${esc(it.name)}</b>${Object.values(me.eq).includes(it)?' <span class="meta">(착용 중)</span>':''}</p><p class="meta" style="margin:0 0 10px;font-size:12px">${g.cd?'박은 카드는 뺄 수 없어요. 장인의 집에서 카드칸을 비우면 카드가 사라져요.':'박은 보석은 뺄 수 없어요. 장인의 집에서 소켓을 비우면 보석이 사라져요.'}</p><div class="row2"><button class="btn" id="gcNo">취소</button><button class="btn primary" id="gcGo">박기</button></div>`,m=>{
     m.querySelector('#gcNo').onclick=()=>{ if(fromPick)gemSock=null; closeModal(); }; if(fromPick)m.onclick=e=>{ if(e.target===m){ gemSock=null; closeModal(); } };
-    m.querySelector('#gcGo').onclick=()=>{ if(!gemSock||me.misc[gemSock.ix]!==g||!gemTgt(it)){ closeModal(); return; }
+    m.querySelector('#gcGo').onclick=()=>{ if(!gemSock||me.misc[gemSock.ix]!==g||!gemTgt(it,g)){ closeModal(); return; }
       const cp0=calcCP(me), worn=Object.values(me.eq).includes(it); it.gm=gmOf(g); gemUse(me,gemSock.ix,1); gemSock=null; selItem=null;
       if(worn){ const hr=me.hp/me.D.maxHp, mr=me.mp/me.D.maxMp; me.D=derive(me); me.hp=me.D.maxHp*hr; me.mp=me.D.maxMp*mr; buildSkills(); }
-      saveChar(); uiDirty=true; closeModal(); sfx('rare'); rerender(); if(worn)cpMsg(cp0,calcCP(me)); else sheetToast('💎 소켓에 박았어요'); }; }); }
+      saveChar(); uiDirty=true; closeModal(); sfx('rare'); rerender(); if(worn)cpMsg(cp0,calcCP(me)); else sheetToast(g.cd?'🃏 카드칸에 박았어요':'💎 소켓에 박았어요'); }; }); }
 /* 마을 건물 움직임: 화면 밖(스크롤로 안 보이는) 건물은 애니메이션을 멈춰 건물이 많아져도 가볍게 */
 let townFxIO=null;
 function townFxWatch(root){
