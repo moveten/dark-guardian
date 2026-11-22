@@ -1549,7 +1549,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0858</div>
+    <div class="ver" id="verT">v0.7.2.0859</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -6443,7 +6443,7 @@ function itemLines(it,opt){
   const bt=baseText(it); if(bt)s+=`<div>${bt}</div>`;
   if(BASEFX[it.base]&&it.slot==='weapon') s+=`<div class="meta" style="color:#9fd0ff">▪ ${BASEFX[it.base].t}</div>`; s+=wpPenLine(it);
   if(it.pk) s+=`<div class="meta" style="color:#e0c080">⛏️ 광산 채굴 도구 · 채굴 속도 ×${((PICKS[it.pk]||PICKS[1]).sp).toFixed(1)}<br><span style="color:#a89a80">가지고 있어야 광산에 들어갈 수 있어요</span></div>`;
-  if(it.sp&&SPFX[it.sp]&&SPFX[it.sp].d) s+=`<div style="margin:4px 0;color:#ffb14a;font-weight:700">★ 특수 효과: ${SPFX[it.sp].d}</div>`;
+  if(it.sp&&SPFX[it.sp]&&SPFX[it.sp].d) s+=`<div style="margin:4px 0;color:#ffb14a;font-weight:700">★ ${esc(SPFX[it.sp].d)}</div>`;
   if(opt&&opt.noSet){}   /* 같은 세트의 반지가 위에 이미 나왔으면 세트 효과 안내는 한 번만 */
   else if(it.rar===4&&it.sp&&SPFX[it.sp]&&SPFX[it.sp].cs){ const n=(me.D&&me.D.ks)|0, on=c=>c?'#f0d29a':'#8a8a8a'; s+=`<div style="margin:4px 0;font-size:12px;line-height:1.55"><span style="color:${on(n>=2)}">2개: 최대 생명력 +10%, 최대 마나 +350</span><br><span style="color:${on(n>=4)}">4개: 스킬봉쇄 지속시간 절반</span><br><span style="color:${on(n>=7)}">7개: 공포 지속시간 1초, 모든 스킬 +3</span></div>`; }
   else if(it.rar===4&&it.sp&&SPFX[it.sp]&&SPFX[it.sp].aw){ const n=(me.D&&me.D.ac)|0, on=c=>c?'#d9c6ff':'#8a8a8a'; s+=`<div style="margin:4px 0;font-size:12px;line-height:1.55"><span style="color:${on(n>=2)}">2개: 최대 생명력 +10%, 최대 마나 +250</span><br><span style="color:${on(n>=4)}">4개: 보스에게 주는 피해 +20%, 파괴 오브젝트에 주는 피해 +25%</span><br><span style="color:${on(n>=7)}">7개: 모든 스킬 +3, 피해 +15%, 생명력 50% 이하가 되면 8초간 피해 +30% · 공격 속도 +20% (재사용 45초)</span></div>`; }
@@ -6952,7 +6952,7 @@ function rkItemDetail(row,k,back){
   let ex=''; try{ ex=enhOptText(it); }catch(e){}
   let gl=''; try{ if(it.sk)gl=`<li style="color:${it.gm?'#afeeee':'#707070'}">${it.gm?esc(gemOptText(it.gm))+' <span class="meta">('+gemNm(it.gm)+')</span>':'비어 있음 <span class="meta">(소켓)</span>'}</li>`; }catch(e){}
   modal(`<div class="rkit" style="border:0"><img src="${ic}" alt="" style="border-color:${RBD[it.rar]}"><div class="rkib"><div style="font-size:16px"><b style="color:${RARC[it.rar]}">${esc(dn(it))}</b>${it.enh>0?` <span style="color:#ffd84a;font-weight:800">+${it.enh}</span>`:''}</div><div class="meta">${RKSN[k]} · ${RARN[it.rar]} · 아이템 레벨 ${it.ilvl}</div>${it.req?`<div class="meta">필요 레벨 ${it.req}</div>`:''}</div></div>
-    ${bt?`<div style="margin:6px 0">${bt}</div>`:''}${BASEFX[it.base]&&it.slot==='weapon'?`<div class="meta" style="color:#9fd0ff">▪ ${esc(BASEFX[it.base].t)}</div>`:''}${wpPenLine(it)}${it.sp&&SPFX[it.sp]?`<div style="margin:6px 0;color:#ffb14a;font-weight:700">★ 특수 효과: ${esc(SPFX[it.sp].d)}</div>`:''}${(af||ex||gl)?`<ul style="margin:6px 0;padding-left:18px;line-height:1.55">${af}${ex?`<li style="color:#ffe27a">${ex}</li>`:''}${gl}</ul>`:''}
+    ${bt?`<div style="margin:6px 0">${bt}</div>`:''}${BASEFX[it.base]&&it.slot==='weapon'?`<div class="meta" style="color:#9fd0ff">▪ ${esc(BASEFX[it.base].t)}</div>`:''}${wpPenLine(it)}${it.sp&&SPFX[it.sp]?`<div style="margin:6px 0;color:#ffb14a;font-weight:700">★ ${esc(SPFX[it.sp].d)}</div>`:''}${(af||ex||gl)?`<ul style="margin:6px 0;padding-left:18px;line-height:1.55">${af}${ex?`<li style="color:#ffe27a">${ex}</li>`:''}${gl}</ul>`:''}
     <div class="row2" style="margin-top:10px"><button class="btn" id="rkBack">← 장비 보기</button><button class="btn primary" id="rkNo">${back==='close'?'닫기':'랭킹으로'}</button></div>`,m=>{
     m.onclick=e=>{ if(e.target===m)rkGo(back); }; m.querySelector('#rkBack').onclick=()=>rkProfile(row,back); m.querySelector('#rkNo').onclick=()=>rkGo(back); });
 }
