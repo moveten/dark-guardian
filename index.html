@@ -457,6 +457,7 @@ body.hud-norank #dmgRank,body.hud-nocombo #combo{display:none!important}
 .detail .in{font-family:var(--f-disp);font-weight:800;font-size:17px}
 .detail .meta{color:var(--mute);font-size:12px}
 .detail ul{margin:6px 0;padding-left:16px;color:#a9b8ff}
+.rr{font-size:.82em;color:#8d8678;white-space:nowrap;margin-left:3px}.rr.hi{color:#ffd84a}li.hr{white-space:nowrap}@media(max-width:380px){.rr{font-size:.72em;margin-left:2px}}   /* 옵션 굴림 범위 (최소~최대): 값이 범위의 85% 지점 이상이면 금색 */
 .detail .acts{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
 .detail .acts .btn{padding:8px 14px;min-height:38px;font-size:13px}
 .cmp{color:var(--mute);font-size:12px}
@@ -1548,7 +1549,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0857</div>
+    <div class="ver" id="verT">v0.7.2.0858</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -2532,6 +2533,13 @@ function affText(a){
   if(a.key&&SKBY[a.key]) s=s.replace('{s}',SKBY[a.key].n);
   return s;
 }
+/* 옵션 굴림 범위: 옵션을 만들 때 쓰는 식(AFX.r · 특수 아이템의 능력치 범위)을 그대로 읽어서 '(최소~최대)'를 붙여요. 고정 옵션(스킬 +n 등)·범위를 알 수 없는 값은 붙이지 않아요. 툴팁을 그릴 때만 한 번 계산 */
+function affRng(it,a){ try{ const d=AFXBY[a&&a.t]; if(!d||!d.r||typeof a.v!=='number'||!(it&&it.ilvl>0))return '';
+    const il=it.ilvl, sp=!!it.sp&&(a.t==='str'||a.t==='dex'||a.t==='vit'||a.t==='ene'), R=sp?[8,Math.max(10,5+Math.floor(il/5))]:d.r(il,it.slot,it.rar), lo=R[0], hi=R[1];
+    if(!(hi>=lo)||a.v<lo||a.v>hi)return '';   /* 이 범위에서 나온 값이 아니면(옛 아이템·고정값) 표시하지 않아요 */
+    const u=/\{v\}%/.test(d.n)?'%':'', hot=hi>lo&&(a.v-lo)/(hi-lo)>=.85;
+    return `<span class="rr${hot?' hi':''}">(${lo}~${hi}${u})</span>`; }catch(e){ return ''; } }
+const affLi=(it,a,extra)=>{ const r=affRng(it,a); return `<li${r?' class="hr"':''}>${esc(affText(a))}${r?' '+r:''}${extra||''}</li>`; };
 function baseText(it){
   if(it.mx) return `공격력 ${it.mn}–${it.mx}`;
   if(it.dm&&it.om) return `<b style="color:#ffb070">공격력 +${it.dm}</b> · <b style="color:#9fd0ff">마나 +${it.om}</b>`;
@@ -6443,11 +6451,11 @@ function itemLines(it,opt){
   else if(it.rar===4&&it.sp&&SPFX[it.sp]&&SPFX[it.sp].hero){ const n=(me.D&&me.D.hc)|0, on=(c,a)=>c?'#d9c6ff':'#8a8a8a'; s+=`<div style="margin:4px 0;font-size:12px;line-height:1.55"><span style="color:${on(n>=2)}">2개: 최대 마나 +200</span><br><span style="color:${on(n>=3)}">3개: 레이드 보스에게 주는 피해 +15%</span><br><span style="color:${on(n>=7)}">7개: 레이드 보스에게 주는 피해 추가 +15% (합계 +30%) · 모든 스킬 +3</span></div>`; }
   const ex=enhOptText(it);
   const SK1='', skL=it.sk?`<li style="color:${it.gm?'#afeeee':'#707070'}">${SK1}${it.gm?esc(gemOptText(it.gm)):'비어 있음'} <span class="meta">(${it.gm?gemNm(it.gm):'소켓'})</span>${opt&&opt.skTag||''}</li>`:(opt&&opt.skNew?'<li style="color:#707070;list-style:none">'+SK1+'비어 있음 <span class="meta">(소켓 뚫림)</span> <b style="color:#ffd84a;font-size:11px">NEW</b></li>':'');
-  if(it.aff.length||ex||skL) s+='<ul>'+affSorted(it).map(a=>`<li>${esc(affText(a))}${(a.cls&&a.cls!==me.cls)?' <span class="meta">(효과 없음)</span>':''}</li>`).join('')+(ex?`<li style="color:#ffe27a">${ex}</li>`:'')+skL+'</ul>';
+  if(it.aff.length||ex||skL) s+='<ul>'+affSorted(it).map(a=>affLi(it,a,(a.cls&&a.cls!==me.cls)?' <span class="meta">(효과 없음)</span>':'')).join('')+(ex?`<li style="color:#ffe27a">${ex}</li>`:'')+skL+'</ul>';
   return s;
 }
 function warn(msg){ if(G.titleSheet||!G.inGame) modal(`<h3>⚠️ 알림</h3><p style="margin:0 0 12px;font-size:14px">${esc(msg)}</p><div class="row2"><button class="btn primary" id="wOk">확인</button></div>`,m=>{m.querySelector('#wOk').onclick=closeModal;}); else toast(msg,'#e07060'); }
-function cmpMini(it){ let t=`<div style="color:${RARC[it.rar]};font-weight:700">${esc(it.name)}</div><div class="meta" style="color:#fff">아이템 레벨 ${ilvOf(it)}${it.enh>0?` <span style="color:#ffd84a">(기본 ${it.ilvl} + 강화 ${it.enh})</span>`:''}</div>${ownTag(it)}<div class="meta">${reqHtml(it)}</div>`; const bt=baseText(it); if(bt)t+=`<div>${bt}</div>`; { const ex=enhOptText(it); if(it.aff.length||ex)t+='<ul style="margin:4px 0">'+affSorted(it).map(a=>`<li>${esc(affText(a))}</li>`).join('')+(ex?`<li style="color:#ffe27a">${ex}</li>`:'')+'</ul>'; } return t; }
+function cmpMini(it){ let t=`<div style="color:${RARC[it.rar]};font-weight:700">${esc(it.name)}</div><div class="meta" style="color:#fff">아이템 레벨 ${ilvOf(it)}${it.enh>0?` <span style="color:#ffd84a">(기본 ${it.ilvl} + 강화 ${it.enh})</span>`:''}</div>${ownTag(it)}<div class="meta">${reqHtml(it)}</div>`; const bt=baseText(it); if(bt)t+=`<div>${bt}</div>`; { const ex=enhOptText(it); if(it.aff.length||ex)t+='<ul style="margin:4px 0">'+affSorted(it).map(a=>affLi(it,a)).join('')+(ex?`<li style="color:#ffe27a">${ex}</li>`:'')+'</ul>'; } return t; }
 /* 전투력(스킬 반영): 마법사·팔라딘은 기본 공격 + 배운 스킬들의 '초당 피해(재사용 대기시간 반영)'를 함께 봐요. 에너지·스킬 레벨·쿨감이 전투력에 들어가요.
    항목: [스킬키, 1회 시전 피해(레벨→기본치), 재사용 대기(초), 종류 s=마법(에너지 계수)/p=물리(힘 계수)] */
 const CPSKW=.5, CPCW={war:1,sorc:.75,pal:1.2,necro:.8,druid:.9}; /* 스킬을 전부 동시에 못 쓰고 마나도 한정이라서 곱하는 보정(.5) · 클래스별 균형 보정(마법사는 원거리 이점, 팔라딘은 오라 등 비공격 스킬이 많아서) */
@@ -6940,7 +6948,7 @@ function rkItemDetail(row,k,back){
   let it; try{ it=rkBuildItem(k,x); }catch(e){ rkProfile(row,back); return; }
   let ic=''; try{ ic=itemIcon(it).url; }catch(e){}
   let bt=''; try{ bt=baseText(it); }catch(e){}
-  let af=''; for(const a of affSorted(it)){ try{ af+=`<li>${esc(affText(a))}</li>`; }catch(e){} }
+  let af=''; for(const a of affSorted(it)){ try{ af+=affLi(it,a); }catch(e){} }
   let ex=''; try{ ex=enhOptText(it); }catch(e){}
   let gl=''; try{ if(it.sk)gl=`<li style="color:${it.gm?'#afeeee':'#707070'}">${it.gm?esc(gemOptText(it.gm))+' <span class="meta">('+gemNm(it.gm)+')</span>':'비어 있음 <span class="meta">(소켓)</span>'}</li>`; }catch(e){}
   modal(`<div class="rkit" style="border:0"><img src="${ic}" alt="" style="border-color:${RBD[it.rar]}"><div class="rkib"><div style="font-size:16px"><b style="color:${RARC[it.rar]}">${esc(dn(it))}</b>${it.enh>0?` <span style="color:#ffd84a;font-weight:800">+${it.enh}</span>`:''}</div><div class="meta">${RKSN[k]} · ${RARN[it.rar]} · 아이템 레벨 ${it.ilvl}</div>${it.req?`<div class="meta">필요 레벨 ${it.req}</div>`:''}</div></div>
