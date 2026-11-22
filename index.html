@@ -1548,7 +1548,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0856</div>
+    <div class="ver" id="verT">v0.7.2.0857</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -4879,8 +4879,9 @@ function castSkill(o,key,real,tx,ty,lv,tgt){
     const pts=real?ts.map(m=>({x:m.x,y:m.y,m})):[{x:tx,y:ty}];
     { const k=5-pts.length, rr=Math.max(70,60*RS(lv)*1.15), a0=Math.random()*6.283; for(let i=0;i<k;i++){ const a=a0+i*6.283/k+(k===1?0:rand(-.15,.15)), d=rr*rand(.9,1.1); pts.push({x:clamp(o.x+Math.cos(a)*d,20,WW-20),y:clamp(o.y+Math.sin(a)*d,20,WH-20)}); } }   /* 타겟이 5명보다 적으면 남는 빛기둥은 시전자 주변에 고르게(조금씩 겹치게) 세움 — 항상 5개 */
     const Z=real?zealMul():{d:1,t:1};
-    for(const p of pts){ efx.push({k:'pillar',x:p.x,y:p.y,t:0,life:.8,col:'#fff7d6',pal:PALV}); impact(p.x,p.y,'255,245,200',110); burst(p.x,p.y,'#fff3c0',22,240); efx.push({k:'cross',x:p.x,y:p.y,t:0,life:.6,pal:PALV});
-      zones.push({x:p.x,y:p.y,r:60*RS(lv),life:2*Z.t,t:0,tick:.5,iv:.5,real,kind:'holy',pal:PALV,fn:m=>{const r=spellDmg(18+10*lv); r.v*=Z.d; hitMob(m,r);}});
+    const IMG=!!sprGet('fx_pal');   /* 이미지 이펙트가 준비됐으면 옛 섬광(impact/burst)은 생략해서 가볍게 */
+    for(const p of pts){ efx.push({k:'pillar',x:p.x,y:p.y,t:0,life:.8,col:'#fff7d6',pal:IMG}); if(!IMG){ impact(p.x,p.y,'255,245,200',110); burst(p.x,p.y,'#fff3c0',22,240); } efx.push({k:'cross',x:p.x,y:p.y,t:0,life:.6,pal:IMG});
+      zones.push({x:p.x,y:p.y,r:60*RS(lv),life:2*Z.t,t:0,tick:.5,iv:.5,real,kind:'holy',pal:IMG,fn:m=>{const r=spellDmg(18+10*lv); r.v*=Z.d; hitMob(m,r);}});
       if(real&&p.m) later(.25,()=>{ if(!p.m.dead){const r=spellDmg(110+50*lv); r.v*=Z.d; hitMob(p.m,r);} }); }
     break;}
   case 'ragnarok':
@@ -6586,7 +6587,7 @@ if(SKM){
 /* ===== 연구실 (관리자 전용 공간) — 계정 전체에 적용: 켜짐 여부(dkdef2.lab)는 클라우드 저장에 함께 실려요. 비밀번호·전송 대기열(dkdef2.cl.*)은 이 기기에만 ===== */
 const RS_KEY='dkdef2.lab', RS_PW='dkdef2.cl.labpw', RS_Q='dkdef2.cl.labq', RS_H=1529703320, RS_WD=['일','월','화','수','목','금','토'];
 const rsOn=()=>lsGet(RS_KEY)==='1', PPR_KEY='dkdef2.cl.pprOff', DEF2_KEY='dkdef2.cl.def2';
-let DEF2V=false, PALV=false; const def2On=()=>DEF2V, def2Sync=()=>{ DEF2V=rsOn()&&lsGet(DEF2_KEY)==='1'; PALV=rsOn(); if(PALV)setTimeout(()=>{ try{ sprGet('fx_pal'); }catch(e){} },2500); };   /* 🛡️ 새 방어 공식: 이 기기에서 연구실이 켜져 있고 스위치를 켰을 때만 (매 피격마다 저장소를 읽지 않게 값으로 보관) */
+let DEF2V=false; const def2On=()=>DEF2V, def2Sync=()=>{ DEF2V=rsOn()&&lsGet(DEF2_KEY)==='1'; };   /* 🛡️ 새 방어 공식: 이 기기에서 연구실이 켜져 있고 스위치를 켰을 때만 (매 피격마다 저장소를 읽지 않게 값으로 보관) */
 const pprSync=()=>{ PPR=(rsOn()&&lsGet(PPR_KEY)==='1')?0:1; def2Sync(); };   /* 패치 이전 상태 비교(미적용 ON)는 이 기기에서 연구실이 켜진 동안만 — 나가면 자동으로 새 밸런스 */
 const pprSet=old=>{ if(old)lsSet(PPR_KEY,'1'); else lsDel(PPR_KEY); pprSync(); const b=document.getElementById('trPp'); if(b)b.textContent=PPR?'🥨 빼빼로 미적용 OFF':'🥨 빼빼로 미적용 ON'; if(G.train){ TR.dirty=true; trRender(true); } };
 pprSync();
@@ -8685,7 +8686,7 @@ function fxSpr(row,c0,c1,x,y,size,life,o){ if(!fxAtlas())return false; if(efx.le
 /* 전사 스킬 이펙트 시트: img/fx_war.png (8열×5줄, 칸 140px, 검은 배경 · 가산 합성) — 0 강타 임팩트 · 1 충격 고리 · 2 소용돌이 · 3 대지 균열 · 4 십자 베기. 못 불러왔으면 false(예전 도형 이펙트로 대체) */
 function warAtlas(){ return sprGet('fx_war'); }
 function wfx(row,c0,c1,x,y,size,life){ if(!warAtlas())return false; if(efx.length>60)return true; efx.push({k:'spr',at:'war',row,c0,c1,x,y,sz:Math.min(size,200),t:0,life}); return true; }
-setTimeout(()=>{ try{ sprGet('fx_war'); }catch(e){} },2500);
+setTimeout(()=>{ try{ sprGet('fx_war'); sprGet('fx_pal'); }catch(e){} },2500);
 function fxChain(pts){ if(!fxAtlas())return false; efx.push({k:'chainspr',pts,t:0,life:.4}); return true; }
 function fxMeteor(mx,my,r,lv,fall){ /* 범위 표시(점선) → 유성 낙하 → 폭발 */
   if(!fxAtlas())return false; efx.push({k:'tele',x:mx,y:my,r:r,t:0,life:fall,col:'#ff5a1f'}); efx.push({k:'mfall',x:mx,y:my,t:0,life:fall}); return true; }
@@ -9133,15 +9134,15 @@ function drawProjs(){
     else if(p.kind==='hammer'){ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.a*3);ctx.fillStyle='rgba(255,224,138,.3)';ctx.fillRect(-11,-11,22,22);ctx.fillStyle='#ffe08a';ctx.fillRect(-7,-5,14,10);ctx.fillStyle='#8a6a3a';ctx.fillRect(-2,5,4,8);ctx.restore();}
   }
 }
-/* 🔆 팔라딘 이펙트 시트(관리자 모드): img/fx_pal.png (8열×3줄, 칸 192px, 검은 배경 · 가산 합성) — 0줄 천벌 빛기둥(땅 닿는 점이 칸 높이 85%) · 1줄 착지 충격 · 2줄 성역 반복. 못 불러오면 false(예전 도형 이펙트로 대체) */
-function palFx(row,col,x,y,S,ay,al){ const im=sprGet('fx_pal'); if(!im)return false; ctx.save(); ctx.globalCompositeOperation='lighter'; ctx.globalAlpha=Math.max(0,Math.min(1,al==null?1:al))*.9; ctx.drawImage(im,col*192,row*192,192,192,x-S/2,y-S*ay,S,S); ctx.restore(); return true; }
+/* 🔆 팔라딘 이펙트 시트: img/fx_pal.png (8열×3줄, 칸 192px, 검은 배경 · 가산 합성) — 0줄 천벌 빛기둥(땅 닿는 점이 칸 높이 85%) · 1줄 착지 충격 · 2줄 성역 반복. 못 불러오면 false(예전 도형 이펙트로 대체) */
+function palFx(row,col,x,y,S,ay,al){ const im=sprGet('fx_pal'); if(!im)return false; ctx.save(); ctx.globalCompositeOperation='lighter'; ctx.globalAlpha=Math.max(0,Math.min(1,al==null?1:al))*.62; ctx.drawImage(im,col*192,row*192,192,192,x-S/2,y-S*ay,S,S); ctx.restore(); return true; }
 function drawZones(t){
   for(const z of zones){ const a=Math.min(1,(z.life-z.t)*2,z.t*4);
     if(z.kind==='ice'&&fxAtlas()){ fxFrame(8,Math.floor(t*10)%8,z.x,z.y,Math.min(200,z.r*1.7),Math.min(200,z.r*1.7),0,a*.7); ctx.strokeStyle=`rgba(190,235,255,${.3*a})`; ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(z.x,z.y,z.r,0,6.283); ctx.stroke(); }
     else if(z.kind==='ice'){ ctx.fillStyle=`rgba(150,215,255,${.14*a})`; ctx.beginPath();ctx.arc(z.x,z.y,z.r,0,6.283);ctx.fill();
       ctx.strokeStyle=`rgba(220,245,255,${.8*a})`;ctx.lineWidth=2;ctx.beginPath();
       for(let i=0;i<14;i++){const sd=(i*97+Math.floor(t*6+i)*31)%1000/1000, ang=i*2.4+sd, rr=sd*z.r, px=z.x+Math.cos(ang)*rr, py=z.y+Math.sin(ang)*rr, ph=(t*3+i*.37)%1; ctx.moveTo(px-6,py-30*(1-ph)-6);ctx.lineTo(px,py-30*(1-ph));} ctx.stroke(); }
-    else if(z.kind==='holy'&&z.pal&&palFx(2,Math.floor(t*10)%8,z.x,z.y,Math.min(320,z.r*2.9),.555,a)){ }
+    else if(z.kind==='holy'&&z.pal&&palFx(2,Math.floor(t*10)%8,z.x,z.y,Math.min(230,z.r*2.09),.555,a)){ }
     else if(z.kind==='holy'){ ctx.fillStyle=`rgba(255,240,170,${.16*a})`; ctx.beginPath();ctx.arc(z.x,z.y,z.r,0,6.283);ctx.fill(); ctx.strokeStyle=`rgba(255,235,150,${.6*a})`; ctx.lineWidth=2; ctx.beginPath(); for(let i=0;i<6;i++){const ang=i*1.047+t; ctx.moveTo(z.x,z.y); ctx.lineTo(z.x+Math.cos(ang)*z.r,z.y+Math.sin(ang)*z.r);} ctx.stroke(); }
     else { ctx.fillStyle=`rgba(255,90,30,${.18*a})`; ctx.beginPath();ctx.arc(z.x,z.y,z.r,0,6.283);ctx.fill();
       for(let i=0;i<6;i++){const ang=i+t*2, rr=(i*13%z.r)*.8; circle(z.x+Math.cos(ang)*rr,z.y+Math.sin(ang)*rr,4+Math.sin(t*10+i)*2,`rgba(255,160,60,${.5*a})`);} }
@@ -9198,14 +9199,14 @@ function drawEfx(t){
     else if(e.k==='whirl'){ const o=e.o; if(o.x===undefined)continue; ctx.strokeStyle=e.col; ctx.globalAlpha=1-p; ctx.lineWidth=5; for(let i=0;i<3;i++){ctx.beginPath(); ctx.arc(o.x,o.y,60+i*14,p*12+i*2,p*12+i*2+1.6); ctx.stroke();} ctx.globalAlpha=1; }
     else if(e.k==='boom'){ circle(e.x,e.y,e.r*(.5+p*.5),`rgba(255,140,40,${.5*(1-p)})`); circle(e.x,e.y,e.r*.4*(1-p),`rgba(255,230,160,${1-p})`); }
     else if(e.k==='crack'){ ctx.strokeStyle=`rgba(40,25,15,${1-p})`; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(e.x-Math.cos(e.a)*30,e.y-Math.sin(e.a)*30); ctx.lineTo(e.x+Math.sin(e.a)*8,e.y-Math.cos(e.a)*8); ctx.lineTo(e.x+Math.cos(e.a)*30,e.y+Math.sin(e.a)*30); ctx.stroke(); circle(e.x,e.y,40*(1-p*.5),`rgba(180,140,90,${.25*(1-p)})`); }
-    else if(e.k==='pillar'&&e.pal&&palFx(0,Math.min(7,(p*8)|0),e.x,e.y,260,.85,1)){ }
+    else if(e.k==='pillar'&&e.pal&&palFx(0,Math.min(7,(p*8)|0),e.x,e.y,187,.85,1)){ }
     else if(e.k==='pillar'){ const a=p<.3?p/.3:1-(p-.3)/.7; ctx.fillStyle=`rgba(255,247,214,${.75*a})`; ctx.fillRect(e.x-10,e.y-260,20,260); ctx.fillStyle=`rgba(255,255,255,${a})`; ctx.fillRect(e.x-3,e.y-260,6,260); circle(e.x,e.y,28*a,`rgba(255,240,180,${.4*a})`); }
     else if(e.k==='bolt'){ ctx.strokeStyle=e.col; ctx.globalAlpha=1-p; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(e.pts[0].x,e.pts[0].y);
       for(let i=1;i<e.pts.length;i++){const a=e.pts[i-1],b=e.pts[i]; for(let j=1;j<=4;j++){const f=j/4; ctx.lineTo(a.x+(b.x-a.x)*f+(j<4?rand(-10,10):0),a.y+(b.y-a.y)*f+(j<4?rand(-10,10):0));}} ctx.stroke(); ctx.globalCompositeOperation='lighter'; ctx.lineWidth=12; ctx.globalAlpha=(1-p)*.3; ctx.strokeStyle='#8fa8ff'; ctx.stroke(); ctx.lineWidth=5; ctx.globalAlpha=(1-p)*.6; ctx.stroke(); ctx.globalAlpha=1; ctx.globalCompositeOperation='source-over'; }
     else if(e.k==='tele'){ ctx.strokeStyle=`rgba(255,90,30,${.4+.4*Math.sin(t*20)})`; ctx.lineWidth=2; ctx.setLineDash([8,6]); ctx.beginPath(); ctx.arc(e.x,e.y,e.r,0,6.283); ctx.stroke(); ctx.setLineDash([]); circle(e.x,e.y,e.r*p,'rgba(255,90,30,.12)'); }
     else if(e.k==='meteor'){ const h=(1-p)*420, mx=e.x+h*.35, my=e.y-h; circle(mx,my,16,'rgba(255,120,40,.35)'); circle(mx,my,9,'#ffb04a'); ctx.strokeStyle='rgba(255,140,60,.5)'; ctx.lineWidth=6; ctx.beginPath(); ctx.moveTo(mx,my); ctx.lineTo(mx+40,my-110); ctx.stroke(); }
     else if(e.k==='glow'){ const a=1-p, g=ctx.createRadialGradient(e.x,e.y,0,e.x,e.y,e.r*(.6+p*.6)); g.addColorStop(0,`rgba(${e.rgb},${.75*a})`); g.addColorStop(1,`rgba(${e.rgb},0)`); ctx.globalCompositeOperation='lighter'; ctx.fillStyle=g; ctx.beginPath(); ctx.arc(e.x,e.y,e.r*(.6+p*.6),0,6.283); ctx.fill(); ctx.globalCompositeOperation='source-over'; }
-    else if(e.k==='cross'&&e.pal&&palFx(1,Math.min(7,(p*8)|0),e.x,e.y,200,.62,1)){ }
+    else if(e.k==='cross'&&e.pal&&palFx(1,Math.min(7,(p*8)|0),e.x,e.y,144,.62,1)){ }
     else if(e.k==='cross'){ const a=1-p, L=60+p*30; ctx.globalCompositeOperation='lighter'; ctx.fillStyle=`rgba(255,235,160,${.8*a})`; ctx.fillRect(e.x-4,e.y-L,8,L*1.6); ctx.fillRect(e.x-L*.6,e.y-L*.45,L*1.2,8); ctx.fillStyle=`rgba(255,255,240,${a})`; ctx.fillRect(e.x-1.5,e.y-L,3,L*1.6); ctx.globalCompositeOperation='source-over'; }
     else if(e.k==='shards'){ ctx.globalCompositeOperation='lighter'; ctx.strokeStyle=`rgba(200,240,255,${1-p})`; ctx.lineWidth=3; ctx.beginPath(); for(let i=0;i<16;i++){const an=i/16*6.283+(i%2)*.2, r0=e.r*p*.5, r1=e.r*Math.min(1,p*1.6)*(i%2?.8:1); ctx.moveTo(e.x+Math.cos(an)*r0,e.y+Math.sin(an)*r0); ctx.lineTo(e.x+Math.cos(an)*r1,e.y+Math.sin(an)*r1);} ctx.stroke(); ctx.globalCompositeOperation='source-over'; }
     else if(e.k==='dome'){ const r=40+p*(e.r-40), a=p<.15?p/.15:1-(p-.15)/.85; ctx.globalCompositeOperation='lighter';
