@@ -1560,7 +1560,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0871</div>
+    <div class="ver" id="verT">v0.7.2.0872</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -6637,9 +6637,11 @@ if(SKM){
   bo.querySelectorAll('[data-st]').forEach(el=>el.onclick=()=>{ if(me.statPts<=0)return; me.statPts--; me.stats[el.dataset.st]++; const hp=me.hp,mp=me.mp; me.D=derive(me); me.hp=Math.min(hp,me.D.maxHp); me.mp=Math.min(mp,me.D.maxMp); saveChar(); renderStat(); });
   bo.querySelectorAll('[data-sk]').forEach(el=>el.onclick=()=>{ const k=el.dataset.sk, s=SKBY[k]; if(me.skillPts<=0||me.lvl<s.req||(me.skills[k]||0)>=20)return; me.skillPts--; me.skills[k]=(me.skills[k]||0)+1; saveChar(); buildSkills(); renderStat(); });
 }
-/* ===== 연구실 (관리자 전용 공간) — 계정 전체에 적용: 켜짐 여부(dkdef2.lab)는 클라우드 저장에 함께 실려요. 비밀번호·전송 대기열(dkdef2.cl.*)은 이 기기에만 ===== */
-const RS_KEY='dkdef2.lab', RS_PW='dkdef2.cl.labpw', RS_Q='dkdef2.cl.labq', RS_H=1197519288, RS_WD=['일','월','화','수','목','금','토'];
-const rsOn=()=>lsGet(RS_KEY)==='1', PPR_KEY='dkdef2.cl.pprOff', DEF2_KEY='dkdef2.cl.def2';
+/* ===== 연구실 (관리자 전용 공간) — 계정 전체에 적용: 켜짐 여부(dkdef2.lab)와 암행 시찰(dkdef2.labpt)은 클라우드 저장에 함께 실려요. 비밀번호는 어디에도 저장하지 않아요 ===== */
+try{ localStorage.removeItem('dkdef2.cl.labpw'); localStorage.removeItem('dkdef2.cl.labq'); }catch(e){}   /* 예전 버전이 이 기기에 남겨 둔 비밀번호·전송 대기열(비밀번호 포함) 삭제 */
+const RS_KEY='dkdef2.lab', RS_PT='dkdef2.labpt', RS_H=1197519288, RS_WD=['일','월','화','수','목','금','토'];
+const rsLab=()=>lsGet(RS_KEY)==='1',   /* rsLab: 연구실이 열려 있는가(연구실 화면·훈련장·연구실 스위치) */
+  rsOn=()=>rsLab()&&lsGet(RS_PT)!=='1', PPR_KEY='dkdef2.cl.pprOff', DEF2_KEY='dkdef2.cl.def2';
 let DEF2V=false; const def2On=()=>DEF2V, def2Sync=()=>{ DEF2V=rsOn()&&lsGet(DEF2_KEY)==='1'; };   /* 🛡️ 새 방어 공식: 이 기기에서 연구실이 켜져 있고 스위치를 켰을 때만 (매 피격마다 저장소를 읽지 않게 값으로 보관) */
 const pprSync=()=>{ PPR=(rsOn()&&lsGet(PPR_KEY)==='1')?0:1; def2Sync(); };   /* 패치 이전 상태 비교(미적용 ON)는 이 기기에서 연구실이 켜진 동안만 — 나가면 자동으로 새 밸런스 */
 const pprSet=old=>{ if(old)lsSet(PPR_KEY,'1'); else lsDel(PPR_KEY); pprSync(); const b=document.getElementById('trPp'); if(b)b.textContent=PPR?'🥨 빼빼로 미적용 OFF':'🥨 빼빼로 미적용 ON'; if(G.train){ TR.dirty=true; trRender(true); } };
@@ -6647,37 +6649,29 @@ pprSync();
 const rsStamp=t=>{ const d=t instanceof Date?t:new Date(t), p=n=>String(n).padStart(2,'0'); return isNaN(d)?'-':`${d.getFullYear()}/${RKMON[d.getMonth()]}/${p(d.getDate())}(${RS_WD[d.getDay()]}) ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`; };   /* yyyy/MMM/dd(aaa) HH:mm:ss */
 const rsNames=()=>charIds().map(loadChar).filter(Boolean).map(c=>dispName(c)).join(', ');
 const rsPwOk=v=>typeof v==='string'&&v.length>0&&hashStr(v)===RS_H;
-function rsTrap(key,n){ if(key==='rev'&&n===4&&me.lvl===2&&eqSum(me.eq)===0&&!rsOn())rsAsk(rsGrant); }   /* 장비 레벨 합 0 · 캐릭터 Lv 2 · 부활물약 4개를 구매에 성공했을 때 */
+function rsTrap(key,n){ if(key==='rev'&&n===4&&me.lvl===2&&eqSum(me.eq)===0&&!rsLab())rsAsk(rsGrant); }   /* 장비 레벨 합 0 · 캐릭터 Lv 2 · 부활물약 4개를 구매에 성공했을 때 */
 function rsAsk(onOk,onNo){
   modal(`<h3>🔐 관리자 확인</h3><p class="meta" style="margin:0 0 8px">비밀번호를 입력하세요</p><input id="rsPw" type="password" inputmode="numeric" autocomplete="off" maxlength="12" style="width:100%;box-sizing:border-box;padding:11px;font-size:16px;border-radius:8px;border:1px solid var(--line2);background:#0f0b09;color:#fff"><p class="meta" id="rsMsg" style="min-height:18px;margin:6px 0;color:#ff8a7a"></p><div class="row2"><button class="btn" id="rsNo">취소</button><button class="btn primary" id="rsGo">확인</button></div>`,m=>{
     const inp=m.querySelector('#rsPw'); setTimeout(()=>{ try{ inp.focus(); }catch(e){} },60);
     const go=()=>{ const v=inp.value.trim(); if(!rsPwOk(v)){ m.querySelector('#rsMsg').textContent='비밀번호가 올바르지 않아요'; inp.value=''; return; } onOk(v); };
     m.querySelector('#rsGo').onclick=go; inp.onkeydown=e=>{ if(e.key==='Enter')go(); }; m.querySelector('#rsNo').onclick=()=>{ closeModal(); if(onNo)onNo(); }; }); }
 /* 캐릭터 로그: charlogs.txt 는 서버(Supabase dd_charlog)에 쌓이고 [캐릭터 로그]에서 그 형식 그대로 보여줘요. 못 보낸 기록은 기기에 남겨 뒀다가 나중에 다시 보내요 */
-const rsQ=()=>{ try{ const a=JSON.parse(lsGet(RS_Q)||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } };
 async function rsPost(o){ const r=await fetch(SB_URL+'/rest/v1/rpc/dd_lab_log',{method:'POST',headers:rkHead(),body:JSON.stringify({p_pw:o.pw,p_kind:o.k,p_names:String(o.n||'').slice(0,380),p_at:o.t})}); if(!r.ok)throw new Error('http '+r.status); const v=await r.json(); if(v!=='ok')throw new Error(String(v)); }
-let rsBusy=false;
-async function rsFlush(){ if(rsBusy)return; rsBusy=true; try{ const a=rsQ(); while(a.length){ try{ await rsPost(a[0]); }catch(e){ if(String(e.message)!=='denied')break; } a.shift(); lsSet(RS_Q,JSON.stringify(a)); } }finally{ rsBusy=false; } }
-function rsLogAdd(k,pw){ const a=rsQ(); a.push({k,n:rsNames(),t:new Date().toISOString(),pw}); lsSet(RS_Q,JSON.stringify(a.slice(-20))); rsFlush(); }
-function rsGrant(pw){ lsSet(RS_PW,pw); rsLogAdd('in',pw); lsSet(RS_KEY,'1'); def2Sync(); verSync(); closeModal(); buyMsg=''; sfx('rare'); rerender(); sheetToast('📚 연구실이 열렸어요'); }
-function rsExit(){
-  modal(`<h3>🚪 나가기</h3><p style="margin:0 0 12px;font-size:14px;line-height:1.5">관리자 권한을 반납하고 연구실을 닫을까요?</p><div class="row2"><button class="btn" id="rxNo">취소</button><button class="btn primary" id="rxGo">반납하고 나가기</button></div>`,m=>{
-    m.querySelector('#rxNo').onclick=closeModal;
-    m.querySelector('#rxGo').onclick=()=>{ const pw=lsGet(RS_PW); if(rsPwOk(pw))rsLogAdd('out',pw);   /* 나가기는 비밀번호를 묻지 않아요 · 이 기기에 비밀번호가 없으면(복구 코드로 이어받은 경우) 반납 기록은 남기지 못해요 */
-      lsDel(RS_KEY); lsDel(RS_PW); pprSet(0); verSync(); closeModal(); rerender(); sheetToast('🚪 관리자 권한을 반납했어요'); }; }); }
+function rsLogIn(pw){ const o={k:'in',n:rsNames(),t:new Date().toISOString(),pw}; let n=0; const go=()=>rsPost(o).catch(e=>{ if(String(e.message)==='denied'||n>=3)return; setTimeout(go,[15000,60000,180000][n++]); }); go(); }   /* 입장 기록만 남겨요(나가기는 없어요). 비밀번호는 이 함수 안(메모리)에만 있고 저장하지 않아요 — 전송에 실패하면 페이지가 열려 있는 동안 3번까지 다시 시도 */
+function rsGrant(pw){ rsLogIn(pw); lsSet(RS_KEY,'1'); def2Sync(); verSync(); closeModal(); buyMsg=''; sfx('rare'); rerender(); sheetToast('📚 연구실이 열렸어요'); }
 const rsPre='white-space:pre-wrap;word-break:break-word;font:12px/1.55 ui-monospace,Menlo,monospace;max-height:58vh;overflow:auto;margin:0 0 8px;padding:8px;background:#0a0807;border:1px solid var(--line2);border-radius:8px;touch-action:pan-y';
 function rsNotes(){
-  rsAsk(pw=>{ lsSet(RS_PW,pw); modal(`<h3>📔 관리자 노트</h3><pre id="rsT" style="${rsPre}">불러오는 중…</pre><div class="row2"><button class="btn" id="rnRe">🔄 새로고침</button><button class="btn primary" id="rnX">닫기</button></div>`,m=>{
+  rsAsk(pw=>{ modal(`<h3>📔 관리자 노트</h3><pre id="rsT" style="${rsPre}">불러오는 중…</pre><div class="row2"><button class="btn" id="rnRe">🔄 새로고침</button><button class="btn primary" id="rnX">닫기</button></div>`,m=>{
     m.querySelector('#rnX').onclick=closeModal;
     const load=()=>fetch('adminnotes.txt?'+Date.now(),{cache:'no-store'}).then(r=>{ if(!r.ok)throw 0; return r.text(); }).then(t=>{ m.querySelector('#rsT').textContent=t||'(비어 있어요)'; }).catch(()=>{ m.querySelector('#rsT').textContent='관리자 노트를 불러오지 못했어요. (오프라인이거나 서버 점검 중)'; });
     m.querySelector('#rnRe').onclick=()=>{ m.querySelector('#rsT').textContent='불러오는 중…'; load(); }; load(); }); }); }
 function rsLogView(){
-  rsAsk(pw=>{ lsSet(RS_PW,pw); modal(`<h3>📜 캐릭터 로그</h3><pre id="rsT" style="${rsPre}">불러오는 중…</pre><div class="row2"><button class="btn" id="rlRe">🔄 새로고침</button><button class="btn primary" id="rlX">닫기</button></div>`,m=>{
+  rsAsk(pw=>{ modal(`<h3>📜 캐릭터 로그</h3><pre id="rsT" style="${rsPre}">불러오는 중…</pre><div class="row2"><button class="btn" id="rlRe">🔄 새로고침</button><button class="btn primary" id="rlX">닫기</button></div>`,m=>{
     m.querySelector('#rlX').onclick=closeModal;
-    const line=(k,names,t,wait)=>k==='in'?`${rsStamp(t)}, 새로운 관리자가 권한을 획득하였습니다 - ${names}${wait?' (전송 대기)':''}`:`${rsStamp(t)}, ${names} - 관리자 권한을 반납했습니다.${wait?' (전송 대기)':''}`;
-    const load=async()=>{ const el=m.querySelector('#rsT'); await rsFlush();
+    const line=(k,names,t)=>k==='in'?`${rsStamp(t)}, 새로운 관리자가 권한을 획득하였습니다 - ${names}`:`${rsStamp(t)}, ${names} - 관리자 권한을 반납했습니다.`;   /* 'out' 은 예전 기록만 남아 있어요(지금은 기록하지 않음) */
+    const load=async()=>{ const el=m.querySelector('#rsT');
       try{ const rows=await clRpc('dd_lab_list',{p_pw:pw,p_limit:200}); if(!Array.isArray(rows))throw 0;
-        const L=rsQ().map(o=>({t:o.t,s:line(o.k,o.n,o.t,1)})).concat(rows.map(o=>({t:o.created_at,s:line(o.kind,o.names,o.created_at)}))).sort((a,b)=>new Date(b.t)-new Date(a.t));
+        const L=rows.map(o=>({t:o.created_at,s:line(o.kind,o.names,o.created_at)})).sort((a,b)=>new Date(b.t)-new Date(a.t));
         el.textContent=L.length?L.map(x=>x.s).join('\n\n'):'아직 기록이 없어요.'; }
       catch(e){ el.textContent='캐릭터 로그를 불러오지 못했어요. (오프라인이거나 서버 점검 중)'; } };
     m.querySelector('#rlRe').onclick=()=>{ m.querySelector('#rsT').textContent='불러오는 중…'; load(); }; load(); }); }); }
@@ -6685,18 +6679,17 @@ function rsLogView(){
 let rsClN=null, rsShopIn=false;   /* rsShopIn: 상점에 들어와 행 수를 확인했는지 (다른 탭으로 나가면 다시 false) */
 const rsClTxt=()=>'☁️ 클라우드 저장본 '+(rsClN==null?'?':rsClN)+'행 조회하기';
 function rsClLabel(b){ const el=b&&b.querySelector('#rsCl'); if(!el)return; el.textContent=rsClTxt(); if(rsShopIn)return; rsShopIn=true;   /* 상점에 들어와 버튼을 처음 그릴 때 한 번만 행 수를 확인 (주기적 새로고침 없음) */
-  const pw=lsGet(RS_PW); if(!rsPwOk(pw)){ if(pw)lsDel(RS_PW); return; }   /* 비밀번호가 바뀌기 전에 저장된 옛 값이면 서버로 보내지 않고(서버는 200 + null 로 거절) 지워요 */
-  clRpc('dd_lab_save_count',{p_pw:pw}).then(n=>{ if(typeof n==='number'){ rsClN=n; const e=document.querySelector('#rsCl'); if(e)e.textContent=rsClTxt(); } }).catch(()=>{ rsShopIn=false; }); }
+  clRpc('dd_lab_save_count',{}).then(n=>{ if(typeof n==='number'){ rsClN=n; const e=document.querySelector('#rsCl'); if(e)e.textContent=rsClTxt(); } }).catch(()=>{ rsShopIn=false; }); }
 /* 클라우드 정리하기: ① 같은 캐릭터(dkdef2.c.<id>) 행끼리 가장 최근 행만 남기고 나머지에 invalid_at 기록(이미 무효인 행은 그대로) ② 무효 48시간 지난 행 삭제 ③ 마지막 저장 61일 지난 행 삭제 — 삭제된 행은 dd_save_audit 에 남아요 */
 function rsSaveClean(pw0){   /* 클라우드 저장본 목록의 '🧹 정리하기'에서 호출 — 목록을 열 때 이미 비밀번호를 확인했으므로 다시 묻지 않고, 끝나면 목록을 다시 불러와요 */
-  (rsPwOk(pw0)?(f=>f(pw0)):rsAsk)(pw=>{ lsSet(RS_PW,pw); modal(`<h3>🧹 클라우드 정리하기</h3><p style="margin:0 0 10px;font-size:14px;line-height:1.6">다음 순서로 정리해요.<br>① 같은 캐릭터가 겹치는 행은 가장 최근 행만 두고 나머지를 <b>무효</b>로 표시 (이미 무효인 행은 그대로)<br>② 무효가 된 지 <b>48시간</b> 넘은 행 <b style="color:#ff9a8a">삭제</b><br>③ 마지막 저장이 <b>61일</b> 넘은 행 <b style="color:#ff9a8a">삭제</b><br><span class="meta">삭제된 행은 되돌릴 수 없어요 (기록은 dd_save_audit 에 남아요).</span></p><div id="clrMsg" class="meta" style="min-height:18px;margin:0 0 8px"></div><div class="row2"><button class="btn" id="clrNo">취소</button><button class="btn danger" id="clrGo">정리하기</button></div>`,m=>{
+  (rsPwOk(pw0)?(f=>f(pw0)):rsAsk)(pw=>{ modal(`<h3>🧹 클라우드 정리하기</h3><p style="margin:0 0 10px;font-size:14px;line-height:1.6">다음 순서로 정리해요.<br>① 같은 캐릭터가 겹치는 행은 가장 최근 행만 두고 나머지를 <b>무효</b>로 표시 (이미 무효인 행은 그대로)<br>② 무효가 된 지 <b>48시간</b> 넘은 행 <b style="color:#ff9a8a">삭제</b><br>③ 마지막 저장이 <b>61일</b> 넘은 행 <b style="color:#ff9a8a">삭제</b><br><span class="meta">삭제된 행은 되돌릴 수 없어요 (기록은 dd_save_audit 에 남아요).</span></p><div id="clrMsg" class="meta" style="min-height:18px;margin:0 0 8px"></div><div class="row2"><button class="btn" id="clrNo">취소</button><button class="btn danger" id="clrGo">정리하기</button></div>`,m=>{
     m.querySelector('#clrNo').onclick=()=>rsSaveView(pw);
     m.querySelector('#clrGo').onclick=async e=>{ const b=e.currentTarget, msg=m.querySelector('#clrMsg'); b.disabled=true; b.textContent='정리하는 중…'; msg.textContent='';
       try{ const r=await clRpc('dd_lab_save_clean',{p_pw:pw}); if(!r||typeof r!=='object')throw 0; rsClN=r.rows; const el=document.querySelector('#rsCl'); if(el)el.textContent=rsClTxt();
         modal(`<h3>🧹 정리했어요</h3><p style="margin:0 0 12px;font-size:14px;line-height:1.7">새로 무효 표시 <b>${r.invalidated|0}</b>행<br>무효 48시간 경과로 삭제 <b>${r.deleted_invalid|0}</b>행<br>61일 경과로 삭제 <b>${r.deleted_old|0}</b>행<br>남은 행 <b>${r.rows|0}</b>행</p><button class="btn primary" id="clrOk" style="width:100%">확인</button>`,mm=>{ mm.querySelector('#clrOk').onclick=()=>rsSaveView(pw); }); }
       catch(x){ msg.style.color='#ff8a7a'; msg.textContent='정리하지 못했어요. (비밀번호 오류이거나 서버 점검 중)'; b.disabled=false; b.textContent='다시 시도'; } }; }); }); }
 function rsSaveView(pw0){
-  (rsPwOk(pw0)?(f=>f(pw0)):rsAsk)(pw=>{ lsSet(RS_PW,pw); modal(`<h3>☁️ 클라우드 저장본</h3><div style="font-size:12px;color:var(--mute);margin:-4px 0 8px">행을 펼치면 그 행의 내용이 클립보드에 복사돼요.</div><div id="scL" style="max-height:58vh;overflow:auto;margin:0 0 8px;touch-action:pan-y">불러오는 중…</div><div class="row2"><button class="btn" id="scClr">🧹 정리하기</button><button class="btn primary" id="scX">닫기</button></div>`,m=>{
+  (rsPwOk(pw0)?(f=>f(pw0)):rsAsk)(pw=>{ modal(`<h3>☁️ 클라우드 저장본</h3><div style="font-size:12px;color:var(--mute);margin:-4px 0 8px">행을 펼치면 그 행의 내용이 클립보드에 복사돼요.</div><div id="scL" style="max-height:58vh;overflow:auto;margin:0 0 8px;touch-action:pan-y">불러오는 중…</div><div class="row2"><button class="btn" id="scClr">🧹 정리하기</button><button class="btn primary" id="scX">닫기</button></div>`,m=>{
     m.querySelector('#scX').onclick=closeModal;
     const box=m.querySelector('#scL'), pre='white-space:pre-wrap;word-break:break-all;font:11px/1.5 ui-monospace,Menlo,monospace;max-height:33vh;overflow:auto;margin:6px 0 0;padding:8px;background:#0a0807;border:1px solid var(--line2);border-radius:8px;touch-action:pan-y';
     const load=async()=>{ box.textContent='불러오는 중…';
@@ -6715,7 +6708,6 @@ function rsSaveView(pw0){
           box.append(d); }); }
       catch(e){ box.textContent='저장본을 불러오지 못했어요. (오프라인이거나 서버 점검 중)'; } };
     m.querySelector('#scClr').onclick=()=>rsSaveClean(pw); load(); }); }); }
-if(rsQ().length)setTimeout(rsFlush,4000);
 const SHOP={potion:{n:'회복 물약',d:'생명력·마나 45% 회복. 습격마다 주는 무료 물약 3개와 별도로 쌓여요.',p:500},rev:{n:'즉시 부활',d:'쓰러졌을 때 그 자리에서 바로 일어나요. (스테이지마다 무료 1회 포함)',p:2000}};
 const SHOPMAXN={potion:20,rev:REV_MAX}, shopMax=k=>SHOPMAXN[k]||20, shopQty={potion:1,rev:1};
 function shopRow(k){ const o=SHOP[k], have=k==='potion'?me.potBuy:me.rev, space=Math.max(0,shopMax(k)-have), q=space?clamp(shopQty[k]|0||1,1,space):0; shopQty[k]=q||1;
@@ -6735,10 +6727,10 @@ function renderShop(){
   markTabs(); sheetHead(); sellAskIt=null;
   selItem=null;   /* 상점에는 판매창이 없음 — 판매·일괄 판매는 가방에서 */
   let h=`<div class="box"><h3>🛍️ 구매</h3>${shopRow('potion')}${shopAuto('potion')}${me.hc?'':shopRow('rev')+shopAuto('rev')}<div class="smsg">${esc(buyMsg)}</div></div>`;
-  if(rsOn())h+=`<div class="box" id="rsBox"><h3>📚 연구실</h3><p style="margin:0 0 10px;font-size:14px;line-height:1.5">어서오세요, 관리자님 환영합니다.</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button class="btn" id="rsNote" style="grid-column:1;grid-row:1">📔 관리자 노트</button><button class="btn" id="rsPn" style="grid-column:1;grid-row:2">📜 패치노트</button><button class="btn" id="rsLog" style="grid-column:2;grid-row:1/3">📜 캐릭터 로그</button></div>${G.inGame?'':'<button class="btn primary" id="rsTrain" style="width:100%;margin-top:8px">🏋️ 훈련장 입장</button>'}<button class="btn" id="rsPpr" aria-pressed="${PPR?'false':'true'}" style="width:100%;margin-top:8px">🥨 빼빼로 미적용 : ${PPR?'OFF':'ON'}</button><button class="btn" id="rsDef2" aria-pressed="${def2On()?'true':'false'}" style="width:100%;margin-top:8px">🛡️ 새 방어 공식 : ${def2On()?'ON':'OFF'}</button><button class="btn" id="rsCl" style="width:100%;margin-top:8px">☁️ 클라우드 저장본 ?행 조회하기</button><button class="btn" id="rsExit" style="width:100%;margin-top:8px">🚪 나가기</button></div>`;
+  if(rsLab()){ const pt=lsGet(RS_PT)==='1', pp=lsGet(PPR_KEY)==='1', d2=lsGet(DEF2_KEY)==='1'; h+=`<div class="box" id="rsBox"><h3>📚 연구실</h3><p style="margin:0 0 10px;font-size:14px;line-height:1.5">어서오세요, 관리자님 환영합니다.</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button class="btn" id="rsNote" style="grid-column:1;grid-row:1">📔 관리자 노트</button><button class="btn" id="rsPn" style="grid-column:1;grid-row:2">📜 패치노트</button><button class="btn" id="rsLog" style="grid-column:2;grid-row:1/3">📜 캐릭터 로그</button></div>${G.inGame?'':'<button class="btn primary" id="rsTrain" style="width:100%;margin-top:8px">🏋️ 훈련장 입장</button>'}<button class="btn" id="rsPpr" aria-pressed="${pp?'true':'false'}"${pt?' disabled':''} style="width:100%;margin-top:8px">🥨 빼빼로 미적용 : ${pp?'ON':'OFF'}${pt?' · 암행 중 꺼짐':''}</button><button class="btn" id="rsDef2" aria-pressed="${d2?'true':'false'}"${pt?' disabled':''} style="width:100%;margin-top:8px">🛡️ 새 방어 공식 : ${d2?'ON':'OFF'}${pt?' · 암행 중 꺼짐':''}</button><button class="btn" id="rsCl" style="width:100%;margin-top:8px">☁️ 클라우드 저장본 ?행 조회하기</button><button class="btn" id="rsPt" aria-pressed="${pt?'true':'false'}" style="width:100%;margin-top:8px">🕶️ 암행 시찰 : ${pt?'ON':'OFF'}</button></div>`; }
   const b=$('#sheetB'); b.className='sbody stats'; b.innerHTML=h; fitGo(b);
   rsClLabel(b);
-  { const q=id=>b.querySelector(id); if(q('#rsCl'))q('#rsCl').onclick=()=>rsSaveView(); if(q('#rsPn'))q('#rsPn').onclick=()=>patchModal(); if(q('#rsNote'))q('#rsNote').onclick=rsNotes; if(q('#rsLog'))q('#rsLog').onclick=rsLogView; if(q('#rsExit'))q('#rsExit').onclick=rsExit; if(q('#rsTrain'))q('#rsTrain').onclick=startTraining; if(q('#rsMine'))q('#rsMine').onclick=startMine; if(q('#rsJw'))q('#rsJw').onclick=combineMenu; if(q('#rsDef2'))q('#rsDef2').onclick=()=>{ if(def2On())lsDel(DEF2_KEY); else lsSet(DEF2_KEY,'1'); def2Sync(); try{ if(me&&me.D)recalc(); }catch(e){} sfx('ui'); sheetToast(def2On()?'🛡️ 새 방어 공식 ON (이 기기·연구실 전용)':'🛡️ 새 방어 공식 OFF (기존 공식)'); rerender(); }; if(q('#rsPpr'))q('#rsPpr').onclick=()=>{ pprSet(PPR?1:0); sfx('ui'); sheetToast(PPR?'🥨 빼빼로 미적용 OFF (새 밸런스)':'🥨 빼빼로 미적용 ON (패치 이전)'); rerender(); }; }
+  { const q=id=>b.querySelector(id); if(q('#rsCl'))q('#rsCl').onclick=()=>rsSaveView(); if(q('#rsPn'))q('#rsPn').onclick=()=>patchModal(); if(q('#rsNote'))q('#rsNote').onclick=rsNotes; if(q('#rsLog'))q('#rsLog').onclick=rsLogView; if(q('#rsPt'))q('#rsPt').onclick=()=>{ const on=lsGet(RS_PT)!=='1'; if(on)lsSet(RS_PT,'1'); else lsDel(RS_PT); pprSync(); verSync(); try{ if(me&&me.D)recalc(); }catch(e){} sfx('ui'); sheetToast(on?'🕶️ 암행 시찰 ON — 외부에서는 일반 사용자로 보여요':'🕶️ 암행 시찰 OFF — 관리자로 돌아왔어요'); rerender(); };   /* 연구실 화면은 그대로, 그 밖의 곳(버전 글자·랭킹 탭·광산 층·캐릭터 수·새 코드 발급 등)은 일반 사용자처럼 */ if(q('#rsTrain'))q('#rsTrain').onclick=startTraining; if(q('#rsMine'))q('#rsMine').onclick=startMine; if(q('#rsJw'))q('#rsJw').onclick=combineMenu; if(q('#rsDef2'))q('#rsDef2').onclick=()=>{ if(def2On())lsDel(DEF2_KEY); else lsSet(DEF2_KEY,'1'); def2Sync(); try{ if(me&&me.D)recalc(); }catch(e){} sfx('ui'); sheetToast(def2On()?'🛡️ 새 방어 공식 ON (이 기기·연구실 전용)':'🛡️ 새 방어 공식 OFF (기존 공식)'); rerender(); }; if(q('#rsPpr'))q('#rsPpr').onclick=()=>{ pprSet(PPR?1:0); sfx('ui'); sheetToast(PPR?'🥨 빼빼로 미적용 OFF (새 밸런스)':'🥨 빼빼로 미적용 ON (패치 이전)'); rerender(); }; }
   b.querySelectorAll('[data-atg]').forEach(el=>el.onclick=()=>{ const f=AUTOK[el.dataset.atg]; me[f]=me[f]?0:1; saveChar(); sfx('ui'); renderShop(); });
   b.querySelectorAll('[data-q]').forEach(el=>el.onclick=()=>{ const [k,a]=el.dataset.q.split(':'), have=k==='potion'?me.potBuy:me.rev, space=Math.max(1,shopMax(k)-have), o=SHOP[k];
     if(a==='max')shopQty[k]=Math.max(1,Math.min(Math.floor(aGold()/o.p),space)); else shopQty[k]=clamp((shopQty[k]|0)+(+a),1,space); buyMsg=''; renderShop(); });
@@ -7358,7 +7350,7 @@ window.__verSync=verSync; verSync();
 /* 패치노트: 저장소의 patchnotes.txt를 불러와서 보여줌 (원본 파일 링크 포함) */
 const PN_MAX=32767; /* 패치노트 창에는 최신(맨 위)부터 이만큼(바이트)만 보여줘요 */
 function patchModal(){
-  modal(`<div class="ntH"><h3>📜 패치노트</h3><button class="ntX" id="pnX" aria-label="닫기">✕</button></div><pre id="pnT" style="white-space:pre-wrap;word-break:break-word;font:12px/1.55 ui-monospace,Menlo,monospace;max-height:58vh;overflow:auto;margin:0 0 8px;padding:8px;background:#0a0807;border:1px solid var(--line2);border-radius:8px;touch-action:pan-y">불러오는 중…</pre>${rsOn()?'<a class="btn" href="patchnotes.txt" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;text-align:center;text-decoration:none;box-sizing:border-box">원본 파일 열기</a>':''}`,m=>{
+  modal(`<div class="ntH"><h3>📜 패치노트</h3><button class="ntX" id="pnX" aria-label="닫기">✕</button></div><pre id="pnT" style="white-space:pre-wrap;word-break:break-word;font:12px/1.55 ui-monospace,Menlo,monospace;max-height:58vh;overflow:auto;margin:0 0 8px;padding:8px;background:#0a0807;border:1px solid var(--line2);border-radius:8px;touch-action:pan-y">불러오는 중…</pre>${rsLab()?'<a class="btn" href="patchnotes.txt" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;text-align:center;text-decoration:none;box-sizing:border-box">원본 파일 열기</a>':''}`,m=>{
     m.querySelector('#pnX').onclick=closeModal;
     fetch('patchnotes.txt?'+Date.now(),{cache:'no-store'}).then(r=>{ if(!r.ok)throw 0; return r.text(); }).then(t=>{ const el=m.querySelector('#pnT'); const bytes=new TextEncoder().encode(t);
       if(bytes.length<=PN_MAX){ el.textContent=t; return; }
@@ -7399,7 +7391,7 @@ zones.push=function(...a){ if(G.train)for(const z of a)if(z&&z.sk==null)z.sk=TR.
 const TR_CN=[0,-480];   /* 반격 허수아비: 중심에서 위로 480 */
 const TR_D=45.25, TR_POS=[[-320,0],[320,0],[320-TR_D,-TR_D],[320+TR_D,-TR_D],[320-TR_D,TR_D],[320+TR_D,TR_D]];   /* 왼쪽 1기 · 오른쪽 X자 5기(반경 64) */
 function startTraining(){
-  if(!rsOn()||G.inGame||!selId)return; if(hcDead(loadChar(selId)))return;
+  if(!rsLab()||G.inGame||!selId)return; if(hcDead(loadChar(selId)))return;
   closeModal(); G.mode='solo'; prepMe(); ally=null; resetWorld(); G.train=1; { const pb=$('#trPp'); if(pb)pb.textContent=PPR?'🥨 빼빼로 미적용 OFF':'🥨 빼빼로 미적용 ON'; } TR.log=[]; TR.sk='기본공격'; TR.dirty=true; TR.sum={}; TR.ev=[]; TR.dps=0; TR.dpsAt=0;
   dmgReset(); G.firstClr=false; G.potN=0; G.stageIdx=selStage; G.stg=TRAIN_STG; G.TW=0; setTheme(0); G.castle=null; G.gts=[];
   G.allMode=false; G.allQ=[]; G.fires=[]; G.freeRev=me.hc?0:1; G.hcWhy=''; me.rvGiven=0; me.seenRg=0; me.out=false; me.rvT=0;
