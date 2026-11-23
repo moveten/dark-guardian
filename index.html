@@ -1560,7 +1560,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0869</div>
+    <div class="ver" id="verT">v0.7.2.0870</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -2086,8 +2086,8 @@ for(const k in CARD_DEF)GEM_C[k]=CARD_DEF[k].c;
 const cardOptText=g=>`곡괭이질 때 ${(CARD_DEF[g.gk]||{p:0}).p}% 확률로 한 번 더 타격`;
 function mkCard(ck){ const D=CARD_DEF[ck]; return {id:++ITEMID,slot:'mat',mat:'gem',jw:1,cd:1,gk:ck,rar:0,name:D.n,base:'',ilvl:25,jt:1,aff:[],lock:true}; }
 for(const k in CARD_DEF)gemImg({cd:1,jw:1,gk:k});   /* 카드 그림 미리 불러오기 (img/card_trio·awk·cas.png) */
-const cardP=p=>{ const w=p&&p.eq&&p.eq.weapon; if(!w||!w.pk||!w.sk||!w.gm||!w.gm.cd||!rsOn())return 0; const D=CARD_DEF[w.gm.gk]; return D?D.p/100:0; };   /* 지금 든 곡괭이의 카드가 주는 '한 번 더 타격' 확률 */
-function cardRoll(ck,x,y){ if(!me||G.mode==='guest'||!rsOn()||Math.random()>=CARD_P)return; const it=mkCard(ck); it.isNew=1;
+const cardP=p=>{ const w=p&&p.eq&&p.eq.weapon; if(!w||!w.pk||!w.sk||!w.gm||!w.gm.cd)return 0; const D=CARD_DEF[w.gm.gk]; return D?D.p/100:0; };   /* 지금 든 곡괭이의 카드가 주는 '한 번 더 타격' 확률 */
+function cardRoll(ck,x,y){ if(!me||G.mode==='guest'||Math.random()>=CARD_P)return; const it=mkCard(ck); it.isNew=1;
   if(gemFit(me,it)>=1)gemPut(me,it,1,true); else dropItem(it,x+rand(-20,20),y+rand(-20,20));
   if(!me.dc)me.dc={}; if(!(me.dc[ck]|0)){ if(!me.dcn)me.dcn={}; me.dcn[ck]=1; } me.dc[ck]=Math.min(9999,(me.dc[ck]|0)+1);   /* 카드 도감: 이 캐릭터가 직접 얻은 횟수 */
   later(.5,()=>{ announce(`🃏 ${CARD_DEF[ck].n}를 얻었어요!`,CARD_DEF[ck].c); sfx('rare'); }); saveChar(); uiDirty=true; }
@@ -2650,7 +2650,7 @@ const minerLv=p=>Math.max(1,(p&&p.mine&&p.mine.lv)|0);   /* 광부 레벨: 캐�
 function pickOwned(p){ p=p||me; if(!p)return null; let best=null; const see=it=>{ if(isPick(it)&&(!best||(it.pk|0)>(best.pk|0)))best=it; };   /* 지금 착용 중이거나(아이템세팅 포함) 가방에 있는 곡괭이 중 가장 좋은 것 */
   see(p.eq&&p.eq.weapon); if(p.eq2)Object.values(p.eq2).forEach(see); (p.inv||[]).forEach(see); return best; }
 const mineCanEnter=p=>!!pickOwned(p);   /* 곡괭이를 지금 가지고 있어야만 입장 (팔거나 보관함으로 옮기면 광부 레벨이 높아도 입장 불가) */
-function mkPick(g){ const P=PICKS[g]||PICKS[1]; const it=genItem(-1,1,'weapon','곡괭이'); it.rar=P.rar; it.aff=[]; it.pk=PICKS[g]?g:1; it.name=P.n; it.req=1; it.lock=true; if(rsOn()){ it.sk=1; it.gm=null; } return it; }   /* 연구실: 곡괭이엔 카드칸(소켓 1칸)이 처음부터 있어요 */   /* 처음부터 잠금 → 자동판매·일괄판매·합성에 안 들어가요 */
+function mkPick(g){ const P=PICKS[g]||PICKS[1]; const it=genItem(-1,1,'weapon','곡괭이'); it.rar=P.rar; it.aff=[]; it.pk=PICKS[g]?g:1; it.name=P.n; it.req=1; it.lock=true; it.sk=1; it.gm=null; return it; }   /* 곡괭이엔 카드칸(소켓 1칸)이 처음부터 있어요 */   /* 처음부터 잠금 → 자동판매·일괄판매·합성에 안 들어가요 */
 var TOWNC=null;
 function townLoad(){ let o=null; try{ o=JSON.parse(lsGet(TOWN_KEY)||'null'); }catch(e){} if(!o||typeof o!=='object')o={};
   const t={}, save=[]; for(const k in TOWN_B){ const q=o[k]||{}, D=TOWN_B[k]; t[k]={lv:Math.max(0,Math.min(D.main?TOWN_MAIN_MAXLV:TOWN_MAXLV,q.lv|0)),n:Math.max(0,q.n|0),t:+q.t>0?+q.t:0,u:+q.u>0?+q.u:0};
@@ -2797,7 +2797,7 @@ function loadChar(id){
       p.eq2=e2; p.es=cur; delete p.ps; }
     { const e2=(p.eq2&&typeof p.eq2==='object')?p.eq2:{}, o={}; for(const k of EQSL)o[k]=e2[k]||null; p.eq2=o; p.es=p.es===1?1:0; }
     miscFix(p); p.shard=p.shard|0; shardAdd(p,0); p.ashard=p.ashard|0; shardAdd(p,0,'ashard'); p.cshard=p.cshard|0; shardAdd(p,0,'cshard'); if(p.ore)oreFold(p); /* 예전 조각 숫자 → 가방 아이템으로 (각성 조각 포함) */
-    const fx=it=>{ if(!it)return; if(it.pk&&it.slot==='weapon'&&!it.sk&&rsOn()){ it.sk=1; it.gm=null; } ilCapFix(it); heroFix(it); csFix(it); newOptFix(it); heroSmFix(it); lanternFix(it); if(!Array.isArray(it.aff))it.aff=[]; if(it.rar===3&&it.name==='그림자 망토')it.name='밤의 망토'; /* 영웅 '그림자' 장비와 헷갈리지 않게 개명 */ if(!p.dv4&&it.slot!=='weapon')for(const a of it.aff)if(a&&(a.t==='dmgPct'||a.t==='sm'||a.t==='smhp'))a.v=Math.min(50,Math.max(1,Math.round(a.v/4))); /* v0.3: 무기 외 피해%·소환수 피해%·소환수 생명력% 옵션은 예전 수치를 4로 나눈 값으로(캐릭터마다 1회, p.dv4) */ if(!(it.rar===3&&it.sp))for(const a of it.aff)if(a&&(a.t==='str'||a.t==='dex'||a.t==='vit'||a.t==='ene')&&a.v>10)a.v=10; /* 힘·민첩·체력·에너지 옵션 상한 10(이전에 얻은 더 높은 수치도 10으로) */ if(it.rar===3&&!it.sv){ it.sv=1; const sh=it.slot==='shield'; /* 유니크 스킬 옵션 개편: 직업 스킬→모든 스킬, 개별 스킬→그 직업 스킬, 보조장비→내(보조장비) 직업 스킬 (1회) */
+    const fx=it=>{ if(!it)return; if(it.pk&&it.slot==='weapon'&&!it.sk){ it.sk=1; it.gm=null; } ilCapFix(it); heroFix(it); csFix(it); newOptFix(it); heroSmFix(it); lanternFix(it); if(!Array.isArray(it.aff))it.aff=[]; if(it.rar===3&&it.name==='그림자 망토')it.name='밤의 망토'; /* 영웅 '그림자' 장비와 헷갈리지 않게 개명 */ if(!p.dv4&&it.slot!=='weapon')for(const a of it.aff)if(a&&(a.t==='dmgPct'||a.t==='sm'||a.t==='smhp'))a.v=Math.min(50,Math.max(1,Math.round(a.v/4))); /* v0.3: 무기 외 피해%·소환수 피해%·소환수 생명력% 옵션은 예전 수치를 4로 나눈 값으로(캐릭터마다 1회, p.dv4) */ if(!(it.rar===3&&it.sp))for(const a of it.aff)if(a&&(a.t==='str'||a.t==='dex'||a.t==='vit'||a.t==='ene')&&a.v>10)a.v=10; /* 힘·민첩·체력·에너지 옵션 상한 10(이전에 얻은 더 높은 수치도 10으로) */ if(it.rar===3&&!it.sv){ it.sv=1; const sh=it.slot==='shield'; /* 유니크 스킬 옵션 개편: 직업 스킬→모든 스킬, 개별 스킬→그 직업 스킬, 보조장비→내(보조장비) 직업 스킬 (1회) */
       for(const a of it.aff){ if(!a)continue; const v=Math.min(2,Math.max(1,a.v|0)); if(a.t==='cls'){ if(sh){ a.cls=it.oc||cls; a.v=v; } else { a.t='all'; a.v=v; delete a.cls; } } else if(a.t==='sk'){ a.t='cls'; a.v=v; if(sh)a.cls=it.oc||cls; delete a.key; } }
       if(it.aff.some(a=>a&&a.t==='all'))it.aff=it.aff.filter(a=>!(a&&a.t==='cls')); }
     if(it.rar===3&&it.aff.some(a=>a&&a.t==='all'))it.aff=it.aff.filter(a=>!(a&&a.t==='sk')); it.aff=it.aff.filter(a=>a&&AFXBY[a.t]&&!(it.slot==='armor'&&a.t==='ms')&&!(a.cls&&!CLASSES[a.cls])&&!(a.t==='sk'&&!(SKBY[a.key]&&SK[a.cls]&&SK[a.cls].includes(SKBY[a.key])))); }; p.inv.forEach(fx); p.eq=p.eq||{}; for(const k in p.eq)fx(p.eq[k]); for(const k in p.eq2)fx(p.eq2[k]); p.dv4=1;
@@ -6069,7 +6069,7 @@ function dexCardCell(k,p){ const D=CARD_DEF[k], n=(p.dc&&p.dc[k])|0, nw=!!(p.dcn
 function dexCardGroup(p){ const got=dexCardN(p), open=!dexClosed.has('cd0');
   return `<section class="dxg"><div class="dxh2"><button class="dxh" data-dg="cd0" aria-expanded="${open}"><span>🃏 영웅 보스 카드 <em>${got}/${CARD_N}</em>${dexCardNew(p)?'<i class="dxnb">NEW</i>':''}</span><u>${open?'▾':'▸'}</u></button></div>${open?`<div class="dxgrid c3">${Object.keys(CARD_DEF).map(k=>dexCardCell(k,p)).join('')}</div>`:''}</section>`; }
 function renderDex(){
-  markTabs(); sheetHead(); const b=$('#sheetB'); b.className='sbody dex'; const p=me, spNw=DEX_SP.some(g=>g[2].some(k=>p.dxn&&p.dxn[k])), stNw=DEX_ST.some(g=>dexKeysOf(g[2],p).some(k=>p.dxn&&p.dxn[k])), spN=dexSpN(p), stN=dexStN(p), lab=rsOn(), isCd=lab&&dexTab==='cd', isSp=dexTab==='sp'&&!isCd, cdN=dexCardN(p), got=isCd?cdN:isSp?spN:stN, tot=isCd?CARD_N:isSp?DEX_SP_TOT:Math.max(1,dexStTot(p)), pct=(got/tot*100).toFixed(1)+'%';
+  markTabs(); sheetHead(); const b=$('#sheetB'); b.className='sbody dex'; const p=me, spNw=DEX_SP.some(g=>g[2].some(k=>p.dxn&&p.dxn[k])), stNw=DEX_ST.some(g=>dexKeysOf(g[2],p).some(k=>p.dxn&&p.dxn[k])), spN=dexSpN(p), stN=dexStN(p), lab=true, isCd=lab&&dexTab==='cd', isSp=dexTab==='sp'&&!isCd, cdN=dexCardN(p), got=isCd?cdN:isSp?spN:stN, tot=isCd?CARD_N:isSp?DEX_SP_TOT:Math.max(1,dexStTot(p)), pct=(got/tot*100).toFixed(1)+'%';
   b.innerHTML=`<div class="dxt${lab?' d3':''}"><button data-dt="sp" aria-pressed="${isSp}">✨ 스페셜${lab?'':' 아이템'}<small>${spN}/${DEX_SP_TOT}</small>${spNw?'<i class="dxnb">NEW</i>':''}</button><button data-dt="st" aria-pressed="${!isSp&&!isCd}">🧩 ${lab?'세트':'세트 아이템'}<small>${stN}/${dexStTot(p)}</small>${stNw?'<i class="dxnb">NEW</i>':''}</button>${lab?`<button data-dt="cd" aria-pressed="${isCd}">🃏 카드<small>${cdN}/${CARD_N}</small>${dexCardNew(p)?'<i class="dxnb">NEW</i>':''}</button>`:''}</div>
   <div class="dxp"><div class="dxpt"><b>${isCd?'영웅 카드 수집':isSp?'특수 유니크 수집':'세트 수집'}</b><strong>${pct}</strong></div><div class="dxbar"><i style="width:${(got/tot*100).toFixed(2)}%"></i></div>${isSp?`<div class="dxpn">🏅 ${spN>=20?`칭호 <b>「${DEX_TITLE}」</b> 획득 완료`:`20종을 모으면 칭호 <b>「${DEX_TITLE}」</b> 획득`}</div>`:''}</div>
   ${isCd?dexCardGroup(p):isSp?DEX_SP.map((g,i)=>dexGroup('sp'+i,g[0],g[1],g[2],p,'sp')).join(''):DEX_ST.map((g,i)=>dexGroup('st'+i,g[0],g[1],g[2],p,'st')).join('')+'<div class="dxsoon">+ 새 세트는 스토리와 함께 추가돼요 <span>🔒</span></div>'}`;
@@ -6152,7 +6152,7 @@ let STORE=null, satSeq=0;
 function loadStore(){ let o=null; try{ o=JSON.parse(lsGet(STORE_KEY)||'null'); }catch(e){} if(!o||typeof o!=='object')o={};
   const inv=Array.isArray(o.inv)?o.inv.slice(0,STORE_N):[]; while(inv.length<STORE_N)inv.push(null);
   let ch=false; for(const it of inv){ if(it){ if(!Array.isArray(it.aff))it.aff=[]; try{ if(ilCapFix(it))ch=true; heroFix(it); if(csFix(it))ch=true; newOptFix(it); if(heroSmFix(it))ch=true; lanternFix(it); if(sumFix(it))ch=true; if(optFix2(it))ch=true; if(itemMig(it,me&&me.cls))ch=true; if(baseFix(it))ch=true; if(nameFix(it))ch=true; }catch(e){} } }
-  const S={inv,gold:Math.max(0,o.gold|0),shard:0,st:1,smith:o.smith?1:0,misc:Array.isArray(o.misc)?o.misc.slice(0,MISC_NS):[]}; const had=inv.some(x=>x&&isShard(x)); inv.forEach(x=>{ if(x&&x.pk&&x.slot==='weapon'&&!x.sk&&rsOn()){ x.sk=1; x.gm=null; } }); miscFix(S);
+  const S={inv,gold:Math.max(0,o.gold|0),shard:0,st:1,smith:o.smith?1:0,misc:Array.isArray(o.misc)?o.misc.slice(0,MISC_NS):[]}; const had=inv.some(x=>x&&isShard(x)); inv.forEach(x=>{ if(x&&x.pk&&x.slot==='weapon'&&!x.sk){ x.sk=1; x.gm=null; } }); miscFix(S);
   if(ch||had){ try{ lsSet(STORE_KEY,JSON.stringify({inv:S.inv,misc:S.misc,gold:S.gold,smith:S.smith})); }catch(e){} }
   return S; }
 function getStore(){ if(!STORE)STORE=loadStore(); return STORE; }
@@ -6685,7 +6685,8 @@ function rsLogView(){
 let rsClN=null, rsShopIn=false;   /* rsShopIn: 상점에 들어와 행 수를 확인했는지 (다른 탭으로 나가면 다시 false) */
 const rsClTxt=()=>'☁️ 클라우드 저장본 '+(rsClN==null?'?':rsClN)+'행 조회하기';
 function rsClLabel(b){ const el=b&&b.querySelector('#rsCl'); if(!el)return; el.textContent=rsClTxt(); if(rsShopIn)return; rsShopIn=true;   /* 상점에 들어와 버튼을 처음 그릴 때 한 번만 행 수를 확인 (주기적 새로고침 없음) */
-  const pw=lsGet(RS_PW); if(!pw)return; clRpc('dd_lab_save_count',{p_pw:pw}).then(n=>{ if(typeof n==='number'){ rsClN=n; const e=document.querySelector('#rsCl'); if(e)e.textContent=rsClTxt(); } }).catch(()=>{ rsShopIn=false; }); }
+  const pw=lsGet(RS_PW); if(!rsPwOk(pw)){ if(pw)lsDel(RS_PW); return; }   /* 비밀번호가 바뀌기 전에 저장된 옛 값이면 서버로 보내지 않고(서버는 200 + null 로 거절) 지워요 */
+  clRpc('dd_lab_save_count',{p_pw:pw}).then(n=>{ if(typeof n==='number'){ rsClN=n; const e=document.querySelector('#rsCl'); if(e)e.textContent=rsClTxt(); } }).catch(()=>{ rsShopIn=false; }); }
 /* 클라우드 정리하기: ① 같은 캐릭터(dkdef2.c.<id>) 행끼리 가장 최근 행만 남기고 나머지에 invalid_at 기록(이미 무효인 행은 그대로) ② 무효 48시간 지난 행 삭제 ③ 마지막 저장 61일 지난 행 삭제 — 삭제된 행은 dd_save_audit 에 남아요 */
 function rsSaveClean(pw0){   /* 클라우드 저장본 목록의 '🧹 정리하기'에서 호출 — 목록을 열 때 이미 비밀번호를 확인했으므로 다시 묻지 않고, 끝나면 목록을 다시 불러와요 */
   (pw0?(f=>f(pw0)):rsAsk)(pw=>{ lsSet(RS_PW,pw); modal(`<h3>🧹 클라우드 정리하기</h3><p style="margin:0 0 10px;font-size:14px;line-height:1.6">다음 순서로 정리해요.<br>① 같은 캐릭터가 겹치는 행은 가장 최근 행만 두고 나머지를 <b>무효</b>로 표시 (이미 무효인 행은 그대로)<br>② 무효가 된 지 <b>48시간</b> 넘은 행 <b style="color:#ff9a8a">삭제</b><br>③ 마지막 저장이 <b>61일</b> 넘은 행 <b style="color:#ff9a8a">삭제</b><br><span class="meta">삭제된 행은 되돌릴 수 없어요 (기록은 dd_save_audit 에 남아요).</span></p><div id="clrMsg" class="meta" style="min-height:18px;margin:0 0 8px"></div><div class="row2"><button class="btn" id="clrNo">취소</button><button class="btn danger" id="clrGo">정리하기</button></div>`,m=>{
