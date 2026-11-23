@@ -1,5 +1,5 @@
 # 작업 인계 (HANDOFF) — 어둠의 수호자 / Dark Guardian
-> 마지막 갱신: 2026-11-23 14:40 · 기준 버전 **v0.7.2.0873** · 새 세션은 이 문서와 `CLAUDE.md`를 먼저 읽고 이어서 작업합니다.
+> 마지막 갱신: 2026-11-23 14:40 · 기준 버전 **v0.7.2.0874** · 새 세션은 이 문서와 `CLAUDE.md`를 먼저 읽고 이어서 작업합니다.
 > ⚠ 비밀번호·복구 코드·저장 데이터는 이 문서에 적지 않습니다. (관리자 비밀번호는 노트·커밋 어디에도 쓰지 않고 `****`)
 
 ## 1. 프로젝트
@@ -17,12 +17,13 @@
 
 ## 3. 테스트 방법 (Playwright, 네트워크 설치 없이 가능)
 1. `index.html`을 복사해 `index_test_n.html`로 저장하면서 `function rkItem(it){` → `window.__x=s=>eval(s);function rkItem(it){`로 치환(페이지 안 함수 호출용).
-2. 저장소 폴더에서 `python3 -m http.server 8777` 실행, Playwright(chromium)로 `http://localhost:8777/index_test_n.html` 열기. 외부 요청은 `route`로 abort. `add_init_script("localStorage.setItem('dkdef2.lab','1')")`, 스플래시 `#sSplash{display:none!important}`.
+2. 저장소 폴더에서 `python3 -m http.server 8777` 실행, Playwright(chromium)로 `http://localhost:8777/index_test_n.html` 열기. 외부 요청은 `route`로 abort. `add_init_script("localStorage.setItem('dkdef2.lab','928')")`, 스플래시 `#sSplash{display:none!important}`.
 3. 캐릭터 만들기: `createChar('war','시안','n1')` → `me=c; selId=c.id;`. 보석 `gemPut(c,mkGem('diamond',3),n,true)`, 광석 조각 `c.ore.rust=…`, 곡괭이 `c.eq.weapon=mkPick(1)`, 광산 `c.mine={lv:59,xp:0,fl:6,q:{d:{},a:'',p:0,o:0}}; startMine()`.
 4. 화면은 390×844, `device_scale_factor=2`로 캡처. 끝나면 **`index_test_n.html` 삭제** 및 서버 종료. `pageerror` 로그로 JS 오류 확인.
 - 주의: 새 CSS 클래스 이름은 기존과 겹치기 쉬움(예: `.nw`는 NEW 딱지 → 연출 클래스는 `x…` 접두어 사용). 시안 이미지는 같은 하네스에서 DOM/CSS를 덧씌워 "실제 화면" 위에 그립니다.
 
 ## 4. 이번 세션에서 한 일 (최신순)
+- v0.7.2.0874 연구실 열림 표식이 `dkdef2.lab`='928'(`RS_ON`)로 변경(예전 '1'은 무효, 자동 변환 없음). **테스트 하네스에서 연구실을 켤 때 `localStorage.setItem('dkdef2.lab','928')` 를 써야 함.**
 - v0.7.2.0873 지하 10층 `MINE_FL` b10 `cnt` 36 → 24 (처음 광석 24개, 자리는 ×1.5 = 36). 광석 생성은 `mineFloor()`(index.html 7431~) — 기본 cnt 16.
 - v0.7.2.0872 연구실: 나가기 제거 → `🕶️ 암행 시찰`(dkdef2.labpt, 클라우드 동기화). `rsLab()`(연구실 열림) / `rsOn()`(= rsLab && 암행 OFF, 외부 동작 차이)로 분리. 'out' 로그 기록 중단. 관리자 비밀번호 로컬 저장·전송 대기열 제거(부팅 시 옛 dkdef2.cl.labpw/labq 삭제), 입장 로그는 메모리에서 3회 재시도. `dd_lab_save_count` 비밀번호 없이 응답, `dd_lab_save_list/clean` 은 `dd_lab_ok` 직접 사용. 남은 제안: 서버 발급 세션 토큰·로그인 시도 제한(미적용, 사용자 확인 대기).
 - v0.7.2.0871 `rsCl` 버튼이 `onclick=rsSaveView` 로 이벤트를 비밀번호 자리에 넘겨 `dd_lab_save_list` 가 null 이던 버그 수정(0868 도입). **노트 복원**: 0870 커밋이 patchnotes/adminnotes 를 새 항목만으로 덮어써 이력이 날아갔던 것을 복원 — 노트에 항목을 추가할 땐 반드시 `새 항목 + 기존 내용`으로 쓰고 줄 수가 늘었는지 확인할 것. `deleteChar` 가 `nwf`·`rkt` 도 삭제, `rkt.` 를 `CLSKIP` 에 추가(복원해도 무시), 랭킹 업로드 중 삭제된 캐릭터 기록 재생성 방지. `dkdef2.last4`(버전 글자 끝 4자리)를 시작할 때 직접 `localStorage` 에 기록(저장 트리거 없이 다음 클라우드 저장에 포함), `clApply` 는 불러와도 이 기기의 값을 유지.

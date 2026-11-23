@@ -1560,7 +1560,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0873</div>
+    <div class="ver" id="verT">v0.7.2.0874</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -6639,8 +6639,8 @@ if(SKM){
 }
 /* ===== 연구실 (관리자 전용 공간) — 계정 전체에 적용: 켜짐 여부(dkdef2.lab)와 암행 시찰(dkdef2.labpt)은 클라우드 저장에 함께 실려요. 비밀번호는 어디에도 저장하지 않아요 ===== */
 try{ localStorage.removeItem('dkdef2.cl.labpw'); localStorage.removeItem('dkdef2.cl.labq'); }catch(e){}   /* 예전 버전이 이 기기에 남겨 둔 비밀번호·전송 대기열(비밀번호 포함) 삭제 */
-const RS_KEY='dkdef2.lab', RS_PT='dkdef2.labpt', RS_H=1197519288, RS_WD=['일','월','화','수','목','금','토'];
-const rsLab=()=>lsGet(RS_KEY)==='1',   /* rsLab: 연구실이 열려 있는가(연구실 화면·훈련장·연구실 스위치) */
+const RS_KEY='dkdef2.lab', RS_ON='928', RS_PT='dkdef2.labpt',   /* 연구실이 열린 표시: dkdef2.lab 값이 '928' 일 때만 (비밀번호가 아니라 단순히 조금 어렵게 만든 표식 — 예전 값 '1' 은 더 이상 인정하지 않아요) */ RS_H=1197519288, RS_WD=['일','월','화','수','목','금','토'];
+const rsLab=()=>lsGet(RS_KEY)===RS_ON,   /* rsLab: 연구실이 열려 있는가(연구실 화면·훈련장·연구실 스위치) */
   rsOn=()=>rsLab()&&lsGet(RS_PT)!=='1', PPR_KEY='dkdef2.cl.pprOff', DEF2_KEY='dkdef2.cl.def2';
 let DEF2V=false; const def2On=()=>DEF2V, def2Sync=()=>{ DEF2V=rsOn()&&lsGet(DEF2_KEY)==='1'; };   /* 🛡️ 새 방어 공식: 이 기기에서 연구실이 켜져 있고 스위치를 켰을 때만 (매 피격마다 저장소를 읽지 않게 값으로 보관) */
 const pprSync=()=>{ PPR=(rsOn()&&lsGet(PPR_KEY)==='1')?0:1; def2Sync(); };   /* 패치 이전 상태 비교(미적용 ON)는 이 기기에서 연구실이 켜진 동안만 — 나가면 자동으로 새 밸런스 */
@@ -6658,7 +6658,7 @@ function rsAsk(onOk,onNo){
 /* 캐릭터 로그: charlogs.txt 는 서버(Supabase dd_charlog)에 쌓이고 [캐릭터 로그]에서 그 형식 그대로 보여줘요. 못 보낸 기록은 기기에 남겨 뒀다가 나중에 다시 보내요 */
 async function rsPost(o){ const r=await fetch(SB_URL+'/rest/v1/rpc/dd_lab_log',{method:'POST',headers:rkHead(),body:JSON.stringify({p_pw:o.pw,p_kind:o.k,p_names:String(o.n||'').slice(0,380),p_at:o.t})}); if(!r.ok)throw new Error('http '+r.status); const v=await r.json(); if(v!=='ok')throw new Error(String(v)); }
 function rsLogIn(pw){ const o={k:'in',n:rsNames(),t:new Date().toISOString(),pw}; let n=0; const go=()=>rsPost(o).catch(e=>{ if(String(e.message)==='denied'||n>=3)return; setTimeout(go,[15000,60000,180000][n++]); }); go(); }   /* 입장 기록만 남겨요(나가기는 없어요). 비밀번호는 이 함수 안(메모리)에만 있고 저장하지 않아요 — 전송에 실패하면 페이지가 열려 있는 동안 3번까지 다시 시도 */
-function rsGrant(pw){ rsLogIn(pw); lsSet(RS_KEY,'1'); def2Sync(); verSync(); closeModal(); buyMsg=''; sfx('rare'); rerender(); sheetToast('📚 연구실이 열렸어요'); }
+function rsGrant(pw){ rsLogIn(pw); lsSet(RS_KEY,RS_ON); def2Sync(); verSync(); closeModal(); buyMsg=''; sfx('rare'); rerender(); sheetToast('📚 연구실이 열렸어요'); }
 const rsPre='white-space:pre-wrap;word-break:break-word;font:12px/1.55 ui-monospace,Menlo,monospace;max-height:58vh;overflow:auto;margin:0 0 8px;padding:8px;background:#0a0807;border:1px solid var(--line2);border-radius:8px;touch-action:pan-y';
 function rsNotes(){
   rsAsk(pw=>{ modal(`<h3>📔 관리자 노트</h3><pre id="rsT" style="${rsPre}">불러오는 중…</pre><div class="row2"><button class="btn" id="rnRe">🔄 새로고침</button><button class="btn primary" id="rnX">닫기</button></div>`,m=>{
