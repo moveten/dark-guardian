@@ -1571,7 +1571,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0929</div>
+    <div class="ver" id="verT">v0.7.2.0930</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3497,7 +3497,7 @@ function awkAI(m,dt,pls,sf,best,bd,tau){
 /* ===== 7스테이지 「거인왕의 무덤」 — 성채 단계 뼈대 =====
    우리 성(맨 아래) · 적 성채 3곳(위쪽) · 성채마다 4.5초에 1마리 · 좌·우 성채 몹은 우리 성 좌·우쪽을 침 · 성채를 다 부수면 보스 단계(다음 단계에서 구현) */
 const GMC_POS=[{k:'shield',x:175,y:512,off:-62,nm:'방패 보루'},{k:'helm',x:500,y:175,off:0,nm:'투구 성'},{k:'blade',x:825,y:512,off:62,nm:'칼날 성채'}];
-const GMC_HP=1.5e7, GMC_IV=4.5, GMC_CAP=90, GMC_N=3, GMC_KILL_CAP=90;   /* 성채마다 GMC_IV초에 GMC_N마리 · 필드 몬스터 상한 GMC_CAP · 성채 몬스터 누적 처치가 GMC_KILL_CAP마리를 넘으면 이후 처치는 보상(경험치·골드·아이템) 없음 (수문장은 해당 없음) */
+const GMC_HP=1.5e7, GMC_IV=4.5, GMC_CAP=90, GMC_N=2, GMC_KILL_CAP=90;   /* 성채마다 GMC_IV초에 GMC_N마리 · 필드 몬스터 상한 GMC_CAP · 성채 몬스터 누적 처치가 GMC_KILL_CAP마리를 넘으면 이후 처치는 보상(경험치·골드·아이템) 없음 (수문장은 해당 없음) */
 const gmcTy=()=>MT.findIndex(t=>t.gmc);
 function gmBegin(){ G.phase='wave'; G.wave=1; G.waveSides=[0]; G.laneShow=[]; G.spawnQ=0; G.gmc=[]; G.gmDone=0; G.gmKills=0; G.gmDw=null; G.gal=[]; G.galDone=1; G.gmPen=gmPenOf(me.eq).pct/100; const ty=gmcTy(); galSpawn(true);   /* 우리 편 정예는 시작하자마자 성문 앞에 등장 */
   for(const P of GMC_POS){ const m=spawnMob(ty,P.x,P.y,false); m.gmc=P.k; m.gn=P.nm; m.hx=P.x; m.hy=P.y; m.hp=m.max=GMC_HP; m.xp=0; m.dmg=0; m.spd=0; m.r=70; m.sp=rand(1,2.5); m.el=null; m.elT=2; gmgSpawn(P); m.cT=P.off?{x:CAS_T.x+P.off,y:CAS_T.y,i:-1,cas:1}:null; G.gmc.push(m); }
@@ -9784,6 +9784,7 @@ function drawBossBar(){
   let b=G.mobs.find(m=>m.boss&&!m.dead); if(!b)return;
   const p=b.hpp!==undefined?b.hpp/100:b.hp/b.max, w=Math.min(300,VW*.4), x=(VW-w)/2, y=72;
   ctx.fillStyle='rgba(0,0,0,.75)'; ctx.fillRect(x-2,y-2,w+4,14); ctx.fillStyle='#7a1f3a'; ctx.fillRect(x,y,w*p,10);
+  if(b.gmb){ for(const q of [.7,.35]){ ctx.fillStyle='#e9d9b4'; ctx.fillRect(x+w*q-1,y-4,2,18); } }   /* 거인왕: 70%·35% 페이즈 구분선만 */
   ctx.font='700 13px "Nanum Myeongjo",serif'; ctx.textAlign='center'; ctx.fillStyle='#e9d9b4'; ctx.fillText((G.stg&&G.stg.bn)||MT[b.type].n,VW/2,y+26);
   { const pc=Math.max(1,Math.round(p*100))+'%'; ctx.font='700 11px "Noto Sans KR",sans-serif'; ctx.textAlign='left'; ctx.lineWidth=3; ctx.strokeStyle='#000'; ctx.strokeText(pc,x+w+7,y+9); ctx.fillStyle='#e9d9b4'; ctx.fillText(pc,x+w+7,y+9); }   /* 삼남매처럼 체력바 오른쪽에 남은 체력 % */
 }
