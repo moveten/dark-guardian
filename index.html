@@ -1571,7 +1571,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0926</div>
+    <div class="ver" id="verT">v0.7.2.0927</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3613,6 +3613,12 @@ function drawGmDoorDead(d){ drawGmDoor(d.x,d.y,2,0); const k=Math.min(1,(T-d.t0-
 function drawGmo(m,t){ const x=m.x,y=m.y,r=m.hp/m.max;
   if(m.gmd){ drawGmDoor(x,y,m.open>0?1:0,r); if(m.flash>0){ ctx.save(); ctx.globalAlpha=.35; ctx.globalCompositeOperation='lighter'; drawGmDoor(x,y,m.open>0?1:0,r); ctx.restore(); }
     const bw=110, by=y-150; ctx.fillStyle='rgba(0,0,0,.7)'; ctx.fillRect(x-bw/2-1,by-1,bw+2,8); ctx.fillStyle='#d0803a'; ctx.fillRect(x-bw/2,by,bw*Math.max(0,r),6); ctx.font='bold 11px sans-serif'; ctx.textAlign='center'; ctx.fillStyle='#ffe2b0'; ctx.fillText('소환의 문',x,by-4); return; }
+  /* 붉은 표적등(투명도 70%): 해골 발밑 조준 고리 + 십자 눈금 + 우리 성까지 가는 길 점선 + 이름표 — 가벼운 선 그리기만 */
+  { const k=.7*(.86+.14*Math.sin(t*6)), cy=y+m.r*.5; ctx.save(); ctx.lineCap='round'; ctx.strokeStyle='rgba(255,50,45,'+k+')';
+    if(G.castle&&G.castle.hp>0){ ctx.setLineDash([12,13]); ctx.lineWidth=4; ctx.globalAlpha=.6; ctx.beginPath(); ctx.moveTo(x,cy); ctx.lineTo(CAS_T.x,CAS_T.y-40); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha=1; }
+    for(const [rx,w] of [[48,4],[36,2.6],[63,1.6]]){ ctx.lineWidth=w; ctx.beginPath(); ctx.ellipse(x,cy,rx,rx*.55,0,0,6.283); ctx.stroke(); }
+    ctx.lineWidth=4; for(let q=0;q<4;q++){ const an=q*1.5708, cs=Math.cos(an), sn=Math.sin(an); ctx.beginPath(); ctx.moveTo(x+cs*52,cy+sn*29); ctx.lineTo(x+cs*76,cy+sn*42); ctx.stroke(); }
+    const ty=y-m.r-44; ctx.fillStyle='rgba(150,15,15,'+(.9*.7)+')'; ctx.fillRect(x-48,ty,96,20); ctx.strokeStyle='rgba(255,120,100,'+.7+')'; ctx.lineWidth=1.5; ctx.strokeRect(x-48,ty,96,20); ctx.font='bold 12px sans-serif'; ctx.textAlign='center'; ctx.fillStyle='rgba(255,235,225,.92)'; ctx.fillText('거인 두개골',x,ty+14); ctx.restore(); }
   const im=sprGet('skull_s7'), S=84, cell=m.flash>0?2:m.atk>0?1:0; ctx.fillStyle='rgba(0,0,0,.35)'; ctx.beginPath(); ctx.ellipse(x,y+m.r*.8,m.r*1.0,m.r*.4,0,0,6.283); ctx.fill();
   if(im){ const cw=im.width/3; ctx.save(); ctx.translate(x,y); if(cell===0)ctx.rotate(m.roll||0); ctx.drawImage(im,cell*cw,0,cw,im.height,-S/2,-S/2,S,S*im.height/cw); ctx.restore(); } else { circle(x,y,m.r,'#d8d2c0'); }
   const bw=54, by=y-m.r-18; ctx.fillStyle='rgba(0,0,0,.7)'; ctx.fillRect(x-bw/2-1,by-1,bw+2,7); ctx.fillStyle='#e0d8c0'; ctx.fillRect(x-bw/2,by,bw*Math.max(0,r),5); }
