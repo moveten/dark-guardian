@@ -1560,7 +1560,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0896</div>
+    <div class="ver" id="verT">v0.7.2.0897</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3656,7 +3656,7 @@ function gmbUlt(m,c,pls){ const lx=c.lx, hw=GMU_W/2;
 function gmArenaClamp(o){ const dx=o.x-GM_ARENA.x, dy=o.y-GM_ARENA.y, d=hyp(dx,dy), R=430; if(d>R){ o.x=GM_ARENA.x+dx/d*R; o.y=GM_ARENA.y+dy/d*R; } }
 function gmbSpawn(){ const pn=1+(G.gmPen||0), m=spawnMob(gmbTy(),GM_ARENA.x,GM_ARENA.y-100,false);
   m.gmb=1; m.boss=true; m.gmt=1; m.hp=m.max=GMB_HP*pn; m.dmg0=RAIDB()*GMB_RDM*pn; m.dmg=m.dmg0; m.spd=0; m.r=80; m.xp=Math.round(m.xp); m.fa=Math.PI/2; m.ph=1; m.cs=null; m.gap=2.5; m.cdk={slam:3,sweep:6,wave:5,bash:7,flame:9,tomb:11,roar:16,summon:10,ult:99}; m.stn=0; m.pr={sword:0,shield:0,helm:0}; m.parts={}; m.bt=99;
-  G.gmB=m; G.gmTel=[]; for(const k in GMB_PART)gmpSpawn(m,k,true); for(const k of ['boss_7','boss_7_atk','boss_7_hurt','boss_7_ult','relics_s7'])sprGet(k);
+  G.gmB=m; G.gmTel=[]; for(const k of ['boss_7','boss_7_atk','boss_7_hurt','boss_7_ult','relics_s7'])sprGet(k);
   sfx('boss'); G.shake=Math.max(G.shake,.8); me.god=Math.max(me.god||0,2); }
 function gmpSpawn(b,k,first){ const P=GMB_PART[k], o=spawnMob(gmpTy(),b.x+P.dx,b.y+P.dy,false); o.gmp=k; o.gmt=1; o.hp=o.max=b.max*P.pc; o.r=42; o.xp=0; o.dmg=0; o.spd=0; o.par=b; b.parts[k]=o; if(!first){ burst(o.x,o.y,'#9ad0ff',18,260); efx.push({k:'ring',x:o.x,y:o.y,r0:8,r1:80,t:0,life:.5,col:'#9ad0ff',w:8}); announce(`🔄 ${P.n}이 다시 생겼어요`,'#9ad0ff'); } return o; }
 function gmpTick(m){ const b=m.par; if(!b||b.dead){ m.dead=true; return; } const P=GMB_PART[m.gmp]; m.x=b.x+P.dx; m.y=b.y+P.dy; m.kx=m.ky=0; }
@@ -3684,14 +3684,13 @@ function gmbSummon(b){ const hp=b.max*.05/6; let n=0; for(let i=0;i<6;i++){ cons
 function gmbTick(m,dt,pls){ m.kx=m.ky=0; m.dvx=m.dvy=0; if(G.phase!=='boss')return;
   const r=m.hp/m.max, np=r>.7?1:r>.35?2:3; if(np!==m.ph){ m.ph=np; m.dmg=m.dmg0*GMB_PM[np-1]; announce(np===2?'💢 고르무스가 격노했다! 피해 ×1.3':'⚡ 고르무스가 최후의 힘을 끌어올린다! 피해 ×1.6','#ff7a5a'); efx.push({k:'ring',x:m.x,y:m.y,r0:20,r1:300,t:0,life:.7,col:'#9ad0ff',w:14}); G.shake=Math.max(G.shake,.8); sfx('boss'); m.gap=Math.max(m.gap,1.2); if(np===3)m.cdk.ult=6; }
   if(m.stn>0){ m.stn-=dt; for(const k in m.cdk)m.cdk[k]-=0; return; }
-  for(const k in GMB_PART){ const pt=m.parts[k]; if(!pt||pt.dead){ m.pr[k]-=dt; if(m.pr[k]<=0)gmpSpawn(m,k); } }
   for(const k in m.cdk)m.cdk[k]-=dt;
   let best=null,bd=1e9; const tz=m.taunt&&m.taunt.t>0&&pls.find(q=>q.i===m.taunt.i); if(tz){ best=tz; bd=hyp(tz.x-m.x,tz.y-m.y); } else for(const p of pls){ const d=hyp(p.x-m.x,p.y-m.y); if(d<bd){ bd=d; best=p; } }
   if(best&&!m.cs){ const ta=Math.atan2(best.y-m.y,best.x-m.x), df=((ta-m.fa+Math.PI*3)%(Math.PI*2))-Math.PI, st=1.2*dt; m.fa+=Math.abs(df)<st?df:Math.sign(df)*st; }
   if(m.cs){ const c=m.cs; c.t+=dt; if(c.k==='ult'){ if(c.t>=c.dur)gmbUlt(m,c,pls); return; } if(c.t>=c.dur){ m.cs=null; gmbResolve(m,c,pls); m.gap=rand(.6,1.1); m.atk=.35; } return; }
   if(m.gap>0){ m.gap-=dt; return; } if(!best)return;
-  if(m.ph===3&&m.cdk.ult<=0&&m.parts.sword&&!m.parts.sword.dead){ gmbUltStart(m); return; }
-  const ready=[]; for(const k in GMB_SK){ const S=GMB_SK[k], pt=S.part?m.parts[S.part]:null; if(m.cdk[k]>0||(S.part&&(!pt||pt.dead)))continue; if(S.minPh&&m.ph<S.minPh)continue; if(k==='summon'&&G.mobs.filter(q=>q.tsd&&!q.dead).length>=3)continue;
+  if(m.ph===3&&m.cdk.ult<=0){ gmbUltStart(m); return; }
+  const ready=[]; for(const k in GMB_SK){ const S=GMB_SK[k]; if(m.cdk[k]>0)continue; if(S.minPh&&m.ph<S.minPh)continue; if(k==='summon'&&G.mobs.filter(q=>q.tsd&&!q.dead).length>=3)continue;
     if(k==='slam'&&bd>440)continue; if(k==='sweep'&&bd>400)continue; if(k==='bash'&&bd>320)continue; ready.push(k); }
   if(!ready.length){ m.gap=.4; return; }
   const k=pick(ready), S=GMB_SK[k], ta=Math.atan2(best.y-m.y,best.x-m.x); m.cdk[k]=k==='summon'?S.cd:S.cd*GMB_CF[m.ph-1]; m.fa=ta;
@@ -3713,10 +3712,7 @@ function drawGmTel(){ for(let i=G.gmTel.length-1;i>=0;i--){ const o=G.gmTel[i], 
 function drawGmb(m,t){ const x=m.x, y=m.y, base=GM_ARENA.y-20, atk=m.cs||m.atk>0, hurt=m.flash>0&&!atk, ult=m.cs&&m.cs.k==='ult', im=sprGet(ult?'boss_7_ult':hurt?'boss_7_hurt':atk?'boss_7_atk':'boss_7')||sprGet('boss_7'); const W=ult?300:360;
   ctx.fillStyle='rgba(0,0,0,.4)'; ctx.beginPath(); ctx.ellipse(x,base,W*.42,34,0,0,6.283); ctx.fill();
   if(im){ const H=W*im.height/im.width; ctx.save(); ctx.beginPath(); ctx.rect(x-W,0,W*2,base+4); ctx.clip(); ctx.drawImage(im,x-W/2,base-H+4,W,H); ctx.restore(); } else { circle(x,y,70,'#9aa'); }
-  const rl=sprGet('relics_s7'); for(const k in GMB_PART){ const pt=m.parts[k], P=GMB_PART[k], px=x+P.dx, py=y+P.dy, alive=pt&&!pt.dead;
-    if(alive){ const q=pt.hp/pt.max, bw=64; ctx.fillStyle='rgba(0,0,0,.7)'; ctx.fillRect(px-bw/2-1,py+44,bw+2,7); ctx.fillStyle=pt.flash>0?'#fff':'#7ac8ff'; ctx.fillRect(px-bw/2,py+45,bw*Math.max(0,q),5); ctx.strokeStyle='rgba(150,220,255,.5)'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(px,py,pt.r,0,6.283); ctx.stroke(); }
-    else { const q=1-Math.max(0,m.pr[k])/GMB_REGEN; ctx.strokeStyle='rgba(255,120,90,.5)'; ctx.lineWidth=2; ctx.setLineDash([5,5]); ctx.beginPath(); ctx.arc(px,py,42,0,6.283); ctx.stroke(); ctx.setLineDash([]); ctx.strokeStyle='rgba(150,220,255,.9)'; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(px,py,42,-1.57,-1.57+6.283*q); ctx.stroke(); }
-    if(rl){ const cw=rl.width/3, sc=.075; ctx.save(); ctx.globalAlpha=alive?.95:.35; ctx.drawImage(rl,P.cell*cw,0,cw,rl.height,px-cw*sc/2,py-rl.height*sc/2-4,cw*sc,rl.height*sc); ctx.restore(); } } }
+}
 function spawnMob(type,x,y,elite){
   const S=G.stg||STAGES[0], w=Math.max(1,G.wave), hm=(1+.12*(w-1))*(G.coop?1.4:1)*(elite?8:1)*S.hpM*1.2, dm=(1+.08*(w-1))*(elite?4.6:1)*S.dmgM*1.6;
   const t=MT[type], m={id:G.mobId++,type,x,y,hp:t.hp*hm,max:t.hp*hm,dmg:t.dmg*dm,spd:t.spd*(elite?1.3:S.spdM)*(t.boss?.95:.5),r:t.r*(elite?1.5:1),xp:Math.round(t.xp*(1+.1*(w-1))*S.xpM*(elite?5:1)),elite:!!elite,boss:!!t.boss,fly:!!t.fly,cd:rand(0,1),slowT:0,tgt:0,rt:0,atk:0,fa:0,flash:0,anim:Math.random()*6,kx:0,ky:0,sq:0};
