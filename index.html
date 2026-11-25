@@ -155,6 +155,15 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
 #casAl{position:absolute;left:0;right:0;top:100px;height:30px;display:none;align-items:center;justify-content:center;gap:8px;pointer-events:none;z-index:6;background:linear-gradient(90deg,rgba(30,0,0,0),rgba(34,2,2,.9) 16%,rgba(34,2,2,.9) 84%,rgba(30,0,0,0));border-top:1px solid rgba(255,80,80,.7);border-bottom:1px solid rgba(255,80,80,.7);font:900 15px var(--f-body);color:#ff4040;text-shadow:0 0 8px rgba(255,30,30,.7),0 0 2px #000,0 1px 0 #000;letter-spacing:1px;white-space:nowrap}
 #casAl.on{display:flex;animation:casAl 2.4s both}
 @keyframes casAl{0%{opacity:0}8%{opacity:1}22%{opacity:.5}36%{opacity:1}50%{opacity:.5}64%{opacity:1}85%{opacity:1}100%{opacity:0}}
+#gmVg{position:absolute;inset:0;display:none;pointer-events:none;z-index:5;box-shadow:inset 0 0 70px 26px rgba(255,24,24,.62),inset 0 0 160px 50px rgba(190,0,0,.4)}
+#gmVg.on{display:block;animation:gmVg 3s both}
+@keyframes gmVg{0%{opacity:0}10%{opacity:1}25%{opacity:.35}40%{opacity:1}55%{opacity:.35}70%{opacity:1}100%{opacity:0}}
+#gmWb{position:absolute;left:0;right:0;top:113px;height:46px;display:none;align-items:center;gap:10px;padding:0 14px;pointer-events:none;z-index:6;background:linear-gradient(rgba(120,8,8,.86),rgba(120,8,8,.86)),repeating-linear-gradient(115deg,rgba(255,200,40,.28) 0 14px,transparent 14px 28px);background-blend-mode:normal;border-top:2px solid #ff5a46;border-bottom:2px solid #ff5a46;font-family:var(--f-body);color:#fff;text-shadow:0 1px 3px #000,0 0 2px #400}
+#gmWb .ic{font-size:26px;filter:drop-shadow(0 0 4px #000)}
+#gmWb b{display:block;font:900 17px var(--f-body);letter-spacing:.5px;line-height:1.15}
+#gmWb small{display:block;font:700 12px var(--f-body);color:#ffdcb8;line-height:1.2}
+#gmWb.on{display:flex;animation:gmWb 3.4s both}
+@keyframes gmWb{0%{opacity:0;transform:translateX(-30px)}8%{opacity:1;transform:none}85%{opacity:1}100%{opacity:0}}
 #casMs{position:absolute;left:0;right:0;top:36%;text-align:center;pointer-events:none;z-index:6;display:none;font-family:var(--f-disp);font-weight:800;font-size:clamp(28px,8.6vw,38px);color:#ff5a4a;text-shadow:0 0 14px rgba(255,40,30,.8),0 0 2px #000,0 3px 0 #4a0a08;letter-spacing:2px}
 #casMs small{display:block;font:700 13px var(--f-body);color:#ffd0c8;letter-spacing:0;margin-top:2px;text-shadow:0 1px 3px #000}
 #casMs.on{display:block;animation:casMs 1.8s cubic-bezier(.2,.8,.2,1) both}
@@ -1560,7 +1569,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0916</div>
+    <div class="ver" id="verT">v0.7.2.0917</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3500,7 +3509,21 @@ function gmcTick(m,dt){ m.x=m.hx; m.y=m.hy; m.kx=m.ky=0; if(G.phase!=='wave')ret
   m.sp-=dt; if(m.sp>0)return; m.sp=GMC_IV; if(G.mobs.length>=GMC_CAP)return;
   gmcMob(m); }
 function gmcKill(m){ if(m.dead)return; m.dead=true; burst(m.x,m.y,'#8a7a60',40,320); spark(m.x,m.y,'#fff0c0',24); for(let i=0;i<3;i++)later(i*.15,()=>efx.push({k:'ring',x:m.x,y:m.y,r0:10,r1:170,t:0,life:.7,col:'#cdb9a0',w:12})); sfx('kill'); pushEv(['bx',Math.round(m.x),Math.round(m.y),70]); announce(`💥 ${m.gn} 파괴!`,'#ffd860'); if(!G.galDone){ G.galDone=1; galSpawn(); } castleRepair();   /* 성벽 수리 규칙대로 우리 성 회복 */
-  for(const g of G.mobs){ if(g.gmg===m.gmc&&!g.dead){ g.dead=true; burst(g.x,g.y,'#bdb09a',22,260); efx.push({k:'ring',x:g.x,y:g.y,r0:8,r1:80,t:0,life:.5,col:'#cfc4ae',w:8}); later(.9,()=>announce('🛡️ "성채를 지키지 못했다…" 수문장이 사라졌어요','#c9b99a')); } } }   /* 수문장보다 성채를 먼저 부수면 수문장은 사라짐(전리품 없음) */
+  for(const g of G.mobs){ if(g.gmg===m.gmc&&!g.dead)gmStone(g); } }   /* 수문장보다 성채를 먼저 부수면 수문장은 그 자리에서 돌이 돼요 (전리품 없음 · 공격 대상도 충돌도 없는 장식) */
+let GM_STONE_STYLE=1;   /* 석상 모양: 1 = 회색 석상 · 2 = 균열 + 이끼 낀 석상 */
+function gmStone(g){ g.dead=true; (G.gmStones=G.gmStones||[]).push({k:g.gmg,x:g.x,y:g.y,t0:T}); burst(g.x,g.y,'#bdb09a',30,260); spark(g.x,g.y-40,'#e6e0d0',14); efx.push({k:'ring',x:g.x,y:g.y,r0:8,r1:90,t:0,life:.6,col:'#cfc4ae',w:8}); sfx('block'); later(.9,()=>announce('🗿 "성채를 지키지 못했다…" 수문장이 그 자리에서 돌로 굳었어요','#c9b99a')); }
+const STONE_C={};
+function gmStoneCv(k,style){ const im=sprGet('guard7_'+k); if(!im||!im.width)return null; const key=k+style, ch=STONE_C[key]; if(ch&&ch.src===im)return ch.c;
+  const sc=.45, w=Math.round(im.width*sc), h=Math.round(im.height*sc), c=document.createElement('canvas'); c.width=w; c.height=h; const g=c.getContext('2d'); g.drawImage(im,0,0,w,h);
+  const d=g.getImageData(0,0,w,h), p=d.data; for(let i=0;i<p.length;i+=4){ if(!p[i+3])continue; const v=Math.min(255,(.3*p[i]+.59*p[i+1]+.11*p[i+2])*.92+18); p[i]=v*.86; p[i+1]=v*.9; p[i+2]=Math.min(255,v+10); } g.putImageData(d,0,0);
+  if(style===2){ g.globalCompositeOperation='source-atop'; let sd=k.length*977+13; const rn=()=>{ sd=(sd*16807)%2147483647; return sd/2147483647; };
+    g.strokeStyle='rgba(18,18,26,.75)'; g.lineWidth=Math.max(2,w*.006); for(let i=0;i<16;i++){ let x=rn()*w, y=rn()*h*.9; g.beginPath(); g.moveTo(x,y); for(let j=0;j<4;j++){ x+=(rn()-.5)*w*.1; y+=rn()*h*.06; g.lineTo(x,y); } g.stroke(); }
+    for(let i=0;i<26;i++){ const x=rn()*w, y=h*(.55+rn()*.45), r=w*(.02+rn()*.05); g.fillStyle=`rgba(${60+rn()*20|0},${96+rn()*30|0},${52},.42)`; g.beginPath(); g.ellipse(x,y,r,r*.6,0,0,6.283); g.fill(); }
+    g.globalCompositeOperation='source-over'; }
+  STONE_C[key]={src:im,c}; return c; }
+function drawGmStone(a){ const im=sprGet('guard7_'+a.k), cv=gmStoneCv(a.k,GM_STONE_STYLE), sc=200/900, r=46; ctx.fillStyle='rgba(0,0,0,.4)'; ctx.beginPath(); ctx.ellipse(a.x,a.y+r*.5,r*1.1,r*.38,0,0,6.283); ctx.fill();
+  if(!im||!im.width)return; const w=im.width*sc, h=im.height*sc, y0=a.y+r*.55-h, f=Math.min(1,(T-a.t0)/1);
+  if(f<1)ctx.drawImage(im,a.x-w/2,y0,w,h); if(cv){ ctx.save(); ctx.globalAlpha=f; ctx.drawImage(cv,a.x-w/2,y0,w,h); ctx.restore(); } }
 function drawGmc(m,t){ const im=sprGet('castle_s7_'+m.gmc), r=m.hp/m.max, st=r>.65?0:r>.3?1:2, x=m.x, y=m.y, W=250;
   ctx.fillStyle='rgba(0,0,0,.35)'; ctx.beginPath(); ctx.ellipse(x,y+58,W*.42,26,0,0,6.283); ctx.fill();
   if(im){ const cw=im.width/3, h=W*im.height/cw; ctx.drawImage(im,st*cw,0,cw,im.height,x-W/2,y+66-h,W,h); if(m.flash>0){ ctx.save(); ctx.globalAlpha=Math.min(.5,m.flash*4); ctx.globalCompositeOperation='lighter'; ctx.drawImage(im,st*cw,0,cw,im.height,x-W/2,y+66-h,W,h); ctx.restore(); } }
@@ -3555,8 +3578,13 @@ function gmDoorTick(dt){ const d=G.gmDoor; if(!d||d.dead)return; G.gmDoorT-=dt; 
   if(G.mobs.filter(m=>m.gms&&!m.dead).length>=GMS_MAX){ G.gmDoorT=3; return; }
   G.gmDoorT=GMD_IV; d.open=1.6; const pn=1+(G.gmPen||0), o=spawnMob(gmsTy(),d.x,d.y+40,false);
   o.gmo=1; o.gms=1; o.hp=o.max=GMS_HP*pn; o.xp=0; o.dmg=0; o.r=30; o.spd=o.spd*1.8; o.inn=true; o.roll=0; o.at=1; o.seal=0;
-  announce('🚪 소환의 문이 열렸어요! 거인 두개골이 성으로 굴러옵니다','#ffb070'); sfx('boss'); gmDoorFx(d); }
+  gmSkullWarn(); sfx('boss'); gmDoorFx(d); }
 /* 소환의 문 해골 등장 연출: 문 빛 번쩍 → 겹겹이 퍼지는 고리 · 불꽃 · 땅 충격 · 화면 흔들림 */
+/* 거인 두개골이 나올 때 위험 표시: 화면 가장자리 붉은 깜빡임(비네트) + 위쪽 경고 띠(배너) — 3초쯤 보였다 사라져요 (컷인 없음) */
+function gmSkullWarn(){ const host=($('#casAl')||{}).parentNode; if(!host)return; let vg=$('#gmVg'), wb=$('#gmWb');
+  if(!vg){ vg=document.createElement('div'); vg.id='gmVg'; vg.setAttribute('aria-hidden','true'); host.appendChild(vg); }
+  if(!wb){ wb=document.createElement('div'); wb.id='gmWb'; wb.setAttribute('aria-hidden','true'); wb.innerHTML='<span class="ic">⚠️</span><div><b>위험! 거인 두개골 출현</b><small>우리 성으로 굴러옵니다 · 막아요!</small></div>'; host.appendChild(wb); }
+  for(const el of [vg,wb]){ el.classList.remove('on'); void el.offsetWidth; el.classList.add('on'); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('on'),3500); } }
 function gmDoorFx(d){ const x=d.x, y=d.y;
   G.flash=Math.max(G.flash||0,.35); G.shake=Math.max(G.shake,.7); slamFx(x,y+30,150,'#b070ff');
   efx.push({k:'ring',x,y,r0:10,r1:90,t:0,life:.45,col:'#ffffff',w:14});
@@ -3630,7 +3658,7 @@ function gmCutUi(on){ let el=document.getElementById('gmCut'); if(!on){ if(el)el
   el.innerHTML='<div class="gt" style="position:absolute;left:0;right:0;top:0;height:0;background:#000"></div><div class="gb" style="position:absolute;left:0;right:0;bottom:0;height:0;background:#000"></div><div class="gf" style="position:absolute;inset:0;background:#000;opacity:0"></div><div class="gw" style="position:absolute;inset:0;background:#dff4ff;opacity:0"></div><button type="button" class="gs" style="position:absolute;right:12px;top:calc(env(safe-area-inset-top,0px) + 54px);pointer-events:auto;padding:7px 14px;border-radius:16px;border:1px solid #8a7a60;background:rgba(10,8,7,.7);color:#e9d9b4;font-size:13px">건너뛰기 ⏭</button>';
   document.body.appendChild(el); el.querySelector('.gs').onclick=()=>{ if(G.gmCut)G.gmCut.t=Math.max(G.gmCut.t,GM_CUT_T); }; }
 function gmCutStart(){ G.gmCut={t:0,cam:{x:500,y:330},sw:0,sh:0}; gmCutUi(true); for(const k of ['relics_s7','boss_7_bare'])sprGet(k); try{ const im=new Image(); im.src='img/field_7_2.jpg'; }catch(e){} G.mobs.length=0; me.god=Math.max(me.god||0,GM_CUT_T+3); }
-function gmArenaSwap(){ const c=G.gmCut; c.sw=1; G.gmArena=1; VY=GM_ARENA.y; CAS_T.y=VY+CAS_Y; CAS_HY=VY+14; G.castle=null; G.gmDw=null; G.gmc=[]; G.gmDoor=null; G.mobs.length=0; me.x=500; me.y=1020; me.dead=false;
+function gmArenaSwap(){ const c=G.gmCut; c.sw=1; G.gmArena=1; VY=GM_ARENA.y; CAS_T.y=VY+CAS_Y; CAS_HY=VY+14; G.castle=null; G.gmDw=null; G.gmc=[]; G.gmDoor=null; G.gmStones=null; G.mobs.length=0; me.x=500; me.y=1020; me.dead=false;
   if(G.gal){ let n=0; for(const a of G.gal){ if(a.dead)continue; a.x=500+(n-1)*70; a.y=1080; a.seal=null; n++; } } try{ fieldGet(themeIdx); }catch(e){} c.cam={x:500,y:690}; }
 function gmCutTick(dt){ const c=G.gmCut; c.t+=dt; const t=c.t, el=document.getElementById('gmCut'); if(!el){ gmCutUi(true); return; }
   if(t>=3.3&&!c.sw&&t>=4.2)gmArenaSwap(); if(t>=4.2&&!c.sw)gmArenaSwap();
@@ -3811,7 +3839,7 @@ function castleTick(dt){ const c=G.castle; if(!c)return; c.fl=Math.max(0,c.fl-dt
 function castlePush(o){ if(!G.castle)return; const cx=VX, cy=VY+CAS_Y+4, rx=58, ry=26, dx=(o.x-cx)/rx, dy=(o.y-cy)/ry, q=dx*dx+dy*dy; if(q>=1)return; if(q<1e-6){ o.y=cy+ry; return; } const k=1/Math.sqrt(q); o.x=cx+dx*k*rx; o.y=cy+dy*k*ry; }
 function startStage(){
   AUD.voicePre(me.cls); setTimeout(()=>{ if(G.inGame&&!me.dead)voice('start'); },1500);
-  dmgReset(); G.firstClr=false; G.potN=0; G.stageIdx=selStage; G.stg=STAGES[selStage]; G.TW=G.stg.waves.length; worldSet(G.stg); G.gmArena=0; G.gmTel=[]; G.gmB=null; G.gmCut=null; G.gmc=null; G.gmDoor=null; G.gmCnTip=0; try{ gmCutUi(false); }catch(e){} if(G.stg.gm){ me.x=VX+rand(-30,30); me.y=VY+VR+30; } preBoss(); setTheme(selStage); castleInit(); if(G.castle)later(3.2,()=>{ if(G.inGame&&G.castle&&G.phase!=='lose')toast('🏰 중앙의 성을 지켜요 · 체력이 0이 되면 패배 · 성 둘레에서는 생명력·마나가 회복돼요','#e0c080'); }); G.gts=[]; later(.5,()=>{ if(G.inGame)banner(`${G.stg.id} ${G.stg.n}`,G.stg.tag||''); });
+  dmgReset(); G.firstClr=false; G.potN=0; G.stageIdx=selStage; G.stg=STAGES[selStage]; G.TW=G.stg.waves.length; worldSet(G.stg); G.gmArena=0; G.gmTel=[]; G.gmB=null; G.gmCut=null; G.gmc=null; G.gmDoor=null; G.gmStones=null; G.gmCnTip=0; try{ gmCutUi(false); }catch(e){} if(G.stg.gm){ me.x=VX+rand(-30,30); me.y=VY+VR+30; } preBoss(); setTheme(selStage); castleInit(); if(G.castle)later(3.2,()=>{ if(G.inGame&&G.castle&&G.phase!=='lose')toast('🏰 중앙의 성을 지켜요 · 체력이 0이 되면 패배 · 성 둘레에서는 생명력·마나가 회복돼요','#e0c080'); }); G.gts=[]; later(.5,()=>{ if(G.inGame)banner(`${G.stg.id} ${G.stg.n}`,G.stg.tag||''); });
   gobInit(); G.allMode=false; G.allQ=[]; G.fires=[]; G.freeRev=me.hc?0:1; G.hcWhy=''; me.rvGiven=0; me.seenRg=0; me.out=false; me.rvT=0;
   G.gemDone=false; G.wave=0;G.skipUsed=false;G.phase='prep';G.timer=2;G.mobs.length=0;G.ev=[];G.spawnQ=0;G.lastSq=-1;G.endShown=false;G.coop=!!guestPeer;
   G.waveSides=[0,1,3]; G.nextSides=sidesFor(1); G.laneShow=G.stg.gm?[]:G.nextSides;
@@ -7707,7 +7735,7 @@ window.__noticeShow=noticeShow;
 function prepMe(){ me=loadChar(selId); me.D=derive(me); spawnMe(); }
 function resetWorld(){
   G.mine=null; worldSet(null); { const mh=$('#mineHud'); if(mh)mh.hidden=true; document.body.classList.remove('mining'); dockSkill(null); } GB=null; G.gobRoll=false; G.train=0; G.trNoAtk=false; G.trNoPet=false; G.trPet=null; trUi();
-  storyStop(); G.stZ=0; G.aim=null; G.lostBoss=false; G.castle=null; G.lostCastle=false; G.awz=null; G.awc=null; { const ac=$('#awCut'); if(ac)ac.classList.remove('on'); for(const q of ['#casAl','#casMs']){ const z=$(q); if(z)z.classList.remove('on'); } const hc=$('#hCastle'); if(hc)hc.classList.remove('atk'); } if(me){ me.erode=me.hblk=me.mblk=me.hbStrict=me.bleed=me.bleedN=0; me.hpLk=me.mpLk=null; }
+  storyStop(); G.stZ=0; G.aim=null; G.lostBoss=false; G.castle=null; G.lostCastle=false; G.awz=null; G.awc=null; { const ac=$('#awCut'); if(ac)ac.classList.remove('on'); for(const q of ['#casAl','#casMs','#gmVg','#gmWb']){ const z=$(q); if(z)z.classList.remove('on'); } const hc=$('#hCastle'); if(hc)hc.classList.remove('atk'); } if(me){ me.erode=me.hblk=me.mblk=me.hbStrict=me.bleed=me.bleedN=0; me.hpLk=me.mpLk=null; }
   projs.length=zones.length=timers.length=parts.length=nums.length=ground.length=efx.length=0; G.casWreck=[]; G.casDvLv={};   /* 6스테이지 공성탑 잔해는 다른 스테이지로 넘어가지 않게 */
   G.mobs=[]; G.mobMap=new Map(); G.gemDone=false; G.stKills=0; G.stDrops=0; G.stCap=0; G.runT=0; G.stGot=[0,0,0,0,0,0]; G.stGem=null; G.sib=0; G.endShown=false; G.clrDone=false; alClear(); G.stRev=0; G.stTaken=0; G.stGold0=me?(me.gold|0):0; G.paused=false; G.bt=null; G.shake=0;
   hitQ=[]; fxQ=[]; lastAllyFx=-1; lastEv=-1; lastHit=0; G.guestDmg=0; G.fires=[]; G.freeRev=(me&&me.hc)?0:1; G.fireT=3; if(me){ me.rvGiven=0; me.seenRg=0; me.out=false; me.rvT=0; }
@@ -9848,6 +9876,7 @@ function render(t){
   if(G.gal)for(const g of G.gal){ if(!g.dead)actors.push({y:g.y,f:()=>drawGal(g,t)}); }
   if(G.gmCut)actors.push({y:99999,f:()=>drawGmCut(t)});
   if(G.gmTel&&G.gmTel.length&&G.gmB&&!G.gmB.dead&&G.stg&&G.stg.gm)actors.push({y:-1,f:()=>drawGmTel()});
+  if(G.gmStones)for(const a of G.gmStones)actors.push({y:a.y,f:()=>drawGmStone(a)});
   if(G.gmDw)actors.push({y:G.gmDw.y,f:()=>drawGmDoorDead(G.gmDw)});
   if(me.spirit&&me.spirit.t>0&&!me.dead)actors.push({y:me.y+30,f:()=>drawSpirit(me,t,me.spirit.t,me.spirit.m)});
   if(ally&&!ally.lobby&&!ally.dead&&ally.sp>0&&ally.x!==undefined)actors.push({y:ally.y+30,f:()=>drawSpirit(ally,t,0,0)});
