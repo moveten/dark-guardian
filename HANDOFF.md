@@ -1,5 +1,5 @@
 # 작업 인계 (HANDOFF) — 어둠의 수호자 / Dark Guardian
-> 마지막 갱신: 2026-11-23 14:40 · 기준 버전 **v0.7.2.0881** · 새 세션은 이 문서와 `CLAUDE.md`를 먼저 읽고 이어서 작업합니다.
+> 마지막 갱신: 2026-11-23 14:40 · 기준 버전 **v0.7.2.0882** · 새 세션은 이 문서와 `CLAUDE.md`를 먼저 읽고 이어서 작업합니다.
 > ⚠ 비밀번호·복구 코드·저장 데이터는 이 문서에 적지 않습니다. (관리자 비밀번호는 노트·커밋 어디에도 쓰지 않고 `****`)
 
 ## 1. 프로젝트
@@ -24,6 +24,7 @@
 - 주의: 새 CSS 클래스 이름은 기존과 겹치기 쉬움(예: `.nw`는 NEW 딱지 → 연출 클래스는 `x…` 접두어 사용). 시안 이미지는 같은 하네스에서 DOM/CSS를 덧씌워 "실제 화면" 위에 그립니다.
 
 ## 4. 이번 세션에서 한 일 (최신순)
+- v0.7.2.0882 **7스테이지 8단계 전반**: 고르무스 `gmbSpawn/gmbTick/drawGmb`(MT `gmb`, boss 플래그) · 부위 `gmpSpawn/gmpHit/gmpBreak`(MT `gmp`, `m.par`) · 기술 5종 `GMB_SK` + 예고 `G.gmTel`/`drawGmTel` · `gmArenaClamp`. 후반 남음: 묘비 낙하·포효(투구 파괴 중 불가)·무덤 병사 부활(2페이즈~). 이후 9단계 왕의 심판(검 부위 파괴 시 취소+스턴 3초는 `gmpBreak`에 연결).
 - v0.7.2.0881 **7스테이지 7단계**: 전환 연출 `gmCutStart/gmCutTick/drawGmCut/gmArenaSwap`(DOM `#gmCut` 띠·암전·섬광·건너뛰기, `G.gmCut.cam` 카메라) · 아레나 `G.gmArena`(field_7_2, VY=750, 중심 `GM_ARENA` 500,750, G.castle=null) · 성채 파괴 시 `castleRepair()`. 끝에서 `gmFightStart()` 호출 — 8단계에서 고르무스 생성. 남은 정리: 보스 단계 HUD의 '삼남매 레이드' 문구·형제 목록, 아레나 이동 범위 제한.
 - v0.7.2.0880 **7스테이지 6단계**: 우리 편 정예 `galSpawn/galTick/galHit/drawGal`(`G.gal`, id 100+, `minionTargets`에 포함, `mobHitPlayer(i>=100)`→galHit) · 사제 봉인 → `gmSeal`. 다음: 7단계 전환 연출 + 우리 성 회복(`castleRepair` 규칙).
 - v0.7.2.0879 **7스테이지 5단계**: 소환의 문/두개골 `gmDoorSpawn/gmDoorTick/gmoTick/drawGmo`(`m.gmo`+`gmd`/`gms` 플래그는 인스턴스에 직접 설정해야 함) · `gmSeal(두개골)` 봉인 훅만 준비. 다음: 6단계 우리 편 정예 3마리(첫 성채 파괴 시 등장, 사제 봉인 연결).
