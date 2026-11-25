@@ -1569,7 +1569,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0921</div>
+    <div class="ver" id="verT">v0.7.2.0922</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1837,7 +1837,7 @@ const SK={
   {k:'communion',lb:['까마귀피해','까마귀생명력','정령지속'],e:'🌿',n:'자연의 교감',s:'교감',req:12,mp:0,cd:0,el:'#8fe08a',passive:1,d:l=>`패시브: 까마귀 피해 +${V(4*l)}%, 까마귀 생명력 +${V(2*l)}%, 영혼 정령 지속시간 +${V(2*l)}%`},
   {k:'bite',lb:['반경','무기피해'],e:'🦷',n:'물어뜯기',s:'물기',req:12,mp:10,cd:3,el:'#ff6a5a',rg:260,freq:1,d:l=>`[곰 변신 필요] 전방 부채꼴 반경 ${RR(105,l)} 모든 적에게 무기 피해 ${V(300+45*l)}% + 0.8초 기절`},
   {k:'roar',get lb(){ return def2On()?['도발','속도감소','재사용대기']:['도발','지속시간','받는피해']; },e:'📢',n:'포효',s:'포효',req:18,mp:12,cd:18,el:'#e0a050',freq:1,d:l=>def2On()?`[곰 변신 필요] 반경 320 적 ${V(3+Math.floor(l/3))}명을 도발하고, 반경 320 안의 모든 적의 이동 속도·공격 속도를 3초간 -${V(10+l)}% (우두머리 절반, 레이드 우두머리 1/3). 재사용 대기 ${V(roarCd(l).toFixed(1))}초`:`[곰 변신 필요] 반경 320 적 ${V(3+Math.floor(l/3))}명을 도발하고, ${V(6+Math.floor(l/4))}초간 반경 320 안의 나와 동료가 받는 피해 -${V(Math.min(45,Math.round(20+1.5*l)))}%`},
-  {k:'fury',lb:['받는피해','주는피해','반경','무기피해'],e:'💢',n:'광란',s:'광란',req:22,mp:14,cd:30,el:'#ff5a3a',freq:1,d:l=>`[곰 변신 필요] 8초간 받는 피해 -${V(Math.min(50,Math.round(25+1.2*l)))}%, 주는 피해 +${V(10+2*l)}%, 1초마다 반경 ${RR(110,l)} 충격파 무기 피해 ${V(120+15*l)}%`},
+  {k:'fury',get lb(){ return ADMX?['주는피해','반경','무기피해']:['받는피해','주는피해','반경','무기피해']; },e:'💢',n:'광란',s:'광란',req:22,mp:14,cd:30,el:'#ff5a3a',freq:1,d:l=>`[곰 변신 필요] 8초간 ${ADMX?'':`받는 피해 -${V(FRD(l))}%, `}주는 피해 +${V(FRV(l))}%, 1초마다 반경 ${RR(110,l)} 충격파 무기 피해 ${V(120+15*l)}%`},
   {k:'spirit',lb:['지속시간','주는피해','공격속도','마나회복'],e:'👻',n:'영혼 정령',s:'정령',req:24,mp:22,cd:36,el:'#b8f0ff',d:l=>`[소환수·시한] ${V((PPR?10+.4*l:14+.4*l).toFixed(1))}초간 정령이 곁에 떠올라요. 반경 260 안의 나와 동료: 주는 피해 +${V(PPR?14+l:Math.round(10+1.5*l))}%, 공격 속도 +${V(8+l)}%, 마나 회복 +${V(30+3*l)}%`},
   {k:'hunt',lb:['까마귀피해','곰무기피해'],e:'🌕',n:'야생의 대사냥',s:'대사냥',req:30,mp:24,cd:12,el:'#ffd24a',rg:420,d:l=>`[필살기] 🧑 까마귀 떼가 적을 16번 급습, 반경 75 범위 피해 ${V(110+36*l)} / 🐻 반경 320 충격파 3연타 무기 피해 ${V(500+90*l)}% + 2초 기절`},
   {k:'bears',lb:['초'],e:'🐻',n:'곰세마리',s:'곰세마리',req:90,mp:60,cd:80,el:'#d9a46a',d:l=>`[궁극기]${V(BEAR_T(l))}초간 내 최대 생명력의 ${V(220+10*l)}%인 아빠곰과 가족을 소환. 아빠곰: 범위 평타 ${V(100+40*l)}, 돌진 ${V(160+60*l)}(기절). 엄마곰: 포효(적 받는 데미지 +20% 추가, 우두머리 절반). 아기곰: 회복(나와 소환수 생명력 5%).`}]
@@ -1846,6 +1846,7 @@ const SK={
 const BRB=l=>.9+.03*(l-1), BRS=.8; /* 곰 변신 평타 피해 배율(무기 피해 대비): 주 대상 = 곰 변신 레벨당 +3% · 주변 적 = 주 대상의 80% */
 const BEAR_T=l=>Math.round((18+.5*l)*10)/10, BRV=.2; /* 곰세마리: 곰 가족이 머무는 시간(초) / 엄마곰 포효의 '받는 피해 증가' 비율은 20% 고정(우두머리는 절반) · 엄마곰 = 아빠곰의 60%, 아기곰 = 아빠곰의 40% (생명력·평타) */
 var ADMX=0;   /* 관리자(연구실 켜짐) 전용 시험 수치 스위치 — def2Sync에서 갱신 */
+const FRV=l=>ADMX?5+l:10+2*l, FRD=l=>ADMX?0:Math.min(50,Math.round(25+1.2*l));   /* 광란: 주는 피해 증가(%) / 받는 피해 감소(%) — 관리자(연구실)는 5+Lv, 감소 없음 */
 const BRH=l=>(ADMX?5:25)+1.2*l, BRD=l=>(ADMX?2:30)+2*l, BRR=l=>8+.4*l;           /* 곰: 최대 생명력 / 방어력 / 받는 피해 감소 (%) */
 const SBHP=l=>Math.min(2,.4+.08*l); /* 수호 폭발: 수호 영혼 현재 생명력 반영 비율 (1레벨 48% → 20레벨 200%) */
 const RAID_RED=.7; /* 레이드 보스 공격에 대한 방어력 피해 감소 상한 (일반 .8) */
@@ -5156,7 +5157,7 @@ function druidCast(o,key,real,lv,tgt,tx,ty,ang){
   case 'fury':
     efx.push({k:'ring',x:o.x,y:o.y,r0:10,r1:100,t:0,life:.5,col,w:9}); impact(o.x,o.y,'255,90,60',100); burst(o.x,o.y,'#ff7a4a',26,240);
     if(real){
-      me.buffs.fury={t:8,m:8,v:(10+2*lv)/100,dr:Math.min(.5,(25+1.2*lv)/100)};
+      me.buffs.fury={t:8,m:8,v:FRV(lv)/100,dr:FRD(lv)/100};
       for(let i=1;i<=8;i++) later(i,()=>{ if(me.dead||!(me.buffs.fury&&me.buffs.fury.t>0))return; const R=110*RS; efx.push({k:'ring',x:me.x,y:me.y,r0:20,r1:R,t:0,life:.35,col,w:8}); slamFx(me.x,me.y,R,col); sfx('slam'); G.shake=Math.max(G.shake,.2); for(const q of mobsIn(me.x,me.y,R)) hitMob(q,physDmg(1.2+.15*lv)); });
       me.buffs.fury.form=f;
     }
@@ -6887,7 +6888,7 @@ function calcCP(p0){ let p=p0; if(p.cls==='druid'&&(p.skills&&p.skills.bearform|
   let basic=((wav+D.dmg)*pool)/D.atkInt; if(p.cls==='sorc'||p.cls==='necro')basic*=1+D.ene/150;
   let sk=cpSkillDps(p,D), extra=0, offAdd=0, iasAdd=0, drAdd=0;
   if(p.cls==='druid'){ const pMul=(wav+D.dmg)*pool, lf=bear?skLv(pp,'fury'):0, lr=bear&&!def2On()?skLv(pp,'roar'):0, ls=skLv(pp,'spirit');
-    if(lf){ extra+=8*(1.2+.15*lf)*pMul/Math.max(1,30*(1-cdr)); const u=cpUp(8,30,D); offAdd+=u*(10+2*lf)/100; drAdd+=u*Math.min(.5,(25+1.2*lf)/100); }
+    if(lf){ extra+=8*(1.2+.15*lf)*pMul/Math.max(1,30*(1-cdr)); const u=cpUp(8,30,D); offAdd+=u*FRV(lf)/100; drAdd+=u*FRD(lf)/100; }
     if(lr){ extra+=(3+Math.floor(lr/3))*(.6+.08*lr)*pMul/Math.max(1,18*(1-cdr)); drAdd+=cpUp(6+Math.floor(lr/4),18,D)*Math.min(.45,(20+1.5*lr)/100); }
     extra*=CPSKW*(CPCW.druid);
     if(ls){ const u=cpUp((14+.4*ls)*(1+.02*skLv(pp,'communion')),36,D); offAdd+=u*(10+1.5*ls)/100; iasAdd+=u*(8+ls)/100; } }
