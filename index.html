@@ -1560,7 +1560,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0907</div>
+    <div class="ver" id="verT">v0.7.2.0908</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3508,18 +3508,20 @@ function drawGmc(m,t){ const im=sprGet('castle_s7_'+m.gmc), r=m.hp/m.max, st=r>.
   const bw=150, by=y-112; ctx.fillStyle='rgba(0,0,0,.7)'; ctx.fillRect(x-bw/2-1,by-1,bw+2,9); ctx.fillStyle='#c0553a'; ctx.fillRect(x-bw/2,by,bw*Math.max(0,r),7);
   ctx.font='bold 12px sans-serif'; ctx.textAlign='center'; ctx.fillStyle='#ffe2b0'; ctx.fillText(m.gn,x,by-4); }
 /* ===== 성채 수문장 (7스테이지) — 성채 앞에 미리 서 있다가 반경 260 안에 들어오면 전투 ===== */
-const GMG_HP=7.2e7, GMG_AGGRO=260;
+const GMG_HP=7.2e7, GMG_AGGRO=260, GMG_CN_IV=16, GMG_CN_DUR=2.3;   /* 방패 수문장 반격 태세: 16초마다 2.3초 (태세 중 쓴 스킬은 나에게 반사 — 보스 반격 태세와 같은 규칙) */
 const gmgTy=()=>MT.findIndex(t=>t.gmg);
 const gmgDmg=()=>RAIDB()*Math.pow(44/34,.8)*2;   /* 수문장 카스텔 기본 피해 기준 + 스테이지 피해 배율 차이 */
 const gmFront=m=>{ const dx=me.x-m.x, dy=me.y-m.y, d=hyp(dx,dy)||1; return (Math.cos(m.fa||0)*dx+Math.sin(m.fa||0)*dy)/d>.5; };   /* 방패 수문장 정면(±60°) */
 function gmgSpawn(P){ const o=spawnMob(gmgTy(),P.x,P.y+150,false), pn=1+(G.gmPen||0);
-  o.gmg=P.k; o.gmt=1; o.elite=true; o.hp=o.max=GMG_HP*pn; o.dmg=gmgDmg()*pn; o.spd=60; o.r=46; o.xp=5000; o.hx=P.x; o.hy=P.y+150; o.fa=Math.PI/2; o.eng=0; o.c1=rand(2,4); o.c2=rand(5,8); o.ba=1.5; o.cs=null; o.ds=null;
+  o.gmg=P.k; o.gmt=1; o.elite=true; o.hp=o.max=GMG_HP*pn; o.dmg=gmgDmg()*pn; o.spd=60; o.r=46; o.xp=5000; o.hx=P.x; o.hy=P.y+150; o.fa=Math.PI/2; o.eng=0; o.c1=rand(2,4); o.c2=rand(5,8); o.c3=rand(8,12); o.counter=0; o.ba=1.5; o.cs=null; o.ds=null;
   if(P.k==='shield')o.gfr=1; if(P.k==='helm'){ o.gpr=6; o.gpi=12; } return o; }
 function gmgCircle(m,x,y,r,dur,mult,stun){ m.cs={t:0,dur,x,y,r,mult,stun:stun||0}; addETel(x,y,r,dur); pushEv(['e',Math.round(x),Math.round(y),r,Math.round(dur*100)]); }
 function gmgTick(m,dt,pls,sf){
   m.kx=m.ky=0; let best=null,bd=1e9; for(const p of pls){ const d=hyp(p.x-m.x,p.y-m.y); if(d<bd){ bd=d; best=p; } }
   if(!m.eng){ if(m.hp<m.max||(best&&hyp(best.x-m.hx,best.y-m.hy)<GMG_AGGRO)){ m.eng=1; sfx('boss'); } else { m.dvx=m.dvy=0; return; } }
-  m.c1-=dt; m.c2-=dt; m.ba-=dt;
+  m.c1-=dt; m.c2-=dt; m.ba-=dt; m.c3-=dt;
+  if(m.counter>0){ m.counter-=dt; if(best)m.fa=Math.atan2(best.y-m.y,best.x-m.x); m.dvx=m.dvy=0; if(m.counter<=0){ m.counter=0; m.ba=Math.max(m.ba,.8); } return; }   /* 반격 태세 중에는 제자리에서 버텨요 */
+  if(m.gmg==='shield'&&m.c3<=0&&best&&bd<520&&!m.cs&&!m.ds){ m.c3=GMG_CN_IV; m.counter=GMG_CN_DUR; addNum(m.x,m.y-m.r-60,'⚔️ 반격 태세!','#ffb347',true); sfx('block'); if(!G.gmCnTip){ G.gmCnTip=1; announce('⚔️ 방패 수문장의 반격 태세! 스킬을 쓰면 크게 다쳐요 (일반공격은 OK)','#ffb347'); } return; }
   if(m.ds){ const c=m.ds; c.t-=dt; m.x=clamp(m.x+c.dx*520*dt,30,WW-30); m.y=clamp(m.y+c.dy*520*dt,30,WH-30); for(const p of pls){ if(!c.hit[p.i]&&hyp(p.x-m.x,p.y-m.y)<m.r+30){ c.hit[p.i]=1; mobHitPlayer(p.i,m.dmg*2,'slow',2); } } if(c.t<=0)m.ds=null; m.dvx=m.dvy=0; return; }
   if(m.cs){ const c=m.cs; c.t+=dt; m.dvx=m.dvy=0; if(c.dash){ if(c.t>=c.dur){ const dd=hyp(c.x-m.x,c.y-m.y)||1; m.ds={dx:(c.x-m.x)/dd,dy:(c.y-m.y)/dd,t:Math.min(.8,dd/520),hit:{}}; m.cs=null; } return; }
     if(c.t>=c.dur){ for(const p of pls){ if(hyp(p.x-c.x,p.y-c.y)<c.r+14)mobHitPlayer(p.i,m.dmg*c.mult,c.stun?'stun':0,c.stun); } slamFx(c.x,c.y,c.r,'#9ad0ff'); pushEv(['s',Math.round(c.x),Math.round(c.y),c.r]); m.cs=null; m.atk=.3; } return; }
@@ -3535,14 +3537,15 @@ function gmgTick(m,dt,pls,sf){
 function drawGmg(m,t){ const k=m.gmg, x=m.x, y=m.y, hurt=m.flash>0, atk=m.atk>0||m.cs, key='guard7_'+k+(hurt?'_hurt':atk?'_atk':''), im=sprGet(key)||sprGet('guard7_'+k), sc=200/900, r=m.hp/m.max;
   ctx.fillStyle='rgba(0,0,0,.4)'; ctx.beginPath(); ctx.ellipse(x,y+m.r*.5,m.r*1.1,m.r*.38,0,0,6.283); ctx.fill();
   if(im){ const w=im.width*sc, h=im.height*sc; ctx.drawImage(im,x-w/2,y+m.r*.55-h,w,h); } else { ctx.fillStyle='#6a6a70'; ctx.fillRect(x-24,y-90,48,110); }
+  if(m.counter>0){ const pu=.5+.5*Math.sin(t*14); ctx.save(); ctx.strokeStyle=`rgba(255,170,60,${.6+.35*pu})`; ctx.lineWidth=5; ctx.beginPath(); ctx.arc(x,y-30,m.r*1.5+pu*4,0,6.283); ctx.stroke(); ctx.globalCompositeOperation='lighter'; circle(x,y-30,m.r*1.4,`rgba(255,140,30,${.18+.12*pu})`); ctx.restore(); }
   if(m.bar>0){ ctx.strokeStyle='rgba(120,200,255,.75)'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(x,y-50,m.r*1.5,0,6.283); ctx.stroke(); }
   const bw=96, by=y-m.r*.55-172; ctx.fillStyle='rgba(0,0,0,.7)'; ctx.fillRect(x-bw/2-1,by-1,bw+2,8); ctx.fillStyle=m.eng?'#d8503a':'#a0a0a8'; ctx.fillRect(x-bw/2,by,bw*Math.max(0,r),6);
   ctx.font='bold 11px sans-serif'; ctx.textAlign='center'; ctx.fillStyle='#ffe2b0'; ctx.fillText({blade:'칼날 수문장',shield:'방패 수문장',helm:'투구 수문장'}[k],x,by-4); }
 /* ===== 소환의 문 · 거인 두개골 (7스테이지) =====
-   문(체력 2.0e7)은 전투 시작 20초 뒤 처음 열리고 이후 45초마다 열려 거인 두개골(체력 6.0e6)을 내보냄(동시에 최대 2마리).
+   문(체력 2.0e7)은 전투 시작 20초 뒤 처음 열리고 이후 45초마다 열려 거인 두개골(체력 1.2e7)을 내보냄(동시에 최대 2마리).
    두개골: 속도 ×1.8 · 캐릭터·정예를 무시하고 우리 성으로 직진 · 닿으면 4초마다 성 최대 체력의 8% · 기절·넉백·둔화 면역. 문을 부수면 더는 안 나옴.
    성가 사제 봉인은 6단계(우리 편 정예)에서 gmSeal(두개골)로 연결 */
-const GMD_POS={x:500,y:760}, GMD_HP=6.0e7, GMS_HP=6.0e6, GMD_FIRST=10, GMD_IV=45, GMS_MAX=2;
+const GMD_POS={x:500,y:760}, GMD_HP=6.0e7, GMS_HP=1.2e7, GMD_FIRST=10, GMD_IV=45, GMS_MAX=2;
 const gmdTy=()=>MT.findIndex(t=>t.gmd), gmsTy=()=>MT.findIndex(t=>t.gms);
 function gmDoorSpawn(){ const pn=1+(G.gmPen||0), o=spawnMob(gmdTy(),GMD_POS.x,GMD_POS.y,false); o.gmo=1; o.gmd=1; o.hp=o.max=GMD_HP*pn; o.xp=0; o.dmg=0; o.spd=0; o.r=48; o.hx=o.x; o.hy=o.y; o.open=0; G.gmDoor=o; G.gmDoorT=GMD_FIRST; }
 function gmDoorTick(dt){ const d=G.gmDoor; if(!d||d.dead)return; G.gmDoorT-=dt; if(G.gmDoorT>0)return;
@@ -3797,7 +3800,7 @@ function castleTick(dt){ const c=G.castle; if(!c)return; c.fl=Math.max(0,c.fl-dt
 function castlePush(o){ if(!G.castle)return; const cx=VX, cy=VY+CAS_Y+4, rx=58, ry=26, dx=(o.x-cx)/rx, dy=(o.y-cy)/ry, q=dx*dx+dy*dy; if(q>=1)return; if(q<1e-6){ o.y=cy+ry; return; } const k=1/Math.sqrt(q); o.x=cx+dx*k*rx; o.y=cy+dy*k*ry; }
 function startStage(){
   AUD.voicePre(me.cls); setTimeout(()=>{ if(G.inGame&&!me.dead)voice('start'); },1500);
-  dmgReset(); G.firstClr=false; G.potN=0; G.stageIdx=selStage; G.stg=STAGES[selStage]; G.TW=G.stg.waves.length; worldSet(G.stg); G.gmArena=0; G.gmTel=[]; G.gmB=null; G.gmCut=null; G.gmc=null; G.gmDoor=null; try{ gmCutUi(false); }catch(e){} if(G.stg.gm){ me.x=VX+rand(-30,30); me.y=VY+VR+30; } preBoss(); setTheme(selStage); castleInit(); if(G.castle)later(3.2,()=>{ if(G.inGame&&G.castle&&G.phase!=='lose')toast('🏰 중앙의 성을 지켜요 · 체력이 0이 되면 패배 · 성 둘레에서는 생명력·마나가 회복돼요','#e0c080'); }); G.gts=[]; later(.5,()=>{ if(G.inGame)banner(`${G.stg.id} ${G.stg.n}`,G.stg.tag||''); });
+  dmgReset(); G.firstClr=false; G.potN=0; G.stageIdx=selStage; G.stg=STAGES[selStage]; G.TW=G.stg.waves.length; worldSet(G.stg); G.gmArena=0; G.gmTel=[]; G.gmB=null; G.gmCut=null; G.gmc=null; G.gmDoor=null; G.gmCnTip=0; try{ gmCutUi(false); }catch(e){} if(G.stg.gm){ me.x=VX+rand(-30,30); me.y=VY+VR+30; } preBoss(); setTheme(selStage); castleInit(); if(G.castle)later(3.2,()=>{ if(G.inGame&&G.castle&&G.phase!=='lose')toast('🏰 중앙의 성을 지켜요 · 체력이 0이 되면 패배 · 성 둘레에서는 생명력·마나가 회복돼요','#e0c080'); }); G.gts=[]; later(.5,()=>{ if(G.inGame)banner(`${G.stg.id} ${G.stg.n}`,G.stg.tag||''); });
   gobInit(); G.allMode=false; G.allQ=[]; G.fires=[]; G.freeRev=me.hc?0:1; G.hcWhy=''; me.rvGiven=0; me.seenRg=0; me.out=false; me.rvT=0;
   G.gemDone=false; G.wave=0;G.skipUsed=false;G.phase='prep';G.timer=2;G.mobs.length=0;G.ev=[];G.spawnQ=0;G.lastSq=-1;G.endShown=false;G.coop=!!guestPeer;
   G.waveSides=[0,1,3]; G.nextSides=sidesFor(1); G.laneShow=G.stg.gm?[]:G.nextSides;
@@ -4067,7 +4070,7 @@ function bossAI(m,dt,pls,sf){
   if(m.rk==='shd'&&!m.awk&&m.hp<m.max*.2){ m.awk=true; m.spd*=1.5; spark(m.x,m.y,'#ff2a2a',50); burst(m.x,m.y,'#8a0010',40,360); G.shake=1; sfx('boss'); announce('🩸 검은 그림자가 깨어났어요! 공격·이동 속도 +50%','#ff4a4a'); pushEv(['awk',1]); }
   if(m.hp<m.max*.75&&!m.sum0){m.sum0=true;summon(m);} if(m.hp<m.max*.5&&!m.sum1){m.sum1=true;summon(m);} if(m.hp<m.max*.25&&!m.sum2){m.sum2=true;summon(m);}
   if(m.hp<m.max*.4&&!m.enr&&m.rk!=='shd'&&m.rk!=='cas'){ m.enr=true; m.spd*=1.25; spark(m.x,m.y,'#ff3a2a',40); G.shake=1; toast('우두머리가 분노했다!','#ff6a4a'); }
-  if(m.counter>0){ m.counter-=dt; m.fa=Math.atan2(best.y-m.y,best.x-m.x); if(m.counter<=0){ m.counter=0; m.bt=m.rk==='shd'?rand(5,8)/(m.awk?1.5:1):m.enr?1:1.6; } return; }
+  if(m.counter>0){ m.counter-=dt; if(best)m.fa=Math.atan2(best.y-m.y,best.x-m.x); if(m.counter<=0){ m.counter=0; m.bt=m.rk==='shd'?rand(5,8)/(m.awk?1.5:1):m.enr?1:1.6; } return; }
   if(m.charge){ const c=m.charge; c.t-=dt; const sp=620;
     m.x=clamp(m.x+c.dx*sp*dt,40,WW-40); m.y=clamp(m.y+c.dy*sp*dt,40,WH-40);
     for(const p of pls){ if(!c.hit[p.i]&&hyp(p.x-m.x,p.y-m.y)<(m.rk==='cas'?CAS_CFG.tr.chargeHW:m.r+20)){c.hit[p.i]=1;mobHitPlayer(p.i,m.dmg*(c.mul||1.6)*BSKM,'slow',2.5);} }
@@ -4725,7 +4728,7 @@ function hitMob(m,r,slow,tn,fx){
   if(!raw&&fx&&fx.basic&&!G.inProc&&me.D&&me.D.sp&&(me.D.sp.cs_mace||me.D.sp.cs_sword)&&Math.random()<(m.boss?.005:.05)){ G.inProc=true; try{ const qx=m.x, qy=m.y; for(const q of mobsIn(qx,qy,130)){ if(q.boss&&q!==m&&Math.random()>=.1)continue; hitMob(q,{v:1,crit:false},0,false,{raw:1,stun:1}); } efx.push({k:'ring',x:qx,y:qy,r0:10,r1:130,t:0,life:.35,col:'#f0d29a',w:8}); spark(qx,qy,'#f0d29a',10); }finally{ G.inProc=false; } }   /* 성문 강타(수문장 철퇴·대검): 기본 공격 5% 범위 기절 1초 — 우두머리는 0.5%(맞춘 상대가 우두머리일 때, 다른 적을 때려 터진 범위 안의 우두머리는 그중 10%) */
   if(!raw&&fx&&fx.basic&&!G.inProc&&me.D&&(me.D.cs|0)>=3&&Math.random()<.07){ r=trX(r,3,'잭팟'); addNum(m.x,m.y-m.r-22,'🎰 잭팟!','#ffd34d',true); burst(m.x,m.y,'#ffd34d',16,240); }   /* 행운의 도박꾼 세트 3개: 잭팟 타격 */
   let shk=false; if(!raw&&!(fx&&fx.basic)&&(m.shockT>0||m.shockP>0)){ r=trX(r,shockF(m),'L'); shk=true; } /* 감전된 적이 받는 스킬 피해(기본 공격 제외): 마법사 감전 +33% · 펫 감전 +12% (합연산, 둘 다면 +45%) */
-  if(!raw&&(m.boss||m.cnD)&&m.counter>0&&!(fx&&fx.basic)&&!G.inProc){ counterHit(m,r.v); } /* 스킬 피해는 보스에게도 그대로 들어가고, 나는 반사 피해를 받음(무적 아님) */
+  if(!raw&&(m.boss||m.cnD||m.gmg==='shield')&&m.counter>0&&!(fx&&fx.basic)&&!G.inProc){ counterHit(m,r.v); } /* 스킬 피해는 보스에게도 그대로 들어가고, 나는 반사 피해를 받음(무적 아님) */
   const dmg=Math.max(1,Math.round(r.v)); if(G.train)trLog(r,dmg,fx); if(r.v>0)dmgTally(fx,m.hp>0?Math.min(dmg,m.hp):dmg); const sp=me.D&&me.D.sp; if(sp&&(sp.frost||sp.fallen)&&Math.random()<.5&&!G.inProc) slow=Math.max(slow||0,5);
   if(fx&&fx.shockP){ m.shockP=Math.max(m.shockP||0,fx.shockP); burst(m.x,m.y,'#8f96ff',4,160); }
   if(fx&&fx.shock){ if(!(m.shockT>0))m.shockB=0; m.shockB=Math.max(m.shockB||0,fx.shockB||0); m.shockT=Math.max(m.shockT||0,fx.shock); burst(m.x,m.y,'#cfe0ff',6,200); }
@@ -5164,7 +5167,7 @@ const roarCd=l=>Math.max(10,18-.2*((l|0)-1));
 function roarDebuff(o,lv){ const v0=(10+lv)/100; for(const q of mobsIn(o.x,o.y,320)){ if(q.dead)continue; const v=Math.min(.9,v0*(q.boss?(q.rk?1/3:.5):1)); if(!(q.rT>0)||v>=(q.rM||0)){ q.rM=v; q.rA=v; } q.rT=Math.max(q.rT||0,3); } }
 function castSkill(o,key,real,tx,ty,lv,tgt){
   if(G.train&&o===me){ if(key==='atk'&&G.trNoAtk)return; TR.sk=key==='atk'?'기본공격':(SKBY[key]&&SKBY[key].n)||key; }   /* 훈련장: 기본공격 끄기 · 로그용 스킬 이름 */
-  if(o===me&&real&&G.mobs.some(b=>(b.boss||b.cnD)&&!b.dead&&b.counter>0)){ me.cnCast=T; me.cnId=(me.cnId|0)+1; } /* 반격 태세 중에 스킬을 썼음 */
+  if(o===me&&real&&G.mobs.some(b=>(b.boss||b.cnD||b.gmg==='shield')&&!b.dead&&b.counter>0)){ me.cnCast=T; me.cnId=(me.cnId|0)+1; } /* 반격 태세 중에 스킬을 썼음 */
   const ang=Math.atan2(ty-o.y,tx-o.x), dx=Math.cos(ang), dy=Math.sin(ang);
   o.face=ang; o.swing=.22; if(o===me)me.faceT=.9;
   const C=CLASSES[o.cls]; const s=SKBY[key]; const rbm=((o===me&&me.D&&me.D.rng>0)?1+me.D.rng/100:1)*((o===me&&me.buffs.rage&&me.buffs.rage.t>0)?1.25:1), RS=l=>RS0(l)*rbm;
