@@ -1569,7 +1569,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0919</div>
+    <div class="ver" id="verT">v0.7.2.0920</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1744,6 +1744,7 @@ const RARN=['일반','매직','레어','유니크','영웅'], RARC=['#e9e2d4','#
 const dn=it=>it.rar>=2?`[${RARN[it.rar]}] ${it.name}`:it.name;
 /* 아이템 설명 이름 줄: 이름 바로 뒤에 등급 별(★1 일반 · ★2 매직 · ★3 레어 · ★4 유니크 · ★5 영웅), 색은 등급색 (★6은 아직 없음) */
 const dnTag=it=>`<span class="rtg">★${it.ep?6:Math.min(5,(it.rar|0)+1)}${it.rar===3&&it.sp?'+':''}</span>`;   /* 특수 유니크(it.sp)는 ★4+ */
+const rkS=it=>it&&it.ep?9:((it&&it.rar)|0);   /* 정렬용 등급값: ★6(ep)이 ★5(rar 4)보다 앞 */
 /* 이름 + 등급 별: 마지막 글자와 별을 한 덩어리로 묶어, 이름이 두 줄로 꺾여도 별이 마지막 글자 바로 옆에 붙어요 */
 /* 영웅 세트 구분: 그림자(보라 ☾) · 각성(하늘색 ✦) — 아이템 창 이름 아래에 세트 뱃지와 아이콘 테두리 색으로 한눈에 */
 const HSET=it=>{ const S=it&&it.sp&&SPFX[it.sp]; if(!S)return null; if(S.cas)return {c:'#a98bff',e:'🎲',n:'행운의 도박꾼 세트',k:'cs',m:3}; /* 도박꾼 세트: 그림자 세트와 같은 보라색 */ if(it.rar!==4)return null; return S.gm?{c:'#ff7a5a',e:'👑',n:'거인왕의 유산 세트',k:'gs',m:7}:S.cs?{c:'#e0b070',e:'🏰',n:'수문장 세트',k:'ks',m:7}:S.aw?{c:'#a98bff',e:'⭐',n:'각성 세트',k:'ac',m:7}:S.hero?{c:'#a98bff',e:'🌑',n:'그림자 세트',k:'hc',m:7}:null; };
@@ -6528,7 +6529,7 @@ function saveTarget(t){ if(t.k==='s')saveStore(); else if(t.o===me)saveChar(); e
 const saveSrc=P=>{ if(P===STORE)saveStore(); else saveChar(); };
 function storeHead(){ $('#sheetT').innerHTML=`${STORE_IC} 공유보관함`; const gp=$('#goldPill'); if(gp)gp.hidden=true; }   /* 공유보관함에는 캐릭터 골드 알약이 없어요 */
 function sortStore(mode){ const S=getStore(); shardRepack(S); let mx=0; for(const it of S.inv)if(it&&it.sat>mx)mx=it.sat; for(const it of S.inv)if(it&&!it.sat)it.sat=(mx+=.001);
-  const byRar=(a,b)=>(b.rar|0)-(a.rar|0)||(SLOTO[a.slot]|0)-(SLOTO[b.slot]|0)||bk(a,b)||(b.ilvl|0)-(a.ilvl|0)||String(a.name).localeCompare(String(b.name));
+  const byRar=(a,b)=>rkS(b)-rkS(a)||(SLOTO[a.slot]|0)-(SLOTO[b.slot]|0)||bk(a,b)||(b.ilvl|0)-(a.ilvl|0)||String(a.name).localeCompare(String(b.name));
   const its=S.inv.filter(Boolean);
   its.sort(mode==='enh'?((a,b)=>(b.enh|0)-(a.enh|0)||byRar(a,b)):mode==='in'?((a,b)=>a.sat-b.sat):byRar);   /* 강화순: 높은 강화 단계 먼저, 같은 단계 안에서는 등급순 · 입고순: 먼저 넣은 것부터 */
   S.inv=its.concat(Array(Math.max(0,STORE_N-its.length)).fill(null)); selItem=null; saveStore(); renderStore(); sheetToast(mode==='enh'?'강화순으로 정리했어요':mode==='in'?'입고순으로 정리했어요':'등급순으로 정리했어요'); }
@@ -6687,11 +6688,11 @@ const bk=(a,b)=>(a.base||'')<(b.base||'')?-1:(a.base||'')>(b.base||'')?1:0;
 const SORTM=['rar','lv','enh'], SORTN=['등급순','Lv순','강화순'];
 const sortCur=()=>{ const v=+lsGet('dkdef2.sortC'); return (isNaN(v)?0:v)%3; };
 function sortInv(mode){ sortedNew.add('eq'); shardRepack(me); const its=me.inv.filter(Boolean);
-  const rarC=(a,b)=>(b.rar|0)-(a.rar|0)||(SLOTO[a.slot]|0)-(SLOTO[b.slot]|0)||bk(a,b)||(b.ilvl|0)-(a.ilvl|0)||String(a.name).localeCompare(String(b.name));
+  const rarC=(a,b)=>rkS(b)-rkS(a)||(SLOTO[a.slot]|0)-(SLOTO[b.slot]|0)||bk(a,b)||(b.ilvl|0)-(a.ilvl|0)||String(a.name).localeCompare(String(b.name));
   if(SORTM.includes(mode))lsSet('dkdef2.sortC',String(SORTM.indexOf(mode)));
   if(mode==='lv'||mode==='enh'){ its.sort(mode==='lv'?((a,b)=>(isShard(a)-isShard(b))||ilvOf(b)-ilvOf(a)||rarC(a,b)):((a,b)=>(isShard(a)-isShard(b))||((b.enh|0)-(a.enh|0))||rarC(a,b)));
     me.inv=its.concat(Array(Math.max(0,INVN-its.length)).fill(null)); selItem=null; saveChar(); renderBag(); sheetToast(mode==='lv'?'아이템 레벨순으로 정리했어요':'강화 단계순으로 정리했어요'); return; }
-  its.sort(mode==='type'?((a,b)=>(SLOTO[a.slot]|0)-(SLOTO[b.slot]|0)||(b.rar|0)-(a.rar|0)||bk(a,b)||(b.ilvl|0)-(a.ilvl|0)||String(a.name).localeCompare(String(b.name))):((a,b)=>(b.rar|0)-(a.rar|0)||(SLOTO[a.slot]|0)-(SLOTO[b.slot]|0)||bk(a,b)||(b.ilvl|0)-(a.ilvl|0)||String(a.name).localeCompare(String(b.name))));
+  its.sort(mode==='type'?((a,b)=>(SLOTO[a.slot]|0)-(SLOTO[b.slot]|0)||rkS(b)-rkS(a)||bk(a,b)||(b.ilvl|0)-(a.ilvl|0)||String(a.name).localeCompare(String(b.name))):((a,b)=>rkS(b)-rkS(a)||(SLOTO[a.slot]|0)-(SLOTO[b.slot]|0)||bk(a,b)||(b.ilvl|0)-(a.ilvl|0)||String(a.name).localeCompare(String(b.name))));
   me.inv=its.concat(Array(Math.max(0,INVN-its.length)).fill(null)); selItem=null; saveChar(); renderBag(); sheetToast(mode==='type'?'종류별로 정리했어요':'등급별로 정리했어요'); }
 const SHARD_SELL=1000;   /* 그림자 조각 판매가(개당 G) */
 /* 수량 고르기(−/+/직접 입력/슬라이더/전부) — 조각 보내기·판매에서 사용 */
@@ -8692,7 +8693,7 @@ function smithModal(st){
   st=st||{tab:'dig',sel:null,ask:false};
   if(st.tab==='swp'){ smSwap(P); return; }
   const worn=it=>Object.values(P.eq).includes(it);
-  const gear=[...Object.values(P.eq).filter(it=>it&&SMITH_SLOTS.includes(it.slot)),...P.inv.filter(it=>it&&SMITH_SLOTS.includes(it.slot)&&!it.mat).sort((a,b)=>(b.rar|0)-(a.rar|0)||(b.ilvl|0)-(a.ilvl|0))];
+  const gear=[...Object.values(P.eq).filter(it=>it&&SMITH_SLOTS.includes(it.slot)),...P.inv.filter(it=>it&&SMITH_SLOTS.includes(it.slot)&&!it.mat).sort((a,b)=>rkS(b)-rkS(a)||(b.ilvl|0)-(a.ilvl|0))];
   if(st.sel&&(!gear.includes(st.sel)||!smOk(st.sel,st.tab)))st.sel=null;
   if(!st.sel)st.sel=gear.find(it=>smOk(it,st.tab))||null;
   const sel=st.sel, tab=st.tab, cost=sel?smCost(sel,tab):0, can=sel&&gold>=cost;
