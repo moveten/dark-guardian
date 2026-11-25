@@ -1560,7 +1560,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0888</div>
+    <div class="ver" id="verT">v0.7.2.0889</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3569,9 +3569,9 @@ function drawGmo(m,t){ const x=m.x,y=m.y,r=m.hp/m.max;
   const bw=54, by=y-m.r-18; ctx.fillStyle='rgba(0,0,0,.7)'; ctx.fillRect(x-bw/2-1,by-1,bw+2,7); ctx.fillStyle='#e0d8c0'; ctx.fillRect(x-bw/2,by,bw*Math.max(0,r),5); }
 /* ===== 우리 편 정예 3마리 (7스테이지) — 첫 번째 성채가 무너질 때 우리 성문에서 한 번만 등장, 죽으면 끝 · 정예 스킬은 캐릭터에 영향 없음 =====
    방패 근위대장(체력 1.2e7 · 받는 피해 −25% · 8초마다 3초 도발) · 대검 돌격기사(8.4e6 · 피해 근위대장 ×2.5 · 1.6초 범위 베기 · 정예·보스 쪽으로 돌진) · 성가 사제(7.2e6 · 6초마다 가장 약한 정예 8% 치유 · 15초마다 전원 5% 보호막 · 두개골 봉인 최우선) */
-const GAL={royal:{n:'방패 근위대장',hp:1.2e7,dmg:9000,iv:1.2,spd:72,r:30,h:80,bh:787},knight:{n:'대검 돌격기사',hp:8.4e6,dmg:22500,iv:1.6,spd:118,r:30,h:80,bh:757},cleric:{n:'성가 사제',hp:7.2e6,dmg:0,iv:9,spd:62,r:26,h:80,bh:783}};
+const GAL={royal:{n:'방패 근위대장',hp:1.2e7,dmg:9000,iv:1.2,spd:72,r:30,h:80,bh:787},cleric:{n:'성가 사제',hp:7.2e6,dmg:0,iv:9,spd:62,r:26,h:80,bh:783}};
 function galSpawn(){ if(G.stg&&G.stg.gm!==1||G.mode==='guest')return; let n=0;
-  for(const k of ['royal','knight','cleric']){ const C=GAL[k], x=CAS_T.x+(n-1)*58, y=CAS_T.y+62; G.gal.push({k,i:100+n,x,y,hp:C.hp,max:C.hp,r:C.r,cd:rand(.4,1),flash:0,atk:0,mv:0,bar:0,tc:0,tt:0,heal:3,shd:6,seal:null,spd0:C.spd,buf:0}); burst(x,y,'#bfe0ff',22,260); efx.push({k:'ring',x,y,r0:10,r1:90,t:0,life:.6,col:'#cfe8ff',w:8}); n++; }
+  for(const k of ['royal','cleric']){ const C=GAL[k], x=CAS_T.x+(n-.5)*80, y=CAS_T.y+62; G.gal.push({k,i:100+n,x,y,hp:C.hp,max:C.hp,r:C.r,cd:rand(.4,1),flash:0,atk:0,mv:0,bar:0,tc:0,tt:0,heal:3,shd:6,seal:null,spd0:C.spd,buf:0}); burst(x,y,'#bfe0ff',22,260); efx.push({k:'ring',x,y,r0:10,r1:90,t:0,life:.6,col:'#cfe8ff',w:8}); n++; }
   banner('🛡️ 지원군 도착!','우리 편 정예가 성문에서 나왔어요'); sfx('boss'); }
 function galHit(id,raw){ const a=G.gal&&G.gal.find(q=>q.i===id); if(!a||a.dead)return; let d=raw*(a.k==='royal'?.75:1); if(a.bar>0){ const t=Math.min(a.bar,d); a.bar-=t; d-=t; } if(d<=0){ a.flash=.12; return; }
   a.hp-=d; a.flash=.12; if(d>=1)addNum(a.x,a.y-60,Math.round(d),'#8fe6ff',false,'g'+a.i);
@@ -3584,18 +3584,18 @@ function galTick(dt){ const L=G.gal; if(!L)return; const alive=L.filter(q=>!q.de
       if(a.heal<=0){ a.heal=6; let w=null,wr=2; for(const q of alive){ const r=q.hp/q.max; if(r<wr&&r<1){ wr=r; w=q; } } if(w){ w.hp=Math.min(w.max,w.hp+w.max*.08); spark(w.x,w.y,'#9be38a',8); a.atk=.4; } }
       if(a.shd<=0){ a.shd=15; for(const q of alive){ q.bar=Math.max(q.bar,q.max*.05); } efx.push({k:'ring',x:a.x,y:a.y,r0:10,r1:130,t:0,life:.5,col:'#7ec8ff',w:6}); a.atk=.4; }
       const sk=G.mobs.filter(m=>m.gms&&!m.dead).sort((p,q)=>hyp(p.x-a.x,p.y-a.y)-hyp(q.x-a.x,q.y-a.y))[0];
-      if(sk){ if(!a.skSeen&&alive.some(q=>q.k==='knight')){ a.buf=8; } a.skSeen=1; const d=hyp(sk.x-a.x,sk.y-a.y);
+      if(sk){ a.skSeen=1; const d=hyp(sk.x-a.x,sk.y-a.y);
         if(d>120){ a.seal=null; const dx=sk.x-a.x, dy=sk.y-a.y; a.x+=dx/d*sp*dt; a.y+=dy/d*sp*dt; a.mv=1; a.fa=Math.atan2(dy,dx); }
         else { if(!a.seal)a.seal={t:0,sk}; a.seal.t+=dt; a.atk=.2; if(a.seal.t>=5){ gmSeal(sk); a.seal=null; } }
         continue; }
       a.skSeen=0; a.seal=null;
-      const f=alive.find(q=>q.k==='royal')||alive.find(q=>q.k==='knight'); if(f){ const d=hyp(f.x-a.x,f.y-a.y); if(d>110){ a.x+=(f.x-a.x)/d*sp*dt; a.y+=(f.y-a.y)/d*sp*dt; a.mv=1; a.fa=Math.atan2(f.y-a.y,f.x-a.x); } }
+      const f=alive.find(q=>q.k==='royal'); if(f){ const d=hyp(f.x-a.x,f.y-a.y); if(d>110){ a.x+=(f.x-a.x)/d*sp*dt; a.y+=(f.y-a.y)/d*sp*dt; a.mv=1; a.fa=Math.atan2(f.y-a.y,f.x-a.x); } }
       continue; }
     if(a.k==='royal'){ a.tt-=dt; if(a.tt<=0){ a.tt=8; for(const m of G.mobs){ if(m.dead||m.gmc||m.gmo||hyp(m.x-a.x,m.y-a.y)>320)continue; m.taunt={i:a.i,t:3}; } efx.push({k:'ring',x:a.x,y:a.y,r0:10,r1:150,t:0,life:.5,col:'#ffb259',w:8}); } }
-    const f=galFoe(a,a.k==='knight'); if(!f){ const hx=CAS_T.x+(a.k==='royal'?-40:40), hy=CAS_T.y-40, d=hyp(hx-a.x,hy-a.y); if(d>30){ a.x+=(hx-a.x)/d*sp*dt; a.y+=(hy-a.y)/d*sp*dt; a.mv=1; a.fa=Math.atan2(hy-a.y,hx-a.x); } continue; }
+    const f=galFoe(a,false); if(!f){ const hx=CAS_T.x+(a.k==='royal'?-40:40), hy=CAS_T.y-40, d=hyp(hx-a.x,hy-a.y); if(d>30){ a.x+=(hx-a.x)/d*sp*dt; a.y+=(hy-a.y)/d*sp*dt; a.mv=1; a.fa=Math.atan2(hy-a.y,hx-a.x); } continue; }
     const dx=f.x-a.x, dy=f.y-a.y, d=hyp(dx,dy)||1, reach=a.r+f.r+10; a.fa=Math.atan2(dy,dx);
-    if(d>reach){ const k=a.k==='knight'&&d>180?1.25:1; a.x+=dx/d*sp*k*dt; a.y+=dy/d*sp*k*dt; a.mv=1; }
-    else if(a.cd<=0){ a.cd=C.iv; a.atk=.3; if(a.k==='knight'){ for(const m of G.mobs){ if(m.dead||m.gmc||m.gmd||hyp(m.x-f.x,m.y-f.y)>90+m.r)continue; applyDmg(m,C.dmg,0,null); } slamFx(f.x,f.y,90,'#cfe8ff'); } else applyDmg(f,C.dmg,0,null); spark(f.x,f.y,'#fff0c0',6); }
+    if(d>reach){ a.x+=dx/d*sp*dt; a.y+=dy/d*sp*dt; a.mv=1; }
+    else if(a.cd<=0){ a.cd=C.iv; a.atk=.3; applyDmg(f,C.dmg,0,null); spark(f.x,f.y,'#fff0c0',6); }
     a.x=clamp(a.x,30,WW-30); a.y=clamp(a.y,30,WH-30); } }
 function drawGal(a,t){ const C=GAL[a.k], x=a.x, y=a.y, key='ally7_'+a.k+(a.flash>0?'_hurt':a.atk>0?'_atk':a.mv?'_walk':''), im=sprGet(key)||sprGet('ally7_'+a.k), sc=C.h/C.bh, r=a.hp/a.max;
   ctx.fillStyle='rgba(0,0,0,.4)'; ctx.beginPath(); ctx.ellipse(x,y+10,C.r*1.1,C.r*.4,0,0,6.283); ctx.fill();
