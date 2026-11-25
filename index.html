@@ -990,7 +990,8 @@ body.land #bBas{position:absolute;width:calc(var(--u) + 4px);height:calc(var(--u
 .ban span{display:block;font-size:12px;color:#e8dcc4;margin-top:5px}
 .ban i{display:block;font-style:normal;font-size:11.5px;color:#9fd18b;font-weight:700;margin-top:4px}
 .ban i.warn{color:#e07060}
-.ban .t i.wrap{white-space:normal;overflow:visible;line-height:1.3}   /* 긴 안내(수문장 세트 점수 · 몬스터 강화)는 잘리지 않게 두 줄로 */
+.ban .t.gmt{padding-bottom:4px}   /* 7스테이지: 안내가 두 줄이라 아래 여백을 줄여 다른 카드와 같은 높이로 */
+.ban .t i.wrap{white-space:normal;overflow:visible;line-height:1.15;margin-top:0}   /* 긴 안내(수문장 세트 점수 · 몬스터 강화)는 잘리지 않게 두 줄로 */
 .ban.trio .t{padding-right:150px}
 .ban .st{position:absolute;z-index:2;right:12px;top:24px;width:122px;text-align:center;pointer-events:none}
 .ban .st b{display:inline-block;margin:0;padding:3px 11px 3px 13px;font-family:var(--f-disp);font-size:14.4px;letter-spacing:.16em;transform:rotate(-7deg);border-radius:6px}
@@ -1570,7 +1571,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0924</div>
+    <div class="ver" id="verT">v0.7.2.0925</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3498,11 +3499,11 @@ function awkAI(m,dt,pls,sf,best,bd,tau){
 const GMC_POS=[{k:'shield',x:175,y:512,off:-62,nm:'방패 보루'},{k:'helm',x:500,y:175,off:0,nm:'투구 성'},{k:'blade',x:825,y:512,off:62,nm:'칼날 성채'}];
 const GMC_HP=1.5e7, GMC_IV=4.5, GMC_CAP=90, GMC_N=3, GMC_KILL_CAP=90;   /* 성채마다 GMC_IV초에 GMC_N마리 · 필드 몬스터 상한 GMC_CAP · 성채 몬스터 누적 처치가 GMC_KILL_CAP마리를 넘으면 이후 처치는 보상(경험치·골드·아이템) 없음 (수문장은 해당 없음) */
 const gmcTy=()=>MT.findIndex(t=>t.gmc);
-function gmBegin(){ G.phase='wave'; G.wave=1; G.waveSides=[0]; G.laneShow=[]; G.spawnQ=0; G.gmc=[]; G.gmDone=0; G.gmKills=0; G.gmDw=null; G.gal=[]; G.galDone=0; G.gmPen=gmPenOf(me.eq).pct/100; const ty=gmcTy();
+function gmBegin(){ G.phase='wave'; G.wave=1; G.waveSides=[0]; G.laneShow=[]; G.spawnQ=0; G.gmc=[]; G.gmDone=0; G.gmKills=0; G.gmDw=null; G.gal=[]; G.galDone=1; G.gmPen=gmPenOf(me.eq).pct/100; const ty=gmcTy(); galSpawn(true);   /* 우리 편 정예는 시작하자마자 성문 앞에 등장 */
   for(const P of GMC_POS){ const m=spawnMob(ty,P.x,P.y,false); m.gmc=P.k; m.gn=P.nm; m.hx=P.x; m.hy=P.y; m.hp=m.max=GMC_HP; m.xp=0; m.dmg=0; m.spd=0; m.r=70; m.sp=rand(1,2.5); m.el=null; m.elT=2; gmgSpawn(P); m.cT=P.off?{x:CAS_T.x+P.off,y:CAS_T.y,i:-1,cas:1}:null; G.gmc.push(m); }
   gmDoorSpawn(); banner('성채를 부수세요','세 성채에서 몬스터가 쏟아집니다'); me.pot=3; pushEv(['w',1]); }
 function gmWave(dt){ gmDoorTick(dt); if(G.gmc&&G.gmc.length&&G.gmc.every(m=>m.dead)&&!G.gmDone){ G.gmDone=1; G.phase='boss'; announce('🏰 세 성채가 모두 무너졌어요!','#ffd860'); for(const m of G.mobs){ if(!m.dead&&!m.gmc)m.dead=true; } gmCutStart(); } }
-const GM_MOB={shield:{ty:1,hp:250,dm:4,sp:1.2},blade:{ty:2,hp:90,dm:6,sp:3},helm:{ty:9,hp:70,dm:5,sp:1.8}};   /* 성채 몹: 스테이지 몹 기본값 대비 체력·피해·속도 배율(그림은 기존 좀비·해골·궁수를 임시로 사용) */
+const GM_MOB={shield:{ty:1,hp:125,dm:4,sp:1.2},blade:{ty:2,hp:45,dm:6,sp:3},helm:{ty:9,hp:35,dm:5,sp:1.8}};   /* 성채 몹: 스테이지 몹 기본값 대비 체력·피해·속도 배율(그림은 기존 좀비·해골·궁수를 임시로 사용) */
 function gmcMob(m){ const C=GM_MOB[m.gmc], pn=1+(G.gmPen||0), o=spawnMob(C.ty,m.hx+rand(-46,46),m.hy+78+rand(-6,16),false);
   o.hp=o.max=o.hp*C.hp*pn; o.dmg*=C.dm*pn; o.spd*=C.sp; o.cT=m.cT; o.inn=true; o.gfrom=m.gmc;
   if(m.gmc==='shield')o.gsh=1; else if(m.gmc==='blade')o.gbl=1; else o.gpr=rand(2,8);
@@ -3618,9 +3619,9 @@ function drawGmo(m,t){ const x=m.x,y=m.y,r=m.hp/m.max;
 /* ===== 우리 편 정예 3마리 (7스테이지) — 첫 번째 성채가 무너질 때 우리 성문에서 한 번만 등장, 죽으면 끝 · 정예 스킬은 캐릭터에 영향 없음 =====
    방패 근위대장(체력 1.2e7 · 받는 피해 −25% · 8초마다 3초 도발) · 대검 돌격기사(8.4e6 · 피해 근위대장 ×2.5 · 1.6초 범위 베기 · 정예·보스 쪽으로 돌진) · 성가 사제(7.2e6 · 6초마다 가장 약한 정예 8% 치유 · 15초마다 전원 5% 보호막 · 두개골 봉인 최우선) */
 const GAL={royal:{n:'방패 근위대장',hp:1.2e5,dmg:9000,iv:1.2,spd:72,r:30,h:80,bh:787},cleric:{n:'성가 사제',hp:7.2e4,dmg:0,iv:9,spd:62,r:26,h:80,bh:783}};
-function galSpawn(){ if(G.stg&&G.stg.gm!==1||G.mode==='guest')return; let n=0;
+function galSpawn(quiet){ if(G.stg&&G.stg.gm!==1||G.mode==='guest')return; let n=0;
   for(const k of ['royal','cleric']){ const C=GAL[k], x=CAS_T.x+(n-.5)*80, y=CAS_T.y+62; G.gal.push({k,i:100+n,x,y,hp:C.hp,max:C.hp,r:C.r,cd:rand(.4,1),flash:0,atk:0,mv:0,bar:0,tc:0,tt:0,heal:3,shd:6,seal:null,spd0:C.spd,buf:0}); burst(x,y,'#bfe0ff',22,260); efx.push({k:'ring',x,y,r0:10,r1:90,t:0,life:.6,col:'#cfe8ff',w:8}); n++; }
-  banner('🛡️ 지원군 도착!','우리 편 정예가 성문에서 나왔어요'); sfx('boss'); }
+  if(!quiet){ banner('🛡️ 지원군 도착!','우리 편 정예가 성문에서 나왔어요'); sfx('boss'); } }
 function galHit(id,raw){ const a=G.gal&&G.gal.find(q=>q.i===id); if(!a||a.dead)return; let d=raw*(a.k==='royal'?.75:1); if(a.bar>0){ const t=Math.min(a.bar,d); a.bar-=t; d-=t; } if(d<=0){ a.flash=.12; return; }
   a.hp-=d; a.flash=.12; if(d>=1)addNum(a.x,a.y-60,Math.round(d),'#8fe6ff',false,'g'+a.i);
   if(a.hp<=0){ a.dead=true; burst(a.x,a.y,'#bfe0ff',26,300); announce(`💀 ${GAL[a.k].n}가 쓰러졌어요`,'#ff8a7a'); } }
@@ -5806,6 +5807,9 @@ const tutSt=k=>(k===4&&me&&me.hc)?TUTS_HC4:TUTS[k];
    - 대사 정의: [화자키, 내용, (나레이션일 때 오른쪽에 보여줄 화자)] · 화자 me = 내 캐릭터, nar = 나레이션 */
 const STSP={
  gk:{n:'그라크',t:'묘지기',img:'img/mob_grak.png',c:'#c9b48a'},
+ ar:{n:'방패 근위대장',t:'우리 성의 정예',img:'img/ally7_royal.png',c:'#9fd0ff'},   /* 7스테이지: 우리 편 정예 (시작 대화에 잠깐 출연) */
+ ac:{n:'성가 사제',t:'우리 성의 정예',img:'img/ally7_cleric.png',c:'#cfe8ff'},
+ gm:{n:'고르무스',t:'거인왕',img:'img/boss_7.png',c:'#8fd0ff'},
  qg:{n:'그라크',t:'묘지기',img:'img/npc_grak_talk.png',c:'#c9b48a'},   /* 광산 NPC (관리자 시범) */
  qt:{n:'토비',t:'견습 광부',img:'img/npc_tobi_talk.png',c:'#ffd06a'},
  qe:{n:'엘리네',t:'은세공사',img:'img/npc_eline_talk.png',c:'#cfe0f2'},
@@ -6116,7 +6120,21 @@ const STORY={
    ['me','너는 끝까지 문을 지켰어.'],
    ['cas','그 너머의 성은… 나와 같지 않다. 문을 닫는 법을 잊은 성이다. 조심해라.'],
    ['nar','길 끝, 안개 너머로 또 다른 성의 그림자가 어렴풋이 보인다. 이쪽을 향한 수많은 창끝이 어둠 속에서 빛난다.','-']
-  ]}
+  ]},
+ '7':{
+  pre:[
+   ['nar','안개를 건너자 끝없는 무덤 벌판이 펼쳐진다. 저 멀리 세 개의 성채가 불길한 붉은 빛을 뿜으며 서 있다.','-'],
+   ['me','수문장이 말한 「문을 닫는 법을 잊은 성」… 저게 그 성들인가.'],
+   ['ar','맞습니다. 저 성채들이 거인왕의 유물을 봉인한 채 쉴 새 없이 병사를 토해냅니다.'],
+   ['ar','우리 성문을 지키는 방패 근위대장입니다. 이번 싸움은 제가 앞장서겠습니다.'],
+   ['ac','성가 사제입니다. 쓰러지는 분은 제가 치유하고, 성스러운 방벽으로 지켜 드리겠습니다.'],
+   ['me','든든하군. 성채부터 하나씩 부수자.'],
+   ['ar','세 성채가 모두 무너지면 땅속에 잠든 거인왕이 깨어납니다. 그때까지 우리 성을 사수해 주십시오.'],
+   ['nar','땅이 낮게 울린다. 흙 속에서 푸른 번개가 한 줄기 스치고, 거대한 해골의 손가락이 꿈틀거린다.','gm'],
+   ['gm','…누가 내 무덤 앞에서 칼을 들었느냐.'],
+   ['gm','부수고 싶거든 부숴라. 저 돌들이 무너지는 날, 나는 일어난다. 그리고 너희를 전부 묻어 줄 것이다.'],
+   ['me','기다려라. 곧 깨워 주지.']
+  ]},
 };
 var stS=null, stTm=0;
 let storyWait=false;
@@ -7551,7 +7569,7 @@ function fitBan(root){ try{ (root||document).querySelectorAll('.ban .t b,.ban .t
 try{ document.fonts&&document.fonts.ready.then(()=>fitBan($('#stageBan'))); }catch(e){}
 window.addEventListener('resize',()=>fitBan($('#stageBan')));
 function banCard(cur,i,role){ const T=STAGES[i], bi=T.bs||MAPBOSS[T.id], tr=BANTRIO[T.id], gq=cur.eq?gearPenOf(cur.eq,T.icap):null, gv=!!gq&&gq.wm<.97, cl=i<stageClear;
-        return `<div class="ban ${role}${!bi&&!tr?' noimg':''}${tr?' trio':''}${role==='bk nx'&&i>stageClear?' lk':''}" data-i="${i}"${role==='cu'?'':' aria-hidden="true"'}><div class="t"><div class="sid">${esc(T.id)}</div><span class="sn">${esc(T.n)}${T.id==='4'?' (권장Lv95↑)':''}</span><b>${esc(T.bn||'')}</b>${T.gm?(()=>{ const q=gmPenOf(cur.eq); return `<i class="warn wrap">수문장 세트 점수 ${q.ok}/${q.n} · 몬스터 +${q.pct}% 강화</i>`; })():`<i class="${gv?'warn':''}">권장 장비 Lv 합 ${Math.max(1,T.icap-12)*EQSL.length}↑${gv?' · 부족':''}</i>`}</div>${cl?'<div class="st clr"><b>클리어</b></div>':'<div class="st nc"><b>미클리어</b></div>'}${tr?`<span class="tri">${tr.map(k=>`<img src="img/${k}.png" alt="" onerror="this.remove()">`).join('')}</span>`:bi?`<img src="img/${bi}.png" alt="" onerror="this.remove()">`:''}</div>`; }
+        return `<div class="ban ${role}${!bi&&!tr?' noimg':''}${tr?' trio':''}${role==='bk nx'&&i>stageClear?' lk':''}" data-i="${i}"${role==='cu'?'':' aria-hidden="true"'}><div class="t${T.gm?' gmt':''}"><div class="sid">${esc(T.id)}</div><span class="sn">${esc(T.n)}${T.id==='4'?' (권장Lv95↑)':''}</span><b>${esc(T.bn||'')}</b>${T.gm?(()=>{ const q=gmPenOf(cur.eq); return `<i class="warn wrap">수문장 세트 점수 ${q.ok}/${q.n}<br>몬스터 +${q.pct}% 강화</i>`; })():`<i class="${gv?'warn':''}">권장 장비 Lv 합 ${Math.max(1,T.icap-12)*EQSL.length}↑${gv?' · 부족':''}</i>`}</div>${cl?'<div class="st clr"><b>클리어</b></div>':'<div class="st nc"><b>미클리어</b></div>'}${tr?`<span class="tri">${tr.map(k=>`<img src="img/${k}.png" alt="" onerror="this.remove()">`).join('')}</span>`:bi?`<img src="img/${bi}.png" alt="" onerror="this.remove()">`:''}</div>`; }
 function renderStagePanel(){
   const chars=charIds().map(loadChar).filter(Boolean);
   $('#playPanel').hidden=!selId;
