@@ -1560,7 +1560,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0874</div>
+    <div class="ver" id="verT">v0.7.2.0875</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1724,13 +1724,19 @@ const STG6={id:'6',raid:3,bn:'수문장 카스텔',rl:99,n:'움직이는 성채'
   mix:w=>({imp:30,zom:20,sk:30,ar:20,bo:0,he:0}),
   th:{g:'#1c1b1f',gd:'rgba(70,64,76,.5)',gl:'rgba(6,5,8,.7)',tuft:'rgba(120,110,90,.3)',road:['#2b2823','#35312b'],tint:'rgba(120,90,60,.1)',amb:'ember',pc:'230,170,110',dec:[['rock',.3],['pillar',.3],['bones',.14],['torch',.16],['lrock',.1]]}};
 STAGES.push(STG6);   /* 6스테이지 공개 (11/6) */
+/* 7스테이지 「거인왕의 무덤」(보스 고르무스) — 관리자 전용: 연구실이 열려 있고 암행 시찰이 꺼져 있을 때만 목록에 들어감(페이지를 다시 열어야 반영). 설계는 STAGE7.md */
+const GM_ON=(()=>{ try{ return localStorage.getItem('dkdef2.lab')==='928'&&localStorage.getItem('dkdef2.labpt')!=='1'; }catch(e){ return false; } })();
+const STG7={id:'7',raid:4,gm:1,bn:'거인왕 고르무스',bs:'boss_7',rl:99,n:'거인왕의 무덤',d:'거인왕의 유물을 봉인한 세 성채에서 몬스터가 쏟아져요. 성채를 모두 부수면 땅속의 해골 거인왕 고르무스가 깨어납니다.',tag:'👑 레이드 · 성채 셋 파괴 · 해골 거인왕 · 일격필살',waves:[],ilo:104,icap:114,boss:-1,spdM:1.85,hpM:170,dmgM:44,xpM:85,fly:0,el:0,
+  mix:w=>({imp:30,zom:20,sk:30,ar:20,bo:0,he:0}),
+  th:{g:'#15111a',gd:'rgba(60,50,80,.5)',gl:'rgba(6,5,9,.75)',tuft:'rgba(140,130,190,.28)',road:['#26222d','#2f2a38'],tint:'rgba(90,70,140,.12)',amb:'ember',pc:'170,150,230',dec:[['lrock',.3],['pillar',.26],['bones',.2],['torch',.12],['crack',.12]]}};
+if(GM_ON)STAGES.push(STG7);
 const RARN=['일반','매직','레어','유니크','영웅'], RARC=['#e9e2d4','#7d96ff','#ffe24d','#e4b65a','#ff4f7a'];
 const dn=it=>it.rar>=2?`[${RARN[it.rar]}] ${it.name}`:it.name;
 /* 아이템 설명 이름 줄: 이름 바로 뒤에 등급 별(★1 일반 · ★2 매직 · ★3 레어 · ★4 유니크 · ★5 영웅), 색은 등급색 (★6은 아직 없음) */
-const dnTag=it=>`<span class="rtg">★${Math.min(5,(it.rar|0)+1)}${it.rar===3&&it.sp?'+':''}</span>`;   /* 특수 유니크(it.sp)는 ★4+ */
+const dnTag=it=>`<span class="rtg">★${it.ep?6:Math.min(5,(it.rar|0)+1)}${it.rar===3&&it.sp?'+':''}</span>`;   /* 특수 유니크(it.sp)는 ★4+ */
 /* 이름 + 등급 별: 마지막 글자와 별을 한 덩어리로 묶어, 이름이 두 줄로 꺾여도 별이 마지막 글자 바로 옆에 붙어요 */
 /* 영웅 세트 구분: 그림자(보라 ☾) · 각성(하늘색 ✦) — 아이템 창 이름 아래에 세트 뱃지와 아이콘 테두리 색으로 한눈에 */
-const HSET=it=>{ const S=it&&it.sp&&SPFX[it.sp]; if(!S)return null; if(S.cas)return {c:'#a98bff',e:'🎲',n:'행운의 도박꾼 세트',k:'cs',m:3}; /* 도박꾼 세트: 그림자 세트와 같은 보라색 */ if(it.rar!==4)return null; return S.cs?{c:'#e0b070',e:'🏰',n:'수문장 세트',k:'ks',m:7}:S.aw?{c:'#a98bff',e:'⭐',n:'각성 세트',k:'ac',m:7}:S.hero?{c:'#a98bff',e:'🌑',n:'그림자 세트',k:'hc',m:7}:null; };
+const HSET=it=>{ const S=it&&it.sp&&SPFX[it.sp]; if(!S)return null; if(S.cas)return {c:'#a98bff',e:'🎲',n:'행운의 도박꾼 세트',k:'cs',m:3}; /* 도박꾼 세트: 그림자 세트와 같은 보라색 */ if(it.rar!==4)return null; return S.gm?{c:'#ff7a5a',e:'👑',n:'거인왕의 유산 세트',k:'gs',m:7}:S.cs?{c:'#e0b070',e:'🏰',n:'수문장 세트',k:'ks',m:7}:S.aw?{c:'#a98bff',e:'⭐',n:'각성 세트',k:'ac',m:7}:S.hero?{c:'#a98bff',e:'🌑',n:'그림자 세트',k:'hc',m:7}:null; };
 const hsetChip=it=>{ const h=HSET(it); if(!h)return ''; const n=(me&&me.D&&me.D[h.k])|0; return `<div style="display:inline-block;margin:2px 0 3px;padding:1px 8px;border-radius:99px;border:1px solid ${h.c};background:${h.c}22;color:${h.c};font-size:12px;font-weight:800">${h.e} ${h.n} ${n}/${h.m||7}</div>`; };
 const nameTag=(pre,name,it)=>{ const c=Array.from(String(name)), l=c.pop()||''; return `${esc(pre+c.join(''))}<span class="nmw">${esc(l)}${dnTag(it)}</span>`; };
 const SLOTN={weapon:'무기',helm:'헬멧',armor:'갑옷',amulet:'목걸이',ring:'반지',shield:'방패'};
@@ -1936,7 +1942,8 @@ const AFX=[
  {t:'smhp',n:'소환수 생명력 +{v}%',sl:'armor helm amulet shield',r:(i,s,rar)=>(s==='shield'&&rar===3)?[8,20+2*i]:[8,Math.max(8,Math.round(5+i*.5))],only:'necro druid'},   /* 유니크 보조장비: 최대 20 + 아이템 레벨×2 */
  {t:'cls',n:'{c} 스킬 +{v}',sl:'amulet helm weapon'},
  {t:'all',n:'모든 스킬 +{v}',sl:'amulet helm weapon ring armor'},
- {t:'sk',n:'{s} +{v} ({c} 전용)',sl:'*'}];
+ {t:'sk',n:'{s} +{v} ({c} 전용)',sl:'*'},
+ {t:'cdm',n:'치명타 피해 +{v}%',sl:''}];   /* 거인왕 장비 고정 옵션 전용(굴림 대상 아님) */
 const AFXBY={}; AFX.forEach(a=>AFXBY[a.t]=a);
 const PREF={dmg:'날카로운',dmgPct:'잔혹한',str:'거인의',dex:'재빠른',vit:'강인한',ene:'현자의',life:'활력의',mana:'마력의',def:'견고한',ias:'신속한',ms:'바람의',ls:'흡혈의',crit:'치명적인',cls:'숙련된',sk:'숙련된'};
 const RAREA=['핏빛','잿빛','망령의','폭풍','서리','어둠의','황혼','유령'];
@@ -2237,13 +2244,26 @@ const SPFX={
  csoff_pal:{n:'성벽의 방패',slot:'shield',base:'성스러운 방패',il:999,hero:1,cs:1,fcls:'pal',d:'막으면 받은 피해의 70%를 가까운 적에게 되돌리고 0.8초 기절',ap:()=>{}},
  csoff_sorc:{n:'수문장의 오브',slot:'shield',base:'별빛 오브',il:999,hero:1,cs:1,fcls:'sorc',d:'스킬 마나 소모 -25%, 피해 +12%',ap:d=>{d.dmgPct+=12;}},
  csoff_necro:{n:'성채의 등불',slot:'shield',base:'망령의 등불',il:999,hero:1,cs:1,fcls:'necro',d:'소환수 피해 +30%, 혼불 스킬 +2',ap:d=>{d.sm+=30;d.sk.soulbolt=(d.sk.soulbolt||0)+2;}},
- csoff_druid:{n:'성탑 토템',slot:'shield',base:'정령 토템',il:999,hero:1,cs:1,fcls:'druid',d:'변신 중 받는 피해 -15%, 피해 +12%',ap:d=>{d.dmgPct+=12;}}};
+ csoff_druid:{n:'성탑 토템',slot:'shield',base:'정령 토템',il:999,hero:1,cs:1,fcls:'druid',d:'변신 중 받는 피해 -15%, 피해 +12%',ap:d=>{d.dmgPct+=12;}},
+ /* ===== 거인왕 장비 ★6 (7스테이지 고르무스) — 에픽 등급(it.ep) · 관리자 전용 · 아이템 레벨 GM_IL · 착용 Lv GM_REQ · 기본 수치 ×GM_M ===== */
+ gm_axe:{n:'거인왕의 대도끼',slot:'weapon',base:'전투 도끼',il:999,hero:1,gm:1,d:'왕의 일격: 기본 공격 시 6% 확률로 0.15초 뒤 같은 타격이 한 번 더 들어감 (첫 타격과 같은 피해·치명타, 다른 효과는 없음)',ap:()=>{}},
+ gm_staff:{n:'왕묘의 지팡이',slot:'weapon',base:'참나무 지팡이',il:999,hero:1,gm:1,d:'메아리: 피해를 주는 스킬을 쓸 때 6% 확률로 0.15초 뒤 같은 스킬이 무료로 한 번 더 발동 (소환·변신·버프·궁극기 제외)',ap:()=>{}},
+ gm_helm:{n:'부러진 뿔 투구',slot:'helm',base:'뿔 달린 투구',il:999,hero:1,gm:1,d:'거인의 가호: 받는 피해 -10%',ap:d=>{d.dr+=.1;}},
+ gm_armor:{n:'늑골 흉갑',slot:'armor',base:'사슬 갑옷',il:999,hero:1,gm:1,d:'뼈의 장막: 생명력 30% 이하가 되면 피해를 6번 막는 방벽 생성(재사용 80초)',ap:()=>{}},
+ gm_amu:{n:'왕묘의 인장',slot:'amulet',base:'목걸이',il:999,hero:1,gm:1,d:'왕의 위엄: 치명타 피해 +50~100%',ap:()=>{}},
+ gm_ring:{n:'사슬 반지',slot:'ring',base:'반지',il:999,hero:1,gm:1,d:'거인 사냥꾼: 고르무스와 성채 수문장에게 주는 피해 +10% (2개 끼면 +20%)',ap:()=>{}},
+ gmoff_war:{n:'돌뿔나팔',slot:'shield',base:'전쟁의 뿔',il:999,hero:1,gm:1,fcls:'war',d:'피해 +21%, 스킬 범위 +14%',ap:d=>{d.dmgPct+=21;d.rng+=14;}},
+ gmoff_pal:{n:'묘비 방패',slot:'shield',base:'성스러운 방패',il:999,hero:1,gm:1,fcls:'pal',d:'막으면 받은 피해의 75%를 가까운 적에게 되돌리고 1초 기절',ap:()=>{}},
+ gmoff_sorc:{n:'청백 구슬',slot:'shield',base:'별빛 오브',il:999,hero:1,gm:1,fcls:'sorc',d:'스킬 마나 소모 -28%, 피해 +14%',ap:d=>{d.dmgPct+=14;}},
+ gmoff_necro:{n:'영혼 등불',slot:'shield',base:'망령의 등불',il:999,hero:1,gm:1,fcls:'necro',d:'혼불 스킬 +4~5, 받는 피해 -10%',ap:d=>{d.dr+=.1;}},
+ gmoff_druid:{n:'뿌리 토템',slot:'shield',base:'정령 토템',il:999,hero:1,gm:1,fcls:'druid',d:'변신 중 받는 피해 -15%, 피해 +15%',ap:d=>{d.dmgPct+=15;}}};
 /* ===== 영웅 아이템: 아이템 레벨 100 · 착용 Lv 90 · 기본 수치 ×1.6 (유니크 ×1.3) · 옵션 종류 고정, 수치만 변동 =====
    fx: [옵션, 최소, 최대] · clsR = 무작위 직업의 '+N 직업 스킬' · clsM = 착용 직업의 '+N 직업 스킬' */
 const HERO_IL=100, HERO_REQ=90, HERO_P=.02, SHARD_N=120, SHARD_MAX=999, RAID_UQ=.6;   /* HERO_P=레이드 보스 한 마리당 영웅 아이템 추가 드랍 확률, SHARD_N=교환에 필요한 개수, SHARD_MAX=가방 한 칸에 쌓이는 최대 수량, RAID_UQ=레이드 스테이지 일반 드랍의 유니크 비율(나머지는 레어) */
 const HERO_AFC=[['life',150,210],['def',70,105],['vit',5,10],['mr',20,30],['dmgPct',25,50]];
 const AW_AFC=[['life',180,250],['def',85,125],['vit',6,12],['mr',25,35],['dmgPct',30,60]]; /* 각성 보조장비 공통 옵션 */
 const HERO_AFS=HERO_AFC.map(o=>o[0]==='dmgPct'?['sm',25,150]:o), AW_AFS=AW_AFC.map(o=>o[0]==='dmgPct'?['sm',30,180]:o);   /* 강령술사·드루이드 보조장비(등불·토템): 일반 옵션 '피해 +%' 자리가 '소환수 피해 +%' */ /* 보조무기 공통 옵션(+ 직업 스킬) */
+const GM_AFC=[['life',235,330],['def',110,165],['vit',8,15],['mr',33,45],['dmgPct',41,82]];   /* 거인왕 보조장비 공통 옵션 */
 const CS_AFC=[['life',200,280],['def',95,140],['vit',7,13],['mr',28,38],['dmgPct',35,70]], CS_AFS=CS_AFC.map(o=>o[0]==='dmgPct'?['sm',35,200]:o);   /* 수문장 보조장비 공통 옵션 (강령술사·드루이드는 '소환수 피해 +%') */
 const HEROI={
  hdag:{mn:6,mx:14,fx:[['dmgPct',150,212],['ias',10,15],['crit',5,10],['ls',3,5],['dex',5,10],['clsR',1,2]]},
@@ -2277,9 +2297,22 @@ const HEROI={
  csoff_pal:{df:18,blk:[34,39],fx:[['clsM',1,2],...CS_AFC]},
  csoff_sorc:{om:44,fx:[['clsM',1,2],...CS_AFC]},
  csoff_necro:{om:44,fx:[['clsM',1,2],...CS_AFS]},
- csoff_druid:{dm:6,om:22,fx:[['clsM',1,2],...CS_AFS]}};
+ csoff_druid:{dm:6,om:22,fx:[['clsM',1,2],...CS_AFS]},
+ /* 거인왕 ★6 — 무기 기본 수치: 대도끼 12~22 · 지팡이 8~15 / 방어 기본: 투구 12 · 갑옷 24 · 보조 방패 18 */
+ gm_axe:{mn:12,mx:22,fx:[['dmgPct',235,330],['ias',16,23],['crit',8,15],['ls',6,8],['str',35,40],['clsR',1,3]]},
+ gm_staff:{mn:8,mx:15,fx:[['dmgPct',235,330],['ias',16,23],['crit',8,15],['ls',6,8],['ene',35,40],['clsR',1,3]]},
+ gm_helm:{df:12,fx:[['life',235,330],['def',110,165],['all',1,2],['crit',7,9],['dmgPct',41,76],['mr',21,45]]},
+ gm_armor:{df:24,fx:[['life',235,330],['def',110,165],['vit',8,15],['str',8,15],['dmgPct',41,76],['all',1,2]]},
+ gm_amu:{fx:[['all',1,3],['dmgPct',65,82],['crit',6,8],['life',235,330],['mana',350,530],['mr',33,45],['cdm',50,100]]},
+ gm_ring:{fx:[['ias',16,23],['crit',6,8],['ls',6,8],['dmgPct',41,76],['dex',20,30],['vit',20,30]]},
+ gmoff_war:{dm:12,fx:[['clsM',1,3],...GM_AFC]},
+ gmoff_pal:{df:18,blk:[36,41],fx:[['clsM',1,3],...GM_AFC]},
+ gmoff_sorc:{om:44,fx:[['clsM',1,3],...GM_AFC]},
+ gmoff_necro:{om:44,fx:[['clsM',1,3],...GM_AFC.slice(0,4),['sm',150,250],['skSoul',4,5]]},
+ gmoff_druid:{dm:6,om:22,fx:[['clsM',1,3],...GM_AFC.slice(0,4),['sm',150,250]]}};
 const AW_IL=102, AW_REQ=92, AW_M=2.11, ASHARD_N=120, AW_P=.03;   /* 각성 장비: 아이템 레벨·착용 레벨·기본 성능 배율 / 교환에 필요한 각성 그림자 조각 / 처치당 각성 장비 직접 드랍 확률 */
 const AW_PART={weapon:'aw_wpn',helm:'aw_helm',armor:'aw_armor',amulet:'aw_amu',ring:'aw_ring'};
+const GM_IL=108, GM_REQ=98, GM_M=2.6;   /* 거인왕 ★6: 아이템 레벨 108 · 착용 Lv 98(최대 99) · 기본 성능 ×2.6 (관리자 전용) */
 const CS_IL=104, CS_REQ=94, CS_M=2.3, CS_P=.03;   /* 수문장 장비: 아이템 레벨·착용 레벨·기본 성능 배율(2.17 → 2.3) / 처치당 영웅 장비 드랍 확률(5스테이지와 같은 3%) */
 const CS_PART={helm:'cs_helm',armor:'cs_armor',amulet:'cs_amu',ring:'cs_ring'};
 const csKey=(part,cls)=>part==='shield'?'csoff_'+(cls||(me&&me.cls)||'war'):part==='weapon'?(Math.random()<.5?'cs_mace':'cs_sword'):CS_PART[part];
@@ -2455,13 +2488,14 @@ function genCas(key){ const S=SPFX[key], F=CASI[key]; if(!S||!F)return null;
   for(const [t,lo,hi] of F)it.aff.push({t,v:ri(lo,hi)});
   return it; }
 function genHero(key){ const H=HEROI[key], S=SPFX[key]; if(!H||!S)return null;
-  const IL=S.cs?CS_IL:S.aw?AW_IL:HERO_IL, it={id:++ITEMID,slot:S.slot,rar:4,ilvl:IL,base:S.base,aff:[],sp:key,name:S.n,req:S.cs?CS_REQ:S.aw?AW_REQ:HERO_REQ,hv:2,nof:1,nfa:1}; if(S.cs)it.cv=2;
+  const IL=S.gm?GM_IL:S.cs?CS_IL:S.aw?AW_IL:HERO_IL, it={id:++ITEMID,slot:S.slot,rar:4,ilvl:IL,base:S.base,aff:[],sp:key,name:S.n,req:S.gm?GM_REQ:S.cs?CS_REQ:S.aw?AW_REQ:HERO_REQ,hv:2,nof:1,nfa:1}; if(S.cs)it.cv=2; if(S.gm){ it.cv=2; it.ep=1; }   /* ep=에픽(★6): 등급 숫자는 영웅(4) 그대로 두고 표시만 ★6 */
   if(S.fcls)it.oc=S.fcls;
-  const M=S.cs?CS_M:S.aw?AW_M:HERO_M; if(H.mx){ const m=(1+IL*.16)*M; it.mn=Math.round(H.mn*m); it.mx=Math.round(H.mx*m); }
+  const M=S.gm?GM_M:S.cs?CS_M:S.aw?AW_M:HERO_M; if(H.mx){ const m=(1+IL*.16)*M; it.mn=Math.round(H.mn*m); it.mx=Math.round(H.mx*m); }
   if(H.df)it.df=Math.round(H.df*(1+IL*.2)*M); if(H.dm)it.dm=Math.round(H.dm*(1+IL*.1)*M); if(H.om)it.om=Math.round(H.om*(1+IL*.1)*M); if(H.blk)it.blk=ri(H.blk[0],H.blk[1]);
   for(const [t,lo,hi] of H.fx){ const v=ri(lo,hi);
     if(t==='clsR'){ const ks=Object.keys(CLASSES); it.aff.push({t:'cls',v,cls:ks[Math.floor(Math.random()*ks.length)]}); }
     else if(t==='clsM') it.aff.push({t:'cls',v,cls:S.fcls});
+    else if(t==='skSoul') it.aff.push({t:'sk',v,cls:'necro',key:'soulbolt'});
     else it.aff.push({t,v}); }
   return it; }
 const MAXENH=10, ENHBASE=[5000,7000,10000,15000];
@@ -2861,11 +2895,11 @@ function petGain(xp){ const e=petOf(me); if(!e||!(xp>0))return; const top=petT(e
   if(lv>(e.lv||1)){ const pv=e.lv||1; e.lv=lv; recalc(); saveChar(); PET.fx.push({k:'lvup',t:0,life:1.8,a:pv,b:lv}); { const un=PETS[e.id].un&&PETS[e.id].un[lv]; if(un)toast(PETS[e.id].pas?`패시브 「${un}」 해금`:`스킬 「${un}」 해금 · 쿨타임마다 자동 발동`,PETS[e.id].col); } sfx('lvl'); } }
 
 function derive(p,nm){   /* nm=true: 마을 풍차 보너스를 빼고 계산 (능력치 창에서 풍차 몫을 따로 보여주려고) */
-  const d={rng:0,blk:0,mf:0,pr:0,mr:0,str:p.stats.str,dex:p.stats.dex,vit:p.stats.vit,ene:p.stats.ene,dmg:0,dmgPct:0,def:0,life:0,mana:0,ias:0,ms:0,ls:0,crit:5,cls:0,sk:{},wmn:1,wmx:3,dr:0,regen:0,cdr:0,sm:0,smhp:0,sp:{},hc:0,rbd:0};
+  const d={rng:0,blk:0,mf:0,pr:0,mr:0,str:p.stats.str,dex:p.stats.dex,vit:p.stats.vit,ene:p.stats.ene,dmg:0,dmgPct:0,def:0,life:0,mana:0,ias:0,ms:0,ls:0,crit:5,cls:0,sk:{},wmn:1,wmx:3,dr:0,regen:0,cdr:0,sm:0,smhp:0,sp:{},hc:0,rbd:0,cdm:0,gs:0,gmr:0};
   { const ts=nm?0:townStatBonus(); if(ts){ d.str+=ts; d.dex+=ts; d.vit+=ts; d.ene+=ts; } }   /* 마을 각성 풍차: 모든 캐릭터 올스탯 */
   for(const k in p.eq){const it=p.eq[k]; if(!it)continue; if(it.sp&&SPFX[it.sp]&&SPFX[it.sp].fcls&&SPFX[it.sp].fcls!==p.cls)continue; /* 전용 장비는 다른 직업이 끼고 있어도 효과 없음 */
     if(it.slot==='weapon'){d.wmn=it.mn;d.wmx=it.mx; const bf=BASEFX[it.base]; if(bf){ for(const q in bf) if(q!=='t')d[q]+=bf[q]; }}
-    if(it.sp&&SPFX[it.sp]){ SPFX[it.sp].ap(d); d.sp[it.sp]=((it.sp==='hring'||it.sp==='aw_ring'||it.sp==='cs_ring')?(d.sp[it.sp]|0)+1:1);   /* 그림자·각성 반지는 2개 끼면 효과도 2번 */ if(SPFX[it.sp].hero&&it.rar===4){ if(SPFX[it.sp].cs)d.ks=(d.ks|0)+1; else if(SPFX[it.sp].aw)d.ac=(d.ac|0)+1; else d.hc++; } if(SPFX[it.sp].cas)d.cs=(d.cs|0)+1; }   /* 그림자(영웅) 장비 개수 */
+    if(it.sp&&SPFX[it.sp]){ SPFX[it.sp].ap(d); d.sp[it.sp]=((it.sp==='hring'||it.sp==='aw_ring'||it.sp==='cs_ring'||it.sp==='gm_ring')?(d.sp[it.sp]|0)+1:1);   /* 그림자·각성 반지는 2개 끼면 효과도 2번 */ if(SPFX[it.sp].hero&&it.rar===4){ if(SPFX[it.sp].gm)d.gs=(d.gs|0)+1; else if(SPFX[it.sp].cs)d.ks=(d.ks|0)+1; else if(SPFX[it.sp].aw)d.ac=(d.ac|0)+1; else d.hc++; } if(SPFX[it.sp].cas)d.cs=(d.cs|0)+1; }   /* 그림자(영웅) 장비 개수 */
     if(it.enh>0){ if(it.slot==='amulet'){ const e=it.enh|0; d.str+=e; d.dex+=e; d.vit+=e; d.ene+=e; } else if(it.slot==='ring'&&it.enh>=10)d.cls+=1; }
     if(it.gm&&it.sk)gemApply(d,it.gm,p);
     if(it.df)d.def+=it.df; if(it.blk)d.blk+=it.blk; if(it.dm)d.dmg+=it.dm; if(it.om)d.mana+=it.om;
@@ -2877,6 +2911,7 @@ function derive(p,nm){   /* nm=true: 마을 풍차 보너스를 빼고 계산 (�
     }}
   if(d.hc>=2) d.mana+=200;   /* 그림자 세트 2개: 최대 마나 +200 */
   if((d.ks|0)>=2){ d._hpm=(d._hpm||1)*1.1; d.mana+=350; } if((d.ks|0)>=7)d.cls+=3;   /* 수문장 세트: 2개 최대 생명력 +10%·최대 마나 +350 / 7개 모든 스킬 +3 (4개 봉쇄 절반·7개 공포 1초는 따로) */
+  if((d.gs|0)>=3)d.cdm+=100; if((d.gs|0)>=7){ d.cls+=5; d.abd=(d.abd||0)+50; d.fearNo=1; }   /* 거인왕의 유산 세트: 3개 치명타 피해 +100% / 7개 모든 스킬 +5 · 공포 면역 · 보스 피해 +50% */
   if((d.ac|0)>=2){ d._hpm=(d._hpm||1)*1.1; d.mana+=250; } if((d.ac|0)>=4){ d.abd=20; d.aobj=25; } if((d.ac|0)>=7){ d.cls+=3; d.dmgPct+=15; d.awk7=1; }   /* 각성 세트: 2개 최대 생명력 +10%·마나 +250 / 4개 보스 피해 +20%·파괴 오브젝트 피해 +25% / 7개 모든 스킬 +3·피해 +15%·'각성' */
   if((d.cs|0)>=2){ d.mf+=20; d.crit+=5; } if((d.cs|0)>=3){ d.cls+=3; d.ms+=30; }   /* 행운의 도박꾼 세트: 2개 드롭률 +20%·치명타 +5% / 3개 모든 스킬 +3·이동 속도 +30%·잭팟 타격(기본 공격 7% 피해 3배) */
   if(d.hc>=3) d.rbd=15; if(d.hc>=7){ d.rbd+=15; d.cls+=3; }   /* 그림자 세트: 3개 레이드 보스 피해 +15% · 7개 추가 +15%(합계 30%) & 모든 스킬 +3 */
@@ -4002,7 +4037,7 @@ function spiritBuff(){ if(!me||me.cls===undefined)return null; let l=0; if(me.sp
 function drMul(){ const b=me.buffs; let m=1; if(b.rage&&b.rage.t>0)m*=1+b.rage.pen; if(b.fury&&b.fury.t>0&&b.fury.dr)m*=1-b.fury.dr; if(b.roar&&b.roar.t>0)m*=1-b.roar.v; if(b.hunt&&b.hunt.t>0)m*=1-b.hunt.dr; return m; }
 /* 형태 바꾸기: 생명력 비율은 그대로, 0.3초 동안 움직임 잠금 */
 function setForm(f){ const hr=me.hp/me.D.maxHp; me.form=f||''; me.D=derive(me); me.hp=Math.min(me.D.maxHp,me.D.maxHp*hr); me.mp=Math.min(me.mp,me.D.maxMp); me.formLock=.3; me.vx=me.vy=0; uiDirty=true; }
-function critRoll(v){const c=!G.train&&Math.random()*100<me.D.crit;   /* 훈련장: 치명타 항상 실패 */ return {v:c?v*1.5*(me.D.sp&&me.D.sp.hdag?1.4:1)*(me.D.sp&&me.D.sp.aw_amu?1.3:1)*(me.D.sp&&me.D.sp.cas_wpn?1.5:1):v,crit:c};}
+function critRoll(v){const c=!G.train&&Math.random()*100<me.D.crit;   /* 훈련장: 치명타 항상 실패 */ return {v:c?v*1.5*(1+(me.D.cdm||0)/100)*(me.D.sp&&me.D.sp.hdag?1.4:1)*(me.D.sp&&me.D.sp.aw_amu?1.3:1)*(me.D.sp&&me.D.sp.cas_wpn?1.5:1):v,crit:c};}
 function physDmg(mult,basic){const D=me.D; const wr=ri(D.wmn,D.wmx), w=wr+D.dmg, pm=1+D.str/100+D.dmgPct/100+buffDmg(), bm=buffMul(), wk=PPR&&!basic?1+(D.wmn+D.wmx)/2/450:1; const r=critRoll(w*pm*mult*bm*wk); if(G.train)trMk(r,'p',[['W',wr],['A',D.dmg],['B',pm],['m',mult],['U',bm],['T',wk]]); return r;}   /* 🥨 빼빼로: 스킬(기본 공격 제외)에 무기 기술 보정 (1+무기 평균/450) */
 const ENEM=.003; /* 에너지 1당 마법 피해 +0.3% */
 function spellDmg(base,noPct){const D=me.D; const sm=1+D.ene*ENEM+(noPct?0:D.dmgPct/100)+buffDmg(), wm=1+((D.wmn+D.wmx)/2)/35, tm=D.sp.tome?1.3:1, bm=buffMul(); const r=critRoll(base*sm*wm*tm*bm); if(G.train)trMk(r,'s',[['b',base],[noPct?'D':'C',sm],['E',wm],['F',tm],['U',bm]]); return r;}
@@ -4016,7 +4051,7 @@ function applyStatus(kind,dur){ if(me.dead||me.god>0)return; let noImm=0; if(kin
   { const ar=(me.D&&me.D.sp&&me.D.sp.aw_ring)|0; if(ar&&['erode','hblock','hblockp','mblock','slow','stun','bleed','hlock'].includes(kind))dur*=Math.max(.5,1-.25*ar); }   /* 각성 반지 '속박 해제': 디버프 지속시간 -25% (2개 -50%) */
   { const sp=me.D&&me.D.sp; if(sp){ if(kind==='sil'){ dur*=Math.max(.5,1-.1*(sp.cs_ring|0))*((me.D.ks|0)>=4?.5:1); } else if(kind==='fear'&&(me.D.ks|0)>=7)dur=Math.min(dur,1); } }   /* 수문장 세트: 반지 봉쇄 -10%(2개 -20%) · 4세트 봉쇄 절반 · 7세트 공포 1초 */
   if(kind==='sil'){ me.sil=dur; addNum(me.x,me.y-52,'🚫 침묵!','#d0a8ff',true); spark(me.x,me.y,'#c8a0ff',14); return; }
-  if(kind==='fear'){ if(me.fearImm>0)return; me.fear=dur; me.fearImm=dur+CAS_CFG.horn.imm; me.fearT2=0; addNum(me.x,me.y-52,'😱 공포!','#ffb070',true); spark(me.x,me.y,'#ff9a5a',14); return; }
+  if(kind==='fear'){ if(me.fearImm>0||(me.D&&me.D.fearNo))return; me.fear=dur; me.fearImm=dur+CAS_CFG.horn.imm; me.fearT2=0; addNum(me.x,me.y-52,'😱 공포!','#ffb070',true); spark(me.x,me.y,'#ff9a5a',14); return; }
   if(kind==='cfix'){ spinHitMe(dur); return; }
   if(kind==='doom'){ if(me.hp>0){ addNum(me.x,me.y-50,'☠️ 즉사','#ff4a6a',true); burst(me.x,me.y,'#2a1a4a',40,320); spark(me.x,me.y,'#8a6cff',30); G.shake=1; sfx('hurt'); goDown(); } return; }   /* 그림자 등불 실패 */
   if(kind==='bleed'){ if(!(me.bleed>0))me.bleedT=.5; me.bleed=Math.max(me.bleed||0,dur); me.bleedN=Math.max(me.bleedN|0,Math.round(dur/.5)); me.hblk=Math.max(me.hblk||0,dur); if(me.hpLk==null)me.hpLk=me.hp; addNum(me.x,me.y-46,'🩸 출혈 · 물약·치유 오라만 회복','#ff5a6a',true); return; }   /* 그림자 베기: 3초간 0.5초마다 최대 생명력 10% 고정 피해 + 생명력 회복 불가(물약만) */
@@ -4357,6 +4392,8 @@ const EQSL=['weapon','helm','armor','amulet','ring1','ring2','shield'];
 const ilvOf=it=>it?(it.ilvl|0)+(it.enh|0):0; /* 표시·장비 레벨 계산용: 강화 +1마다 아이템 레벨 +1 (착용 요구치는 원래 레벨 기준) */
 const eqIlv=ilvOf;
 const eqSum=eq=>EQSL.reduce((t,k)=>t+eqIlv(eq&&eq[k]),0);
+const GM_PEN=[0,2,3,4];   /* 입장 패널티(칸마다 몬스터 체력·공격력 +%): 수문장·거인왕 세트 0 · 각성 2 · 그림자 3 · 그 외/빈 칸 4 → 최대 +28% */
+function gmPenOf(eq){ let pct=0, ok=0; const ks=['weapon','helm','armor','amulet','ring1','ring2','shield']; for(const k of ks){ const it=eq&&eq[k], S=it&&it.rar===4&&it.sp&&SPFX[it.sp]; const g=S?(S.gm||S.cs?0:S.aw?1:S.hero?2:3):3; pct+=GM_PEN[g]; if(g===0)ok++; } return {pct,ok,n:ks.length}; }
 function gearPenOf(eq,icap){ const gl=icap|0, n=EQSL.length, sum=eqSum(eq), gap=sum/n-gl;  /* 칸 평균과 스테이지 아이템 레벨의 차 */
   const wm=gap<-12?Math.max(.08,Math.pow(.55,(-gap-12)/8)):gap>5?Math.min(1.6,1+.015*(gap-5)):1;
   const tk=gap<-12?Math.min(2.5,Math.pow(1.2,(-gap-12)/8)):gap>5?Math.max(.6,1-.01*(gap-5)):1;
@@ -4407,7 +4444,7 @@ function hitMob(m,r,slow,tn,fx){
   if(!raw&&me.D&&me.D.rbd&&MT[m.type]&&MT[m.type].raid){ r=trX(r,1+me.D.rbd/100,'레이드 보스 피해'); } /* 그림자 세트: 레이드 보스에게 주는 피해 */
   if(!raw&&m.silT>0&&r.crit){ r=trX(r,CAS_CFG.sil.crit,'침묵 치명'); }   /* 침묵의 군기 동안 보스가 받는 치명타 피해 2배 */
   if(!raw&&m.mark&&m.mark.t>0){ r=trX(r,1+m.mark.v,'처형 표식'); } /* 처형 명령 표식: 받는 모든 피해 증가 */
-  if(!raw&&me.D){ const D=me.D; if(m.boss&&D.abd)r=trX(r,1+D.abd/100,'보스 피해'); if(m.obj){ const k=(D.sp&&D.sp.aw_helm?1.5:1)*(1+(D.aobj||0)/100); if(k!==1)r=trX(r,k,'오브젝트'); } }   /* 각성 세트 4개: 보스 피해 · 갈라진 왕관/세트: 파괴 오브젝트 피해 */
+  if(!raw&&me.D){ const D=me.D; { const ab=(m.boss?(D.abd||0):0)+(m.gmt&&D.sp&&D.sp.gm_ring?10*(D.sp.gm_ring|0):0); if(ab)r=trX(r,1+ab/100,'보스 피해'); }   /* 거인왕 반지(고르무스·수문장 +10%/개)와 세트 보스 피해는 더하기 */ if(m.obj){ const k=(D.sp&&D.sp.aw_helm?1.5:1)*(1+(D.aobj||0)/100); if(k!==1)r=trX(r,k,'오브젝트'); } }   /* 각성 세트 4개: 보스 피해 · 갈라진 왕관/세트: 파괴 오브젝트 피해 */
   if(!raw&&fx&&fx.basic&&!G.inProc&&me.D&&me.D.sp&&me.D.sp.aw_wpn&&Math.random()<.12){ const v2=r.v*.5, c2=r.crit; later(.12,()=>{ if(m.dead||!G.inGame)return; G.inProc=true; try{ hitMob(m,{v:v2,crit:c2},0,false,{basic:1}); spark(m.x,m.y,'#a68bff',8); }finally{ G.inProc=false; } }); }   /* 각성의 칼날: 분열 베기 */
   if(!raw&&fx&&fx.basic&&!G.inProc&&me.D&&me.D.sp&&(me.D.sp.cs_mace||me.D.sp.cs_sword)&&Math.random()<(m.boss?.005:.05)){ G.inProc=true; try{ const qx=m.x, qy=m.y; for(const q of mobsIn(qx,qy,130)){ if(q.boss&&q!==m&&Math.random()>=.1)continue; hitMob(q,{v:1,crit:false},0,false,{raw:1,stun:1}); } efx.push({k:'ring',x:qx,y:qy,r0:10,r1:130,t:0,life:.35,col:'#f0d29a',w:8}); spark(qx,qy,'#f0d29a',10); }finally{ G.inProc=false; } }   /* 성문 강타(수문장 철퇴·대검): 기본 공격 5% 범위 기절 1초 — 우두머리는 0.5%(맞춘 상대가 우두머리일 때, 다른 적을 때려 터진 범위 안의 우두머리는 그중 10%) */
   if(!raw&&fx&&fx.basic&&!G.inProc&&me.D&&(me.D.cs|0)>=3&&Math.random()<.07){ r=trX(r,3,'잭팟'); addNum(m.x,m.y-m.r-22,'🎰 잭팟!','#ffd34d',true); burst(m.x,m.y,'#ffd34d',16,240); }   /* 행운의 도박꾼 세트 3개: 잭팟 타격 */
@@ -7187,7 +7224,7 @@ function fitBan(root){ try{ (root||document).querySelectorAll('.ban .t b,.ban .t
 try{ document.fonts&&document.fonts.ready.then(()=>fitBan($('#stageBan'))); }catch(e){}
 window.addEventListener('resize',()=>fitBan($('#stageBan')));
 function banCard(cur,i,role){ const T=STAGES[i], bi=T.bs||MAPBOSS[T.id], tr=BANTRIO[T.id], gq=cur.eq?gearPenOf(cur.eq,T.icap):null, gv=!!gq&&gq.wm<.97, cl=i<stageClear;
-        return `<div class="ban ${role}${!bi&&!tr?' noimg':''}${tr?' trio':''}${role==='bk nx'&&i>stageClear?' lk':''}" data-i="${i}"${role==='cu'?'':' aria-hidden="true"'}><div class="t"><div class="sid">${esc(T.id)}</div><span class="sn">${esc(T.n)}${T.id==='4'?' (권장Lv95↑)':''}</span><b>${esc(T.bn||'')}</b><i class="${gv?'warn':''}">권장 장비 Lv 합 ${Math.max(1,T.icap-12)*EQSL.length}↑${gv?' · 부족':''}</i></div>${cl?'<div class="st clr"><b>클리어</b></div>':'<div class="st nc"><b>미클리어</b></div>'}${tr?`<span class="tri">${tr.map(k=>`<img src="img/${k}.png" alt="" onerror="this.remove()">`).join('')}</span>`:bi?`<img src="img/${bi}.png" alt="" onerror="this.remove()">`:''}</div>`; }
+        return `<div class="ban ${role}${!bi&&!tr?' noimg':''}${tr?' trio':''}${role==='bk nx'&&i>stageClear?' lk':''}" data-i="${i}"${role==='cu'?'':' aria-hidden="true"'}><div class="t"><div class="sid">${esc(T.id)}</div><span class="sn">${esc(T.n)}${T.id==='4'?' (권장Lv95↑)':''}</span><b>${esc(T.bn||'')}</b>${T.gm?(()=>{ const q=gmPenOf(cur.eq); return `<i class="warn">세트 점수 ${q.ok}/${q.n} · 몬스터 +${q.pct}% 강화</i>`; })():`<i class="${gv?'warn':''}">권장 장비 Lv 합 ${Math.max(1,T.icap-12)*EQSL.length}↑${gv?' · 부족':''}</i>`}</div>${cl?'<div class="st clr"><b>클리어</b></div>':'<div class="st nc"><b>미클리어</b></div>'}${tr?`<span class="tri">${tr.map(k=>`<img src="img/${k}.png" alt="" onerror="this.remove()">`).join('')}</span>`:bi?`<img src="img/${bi}.png" alt="" onerror="this.remove()">`:''}</div>`; }
 function renderStagePanel(){
   const chars=charIds().map(loadChar).filter(Boolean);
   $('#playPanel').hidden=!selId;
@@ -8578,7 +8615,7 @@ function buildGround(th,seed){ const c=document.createElement('canvas'); c.width
   else for(let i=0;i<40;i++){g.strokeStyle=th.tuft; g.lineWidth=1; const x=r()*256,y=r()*256; g.beginPath(); for(let j=0;j<4;j++){g.moveTo(x+j*2,y);g.lineTo(x+j*2+r()*4-2,y-4-r()*4);} g.stroke();}
   return ctx.createPattern(c,'repeat'); }
 const FLD={};
-function fieldGet(i){ let e=FLD[i]; if(!e){ e=FLD[i]={ok:false,im:new Image()}; e.im.onload=()=>{e.ok=true;}; e.im.onerror=()=>{e.bad=true;}; e.im.src='img/field_'+((i/5|0)+1)+'_'+(i%5+1)+'.jpg'; } return e.ok?e.im:null; }  /* 스테이지별 필드 배경 이미지(1000×1000) */
+function fieldGet(i){ let e=FLD[i]; if(!e){ e=FLD[i]={ok:false,im:new Image()}; e.im.onload=()=>{e.ok=true;}; e.im.onerror=()=>{e.bad=true;}; e.im.src=STAGES[i]&&STAGES[i].gm?'img/field_7_1.jpg':'img/field_'+((i/5|0)+1)+'_'+(i%5+1)+'.jpg'; } return e.ok?e.im:null; }  /* 스테이지별 필드 배경 이미지(1000×1000) */
 function setTheme(i){ i=Math.max(0,Math.min(STAGES.length-1,i|0)); if(themeIdx===i&&groundPat)return; themeIdx=i; const S=STAGES[i], th=S.th; try{fieldGet(i);}catch(e){}
   groundPat=buildGround(th,7+i*13);
   const r=mulberry(42+i*101); decor=[]; const tot=th.dec.reduce((a,d)=>a+d[1],0);
