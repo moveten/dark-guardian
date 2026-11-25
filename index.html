@@ -1569,7 +1569,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0918</div>
+    <div class="ver" id="verT">v0.7.2.0919</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3492,9 +3492,9 @@ function awkAI(m,dt,pls,sf,best,bd,tau){
 /* ===== 7스테이지 「거인왕의 무덤」 — 성채 단계 뼈대 =====
    우리 성(맨 아래) · 적 성채 3곳(위쪽) · 성채마다 4.5초에 1마리 · 좌·우 성채 몹은 우리 성 좌·우쪽을 침 · 성채를 다 부수면 보스 단계(다음 단계에서 구현) */
 const GMC_POS=[{k:'shield',x:175,y:512,off:-62,nm:'방패 보루'},{k:'helm',x:500,y:175,off:0,nm:'투구 성'},{k:'blade',x:825,y:512,off:62,nm:'칼날 성채'}];
-const GMC_HP=1.5e7, GMC_IV=4.5, GMC_CAP=70;
+const GMC_HP=1.5e7, GMC_IV=4.5, GMC_CAP=90, GMC_N=3, GMC_KILL_CAP=90;   /* 성채마다 GMC_IV초에 GMC_N마리 · 필드 몬스터 상한 GMC_CAP · 성채 몬스터 누적 처치가 GMC_KILL_CAP마리를 넘으면 이후 처치는 보상(경험치·골드·아이템) 없음 (수문장은 해당 없음) */
 const gmcTy=()=>MT.findIndex(t=>t.gmc);
-function gmBegin(){ G.phase='wave'; G.wave=1; G.waveSides=[0]; G.laneShow=[]; G.spawnQ=0; G.gmc=[]; G.gmDone=0; G.gmDw=null; G.gal=[]; G.galDone=0; G.gmPen=gmPenOf(me.eq).pct/100; const ty=gmcTy();
+function gmBegin(){ G.phase='wave'; G.wave=1; G.waveSides=[0]; G.laneShow=[]; G.spawnQ=0; G.gmc=[]; G.gmDone=0; G.gmKills=0; G.gmDw=null; G.gal=[]; G.galDone=0; G.gmPen=gmPenOf(me.eq).pct/100; const ty=gmcTy();
   for(const P of GMC_POS){ const m=spawnMob(ty,P.x,P.y,false); m.gmc=P.k; m.gn=P.nm; m.hx=P.x; m.hy=P.y; m.hp=m.max=GMC_HP; m.xp=0; m.dmg=0; m.spd=0; m.r=70; m.sp=rand(1,2.5); m.el=null; m.elT=2; gmgSpawn(P); m.cT=P.off?{x:CAS_T.x+P.off,y:CAS_T.y,i:-1,cas:1}:null; G.gmc.push(m); }
   gmDoorSpawn(); banner('성채를 부수세요','세 성채에서 몬스터가 쏟아집니다'); me.pot=3; pushEv(['w',1]); }
 function gmWave(dt){ gmDoorTick(dt); if(G.gmc&&G.gmc.length&&G.gmc.every(m=>m.dead)&&!G.gmDone){ G.gmDone=1; G.phase='boss'; announce('🏰 세 성채가 모두 무너졌어요!','#ffd860'); for(const m of G.mobs){ if(!m.dead&&!m.gmc)m.dead=true; } gmCutStart(); } }
@@ -3506,8 +3506,7 @@ function gmcMob(m){ const C=GM_MOB[m.gmc], pn=1+(G.gmPen||0), o=spawnMob(C.ty,m.
   return o; }
 function gmcTick(m,dt){ m.x=m.hx; m.y=m.hy; m.kx=m.ky=0; if(G.phase!=='wave')return;
   if(m.el&&m.el.dead){ m.el=null; m.elT=45; } if(!m.el&&m.elT>0)m.elT-=dt;
-  m.sp-=dt; if(m.sp>0)return; m.sp=GMC_IV; if(G.mobs.length>=GMC_CAP)return;
-  gmcMob(m); }
+  m.sp-=dt; if(m.sp>0)return; m.sp=GMC_IV; for(let i=0;i<GMC_N&&G.mobs.length<GMC_CAP;i++)gmcMob(m); }
 function gmcKill(m){ if(m.dead)return; m.dead=true; burst(m.x,m.y,'#8a7a60',40,320); spark(m.x,m.y,'#fff0c0',24); for(let i=0;i<3;i++)later(i*.15,()=>efx.push({k:'ring',x:m.x,y:m.y,r0:10,r1:170,t:0,life:.7,col:'#cdb9a0',w:12})); sfx('kill'); pushEv(['bx',Math.round(m.x),Math.round(m.y),70]); announce(`💥 ${m.gn} 파괴!`,'#ffd860'); if(!G.galDone){ G.galDone=1; galSpawn(); } castleRepair();   /* 성벽 수리 규칙대로 우리 성 회복 */
   for(const g of G.mobs){ if(g.gmg===m.gmc&&!g.dead)gmStone(g); } }   /* 수문장보다 성채를 먼저 부수면 수문장은 그 자리에서 돌이 돼요 (전리품 없음 · 공격 대상도 충돌도 없는 장식) */
 function gmStone(g){ g.dead=true; (G.gmStones=G.gmStones||[]).push({k:g.gmg,x:g.x,y:g.y,t0:T}); burst(g.x,g.y,'#bdb09a',30,260); spark(g.x,g.y-40,'#e6e0d0',14); efx.push({k:'ring',x:g.x,y:g.y,r0:8,r1:90,t:0,life:.6,col:'#cfc4ae',w:8}); sfx('block'); later(.9,()=>announce('🗿 "성채를 지키지 못했다…" 수문장이 그 자리에서 돌로 굳었어요','#c9b99a')); }
@@ -4262,8 +4261,9 @@ function killMob(m){
   m.dead=true; killJuice(m);
   if(G.mode!=='guest'&&m.af===3)spawnFire(m.x,m.y,64,6,.8);
   const tier=m.boss?2:m.elite?1:0, S=G.stg||STAGES[0], ilvl=m.boss?S.icap:Math.min(S.icap,Math.max(1,G.wave)+S.ilo);
-  pushEv(['k',m.id,Math.round(m.x),Math.round(m.y),m.xp,tier,ilvl,m.type,m.lf||1]);
-  onKill(Math.round(m.x),Math.round(m.y),m.xp,tier,ilvl,m.type,m.lf||1);
+  let noRew=false; if(m.gfrom&&G.stg&&G.stg.gm){ G.gmKills=(G.gmKills|0)+1; if(G.gmKills>GMC_KILL_CAP)noRew=true; else if(G.gmKills===GMC_KILL_CAP)later(.2,()=>announce(`🏰 성채 몬스터를 ${GMC_KILL_CAP}마리 처치했어요! 이후 처치는 보상이 없어요`,'#ffd860')); }   /* 성채 몬스터 보상 한도 */
+  if(!noRew){ pushEv(['k',m.id,Math.round(m.x),Math.round(m.y),m.xp,tier,ilvl,m.type,m.lf||1]);
+  onKill(Math.round(m.x),Math.round(m.y),m.xp,tier,ilvl,m.type,m.lf||1); }
   if(m.gmb&&G.mode!=='guest'&&Math.random()<GM_DROP_P){ const pt=pick(['weapon','helm','armor','amulet','ring','ring','shield']), key=pt==='weapon'?((me.cls==='war'||me.cls==='pal')?'gm_axe':'gm_staff'):pt==='shield'?'gmoff_'+me.cls:{helm:'gm_helm',armor:'gm_armor',amulet:'gm_amu',ring:'gm_ring'}[pt], it=genHero(key); if(it){ dropItem(it,Math.round(m.x)+rand(-24,24),Math.round(m.y)+rand(60,100)); later(.4,()=>announce('✨ 거인왕의 유산이 떨어졌어요!','#6fe8ff')); } }   /* ★6: 고르무스 처치 때만(임시 확률 30%, 부위 무작위·직업에 맞는 무기/보조) */
   if(m.gmg&&G.mode!=='guest'&&Math.random()<.01){ const g3=pick([0,1,2]), pt=['weapon','helm','armor','amulet','ring','shield'], it=g3===0?genHero(heroKey(pick(HDROP[pick(['war','sorc','shd'])]))):g3===1?genHero(awKey(pick(pt))):genHero(csKey(pick(pt))); if(it){ dropItem(it,Math.round(m.x)+rand(-20,20),Math.round(m.y)+rand(-20,20)); later(.3,()=>announce('✨ 수문장이 ★5 영웅 장비를 떨어뜨렸어요!','#ff7ea0')); } }   /* 성채 수문장: ★5 영웅 전체 풀에서 1종 1% (★6은 고르무스만) */
   if(m.boss&&!MT[m.type].raid&&G.mode!=='guest'&&!G.gemDone&&/^\d-\d$/.test(S.id)){ G.gemDone=true; if(Math.random()<gemP(S)){ const gt=Math.max(1,Math.min(3,Math.ceil((S.icap+1)/40))); pushEv(['gem',gt,Math.round(m.x),Math.round(m.y)]); gemDrop(gt,Math.round(m.x),Math.round(m.y)); } }   /* 스테이지 우두머리(1-1~3-5): 방장이 한 번만 30% 굴림 → 성공하면 모두에게 보석 하나씩 (종류는 각자 무작위) */
