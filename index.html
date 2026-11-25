@@ -1560,7 +1560,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0915</div>
+    <div class="ver" id="verT">v0.7.2.0916</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3483,7 +3483,7 @@ function awkAI(m,dt,pls,sf,best,bd,tau){
 /* ===== 7스테이지 「거인왕의 무덤」 — 성채 단계 뼈대 =====
    우리 성(맨 아래) · 적 성채 3곳(위쪽) · 성채마다 4.5초에 1마리 · 좌·우 성채 몹은 우리 성 좌·우쪽을 침 · 성채를 다 부수면 보스 단계(다음 단계에서 구현) */
 const GMC_POS=[{k:'shield',x:175,y:512,off:-62,nm:'방패 보루'},{k:'helm',x:500,y:175,off:0,nm:'투구 성'},{k:'blade',x:825,y:512,off:62,nm:'칼날 성채'}];
-const GMC_HP=3.0e7, GMC_IV=4.5, GMC_CAP=70;
+const GMC_HP=1.5e7, GMC_IV=4.5, GMC_CAP=70;
 const gmcTy=()=>MT.findIndex(t=>t.gmc);
 function gmBegin(){ G.phase='wave'; G.wave=1; G.waveSides=[0]; G.laneShow=[]; G.spawnQ=0; G.gmc=[]; G.gmDone=0; G.gmDw=null; G.gal=[]; G.galDone=0; G.gmPen=gmPenOf(me.eq).pct/100; const ty=gmcTy();
   for(const P of GMC_POS){ const m=spawnMob(ty,P.x,P.y,false); m.gmc=P.k; m.gn=P.nm; m.hx=P.x; m.hy=P.y; m.hp=m.max=GMC_HP; m.xp=0; m.dmg=0; m.spd=0; m.r=70; m.sp=rand(1,2.5); m.el=null; m.elT=2; gmgSpawn(P); m.cT=P.off?{x:CAS_T.x+P.off,y:CAS_T.y,i:-1,cas:1}:null; G.gmc.push(m); }
@@ -3545,10 +3545,10 @@ function drawGmg(m,t){ const k=m.gmg, x=m.x, y=m.y, hurt=m.flash>0, atk=m.atk>0|
   const bw=96, by=y-m.r*.55-172; ctx.fillStyle='rgba(0,0,0,.7)'; ctx.fillRect(x-bw/2-1,by-1,bw+2,8); ctx.fillStyle=m.eng?'#d8503a':'#a0a0a8'; ctx.fillRect(x-bw/2,by,bw*Math.max(0,r),6);
   ctx.font='bold 11px sans-serif'; ctx.textAlign='center'; ctx.fillStyle='#ffe2b0'; ctx.fillText({blade:'칼날 수문장',shield:'방패 수문장',helm:'투구 수문장'}[k],x,by-4); }
 /* ===== 소환의 문 · 거인 두개골 (7스테이지) =====
-   문(체력 2.0e7)은 전투 시작 20초 뒤 처음 열리고 이후 45초마다 열려 거인 두개골(체력 1.2e7)을 내보냄(동시에 최대 2마리).
+   문(체력 3.0e7)은 전투 시작 20초 뒤 처음 열리고 이후 45초마다 열려 거인 두개골(체력 1.8e7)을 내보냄(동시에 최대 2마리).
    두개골: 속도 ×1.8 · 캐릭터·정예를 무시하고 우리 성으로 직진 · 닿으면 4초마다 성 최대 체력의 8% · 기절·넉백·둔화 면역. 문을 부수면 더는 안 나옴.
    성가 사제 봉인은 6단계(우리 편 정예)에서 gmSeal(두개골)로 연결 */
-const GMD_POS={x:500,y:760}, GMD_HP=6.0e7, GMS_HP=1.2e7, GMD_FIRST=10, GMD_IV=45, GMS_MAX=2;
+const GMD_POS={x:500,y:760}, GMD_HP=3.0e7, GMS_HP=1.8e7, GMD_FIRST=10, GMD_IV=45, GMS_MAX=2;
 const gmdTy=()=>MT.findIndex(t=>t.gmd), gmsTy=()=>MT.findIndex(t=>t.gms);
 function gmDoorSpawn(){ const pn=1+(G.gmPen||0), o=spawnMob(gmdTy(),GMD_POS.x,GMD_POS.y,false); o.gmo=1; o.gmd=1; o.hp=o.max=GMD_HP*pn; o.xp=0; o.dmg=0; o.spd=0; o.r=48; o.hx=o.x; o.hy=o.y; o.open=0; G.gmDoor=o; G.gmDoorT=GMD_FIRST; }
 function gmDoorTick(dt){ const d=G.gmDoor; if(!d||d.dead)return; G.gmDoorT-=dt; if(G.gmDoorT>0)return;
@@ -3571,10 +3571,14 @@ function gmoTick(m,dt){ m.kx=m.ky=0; if(m.gmd){ if(m.open>0)m.open-=dt; m.x=m.hx
   else { m.dvx=m.dvy=0; m.at-=dt; if(m.at<=0){ m.at=4; m.atk=.3; castleHit(c.max*.08/Math.max(.05,1-(c.def||0))); G.shake=Math.max(G.shake,.4); sfx('slam'); } } }
 function gmSeal(m){ if(!m||m.dead)return; m.dead=true; burst(m.x,m.y,'#9ad0ff',24,280); efx.push({k:'ring',x:m.x,y:m.y,r0:8,r1:90,t:0,life:.5,col:'#bfe0ff',w:8}); announce('✨ 성가 사제가 거인 두개골을 봉인했어요','#bfe0ff'); }
 function gmoKill(m){ if(m.dead)return; m.dead=true;
-  if(m.gmd){ G.gmDw={x:m.x,y:m.y}; burst(m.x,m.y,'#8a7a60',36,320); for(let i=0;i<3;i++)later(i*.15,()=>efx.push({k:'ring',x:m.x,y:m.y,r0:10,r1:150,t:0,life:.6,col:'#cdb9a0',w:12})); sfx('kill'); announce('🚪 소환의 문이 부서졌어요! 이제 두개골이 나오지 않아요','#ffd860'); }
+  if(m.gmd){ G.gmDw={x:m.x,y:m.y,t0:T}; burst(m.x,m.y,'#8a7a60',36,320); for(let i=0;i<3;i++)later(i*.15,()=>efx.push({k:'ring',x:m.x,y:m.y,r0:10,r1:150,t:0,life:.6,col:'#cdb9a0',w:12})); sfx('kill'); announce('🚪 소환의 문이 부서졌어요! 이제 두개골이 나오지 않아요','#ffd860'); }
   else { burst(m.x,m.y,'#d8d2c0',26,300); spark(m.x,m.y,'#fff0c0',12); sfx('kill'); } }   /* 문·두개골: 전리품·경험치 없음 */
 function drawGmDoor(x,y,cell,hp){ const im=sprGet('door_s7'), W=170; if(!im)return; const cw=im.width/3, h=W*im.height/cw;
   ctx.fillStyle='rgba(0,0,0,.35)'; ctx.beginPath(); ctx.ellipse(x,y+34,W*.4,16,0,0,6.283); ctx.fill(); ctx.drawImage(im,cell*cw,0,cw,im.height,x-W/2,y+40-h,W,h); }
+/* 부서진 소환의 문: 부서진 뒤 5초가 지나면 2초에 걸쳐 더 어둡게 변해요 (어두운 그림은 한 번만 만들어 두고 겹쳐 그려요) */
+let GMD_DARK=null;
+function gmDoorDark(im){ if(GMD_DARK&&GMD_DARK.src===im)return GMD_DARK.c; const cw=im.width/3, c=document.createElement('canvas'); c.width=cw; c.height=im.height; const g=c.getContext('2d'); g.drawImage(im,2*cw,0,cw,im.height,0,0,cw,im.height); g.globalCompositeOperation='source-atop'; g.fillStyle='rgba(6,4,14,.74)'; g.fillRect(0,0,cw,im.height); GMD_DARK={src:im,c}; return c; }
+function drawGmDoorDead(d){ drawGmDoor(d.x,d.y,2,0); const k=Math.min(1,(T-d.t0-5)/2); if(k<=0)return; const im=sprGet('door_s7'); if(!im)return; const W=170, cw=im.width/3, h=W*im.height/cw, c=gmDoorDark(im); ctx.save(); ctx.globalAlpha=k; ctx.drawImage(c,0,0,c.width,c.height,d.x-W/2,d.y+40-h,W,h); ctx.restore(); }
 function drawGmo(m,t){ const x=m.x,y=m.y,r=m.hp/m.max;
   if(m.gmd){ drawGmDoor(x,y,m.open>0?1:0,r); if(m.flash>0){ ctx.save(); ctx.globalAlpha=.35; ctx.globalCompositeOperation='lighter'; drawGmDoor(x,y,m.open>0?1:0,r); ctx.restore(); }
     const bw=110, by=y-150; ctx.fillStyle='rgba(0,0,0,.7)'; ctx.fillRect(x-bw/2-1,by-1,bw+2,8); ctx.fillStyle='#d0803a'; ctx.fillRect(x-bw/2,by,bw*Math.max(0,r),6); ctx.font='bold 11px sans-serif'; ctx.textAlign='center'; ctx.fillStyle='#ffe2b0'; ctx.fillText('소환의 문',x,by-4); return; }
@@ -9844,7 +9848,7 @@ function render(t){
   if(G.gal)for(const g of G.gal){ if(!g.dead)actors.push({y:g.y,f:()=>drawGal(g,t)}); }
   if(G.gmCut)actors.push({y:99999,f:()=>drawGmCut(t)});
   if(G.gmTel&&G.gmTel.length&&G.gmB&&!G.gmB.dead&&G.stg&&G.stg.gm)actors.push({y:-1,f:()=>drawGmTel()});
-  if(G.gmDw)actors.push({y:G.gmDw.y,f:()=>drawGmDoor(G.gmDw.x,G.gmDw.y,2,0)});
+  if(G.gmDw)actors.push({y:G.gmDw.y,f:()=>drawGmDoorDead(G.gmDw)});
   if(me.spirit&&me.spirit.t>0&&!me.dead)actors.push({y:me.y+30,f:()=>drawSpirit(me,t,me.spirit.t,me.spirit.m)});
   if(ally&&!ally.lobby&&!ally.dead&&ally.sp>0&&ally.x!==undefined)actors.push({y:ally.y+30,f:()=>drawSpirit(ally,t,0,0)});
   if(ally&&!ally.lobby&&ally.mnv)for(const q of ally.mnv)actors.push({y:q.y,f:()=>drawMinion(q,t)});
