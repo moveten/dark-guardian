@@ -1571,7 +1571,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0931</div>
+    <div class="ver" id="verT">v0.7.2.0932</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3740,6 +3740,8 @@ function gmbResolve(b,c,pls){ const L=Array.isArray(c.tel)?c.tel:[c.tel];
   for(const o of L){ if(c.k==='roar'){ efx.push({k:'ring',x:o.x,y:o.y,r0:40,r1:o.r,t:0,life:.6,col:'#ffb070',w:14}); continue; }
     if(o.sh==='circ')slamFx(o.x,o.y,o.r,c.k==='tomb'?'#b8b0a0':'#9ad0ff'); else if(o.sh==='fan')slamFx(b.x+Math.cos(o.a)*o.r*.6,b.y+Math.sin(o.a)*o.r*.6,o.r*.5,'#9ad0ff'); else slamFx(b.x+Math.cos(o.a)*o.r*.5,b.y+Math.sin(o.a)*o.r*.5,60,'#9ad0ff'); } }
 /* 무덤 병사 부활(2페이즈~): 6마리, 체력 합 = 전체 체력의 5%, 사라지지 않고 싸움 */
+function gmSoldierHit(){ fixDmg(GMS_PCT,'💀','#9ad0ff'); if(me.dead||me.hp<=0||me.god>0)return; me.hblk=Math.max(me.hblk||0,GMS_BLK); me.hpLk=me.hp; if(T-(me._gsN||-9)>1){ me._gsN=T; addNum(me.x,me.y-66,'💔 '+GMS_BLK+'초 봉쇄 · 물약·치유 오라만 회복','#ff8ab0',true); } }   /* 무덤 병사 타격: 내 최대 생명력의 5% 고정 피해 + 2초 회복 금지 */
+const GMS_PCT=.05, GMS_BLK=2;
 function gmbSummon(b){ const hp=b.max*.05/6; let n=0; for(let i=0;i<6;i++){ const a=i/6*6.283+rand(-.2,.2), r=rand(150,210), x=GM_ARENA.x+Math.cos(a)*r, y=Math.max(GM_CLIFF+40,GM_CLIFF+170+Math.sin(a)*r*.6); const o=spawnMob(2,x,y,false);
     o.hp=o.max=hp; o.dmg=b.dmg0*.12; o.xp=0; o.inn=true; o.tsd=1; o.spd=o.spd*1.1; burst(x,y,'#9ad0ff',8,200); n++; }
   announce('💀 무덤 병사 6마리가 깨어났어요!','#c8d8e8'); sfx('boss'); }
@@ -4085,7 +4087,7 @@ function updateMobs(dt){
     mobKb(m,dt);
     m.sq=Math.max(0,(m.sq||0)-dt);
     if(d>reach){ const tm=tau?1.25:1; let ux=dx/d*tm,uy=dy/d*tm; if(m.fly){const a=Math.atan2(dy,dx)+Math.sin(T*4+m.id)*.8; ux=Math.cos(a);uy=Math.sin(a);} m.dvx=ux*m.spd*sf;m.dvy=uy*m.spd*sf;}
-    else if(m.cd<=0){m.cd=1.5;m.atk=.25; m.lastP=T; mobHitPlayer(m.tgt,m.dmg*((G.stageIdx|0)===0?.62:.85),(G.stg.zp&&m.type===1)?'poison':0,3); }
+    else if(m.cd<=0){m.cd=1.5;m.atk=.25; m.lastP=T; if(m.tsd&&m.tgt===1)gmSoldierHit(); else mobHitPlayer(m.tgt,m.dmg*((G.stageIdx|0)===0?.62:.85),(G.stg.zp&&m.type===1)?'poison':0,3); }
   }
   for(const m of G.mobs){ if(!m.dead){ mobSteer(m,dt); mobStay(m); } }
   // separation (겹침은 한 번에 밀어내지 않고 여러 프레임에 걸쳐 부드럽게)
