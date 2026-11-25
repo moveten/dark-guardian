@@ -1560,7 +1560,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0878</div>
+    <div class="ver" id="verT">v0.7.2.0879</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1910,7 +1910,9 @@ const MT0=[
  {n:'성 방패병',hp:10,dmg:1,spd:0,r:26,xp:0,leg:'sh'}, {n:'성 석궁병',hp:10,dmg:1,spd:0,r:22,xp:0,leg:'xb'}, {n:'대형 발리스타',hp:10,dmg:1,spd:0,r:36,xp:0,leg:'bl'},   /* 6스테이지 군단 호출 병사 */
  {n:'황금 고블린',hp:1e9,dmg:0,spd:0,r:20,xp:0,gob:1},
  {n:'적 성채',hp:10,dmg:0,spd:0,r:70,xp:0,gmc:1},   /* 7스테이지 적 성채 3곳 */
- {n:'성채 수문장',hp:10,dmg:1,spd:60,r:46,xp:5000,gmg:1}   /* 7스테이지 성채 수문장 3체 */   /* 레이드 4·5 스테이지 이벤트: 체력 없음, 때린 횟수로 보상 */
+ {n:'성채 수문장',hp:10,dmg:1,spd:60,r:46,xp:5000,gmg:1},   /* 7스테이지 성채 수문장 3체 */
+ {n:'소환의 문',hp:10,dmg:0,spd:0,r:48,xp:0,gmo:1,gmd:1},
+ {n:'거인 두개골',hp:10,dmg:0,spd:34,r:30,xp:0,gmo:1,gms:1}   /* 7스테이지 소환의 문 · 거인 두개골 */   /* 레이드 4·5 스테이지 이벤트: 체력 없음, 때린 횟수로 보상 */
 ];
 const MT=MT0.map(t=>({...t,r:t.r*MOBS}));
 const BOSSNAMES=MT.filter(m=>m.boss&&!m.raid).map(m=>m.n.split(' ').pop());
@@ -3480,10 +3482,10 @@ function awkAI(m,dt,pls,sf,best,bd,tau){
 const GMC_POS=[{k:'shield',x:175,y:512,off:-62,nm:'방패 보루'},{k:'helm',x:500,y:175,off:0,nm:'투구 성'},{k:'blade',x:825,y:512,off:62,nm:'칼날 성채'}];
 const GMC_HP=3.0e7, GMC_IV=4.5, GMC_CAP=70;
 const gmcTy=()=>MT.findIndex(t=>t.gmc);
-function gmBegin(){ G.phase='wave'; G.wave=1; G.waveSides=[0]; G.laneShow=[]; G.spawnQ=0; G.gmc=[]; G.gmDone=0; G.gmPen=gmPenOf(me.eq).pct/100; const ty=gmcTy();
+function gmBegin(){ G.phase='wave'; G.wave=1; G.waveSides=[0]; G.laneShow=[]; G.spawnQ=0; G.gmc=[]; G.gmDone=0; G.gmDw=null; G.gmPen=gmPenOf(me.eq).pct/100; const ty=gmcTy();
   for(const P of GMC_POS){ const m=spawnMob(ty,P.x,P.y,false); m.gmc=P.k; m.gn=P.nm; m.hx=P.x; m.hy=P.y; m.hp=m.max=GMC_HP; m.xp=0; m.dmg=0; m.spd=0; m.r=70; m.sp=rand(1,2.5); m.el=null; m.elT=2; gmgSpawn(P); m.cT=P.off?{x:CAS_T.x+P.off,y:CAS_T.y,i:-1,cas:1}:null; G.gmc.push(m); }
-  banner('성채를 부수세요','세 성채에서 몬스터가 쏟아집니다'); me.pot=3; pushEv(['w',1]); }
-function gmWave(dt){ if(G.gmc&&G.gmc.length&&G.gmc.every(m=>m.dead)&&!G.gmDone){ G.gmDone=1; G.phase='boss'; announce('🏰 세 성채가 모두 무너졌어요!','#ffd860'); for(const m of G.mobs){ if(!m.dead&&!m.gmc)m.dead=true; } } }
+  gmDoorSpawn(); banner('성채를 부수세요','세 성채에서 몬스터가 쏟아집니다'); me.pot=3; pushEv(['w',1]); }
+function gmWave(dt){ gmDoorTick(dt); if(G.gmc&&G.gmc.length&&G.gmc.every(m=>m.dead)&&!G.gmDone){ G.gmDone=1; G.phase='boss'; announce('🏰 세 성채가 모두 무너졌어요!','#ffd860'); for(const m of G.mobs){ if(!m.dead&&!m.gmc)m.dead=true; } } }
 const GM_MOB={shield:{ty:1,hp:2.5,dm:.8,sp:.6},blade:{ty:2,hp:.9,dm:1.2,sp:1.5},helm:{ty:9,hp:.7,dm:1,sp:.9}};   /* 성채 몹: 스테이지 몹 기본값 대비 체력·피해·속도 배율(그림은 기존 좀비·해골·궁수를 임시로 사용) */
 function gmcMob(m){ const C=GM_MOB[m.gmc], pn=1+(G.gmPen||0), o=spawnMob(C.ty,m.hx+rand(-46,46),m.hy+78+rand(-6,16),false);
   o.hp=o.max=o.hp*C.hp*pn; o.dmg*=C.dm*pn; o.spd*=C.sp; o.cT=m.cT; o.inn=true; o.gfrom=m.gmc;
@@ -3533,6 +3535,35 @@ function drawGmg(m,t){ const k=m.gmg, x=m.x, y=m.y, hurt=m.flash>0, atk=m.atk>0|
   if(m.bar>0){ ctx.strokeStyle='rgba(120,200,255,.75)'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(x,y-50,m.r*1.5,0,6.283); ctx.stroke(); }
   const bw=96, by=y-m.r*.55-172; ctx.fillStyle='rgba(0,0,0,.7)'; ctx.fillRect(x-bw/2-1,by-1,bw+2,8); ctx.fillStyle=m.eng?'#d8503a':'#a0a0a8'; ctx.fillRect(x-bw/2,by,bw*Math.max(0,r),6);
   ctx.font='bold 11px sans-serif'; ctx.textAlign='center'; ctx.fillStyle='#ffe2b0'; ctx.fillText({blade:'칼날 수문장',shield:'방패 수문장',helm:'투구 수문장'}[k],x,by-4); }
+/* ===== 소환의 문 · 거인 두개골 (7스테이지) =====
+   문(체력 2.0e7)은 전투 시작 20초 뒤 처음 열리고 이후 45초마다 열려 거인 두개골(체력 6.0e6)을 내보냄(동시에 최대 2마리).
+   두개골: 속도 ×1.8 · 캐릭터·정예를 무시하고 우리 성으로 직진 · 닿으면 4초마다 성 최대 체력의 8% · 기절·넉백·둔화 면역. 문을 부수면 더는 안 나옴.
+   성가 사제 봉인은 6단계(우리 편 정예)에서 gmSeal(두개골)로 연결 */
+const GMD_POS={x:500,y:760}, GMD_HP=2.0e7, GMS_HP=6.0e6, GMD_FIRST=20, GMD_IV=45, GMS_MAX=2;
+const gmdTy=()=>MT.findIndex(t=>t.gmd), gmsTy=()=>MT.findIndex(t=>t.gms);
+function gmDoorSpawn(){ const pn=1+(G.gmPen||0), o=spawnMob(gmdTy(),GMD_POS.x,GMD_POS.y,false); o.gmo=1; o.gmd=1; o.hp=o.max=GMD_HP*pn; o.xp=0; o.dmg=0; o.spd=0; o.r=48; o.hx=o.x; o.hy=o.y; o.open=0; G.gmDoor=o; G.gmDoorT=GMD_FIRST; }
+function gmDoorTick(dt){ const d=G.gmDoor; if(!d||d.dead)return; G.gmDoorT-=dt; if(G.gmDoorT>0)return;
+  if(G.mobs.filter(m=>m.gms&&!m.dead).length>=GMS_MAX){ G.gmDoorT=3; return; }
+  G.gmDoorT=GMD_IV; d.open=1.6; const pn=1+(G.gmPen||0), o=spawnMob(gmsTy(),d.x,d.y+40,false);
+  o.gmo=1; o.gms=1; o.hp=o.max=GMS_HP*pn; o.xp=0; o.dmg=0; o.r=30; o.spd=o.spd*1.8; o.inn=true; o.roll=0; o.at=1; o.seal=0;
+  announce('🚪 소환의 문이 열렸어요! 거인 두개골이 성으로 굴러옵니다','#ffb070'); sfx('boss'); efx.push({k:'ring',x:d.x,y:d.y,r0:10,r1:120,t:0,life:.6,col:'#ff9a50',w:10}); }
+function gmoTick(m,dt){ m.kx=m.ky=0; if(m.gmd){ if(m.open>0)m.open-=dt; m.x=m.hx; m.y=m.hy; return; }
+  const c=G.castle; if(!c||c.hp<=0||G.phase!=='wave'){ m.dvx=m.dvy=0; return; }
+  const dx=CAS_T.x-m.x, dy=CAS_T.y-m.y, d=hyp(dx,dy)||1, reach=CAS_R+m.r+6; m.fa=Math.atan2(dy,dx);
+  if(d>reach){ m.dvx=dx/d*m.spd; m.dvy=dy/d*m.spd; m.roll+=m.spd*dt/m.r; m.at=Math.min(m.at,1); }
+  else { m.dvx=m.dvy=0; m.at-=dt; if(m.at<=0){ m.at=4; m.atk=.3; castleHit(c.max*.08/Math.max(.05,1-(c.def||0))); G.shake=Math.max(G.shake,.4); sfx('slam'); } } }
+function gmSeal(m){ if(!m||m.dead)return; m.dead=true; burst(m.x,m.y,'#9ad0ff',24,280); efx.push({k:'ring',x:m.x,y:m.y,r0:8,r1:90,t:0,life:.5,col:'#bfe0ff',w:8}); announce('✨ 성가 사제가 거인 두개골을 봉인했어요','#bfe0ff'); }
+function gmoKill(m){ if(m.dead)return; m.dead=true;
+  if(m.gmd){ G.gmDw={x:m.x,y:m.y}; burst(m.x,m.y,'#8a7a60',36,320); for(let i=0;i<3;i++)later(i*.15,()=>efx.push({k:'ring',x:m.x,y:m.y,r0:10,r1:150,t:0,life:.6,col:'#cdb9a0',w:12})); sfx('kill'); announce('🚪 소환의 문이 부서졌어요! 이제 두개골이 나오지 않아요','#ffd860'); }
+  else { burst(m.x,m.y,'#d8d2c0',26,300); spark(m.x,m.y,'#fff0c0',12); sfx('kill'); } }   /* 문·두개골: 전리품·경험치 없음 */
+function drawGmDoor(x,y,cell,hp){ const im=sprGet('door_s7'), W=170; if(!im)return; const cw=im.width/3, h=W*im.height/cw;
+  ctx.fillStyle='rgba(0,0,0,.35)'; ctx.beginPath(); ctx.ellipse(x,y+34,W*.4,16,0,0,6.283); ctx.fill(); ctx.drawImage(im,cell*cw,0,cw,im.height,x-W/2,y+40-h,W,h); }
+function drawGmo(m,t){ const x=m.x,y=m.y,r=m.hp/m.max;
+  if(m.gmd){ drawGmDoor(x,y,m.open>0?1:0,r); if(m.flash>0){ ctx.save(); ctx.globalAlpha=.35; ctx.globalCompositeOperation='lighter'; drawGmDoor(x,y,m.open>0?1:0,r); ctx.restore(); }
+    const bw=110, by=y-150; ctx.fillStyle='rgba(0,0,0,.7)'; ctx.fillRect(x-bw/2-1,by-1,bw+2,8); ctx.fillStyle='#d0803a'; ctx.fillRect(x-bw/2,by,bw*Math.max(0,r),6); ctx.font='bold 11px sans-serif'; ctx.textAlign='center'; ctx.fillStyle='#ffe2b0'; ctx.fillText('소환의 문',x,by-4); return; }
+  const im=sprGet('skull_s7'), S=84, cell=m.flash>0?2:m.atk>0?1:0; ctx.fillStyle='rgba(0,0,0,.35)'; ctx.beginPath(); ctx.ellipse(x,y+m.r*.8,m.r*1.0,m.r*.4,0,0,6.283); ctx.fill();
+  if(im){ const cw=im.width/3; ctx.save(); ctx.translate(x,y); if(cell===0)ctx.rotate(m.roll||0); ctx.drawImage(im,cell*cw,0,cw,im.height,-S/2,-S/2,S,S*im.height/cw); ctx.restore(); } else { circle(x,y,m.r,'#d8d2c0'); }
+  const bw=54, by=y-m.r-18; ctx.fillStyle='rgba(0,0,0,.7)'; ctx.fillRect(x-bw/2-1,by-1,bw+2,7); ctx.fillStyle='#e0d8c0'; ctx.fillRect(x-bw/2,by,bw*Math.max(0,r),5); }
 function spawnMob(type,x,y,elite){
   const S=G.stg||STAGES[0], w=Math.max(1,G.wave), hm=(1+.12*(w-1))*(G.coop?1.4:1)*(elite?8:1)*S.hpM*1.2, dm=(1+.08*(w-1))*(elite?4.6:1)*S.dmgM*1.6;
   const t=MT[type], m={id:G.mobId++,type,x,y,hp:t.hp*hm,max:t.hp*hm,dmg:t.dmg*dm,spd:t.spd*(elite?1.3:S.spdM)*(t.boss?.95:.5),r:t.r*(elite?1.5:1),xp:Math.round(t.xp*(1+.1*(w-1))*S.xpM*(elite?5:1)),elite:!!elite,boss:!!t.boss,fly:!!t.fly,cd:rand(0,1),slowT:0,tgt:0,rt:0,atk:0,fa:0,flash:0,anim:Math.random()*6,kx:0,ky:0,sq:0};
@@ -3800,6 +3831,7 @@ function updateMobs(dt){
     if(m.dev){ casDevTick(m,dt); continue; }
     if(m.gmc){ gmcTick(m,dt); continue; }
     if(m.gmg){ gmgTick(m,dt,pls,sf); continue; }
+    if(m.gmo){ gmoTick(m,dt); continue; }
     if(m.leg){ casLegTick(m,dt); continue; }
     if(m.obj){ m.kx=m.ky=0; awkObjTick(m,dt); continue; }   /* 봉인 결정: 제자리에 가만히 */
     if(m.gpr!=null){ m.gpr-=dt; if(m.gpr<=0){ m.gpr=m.gpi||8; for(const q of G.mobs){ if(q.dead||q.gmc||q===m||hyp(q.x-m.x,q.y-m.y)>160)continue; q.bar=Math.max(q.bar||0,q.max*.2); } efx.push({k:'ring',x:m.x,y:m.y,r0:10,r1:160,t:0,life:.5,col:'#7ec8ff',w:6}); } }   /* 투구 성 사제: 8초마다 주변 몹에 보호막(최대 체력의 20%) */
@@ -4001,7 +4033,7 @@ function applyDmg(m,dmg,slow,fx){
   if(m.leg)dmg=casLegDmg(m,dmg);
   if(!(dmg>0))return;
   if(m.scare)m.scLast=T;
-  if(m.dev||m.leg||m.gmc||m.gmg){ slow=0; if(fx&&fx.stun){ fx={...fx}; delete fx.stun; } }   /* 공성장치: 피해는 받지만 기절·둔화·밀림 등 군중 제어에는 면역 */
+  if(m.dev||m.leg||m.gmc||m.gmg||m.gmo){ slow=0; if(fx&&fx.stun){ fx={...fx}; delete fx.stun; } }   /* 공성장치: 피해는 받지만 기절·둔화·밀림 등 군중 제어에는 면역 */
   if(m.dfM>1)dmg/=m.dfM;
   if(m.vuln&&m.vuln.t>0)dmg*=1+m.vuln.v;
   if(m.bar>0){ const a=Math.min(m.bar,dmg); m.bar-=a; dmg-=a; if(!(dmg>0)){ m.flash=.12; return; } }   /* 보호막 */   /* 위압 함성: 받는 모든 피해 증가 (파티원 피해 포함) */
@@ -4017,6 +4049,7 @@ function killMob(m){
   if(m.gob)return;
   if(m.dev){ casDevKill(m); return; }
   if(m.gmc){ gmcKill(m); return; }
+  if(m.gmo){ gmoKill(m); return; }
   if(m.leg){ casLegKill(m); return; }
   if(m.rk==='cas'){ for(const o of G.mobs){ if((o.dev||o.leg)&&!o.dead){ o.dead=true; burst(o.x,o.y,'#a08a60',16,240); if(o.dev){ casWreckAdd(o); burst(o.x,o.y,CAS_DVC[o.dv],18,300); spark(o.x,o.y,'#fff0c0',14); efx.push({k:'ring',x:o.x,y:o.y,r0:8,r1:110,t:0,life:.5,col:CAS_DVC[o.dv],w:12}); } } } G.casGen=(G.casGen|0)+1; G.leg=null; }
   if(m.fake||m.obj){ m.dead=true; if(m.obj){ burst(m.x,m.y,'#cfc0ff',26,300); spark(m.x,m.y,'#8a6cff',20); efx.push({k:'ring',x:m.x,y:m.y,r0:8,r1:70,t:0,life:.4,col:'#b89cff',w:8}); sfx('crit'); pushEv(['bx',Math.round(m.x),Math.round(m.y),40]); const left=G.mobs.filter(o=>!o.dead&&o.obj).length; announce(left?`🔮 결정 파괴! 남은 결정 ${left}개`:'🔮 결정을 모두 부쉈어요!','#c0a8ff'); }
@@ -4197,7 +4230,7 @@ function hcDown(why){ if(!me||!me.hc||me.hd>0)return; G.hcWhy=why||''; me.hd=Dat
 function hcShowDie(){ if(!me||!me.hc||!(me.hd>0))return; const S=STAGES[(me.hs|0)-1]; $('#hcDieS').textContent=`${dispName(me)} · Lv ${me.lvl}`; $('#hcDieM').innerHTML=`${S?'스테이지 '+esc(S.id)+'에서 ':''}${G.hcWhy==='castle'?'중앙의 성이 무너져 패배했어요':'쓰러졌어요'}<br>처치 ${(me.kills|0).toLocaleString('ko-KR')}마리${(me.kills|0)>0?' · 랭킹에는 💀 표시로 남아요':''}`; try{ storyStop(); }catch(e){} { const o=$('#hcDie'); if(o.parentNode!==document.body)document.body.appendChild(o); } $('#hcDie').hidden=false; sfx('lose'); }
 function reviveMe(pct,free){ voice('revive',0,true); G.stRev=(G.stRev|0)+1; me.vx=me.vy=0; const a=me.aura,pot=me.pot,bx=me.x,by=me.y; me.dead=false; me.out=false; me.stun=me.slowP=me.poison=me.sil=me.fear=0; me.respawn=0; me.leap=null; me.cds={}; me.buffs={}; me.aura=a; me.pot=pot; me.D=derive(me); me.hp=me.D.maxHp*pct; me.mp=me.D.maxMp*.5; me.god=3; me.x=bx; me.y=by;   /* 부활 후 3초 무적 */
   efx.push({k:'rvfx',x:me.x,y:me.y,t:0,life:1.3}); efx.push({k:'ring',x:me.x,y:me.y,r0:10,r1:190,t:0,life:.8,col:'#ffd84a',w:10}); later(.12,()=>efx.push({k:'ring',x:me.x,y:me.y,r0:10,r1:260,t:0,life:.9,col:'#fff6cc',w:7})); later(.26,()=>efx.push({k:'ring',x:me.x,y:me.y,r0:10,r1:330,t:0,life:1,col:'#ffb04a',w:5})); impact(me.x,me.y,'255,235,160',260); spark(me.x,me.y,'#ffd84a',50); burst(me.x,me.y,'#ffe08a',50,340); burst(me.x,me.y-30,'#ffffff',24,200); G.flash=.9; G.shake=Math.max(G.shake,.5); sfx('revive');
-  for(const m of G.mobs){ if(m.dead||m.boss||m.dev||m.leg||m.gmc||m.gmg)continue; const dx=m.x-me.x,dy=m.y-me.y,d=hyp(dx,dy); if(d<170){ m.kx=(m.kx||0)+dx/(d||1)*420; m.ky=(m.ky||0)+dy/(d||1)*420; } } if(me.cls==='necro'&&!minions.length)autoSummon(); uiDirty=true; }   /* 부활하면 기본 소환수(수호 영혼·포격 영혼)는 다시 불러옴 */
+  for(const m of G.mobs){ if(m.dead||m.boss||m.dev||m.leg||m.gmc||m.gmg||m.gmo)continue; const dx=m.x-me.x,dy=m.y-me.y,d=hyp(dx,dy); if(d<170){ m.kx=(m.kx||0)+dx/(d||1)*420; m.ky=(m.ky||0)+dy/(d||1)*420; } } if(me.cls==='necro'&&!minions.length)autoSummon(); uiDirty=true; }   /* 부활하면 기본 소환수(수호 영혼·포격 영혼)는 다시 불러옴 */
 function mightLevel(){ let l=0; if(me.aura==='might')l=skLv(me,'might');
   if(ally&&!ally.lobby&&!ally.dead&&ally.aura==='might'&&hyp(ally.x-me.x,ally.y-me.y)<320) l=Math.max(l,ally.al|0); return l; }
 /* 회복 봉쇄: 걸려 있는 동안 생명력·마나가 올라가지 못하게 잠금 (물약·흡혈·재생·오라·회복 구역·처치 회복 등 모든 회복) */
@@ -4531,7 +4564,7 @@ function hitMob(m,r,slow,tn,fx){
   if(!(fx&&fx.sm&&!r.crit))sfx(r.crit?'crit':'hit',hitPm(),me.cls);
   spark(m.x,m.y,r.crit?'#ffd34d':'#ffb08a',r.crit?12:5);
   if(r.crit&&!(fx&&fx.sm))critSlash(m);
-  if(G.mode!=='guest'&&!m.boss&&!m.elite&&!m.dev&&!m.leg&&!m.gmc&&!m.gmg){ const kx=m.x-me.x,ky=m.y-me.y,kd=hyp(kx,ky)||1,kf=r.crit?95:55; m.kx=(m.kx||0)+kx/kd*kf; m.ky=(m.ky||0)+ky/kd*kf; }
+  if(G.mode!=='guest'&&!m.boss&&!m.elite&&!m.dev&&!m.leg&&!m.gmc&&!m.gmg&&!m.gmo){ const kx=m.x-me.x,ky=m.y-me.y,kd=hyp(kx,ky)||1,kf=r.crit?95:55; m.kx=(m.kx||0)+kx/kd*kf; m.ky=(m.ky||0)+ky/kd*kf; }
   const smh=!!(fx&&fx.sm);
   const nhs=!!(fx&&fx.nohs);   /* 타격 정지(화면 멈춤)는 모든 공격에서 제거 — 여러 번 맞는 스킬에서 끊김처럼 보였음 */
   { const sk=smh?0:nhs?.05:r.crit?.3:.08; if(sk>G.shake){ G.shd=[Math.cos(m.sqa),Math.sin(m.sqa)]; G.shdT=T+.12; } G.shake=Math.max(G.shake,sk); }   /* 흔들림이 때린 방향으로 밀림 */
@@ -8927,6 +8960,7 @@ function drawMob(m,t){
   if(m.dev){ drawDev(m,t); return; }
   if(m.gmc){ drawGmc(m,t); return; }
   if(m.gmg){ drawGmg(m,t); return; }
+  if(m.gmo){ drawGmo(m,t); return; }
   if(m.leg){ drawLeg(m,t); return; }
   if(m.hide){ casHideDraw(m,t); return; }
   if(m.rk==='cas')casUnder(m,t);
@@ -9617,6 +9651,7 @@ function render(t){
   for(const q of minions)if(q.rez<=0)actors.push({y:q.y,o:q,f:()=>drawMinion(q,t)});
   if(PET.on&&petNow()&&!me.dead)actors.push({y:PET.y,f:()=>drawPet(t)});
   if(G.castle)actors.push({y:VY+CAS_BASE,cas:1,f:()=>drawCastle(t)});
+  if(G.gmDw)actors.push({y:G.gmDw.y,f:()=>drawGmDoor(G.gmDw.x,G.gmDw.y,2,0)});
   if(me.spirit&&me.spirit.t>0&&!me.dead)actors.push({y:me.y+30,f:()=>drawSpirit(me,t,me.spirit.t,me.spirit.m)});
   if(ally&&!ally.lobby&&!ally.dead&&ally.sp>0&&ally.x!==undefined)actors.push({y:ally.y+30,f:()=>drawSpirit(ally,t,0,0)});
   if(ally&&!ally.lobby&&ally.mnv)for(const q of ally.mnv)actors.push({y:q.y,f:()=>drawMinion(q,t)});
