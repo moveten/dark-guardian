@@ -1560,7 +1560,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0887</div>
+    <div class="ver" id="verT">v0.7.2.0888</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3569,7 +3569,7 @@ function drawGmo(m,t){ const x=m.x,y=m.y,r=m.hp/m.max;
   const bw=54, by=y-m.r-18; ctx.fillStyle='rgba(0,0,0,.7)'; ctx.fillRect(x-bw/2-1,by-1,bw+2,7); ctx.fillStyle='#e0d8c0'; ctx.fillRect(x-bw/2,by,bw*Math.max(0,r),5); }
 /* ===== 우리 편 정예 3마리 (7스테이지) — 첫 번째 성채가 무너질 때 우리 성문에서 한 번만 등장, 죽으면 끝 · 정예 스킬은 캐릭터에 영향 없음 =====
    방패 근위대장(체력 1.2e7 · 받는 피해 −25% · 8초마다 3초 도발) · 대검 돌격기사(8.4e6 · 피해 근위대장 ×2.5 · 1.6초 범위 베기 · 정예·보스 쪽으로 돌진) · 성가 사제(7.2e6 · 6초마다 가장 약한 정예 8% 치유 · 15초마다 전원 5% 보호막 · 두개골 봉인 최우선) */
-const GAL={royal:{n:'방패 근위대장',hp:1.2e7,dmg:9000,iv:1.2,spd:72,r:30,h:150,bh:787},knight:{n:'대검 돌격기사',hp:8.4e6,dmg:22500,iv:1.6,spd:118,r:30,h:150,bh:757},cleric:{n:'성가 사제',hp:7.2e6,dmg:0,iv:9,spd:62,r:26,h:150,bh:783}};
+const GAL={royal:{n:'방패 근위대장',hp:1.2e7,dmg:9000,iv:1.2,spd:72,r:30,h:80,bh:787},knight:{n:'대검 돌격기사',hp:8.4e6,dmg:22500,iv:1.6,spd:118,r:30,h:80,bh:757},cleric:{n:'성가 사제',hp:7.2e6,dmg:0,iv:9,spd:62,r:26,h:80,bh:783}};
 function galSpawn(){ if(G.stg&&G.stg.gm!==1||G.mode==='guest')return; let n=0;
   for(const k of ['royal','knight','cleric']){ const C=GAL[k], x=CAS_T.x+(n-1)*58, y=CAS_T.y+62; G.gal.push({k,i:100+n,x,y,hp:C.hp,max:C.hp,r:C.r,cd:rand(.4,1),flash:0,atk:0,mv:0,bar:0,tc:0,tt:0,heal:3,shd:6,seal:null,spd0:C.spd,buf:0}); burst(x,y,'#bfe0ff',22,260); efx.push({k:'ring',x,y,r0:10,r1:90,t:0,life:.6,col:'#cfe8ff',w:8}); n++; }
   banner('🛡️ 지원군 도착!','우리 편 정예가 성문에서 나왔어요'); sfx('boss'); }
@@ -3600,8 +3600,8 @@ function galTick(dt){ const L=G.gal; if(!L)return; const alive=L.filter(q=>!q.de
 function drawGal(a,t){ const C=GAL[a.k], x=a.x, y=a.y, key='ally7_'+a.k+(a.flash>0?'_hurt':a.atk>0?'_atk':a.mv?'_walk':''), im=sprGet(key)||sprGet('ally7_'+a.k), sc=C.h/C.bh, r=a.hp/a.max;
   ctx.fillStyle='rgba(0,0,0,.4)'; ctx.beginPath(); ctx.ellipse(x,y+10,C.r*1.1,C.r*.4,0,0,6.283); ctx.fill();
   if(im){ const w=im.width*sc, h=im.height*sc, bob=a.mv?Math.sin(t*10+a.i)*2:0; ctx.drawImage(im,x-w/2,y+12-h+bob,w,h); } else { circle(x,y-30,24,'#9ac0e8'); }
-  if(a.bar>0){ ctx.strokeStyle='rgba(120,200,255,.75)'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(x,y-50,C.r*1.8,0,6.283); ctx.stroke(); }
-  if(a.seal){ const q=Math.min(1,a.seal.t/5); ctx.strokeStyle='rgba(190,230,255,.9)'; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(x,y-50,C.r*2.2,-1.57,-1.57+6.283*q); ctx.stroke(); }
+  if(a.bar>0){ ctx.strokeStyle='rgba(120,200,255,.75)'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(x,y-C.h*.35,C.r*1.8,0,6.283); ctx.stroke(); }
+  if(a.seal){ const q=Math.min(1,a.seal.t/5); ctx.strokeStyle='rgba(190,230,255,.9)'; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(x,y-C.h*.35,C.r*2.2,-1.57,-1.57+6.283*q); ctx.stroke(); }
   const bw=70, by=y-C.h-4; ctx.fillStyle='rgba(0,0,0,.7)'; ctx.fillRect(x-bw/2-1,by-1,bw+2,8); ctx.fillStyle='#5fc86a'; ctx.fillRect(x-bw/2,by,bw*Math.max(0,r),6);
   ctx.font='bold 11px sans-serif'; ctx.textAlign='center'; ctx.fillStyle='#bfe8ff'; ctx.fillText(C.n,x,by-4); }
 /* ===== 성채 3개 파괴 후 전환 연출 (약 9초, 건너뛰기 가능) =====
