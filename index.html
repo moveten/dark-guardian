@@ -1571,7 +1571,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0925</div>
+    <div class="ver" id="verT">v0.7.2.0926</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3534,7 +3534,7 @@ function drawGmc(m,t){ const im=sprGet('castle_s7_'+m.gmc), r=m.hp/m.max, st=r>.
   const bw=150, by=y-112; ctx.fillStyle='rgba(0,0,0,.7)'; ctx.fillRect(x-bw/2-1,by-1,bw+2,9); ctx.fillStyle='#c0553a'; ctx.fillRect(x-bw/2,by,bw*Math.max(0,r),7);
   ctx.font='bold 12px sans-serif'; ctx.textAlign='center'; ctx.fillStyle='#ffe2b0'; ctx.fillText(m.gn,x,by-4); }
 /* ===== 성채 수문장 (7스테이지) — 성채 앞에 미리 서 있다가 반경 260 안에 들어오면 전투 ===== */
-const GMG_HP=7.2e7, GMG_AGGRO=260, GMG_CN_IV=16, GMG_CN_DUR=2.3, GMG_CN_PCT=.33, GMG_BASH_STUN=2, GMG_BLEED_IV=10, GMG_BLEED_T=5, GMG_WEAK_IV=10, GMG_WEAK_T=6, GMG_BUF_IV=15, GMG_BUF_T=5, GMG_BUF_M=1.2;   /* 칼날 수문장: 10초마다 출혈(5초 회복 금지) · 투구 수문장: 10초마다 약화(6초, 받는 피해 +20%) · 15초마다 다른 수문장 공격력 +20%를 5초 */   /* 방패 수문장 반격 태세: 16초마다 2.3초 (태세 중 쓴 스킬은 나에게 반사 — 보스 반격 태세와 같은 규칙) */
+const GMG_HP=4.5e7, GMG_AGGRO=260, GMG_CN_IV=16, GMG_CN_DUR=2.3, GMG_CN_PCT=.33, GMG_BASH_STUN=2, GMG_BLEED_IV=10, GMG_BLEED_T=5, GMG_WEAK_IV=10, GMG_WEAK_T=6, GMG_BUF_IV=15, GMG_BUF_T=5, GMG_BUF_M=1.2;   /* 칼날 수문장: 10초마다 출혈(5초 회복 금지) · 투구 수문장: 10초마다 약화(6초, 받는 피해 +20%) · 15초마다 다른 수문장 공격력 +20%를 5초 */   /* 방패 수문장 반격 태세: 16초마다 2.3초 (태세 중 쓴 스킬은 나에게 반사 — 보스 반격 태세와 같은 규칙) */
 const gmgTy=()=>MT.findIndex(t=>t.gmg);
 const gmgDmg=()=>RAIDB()*Math.pow(44/34,.8)*2;   /* 수문장 카스텔 기본 피해 기준 + 스테이지 피해 배율 차이 */
 const gmFront=m=>{ const dx=me.x-m.x, dy=me.y-m.y, d=hyp(dx,dy)||1; return (Math.cos(m.fa||0)*dx+Math.sin(m.fa||0)*dy)/d>.5; };   /* 방패 수문장 정면(±60°) */
@@ -3574,7 +3574,7 @@ function drawGmg(m,t){ const k=m.gmg, x=m.x, y=m.y, hurt=m.flash>0, atk=m.atk>0|
    문(체력 3.0e7)은 전투 시작 20초 뒤 처음 열리고 이후 45초마다 열려 거인 두개골(체력 1.8e7)을 내보냄(동시에 최대 2마리).
    두개골: 속도 ×1.8 · 캐릭터·정예를 무시하고 우리 성으로 직진 · 닿으면 4초마다 성 최대 체력의 8% · 기절·넉백·둔화 면역. 문을 부수면 더는 안 나옴.
    성가 사제 봉인은 6단계(우리 편 정예)에서 gmSeal(두개골)로 연결 */
-const GMD_POS={x:500,y:760}, GMD_HP=3.0e7, GMS_HP=1.8e7, GMD_FIRST=10, GMD_IV=45, GMS_MAX=2;
+const GMD_POS={x:500,y:760}, GMD_HP=2.5e7, GMS_HP=1.8e7, GMD_FIRST=10, GMD_IV=45, GMS_MAX=2;
 const gmdTy=()=>MT.findIndex(t=>t.gmd), gmsTy=()=>MT.findIndex(t=>t.gms);
 function gmDoorSpawn(){ const pn=1+(G.gmPen||0), o=spawnMob(gmdTy(),GMD_POS.x,GMD_POS.y,false); o.gmo=1; o.gmd=1; o.hp=o.max=GMD_HP*pn; o.xp=0; o.dmg=0; o.spd=0; o.r=48; o.hx=o.x; o.hy=o.y; o.open=0; G.gmDoor=o; G.gmDoorT=GMD_FIRST; }
 function gmDoorTick(dt){ const d=G.gmDoor; if(!d||d.dead)return; G.gmDoorT-=dt; if(G.gmDoorT>0)return;
@@ -3630,7 +3630,10 @@ function galTick(dt){ const L=G.gal; if(!L)return; const alive=L.filter(q=>!q.de
   for(const a of L){ if(a.dead)continue; a.flash=Math.max(0,a.flash-dt); a.atk=Math.max(0,a.atk-dt); a.cd-=dt; a.mv=0; if(a.buf>0)a.buf-=dt; const C=GAL[a.k], sp=a.spd0*(a.buf>0?2:1);
     if(a.k==='cleric'){
       a.heal-=dt; a.shd-=dt;
-      if(a.heal<=0){ a.heal=6; let w=null,wr=2; for(const q of alive){ const r=q.hp/q.max; if(r<wr&&r<1){ wr=r; w=q; } } if(w){ w.hp=Math.min(w.max,w.hp+w.max*.08); spark(w.x,w.y,'#9be38a',8); a.atk=.4; } }
+      if(a.heal<=0){ a.heal=6; const HR=300, who=alive.filter(q=>hyp(q.x-a.x,q.y-a.y)<HR&&q.hp<q.max), mh=!me.dead&&hyp(me.x-a.x,me.y-a.y)<HR&&me.hp<me.D.maxHp;   /* 광역 치유: 반경 300 안의 우리 편 정예 + 내 캐릭터 모두 최대 생명력의 8% */
+        if(who.length||mh){ for(const q of who){ q.hp=Math.min(q.max,q.hp+q.max*.08); spark(q.x,q.y,'#9be38a',8); }
+          if(mh){ const hv=Math.round(me.D.maxHp*.08); me.hp=Math.min(me.D.maxHp,me.hp+hv); addNum(me.x,me.y-40,'+'+hv,'#9be38a',false); spark(me.x,me.y,'#9be38a',10); }
+          efx.push({k:'ring',x:a.x,y:a.y,r0:10,r1:HR,t:0,life:.6,col:'#9be38a',w:8}); a.atk=.4; } }
       if(a.shd<=0){ a.shd=15; for(const q of alive){ q.bar=Math.max(q.bar,q.max*.05); } efx.push({k:'ring',x:a.x,y:a.y,r0:10,r1:130,t:0,life:.5,col:'#7ec8ff',w:6}); a.atk=.4; }
       const sk=G.mobs.filter(m=>m.gms&&!m.dead).sort((p,q)=>hyp(p.x-a.x,p.y-a.y)-hyp(q.x-a.x,q.y-a.y))[0];
       if(sk){ a.skSeen=1; const d=hyp(sk.x-a.x,sk.y-a.y);
