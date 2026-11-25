@@ -1560,7 +1560,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0879</div>
+    <div class="ver" id="verT">v0.7.2.0880</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3482,7 +3482,7 @@ function awkAI(m,dt,pls,sf,best,bd,tau){
 const GMC_POS=[{k:'shield',x:175,y:512,off:-62,nm:'방패 보루'},{k:'helm',x:500,y:175,off:0,nm:'투구 성'},{k:'blade',x:825,y:512,off:62,nm:'칼날 성채'}];
 const GMC_HP=3.0e7, GMC_IV=4.5, GMC_CAP=70;
 const gmcTy=()=>MT.findIndex(t=>t.gmc);
-function gmBegin(){ G.phase='wave'; G.wave=1; G.waveSides=[0]; G.laneShow=[]; G.spawnQ=0; G.gmc=[]; G.gmDone=0; G.gmDw=null; G.gmPen=gmPenOf(me.eq).pct/100; const ty=gmcTy();
+function gmBegin(){ G.phase='wave'; G.wave=1; G.waveSides=[0]; G.laneShow=[]; G.spawnQ=0; G.gmc=[]; G.gmDone=0; G.gmDw=null; G.gal=[]; G.galDone=0; G.gmPen=gmPenOf(me.eq).pct/100; const ty=gmcTy();
   for(const P of GMC_POS){ const m=spawnMob(ty,P.x,P.y,false); m.gmc=P.k; m.gn=P.nm; m.hx=P.x; m.hy=P.y; m.hp=m.max=GMC_HP; m.xp=0; m.dmg=0; m.spd=0; m.r=70; m.sp=rand(1,2.5); m.el=null; m.elT=2; gmgSpawn(P); m.cT=P.off?{x:CAS_T.x+P.off,y:CAS_T.y,i:-1,cas:1}:null; G.gmc.push(m); }
   gmDoorSpawn(); banner('성채를 부수세요','세 성채에서 몬스터가 쏟아집니다'); me.pot=3; pushEv(['w',1]); }
 function gmWave(dt){ gmDoorTick(dt); if(G.gmc&&G.gmc.length&&G.gmc.every(m=>m.dead)&&!G.gmDone){ G.gmDone=1; G.phase='boss'; announce('🏰 세 성채가 모두 무너졌어요!','#ffd860'); for(const m of G.mobs){ if(!m.dead&&!m.gmc)m.dead=true; } } }
@@ -3496,7 +3496,7 @@ function gmcTick(m,dt){ m.x=m.hx; m.y=m.hy; m.kx=m.ky=0; if(G.phase!=='wave')ret
   if(m.el&&m.el.dead){ m.el=null; m.elT=45; } if(!m.el&&m.elT>0)m.elT-=dt;
   m.sp-=dt; if(m.sp>0)return; m.sp=GMC_IV; if(G.mobs.length>=GMC_CAP)return;
   gmcMob(m); }
-function gmcKill(m){ if(m.dead)return; m.dead=true; burst(m.x,m.y,'#8a7a60',40,320); spark(m.x,m.y,'#fff0c0',24); for(let i=0;i<3;i++)later(i*.15,()=>efx.push({k:'ring',x:m.x,y:m.y,r0:10,r1:170,t:0,life:.7,col:'#cdb9a0',w:12})); sfx('kill'); pushEv(['bx',Math.round(m.x),Math.round(m.y),70]); announce(`💥 ${m.gn} 파괴!`,'#ffd860');
+function gmcKill(m){ if(m.dead)return; m.dead=true; burst(m.x,m.y,'#8a7a60',40,320); spark(m.x,m.y,'#fff0c0',24); for(let i=0;i<3;i++)later(i*.15,()=>efx.push({k:'ring',x:m.x,y:m.y,r0:10,r1:170,t:0,life:.7,col:'#cdb9a0',w:12})); sfx('kill'); pushEv(['bx',Math.round(m.x),Math.round(m.y),70]); announce(`💥 ${m.gn} 파괴!`,'#ffd860'); if(!G.galDone){ G.galDone=1; galSpawn(); }
   for(const g of G.mobs){ if(g.gmg===m.gmc&&!g.dead){ g.dead=true; burst(g.x,g.y,'#bdb09a',22,260); efx.push({k:'ring',x:g.x,y:g.y,r0:8,r1:80,t:0,life:.5,col:'#cfc4ae',w:8}); later(.9,()=>announce('🛡️ "성채를 지키지 못했다…" 수문장이 사라졌어요','#c9b99a')); } } }   /* 수문장보다 성채를 먼저 부수면 수문장은 사라짐(전리품 없음) */
 function drawGmc(m,t){ const im=sprGet('castle_s7_'+m.gmc), r=m.hp/m.max, st=r>.65?0:r>.3?1:2, x=m.x, y=m.y, W=250;
   ctx.fillStyle='rgba(0,0,0,.35)'; ctx.beginPath(); ctx.ellipse(x,y+58,W*.42,26,0,0,6.283); ctx.fill();
@@ -3564,6 +3564,43 @@ function drawGmo(m,t){ const x=m.x,y=m.y,r=m.hp/m.max;
   const im=sprGet('skull_s7'), S=84, cell=m.flash>0?2:m.atk>0?1:0; ctx.fillStyle='rgba(0,0,0,.35)'; ctx.beginPath(); ctx.ellipse(x,y+m.r*.8,m.r*1.0,m.r*.4,0,0,6.283); ctx.fill();
   if(im){ const cw=im.width/3; ctx.save(); ctx.translate(x,y); if(cell===0)ctx.rotate(m.roll||0); ctx.drawImage(im,cell*cw,0,cw,im.height,-S/2,-S/2,S,S*im.height/cw); ctx.restore(); } else { circle(x,y,m.r,'#d8d2c0'); }
   const bw=54, by=y-m.r-18; ctx.fillStyle='rgba(0,0,0,.7)'; ctx.fillRect(x-bw/2-1,by-1,bw+2,7); ctx.fillStyle='#e0d8c0'; ctx.fillRect(x-bw/2,by,bw*Math.max(0,r),5); }
+/* ===== 우리 편 정예 3마리 (7스테이지) — 첫 번째 성채가 무너질 때 우리 성문에서 한 번만 등장, 죽으면 끝 · 정예 스킬은 캐릭터에 영향 없음 =====
+   방패 근위대장(체력 1.2e7 · 받는 피해 −25% · 8초마다 3초 도발) · 대검 돌격기사(8.4e6 · 피해 근위대장 ×2.5 · 1.6초 범위 베기 · 정예·보스 쪽으로 돌진) · 성가 사제(7.2e6 · 6초마다 가장 약한 정예 8% 치유 · 15초마다 전원 5% 보호막 · 두개골 봉인 최우선) */
+const GAL={royal:{n:'방패 근위대장',hp:1.2e7,dmg:9000,iv:1.2,spd:72,r:30,h:150,bh:787},knight:{n:'대검 돌격기사',hp:8.4e6,dmg:22500,iv:1.6,spd:118,r:30,h:150,bh:757},cleric:{n:'성가 사제',hp:7.2e6,dmg:0,iv:9,spd:62,r:26,h:150,bh:783}};
+function galSpawn(){ if(G.stg&&G.stg.gm!==1||G.mode==='guest')return; let n=0;
+  for(const k of ['royal','knight','cleric']){ const C=GAL[k], x=CAS_T.x+(n-1)*58, y=CAS_T.y+62; G.gal.push({k,i:100+n,x,y,hp:C.hp,max:C.hp,r:C.r,cd:rand(.4,1),flash:0,atk:0,mv:0,bar:0,tc:0,tt:0,heal:3,shd:6,seal:null,spd0:C.spd,buf:0}); burst(x,y,'#bfe0ff',22,260); efx.push({k:'ring',x,y,r0:10,r1:90,t:0,life:.6,col:'#cfe8ff',w:8}); n++; }
+  banner('🛡️ 지원군 도착!','우리 편 정예가 성문에서 나왔어요'); sfx('boss'); }
+function galHit(id,raw){ const a=G.gal&&G.gal.find(q=>q.i===id); if(!a||a.dead)return; let d=raw*(a.k==='royal'?.75:1); if(a.bar>0){ const t=Math.min(a.bar,d); a.bar-=t; d-=t; } if(d<=0){ a.flash=.12; return; }
+  a.hp-=d; a.flash=.12; if(d>=1)addNum(a.x,a.y-60,Math.round(d),'#8fe6ff',false,'g'+a.i);
+  if(a.hp<=0){ a.dead=true; burst(a.x,a.y,'#bfe0ff',26,300); announce(`💀 ${GAL[a.k].n}가 쓰러졌어요`,'#ff8a7a'); } }
+function galFoe(a,pref){ let b=null,bs=1e9; for(const m of G.mobs){ if(m.dead||m.gmc||m.gmd||m.hp<=0)continue; const d=hyp(m.x-a.x,m.y-a.y); if(d>900)continue; const sc=d-(pref&&(m.elite||m.boss||m.gmg)?420:0); if(sc<bs){ bs=sc; b=m; } } return b; }
+function galTick(dt){ const L=G.gal; if(!L)return; const alive=L.filter(q=>!q.dead);
+  for(const a of L){ if(a.dead)continue; a.flash=Math.max(0,a.flash-dt); a.atk=Math.max(0,a.atk-dt); a.cd-=dt; a.mv=0; if(a.buf>0)a.buf-=dt; const C=GAL[a.k], sp=a.spd0*(a.buf>0?2:1);
+    if(a.k==='cleric'){
+      a.heal-=dt; a.shd-=dt;
+      if(a.heal<=0){ a.heal=6; let w=null,wr=2; for(const q of alive){ const r=q.hp/q.max; if(r<wr&&r<1){ wr=r; w=q; } } if(w){ w.hp=Math.min(w.max,w.hp+w.max*.08); spark(w.x,w.y,'#9be38a',8); a.atk=.4; } }
+      if(a.shd<=0){ a.shd=15; for(const q of alive){ q.bar=Math.max(q.bar,q.max*.05); } efx.push({k:'ring',x:a.x,y:a.y,r0:10,r1:130,t:0,life:.5,col:'#7ec8ff',w:6}); a.atk=.4; }
+      const sk=G.mobs.filter(m=>m.gms&&!m.dead).sort((p,q)=>hyp(p.x-a.x,p.y-a.y)-hyp(q.x-a.x,q.y-a.y))[0];
+      if(sk){ if(!a.skSeen&&alive.some(q=>q.k==='knight')){ a.buf=8; } a.skSeen=1; const d=hyp(sk.x-a.x,sk.y-a.y);
+        if(d>120){ a.seal=null; const dx=sk.x-a.x, dy=sk.y-a.y; a.x+=dx/d*sp*dt; a.y+=dy/d*sp*dt; a.mv=1; a.fa=Math.atan2(dy,dx); }
+        else { if(!a.seal)a.seal={t:0,sk}; a.seal.t+=dt; a.atk=.2; if(a.seal.t>=5){ gmSeal(sk); a.seal=null; } }
+        continue; }
+      a.skSeen=0; a.seal=null;
+      const f=alive.find(q=>q.k==='royal')||alive.find(q=>q.k==='knight'); if(f){ const d=hyp(f.x-a.x,f.y-a.y); if(d>110){ a.x+=(f.x-a.x)/d*sp*dt; a.y+=(f.y-a.y)/d*sp*dt; a.mv=1; a.fa=Math.atan2(f.y-a.y,f.x-a.x); } }
+      continue; }
+    if(a.k==='royal'){ a.tt-=dt; if(a.tt<=0){ a.tt=8; for(const m of G.mobs){ if(m.dead||m.gmc||m.gmo||hyp(m.x-a.x,m.y-a.y)>320)continue; m.taunt={i:a.i,t:3}; } efx.push({k:'ring',x:a.x,y:a.y,r0:10,r1:150,t:0,life:.5,col:'#ffb259',w:8}); } }
+    const f=galFoe(a,a.k==='knight'); if(!f){ const hx=CAS_T.x+(a.k==='royal'?-40:40), hy=CAS_T.y-40, d=hyp(hx-a.x,hy-a.y); if(d>30){ a.x+=(hx-a.x)/d*sp*dt; a.y+=(hy-a.y)/d*sp*dt; a.mv=1; a.fa=Math.atan2(hy-a.y,hx-a.x); } continue; }
+    const dx=f.x-a.x, dy=f.y-a.y, d=hyp(dx,dy)||1, reach=a.r+f.r+10; a.fa=Math.atan2(dy,dx);
+    if(d>reach){ const k=a.k==='knight'&&d>180?1.25:1; a.x+=dx/d*sp*k*dt; a.y+=dy/d*sp*k*dt; a.mv=1; }
+    else if(a.cd<=0){ a.cd=C.iv; a.atk=.3; if(a.k==='knight'){ for(const m of G.mobs){ if(m.dead||m.gmc||m.gmd||hyp(m.x-f.x,m.y-f.y)>90+m.r)continue; applyDmg(m,C.dmg,0,null); } slamFx(f.x,f.y,90,'#cfe8ff'); } else applyDmg(f,C.dmg,0,null); spark(f.x,f.y,'#fff0c0',6); }
+    a.x=clamp(a.x,30,WW-30); a.y=clamp(a.y,30,WH-30); } }
+function drawGal(a,t){ const C=GAL[a.k], x=a.x, y=a.y, key='ally7_'+a.k+(a.flash>0?'_hurt':a.atk>0?'_atk':a.mv?'_walk':''), im=sprGet(key)||sprGet('ally7_'+a.k), sc=C.h/C.bh, r=a.hp/a.max;
+  ctx.fillStyle='rgba(0,0,0,.4)'; ctx.beginPath(); ctx.ellipse(x,y+10,C.r*1.1,C.r*.4,0,0,6.283); ctx.fill();
+  if(im){ const w=im.width*sc, h=im.height*sc, bob=a.mv?Math.sin(t*10+a.i)*2:0; ctx.drawImage(im,x-w/2,y+12-h+bob,w,h); } else { circle(x,y-30,24,'#9ac0e8'); }
+  if(a.bar>0){ ctx.strokeStyle='rgba(120,200,255,.75)'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(x,y-50,C.r*1.8,0,6.283); ctx.stroke(); }
+  if(a.seal){ const q=Math.min(1,a.seal.t/5); ctx.strokeStyle='rgba(190,230,255,.9)'; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(x,y-50,C.r*2.2,-1.57,-1.57+6.283*q); ctx.stroke(); }
+  const bw=70, by=y-C.h-4; ctx.fillStyle='rgba(0,0,0,.7)'; ctx.fillRect(x-bw/2-1,by-1,bw+2,8); ctx.fillStyle='#5fc86a'; ctx.fillRect(x-bw/2,by,bw*Math.max(0,r),6);
+  ctx.font='bold 11px sans-serif'; ctx.textAlign='center'; ctx.fillStyle='#bfe8ff'; ctx.fillText(C.n,x,by-4); }
 function spawnMob(type,x,y,elite){
   const S=G.stg||STAGES[0], w=Math.max(1,G.wave), hm=(1+.12*(w-1))*(G.coop?1.4:1)*(elite?8:1)*S.hpM*1.2, dm=(1+.08*(w-1))*(elite?4.6:1)*S.dmgM*1.6;
   const t=MT[type], m={id:G.mobId++,type,x,y,hp:t.hp*hm,max:t.hp*hm,dmg:t.dmg*dm,spd:t.spd*(elite?1.3:S.spdM)*(t.boss?.95:.5),r:t.r*(elite?1.5:1),xp:Math.round(t.xp*(1+.1*(w-1))*S.xpM*(elite?5:1)),elite:!!elite,boss:!!t.boss,fly:!!t.fly,cd:rand(0,1),slowT:0,tgt:0,rt:0,atk:0,fa:0,flash:0,anim:Math.random()*6,kx:0,ky:0,sq:0};
@@ -3794,7 +3831,7 @@ function playersForAI(){
 const DRNR=165; /* 정예 마나 흡수 범위 */
 function drainPlayer(i,pct){ if(i>=10)return; if(i===1)applyStatus('mdrain',pct); else pushEv(['x',2,'mdrain',pct]); }
 let RAID_HIT=0; /* 지금 처리 중인 몹이 레이드 보스면 1 (방어력 피해 감소 상한을 낮춤) */
-function mobHitPlayer(i,dmg,st,dur){ if(i<0){ castleHit(dmg*CASM); return; } if(i>=10){ minionHit(i,dmg); return; } if(i===1){takeDmg(dmg,false,RAID_HIT); if(st)applyStatus(st,dur);} else { if(RAID_HIT)G.guestDmgR=(G.guestDmgR||0)+dmg; else G.guestDmg+=dmg; if(st)pushEv(['x',2,st,dur]);} }
+function mobHitPlayer(i,dmg,st,dur){ if(i<0){ castleHit(dmg*CASM); return; } if(i>=100){ galHit(i,dmg); return; } if(i>=10){ minionHit(i,dmg); return; } if(i===1){takeDmg(dmg,false,RAID_HIT); if(st)applyStatus(st,dur);} else { if(RAID_HIT)G.guestDmgR=(G.guestDmgR||0)+dmg; else G.guestDmg+=dmg; if(st)pushEv(['x',2,st,dur]);} }
 const shots=[];
 function bombFx(x,y,r){ efx.push({k:'ring',x,y,r0:r*.2,r1:r,t:0,life:.35,col:'#ff8a2a',w:12}); impact(x,y,'255,150,40',r*1.4); burst(x,y,'#ffb04a',22,300); sfx('boom'); G.shake=Math.max(G.shake,.3); }
 const AFXN=['','돌진','소환','불꽃','마나 흡수'];
@@ -3816,7 +3853,7 @@ function mobKb(m,dt){ if(m.kx||m.ky){ m.x+=m.kx*dt; m.y+=m.ky*dt; const f=Math.p
 function updateMobs(dt){
   const pls=playersForAI().concat(minionTargets()); /* 소환수도 몹의 공격 대상 */
   for(let i=shots.length-1;i>=0;i--){ const sh=shots[i]; sh.t+=dt; if(sh.t>=sh.dur){ shots.splice(i,1); if(sh.rift){ spawnMob(0,sh.x,sh.y,true); for(let k=0;k<4;k++)spawnMob(k%2?10:0,sh.x+rand(-40,40),sh.y+rand(-40,40),false); burst(sh.x,sh.y,'#c070ff',40,320); efx.push({k:'ring',x:sh.x,y:sh.y,r0:10,r1:110,t:0,life:.5,col:'#c070ff',w:12}); sfx('slam'); G.shake=Math.max(G.shake,.4); continue; } for(const p of pls){ if(hyp(p.x-sh.x,p.y-sh.y)<sh.r+10) mobHitPlayer(p.i,sh.dmg*(sh.dv&&p.i===1&&me.D&&me.D.sp&&me.D.sp.cs_armor?.7:1),sh.st||0,sh.sd||0); } if(G.castle){ if(sh.cas)castleHit(sh.dmg*.4); else if(sh.vil)castleHit(sh.dmg*.35); } pushEv(['bx',Math.round(sh.x),Math.round(sh.y),sh.r]); bombFx(sh.x,sh.y,sh.r); if(sh.ar){ addNum(sh.x,sh.y-30,'🏹 화살 피격!','#ffb070',true); pushEv(['am',Math.round(sh.x),Math.round(sh.y)]); } } }
-  RAID_HIT=0;
+  RAID_HIT=0; if(G.gal&&G.gal.length)galTick(dt);
   for(const m of G.mobs){ if(m.dead)continue; RAID_HIT=m.rk?1:0;
     if(m.gob){ gobStep(m,dt); continue; }
     if(m.slowT>0)m.slowT-=dt; if(m.shockT>0)m.shockT-=dt; if(m.shockP>0)m.shockP-=dt; if(m.mark&&m.mark.t>0)m.mark.t-=dt; if(m.vuln&&m.vuln.t>0)m.vuln.t-=dt;
@@ -4640,7 +4677,7 @@ function bestCluster(x,y,range,R){ let best=null,bn=0; const L=G.mobs.filter(m=>
 function throwRock(mn,tx,ty,o){ const sx=mn.x, sy=mn.y, d=hyp(tx-sx,ty-sy)||1, sp=o.sp||420; mn.face=Math.atan2(ty-sy,tx-sx);
   proj({x:sx,y:sy,vx:(tx-sx)/d*sp,vy:(ty-sy)/d*sp,r:o.r||14,life:d/sp,col:o.col,kind:'rock',trail:o.trail,real:true,hit:()=>{},boom:(x,y)=>o.boom(x,y)}); sfx('swing'); }
 function autoSummon(){ minions.length=0; if(me&&me.cls==='druid')return; /* 드루이드 까마귀는 스테이지 시작 때 자동 소환하지 않아요(직접 '까마귀 소환'을 써야 나옴) */ if(!me||me.cls!=='necro')return; for(const [k,sk] of [['guard','guardian'],['caster','spiritcaster']]){ const l=skLv(me,sk); if(l>0)summonMinion(k,l,true); } }
-function minionTargets(){ return G.mode==='guest'?[]:minions.filter(q=>q.rez<=0).map(q=>({x:q.x,y:q.y,i:q.i,mn:1})); }
+function minionTargets(){ if(G.mode==='guest')return []; const a=minions.filter(q=>q.rez<=0).map(q=>({x:q.x,y:q.y,i:q.i,mn:1})); if(G.gal&&G.gal.length)for(const g of G.gal)if(!g.dead)a.push({x:g.x,y:g.y,i:g.i,mn:1}); return a; }
 function minionHit(id,raw){ const mn=minions.find(q=>q.i===id); if(mn)mnTake(mn,raw); }
 function mnTake(mn,raw,direct){ if(mn.rez>0)return; const D=me.D, big=!MNK[mn.k].perm, def=D.def*1.2, red=Math.min(.8,def/(def+50+G.wave*8));
   const d=direct?raw:raw*lvPen().tk*gearPen().tk*(1-red)*(def2On()?1:1-Math.min(.3,.015*skLv(me,'soullink')))*(big?(PPR?(mn.k==='fusion'?.95:mn.k==='colossus'?.9:.5):.5):1);   /* 🥨 빼빼로: 융합 영혼 -5% · 고대 거인 -10% */
@@ -9651,6 +9688,7 @@ function render(t){
   for(const q of minions)if(q.rez<=0)actors.push({y:q.y,o:q,f:()=>drawMinion(q,t)});
   if(PET.on&&petNow()&&!me.dead)actors.push({y:PET.y,f:()=>drawPet(t)});
   if(G.castle)actors.push({y:VY+CAS_BASE,cas:1,f:()=>drawCastle(t)});
+  if(G.gal)for(const g of G.gal){ if(!g.dead)actors.push({y:g.y,f:()=>drawGal(g,t)}); }
   if(G.gmDw)actors.push({y:G.gmDw.y,f:()=>drawGmDoor(G.gmDw.x,G.gmDw.y,2,0)});
   if(me.spirit&&me.spirit.t>0&&!me.dead)actors.push({y:me.y+30,f:()=>drawSpirit(me,t,me.spirit.t,me.spirit.m)});
   if(ally&&!ally.lobby&&!ally.dead&&ally.sp>0&&ally.x!==undefined)actors.push({y:ally.y+30,f:()=>drawSpirit(ally,t,0,0)});
