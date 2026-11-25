@@ -1560,7 +1560,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0905</div>
+    <div class="ver" id="verT">v0.7.2.0906</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -4703,6 +4703,9 @@ function awkShieldHit(m,host){ if(host){ m.shield--; m.shF=.2; } addNum(m.x,m.y-
   if(host&&m.shield<=0){ burst(m.x,m.y,'#c0a8ff',40,360); efx.push({k:'ring',x:m.x,y:m.y,r0:20,r1:150,t:0,life:.5,col:'#c0a8ff',w:10}); G.shake=Math.max(G.shake,.6); sfx('crit'); announce('🛡️ 그림자 배리어가 깨졌어요! 이제 피해가 들어가요','#c0a8ff'); pushEv(['ash0',1]); } }
 /* 감전 추가 피해 배율: 마법사 감전 +33% (🥨 빼빼로: 30+3×연쇄 번개 Lv %) · 펫 감전 +12% (합연산) */
 const shockF=m=>1+(m.shockT>0?((PPR&&m.shockB)?m.shockB:SHOCKB-1):0)+(m.shockP>0?SHOCKP:0);
+/* 7스테이지 적 성채(gmc): 범위 스킬(서리 고리·유성·대재앙·눈보라·폭풍 베기·회전베기·대지 분쇄·축복의 망치·천벌·수호 폭발·야생의 대사냥·곰세마리)은 피해 50%만 들어가요 */
+const GMC_AOE=.5;
+function hitA(m,r,slow,tn,fx){ if(m&&m.gmc){ r=Object.assign({},r); r.v*=GMC_AOE; if(fx&&fx.bd)fx=Object.assign({},fx,{bd:fx.bd*GMC_AOE}); } return hitMob(m,r,slow,tn,fx); }
 function hitMob(m,r,slow,tn,fx){
   if(m.ore){ oreHit(m,fx); return; }   /* 광산 광석: 채굴력으로만 깎여요 */
   if(m.gob){ gobHit(m,0); return; }
@@ -4799,7 +4802,7 @@ function summonBears(lv){
   const f=me.face||0, P=[['papa',f+.7,66],['mama',f-.7,66],['baby',f+Math.PI,48]];
   P.forEach(([k,a,d],i)=>{ const mn=summonMinion(k,lv,i>0,clamp(me.x+Math.cos(a)*d,16,WW-16),clamp(me.y+Math.sin(a)*d,16,WH-16),true);
     mn.s1=k==='mama'?2:0; mn.s2=k==='baby'?3:k==='papa'?6:0; mn.ch=null; }); }
-function mnHit(mn,m,base,extra,slow){ hitMob(m,spellDmg(base*mnMul(),true),slow||0,false,Object.assign({},SMF[mn.k]||SMFX,extra||{})); }
+function mnHit(mn,m,base,extra,slow){ (m.gmc&&MNK[mn.k]&&MNK[mn.k].bear?hitA:hitMob)(m,spellDmg(base*mnMul(),true),slow||0,false,Object.assign({},SMF[mn.k]||SMFX,extra||{})); }
 function mnBlast(mn,x,y,R,base,extra,slow){ for(const m of mobsIn(x,y,R)) mnHit(mn,m,base,extra,slow); }   /* 소환수가 (x,y) 한 점에 내리는 범위 피해 */
 function pickFar(mn,lo,hi){ let b=null,bd=0; for(const m of mobsIn(mn.x,mn.y,hi)){ const d=hyp(m.x-mn.x,m.y-mn.y); if(d>lo&&d>bd){ bd=d; b=m; } } return b; }   /* lo~hi 사이에서 가장 먼 적 */
 function bestCluster(x,y,range,R){ let best=null,bn=0; const L=G.mobs.filter(m=>!m.dead&&hyp(m.x-x,m.y-y)<range).slice(0,30);
@@ -5068,7 +5071,7 @@ function necroCast(o,key,real,lv,tgt){
   else if(key==='soulburst'){ let best=null,bd=1e9; const ref=nearestMob(me.x,me.y,NRG(500))||me; for(const q of minions){ if(q.k!=='guard'||q.rez>0)continue; const d=hyp(q.x-ref.x,q.y-ref.y); if(d<bd){bd=d;best=q;} }
     if(!best)return; const R=110*RS0(lv)*(me.D.rng>0?1+me.D.rng/100:1), cx=best.x, cy=best.y; const dmg=100+40*lv+best.hp*SBHP(lv); { const bi=minions.indexOf(best); if(bi>=0)minions.splice(bi,1); toast('수호 영혼이 폭발했어요 — 필요하면 다시 소환하세요','#8fe6d0'); } /* 폭발한 수호 영혼은 사라지고 자동으로 돌아오지 않음 */
     slamFx(cx,cy,R,'#ff9a6a'); impact(cx,cy,'255,150,100',200); efx.push({k:'ring',x:cx,y:cy,r0:20,r1:R,t:0,life:.5,col:'#ffb48a',w:12}); burst(cx,cy,'#ffb48a',40,420); burst(cx,cy,K.el,20,300); G.shake=Math.max(G.shake,.45); sfx('boom');
-    for(const m of mobsIn(cx,cy,R)){ const r=spellDmg(dmg*(1+(me.D.sm||0)/100),true); hitMob(m,r,0,false,{stun:1,el:'soul'}); } }
+    for(const m of mobsIn(cx,cy,R)){ const r=spellDmg(dmg*(1+(me.D.sm||0)/100),true); hitA(m,r,0,false,{stun:1,el:'soul'}); } }
 }
 
 /* ================= 드루이드: 기본 공격 · 스킬 =================
@@ -5122,7 +5125,7 @@ function druidCast(o,key,real,lv,tgt,tx,ty,ang){
         if(px===undefined){ const a=rand(0,6.283), d=rand(40,320); px=clamp(o.x+Math.cos(a)*d,20,WW-20); py=clamp(o.y+Math.sin(a)*d,20,WH-20); }
         efx.push({k:'hcrow',dive:1,x:px,y:py,dx:rand(-90,90),h:300,col:'#120c1e',t:0,life:.26});
         later(.2,()=>{ efx.push({k:'hbeam',x:px,y:py,w:34,h:200,rgb:'130,100,210',t:0,life:.35}); efx.push({k:'ring',x:px,y:py,r0:10,r1:85,t:0,life:.3,col:'#9a86c8',w:7}); burst(px,py,'#1c1428',16,280); burst(px,py,'#b9a6e8',8,220); impact(px,py,'140,110,210',100); });
-        if(real) for(const m of mobsIn(px,py,75)) hitMob(m,spellDmg(110+36*lv),0,false,{el:'nature'}); });
+        if(real) for(const m of mobsIn(px,py,75)) hitA(m,spellDmg(110+36*lv),0,false,{el:'nature'}); });
     } else { /* 곰: 대지의 분노 */
       efx.push({k:'ring',x:o.x,y:o.y,r0:300,r1:20,t:0,life:.5,col:'#c28a5a',w:10});
       for(let i=0;i<3;i++) later(.5+i*.45,()=>{ const cx=o===me?me.x:o.x, cy=o===me?me.y:o.y; slamFx(cx,cy,320,'#c28a5a'); efx.push({k:'ring',x:cx,y:cy,r0:20,r1:320,t:0,life:.5,col:'#e0b080',w:14}); impact(cx,cy,'220,170,110',240); burst(cx,cy,'#c9a27a',40,420); G.shake=Math.max(G.shake,i===2?.9:.6); sfx('slam');
@@ -5190,8 +5193,8 @@ function castSkill(o,key,real,tx,ty,lv,tgt){
     break;
   case 'rend':
     if(warAtlas()){ wfx(1,0,7,o.x,o.y+6,Math.min(200,175*RS(lv)*1.15),.5); wfx(4,0,7,o.x,o.y-4,200,.5); } else { efx.push({k:'ring',x:o.x,y:o.y,r0:30,r1:175*RS(lv),t:0,life:.45,col:s.el,w:14}); efx.push({k:'whirl',o,t:0,life:.45,col:s.el}); } impact(o.x,o.y,'255,120,80',150); burst(o.x,o.y,'#ffb070',34,400); sfx('boom');
-    if(real){ for(const q of mobsIn(o.x,o.y,165*RS(lv))){ hitMob(q,physDmg(4.5+.7*lv)); knock(q,o.x,o.y,14); }
-      const nt=Math.floor((1.5+.12*lv)/.5); for(let i=1;i<=nt;i++) later(i*.5,()=>{ if(me.dead)return; if(!wfx(2,0,7,me.x,me.y+4,Math.min(200,150*RS(lv)*1.3),.4)){ efx.push({k:'whirl',o:me,t:0,life:.4,col:s.el}); efx.push({k:'ring',x:me.x,y:me.y,r0:30,r1:150*RS(lv),t:0,life:.4,col:s.el,w:8}); } sfx('swing'); for(const q of mobsIn(me.x,me.y,150*RS(lv))) hitMob(q,physDmg(.5+.05*lv)); }); }
+    if(real){ for(const q of mobsIn(o.x,o.y,165*RS(lv))){ hitA(q,physDmg(4.5+.7*lv)); knock(q,o.x,o.y,14); }
+      const nt=Math.floor((1.5+.12*lv)/.5); for(let i=1;i<=nt;i++) later(i*.5,()=>{ if(me.dead)return; if(!wfx(2,0,7,me.x,me.y+4,Math.min(200,150*RS(lv)*1.3),.4)){ efx.push({k:'whirl',o:me,t:0,life:.4,col:s.el}); efx.push({k:'ring',x:me.x,y:me.y,r0:30,r1:150*RS(lv),t:0,life:.4,col:s.el,w:8}); } sfx('swing'); for(const q of mobsIn(me.x,me.y,150*RS(lv))) hitA(q,physDmg(.5+.05*lv)); }); }
     break;
   case 'shout':
     efx.push({k:'ring',x:o.x,y:o.y,r0:20,r1:320,t:0,life:.6,col:'#ffb259',w:7}); wfx(1,0,7,o.x,o.y+6,200,.6); impact(o.x,o.y,'255,180,90',100); burst(o.x,o.y,'#ffcf7a',20,180);
@@ -5202,7 +5205,7 @@ function castSkill(o,key,real,tx,ty,lv,tgt){
   case 'whirl':
     if(!wfx(2,0,7,o.x,o.y+4,Math.min(200,150*RS(lv)*1.35),.45))efx.push({k:'whirl',o,t:0,life:.45,col:'#e8e0d0'});
     impact(o.x,o.y,'235,225,210',110); for(let i=0;i<24;i++){const a=i/24*6.283; parts.push({x:o.x+Math.cos(a)*70,y:o.y+Math.sin(a)*70,vx:-Math.sin(a)*260,vy:Math.cos(a)*260,t:0,life:.35,col:'#f4efe6',r:3,glow:1,dm:.9});}
-    if(real) for(const m of mobsIn(o.x,o.y,100*RS(lv))){ const r=physDmg(1.8+.3*lv); hitMob(m,r,0,0,{burn:4,bd:r.v*.6,bl:1}); }   /* 강력한 출혈: 4초, 초당 타격 피해의 60% */
+    if(real) for(const m of mobsIn(o.x,o.y,100*RS(lv))){ const r=physDmg(1.8+.3*lv); hitA(m,r,0,0,{burn:4,bd:r.v*.6,bl:1}); }   /* 강력한 출혈: 4초, 초당 타격 피해의 60% */
     break;
   case 'leap':
     if(real){me.leap={sx:me.x,sy:me.y,ex:tx,ey:ty,t:0,dur:.35};}
@@ -5215,13 +5218,13 @@ function castSkill(o,key,real,tx,ty,lv,tgt){
   case 'quake':
     for(let i=1;i<=5;i++){const px=o.x+dx*60*i, py=o.y+dy*60*i;
       later(i*.08,()=>{ if(!wfx(3,0,7,px,py+6,150,.65))efx.push({k:'crack',x:px,y:py,a:ang,t:0,life:.8}); spark(px,py,'#8a6a4a',10); impact(px,py,'255,150,70',70); burst(px,py,'#ffa860',8,160); G.shake=Math.max(G.shake,.25);
-        if(real) for(const m of mobsIn(px,py,75*RS(lv))) hitMob(m,physDmg(4+.65*lv),.4); });}
+        if(real) for(const m of mobsIn(px,py,75*RS(lv))) hitA(m,physDmg(4+.65*lv),.4); });}
     break;
   case 'hammer':
     {const Z=real?zealMul():{d:1,t:1}, hn=HMN(lv), hf=HMF(hn);
     for(let i=0;i<hn;i++) later(i*.4,()=>{ if(o===me&&me.dead)return; const cx=o.x, cy=o.y; if(i>0)sfx('holy');
       proj({kind:'hammer',cx,cy,a:ang+i*.9,rad:12,x:cx,y:cy,vx:0,vy:0,r:11,life:4.5*Z.t,col:'#ffe08a',real,pierce:true,re:new Map(),trail:'255,224,138',
-        hit:m=>{ if(T-(G.hmFx||-9)>.12){ G.hmFx=T; impact(m.x,m.y,'255,230,150',40); } const r=spellDmg(16+13*lv); r.v*=Z.d*hf; hitMob(m,r,0,0,{nohs:1}); }}); });}   /* 망치: 타격 정지·큰 흔들림 없음, 빛 효과는 0.12초에 한 번 */
+        hit:m=>{ if(T-(G.hmFx||-9)>.12){ G.hmFx=T; impact(m.x,m.y,'255,230,150',40); } const r=spellDmg(16+13*lv); r.v*=Z.d*hf; hitA(m,r,0,0,{nohs:1}); }}); });}   /* 망치: 타격 정지·큰 흔들림 없음, 빛 효과는 0.12초에 한 번 */
     break;
   case 'shock':
     efx.push({k:'ring',x:o.x,y:o.y,r0:20,r1:180,t:0,life:.45,col:'#fff2b0',w:10});
@@ -5235,8 +5238,8 @@ function castSkill(o,key,real,tx,ty,lv,tgt){
     const Z=real?zealMul():{d:1,t:1};
     const IMG=!!sprGet('fx_pal');   /* 이미지 이펙트가 준비됐으면 옛 섬광(impact/burst)은 생략해서 가볍게 */
     for(const p of pts){ efx.push({k:'pillar',x:p.x,y:p.y,t:0,life:.8,col:'#fff7d6',pal:IMG}); if(!IMG){ impact(p.x,p.y,'255,245,200',110); burst(p.x,p.y,'#fff3c0',22,240); } efx.push({k:'cross',x:p.x,y:p.y,t:0,life:.6,pal:IMG});
-      zones.push({x:p.x,y:p.y,r:60*RS(lv),life:2*Z.t,t:0,tick:.5,iv:.5,real,kind:'holy',pal:IMG,fn:m=>{const r=spellDmg(18+10*lv); r.v*=Z.d; hitMob(m,r);}});
-      if(real&&p.m) later(.25,()=>{ if(!p.m.dead){const r=spellDmg(110+50*lv); r.v*=Z.d; hitMob(p.m,r);} }); }
+      zones.push({x:p.x,y:p.y,r:60*RS(lv),life:2*Z.t,t:0,tick:.5,iv:.5,real,kind:'holy',pal:IMG,fn:m=>{const r=spellDmg(18+10*lv); r.v*=Z.d; hitA(m,r);}});
+      if(real&&p.m) later(.25,()=>{ if(!p.m.dead){const r=spellDmg(110+50*lv); r.v*=Z.d; hitA(p.m,r);} }); }
     break;}
   case 'ragnarok':
     efx.push({k:'ring',x:o.x,y:o.y,r0:240,r1:20,t:0,life:.6,col:'#ff2a1a',w:10}); sfx('boss'); burst(o.x,o.y,'#ff5a3a',30,260);
@@ -5260,7 +5263,7 @@ function castSkill(o,key,real,tx,ty,lv,tgt){
       if(px===undefined){ const a=rand(0,6.283), d=rand(40,320); px=clamp(o.x+Math.cos(a)*d,20,WW-20); py=clamp(o.y+Math.sin(a)*d,20,WH-20); }
       const fxm=fxMeteor(px,py,90,lv,.7); if(!fxm){ efx.push({k:'tele',x:px,y:py,r:90,t:0,life:.7,col:'#ff5a1f'}); efx.push({k:'meteor',x:px,y:py,t:0,life:.7}); }
       later(.7,()=>{ if(fxm){ fxSpr(6,3,7,px,py,150,.5); sfx('slam'); } else { slamFx(px,py,95,'#ff5a1f'); impact(px,py,'255,120,30',180); efx.push({k:'ring',x:px,y:py,r0:20,r1:130,t:0,life:.5,col:'#ffd08a',w:9}); } burst(px,py,'#ffb04a',34,380); G.shake=Math.max(G.shake,.4);
-        if(real) for(const m of mobsIn(px,py,95)){ const rr=spellDmg(150+45*lv); hitMob(m,rr,0,false,{stun:1.5,burn:PPR?5:.8,bd:rr.v*.3,el:'fire'}); } }); });
+        if(real) for(const m of mobsIn(px,py,95)){ const rr=spellDmg(150+45*lv); hitA(m,rr,0,false,{stun:1.5,burn:PPR?5:.8,bd:rr.v*.3,el:'fire'}); } }); });
     break;
   case 'fireball':{ const fn=HMN(lv), ff=HMFM(fn);
     for(let i=0;i<fn;i++) later(i*.16,()=>{ if(o===me&&me.dead)return; let a2=ang; if(real&&i>0){ const t2=nearestMob(o.x,o.y,NRG(320)); if(t2)a2=Math.atan2(t2.y-o.y,t2.x-o.x); } const ddx=Math.cos(a2), ddy=Math.sin(a2); if(i>0)sfx('fire');
@@ -5272,7 +5275,7 @@ function castSkill(o,key,real,tx,ty,lv,tgt){
     if(fxSpr(2,0,7,o.x,o.y,200,.7)){ efx.push({k:'ring',x:o.x,y:o.y,r0:20,r1:160*RS(lv)*FNR,t:0,life:.45,col:'#8fdcff',w:3}); } else { efx.push({k:'ring',x:o.x,y:o.y,r0:20,r1:160*RS(lv)*FNR,t:0,life:.5,col:'#8fdcff',w:14}); efx.push({k:'shards',x:o.x,y:o.y,r:160*RS(lv)*FNR,t:0,life:.6}); impact(o.x,o.y,'150,220,255',170); } burst(o.x,o.y,'#dff6ff',36,420);
     { const fn=HMN(lv), ff=HMFM(fn), FR=160*RS(lv)*FNR; /* 서리 고리: 범위 +30%, 피해 +30%, 7레벨 2연타 · 14레벨 3연타 */
       const hitRing=first=>{ if(!first){ sfx('ice'); if(!fxSpr(2,0,7,o.x,o.y,200,.5)) efx.push({k:'ring',x:o.x,y:o.y,r0:20,r1:FR,t:0,life:.4,col:'#8fdcff',w:10}); burst(o.x,o.y,'#dff6ff',20,360); }
-        if(real) for(const m of mobsIn(o.x,o.y,FR)){ const r=spellDmg((14+10*lv)*FND); r.v*=ff; hitMob(m,r,first?3:0,false,{el:'ice'}); } };
+        if(real) for(const m of mobsIn(o.x,o.y,FR)){ const r=spellDmg((14+10*lv)*FND); r.v*=ff; hitA(m,r,first?3:0,false,{el:'ice'}); } };
       hitRing(true); for(let i=1;i<fn;i++) later(i*.28,()=>{ if(o===me&&me.dead)return; hitRing(false); }); }
     break;
   case 'chain':{ const fn=HMN(lv), ff=HMFM(fn), n=3+Math.floor(lv/4), br=[];
@@ -5311,12 +5314,12 @@ function castSkill(o,key,real,tx,ty,lv,tgt){
       const fxm=fxMeteor(mx,my,90,lv,.9); if(!fxm){ efx.push({k:'tele',x:mx,y:my,r:90,t:0,life:.9,col:'#ff5a1f'});
       efx.push({k:'meteor',x:mx,y:my,t:0,life:.9}); }
       later(.9,()=>{ if(fxm)fxSpr(6,3,7,mx,my,Math.min(180,100*RS(lv)*1.6),.5); else { slamFx(mx,my,100,'#ff5a1f'); impact(mx,my,'255,120,30',200); efx.push({k:'ring',x:mx,y:my,r0:30,r1:170,t:0,life:.6,col:'#ffd08a',w:10}); } sfx('slam'); burst(mx,my,'#ffb04a',50,420); burst(mx,my,'#ff5a1f',30,260); G.shake=Math.max(G.shake,.7);
-        if(real){ for(const m of mobsIn(mx,my,100*RS(lv))){ const rr=spellDmg((80+40*lv)*mf); hitMob(m,rr,0,false,{stun:.5+.02*lv,burn:PPR?4:.9,bd:rr.v*.5,el:'fire'}); }
-          zones.push({x:mx,y:my,r:80*RS(lv),life:2.5,t:0,tick:0,iv:.5,real,col:'#ff5a1f',kind:'fire',fn:m=>hitMob(m,spellDmg((12+8*lv)*mf),0,false,{el:'fire'})}); }
+        if(real){ for(const m of mobsIn(mx,my,100*RS(lv))){ const rr=spellDmg((80+40*lv)*mf); hitA(m,rr,0,false,{stun:.5+.02*lv,burn:PPR?4:.9,bd:rr.v*.5,el:'fire'}); }
+          zones.push({x:mx,y:my,r:80*RS(lv),life:2.5,t:0,tick:0,iv:.5,real,col:'#ff5a1f',kind:'fire',fn:m=>hitA(m,spellDmg((12+8*lv)*mf),0,false,{el:'fire'})}); }
         else zones.push({x:mx,y:my,r:70,life:2,t:0,tick:9,iv:9,real:false,col:'#ff5a1f',kind:'fire'}); }); }); }
     break; }
   case 'blizzard':
-    zones.push({x:tx,y:ty,r:130*RS(lv),life:4,t:0,tick:0,iv:.5,real,col:'#bfe9ff',kind:'ice',fn:m=>{hitMob(m,spellDmg(22+13*lv),1,false,{el:'ice'}); burst(m.x,m.y,'#e6f8ff',4,120);}});
+    zones.push({x:tx,y:ty,r:130*RS(lv),life:4,t:0,tick:0,iv:.5,real,col:'#bfe9ff',kind:'ice',fn:m=>{hitA(m,spellDmg(22+13*lv),1,false,{el:'ice'}); burst(m.x,m.y,'#e6f8ff',4,120);}});
     break;
   }
 }
