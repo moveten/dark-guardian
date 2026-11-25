@@ -1571,7 +1571,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0927</div>
+    <div class="ver" id="verT">v0.7.2.0928</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3636,9 +3636,9 @@ function galTick(dt){ const L=G.gal; if(!L)return; const alive=L.filter(q=>!q.de
   for(const a of L){ if(a.dead)continue; a.flash=Math.max(0,a.flash-dt); a.atk=Math.max(0,a.atk-dt); a.cd-=dt; a.mv=0; if(a.buf>0)a.buf-=dt; const C=GAL[a.k], sp=a.spd0*(a.buf>0?2:1);
     if(a.k==='cleric'){
       a.heal-=dt; a.shd-=dt;
-      if(a.heal<=0){ a.heal=6; const HR=300, who=alive.filter(q=>hyp(q.x-a.x,q.y-a.y)<HR&&q.hp<q.max), mh=!me.dead&&hyp(me.x-a.x,me.y-a.y)<HR&&me.hp<me.D.maxHp;   /* 광역 치유: 반경 300 안의 우리 편 정예 + 내 캐릭터 모두 최대 생명력의 8% */
+      if(a.heal<=0){ a.heal=6; const HR=300, who=alive.filter(q=>hyp(q.x-a.x,q.y-a.y)<HR&&q.hp<q.max), mh=!me.dead&&hyp(me.x-a.x,me.y-a.y)<HR&&me.hp<me.D.maxHp;   /* 광역 치유: 반경 300 안 — 우리 편 정예는 최대 생명력의 8%, 내 캐릭터는 20%(출혈·회복봉쇄 중에도 들어감) */
         if(who.length||mh){ for(const q of who){ q.hp=Math.min(q.max,q.hp+q.max*.08); spark(q.x,q.y,'#9be38a',8); }
-          if(mh){ const hv=Math.round(me.D.maxHp*.08); me.hp=Math.min(me.D.maxHp,me.hp+hv); addNum(me.x,me.y-40,'+'+hv,'#9be38a',false); spark(me.x,me.y,'#9be38a',10); }
+          if(mh){ const hv=Math.round(me.D.maxHp*.2); me.hp=Math.min(me.D.maxHp,me.hp+hv); if(me.hpLk!=null)me.hpLk=me.hp; addNum(me.x,me.y-40,'+'+hv,'#9be38a',false); spark(me.x,me.y,'#9be38a',10); }
           efx.push({k:'ring',x:a.x,y:a.y,r0:10,r1:HR,t:0,life:.6,col:'#9be38a',w:8}); a.atk=.4; } }
       if(a.shd<=0){ a.shd=15; for(const q of alive){ q.bar=Math.max(q.bar,q.max*.05); } efx.push({k:'ring',x:a.x,y:a.y,r0:10,r1:130,t:0,life:.5,col:'#7ec8ff',w:6}); a.atk=.4; }
       const sk=G.mobs.filter(m=>m.gms&&!m.dead).sort((p,q)=>hyp(p.x-a.x,p.y-a.y)-hyp(q.x-a.x,q.y-a.y))[0];
