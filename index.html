@@ -1560,7 +1560,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0909</div>
+    <div class="ver" id="verT">v0.7.2.0910</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3489,7 +3489,7 @@ function gmBegin(){ G.phase='wave'; G.wave=1; G.waveSides=[0]; G.laneShow=[]; G.
   for(const P of GMC_POS){ const m=spawnMob(ty,P.x,P.y,false); m.gmc=P.k; m.gn=P.nm; m.hx=P.x; m.hy=P.y; m.hp=m.max=GMC_HP; m.xp=0; m.dmg=0; m.spd=0; m.r=70; m.sp=rand(1,2.5); m.el=null; m.elT=2; gmgSpawn(P); m.cT=P.off?{x:CAS_T.x+P.off,y:CAS_T.y,i:-1,cas:1}:null; G.gmc.push(m); }
   gmDoorSpawn(); banner('성채를 부수세요','세 성채에서 몬스터가 쏟아집니다'); me.pot=3; pushEv(['w',1]); }
 function gmWave(dt){ gmDoorTick(dt); if(G.gmc&&G.gmc.length&&G.gmc.every(m=>m.dead)&&!G.gmDone){ G.gmDone=1; G.phase='boss'; announce('🏰 세 성채가 모두 무너졌어요!','#ffd860'); for(const m of G.mobs){ if(!m.dead&&!m.gmc)m.dead=true; } gmCutStart(); } }
-const GM_MOB={shield:{ty:1,hp:2.5,dm:.8,sp:.6},blade:{ty:2,hp:.9,dm:1.2,sp:1.5},helm:{ty:9,hp:.7,dm:1,sp:.9}};   /* 성채 몹: 스테이지 몹 기본값 대비 체력·피해·속도 배율(그림은 기존 좀비·해골·궁수를 임시로 사용) */
+const GM_MOB={shield:{ty:1,hp:2.5,dm:4,sp:1.2},blade:{ty:2,hp:.9,dm:6,sp:3},helm:{ty:9,hp:.7,dm:5,sp:1.8}};   /* 성채 몹: 스테이지 몹 기본값 대비 체력·피해·속도 배율(그림은 기존 좀비·해골·궁수를 임시로 사용) */
 function gmcMob(m){ const C=GM_MOB[m.gmc], pn=1+(G.gmPen||0), o=spawnMob(C.ty,m.hx+rand(-46,46),m.hy+78+rand(-6,16),false);
   o.hp=o.max=o.hp*C.hp*pn; o.dmg*=C.dm*pn; o.spd*=C.sp; o.cT=m.cT; o.inn=true; o.gfrom=m.gmc;
   if(m.gmc==='shield')o.gsh=1; else if(m.gmc==='blade')o.gbl=1; else o.gpr=rand(2,8);
@@ -3667,7 +3667,11 @@ function gmbUlt(m,c,pls){ const lx=c.lx, hw=GMU_W/2;
   if(c.stage===1){ gmbUltKill(pls,p=>Math.abs(p.x-lx)<hw&&hyp(p.x-GM_ARENA.x,p.y-GM_ARENA.y)<GMU_R+40); G.gmTel=G.gmTel.filter(q=>q!==c.tel); slamFx(lx,GM_ARENA.y,120,'#ff6a5a'); for(let i=-3;i<=3;i++)burst(lx,GM_ARENA.y+i*120,'#ff8a7a',10,260); G.shake=Math.max(G.shake,.9); sfx('slam');
     c.stage=2; c.t=0; const o={sh:'urest',x:lx,y:GM_ARENA.y,lw:GMU_W,r:GMU_R,dur:GMU_T}; c.tel=o; gmbTel(m,o); announce('⚠ 이제 직선이 있던 자리로 들어가세요!','#ffd860'); }
   else { gmbUltKill(pls,p=>Math.abs(p.x-lx)>=hw); G.gmTel=G.gmTel.filter(q=>q!==c.tel); efx.push({k:'ring',x:GM_ARENA.x,y:GM_ARENA.y,r0:60,r1:GMU_R,t:0,life:.7,col:'#ff6a5a',w:20}); G.shake=Math.max(G.shake,1); sfx('boss'); m.cs=null; m.cdk.ult=GMU_CD; m.gap=1.6; m.atk=.4; } }
-function gmArenaClamp(o){ const dx=o.x-GM_ARENA.x, dy=o.y-GM_ARENA.y, d=hyp(dx,dy), R=430; if(d>R){ o.x=GM_ARENA.x+dx/d*R; o.y=GM_ARENA.y+dy/d*R; } }
+const GM_CLIFF=GM_ARENA.y-20;   /* 고르무스 뒤쪽 절벽: 이 선(y) 위로는 못 가요 */
+const GM_CLIFF_P=(()=>{ const p=new Path2D(); p.moveTo(-30,-30); p.lineTo(WW+30,-30); p.lineTo(WW+30,GM_CLIFF); for(let x=WW+30;x>=-30;x-=20){ p.lineTo(x,GM_CLIFF+Math.sin(x*.045)*9+Math.sin(x*.13+1)*5+Math.sin(x*.31)*3); } p.closePath(); return p; })();
+function drawGmCliff(){ if(camY>GM_CLIFF+40)return; ctx.save(); const g=ctx.createLinearGradient(0,GM_CLIFF-260,0,GM_CLIFF+12); g.addColorStop(0,'#000'); g.addColorStop(.7,'#05060b'); g.addColorStop(1,'#141826'); ctx.fillStyle=g; ctx.fill(GM_CLIFF_P);
+  ctx.strokeStyle='#5a6075'; ctx.lineWidth=5; ctx.stroke(GM_CLIFF_P); ctx.strokeStyle='rgba(120,170,255,.28)'; ctx.lineWidth=2; ctx.save(); ctx.translate(0,-4); ctx.stroke(GM_CLIFF_P); ctx.restore(); ctx.restore(); }
+function gmArenaClamp(o){ if(o.y<GM_CLIFF+20)o.y=GM_CLIFF+20; const dx=o.x-GM_ARENA.x, dy=o.y-GM_ARENA.y, d=hyp(dx,dy), R=430; if(d>R){ o.x=GM_ARENA.x+dx/d*R; o.y=GM_ARENA.y+dy/d*R; } }
 function gmbSpawn(){ const pn=1+(G.gmPen||0), m=spawnMob(gmbTy(),GM_ARENA.x,GM_ARENA.y-100,false);
   m.gmb=1; m.boss=true; m.gmt=1; m.hp=m.max=GMB_HP*pn; m.dmg0=RAIDB()*GMB_RDM*pn; m.dmg=m.dmg0; m.spd=0; m.r=80; m.xp=Math.round(m.xp); m.fa=Math.PI/2; m.ph=1; m.cs=null; m.gap=2.5; m.cdk={slam:3,sweep:6,wave:5,bash:7,flame:9,tomb:11,roar:16,summon:10,ult:99}; m.stn=0; m.pr={sword:0,shield:0,helm:0}; m.parts={}; m.bt=99;
   G.gmB=m; G.gmTel=[]; for(const k of ['boss_7','boss_7_atk','boss_7_hurt','boss_7_ult','relics_s7'])sprGet(k);
@@ -5651,7 +5655,7 @@ function autoDir0(){
   const clr=ph==='clear';   /* 우두머리 처치 뒤 전리품 줍기 단계: 무적이라 용암·체력 걱정 없이 전리품을 최대한 주워요 */
   if(!clr)for(const h of hazards){ if(h.k!=='lava')continue; const dx=me.x-h.x,dy=me.y-h.y,d=hyp(dx,dy); if(d<h.r*.95+6)return d>1?[dx/d,dy/d]:[1,0]; }   /* 피해를 주는 용암만 급히 벗어나요 (늪·얼음·모래는 느려질 뿐이라 그대로 싸워요) */
   const hr=me.hp/me.D.maxHp, vd=hyp(me.x-hzX(),me.y-hzY()), fy=G.castle?VY+72:VY;   /* 성이 있으면 성 앞마당으로 돌아가요 */
-  if(clr)autoRet=false; else if(hr<.28)autoRet=true; else if(hr>=.7)autoRet=false;
+  if(clr||(G.stg&&G.stg.gm))autoRet=false; else if(hr<.28)autoRet=true; else if(hr>=.7)autoRet=false;
   if(autoRet)return vd<(G.castle?CAS_HR*.8:VR*.55)?null:lavaSteer(toward(VX,fy));
   const rg=atkRg(me), melee=meleeOf(me);
   { const gm=gobBusy()&&!G.mobs.every(q=>!q.gob||q.dead||q.run)?G.mobs.find(q=>q.gob&&!q.dead&&!q.run):null;   /* 황금 고블린이 나와 있으면 전리품·다른 목표보다 먼저 쫓아요 (마을에서 멀리 도망가도 놓치지 않게 거리 제한 없음) */
@@ -8931,6 +8935,7 @@ function drawWorld(t){
   for(const [w,c] of [[86,TH().road[0]],[64,TH().road[1]]]){ctx.strokeStyle=c;ctx.lineWidth=w;ctx.beginPath();ctx.moveTo(VX,0);ctx.lineTo(VX,VY);ctx.moveTo(0,VY);ctx.lineTo(WW,VY);ctx.stroke();} }
   // world edge
   ctx.strokeStyle='#000';ctx.lineWidth=40;ctx.strokeRect(-20,-20,WW+40,WH+40);
+  if(G.gmArena)drawGmCliff();
   // decor
   const x0=camX-60,x1=camX+VW/ZOOM+60,y0=camY-60,y1=camY+VH/ZOOM+60;
   for(const d of (MB?[]:decor)){ if(d.x<x0||d.x>x1||d.y<y0||d.y>y1)continue;   /* 광산 배경 그림이 있으면 스테이지 장식(묘비·나무 등)은 생략 */
