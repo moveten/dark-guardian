@@ -1571,7 +1571,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0930</div>
+    <div class="ver" id="verT">v0.7.2.0931</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3740,7 +3740,7 @@ function gmbResolve(b,c,pls){ const L=Array.isArray(c.tel)?c.tel:[c.tel];
   for(const o of L){ if(c.k==='roar'){ efx.push({k:'ring',x:o.x,y:o.y,r0:40,r1:o.r,t:0,life:.6,col:'#ffb070',w:14}); continue; }
     if(o.sh==='circ')slamFx(o.x,o.y,o.r,c.k==='tomb'?'#b8b0a0':'#9ad0ff'); else if(o.sh==='fan')slamFx(b.x+Math.cos(o.a)*o.r*.6,b.y+Math.sin(o.a)*o.r*.6,o.r*.5,'#9ad0ff'); else slamFx(b.x+Math.cos(o.a)*o.r*.5,b.y+Math.sin(o.a)*o.r*.5,60,'#9ad0ff'); } }
 /* 무덤 병사 부활(2페이즈~): 6마리, 체력 합 = 전체 체력의 5%, 사라지지 않고 싸움 */
-function gmbSummon(b){ const hp=b.max*.05/6; let n=0; for(let i=0;i<6;i++){ const a=i/6*6.283+rand(-.2,.2), r=rand(150,210), x=GM_ARENA.x+Math.cos(a)*r, y=b.y+90+Math.sin(a)*r*.7; const o=spawnMob(2,x,y,false);
+function gmbSummon(b){ const hp=b.max*.05/6; let n=0; for(let i=0;i<6;i++){ const a=i/6*6.283+rand(-.2,.2), r=rand(150,210), x=GM_ARENA.x+Math.cos(a)*r, y=Math.max(GM_CLIFF+40,GM_CLIFF+170+Math.sin(a)*r*.6); const o=spawnMob(2,x,y,false);
     o.hp=o.max=hp; o.dmg=b.dmg0*.12; o.xp=0; o.inn=true; o.tsd=1; o.spd=o.spd*1.1; burst(x,y,'#9ad0ff',8,200); n++; }
   announce('💀 무덤 병사 6마리가 깨어났어요!','#c8d8e8'); sfx('boss'); }
 function gmbTick(m,dt,pls){ m.kx=m.ky=0; m.dvx=m.dvy=0; if(G.phase!=='boss')return;
@@ -3760,7 +3760,7 @@ function gmbTick(m,dt,pls){ m.kx=m.ky=0; m.dvx=m.dvy=0; if(G.phase!=='boss')retu
   else if(k==='bash')tel={sh:'fan',x:m.x,y:m.y,a:ta,w:.95,r:280,dur:S.tel};
   else if(k==='roar')tel={sh:'circ',x:m.x,y:m.y,r:560,dur:S.tel};
   else if(k==='tomb'){ tel=[{sh:'circ',x:best.x,y:best.y,r:64,dur:S.tel}]; for(let i=0;i<4;i++){ const a=rand(0,6.283), d=rand(90,300); tel.push({sh:'circ',x:best.x+Math.cos(a)*d,y:best.y+Math.sin(a)*d,r:64,dur:S.tel}); } for(const o of tel){ const q=hyp(o.x-GM_ARENA.x,o.y-GM_ARENA.y); if(q>400){ o.x=GM_ARENA.x+(o.x-GM_ARENA.x)/q*400; o.y=GM_ARENA.y+(o.y-GM_ARENA.y)/q*400; } } }
-  else if(k==='summon'){ tel=[]; for(let i=0;i<6;i++){ const a=i/6*6.283; tel.push({sh:'circ',x:GM_ARENA.x+Math.cos(a)*180,y:m.y+90+Math.sin(a)*126,r:38,dur:S.tel}); } }
+  else if(k==='summon'){ tel=[]; for(let i=0;i<6;i++){ const a=i/6*6.283; tel.push({sh:'circ',x:GM_ARENA.x+Math.cos(a)*180,y:GM_CLIFF+170+Math.sin(a)*110,r:38,dur:S.tel}); } }
   else tel={sh:'circ',x:best.x,y:best.y,r:62,dur:S.tel};
   m.cs={k,t:0,dur:S.tel,mult:S.mult,stun:k==='bash'?.6:0,fear:S.fear||0,tel}; for(const o of (Array.isArray(tel)?tel:[tel]))gmbTel(m,o); }
 function drawGmTel(){ for(let i=G.gmTel.length-1;i>=0;i--){ const o=G.gmTel[i], p=Math.min(1,(T-o.t0)/o.dur); if(p<0){ continue; }
@@ -7578,7 +7578,7 @@ function fitBan(root){ try{ (root||document).querySelectorAll('.ban .t b,.ban .t
 try{ document.fonts&&document.fonts.ready.then(()=>fitBan($('#stageBan'))); }catch(e){}
 window.addEventListener('resize',()=>fitBan($('#stageBan')));
 function banCard(cur,i,role){ const T=STAGES[i], bi=T.bs||MAPBOSS[T.id], tr=BANTRIO[T.id], gq=cur.eq?gearPenOf(cur.eq,T.icap):null, gv=!!gq&&gq.wm<.97, cl=i<stageClear;
-        return `<div class="ban ${role}${!bi&&!tr?' noimg':''}${tr?' trio':''}${role==='bk nx'&&i>stageClear?' lk':''}" data-i="${i}"${role==='cu'?'':' aria-hidden="true"'}><div class="t${T.gm?' gmt':''}"><div class="sid">${esc(T.id)}</div><span class="sn">${esc(T.n)}${T.id==='4'?' (권장Lv95↑)':''}</span><b>${esc(T.bn||'')}</b>${T.gm?(()=>{ const q=gmPenOf(cur.eq); return `<i class="warn wrap">수문장 세트 점수 ${q.ok}/${q.n}<br>몬스터 +${q.pct}% 강화</i>`; })():`<i class="${gv?'warn':''}">권장 장비 Lv 합 ${Math.max(1,T.icap-12)*EQSL.length}↑${gv?' · 부족':''}</i>`}</div>${cl?'<div class="st clr"><b>클리어</b></div>':'<div class="st nc"><b>미클리어</b></div>'}${tr?`<span class="tri">${tr.map(k=>`<img src="img/${k}.png" alt="" onerror="this.remove()">`).join('')}</span>`:bi?`<img src="img/${bi}.png" alt="" onerror="this.remove()">`:''}</div>`; }
+        return `<div class="ban ${role}${!bi&&!tr?' noimg':''}${tr?' trio':''}${role==='bk nx'&&i>stageClear?' lk':''}" data-i="${i}"${role==='cu'?'':' aria-hidden="true"'}><div class="t${T.gm?' gmt':''}"><div class="sid">${esc(T.id)}</div><span class="sn">${esc(T.n)}${T.id==='4'?' (권장Lv95↑)':''}</span><b>${esc(T.bn||'')}</b>${T.gm?(()=>{ const q=gmPenOf(cur.eq); return `<i class="warn">영웅 세트 점수 ${q.ok}/${q.n}•몬스터 강화</i>`; })():`<i class="${gv?'warn':''}">권장 장비 Lv 합 ${Math.max(1,T.icap-12)*EQSL.length}↑${gv?' · 부족':''}</i>`}</div>${cl?'<div class="st clr"><b>클리어</b></div>':'<div class="st nc"><b>미클리어</b></div>'}${tr?`<span class="tri">${tr.map(k=>`<img src="img/${k}.png" alt="" onerror="this.remove()">`).join('')}</span>`:bi?`<img src="img/${bi}.png" alt="" onerror="this.remove()">`:''}</div>`; }
 function renderStagePanel(){
   const chars=charIds().map(loadChar).filter(Boolean);
   $('#playPanel').hidden=!selId;
