@@ -1560,7 +1560,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0902</div>
+    <div class="ver" id="verT">v0.7.2.0903</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3542,14 +3542,22 @@ function drawGmg(m,t){ const k=m.gmg, x=m.x, y=m.y, hurt=m.flash>0, atk=m.atk>0|
    문(체력 2.0e7)은 전투 시작 20초 뒤 처음 열리고 이후 45초마다 열려 거인 두개골(체력 6.0e6)을 내보냄(동시에 최대 2마리).
    두개골: 속도 ×1.8 · 캐릭터·정예를 무시하고 우리 성으로 직진 · 닿으면 4초마다 성 최대 체력의 8% · 기절·넉백·둔화 면역. 문을 부수면 더는 안 나옴.
    성가 사제 봉인은 6단계(우리 편 정예)에서 gmSeal(두개골)로 연결 */
-const GMD_POS={x:500,y:760}, GMD_HP=2.0e7, GMS_HP=6.0e6, GMD_FIRST=20, GMD_IV=45, GMS_MAX=2;
+const GMD_POS={x:500,y:760}, GMD_HP=6.0e7, GMS_HP=6.0e6, GMD_FIRST=10, GMD_IV=45, GMS_MAX=2;
 const gmdTy=()=>MT.findIndex(t=>t.gmd), gmsTy=()=>MT.findIndex(t=>t.gms);
 function gmDoorSpawn(){ const pn=1+(G.gmPen||0), o=spawnMob(gmdTy(),GMD_POS.x,GMD_POS.y,false); o.gmo=1; o.gmd=1; o.hp=o.max=GMD_HP*pn; o.xp=0; o.dmg=0; o.spd=0; o.r=48; o.hx=o.x; o.hy=o.y; o.open=0; G.gmDoor=o; G.gmDoorT=GMD_FIRST; }
 function gmDoorTick(dt){ const d=G.gmDoor; if(!d||d.dead)return; G.gmDoorT-=dt; if(G.gmDoorT>0)return;
   if(G.mobs.filter(m=>m.gms&&!m.dead).length>=GMS_MAX){ G.gmDoorT=3; return; }
   G.gmDoorT=GMD_IV; d.open=1.6; const pn=1+(G.gmPen||0), o=spawnMob(gmsTy(),d.x,d.y+40,false);
   o.gmo=1; o.gms=1; o.hp=o.max=GMS_HP*pn; o.xp=0; o.dmg=0; o.r=30; o.spd=o.spd*1.8; o.inn=true; o.roll=0; o.at=1; o.seal=0;
-  announce('🚪 소환의 문이 열렸어요! 거인 두개골이 성으로 굴러옵니다','#ffb070'); sfx('boss'); efx.push({k:'ring',x:d.x,y:d.y,r0:10,r1:120,t:0,life:.6,col:'#ff9a50',w:10}); }
+  announce('🚪 소환의 문이 열렸어요! 거인 두개골이 성으로 굴러옵니다','#ffb070'); sfx('boss'); gmDoorFx(d); }
+/* 소환의 문 해골 등장 연출: 문 빛 번쩍 → 겹겹이 퍼지는 고리 · 불꽃 · 땅 충격 · 화면 흔들림 */
+function gmDoorFx(d){ const x=d.x, y=d.y;
+  G.flash=Math.max(G.flash||0,.35); G.shake=Math.max(G.shake,.7); slamFx(x,y+30,150,'#b070ff');
+  efx.push({k:'ring',x,y,r0:10,r1:90,t:0,life:.45,col:'#ffffff',w:14});
+  burst(x,y,'#d9a8ff',34,380); burst(x,y,'#ff9a50',28,320); spark(x,y,'#fff0c0',22);
+  later(.12,()=>{ efx.push({k:'ring',x,y,r0:20,r1:190,t:0,life:.6,col:'#b070ff',w:12}); burst(x,y+20,'#9a5aff',24,300); });
+  later(.26,()=>{ efx.push({k:'ring',x,y,r0:30,r1:290,t:0,life:.7,col:'#ff7a4a',w:10}); burst(x,y+30,'#ffb070',22,280); G.shake=Math.max(G.shake,.5); });
+  later(.4,()=>{ efx.push({k:'ring',x,y,r0:40,r1:380,t:0,life:.8,col:'#7a3aff',w:7}); }); }
 function gmoTick(m,dt){ m.kx=m.ky=0; if(m.gmd){ if(m.open>0)m.open-=dt; m.x=m.hx; m.y=m.hy; return; }
   const c=G.castle; if(!c||c.hp<=0||G.phase!=='wave'){ m.dvx=m.dvy=0; return; }
   const dx=CAS_T.x-m.x, dy=CAS_T.y-m.y, d=hyp(dx,dy)||1, reach=CAS_R+m.r+6; m.fa=Math.atan2(dy,dx);
