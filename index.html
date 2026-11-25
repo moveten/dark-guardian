@@ -1560,7 +1560,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0883</div>
+    <div class="ver" id="verT">v0.7.2.0884</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3639,10 +3639,22 @@ const GMB_PART={sword:{n:'대검',pc:.06,dx:140,dy:10,cell:0},shield:{n:'방패'
 const GMB_SK={slam:{cd:7,tel:1.2,mult:2.6,part:'sword'},sweep:{cd:9,tel:1.4,mult:2.2,part:'sword'},wave:{cd:11,tel:.9,mult:1.8,part:'sword'},bash:{cd:10,tel:1.0,mult:1.5,part:'shield'},flame:{cd:12,tel:.8,mult:1.6,part:'helm'},tomb:{cd:14,tel:1.6,mult:2.4,part:'shield'},roar:{cd:28,tel:1.3,mult:.1,part:'helm',fear:3},summon:{cd:40,tel:1.2,mult:0,part:null,minPh:2}};
 const gmbTy=()=>MT.findIndex(t=>t.gmb), gmpTy=()=>MT.findIndex(t=>t.gmp);
 const angD=(a,b)=>{ let d=a-b; while(d>Math.PI)d-=6.283; while(d<-Math.PI)d+=6.283; return Math.abs(d); };
+/* ===== 일격필살 「왕의 심판」 (3페이즈 · 대기 45초 · 횟수 제한 없음) =====
+   ① 아레나를 세로로 가르는 좁은 직선 예고(가로 위치 무작위) → 1.7초 뒤 직선 위 전원 즉사 → ② 직선이 사라지며 직선을 뺀 아레나 전체 예고 → 1.7초 뒤 즉사(직선 자리가 안전지대).
+   기절 등에 끊기지 않음. 검 부위를 부수면 취소 + 고르무스 스턴 3초. 대상은 플레이어(우리 편 정예·소환수는 제외). */
+const GMU_R=430, GMU_W=84, GMU_T=1.7, GMU_CD=45;
+function gmbUltStart(m){ const lx=GM_ARENA.x+rand(-260,260); m.fa=Math.PI/2; m.cs={k:'ult',t:0,dur:GMU_T,stage:1,lx};
+  const o={sh:'ustrip',x:lx,y:GM_ARENA.y,lw:GMU_W,r:GMU_R,dur:GMU_T}; m.cs.tel=o; gmbTel(m,o); sfx('boss'); G.shake=Math.max(G.shake,.6);
+  announce('⚡ 왕의 심판! 붉은 직선 위는 즉사 — 직선 밖으로!','#ff5a4a'); banner('왕의 심판','직선 위에 있으면 즉사합니다'); }
+function gmbUltKill(pls,test){ for(const p of pls){ if(p.i<1||p.i>=10||p.mn)continue; if(!test(p))continue; mobHitPlayer(p.i,1e15); } }
+function gmbUlt(m,c,pls){ const lx=c.lx, hw=GMU_W/2;
+  if(c.stage===1){ gmbUltKill(pls,p=>Math.abs(p.x-lx)<hw&&hyp(p.x-GM_ARENA.x,p.y-GM_ARENA.y)<GMU_R+40); G.gmTel=G.gmTel.filter(q=>q!==c.tel); slamFx(lx,GM_ARENA.y,120,'#ff6a5a'); for(let i=-3;i<=3;i++)burst(lx,GM_ARENA.y+i*120,'#ff8a7a',10,260); G.shake=Math.max(G.shake,.9); sfx('slam');
+    c.stage=2; c.t=0; const o={sh:'urest',x:lx,y:GM_ARENA.y,lw:GMU_W,r:GMU_R,dur:GMU_T}; c.tel=o; gmbTel(m,o); announce('⚠ 이제 직선이 있던 자리로 들어가세요!','#ffd860'); }
+  else { gmbUltKill(pls,p=>Math.abs(p.x-lx)>=hw); G.gmTel=G.gmTel.filter(q=>q!==c.tel); efx.push({k:'ring',x:GM_ARENA.x,y:GM_ARENA.y,r0:60,r1:GMU_R,t:0,life:.7,col:'#ff6a5a',w:20}); G.shake=Math.max(G.shake,1); sfx('boss'); m.cs=null; m.cdk.ult=GMU_CD; m.gap=1.6; m.atk=.4; } }
 function gmArenaClamp(o){ const dx=o.x-GM_ARENA.x, dy=o.y-GM_ARENA.y, d=hyp(dx,dy), R=430; if(d>R){ o.x=GM_ARENA.x+dx/d*R; o.y=GM_ARENA.y+dy/d*R; } }
 function gmbSpawn(){ const pn=1+(G.gmPen||0), m=spawnMob(gmbTy(),GM_ARENA.x,GM_ARENA.y-100,false);
-  m.gmb=1; m.boss=true; m.gmt=1; m.hp=m.max=GMB_HP*pn; m.dmg0=RAIDB()*GMB_RDM*pn; m.dmg=m.dmg0; m.spd=0; m.r=80; m.xp=Math.round(m.xp); m.fa=Math.PI/2; m.ph=1; m.cs=null; m.gap=2.5; m.cdk={slam:3,sweep:6,wave:5,bash:7,flame:9,tomb:11,roar:16,summon:10}; m.pr={sword:0,shield:0,helm:0}; m.parts={}; m.bt=99;
-  G.gmB=m; G.gmTel=[]; for(const k in GMB_PART)gmpSpawn(m,k,true); for(const k of ['boss_7','boss_7_atk','boss_7_hurt','relics_s7'])sprGet(k);
+  m.gmb=1; m.boss=true; m.gmt=1; m.hp=m.max=GMB_HP*pn; m.dmg0=RAIDB()*GMB_RDM*pn; m.dmg=m.dmg0; m.spd=0; m.r=80; m.xp=Math.round(m.xp); m.fa=Math.PI/2; m.ph=1; m.cs=null; m.gap=2.5; m.cdk={slam:3,sweep:6,wave:5,bash:7,flame:9,tomb:11,roar:16,summon:10,ult:99}; m.stn=0; m.pr={sword:0,shield:0,helm:0}; m.parts={}; m.bt=99;
+  G.gmB=m; G.gmTel=[]; for(const k in GMB_PART)gmpSpawn(m,k,true); for(const k of ['boss_7','boss_7_atk','boss_7_hurt','boss_7_ult','relics_s7'])sprGet(k);
   sfx('boss'); G.shake=Math.max(G.shake,.8); me.god=Math.max(me.god||0,2); }
 function gmpSpawn(b,k,first){ const P=GMB_PART[k], o=spawnMob(gmpTy(),b.x+P.dx,b.y+P.dy,false); o.gmp=k; o.gmt=1; o.hp=o.max=b.max*P.pc; o.r=42; o.xp=0; o.dmg=0; o.spd=0; o.par=b; b.parts[k]=o; if(!first){ burst(o.x,o.y,'#9ad0ff',18,260); efx.push({k:'ring',x:o.x,y:o.y,r0:8,r1:80,t:0,life:.5,col:'#9ad0ff',w:8}); announce(`🔄 ${P.n}이 다시 생겼어요`,'#9ad0ff'); } return o; }
 function gmpTick(m){ const b=m.par; if(!b||b.dead){ m.dead=true; return; } const P=GMB_PART[m.gmp]; m.x=b.x+P.dx; m.y=b.y+P.dy; m.kx=m.ky=0; }
@@ -3651,7 +3663,8 @@ function gmpHit(m,dmg){ const b=m.par; if(!b||b.dead||m.dead)return;
   m.hp-=dmg; m.flash=.12; applyDmg(b,dmg,0,null);
   if(m.hp<=0&&!m.dead)gmpBreak(m); }
 function gmpBreak(m){ const b=m.par, k=m.gmp, P=GMB_PART[k]; m.dead=true; b.pr[k]=GMB_REGEN; burst(m.x,m.y,'#cfe8ff',30,320); spark(m.x,m.y,'#fff0c0',16); efx.push({k:'ring',x:m.x,y:m.y,r0:10,r1:120,t:0,life:.5,col:'#cfe8ff',w:10}); sfx('crit'); G.shake=Math.max(G.shake,.6);
-  announce(`💥 ${P.n} 파괴! (${GMB_REGEN}초 뒤 재생성)`,'#9ad0ff'); if(b.cs&&GMB_SK[b.cs.k]&&GMB_SK[b.cs.k].part===k){ b.cs=null; G.gmTel=G.gmTel.filter(q=>q.own!==b); b.gap=.8; } }
+  announce(`💥 ${P.n} 파괴! (${GMB_REGEN}초 뒤 재생성)`,'#9ad0ff'); if(k==='sword'&&b.cs&&b.cs.k==='ult'){ b.cs=null; G.gmTel=G.gmTel.filter(q=>q.own!==b); b.stn=3; b.gap=1; b.cdk.ult=45; b.atk=0; announce('😵 왕의 심판이 끊겼다! 고르무스가 3초간 쓰러진다','#ffe27a'); addNum(b.x,b.y-b.r-30,'💫 스턴!','#ffd84a',true); }
+  if(b.cs&&GMB_SK[b.cs.k]&&GMB_SK[b.cs.k].part===k){ b.cs=null; G.gmTel=G.gmTel.filter(q=>q.own!==b); b.gap=.8; } }
 function gmbTel(b,o){ o.t0=T; o.own=b; G.gmTel.push(o); pushEv(['e',Math.round(o.x),Math.round(o.y),Math.round(o.r||60),Math.round(o.dur*100)]); }
 function gmbInShape(o,p){ const dx=p.x-o.x, dy=p.y-o.y, d=hyp(dx,dy);
   if(o.sh==='circ')return d<o.r+14; if(o.sh==='fan')return d<o.r+14&&angD(Math.atan2(dy,dx),o.a)<o.w;
@@ -3667,13 +3680,15 @@ function gmbSummon(b){ const hp=b.max*.05/6; let n=0; for(let i=0;i<6;i++){ cons
     o.hp=o.max=hp; o.dmg=b.dmg0*.12; o.xp=0; o.inn=true; o.tsd=1; o.spd=o.spd*1.1; burst(x,y,'#9ad0ff',8,200); n++; }
   announce('💀 무덤 병사 6마리가 깨어났어요!','#c8d8e8'); sfx('boss'); }
 function gmbTick(m,dt,pls){ m.kx=m.ky=0; m.dvx=m.dvy=0; if(G.phase!=='boss')return;
-  const r=m.hp/m.max, np=r>.7?1:r>.35?2:3; if(np!==m.ph){ m.ph=np; m.dmg=m.dmg0*GMB_PM[np-1]; announce(np===2?'💢 고르무스가 격노했다! 피해 ×1.3':'⚡ 고르무스가 최후의 힘을 끌어올린다! 피해 ×1.6','#ff7a5a'); efx.push({k:'ring',x:m.x,y:m.y,r0:20,r1:300,t:0,life:.7,col:'#9ad0ff',w:14}); G.shake=Math.max(G.shake,.8); sfx('boss'); m.gap=Math.max(m.gap,1.2); }
+  const r=m.hp/m.max, np=r>.7?1:r>.35?2:3; if(np!==m.ph){ m.ph=np; m.dmg=m.dmg0*GMB_PM[np-1]; announce(np===2?'💢 고르무스가 격노했다! 피해 ×1.3':'⚡ 고르무스가 최후의 힘을 끌어올린다! 피해 ×1.6','#ff7a5a'); efx.push({k:'ring',x:m.x,y:m.y,r0:20,r1:300,t:0,life:.7,col:'#9ad0ff',w:14}); G.shake=Math.max(G.shake,.8); sfx('boss'); m.gap=Math.max(m.gap,1.2); if(np===3)m.cdk.ult=6; }
+  if(m.stn>0){ m.stn-=dt; for(const k in m.cdk)m.cdk[k]-=0; return; }
   for(const k in GMB_PART){ const pt=m.parts[k]; if(!pt||pt.dead){ m.pr[k]-=dt; if(m.pr[k]<=0)gmpSpawn(m,k); } }
   for(const k in m.cdk)m.cdk[k]-=dt;
   let best=null,bd=1e9; const tz=m.taunt&&m.taunt.t>0&&pls.find(q=>q.i===m.taunt.i); if(tz){ best=tz; bd=hyp(tz.x-m.x,tz.y-m.y); } else for(const p of pls){ const d=hyp(p.x-m.x,p.y-m.y); if(d<bd){ bd=d; best=p; } }
   if(best&&!m.cs){ const ta=Math.atan2(best.y-m.y,best.x-m.x), df=((ta-m.fa+Math.PI*3)%(Math.PI*2))-Math.PI, st=1.2*dt; m.fa+=Math.abs(df)<st?df:Math.sign(df)*st; }
-  if(m.cs){ const c=m.cs; c.t+=dt; if(c.t>=c.dur){ m.cs=null; gmbResolve(m,c,pls); m.gap=rand(.6,1.1); m.atk=.35; } return; }
+  if(m.cs){ const c=m.cs; c.t+=dt; if(c.k==='ult'){ if(c.t>=c.dur)gmbUlt(m,c,pls); return; } if(c.t>=c.dur){ m.cs=null; gmbResolve(m,c,pls); m.gap=rand(.6,1.1); m.atk=.35; } return; }
   if(m.gap>0){ m.gap-=dt; return; } if(!best)return;
+  if(m.ph===3&&m.cdk.ult<=0&&m.parts.sword&&!m.parts.sword.dead){ gmbUltStart(m); return; }
   const ready=[]; for(const k in GMB_SK){ const S=GMB_SK[k], pt=S.part?m.parts[S.part]:null; if(m.cdk[k]>0||(S.part&&(!pt||pt.dead)))continue; if(S.minPh&&m.ph<S.minPh)continue; if(k==='summon'&&G.mobs.filter(q=>q.tsd&&!q.dead).length>=3)continue;
     if(k==='slam'&&bd>440)continue; if(k==='sweep'&&bd>400)continue; if(k==='bash'&&bd>320)continue; ready.push(k); }
   if(!ready.length){ m.gap=.4; return; }
@@ -3688,10 +3703,12 @@ function gmbTick(m,dt,pls){ m.kx=m.ky=0; m.dvx=m.dvy=0; if(G.phase!=='boss')retu
 function drawGmTel(){ for(let i=G.gmTel.length-1;i>=0;i--){ const o=G.gmTel[i], p=Math.min(1,(T-o.t0)/o.dur); if(p<0){ continue; }
     ctx.save(); ctx.translate(o.x,o.y); ctx.fillStyle='rgba(255,60,50,.15)'; ctx.strokeStyle='rgba(255,90,70,.55)'; ctx.lineWidth=2;
     if(o.sh==='circ'){ ctx.beginPath(); ctx.arc(0,0,o.r,0,6.283); ctx.fill(); ctx.stroke(); ctx.fillStyle='rgba(255,70,50,.28)'; ctx.beginPath(); ctx.arc(0,0,o.r*p,0,6.283); ctx.fill(); }
+    else if(o.sh==='ustrip'){ ctx.fillStyle='rgba(255,40,40,.2)'; ctx.strokeStyle='rgba(255,70,60,.9)'; ctx.lineWidth=3; ctx.fillRect(-o.lw/2,-GMU_R,o.lw,GMU_R*2); ctx.strokeRect(-o.lw/2,-GMU_R,o.lw,GMU_R*2); ctx.fillStyle='rgba(255,40,40,'+(.15+.4*p).toFixed(2)+')'; ctx.fillRect(-o.lw/2,-GMU_R,o.lw,GMU_R*2); }
+    else if(o.sh==='urest'){ ctx.fillStyle='rgba(255,40,40,'+(.12+.38*p).toFixed(2)+')'; ctx.strokeStyle='rgba(255,70,60,.9)'; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(GM_ARENA.x-o.x,0,GMU_R,0,6.283); ctx.rect(-o.lw/2,-GMU_R,o.lw,GMU_R*2); ctx.fill('evenodd'); ctx.stroke(); }
     else if(o.sh==='fan'){ ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0,0,o.r,o.a-o.w,o.a+o.w); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.fillStyle='rgba(255,70,50,.28)'; ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0,0,o.r*p,o.a-o.w,o.a+o.w); ctx.closePath(); ctx.fill(); }
     else { ctx.rotate(o.a); ctx.fillRect(0,-o.lw/2,o.r,o.lw); ctx.strokeRect(0,-o.lw/2,o.r,o.lw); ctx.fillStyle='rgba(255,70,50,.28)'; ctx.fillRect(0,-o.lw/2,o.r*p,o.lw); }
     ctx.restore(); } }
-function drawGmb(m,t){ const x=m.x, y=m.y, base=GM_ARENA.y-20, hurt=m.flash>0, atk=m.cs||m.atk>0, im=sprGet(hurt?'boss_7_hurt':atk?'boss_7_atk':'boss_7')||sprGet('boss_7'); const W=360;
+function drawGmb(m,t){ const x=m.x, y=m.y, base=GM_ARENA.y-20, hurt=m.flash>0, atk=m.cs||m.atk>0, ult=m.cs&&m.cs.k==='ult', im=sprGet(ult?'boss_7_ult':hurt?'boss_7_hurt':atk?'boss_7_atk':'boss_7')||sprGet('boss_7'); const W=ult?300:360;
   ctx.fillStyle='rgba(0,0,0,.4)'; ctx.beginPath(); ctx.ellipse(x,base,W*.42,34,0,0,6.283); ctx.fill();
   if(im){ const H=W*im.height/im.width; ctx.save(); ctx.beginPath(); ctx.rect(x-W,0,W*2,base+4); ctx.clip(); ctx.drawImage(im,x-W/2,base-H+4,W,H); ctx.restore(); } else { circle(x,y,70,'#9aa'); }
   const rl=sprGet('relics_s7'); for(const k in GMB_PART){ const pt=m.parts[k], P=GMB_PART[k], px=x+P.dx, py=y+P.dy, alive=pt&&!pt.dead;
