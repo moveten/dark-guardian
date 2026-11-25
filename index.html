@@ -159,6 +159,14 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
 #gmVg.on{display:block;animation:gmVg 3s both}
 @keyframes gmVg{0%{opacity:0}10%{opacity:1}25%{opacity:.35}40%{opacity:1}55%{opacity:.35}70%{opacity:1}100%{opacity:0}}
 #gmWb{position:absolute;left:0;right:0;top:113px;height:46px;display:none;align-items:center;gap:10px;padding:0 14px;pointer-events:none;z-index:6;background:linear-gradient(rgba(120,8,8,.86),rgba(120,8,8,.86)),repeating-linear-gradient(115deg,rgba(255,200,40,.28) 0 14px,transparent 14px 28px);background-blend-mode:normal;border-top:2px solid #ff5a46;border-bottom:2px solid #ff5a46;font-family:var(--f-body);color:#fff;text-shadow:0 1px 3px #000,0 0 2px #400}
+#gmUc{position:absolute;left:0;right:0;top:36%;height:170px;display:none;pointer-events:none;z-index:7}
+#gmUc.on{display:block;animation:gmUc 2.8s both}
+#gmUc .bd{position:absolute;left:-20px;right:-20px;top:8px;height:140px;transform:skewY(-4deg);background:rgba(24,4,8,.65);border-top:3px solid #ff5a3c;border-bottom:3px solid #ff5a3c;box-shadow:0 0 22px rgba(255,70,40,.55)}
+#gmUc .tx{position:absolute;left:0;right:0;top:22px;text-align:center;font:900 min(24vw,96px)/1 'Noto Serif KR','Nanum Myeongjo','Noto Serif CJK KR',serif;letter-spacing:2px;white-space:nowrap;color:#ffd470;background:linear-gradient(180deg,#fff6c8,#ff9628);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:gmUcT 2.8s both}
+#gmUc .tx0{position:absolute;left:0;right:0;top:22px;text-align:center;font:900 min(24vw,96px)/1 'Noto Serif KR','Nanum Myeongjo','Noto Serif CJK KR',serif;letter-spacing:2px;white-space:nowrap;-webkit-text-stroke:9px #5a0a0a;color:#5a0a0a;filter:drop-shadow(0 0 10px rgba(255,60,40,.9));animation:gmUcT 2.8s both}
+#gmUc .ub{position:absolute;left:0;right:0;top:122px;text-align:center;font:700 13px var(--f-body);color:#ffdcc0;text-shadow:0 0 3px #000,0 0 3px #000}
+@keyframes gmUc{0%{opacity:0;transform:translateX(-60px)}8%{opacity:1;transform:none}82%{opacity:1}100%{opacity:0}}
+@keyframes gmUcT{0%{transform:scale(1.9);opacity:0}12%{transform:scale(.96);opacity:1}18%{transform:scale(1.04)}26%{transform:scale(1)}}
 #gmWb .ic{font-size:26px;filter:drop-shadow(0 0 4px #000)}
 #gmWb b{display:block;font:900 17px var(--f-body);letter-spacing:.5px;line-height:1.15}
 #gmWb small{display:block;font:700 12px var(--f-body);color:#ffdcb8;line-height:1.2}
@@ -1571,7 +1579,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0933</div>
+    <div class="ver" id="verT">v0.7.2.0934</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3698,14 +3706,18 @@ const GMB_PART={sword:{n:'대검',pc:.06,dx:140,dy:10,cell:0},shield:{n:'방패'
 const GMB_SK={slam:{cd:7,tel:1.2,mult:2.6,part:'sword'},sweep:{cd:9,tel:1.4,mult:2.2,part:'sword'},wave:{cd:11,tel:.9,mult:1.8,part:'sword'},bash:{cd:10,tel:1.0,mult:1.5,part:'shield'},flame:{cd:12,tel:.8,mult:1.6,part:'helm'},tomb:{cd:14,tel:1.6,mult:2.4,part:'shield'},roar:{cd:28,tel:1.3,mult:.1,part:'helm',fear:3},summon:{cd:40,tel:1.2,mult:0,part:null,minPh:2}};
 const gmbTy=()=>MT.findIndex(t=>t.gmb), gmpTy=()=>MT.findIndex(t=>t.gmp);
 const angD=(a,b)=>{ let d=a-b; while(d>Math.PI)d-=6.283; while(d<-Math.PI)d+=6.283; return Math.abs(d); };
-/* ===== 일격필살 「왕의 심판」 (3페이즈 · 대기 45초 · 횟수 제한 없음) =====
+/* ===== 일격필살 「왕의 심판」 (2페이즈부터 · 대기 30초 · 횟수 제한 없음) =====
    ① 아레나를 세로로 가르는 좁은 직선 예고(가로 위치 무작위) → 1.7초 뒤 직선 위 전원 즉사 → ② 직선이 사라지며 직선을 뺀 아레나 전체 예고 → 1.7초 뒤 즉사(직선 자리가 안전지대).
    기절 등에 끊기지 않음. 검 부위를 부수면 취소 + 고르무스 스턴 3초. 대상은 플레이어(우리 편 정예·소환수는 제외). */
 const GM_DROP_P=.3;
-const GMU_R=430, GMU_W=84, GMU_T=1.7, GMU_CD=45;
+const GMU_R=430, GMU_W=84, GMU_T=1.7, GMU_CD=30;
 function gmbUltStart(m){ const lx=GM_ARENA.x+rand(-260,260); m.fa=Math.PI/2; m.cs={k:'ult',t:0,dur:GMU_T,stage:1,lx};
   const o={sh:'ustrip',x:lx,y:GM_ARENA.y,lw:GMU_W,r:GMU_R,dur:GMU_T}; m.cs.tel=o; gmbTel(m,o); sfx('boss'); G.shake=Math.max(G.shake,.6);
-  announce('⚡ 왕의 심판! 붉은 직선 위는 즉사 — 직선 밖으로!','#ff5a4a'); banner('왕의 심판','직선 위에 있으면 즉사합니다'); }
+  announce('⚡ 왕의 심판! 붉은 직선 위는 즉사 — 직선 밖으로!','#ff5a4a'); gmUltCut(); }
+function gmUltCut(){ const host=($('#casAl')||{}).parentNode; if(!host)return; let vg=$('#gmVg'), uc=$('#gmUc');   /* 일격필살 발동 컷인: 붉은 띠 + 「一擊必殺」 */
+  if(!vg){ vg=document.createElement('div'); vg.id='gmVg'; vg.setAttribute('aria-hidden','true'); host.appendChild(vg); }
+  if(!uc){ uc=document.createElement('div'); uc.id='gmUc'; uc.setAttribute('aria-hidden','true'); uc.innerHTML='<div class="bd"></div><div class="tx0">一擊必殺</div><div class="tx">一擊必殺</div><div class="ub">일격필살 · 왕의 심판 — 붉은 직선 위는 즉사</div>'; host.appendChild(uc); }
+  for(const el of [vg,uc]){ el.classList.remove('on'); void el.offsetWidth; el.classList.add('on'); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('on'),2800); } }
 function gmbUltKill(pls,test){ for(const p of pls){ if(p.i<1||p.i>=10||p.mn)continue; if(!test(p))continue; mobHitPlayer(p.i,1e15); } }
 function gmbUlt(m,c,pls){ const lx=c.lx, hw=GMU_W/2;
   if(c.stage===1){ gmbUltKill(pls,p=>Math.abs(p.x-lx)<hw&&hyp(p.x-GM_ARENA.x,p.y-GM_ARENA.y)<GMU_R+40); G.gmTel=G.gmTel.filter(q=>q!==c.tel); slamFx(lx,GM_ARENA.y,120,'#ff6a5a'); for(let i=-3;i<=3;i++)burst(lx,GM_ARENA.y+i*120,'#ff8a7a',10,260); G.shake=Math.max(G.shake,.9); sfx('slam');
@@ -3717,7 +3729,7 @@ function drawGmCliff(){ if(camY>GM_CLIFF+40)return; ctx.save(); const g=ctx.crea
   ctx.strokeStyle='#5a6075'; ctx.lineWidth=5; ctx.stroke(GM_CLIFF_P); ctx.strokeStyle='rgba(120,170,255,.28)'; ctx.lineWidth=2; ctx.save(); ctx.translate(0,-4); ctx.stroke(GM_CLIFF_P); ctx.restore(); ctx.restore(); }
 function gmArenaClamp(o){ if(o.y<GM_CLIFF+20)o.y=GM_CLIFF+20; const dx=o.x-GM_ARENA.x, dy=o.y-GM_ARENA.y, d=hyp(dx,dy), R=430; if(d>R){ o.x=GM_ARENA.x+dx/d*R; o.y=GM_ARENA.y+dy/d*R; } }
 function gmbSpawn(){ const pn=1+(G.gmPen||0), m=spawnMob(gmbTy(),GM_ARENA.x,GM_ARENA.y-100,false);
-  m.gmb=1; m.boss=true; m.gmt=1; m.hp=m.max=GMB_HP*pn; m.dmg0=RAIDB()*GMB_RDM*pn; m.dmg=m.dmg0; m.spd=0; m.r=80; m.xp=Math.round(m.xp); m.fa=Math.PI/2; m.ph=1; m.cs=null; m.gap=2.5; m.cdk={slam:3,sweep:6,wave:5,bash:7,flame:9,tomb:11,roar:16,summon:10,ult:99}; m.stn=0; m.pr={sword:0,shield:0,helm:0}; m.parts={}; m.bt=99;
+  m.gmb=1; m.boss=true; m.gmt=1; m.hp=m.max=GMB_HP*pn; m.dmg0=RAIDB()*GMB_RDM*pn; m.dmg=m.dmg0; m.spd=0; m.r=80; m.xp=Math.round(m.xp); m.fa=Math.PI/2; m.ph=1; m.cs=null; m.gap=2.5; m.cdk={slam:3,sweep:6,wave:5,bash:7,flame:9,tomb:11,roar:16,summon:10,ult:30}; m.stn=0; m.pr={sword:0,shield:0,helm:0}; m.parts={}; m.bt=99;
   G.gmB=m; G.gmTel=[]; for(const k of ['boss_7','boss_7_atk','boss_7_hurt','boss_7_ult','relics_s7'])sprGet(k);
   sfx('boss'); G.shake=Math.max(G.shake,.8); me.god=Math.max(me.god||0,2); }
 function gmpSpawn(b,k,first){ const P=GMB_PART[k], o=spawnMob(gmpTy(),b.x+P.dx,b.y+P.dy,false); o.gmp=k; o.gmt=1; o.hp=o.max=b.max*P.pc; o.r=42; o.xp=0; o.dmg=0; o.spd=0; o.par=b; b.parts[k]=o; if(!first){ burst(o.x,o.y,'#9ad0ff',18,260); efx.push({k:'ring',x:o.x,y:o.y,r0:8,r1:80,t:0,life:.5,col:'#9ad0ff',w:8}); announce(`🔄 ${P.n}이 다시 생겼어요`,'#9ad0ff'); } return o; }
@@ -3746,14 +3758,14 @@ function gmbSummon(b){ const hp=b.max*.05/6; let n=0; for(let i=0;i<6;i++){ cons
     o.hp=o.max=hp; o.dmg=b.dmg0*.12; o.xp=0; o.inn=true; o.tsd=1; o.spd=o.spd*1.1; burst(x,y,'#9ad0ff',8,200); n++; }
   announce('💀 무덤 병사 6마리가 깨어났어요!','#c8d8e8'); sfx('boss'); }
 function gmbTick(m,dt,pls){ m.kx=m.ky=0; m.dvx=m.dvy=0; if(G.phase!=='boss')return;
-  const r=m.hp/m.max, np=r>.7?1:r>.35?2:3; if(np!==m.ph){ m.ph=np; m.dmg=m.dmg0*GMB_PM[np-1]; announce(np===2?'💢 고르무스가 격노했다! 피해 ×1.3':'⚡ 고르무스가 최후의 힘을 끌어올린다! 피해 ×1.6','#ff7a5a'); efx.push({k:'ring',x:m.x,y:m.y,r0:20,r1:300,t:0,life:.7,col:'#9ad0ff',w:14}); G.shake=Math.max(G.shake,.8); sfx('boss'); m.gap=Math.max(m.gap,1.2); if(np===3)m.cdk.ult=6; }
+  const r=m.hp/m.max, np=r>.7?1:r>.35?2:3; if(np!==m.ph){ if(m.ph<2&&np>=2)m.cdk.ult=Math.max(m.cdk.ult,10); m.ph=np; m.dmg=m.dmg0*GMB_PM[np-1]; announce(np===2?'💢 고르무스가 격노했다! 피해 ×1.3':'⚡ 고르무스가 최후의 힘을 끌어올린다! 피해 ×1.6','#ff7a5a'); efx.push({k:'ring',x:m.x,y:m.y,r0:20,r1:300,t:0,life:.7,col:'#9ad0ff',w:14}); G.shake=Math.max(G.shake,.8); sfx('boss'); m.gap=Math.max(m.gap,1.2); if(np===3)m.cdk.ult=6; }
   if(m.stn>0){ m.stn-=dt; for(const k in m.cdk)m.cdk[k]-=0; return; }
   for(const k in m.cdk)m.cdk[k]-=dt;
   let best=null,bd=1e9; const tz=m.taunt&&m.taunt.t>0&&pls.find(q=>q.i===m.taunt.i); if(tz){ best=tz; bd=hyp(tz.x-m.x,tz.y-m.y); } else for(const p of pls){ const d=hyp(p.x-m.x,p.y-m.y); if(d<bd){ bd=d; best=p; } }
   if(best&&!m.cs){ const ta=Math.atan2(best.y-m.y,best.x-m.x), df=((ta-m.fa+Math.PI*3)%(Math.PI*2))-Math.PI, st=1.2*dt; m.fa+=Math.abs(df)<st?df:Math.sign(df)*st; }
   if(m.cs){ const c=m.cs; c.t+=dt; if(c.k==='ult'){ if(c.t>=c.dur)gmbUlt(m,c,pls); return; } if(c.t>=c.dur){ m.cs=null; gmbResolve(m,c,pls); m.gap=rand(.6,1.1); m.atk=.35; } return; }
   if(m.gap>0){ m.gap-=dt; return; } if(!best)return;
-  if(m.ph===3&&m.cdk.ult<=0){ gmbUltStart(m); return; }
+  if(m.ph>=2&&m.cdk.ult<=0){ gmbUltStart(m); return; }
   const ready=[]; for(const k in GMB_SK){ const S=GMB_SK[k]; if(m.cdk[k]>0)continue; if(S.minPh&&m.ph<S.minPh)continue; if(k==='summon'&&G.mobs.filter(q=>q.tsd&&!q.dead).length>=3)continue;
     if(k==='slam'&&bd>440)continue; if(k==='sweep'&&bd>400)continue; if(k==='bash'&&bd>320)continue; ready.push(k); }
   if(!ready.length){ m.gap=.4; return; }
@@ -7767,7 +7779,7 @@ window.__noticeShow=noticeShow;
 function prepMe(){ me=loadChar(selId); me.D=derive(me); spawnMe(); }
 function resetWorld(){
   G.mine=null; worldSet(null); { const mh=$('#mineHud'); if(mh)mh.hidden=true; document.body.classList.remove('mining'); dockSkill(null); } GB=null; G.gobRoll=false; G.train=0; G.trNoAtk=false; G.trNoPet=false; G.trPet=null; trUi();
-  storyStop(); G.stZ=0; G.aim=null; G.lostBoss=false; G.castle=null; G.lostCastle=false; G.awz=null; G.awc=null; { const ac=$('#awCut'); if(ac)ac.classList.remove('on'); for(const q of ['#casAl','#casMs','#gmVg','#gmWb']){ const z=$(q); if(z)z.classList.remove('on'); } const hc=$('#hCastle'); if(hc)hc.classList.remove('atk'); } if(me){ me.erode=me.hblk=me.mblk=me.hbStrict=me.bleed=me.bleedN=0; me.hpLk=me.mpLk=null; }
+  storyStop(); G.stZ=0; G.aim=null; G.lostBoss=false; G.castle=null; G.lostCastle=false; G.awz=null; G.awc=null; { const ac=$('#awCut'); if(ac)ac.classList.remove('on'); for(const q of ['#casAl','#casMs','#gmVg','#gmWb','#gmUc']){ const z=$(q); if(z)z.classList.remove('on'); } const hc=$('#hCastle'); if(hc)hc.classList.remove('atk'); } if(me){ me.erode=me.hblk=me.mblk=me.hbStrict=me.bleed=me.bleedN=0; me.hpLk=me.mpLk=null; }
   projs.length=zones.length=timers.length=parts.length=nums.length=ground.length=efx.length=0; G.casWreck=[]; G.casDvLv={};   /* 6스테이지 공성탑 잔해는 다른 스테이지로 넘어가지 않게 */
   G.mobs=[]; G.mobMap=new Map(); G.gemDone=false; G.stKills=0; G.stDrops=0; G.stCap=0; G.runT=0; G.stGot=[0,0,0,0,0,0]; G.stGem=null; G.sib=0; G.endShown=false; G.clrDone=false; alClear(); G.stRev=0; G.stTaken=0; G.stGold0=me?(me.gold|0):0; G.paused=false; G.bt=null; G.shake=0;
   hitQ=[]; fxQ=[]; lastAllyFx=-1; lastEv=-1; lastHit=0; G.guestDmg=0; G.fires=[]; G.freeRev=(me&&me.hc)?0:1; G.fireT=3; if(me){ me.rvGiven=0; me.seenRg=0; me.out=false; me.rvT=0; }
