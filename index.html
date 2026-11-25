@@ -1569,7 +1569,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0917</div>
+    <div class="ver" id="verT">v0.7.2.0918</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3510,18 +3510,17 @@ function gmcTick(m,dt){ m.x=m.hx; m.y=m.hy; m.kx=m.ky=0; if(G.phase!=='wave')ret
   gmcMob(m); }
 function gmcKill(m){ if(m.dead)return; m.dead=true; burst(m.x,m.y,'#8a7a60',40,320); spark(m.x,m.y,'#fff0c0',24); for(let i=0;i<3;i++)later(i*.15,()=>efx.push({k:'ring',x:m.x,y:m.y,r0:10,r1:170,t:0,life:.7,col:'#cdb9a0',w:12})); sfx('kill'); pushEv(['bx',Math.round(m.x),Math.round(m.y),70]); announce(`💥 ${m.gn} 파괴!`,'#ffd860'); if(!G.galDone){ G.galDone=1; galSpawn(); } castleRepair();   /* 성벽 수리 규칙대로 우리 성 회복 */
   for(const g of G.mobs){ if(g.gmg===m.gmc&&!g.dead)gmStone(g); } }   /* 수문장보다 성채를 먼저 부수면 수문장은 그 자리에서 돌이 돼요 (전리품 없음 · 공격 대상도 충돌도 없는 장식) */
-let GM_STONE_STYLE=1;   /* 석상 모양: 1 = 회색 석상 · 2 = 균열 + 이끼 낀 석상 */
 function gmStone(g){ g.dead=true; (G.gmStones=G.gmStones||[]).push({k:g.gmg,x:g.x,y:g.y,t0:T}); burst(g.x,g.y,'#bdb09a',30,260); spark(g.x,g.y-40,'#e6e0d0',14); efx.push({k:'ring',x:g.x,y:g.y,r0:8,r1:90,t:0,life:.6,col:'#cfc4ae',w:8}); sfx('block'); later(.9,()=>announce('🗿 "성채를 지키지 못했다…" 수문장이 그 자리에서 돌로 굳었어요','#c9b99a')); }
 const STONE_C={};
-function gmStoneCv(k,style){ const im=sprGet('guard7_'+k); if(!im||!im.width)return null; const key=k+style, ch=STONE_C[key]; if(ch&&ch.src===im)return ch.c;
+function gmStoneCv(k){ const im=sprGet('guard7_'+k); if(!im||!im.width)return null; const key=k, ch=STONE_C[key]; if(ch&&ch.src===im)return ch.c;
   const sc=.45, w=Math.round(im.width*sc), h=Math.round(im.height*sc), c=document.createElement('canvas'); c.width=w; c.height=h; const g=c.getContext('2d'); g.drawImage(im,0,0,w,h);
   const d=g.getImageData(0,0,w,h), p=d.data; for(let i=0;i<p.length;i+=4){ if(!p[i+3])continue; const v=Math.min(255,(.3*p[i]+.59*p[i+1]+.11*p[i+2])*.92+18); p[i]=v*.86; p[i+1]=v*.9; p[i+2]=Math.min(255,v+10); } g.putImageData(d,0,0);
-  if(style===2){ g.globalCompositeOperation='source-atop'; let sd=k.length*977+13; const rn=()=>{ sd=(sd*16807)%2147483647; return sd/2147483647; };
+  { g.globalCompositeOperation='source-atop'; let sd=k.length*977+13; const rn=()=>{ sd=(sd*16807)%2147483647; return sd/2147483647; };
     g.strokeStyle='rgba(18,18,26,.75)'; g.lineWidth=Math.max(2,w*.006); for(let i=0;i<16;i++){ let x=rn()*w, y=rn()*h*.9; g.beginPath(); g.moveTo(x,y); for(let j=0;j<4;j++){ x+=(rn()-.5)*w*.1; y+=rn()*h*.06; g.lineTo(x,y); } g.stroke(); }
     for(let i=0;i<26;i++){ const x=rn()*w, y=h*(.55+rn()*.45), r=w*(.02+rn()*.05); g.fillStyle=`rgba(${60+rn()*20|0},${96+rn()*30|0},${52},.42)`; g.beginPath(); g.ellipse(x,y,r,r*.6,0,0,6.283); g.fill(); }
     g.globalCompositeOperation='source-over'; }
   STONE_C[key]={src:im,c}; return c; }
-function drawGmStone(a){ const im=sprGet('guard7_'+a.k), cv=gmStoneCv(a.k,GM_STONE_STYLE), sc=200/900, r=46; ctx.fillStyle='rgba(0,0,0,.4)'; ctx.beginPath(); ctx.ellipse(a.x,a.y+r*.5,r*1.1,r*.38,0,0,6.283); ctx.fill();
+function drawGmStone(a){ const im=sprGet('guard7_'+a.k), cv=gmStoneCv(a.k), sc=200/900, r=46; ctx.fillStyle='rgba(0,0,0,.4)'; ctx.beginPath(); ctx.ellipse(a.x,a.y+r*.5,r*1.1,r*.38,0,0,6.283); ctx.fill();
   if(!im||!im.width)return; const w=im.width*sc, h=im.height*sc, y0=a.y+r*.55-h, f=Math.min(1,(T-a.t0)/1);
   if(f<1)ctx.drawImage(im,a.x-w/2,y0,w,h); if(cv){ ctx.save(); ctx.globalAlpha=f; ctx.drawImage(cv,a.x-w/2,y0,w,h); ctx.restore(); } }
 function drawGmc(m,t){ const im=sprGet('castle_s7_'+m.gmc), r=m.hp/m.max, st=r>.65?0:r>.3?1:2, x=m.x, y=m.y, W=250;
