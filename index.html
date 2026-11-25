@@ -1569,7 +1569,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0922</div>
+    <div class="ver" id="verT">v0.7.2.0923</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1839,7 +1839,7 @@ const SK={
   {k:'roar',get lb(){ return def2On()?['도발','속도감소','재사용대기']:['도발','지속시간','받는피해']; },e:'📢',n:'포효',s:'포효',req:18,mp:12,cd:18,el:'#e0a050',freq:1,d:l=>def2On()?`[곰 변신 필요] 반경 320 적 ${V(3+Math.floor(l/3))}명을 도발하고, 반경 320 안의 모든 적의 이동 속도·공격 속도를 3초간 -${V(10+l)}% (우두머리 절반, 레이드 우두머리 1/3). 재사용 대기 ${V(roarCd(l).toFixed(1))}초`:`[곰 변신 필요] 반경 320 적 ${V(3+Math.floor(l/3))}명을 도발하고, ${V(6+Math.floor(l/4))}초간 반경 320 안의 나와 동료가 받는 피해 -${V(Math.min(45,Math.round(20+1.5*l)))}%`},
   {k:'fury',get lb(){ return ADMX?['주는피해','반경','무기피해']:['받는피해','주는피해','반경','무기피해']; },e:'💢',n:'광란',s:'광란',req:22,mp:14,cd:30,el:'#ff5a3a',freq:1,d:l=>`[곰 변신 필요] 8초간 ${ADMX?'':`받는 피해 -${V(FRD(l))}%, `}주는 피해 +${V(FRV(l))}%, 1초마다 반경 ${RR(110,l)} 충격파 무기 피해 ${V(120+15*l)}%`},
   {k:'spirit',lb:['지속시간','주는피해','공격속도','마나회복'],e:'👻',n:'영혼 정령',s:'정령',req:24,mp:22,cd:36,el:'#b8f0ff',d:l=>`[소환수·시한] ${V((PPR?10+.4*l:14+.4*l).toFixed(1))}초간 정령이 곁에 떠올라요. 반경 260 안의 나와 동료: 주는 피해 +${V(PPR?14+l:Math.round(10+1.5*l))}%, 공격 속도 +${V(8+l)}%, 마나 회복 +${V(30+3*l)}%`},
-  {k:'hunt',lb:['까마귀피해','곰무기피해'],e:'🌕',n:'야생의 대사냥',s:'대사냥',req:30,mp:24,cd:12,el:'#ffd24a',rg:420,d:l=>`[필살기] 🧑 까마귀 떼가 적을 16번 급습, 반경 75 범위 피해 ${V(110+36*l)} / 🐻 반경 320 충격파 3연타 무기 피해 ${V(500+90*l)}% + 2초 기절`},
+  {k:'hunt',lb:['까마귀피해','곰무기피해'],e:'🌕',n:'야생의 대사냥',s:'대사냥',req:30,mp:24,cd:12,el:'#ffd24a',rg:420,d:l=>`[필살기] 🧑 까마귀 떼가 적을 16번 급습, 반경 75 범위 피해 ${V(110+36*l)} / 🐻 반경 320 충격파 3연타 무기 피해 ${V(500+90*l)}%${ADMX?' (중심 100 안 100% · 101~200 50% · 201~320 25%)':''} + 2초 기절`},
   {k:'bears',lb:['초'],e:'🐻',n:'곰세마리',s:'곰세마리',req:90,mp:60,cd:80,el:'#d9a46a',d:l=>`[궁극기]${V(BEAR_T(l))}초간 내 최대 생명력의 ${V(220+10*l)}%인 아빠곰과 가족을 소환. 아빠곰: 범위 평타 ${V(100+40*l)}, 돌진 ${V(160+60*l)}(기절). 엄마곰: 포효(적 받는 데미지 +20% 추가, 우두머리 절반). 아기곰: 회복(나와 소환수 생명력 5%).`}]
 };
 /* 드루이드 형태 수치 (derive와 설명이 같이 씀) */
@@ -5177,7 +5177,7 @@ function druidCast(o,key,real,lv,tgt,tx,ty,ang){
       efx.push({k:'ring',x:o.x,y:o.y,r0:300,r1:20,t:0,life:.5,col:'#c28a5a',w:10});
       for(let i=0;i<3;i++) later(.5+i*.45,()=>{ const cx=o===me?me.x:o.x, cy=o===me?me.y:o.y; slamFx(cx,cy,320,'#c28a5a'); efx.push({k:'ring',x:cx,y:cy,r0:20,r1:320,t:0,life:.5,col:'#e0b080',w:14}); impact(cx,cy,'220,170,110',240); burst(cx,cy,'#c9a27a',40,420); G.shake=Math.max(G.shake,i===2?.9:.6); sfx('slam');
         efx.push({k:'hcrack',x:cx,y:cy,r:330,v:(i+Math.floor(Math.random()*2))%4,rot:rand(0,6.283),t:0,life:1.7}); efx.push({k:'ring',x:cx,y:cy,r0:10,r1:210,t:0,life:.6,col:'#8a6a4a',w:22}); efx.push({k:'ring',x:cx,y:cy,r0:10,r1:130,t:0,life:.45,col:'#ffb060',w:10}); burst(cx,cy,'#5a4030',30,340); burst(cx,cy,'#b89870',20,200); burst(cx,cy,'#ff9a3a',14,260);
-        if(real) for(const m of mobsIn(me.x,me.y,320)){ hitMob(m,physDmg(5+.9*lv),0,false,i===0?{stun:2}:undefined); knock(m,me.x,me.y,i===0?30:14); } });
+        if(real) for(const m of mobsIn(me.x,me.y,320)){ const pr=physDmg(5+.9*lv); if(ADMX){ const dd=hyp(m.x-me.x,m.y-me.y); pr.v*=dd<=100?1:dd<=200?.5:.25; } hitMob(m,pr,0,false,i===0?{stun:2}:undefined); knock(m,me.x,me.y,i===0?30:14); } });
     }
     break;
   case 'bears':   /* 곰세마리: 아빠곰·엄마곰·아기곰을 한꺼번에 불러요 (시한 소환수, 이전에 불러둔 곰 가족/큰 소환수는 사라져요) */
