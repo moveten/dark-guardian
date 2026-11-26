@@ -997,7 +997,7 @@ body.land #bBas{position:absolute;width:calc(var(--u) + 4px);height:calc(var(--u
 .ban b{display:block;font-family:var(--f-disp);font-size:17px;color:#ffd36a;margin-top:2px}
 .ban span{display:block;font-size:12px;color:#e8dcc4;margin-top:5px}
 .ban i{display:block;font-style:normal;font-size:11.5px;color:#9fd18b;font-weight:700;margin-top:4px}
-.ban i.warn{color:#e07060}
+.ban i.warn{color:#e07060}.ban .t i.warn{display:flex;align-items:center;gap:4px;width:max-content;max-width:none;overflow:visible;position:relative;z-index:3;font-size:11px;text-shadow:0 0 4px #000,0 0 6px #000}.gmtip{flex:none;display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;font-size:11px;border-radius:50%;border:1.5px solid #e0c080;color:#e0c080;font:700 11px sans-serif;background:rgba(20,14,8,.85);cursor:pointer}.gmtp .r{display:flex;justify-content:space-between;border-bottom:1px solid #3a2c1c;padding:4px 0}.gmtp .r b{color:#ffd860}.gmtp p{margin:8px 0 0;line-height:1.5;font-size:13px}.gmtp p.ok{color:#9fd18b}
 .ban .t.gmt{padding-bottom:4px}   /* 7스테이지: 안내가 두 줄이라 아래 여백을 줄여 다른 카드와 같은 높이로 */
 .ban .t i.wrap{white-space:normal;overflow:visible;line-height:1.15;margin-top:0}   /* 긴 안내(수문장 세트 점수 · 몬스터 강화)는 잘리지 않게 두 줄로 */
 .ban.trio .t{padding-right:150px}
@@ -1579,7 +1579,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0934</div>
+    <div class="ver" id="verT">v0.7.2.0941</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1751,7 +1751,8 @@ const STG7={id:'7',raid:4,gm:1,bn:'거인왕 고르무스',bs:'boss_7',rl:99,n:'
 if(GM_ON)STAGES.push(STG7);
 const rcol=it=>it&&it.ep?'#6fe8ff':RARC[it.rar], rbd=it=>it&&it.ep?'#6fe8ff':RBD[it.rar];   /* ★6(it.ep)는 청백 */
 const RARN=['일반','매직','레어','유니크','영웅'], RARC=['#e9e2d4','#7d96ff','#ffe24d','#e4b65a','#ff4f7a'];
-const dn=it=>it.rar>=2?`[${RARN[it.rar]}] ${it.name}`:it.name;
+const rn=it=>it&&it.ep?'전설':RARN[it.rar];   /* ★6(it.ep)는 '전설' */
+const dn=it=>it.rar>=2?`[${rn(it)}] ${it.name}`:it.name;
 /* 아이템 설명 이름 줄: 이름 바로 뒤에 등급 별(★1 일반 · ★2 매직 · ★3 레어 · ★4 유니크 · ★5 영웅), 색은 등급색 (★6은 아직 없음) */
 const dnTag=it=>`<span class="rtg">★${it.ep?6:Math.min(5,(it.rar|0)+1)}${it.rar===3&&it.sp?'+':''}</span>`;   /* 특수 유니크(it.sp)는 ★4+ */
 const rkS=it=>it&&it.ep?9:((it&&it.rar)|0);   /* 정렬용 등급값: ★6(ep)이 ★5(rar 4)보다 앞 */
@@ -1933,7 +1934,7 @@ const MT0=[
  {n:'성 방패병',hp:10,dmg:1,spd:0,r:26,xp:0,leg:'sh'}, {n:'성 석궁병',hp:10,dmg:1,spd:0,r:22,xp:0,leg:'xb'}, {n:'대형 발리스타',hp:10,dmg:1,spd:0,r:36,xp:0,leg:'bl'},   /* 6스테이지 군단 호출 병사 */
  {n:'황금 고블린',hp:1e9,dmg:0,spd:0,r:20,xp:0,gob:1},
  {n:'적 성채',hp:10,dmg:0,spd:0,r:70,xp:0,gmc:1},   /* 7스테이지 적 성채 3곳 */
- {n:'성채 수문장',hp:10,dmg:1,spd:60,r:46,xp:5000,gmg:1},   /* 7스테이지 성채 수문장 3체 */
+ {n:'성채 정예',hp:10,dmg:1,spd:60,r:46,xp:5000,gmg:1},   /* 7스테이지 성채 정예 3체 */
  {n:'소환의 문',hp:10,dmg:0,spd:0,r:48,xp:0,gmo:1,gmd:1},
  {n:'거인왕 고르무스',hp:10,dmg:1,spd:0,r:80,xp:20000,boss:1,gmb:1,bc:['#101418','#3a4a52','#1c2428','#9ad0ff']},
  {n:'고르무스 부위',hp:10,dmg:0,spd:0,r:42,xp:0,gmp:1},
@@ -2133,6 +2134,7 @@ function gemIconRedraw(){ clearTimeout(gemRdT); gemRdT=setTimeout(()=>{ try{ con
 const UNQIMG={'밤의 망토':'item_u_shadowcloak','용비늘 갑주':'item_u_dragonscale','순교자의 흉갑':'item_u_martyr','서리 군주의 투구':'item_u_frostlord','광전사의 훈장':'item_u_rage','이그니스의 목걸이':'item_u_ignis','세케르의 목걸이':'item_u_sekr','데스락의 목걸이':'item_u_death','도살자의 이빨':'item_u_butcher','피의 맹세':'item_u_bloodoath','심판의 철퇴':'item_u_judge','망자의 지팡이':'item_u_necro','서리 송곳니':'item_u_frost','몰락군주 자검':'item_u_fallen','왜성의 파편':'item_u_dwarf','뒤틀어진 황천수':'item_u_hwangcheon','대지의 맥박':'item_u_pulse','몽환의 경계':'item_u_dream','심문관의 면구':'item_u_inquis','심해의 유혹':'item_u_abyss','오팔색 고리':'item_u_opal','폭풍 절단기':'item_u_storm','금지된 마법서':'item_u_tome','해골 왕관':'item_u_skullcrown','프로스티아의 반지':'item_ring_starlight','사나리아의 반지':'item_ring_blood','니아의 반지':'item_ring_oblivion','모르그의 목걸이':'item_amulet_corrupt','영겁의 눈':'item_amulet_eternity','운명의 주사위 단검':'item_cas_wpn','딜러의 조끼':'item_cas_armor','황금 칩 목걸이':'item_cas_amu',
   '그림자 단검':'item_hero_dagger','그림자 투구':'item_hero_helm','그림자 갑옷':'item_hero_armor','그림자 목걸이':'item_hero_amulet','그림자 반지':'item_hero_ring','그림자 뿔':'item_hero_horn','그림자 방패':'item_hero_shield','그림자 오브':'item_hero_orb','그림자 등불':'item_hero_lantern','그림자 토템':'item_hero_totem',
   '파성의 철퇴':'item_h6_pal','수문장의 대검':'item_h6_war','성가퀴 투구':'item_h6_helm','성채의 갑주':'item_h6_armor','수문장의 인장':'item_h6_amu','성문의 반지':'item_h6_ring','공성의 뿔':'item_h6off_war','성벽의 방패':'item_h6off_pal','수문장의 오브':'item_h6off_sorc','성채의 등불':'item_h6off_necro','성탑 토템':'item_h6off_druid',
+  '거인왕의 대도끼':'item_h7_axe','왕묘의 지팡이':'item_h7_staff','부러진 뿔 투구':'item_h7_helm','늑골 흉갑':'item_h7_armor','왕묘의 인장':'item_h7_amu','사슬 반지':'item_h7_ring','돌뿔나팔':'item_h7_horn','묘비 방패':'item_h7_shield','청백 구슬':'item_h7_orb','영혼 등불':'item_h7_lantern','뿌리 토템':'item_h7_totem',
   '각성의 칼날':'item_aw_wpn','갈라진 왕관':'item_aw_helm','공허의 망토':'item_aw_armor','심장 결정':'item_aw_amu','끊어진 사슬':'item_aw_ring','각성의 뿔':'item_awoff_war','각성의 방패':'item_awoff_pal','각성의 오브':'item_awoff_sorc','각성의 등불':'item_awoff_necro','각성의 토템':'item_awoff_druid'};   /* 영웅(rar 4) 그림자·각성 아이템 아이콘 */
 const UIMGS={};
 const pickImgKey=it=>'pick_'+Math.max(1,Math.min(5,it.pk|0));   /* 곡괭이 등급 그림: img/pick_1~5.webp */
@@ -2274,13 +2276,13 @@ const SPFX={
  csoff_sorc:{n:'수문장의 오브',slot:'shield',base:'별빛 오브',il:999,hero:1,cs:1,fcls:'sorc',d:'스킬 마나 소모 -25%, 피해 +12%',ap:d=>{d.dmgPct+=12;}},
  csoff_necro:{n:'성채의 등불',slot:'shield',base:'망령의 등불',il:999,hero:1,cs:1,fcls:'necro',d:'소환수 피해 +30%, 혼불 스킬 +2',ap:d=>{d.sm+=30;d.sk.soulbolt=(d.sk.soulbolt||0)+2;}},
  csoff_druid:{n:'성탑 토템',slot:'shield',base:'정령 토템',il:999,hero:1,cs:1,fcls:'druid',d:'변신 중 받는 피해 -15%, 피해 +12%',ap:d=>{d.dmgPct+=12;}},
- /* ===== 거인왕 장비 ★6 (7스테이지 고르무스) — 에픽 등급(it.ep) · 관리자 전용 · 아이템 레벨 GM_IL · 착용 Lv GM_REQ · 기본 수치 ×GM_M ===== */
+ /* ===== 거인왕 장비 ★6 (7스테이지 고르무스) — 전설 등급(it.ep) · 관리자 전용 · 아이템 레벨 GM_IL · 착용 Lv GM_REQ · 기본 수치 ×GM_M ===== */
  gm_axe:{n:'거인왕의 대도끼',slot:'weapon',base:'전투 도끼',il:999,hero:1,gm:1,d:'왕의 일격: 기본 공격 시 6% 확률로 0.15초 뒤 같은 타격이 한 번 더 들어감 (첫 타격과 같은 피해·치명타, 다른 효과는 없음)',ap:()=>{}},
  gm_staff:{n:'왕묘의 지팡이',slot:'weapon',base:'참나무 지팡이',il:999,hero:1,gm:1,d:'메아리: 피해를 주는 스킬을 쓸 때 6% 확률로 0.15초 뒤 같은 스킬이 무료로 한 번 더 발동 (소환·변신·버프·궁극기 제외)',ap:()=>{}},
  gm_helm:{n:'부러진 뿔 투구',slot:'helm',base:'뿔 달린 투구',il:999,hero:1,gm:1,d:'거인의 가호: 받는 피해 -10%',ap:d=>{d.dr+=.1;}},
  gm_armor:{n:'늑골 흉갑',slot:'armor',base:'사슬 갑옷',il:999,hero:1,gm:1,d:'뼈의 장막: 생명력 30% 이하가 되면 피해를 6번 막는 방벽 생성(재사용 80초)',ap:()=>{}},
  gm_amu:{n:'왕묘의 인장',slot:'amulet',base:'목걸이',il:999,hero:1,gm:1,d:'왕의 위엄: 치명타 피해 +50~100%',ap:()=>{}},
- gm_ring:{n:'사슬 반지',slot:'ring',base:'반지',il:999,hero:1,gm:1,d:'거인 사냥꾼: 고르무스와 성채 수문장에게 주는 피해 +10% (2개 끼면 +20%)',ap:()=>{}},
+ gm_ring:{n:'사슬 반지',slot:'ring',base:'반지',il:999,hero:1,gm:1,d:'거인 사냥꾼: 고르무스와 성채 정예에게 주는 피해 +10% (2개 끼면 +20%)',ap:()=>{}},
  gmoff_war:{n:'돌뿔나팔',slot:'shield',base:'전쟁의 뿔',il:999,hero:1,gm:1,fcls:'war',d:'피해 +21%, 스킬 범위 +14%',ap:d=>{d.dmgPct+=21;d.rng+=14;}},
  gmoff_pal:{n:'묘비 방패',slot:'shield',base:'성스러운 방패',il:999,hero:1,gm:1,fcls:'pal',d:'막으면 받은 피해의 75%를 가까운 적에게 되돌리고 1초 기절',ap:()=>{}},
  gmoff_sorc:{n:'청백 구슬',slot:'shield',base:'별빛 오브',il:999,hero:1,gm:1,fcls:'sorc',d:'스킬 마나 소모 -28%, 피해 +14%',ap:d=>{d.dmgPct+=14;}},
@@ -2517,7 +2519,7 @@ function genCas(key){ const S=SPFX[key], F=CASI[key]; if(!S||!F)return null;
   for(const [t,lo,hi] of F)it.aff.push({t,v:ri(lo,hi)});
   return it; }
 function genHero(key){ const H=HEROI[key], S=SPFX[key]; if(!H||!S)return null;
-  const IL=S.gm?GM_IL:S.cs?CS_IL:S.aw?AW_IL:HERO_IL, it={id:++ITEMID,slot:S.slot,rar:4,ilvl:IL,base:S.base,aff:[],sp:key,name:S.n,req:S.gm?GM_REQ:S.cs?CS_REQ:S.aw?AW_REQ:HERO_REQ,hv:2,nof:1,nfa:1}; if(S.cs)it.cv=2; if(S.gm){ it.cv=2; it.ep=1; }   /* ep=에픽(★6): 등급 숫자는 영웅(4) 그대로 두고 표시만 ★6 */
+  const IL=S.gm?GM_IL:S.cs?CS_IL:S.aw?AW_IL:HERO_IL, it={id:++ITEMID,slot:S.slot,rar:4,ilvl:IL,base:S.base,aff:[],sp:key,name:S.n,req:S.gm?GM_REQ:S.cs?CS_REQ:S.aw?AW_REQ:HERO_REQ,hv:2,nof:1,nfa:1}; if(S.cs)it.cv=2; if(S.gm){ it.cv=2; it.ep=1; }   /* ep=전설(★6): 등급 숫자는 영웅(4) 그대로 두고 표시만 ★6 */
   if(S.fcls)it.oc=S.fcls;
   const M=S.gm?GM_M:S.cs?CS_M:S.aw?AW_M:HERO_M; if(H.mx){ const m=(1+IL*.16)*M; it.mn=Math.round(H.mn*m); it.mx=Math.round(H.mx*m); }
   if(H.df)it.df=Math.round(H.df*(1+IL*.2)*M); if(H.dm)it.dm=Math.round(H.dm*(1+IL*.1)*M); if(H.om)it.om=Math.round(H.om*(1+IL*.1)*M); if(H.blk)it.blk=ri(H.blk[0],H.blk[1]);
@@ -3504,25 +3506,25 @@ function awkAI(m,dt,pls,sf,best,bd,tau){
   return false; }
 /* ===== 7스테이지 「거인왕의 무덤」 — 성채 단계 뼈대 =====
    우리 성(맨 아래) · 적 성채 3곳(위쪽) · 성채마다 4.5초에 1마리 · 좌·우 성채 몹은 우리 성 좌·우쪽을 침 · 성채를 다 부수면 보스 단계(다음 단계에서 구현) */
-const GMC_POS=[{k:'shield',x:175,y:512,off:-62,nm:'방패 보루'},{k:'helm',x:500,y:175,off:0,nm:'투구 성'},{k:'blade',x:825,y:512,off:62,nm:'칼날 성채'}];
+const GMC_POS=[{k:'shield',x:175,y:512,off:-62,nm:'방패 성채'},{k:'helm',x:500,y:175,off:0,nm:'투구 성채'},{k:'blade',x:825,y:512,off:62,nm:'칼날 성채'}];
 const GMC_HP=1.5e7, GMC_IV=4.5, GMC_CAP=90, GMC_N=2, GMC_KILL_CAP=90;   /* 성채마다 GMC_IV초에 GMC_N마리 · 필드 몬스터 상한 GMC_CAP · 성채 몬스터 누적 처치가 GMC_KILL_CAP마리를 넘으면 이후 처치는 보상(경험치·골드·아이템) 없음 (수문장은 해당 없음) */
 const gmcTy=()=>MT.findIndex(t=>t.gmc);
 function gmBegin(){ G.phase='wave'; G.wave=1; G.waveSides=[0]; G.laneShow=[]; G.spawnQ=0; G.gmc=[]; G.gmDone=0; G.gmKills=0; G.gmDw=null; G.gal=[]; G.galDone=1; G.gmPen=gmPenOf(me.eq).pct/100; const ty=gmcTy(); galSpawn(true);   /* 우리 편 정예는 시작하자마자 성문 앞에 등장 */
   for(const P of GMC_POS){ const m=spawnMob(ty,P.x,P.y,false); m.gmc=P.k; m.gn=P.nm; m.hx=P.x; m.hy=P.y; m.hp=m.max=GMC_HP; m.xp=0; m.dmg=0; m.spd=0; m.r=70; m.sp=rand(1,2.5); m.el=null; m.elT=2; gmgSpawn(P); m.cT=P.off?{x:CAS_T.x+P.off,y:CAS_T.y,i:-1,cas:1}:null; G.gmc.push(m); }
-  gmDoorSpawn(); banner('성채를 부수세요','세 성채에서 몬스터가 쏟아집니다'); me.pot=3; pushEv(['w',1]); }
+  gmDoorSpawn(); banner('적 성채를 부수세요','세 성채에서 몬스터가 쏟아집니다'); me.pot=3; pushEv(['w',1]); }
 function gmWave(dt){ gmDoorTick(dt); if(G.gmc&&G.gmc.length&&G.gmc.every(m=>m.dead)&&!G.gmDone){ G.gmDone=1; G.phase='boss'; announce('🏰 세 성채가 모두 무너졌어요!','#ffd860'); for(const m of G.mobs){ if(!m.dead&&!m.gmc)m.dead=true; } gmCutStart(); } }
 const GM_MOB={shield:{ty:1,hp:125,dm:4,sp:1.2},blade:{ty:2,hp:45,dm:6,sp:3},helm:{ty:9,hp:35,dm:5,sp:1.8}};   /* 성채 몹: 스테이지 몹 기본값 대비 체력·피해·속도 배율(그림은 기존 좀비·해골·궁수를 임시로 사용) */
 function gmcMob(m){ const C=GM_MOB[m.gmc], pn=1+(G.gmPen||0), o=spawnMob(C.ty,m.hx+rand(-46,46),m.hy+78+rand(-6,16),false);
   o.hp=o.max=o.hp*C.hp*pn; o.dmg*=C.dm*pn; o.spd*=C.sp; o.cT=m.cT; o.inn=true; o.gfrom=m.gmc;
   if(m.gmc==='shield')o.gsh=1; else if(m.gmc==='blade')o.gbl=1; else o.gpr=rand(2,8);
-  if(!m.el&&m.elT<=0){ o.elite=true; o.hp=o.max=o.max*10; o.dmg*=1.5; o.r*=1.4; o.xp*=5; if(m.gmc==='blade')o.af=1; m.el=o; }   /* 성채 정예: 일반몹 체력 ×10 · 피해 ×1.5 · 크기 ×1.4 (성채당 1마리, 처치 45초 뒤 재등장) */
+  if(!m.el&&m.elT<=0){ o.elite=true; o.hp=o.max=o.max*10; o.dmg*=1.5; o.r*=1.4; o.xp*=5; if(m.gmc==='blade')o.af=1; m.el=o; }   /* 성채 근위병: 일반몹 체력 ×10 · 피해 ×1.5 · 크기 ×1.4 (성채당 1마리, 처치 45초 뒤 재등장) */
   return o; }
 function gmcTick(m,dt){ m.x=m.hx; m.y=m.hy; m.kx=m.ky=0; if(G.phase!=='wave')return;
   if(m.el&&m.el.dead){ m.el=null; m.elT=45; } if(!m.el&&m.elT>0)m.elT-=dt;
   m.sp-=dt; if(m.sp>0)return; m.sp=GMC_IV; for(let i=0;i<GMC_N&&G.mobs.length<GMC_CAP;i++)gmcMob(m); }
 function gmcKill(m){ if(m.dead)return; m.dead=true; burst(m.x,m.y,'#8a7a60',40,320); spark(m.x,m.y,'#fff0c0',24); for(let i=0;i<3;i++)later(i*.15,()=>efx.push({k:'ring',x:m.x,y:m.y,r0:10,r1:170,t:0,life:.7,col:'#cdb9a0',w:12})); sfx('kill'); pushEv(['bx',Math.round(m.x),Math.round(m.y),70]); announce(`💥 ${m.gn} 파괴!`,'#ffd860'); if(!G.galDone){ G.galDone=1; galSpawn(); } castleRepair();   /* 성벽 수리 규칙대로 우리 성 회복 */
   for(const g of G.mobs){ if(g.gmg===m.gmc&&!g.dead)gmStone(g); } }   /* 수문장보다 성채를 먼저 부수면 수문장은 그 자리에서 돌이 돼요 (전리품 없음 · 공격 대상도 충돌도 없는 장식) */
-function gmStone(g){ g.dead=true; (G.gmStones=G.gmStones||[]).push({k:g.gmg,x:g.x,y:g.y,t0:T}); burst(g.x,g.y,'#bdb09a',30,260); spark(g.x,g.y-40,'#e6e0d0',14); efx.push({k:'ring',x:g.x,y:g.y,r0:8,r1:90,t:0,life:.6,col:'#cfc4ae',w:8}); sfx('block'); later(.9,()=>announce('🗿 "성채를 지키지 못했다…" 수문장이 그 자리에서 돌로 굳었어요','#c9b99a')); }
+function gmStone(g){ g.dead=true; (G.gmStones=G.gmStones||[]).push({k:g.gmg,x:g.x,y:g.y,t0:T}); burst(g.x,g.y,'#bdb09a',30,260); spark(g.x,g.y-40,'#e6e0d0',14); efx.push({k:'ring',x:g.x,y:g.y,r0:8,r1:90,t:0,life:.6,col:'#cfc4ae',w:8}); sfx('block'); later(.9,()=>announce('🗿 "성채를 지키지 못했다…" 성채 정예가 그 자리에서 돌로 굳었어요','#c9b99a')); }
 const STONE_C={};
 function gmStoneCv(k){ const im=sprGet('guard7_'+k); if(!im||!im.width)return null; const key=k, ch=STONE_C[key]; if(ch&&ch.src===im)return ch.c;
   const sc=.45, w=Math.round(im.width*sc), h=Math.round(im.height*sc), c=document.createElement('canvas'); c.width=w; c.height=h; const g=c.getContext('2d'); g.drawImage(im,0,0,w,h);
@@ -3577,7 +3579,7 @@ function drawGmg(m,t){ const k=m.gmg, x=m.x, y=m.y, hurt=m.flash>0, atk=m.atk>0|
   if(m.counter>0){ const pu=.5+.5*Math.sin(t*14); ctx.save(); ctx.strokeStyle=`rgba(255,170,60,${.6+.35*pu})`; ctx.lineWidth=5; ctx.beginPath(); ctx.arc(x,y-30,m.r*1.5+pu*4,0,6.283); ctx.stroke(); ctx.globalCompositeOperation='lighter'; circle(x,y-30,m.r*1.4,`rgba(255,140,30,${.18+.12*pu})`); ctx.restore(); }
   if(m.bar>0){ ctx.strokeStyle='rgba(120,200,255,.75)'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(x,y-50,m.r*1.5,0,6.283); ctx.stroke(); }
   const bw=96, by=y-m.r*.55-172; ctx.fillStyle='rgba(0,0,0,.7)'; ctx.fillRect(x-bw/2-1,by-1,bw+2,8); ctx.fillStyle=m.eng?'#d8503a':'#a0a0a8'; ctx.fillRect(x-bw/2,by,bw*Math.max(0,r),6);
-  ctx.font='bold 11px sans-serif'; ctx.textAlign='center'; ctx.fillStyle='#ffe2b0'; ctx.fillText({blade:'칼날 수문장',shield:'방패 수문장',helm:'투구 수문장'}[k],x,by-4); }
+  ctx.font='bold 11px sans-serif'; ctx.textAlign='center'; ctx.fillStyle='#ffe2b0'; ctx.fillText({blade:'성채 칼날 정예',shield:'성채 방패 정예',helm:'성채 투구 정예'}[k],x,by-4); }
 /* ===== 소환의 문 · 거인 두개골 (7스테이지) =====
    문(체력 3.0e7)은 전투 시작 20초 뒤 처음 열리고 이후 45초마다 열려 거인 두개골(체력 1.8e7)을 내보냄(동시에 최대 2마리).
    두개골: 속도 ×1.8 · 캐릭터·정예를 무시하고 우리 성으로 직진 · 닿으면 4초마다 성 최대 체력의 8% · 기절·넉백·둔화 면역. 문을 부수면 더는 안 나옴.
@@ -3709,7 +3711,7 @@ const angD=(a,b)=>{ let d=a-b; while(d>Math.PI)d-=6.283; while(d<-Math.PI)d+=6.2
 /* ===== 일격필살 「왕의 심판」 (2페이즈부터 · 대기 30초 · 횟수 제한 없음) =====
    ① 아레나를 세로로 가르는 좁은 직선 예고(가로 위치 무작위) → 1.7초 뒤 직선 위 전원 즉사 → ② 직선이 사라지며 직선을 뺀 아레나 전체 예고 → 1.7초 뒤 즉사(직선 자리가 안전지대).
    기절 등에 끊기지 않음. 검 부위를 부수면 취소 + 고르무스 스턴 3초. 대상은 플레이어(우리 편 정예·소환수는 제외). */
-const GM_DROP_P=.3;
+const GM_DROP_P=.03;
 const GMU_R=430, GMU_W=84, GMU_T=1.7, GMU_CD=30;
 function gmbUltStart(m){ const lx=GM_ARENA.x+rand(-260,260); m.fa=Math.PI/2; m.cs={k:'ult',t:0,dur:GMU_T,stage:1,lx};
   const o={sh:'ustrip',x:lx,y:GM_ARENA.y,lw:GMU_W,r:GMU_R,dur:GMU_T}; m.cs.tel=o; gmbTel(m,o); sfx('boss'); G.shake=Math.max(G.shake,.6);
@@ -4043,6 +4045,7 @@ function updateMobs(dt){
   const pls=playersForAI().concat(minionTargets()); /* 소환수도 몹의 공격 대상 */
   for(let i=shots.length-1;i>=0;i--){ const sh=shots[i]; sh.t+=dt; if(sh.t>=sh.dur){ shots.splice(i,1); if(sh.rift){ spawnMob(0,sh.x,sh.y,true); for(let k=0;k<4;k++)spawnMob(k%2?10:0,sh.x+rand(-40,40),sh.y+rand(-40,40),false); burst(sh.x,sh.y,'#c070ff',40,320); efx.push({k:'ring',x:sh.x,y:sh.y,r0:10,r1:110,t:0,life:.5,col:'#c070ff',w:12}); sfx('slam'); G.shake=Math.max(G.shake,.4); continue; } for(const p of pls){ if(hyp(p.x-sh.x,p.y-sh.y)<sh.r+10) mobHitPlayer(p.i,sh.dmg*(sh.dv&&p.i===1&&me.D&&me.D.sp&&me.D.sp.cs_armor?.7:1),sh.st||0,sh.sd||0); } if(G.castle){ if(sh.cas)castleHit(sh.dmg*.4); else if(sh.vil)castleHit(sh.dmg*.35); } pushEv(['bx',Math.round(sh.x),Math.round(sh.y),sh.r]); bombFx(sh.x,sh.y,sh.r); if(sh.ar){ addNum(sh.x,sh.y-30,'🏹 화살 피격!','#ffb070',true); pushEv(['am',Math.round(sh.x),Math.round(sh.y)]); } } }
   RAID_HIT=0; if(G.gal&&G.gal.length)galTick(dt);
+  if(G.stg&&G.stg.gm){ const cy=GM_CLIFF+20; for(const a of (G.gal||[]))if(!a.dead&&a.y<cy)a.y=cy; for(const m of G.mobs)if(m.gob&&m.y<cy)m.y=cy; }   /* 우리 편 정예·황금 고블린도 거인왕 뒤 절벽(위쪽)으로는 못 가요 */
   for(const m of G.mobs){ if(m.dead)continue; RAID_HIT=m.rk?1:0;
     if(m.gob){ gobStep(m,dt); continue; }
     if(m.slowT>0)m.slowT-=dt; if(m.shockT>0)m.shockT-=dt; if(m.shockP>0)m.shockP-=dt; if(m.mark&&m.mark.t>0)m.mark.t-=dt; if(m.vuln&&m.vuln.t>0)m.vuln.t-=dt;
@@ -4292,8 +4295,8 @@ function killMob(m){
   let noRew=false; if(m.gfrom&&G.stg&&G.stg.gm){ G.gmKills=(G.gmKills|0)+1; if(G.gmKills>GMC_KILL_CAP)noRew=true; else if(G.gmKills===GMC_KILL_CAP)later(.2,()=>announce(`🏰 성채 몬스터를 ${GMC_KILL_CAP}마리 처치했어요! 이후 처치는 보상이 없어요`,'#ffd860')); }   /* 성채 몬스터 보상 한도 */
   if(!noRew){ pushEv(['k',m.id,Math.round(m.x),Math.round(m.y),m.xp,tier,ilvl,m.type,m.lf||1]);
   onKill(Math.round(m.x),Math.round(m.y),m.xp,tier,ilvl,m.type,m.lf||1); }
-  if(m.gmb&&G.mode!=='guest'&&Math.random()<GM_DROP_P){ const pt=pick(['weapon','helm','armor','amulet','ring','ring','shield']), key=pt==='weapon'?((me.cls==='war'||me.cls==='pal')?'gm_axe':'gm_staff'):pt==='shield'?'gmoff_'+me.cls:{helm:'gm_helm',armor:'gm_armor',amulet:'gm_amu',ring:'gm_ring'}[pt], it=genHero(key); if(it){ dropItem(it,Math.round(m.x)+rand(-24,24),Math.round(m.y)+rand(60,100)); later(.4,()=>announce('✨ 거인왕의 유산이 떨어졌어요!','#6fe8ff')); } }   /* ★6: 고르무스 처치 때만(임시 확률 30%, 부위 무작위·직업에 맞는 무기/보조) */
-  if(m.gmg&&G.mode!=='guest'&&Math.random()<.01){ const g3=pick([0,1,2]), pt=['weapon','helm','armor','amulet','ring','shield'], it=g3===0?genHero(heroKey(pick(HDROP[pick(['war','sorc','shd'])]))):g3===1?genHero(awKey(pick(pt))):genHero(csKey(pick(pt))); if(it){ dropItem(it,Math.round(m.x)+rand(-20,20),Math.round(m.y)+rand(-20,20)); later(.3,()=>announce('✨ 수문장이 ★5 영웅 장비를 떨어뜨렸어요!','#ff7ea0')); } }   /* 성채 수문장: ★5 영웅 전체 풀에서 1종 1% (★6은 고르무스만) */
+  if(m.gmb&&G.mode!=='guest'&&Math.random()<GM_DROP_P){ const pt=pick(['weapon','helm','armor','amulet','ring','ring','shield']), key=pt==='weapon'?((me.cls==='war'||me.cls==='pal')?'gm_axe':'gm_staff'):pt==='shield'?'gmoff_'+me.cls:{helm:'gm_helm',armor:'gm_armor',amulet:'gm_amu',ring:'gm_ring'}[pt], it=genHero(key); if(it){ dropItem(it,Math.round(m.x)+rand(-24,24),Math.round(m.y)+rand(60,100)); later(.4,()=>announce('✨ 거인왕의 유산이 떨어졌어요!','#6fe8ff')); } }   /* ★6: 고르무스 처치 때만(확률 3%, 부위 무작위·직업에 맞는 무기/보조) */
+  if(m.gmg&&G.mode!=='guest'&&Math.random()<.01){ const g3=pick([0,1,2]), pt=['weapon','helm','armor','amulet','ring','shield'], it=g3===0?genHero(heroKey(pick(HDROP[pick(['war','sorc','shd'])]))):g3===1?genHero(awKey(pick(pt))):genHero(csKey(pick(pt))); if(it){ dropItem(it,Math.round(m.x)+rand(-20,20),Math.round(m.y)+rand(-20,20)); later(.3,()=>announce('✨ 성채 정예가 ★5 영웅 장비를 떨어뜨렸어요!','#ff7ea0')); } }   /* 성채 수문장: ★5 영웅 전체 풀에서 1종 1% (★6은 고르무스만) */
   if(m.boss&&!MT[m.type].raid&&G.mode!=='guest'&&!G.gemDone&&/^\d-\d$/.test(S.id)){ G.gemDone=true; if(Math.random()<gemP(S)){ const gt=Math.max(1,Math.min(3,Math.ceil((S.icap+1)/40))); pushEv(['gem',gt,Math.round(m.x),Math.round(m.y)]); gemDrop(gt,Math.round(m.x),Math.round(m.y)); } }   /* 스테이지 우두머리(1-1~3-5): 방장이 한 번만 30% 굴림 → 성공하면 모두에게 보석 하나씩 (종류는 각자 무작위) */
   if(m.boss&&S.id==='1-1'&&G.mode!=='guest'&&Math.random()<MINE_PICK_P){ dropItem(mkPick(1),Math.round(m.x)+rand(-16,16),Math.round(m.y)+rand(-16,16)); later(.3,()=>announce('⛏️ 곡괭이가 떨어졌어요!','#e0c080')); }   /* 광산(관리자 시범): 1-1 보스 2% 곡괭이 */
   if(m.boss&&m.rk){ const alive=G.mobs.filter(o=>o.rk&&!o.dead); if(alive.length){ G.sib=(G.sib||0)+1; for(const o of alive){ o.dmg=o.dmg0*(1+.1*G.sib); spark(o.x,o.y,'#ff3a2a',40); }
@@ -4339,7 +4342,7 @@ function rollRarity(tier,ilvl,cap){
 function dropItem(it,x,y){
   ground.push({it,x:clamp(x,20,WW-20),y:clamp(y,20,WH-20),t:0});
   G.stDrops=(G.stDrops||0)+1;
-  if(it.rar>=2){ if(it.rar>=3)toast(`${RARN[it.rar]} 아이템이 떨어졌습니다!`,rcol(it),'drop',it.rar>=4); sfx('rare'); G.flash=Math.max(G.flash||0,it.rar>=3?.5:.2); }
+  if(it.rar>=2){ if(it.rar>=3)toast(`${rn(it)} 아이템이 떨어졌습니다!`,rcol(it),'drop',it.rar>=4); sfx('rare'); G.flash=Math.max(G.flash||0,it.rar>=3?.5:.2); }
   if(it.rar>=2&&G.inGame){ const gx=ground[ground.length-1].x, gy=ground[ground.length-1].y, col=rcol(it); efx.push({k:'ring',x:gx,y:gy+6,r0:6,r1:it.rar>=4?96:it.rar===3?70:46,t:0,life:it.rar>=3?.55:.4,col,w:it.rar>=3?7:4}); if(it.rar>=3){ efx.push({k:'ring',x:gx,y:gy+6,r0:4,r1:it.rar>=4?60:40,t:0,life:.4,col:'#fff4d0',w:3}); impact(gx,gy,it.rar>=4?'255,80,120':'255,190,80',it.rar>=4?150:110); } burst(gx,gy,col,it.rar>=4?26:it.rar===3?16:7,it.rar>=3?240:160); }   /* 레어 이상: 떨어질 때 충격파 고리와 빛 알갱이 */
   if(ground.length>90){const i=ground.findIndex(g=>g.it.rar===0&&!isGem(g.it)); ground.splice(i>=0?i:Math.max(0,ground.findIndex(g=>!isGem(g.it))),1); G.stCap=(G.stCap|0)+1;}
 }
@@ -4737,7 +4740,10 @@ const ilvOf=it=>it?(it.ilvl|0)+(it.enh|0):0; /* 표시·장비 레벨 계산용:
 const eqIlv=ilvOf;
 const eqSum=eq=>EQSL.reduce((t,k)=>t+eqIlv(eq&&eq[k]),0);
 const GM_PEN=[0,2,3,4];   /* 입장 패널티(칸마다 몬스터 체력·공격력 +%): 수문장·거인왕 세트 0 · 각성 2 · 그림자 3 · 그 외/빈 칸 4 → 최대 +28% */
-function gmPenOf(eq){ let pct=0, ok=0; const ks=['weapon','helm','armor','amulet','ring1','ring2','shield']; for(const k of ks){ const it=eq&&eq[k], S=it&&it.rar===4&&it.sp&&SPFX[it.sp]; const g=S?(S.gm||S.cs?0:S.aw?1:S.hero?2:3):3; pct+=GM_PEN[g]; if(g===0)ok++; } return {pct,ok,n:ks.length}; }
+function gmPenOf(eq){ let pct=0, ok=0, pts=0; const ks=['weapon','helm','armor','amulet','ring1','ring2','shield']; for(const k of ks){ const it=eq&&eq[k], S=it&&it.rar===4&&it.sp&&SPFX[it.sp]; const g=S?(S.gm||S.cs?0:S.aw?1:S.hero?2:3):3; pct+=GM_PEN[g]; pts+=3-g; if(g===0)ok++; } return {pct,ok,pts,n:ks.length}; }
+/* 영웅아이템 점수: 삼남매(그림자) 1점 · 각성 2점 · 수문장 카스텔/거인왕 3점 · 그 외·빈 칸 0점 → 7칸 최대 21점 (21점이면 몬스터 강화 없음) */
+function gmTipModal(){ const GP=GM_PEN; modal(`<h3 style="margin:0 0 10px;text-align:center">영웅아이템 점수 안내</h3><div class="gmtp"><div class="r"><span>삼남매 영웅 장비 (그림자)</span><b>1점</b></div><div class="r"><span>각성 장비</span><b>2점</b></div><div class="r"><span>수문장 카스텔 · 거인왕 장비</span><b>3점</b></div><p>장비 7칸 × 최대 3점 = <b>21점</b>. 21점을 채우면 몬스터 강화가 없어요.</p><p>점수가 모자라면 칸마다 몬스터 체력·공격력이 올라가요 (3점 +${GP[0]}% · 2점 +${GP[1]}% · 1점 +${GP[2]}% · 0점·빈 칸 +${GP[3]}%, 최대 +${GP[3]*7}%).</p><p class="ok">21점을 넘어도 더 이상 효과는 없어요.</p></div><button type="button" class="btn" style="width:100%;margin-top:10px" onclick="closeModal()">닫기</button>`); }
+document.addEventListener('click',e=>{ const t=e.target.closest&&e.target.closest('.gmtip'); if(t){ e.stopPropagation(); e.preventDefault(); gmTipModal(); } },true);
 function gearPenOf(eq,icap){ const gl=icap|0, n=EQSL.length, sum=eqSum(eq), gap=sum/n-gl;  /* 칸 평균과 스테이지 아이템 레벨의 차 */
   const wm=gap<-12?Math.max(.08,Math.pow(.55,(-gap-12)/8)):gap>5?Math.min(1.6,1+.015*(gap-5)):1;
   const tk=gap<-12?Math.min(2.5,Math.pow(1.2,(-gap-12)/8)):gap>5?Math.max(.6,1-.01*(gap-5)):1;
@@ -7592,7 +7598,7 @@ function fitBan(root){ try{ (root||document).querySelectorAll('.ban .t b,.ban .t
 try{ document.fonts&&document.fonts.ready.then(()=>fitBan($('#stageBan'))); }catch(e){}
 window.addEventListener('resize',()=>fitBan($('#stageBan')));
 function banCard(cur,i,role){ const T=STAGES[i], bi=T.bs||MAPBOSS[T.id], tr=BANTRIO[T.id], gq=cur.eq?gearPenOf(cur.eq,T.icap):null, gv=!!gq&&gq.wm<.97, cl=i<stageClear;
-        return `<div class="ban ${role}${!bi&&!tr?' noimg':''}${tr?' trio':''}${role==='bk nx'&&i>stageClear?' lk':''}" data-i="${i}"${role==='cu'?'':' aria-hidden="true"'}><div class="t${T.gm?' gmt':''}"><div class="sid">${esc(T.id)}</div><span class="sn">${esc(T.n)}${T.id==='4'?' (권장Lv95↑)':''}</span><b>${esc(T.bn||'')}</b>${T.gm?(()=>{ const q=gmPenOf(cur.eq); return `<i class="warn">수문장 세트 ${q.ok}/${q.n} 몬스터 강화 ${q.pct}%</i>`; })():`<i class="${gv?'warn':''}">권장 장비 Lv 합 ${Math.max(1,T.icap-12)*EQSL.length}↑${gv?' · 부족':''}</i>`}</div>${cl?'<div class="st clr"><b>클리어</b></div>':'<div class="st nc"><b>미클리어</b></div>'}${tr?`<span class="tri">${tr.map(k=>`<img src="img/${k}.png" alt="" onerror="this.remove()">`).join('')}</span>`:bi?`<img src="img/${bi}.png" alt="" onerror="this.remove()">`:''}</div>`; }
+        return `<div class="ban ${role}${!bi&&!tr?' noimg':''}${tr?' trio':''}${role==='bk nx'&&i>stageClear?' lk':''}" data-i="${i}"${role==='cu'?'':' aria-hidden="true"'}><div class="t${T.gm?' gmt':''}"><div class="sid">${esc(T.id)}</div><span class="sn">${esc(T.n)}${T.id==='4'?' (권장Lv95↑)':''}</span><b>${esc(T.bn||'')}</b>${T.gm?(()=>{ const q=gmPenOf(cur.eq); return `<i class="warn">영웅아이템 점수 ${q.pts}/21 · 몬스터 강화 ${q.pct}% <span class="gmtip" role="button" aria-label="영웅아이템 점수 안내">?</span></i>`; })():`<i class="${gv?'warn':''}">권장 장비 Lv 합 ${Math.max(1,T.icap-12)*EQSL.length}↑${gv?' · 부족':''}</i>`}</div>${cl?'<div class="st clr"><b>클리어</b></div>':'<div class="st nc"><b>미클리어</b></div>'}${tr?`<span class="tri">${tr.map(k=>`<img src="img/${k}.png" alt="" onerror="this.remove()">`).join('')}</span>`:bi?`<img src="img/${bi}.png" alt="" onerror="this.remove()">`:''}</div>`; }
 function renderStagePanel(){
   const chars=charIds().map(loadChar).filter(Boolean);
   $('#playPanel').hidden=!selId;
@@ -8960,7 +8966,7 @@ function showEnd(msg){
     const top3=rows.slice(0,3).map((r,i)=>`<div class="dr"><span role="img" aria-label="${TRN[i]}트로피">${trophy(TRC[i])}</span><span class="nm">${esc(r.n)}</span><b>${f(r.v)}${tot>0?` <small>${Math.round(r.v/tot*100)}%</small>`:''}</b></div>`).join('')||'<div class="dr"><span class="nm">-</span></div>';
     const gd=G.stGold0===undefined?null:(me.gold|0)-(G.stGold0|0); const miss=Math.max(0,(G.stDrops|0)-gs); if(miss>=80&&G.phase==='win')ttfSet('mini'); const left=Math.min(miss,ground.length), lost=Math.min(miss-left,G.stCap|0), oth=miss-left-lost;
     const missLn=miss>0?`<div class="meta" style="margin-top:6px">못 주운 아이템 ${miss}개 — ${[left?`바닥에 남음 ${left}`:'',lost?`바닥에 90개가 넘어 사라짐 ${lost}`:'',oth?`기타 ${oth}`:''].filter(Boolean).join(' · ')}</div>`:'';
-    $('#endBox').innerHTML=`<div class="etabs" role="tablist"><button type="button" data-t="l" role="tab">📦 전리품</button><button type="button" data-t="r" role="tab">⚔️ 데미지 순위</button></div><div class="epg" id="epR"><div><div style="margin-bottom:6px">데미지 순위</div>${top3}</div><div class="tp"><span>⚔️ 총 데미지</span><b>${f(tot)}</b></div><div class="tp"><span>🩸 내가 받은 피해</span><b>${f(G.stTaken||0)}</b></div></div><div class="epg" id="epL">${gd!==null?`<div class="tp"><span>💰 골드 변화</span><b style="color:${gd>0?'#9fd18b':gd<0?'#ff8a7a':'var(--ink)'}">${gd>0?'+':gd<0?'−':''}${f(Math.abs(gd))}G</b></div>`:''}${(G.stRev|0)>0?`<div class="tp"><span>✨ 부활한 횟수</span><b>${G.stRev|0}회</b></div>`:''}${win&&!msg&&G.ccThis?`<div class="tp"><span>🏆 누적 클리어</span><b>${G.ccThis}회 <small>전체 ${G.ccAll}회</small></b></div>`:''}<div><div style="margin-bottom:6px">📦 획득한 아이템 <b style="display:inline;font-size:14px;color:var(--ink)">${gs}</b>개${G.stGem?` <span style="font-size:13px">· <b style="display:inline;color:${GEM_C[G.stGem.gk]}">${esc(G.stGem.name)}</b> 획득</span>`:''}</div><div class="rr">${[0,1,2,3].concat(got[4]?[4]:[]).concat(got[5]?[5]:[]).map(r=>`<div style="color:${r===5?'#6fe8ff':RARC[r]}">${r===5?'★6':RARN[r]}<b>${got[r]|0}</b></div>`).join('')}</div>${missLn}</div></div>`;
+    $('#endBox').innerHTML=`<div class="etabs" role="tablist"><button type="button" data-t="l" role="tab">📦 전리품</button><button type="button" data-t="r" role="tab">⚔️ 데미지 순위</button></div><div class="epg" id="epR"><div><div style="margin-bottom:6px">데미지 순위</div>${top3}</div><div class="tp"><span>⚔️ 총 데미지</span><b>${f(tot)}</b></div><div class="tp"><span>🩸 내가 받은 피해</span><b>${f(G.stTaken||0)}</b></div></div><div class="epg" id="epL">${gd!==null?`<div class="tp"><span>💰 골드 변화</span><b style="color:${gd>0?'#9fd18b':gd<0?'#ff8a7a':'var(--ink)'}">${gd>0?'+':gd<0?'−':''}${f(Math.abs(gd))}G</b></div>`:''}${(G.stRev|0)>0?`<div class="tp"><span>✨ 부활한 횟수</span><b>${G.stRev|0}회</b></div>`:''}${win&&!msg&&G.ccThis?`<div class="tp"><span>🏆 누적 클리어</span><b>${G.ccThis}회 <small>전체 ${G.ccAll}회</small></b></div>`:''}<div><div style="margin-bottom:6px">📦 획득한 아이템 <b style="display:inline;font-size:14px;color:var(--ink)">${gs}</b>개${G.stGem?` <span style="font-size:13px">· <b style="display:inline;color:${GEM_C[G.stGem.gk]}">${esc(G.stGem.name)}</b> 획득</span>`:''}</div><div class="rr">${[0,1,2,3].concat(got[4]?[4]:[]).concat(got[5]?[5]:[]).map(r=>`<div style="color:${r===5?'#6fe8ff':RARC[r]}">${r===5?'★6 전설':'★'+(r+1)+' '+RARN[r]}<b>${got[r]|0}</b></div>`).join('')}</div>${missLn}</div></div>`;
     endTab('l'); }
   show('#sEnd'); try{ window.__endFx&&window.__endFx.show(win&&!msg); }catch(e){}
 }
@@ -9336,7 +9342,7 @@ function drawMob(m,t){
   ctx.fillStyle='rgba(255,255,255,.25)';ctx.fillRect(x-bw/2,by,bw*hpp,1.6);
   ctx.save(); ctx.font='700 11px "Noto Sans KR",sans-serif'; ctx.textAlign='center'; ctx.textBaseline='bottom'; ctx.lineJoin='round'; ctx.lineWidth=3.5; ctx.strokeStyle='rgba(0,0,0,.9)';
   if(m.slowT>0){ const cx=x, cy=by-27; ctx.fillStyle='rgba(20,40,70,.9)'; ctx.beginPath(); ctx.arc(cx,cy,9,0,6.283); ctx.fill(); ctx.lineWidth=1.6; ctx.strokeStyle='#8fdcff'; ctx.stroke(); ctx.font='12px sans-serif'; ctx.textBaseline='middle'; ctx.fillStyle='#fff'; ctx.fillText('❄️',cx,cy+1); if(m.slowMax>0){ const fr=clamp(m.slowT/m.slowMax,0,1); ctx.fillStyle='rgba(0,0,0,.55)'; ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,8.5,-Math.PI/2+6.283*fr,-Math.PI/2+6.283,false); ctx.closePath(); ctx.fill(); } ctx.textBaseline='bottom'; }
-  const nm=(m.elite?(m.af?AFXN[m.af]+' ':'')+'정예 ':'')+(m.scare?(m.cnD?'반격 허수아비':'허수아비'):(m.boss&&!MT[m.type].raid&&G.stg.bn)||MT[m.type].n); ctx.strokeText(nm,x,by-2); ctx.fillStyle=m.boss?'#f0c36a':m.elite?'#b9c6ff':'#fff3dc'; ctx.fillText(nm,x,by-2); ctx.restore();
+  const nm=(m.elite&&m.gfrom?'성채 근위병 ':(m.elite?(m.af?AFXN[m.af]+' ':'')+'정예 ':''))+(m.elite&&m.gfrom?'':(m.scare?(m.cnD?'반격 허수아비':'허수아비'):(m.boss&&!MT[m.type].raid&&G.stg.bn)||MT[m.type].n)); ctx.strokeText(nm,x,by-2); ctx.fillStyle=m.boss?'#f0c36a':m.elite?'#b9c6ff':'#fff3dc'; ctx.fillText(nm,x,by-2); ctx.restore();
 }
 function lvTier(l){ return l>=20?4:l>=15?3:l>=10?2:l>=5?1:0; }
 /* 오라 마법진: 시전자는 큰 진, 버프를 받는 동료는 작은 진 */
