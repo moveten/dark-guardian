@@ -1579,7 +1579,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0969</div>
+    <div class="ver" id="verT">v0.7.2.0970</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1954,10 +1954,10 @@ const OFFB={pal:BASES.shield,war:[{n:'손도끼',dm:6},{n:'쌍날 단검',dm:7},
 const AFX=[
  {t:'dmg',n:'공격력 +{v}',sl:'weapon ring amulet',r:i=>[1,3+i]},
  {t:'dmgPct',n:'피해 +{v}%',sl:'weapon amulet ring',r:(i,s)=>s==='weapon'?[5,12+2*i]:[5,Math.max(5,Math.round(5+i*.5))]}, /* 무기 외 부위: 최대 = 5 + 아이템 레벨×0.5 */
- {t:'str',n:'힘 +{v}',sl:'*',r:()=>[1,10]},
- {t:'dex',n:'민첩 +{v}',sl:'*',r:()=>[1,10]},
- {t:'vit',n:'체력 +{v}',sl:'*',r:()=>[1,10]},
- {t:'ene',n:'에너지 +{v}',sl:'*',r:()=>[1,10]},
+ {t:'str',n:'힘 +{v}',sl:'*',r:i=>[1,5+Math.round(i/16)]},
+ {t:'dex',n:'민첩 +{v}',sl:'*',r:i=>[1,5+Math.round(i/16)]},
+ {t:'vit',n:'체력 +{v}',sl:'*',r:i=>[1,5+Math.round(i/16)]},
+ {t:'ene',n:'에너지 +{v}',sl:'*',r:i=>[1,5+Math.round(i/16)]},
  {t:'life',n:'생명력 +{v}',sl:'*',r:i=>[25,Math.max(50,30+2*i)]},
  {t:'mana',n:'마나 +{v}',sl:'*',r:i=>[25,Math.max(50,30+2*i)]},
  {t:'def',n:'방어력 +{v}',sl:'helm armor ring amulet',r:i=>[2,5+i]},
@@ -2868,7 +2868,7 @@ function loadChar(id){
       p.eq2=e2; p.es=cur; delete p.ps; }
     { const e2=(p.eq2&&typeof p.eq2==='object')?p.eq2:{}, o={}; for(const k of EQSL)o[k]=e2[k]||null; p.eq2=o; p.es=p.es===1?1:0; }
     miscFix(p); p.shard=p.shard|0; shardAdd(p,0); p.ashard=p.ashard|0; shardAdd(p,0,'ashard'); p.cshard=p.cshard|0; shardAdd(p,0,'cshard'); if(p.ore)oreFold(p); /* 예전 조각 숫자 → 가방 아이템으로 (각성 조각 포함) */
-    const fx=it=>{ if(!it)return; if(it.pk&&it.slot==='weapon'&&!it.sk){ it.sk=1; it.gm=null; } ilCapFix(it); heroFix(it); csFix(it); gmFix(it); newOptFix(it); heroSmFix(it); lanternFix(it); if(!Array.isArray(it.aff))it.aff=[]; if(it.rar===3&&it.name==='그림자 망토')it.name='밤의 망토'; /* 영웅 '그림자' 장비와 헷갈리지 않게 개명 */ if(!p.dv4&&it.slot!=='weapon')for(const a of it.aff)if(a&&(a.t==='dmgPct'||a.t==='sm'||a.t==='smhp'))a.v=Math.min(50,Math.max(1,Math.round(a.v/4))); /* v0.3: 무기 외 피해%·소환수 피해%·소환수 생명력% 옵션은 예전 수치를 4로 나눈 값으로(캐릭터마다 1회, p.dv4) */ if(!(it.rar===3&&it.sp))for(const a of it.aff)if(a&&(a.t==='str'||a.t==='dex'||a.t==='vit'||a.t==='ene')&&a.v>10)a.v=10; /* 힘·민첩·체력·에너지 옵션 상한 10(이전에 얻은 더 높은 수치도 10으로) */ if(it.rar===3&&!it.sv){ it.sv=1; const sh=it.slot==='shield'; /* 유니크 스킬 옵션 개편: 직업 스킬→모든 스킬, 개별 스킬→그 직업 스킬, 보조장비→내(보조장비) 직업 스킬 (1회) */
+    const fx=it=>{ if(!it)return; if(it.pk&&it.slot==='weapon'&&!it.sk){ it.sk=1; it.gm=null; } ilCapFix(it); heroFix(it); csFix(it); gmFix(it); newOptFix(it); heroSmFix(it); lanternFix(it); if(!Array.isArray(it.aff))it.aff=[]; if(it.rar===3&&it.name==='그림자 망토')it.name='밤의 망토'; /* 영웅 '그림자' 장비와 헷갈리지 않게 개명 */ if(!p.dv4&&it.slot!=='weapon')for(const a of it.aff)if(a&&(a.t==='dmgPct'||a.t==='sm'||a.t==='smhp'))a.v=Math.min(50,Math.max(1,Math.round(a.v/4))); /* v0.3: 무기 외 피해%·소환수 피해%·소환수 생명력% 옵션은 예전 수치를 4로 나눈 값으로(캐릭터마다 1회, p.dv4) */ if(it.rar===3&&!it.sv){ it.sv=1; const sh=it.slot==='shield'; /* 유니크 스킬 옵션 개편: 직업 스킬→모든 스킬, 개별 스킬→그 직업 스킬, 보조장비→내(보조장비) 직업 스킬 (1회) */
       for(const a of it.aff){ if(!a)continue; const v=Math.min(2,Math.max(1,a.v|0)); if(a.t==='cls'){ if(sh){ a.cls=it.oc||cls; a.v=v; } else { a.t='all'; a.v=v; delete a.cls; } } else if(a.t==='sk'){ a.t='cls'; a.v=v; if(sh)a.cls=it.oc||cls; delete a.key; } }
       if(it.aff.some(a=>a&&a.t==='all'))it.aff=it.aff.filter(a=>!(a&&a.t==='cls')); }
     if(it.rar===3&&it.aff.some(a=>a&&a.t==='all'))it.aff=it.aff.filter(a=>!(a&&a.t==='sk')); it.aff=it.aff.filter(a=>a&&AFXBY[a.t]&&!(it.slot==='armor'&&a.t==='ms')&&!(a.cls&&!CLASSES[a.cls])&&!(a.t==='sk'&&!(SKBY[a.key]&&SK[a.cls]&&SK[a.cls].includes(SKBY[a.key])))); }; p.inv.forEach(fx); p.eq=p.eq||{}; for(const k in p.eq)fx(p.eq[k]); for(const k in p.eq2)fx(p.eq2[k]); p.dv4=1;
@@ -3173,7 +3173,7 @@ function syncAlly(pl){
   ally.fm=pl.fm===1?'bear':''; ally.sp=pl.sp|0;
   ally.aura=(pl.a==='healaura'||pl.a==='guard'||pl.a==='might')?pl.a:0; ally.al=pl.al|0; ally.face=(pl.f|0)/100; ally.lobby=false;
   { const em=pl.em|0; if(ally.emSeq===undefined){ ally.emSeq=em; } else if(em&&em!==ally.emSeq){ ally.emSeq=em; ally.emo={id:clamp(em%10,0,EMOS.length-1),t:3.2}; sfx('ui'); } }
-  { const ia=Array.isArray(pl.ia)?pl.ia:[]; if(lastAllyAnn<0){lastAllyAnn=ia.length?ia[ia.length-1][0]:0;} for(const a of ia){ if(a[0]<=lastAllyAnn)continue; lastAllyAnn=a[0]; if((a[2]|0)<3)continue; const ar=clamp(a[2]|0,3,4); toast(`${ally.name||'동료'}님이 ${RARN[ar]} 아이템 [${String(a[1]||'').slice(0,16)}] 획득!`,RARC[ar],'get',ar>=4); } }   /* 유니크 이상만 표시 (예전 버전 동료가 보낸 레어 알림도 거름) */
+  { const ia=Array.isArray(pl.ia)?pl.ia:[]; if(lastAllyAnn<0){lastAllyAnn=ia.length?ia[ia.length-1][0]:0;} for(const a of ia){ if(a[0]<=lastAllyAnn)continue; lastAllyAnn=a[0]; if((a[2]|0)<3)continue; const ar=clamp(a[2]|0,3,4); toast(`${ally.name||'동료'}님이 아이템 [${String(a[1]||'').slice(0,16)}] 획득!`,RARC[ar],'get',ar>=4); } }   /* 유니크 이상만 표시 (예전 버전 동료가 보낸 레어 알림도 거름) */
   const fx=Array.isArray(pl.fx)?pl.fx:[];
   if(lastAllyFx<0){lastAllyFx=fx.length?fx[fx.length-1][0]:0;}
   for(const f of fx){ if(f[0]<=lastAllyFx)continue; lastAllyFx=f[0];
@@ -4382,7 +4382,7 @@ function rollRarity(tier,ilvl,cap){
 function dropItem(it,x,y){
   ground.push({it,x:clamp(x,20,WW-20),y:clamp(y,20,WH-20),t:0});
   G.stDrops=(G.stDrops||0)+1;
-  if(it.rar>=2){ if(it.rar>=3)toast(`${rn(it)} 아이템이 떨어졌습니다!`,rcol(it),'drop',it.rar>=4); sfx('rare'); G.flash=Math.max(G.flash||0,it.rar>=3?.5:.2); }
+  if(it.rar>=2){ if(it.rar>=3)toast('아이템이 떨어졌습니다!',rcol(it),'drop',it.rar>=4); sfx('rare'); G.flash=Math.max(G.flash||0,it.rar>=3?.5:.2); }
   if(it.rar>=2&&G.inGame){ const gx=ground[ground.length-1].x, gy=ground[ground.length-1].y, col=rcol(it); efx.push({k:'ring',x:gx,y:gy+6,r0:6,r1:it.rar>=4?96:it.rar===3?70:46,t:0,life:it.rar>=3?.55:.4,col,w:it.rar>=3?7:4}); if(it.rar>=3){ efx.push({k:'ring',x:gx,y:gy+6,r0:4,r1:it.rar>=4?60:40,t:0,life:.4,col:'#fff4d0',w:3}); impact(gx,gy,it.rar>=4?'255,80,120':'255,190,80',it.rar>=4?150:110); } burst(gx,gy,col,it.rar>=4?26:it.rar===3?16:7,it.rar>=3?240:160); }   /* 레어 이상: 떨어질 때 충격파 고리와 빛 알갱이 */
   if(ground.length>90){const i=ground.findIndex(g=>g.it.rar===0&&!isGem(g.it)); ground.splice(i>=0?i:Math.max(0,ground.findIndex(g=>!isGem(g.it))),1); G.stCap=(G.stCap|0)+1;}
 }
@@ -4570,10 +4570,10 @@ const ASELL=[-1,0,1,2], ASN=['끔','일반↓','매직↓','레어↓'];
 function smartModal(kind){   /* 스마트 정리 = 자동판매 + 자동합성 한 창 (kind: 'item' 장비 / 'gem' 기타 탭 보석). 누르는 즉시 저장되고 창은 열려 있어요 */
   kind=kind==='gem'?'gem':'item'; const G_=kind==='gem';
   const opts=G_?[[-1,'끄기','팔지 않아요','#9a8c72'],[0,'하급 이하','하급 보석',GAC[0]],[1,'중급 이하','하급·중급',GAC[1]],[2,'모든 보석','하급·중급·상급',GAC[2]]]
-    :[[-1,'끄기','팔지 않아요','#9a8c72'],[0,'일반 이하','흰색 아이템',RARC[0]],[1,'매직 이하','흰색·파랑',RARC[1]],[2,'레어 이하','흰색·파랑·노랑',RARC[2]]];
+    :[[-1,'끄기','팔지 않아요','#9a8c72'],[0,'★1 일반 이하','흰색 아이템',RARC[0]],[1,'★2 매직 이하','흰색·파랑',RARC[1]],[2,'★3 레어 이하','흰색·파랑·노랑',RARC[2]]];
   const draw=m=>{
     const sel=G_?gasLv:asLv, on=G_?gsOn:syLv>=0, warn=G_?(on&&sel>=0):(on&&sel>=0&&sel>=syLv), nm=o=>o[1];
-    const sellTx=sel<0?'판매 안 함':(G_?GASN[sel+1]:RARN[sel]+' 이하')+' 판매';
+    const sellTx=sel<0?'판매 안 함':(G_?GASN[sel+1]:'★'+(sel+1)+' '+RARN[sel]+' 이하')+' 판매';
     m.querySelector('.card').innerHTML=`<div class="smbody"><div class="smhd"><h3>✨ 스마트 정리</h3><button class="btn sm" id="smX" aria-label="닫기" style="min-width:40px;padding:6px 10px">✕</button></div>
 <div class="smsec"><div class="smh"><span>🛒 ${G_?'보석 ':''}자동판매</span></div>${opts.map(o=>`<button type="button" class="smrl${sel===o[0]?' on':''}" data-a="${o[0]}" style="--c:${o[3]}"><i></i><b>${o[1]}</b><span>${o[2]}</span></button>`).join('')}</div>
 <div class="smsec"><div class="smh"><span>🧬 ${G_?'보석':'자동'}합성</span><button type="button" class="smsw${on?' on':''}" id="smSyn" role="switch" aria-checked="${on}" aria-label="합성"></button></div><p class="smd">${G_?`하급·중급 보석 ${GEM_SYN_N}개가 모이면 한 단계 위 보석 1개로 합쳐요`:`같은 등급 ${SYN_N}개가 모이면 한 단계 위 등급 1개로 합쳐요 (레어 이하)`}</p>${warn?`<p class="smd smw">⚠️ ${G_?GASN[sel+1]:RARN[sel]+' 이하'} 자동판매가 켜져 있어서 합성 재료가 먼저 팔려요</p>`:''}</div>
@@ -4698,7 +4698,7 @@ function pickUp(g){
   const i=me.inv.indexOf(null);
   if(i<0){toast('가방이 가득 찼어요','#e07060');return;}
   const it=g.it; it.isNew=1; me.inv[i]=it; ground.splice(ground.indexOf(g),1); if(it.pk)later(.4,pickStory);   /* 곡괭이: 그라크 대화 */ { const gx=(G.stGot||(G.stGot=[0,0,0,0,0,0])), gi=it.ep?5:(it.rar|0); gx[gi]=(gx[gi]|0)+1; }
-  sfx('pick'); if(it.rar>=((G.coop||G.mode==='guest')?3:2))toast(`획득: ${dn(it)}`,rcol(it),'get',it.rar>=4);   /* 협동 중엔 유니크 이상만 알림 */
+  sfx('pick'); if(it.rar>=((G.coop||G.mode==='guest')?3:2))toast(`획득: ${it.name}`,rcol(it),'get',it.rar>=4);   /* 협동 중엔 유니크 이상만 알림 */
   if(it.rar>=3){ annQ.push([++annSeq,it.name.slice(0,16),it.rar]); if(annQ.length>4)annQ.shift(); }   /* 협동: 동료에게 알리는 획득은 유니크 이상만 */
   const key=it.slot==='ring'?(!me.eq.ring1?'ring1':!me.eq.ring2?'ring2':null):(me.eq[it.slot]?null:it.slot);
   if(key&&canWear(it)){ const cp0=calcCP(me); delete it.isNew; me.eq[key]=it; me.inv[i]=null; const hr=me.hp/me.D.maxHp, mr=me.mp/me.D.maxMp; me.D=derive(me); me.hp=me.D.maxHp*hr; me.mp=me.D.maxMp*mr; buildSkills(); cpMsg(cp0,calcCP(me)); toast(`자동 장착: ${it.name}`,'#9fd18b'); }
@@ -6759,7 +6759,7 @@ function bagSelUi(b){ const on=!!bagSel, tabs=$('#sheetTabs'), bar=$('#selBar');
   b.querySelector('#selAll').onclick=()=>{ A.forEach((it,i)=>{ if(selOk(it))SEL.add(i); }); upd(); };
   b.querySelector('#selClr').onclick=()=>{ bagSel.clear(); bagSelM.clear(); upd(); };
   { const sr=b.querySelector('#selRar'); if(sr)sr.onclick=()=>{ const c=r=>me.inv.filter(it=>selOk(it)&&it.rar===r).length;
-    modal(`<h3>등급별 선택</h3><p class="meta" style="margin:0 0 8px">등급을 누르면 그 등급 아이템이 모두 선택돼요. 이미 모두 선택돼 있으면 해제돼요.</p><div class="col">${[0,1,2,3].map(r=>`<button class="btn" data-r="${r}" ${c(r)?'':'disabled'} style="text-align:left;display:flex;justify-content:space-between"><span style="color:${RARC[r]};font-weight:700">${RARN[r]}</span><span style="color:var(--mute)">${c(r)}개</span></button>`).join('')}<button class="btn" id="srX">닫기</button></div>`,m=>{
+    modal(`<h3>등급별 선택</h3><p class="meta" style="margin:0 0 8px">등급을 누르면 그 등급 아이템이 모두 선택돼요. 이미 모두 선택돼 있으면 해제돼요.</p><div class="col">${[0,1,2,3].map(r=>`<button class="btn" data-r="${r}" ${c(r)?'':'disabled'} style="text-align:left;display:flex;justify-content:space-between"><span style="color:${RARC[r]};font-weight:700">★${r+1} ${RARN[r]}</span><span style="color:var(--mute)">${c(r)}개</span></button>`).join('')}<button class="btn" id="srX">닫기</button></div>`,m=>{
       m.querySelector('#srX').onclick=closeModal;
       m.querySelectorAll('[data-r]').forEach(x=>x.onclick=()=>{ const r=+x.dataset.r, ix=[]; me.inv.forEach((it,i)=>{ if(selOk(it)&&it.rar===r)ix.push(i); }); const all=ix.every(i=>bagSel.has(i)); ix.forEach(i=>all?bagSel.delete(i):bagSel.add(i)); closeModal(); upd(); }); }); }; }
   $('#selNo').onclick=()=>{ bagSel=null; bagSelM=null; rerender(); };
@@ -7210,7 +7210,7 @@ function bulkSell(P){ P=P||me; const mine=P===me;
   let plan=mkPlan();
   const info=()=>{ let n=0,v=0,e=0; plan.inv.forEach(it=>{ if(it&&!it.lock&&sel.has(it.rar)){n++;v+=sellInfo(it).total;if(it.enh>0)e++;} }); return {n,v,e}; };   /* 잠그지 않은 강화 아이템도 일괄 판매 대상 */
   const cnt=r=>plan.inv.filter(it=>it&&!it.lock&&it.rar===r).length, val=r=>plan.inv.reduce((a,it)=>a+(it&&!it.lock&&it.rar===r?sellInfo(it).total:0),0), ecnt=r=>plan.inv.filter(it=>it&&!it.lock&&it.enh>0&&it.rar===r).length;
-  const rowsHtml=()=>[0,1,2,3].map(r=>`<label class="toggle" style="display:flex;gap:8px;align-items:center;font-size:14px;padding:6px 8px;border:1px solid var(--line2);border-radius:8px"><input type="checkbox" data-r="${r}" ${sel.has(r)?'checked':''}> <span style="color:${RARC[r]};font-weight:700">${RARN[r]}</span> <span style="margin-left:auto;color:var(--mute)">${cnt(r)}개${ecnt(r)?` <span style="color:#ffb259">(강화 ${ecnt(r)})</span>`:''} · ${val(r)}G</span></label>`).join('');
+  const rowsHtml=()=>[0,1,2,3].map(r=>`<label class="toggle" style="display:flex;gap:8px;align-items:center;font-size:14px;padding:6px 8px;border:1px solid var(--line2);border-radius:8px"><input type="checkbox" data-r="${r}" ${sel.has(r)?'checked':''}> <span style="color:${RARC[r]};font-weight:700">★${r+1} ${RARN[r]}</span> <span style="margin-left:auto;color:var(--mute)">${cnt(r)}개${ecnt(r)?` <span style="color:#ffb259">(강화 ${ecnt(r)})</span>`:''} · ${val(r)}G</span></label>`).join('');
   const draw=m=>{ plan=mkPlan(); const f=info(), sw=plan.swaps.length;
     m.querySelector('#bsRows').innerHTML=rowsHtml(); m.querySelectorAll('[data-r]').forEach(c=>c.onchange=()=>{ const r=+c.dataset.r; if(c.checked)sel.add(r); else sel.delete(r); me.bs=[...sel].sort(); saveChar(); draw(m); });
     const sb=m.querySelector('#sdBox'); if(sb){ const on=sdOn(); const sw2=sb.querySelector('#sdSw'); sw2.classList.toggle('on',on); sw2.setAttribute('aria-checked',on);
@@ -9808,7 +9808,7 @@ function drawItemsScreen(t){
       ctx.fillStyle=g2; ctx.fillRect(sx-1.5,y0,3,sy-y0);
       ctx.globalCompositeOperation='source-over'; }
     if(!hudOn('label'))continue;
-    const label=dn(it), tw=ctx.measureText(label).width, lx=sx-tw/2-5, ly=sy-30;
+    const label=it.name, tw=ctx.measureText(label).width, lx=sx-tw/2-5, ly=sy-30;
     ctx.fillStyle='rgba(8,6,5,.82)'; ctx.fillRect(lx,ly,tw+10,17);
     const lc=isGem(it)?GEM_C[it.gk]:rcol(it);
     if(it.rar>=1||isGem(it)){ctx.strokeStyle=lc;ctx.globalAlpha=.5;ctx.lineWidth=1;ctx.strokeRect(lx+.5,ly+.5,tw+9,16);ctx.globalAlpha=1;}
