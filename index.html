@@ -1579,7 +1579,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0971</div>
+    <div class="ver" id="verT">v0.7.2.0972</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3761,7 +3761,7 @@ function drawGmCliff(){ if(camY>GM_CLIFF+40)return; ctx.save(); const g=ctx.crea
 function gmArenaClamp(o){ if(o.y<GM_CLIFF+20)o.y=GM_CLIFF+20; const dx=o.x-GM_ARENA.x, dy=o.y-GM_ARENA.y, d=hyp(dx,dy), R=430; if(d>R){ o.x=GM_ARENA.x+dx/d*R; o.y=GM_ARENA.y+dy/d*R; } }
 function gmbSpawn(){ const pn=1+(G.gmPen||0), m=spawnMob(gmbTy(),GM_ARENA.x,GM_ARENA.y-100,false);
   m.gmb=1; m.boss=true; m.gmt=1; m.hp=m.max=GMB_HP*pn; m.dmg0=RAIDB()*GMB_RDM*pn; m.dmg=m.dmg0; m.spd=0; m.r=80; m.xp=Math.round(m.xp); m.fa=Math.PI/2; m.ph=1; m.cs=null; m.gap=2.5; m.cdk={slam:3,sweep:6,wave:5,bash:7,flame:9,tomb:11,roar:16,summon:10,ult:30}; m.stn=0; m.bt=99;
-  G.gmB=m; G.gmTel=[]; G.gmTomb=[]; for(const k of ['boss_7','boss_7_atk','boss_7_hurt','boss_7_ult','relics_s7','skill_tomb','skill_tomb_fall','skill_wave','skill_wave_crack'])sprGet(k);
+  G.gmB=m; G.gmTel=[]; G.gmTomb=[]; for(const k of ['boss_7','boss_7_atk','boss_7_hurt','boss_7_ult','boss_7_sw1','boss_7_sw2','boss_7_sw3','relics_s7','skill_tomb','skill_tomb_fall','skill_wave','skill_wave_crack'])sprGet(k);
   sfx('boss'); G.shake=Math.max(G.shake,.8); me.god=Math.max(me.god||0,2); }
 /* ===== 묘비 (거인왕 기술) — 하늘에서 떨어져 땅에 박힌 뒤 5초간 서 있음 =====
    박힐 때 최대 체력 1% → 0.5초마다 2배씩(1·2·4·8%…) 올라가는 장판 피해 · 맞을 때마다 7초 회복 금지(물약·치유 오라만 회복) */
@@ -3801,13 +3801,13 @@ const GMS_PCT=.05, GMS_BLK=2;
 function gmbSummon(b){ const hp=b.max*.05/6; let n=0; for(let i=0;i<6;i++){ const a=i/6*6.283+rand(-.2,.2), r=rand(150,210), x=GM_ARENA.x+Math.cos(a)*r, y=Math.max(GM_CLIFF+40,GM_CLIFF+170+Math.sin(a)*r*.6); const o=spawnMob(2,x,y,false);
     o.hp=o.max=hp; o.dmg=b.dmg0*.12; o.xp=0; o.inn=true; o.tsd=1; o.spd=o.spd*1.1; burst(x,y,'#9ad0ff',8,200); n++; }
   announce('💀 무덤 병사 6마리가 깨어났어요!','#c8d8e8'); sfx('boss'); }
-function gmbTick(m,dt,pls){ m.kx=m.ky=0; m.dvx=m.dvy=0; if(G.phase!=='boss')return; gmTombTick(m,dt); if(m.inv>0)m.inv-=dt;
+function gmbTick(m,dt,pls){ m.kx=m.ky=0; m.dvx=m.dvy=0; if(G.phase!=='boss')return; gmTombTick(m,dt); if(m.inv>0)m.inv-=dt; if(m.sw){ m.sw.t+=dt; if(m.sw.t>=GMB_SW)m.sw=null; }
   const r=m.hp/m.max, np=r>.7?1:r>.35?2:3; if(np!==m.ph){ if(m.ph<2&&np>=2)m.cdk.ult=Math.max(m.cdk.ult,10); m.ph=np; m.dmg=m.dmg0*GMB_PM[np-1]; m.inv=1.5; announce(np===2?'💢 고르무스가 격노했다! 피해 ×1.3':'⚡ 고르무스가 최후의 힘을 끌어올린다! 피해 ×1.6','#ff7a5a'); efx.push({k:'ring',x:m.x,y:m.y,r0:20,r1:300,t:0,life:.7,col:'#9ad0ff',w:14}); G.shake=Math.max(G.shake,.8); sfx('boss'); m.gap=Math.max(m.gap,1.2); if(np===3)m.cdk.ult=6; }
   if(m.stn>0){ m.stn-=dt; for(const k in m.cdk)m.cdk[k]-=0; return; }
   for(const k in m.cdk)m.cdk[k]-=dt;
   let best=null,bd=1e9; const tz=m.taunt&&m.taunt.t>0&&pls.find(q=>q.i===m.taunt.i); if(tz){ best=tz; bd=hyp(tz.x-m.x,tz.y-m.y); } else for(const p of pls){ const d=hyp(p.x-m.x,p.y-m.y); if(d<bd){ bd=d; best=p; } }
   if(best&&!m.cs){ const ta=Math.atan2(best.y-m.y,best.x-m.x), df=((ta-m.fa+Math.PI*3)%(Math.PI*2))-Math.PI, st=1.2*dt; m.fa+=Math.abs(df)<st?df:Math.sign(df)*st; }
-  if(m.cs){ const c=m.cs; c.t+=dt; if(c.k==='ult'){ if(c.t>=c.dur)gmbUlt(m,c,pls); return; } if(c.t>=c.dur){ m.cs=null; gmbResolve(m,c,pls); m.gap=rand(.6,1.1); m.atk=.35; } return; }
+  if(m.cs){ const c=m.cs; c.t+=dt; if(c.k==='ult'){ if(c.t>=c.dur)gmbUlt(m,c,pls); return; } if(c.t>=c.dur){ m.cs=null; if(GMB_SK[c.k]&&GMB_SK[c.k].part==='sword')m.sw={t:0}; gmbResolve(m,c,pls); m.gap=rand(.6,1.1); m.atk=.35; } return; }
   if(m.gap>0){ m.gap-=dt; return; } if(!best)return;
   if(m.ph>=2&&m.cdk.ult<=0){ gmbUltStart(m); return; }
   const ready=[]; for(const k in GMB_SK){ const S=GMB_SK[k]; if(m.cdk[k]>0)continue; if(S.minPh&&m.ph<S.minPh)continue; if(k==='summon'&&G.mobs.filter(q=>q.tsd&&!q.dead).length>=3)continue;
@@ -3829,7 +3829,8 @@ function drawGmTel(){ for(let i=G.gmTel.length-1;i>=0;i--){ const o=G.gmTel[i], 
     else if(o.sh==='fan'){ ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0,0,o.r,o.a-o.w,o.a+o.w); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.fillStyle='rgba(255,70,50,.28)'; ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0,0,o.r*p,o.a-o.w,o.a+o.w); ctx.closePath(); ctx.fill(); }
     else { ctx.rotate(o.a); ctx.fillRect(0,-o.lw/2,o.r,o.lw); ctx.strokeRect(0,-o.lw/2,o.r,o.lw); ctx.fillStyle='rgba(255,70,50,.28)'; ctx.fillRect(0,-o.lw/2,o.r*p,o.lw); }
     ctx.restore(); } }
-function drawGmb(m,t){ const x=m.x, y=m.y, base=GM_ARENA.y-20, atk=m.cs||m.atk>0, hurt=m.flash>0&&!atk, ult=m.cs&&m.cs.k==='ult', im=sprGet(ult?'boss_7_ult':hurt?'boss_7_hurt':atk?'boss_7_atk':'boss_7')||sprGet('boss_7'); const W=ult?300:360;
+const GMB_SW=.6;   /* 칼날 기술(내려찍기·휩쓸기·파동) 직후 휘두름 3컷: 휘두르는 중 → 내려친 순간 → 복귀 (그림만 바뀜) */
+function drawGmb(m,t){ const x=m.x, y=m.y, base=GM_ARENA.y-20, atk=m.cs||m.atk>0, hurt=m.flash>0&&!atk, ult=m.cs&&m.cs.k==='ult', swt=m.sw&&!m.cs?m.sw.t:-1, im=sprGet(ult?'boss_7_ult':swt>=0?(swt<.14?'boss_7_sw1':swt<.34?'boss_7_sw2':'boss_7_sw3'):hurt?'boss_7_hurt':atk?'boss_7_atk':'boss_7')||sprGet('boss_7'); const W=ult?300:360;
   ctx.fillStyle='rgba(0,0,0,.4)'; ctx.beginPath(); ctx.ellipse(x,base,W*.42,34,0,0,6.283); ctx.fill();
   if(im){ const H=W*im.height/im.width; ctx.save(); ctx.beginPath(); ctx.rect(x-W,0,W*2,base+4); ctx.clip(); ctx.drawImage(im,x-W/2,base-H+4,W,H); ctx.restore(); } else { circle(x,y,70,'#9aa'); }
 }
