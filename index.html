@@ -1318,7 +1318,7 @@ body.land #bBas{position:absolute;width:calc(var(--u) + 4px);height:calc(var(--u
 #sSplash:focus{outline:none}
 #sSplash .spFb{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 38%,#4a2d8c 0%,#24164f 42%,#0a0716 100%);transition:opacity .6s}
 #sSplash .spFb img{position:absolute;left:50%;transform:translateX(-50%);pointer-events:none}
-#sSplash .spFb .b{bottom:11.5%;width:117%;max-width:none}   /* 움직이는 장면(Phaser)의 거인왕과 같은 크기·위치 → 장면이 바뀔 때 그림이 튀지 않음 */
+#sSplash .spFb .b{bottom:calc(50vh - 600*max(100vw/780,100vh/1560));width:calc(912*max(100vw/780,100vh/1560));max-width:none}   /* 움직이는 장면(Phaser)의 거인왕과 같은 크기·위치 → 장면이 바뀔 때 그림이 튀지 않음 */
 #sSplash .spFb .lsh{display:none}
 #sSplash.ph .spFb{opacity:0}
 #phHost{position:absolute;inset:0}
@@ -1580,7 +1580,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0977</div>
+    <div class="ver" id="verT">v0.7.2.0978</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -10320,7 +10320,7 @@ function start(){
       layout(); sc.scale.on('resize',layout);
       sc.t=0;
       sc.zoomOut=()=>{ const L=sc.layout; if(!L)return; const cam=sc.cameras.main; cam.pan(L.cx+(focus[0]-390)*L.s,L.cy+(focus[1]-780)*L.s,700,'Sine.easeIn'); cam.zoomTo(2.6,700,'Sine.easeIn'); };
-      scene=sc; sp.classList.add('ph');
+      scene=sc; { let n=0; const show=()=>{ if(sp.classList.contains('ph'))return; sp.classList.add('ph'); try{ sc.game.events.off('postrender',go); }catch(e){} }, go=()=>{ if(++n>=3)show(); }; try{ sc.game.events.on('postrender',go); }catch(e){} setTimeout(show,1500); }   /* 그림이 화면에 실제로 그려진 뒤에 기본 그림을 치워요(바로 치우면 까만 화면이 잠깐 보임) */
     }
     update(time,dt){
       try{
