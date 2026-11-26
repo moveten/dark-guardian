@@ -1580,7 +1580,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0983</div>
+    <div class="ver" id="verT">v0.7.2.0984</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3235,6 +3235,7 @@ const casIv=m=>CAS_CFG.iv[Math.min(3,Math.max(1,m.ph|0||1))-1];
 function casFlash(m,col,nm,rgb,big){ const r0=m.r; efx.push({k:'ring',x:m.x,y:m.y,r0:r0*.5,r1:r0*3.2,t:0,life:.45,col,w:14}); later(.12,()=>efx.push({k:'ring',x:m.x,y:m.y,r0:r0*.5,r1:r0*4.6,t:0,life:.5,col,w:8}));
   burst(m.x,m.y,col,big?46:28,380); impact(m.x,m.y,rgb||'230,170,90',big?320:220); spark(m.x,m.y,'#fff0c0',16); G.shake=Math.max(G.shake,big?.8:.5); sfx('boss'); if(nm)addNum(m.x,m.y-m.r-34,nm,col,true); }
 const casBan=(t,s,du)=>{ banner(t,s); bannerT=du||1.8; };
+const casBusy=m=>m.rk==='cas'&&!!(m.spin||m.hide||m.tel||m.charge||m.gt>0);   /* 카스텔이 기술을 쓰는 동안(준비·돌진·회전·숨기·성문)에는 기절해도 멈추지 않아요 */
 const casStat=(p,st,du)=>{ if(p.i===1)applyStatus(st,du); else if(p.i===2)pushEv(['x',2,st,du]); };
 /* ---- 공성장치 3종 ---- */
 const CAS_DV=['weak','slow','arrow'], CAS_DVN={weak:'파갑의 탑',slow:'족쇄의 탑',arrow:'공성 화살탑'}, CAS_DVC={weak:'#ff9a4a',slow:'#6fb8ff',arrow:'#ffd860'};
@@ -3824,6 +3825,7 @@ function gmbTick(m,dt,pls){ m.kx=m.ky=0; m.dvx=m.dvy=0; if(G.phase!=='boss')retu
   else if(k==='tomb'){ tel=[{sh:'circ',x:best.x,y:best.y,r:64,dur:S.tel}]; for(let i=0;i<4;i++){ const a=rand(0,6.283), d=rand(90,300); tel.push({sh:'circ',x:best.x+Math.cos(a)*d,y:best.y+Math.sin(a)*d,r:64,dur:S.tel}); } for(const o of tel){ const q=hyp(o.x-GM_ARENA.x,o.y-GM_ARENA.y); if(q>400){ o.x=GM_ARENA.x+(o.x-GM_ARENA.x)/q*400; o.y=GM_ARENA.y+(o.y-GM_ARENA.y)/q*400; } if(o.y<GM_CLIFF+o.r+8)o.y=GM_CLIFF+o.r+8; } }   /* 묘비 예고 원이 절벽 쪽에 생기지 않게 */
   else if(k==='summon'){ tel=[]; for(let i=0;i<6;i++){ const a=i/6*6.283; tel.push({sh:'circ',x:GM_ARENA.x+Math.cos(a)*180,y:GM_CLIFF+170+Math.sin(a)*110,r:38,dur:S.tel}); } }
   else tel={sh:'circ',x:best.x,y:best.y,r:62,dur:S.tel};
+  { const N=GMB_NM[k]; if(N)casBan(N[0],N[1],1.6); }   /* 기술 이름 표시 (카스텔 철퇴 회전처럼) */
   m.cs={k,t:0,dur:S.tel,mult:S.mult,stun:k==='bash'?2:0,fear:S.fear||0,bleed:S.bleed||0,tel}; for(const o of (Array.isArray(tel)?tel:[tel]))gmbTel(m,o); }
 function drawGmTel(){ for(let i=G.gmTel.length-1;i>=0;i--){ const o=G.gmTel[i], p=Math.min(1,(T-o.t0)/o.dur); if(p<0){ continue; }
     ctx.save(); ctx.translate(o.x,o.y); ctx.fillStyle='rgba(255,60,50,.15)'; ctx.strokeStyle='rgba(255,90,70,.55)'; ctx.lineWidth=2;
@@ -3833,6 +3835,7 @@ function drawGmTel(){ for(let i=G.gmTel.length-1;i>=0;i--){ const o=G.gmTel[i], 
     else if(o.sh==='fan'){ ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0,0,o.r,o.a-o.w,o.a+o.w); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.fillStyle='rgba(255,70,50,.28)'; ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0,0,o.r*p,o.a-o.w,o.a+o.w); ctx.closePath(); ctx.fill(); }
     else { ctx.rotate(o.a); ctx.fillRect(0,-o.lw/2,o.r,o.lw); ctx.strokeRect(0,-o.lw/2,o.r,o.lw); ctx.fillStyle='rgba(255,70,50,.28)'; ctx.fillRect(0,-o.lw/2,o.r*p,o.lw); }
     ctx.restore(); } }
+const GMB_NM={slam:['⚔️ 내려찍기','붉은 부채꼴 밖으로 피하세요'],sweep:['🌀 휩쓸기','붉은 원 밖으로 벗어나세요'],wave:['🌊 검기 파동','붉은 직선 밖으로 피하세요 · 출혈'],bash:['🛡️ 방패 후려치기','맞으면 2초 기절'],flame:['🔥 불꽃','맞으면 최대 생명력 33% · 7초 회복 금지'],tomb:['🪦 묘비','붉은 원에서 벗어나세요'],roar:['📢 왕의 포효','범위 안에 있으면 공포'],summon:['💀 소환','소환된 적을 처리하세요']};
 const GMB_SW=.36;   /* 칼날 기술(내려찍기·휩쓸기·파동) 직후 휘두름 3컷: 휘두르는 중 → 내려친 순간 → 복귀 (그림만 바뀜) */
 function drawGmb(m,t){ const x=m.x, y=m.y, base=GM_ARENA.y-20, atk=m.cs||m.atk>0, hurt=m.flash>0&&!atk, ult=m.cs&&m.cs.k==='ult', swt=m.sw&&!m.cs?m.sw.t:-1, im=sprGet(ult?'boss_7_ult':swt>=0?(swt<.06?'boss_7_sw1':swt<.18?'boss_7_sw2':'boss_7_sw3'):hurt?'boss_7_hurt':atk?'boss_7_atk':'boss_7')||sprGet('boss_7'); const W=ult?300:(swt>=.06&&swt<.18?376:360);   /* 내려치는 순간 4% 커졌다 돌아와 타격감을 줘요 */
   ctx.fillStyle='rgba(0,0,0,.4)'; ctx.beginPath(); ctx.ellipse(x,base,W*.42,34,0,0,6.283); ctx.fill();
@@ -4103,7 +4106,7 @@ function updateMobs(dt){
     m.cd-=dt*sf0*(m.rT>0?1-(m.rA||0):1); m.atk=Math.max(0,m.atk-dt); m.flash=Math.max(0,m.flash-dt); m.anim+=dt*sf;
     if(m.stunImm>0)m.stunImm-=dt;
     if(m.scare){ trScareTick(m,dt); continue; }
-    if(m.stunT>0){ if(m.rk==='cas'&&m.spin){ m.stunT=0; } else { m.stunT-=dt; m.cd=Math.max(m.cd,.3); continue; } }   /* 회전 기술 중에는 기절해도 멈추지 않아요 (멈추면 빨간 칸만 남고 피해가 안 들어가요) */
+    if(m.stunT>0){ if(casBusy(m)){ m.stunT=0; } else { m.stunT-=dt; m.cd=Math.max(m.cd,.3); continue; } }   /* 회전 기술 중에는 기절해도 멈추지 않아요 (멈추면 빨간 칸만 남고 피해가 안 들어가요) */
     if(m.dev){ casDevTick(m,dt); continue; }
     if(m.gmc){ gmcTick(m,dt); continue; }
     if(m.gmg){ gmgTick(m,dt,pls,sf); continue; }
@@ -4317,7 +4320,7 @@ function applyDmg(m,dmg,slow,fx){
   if(m.bar>0){ const a=Math.min(m.bar,dmg); m.bar-=a; dmg-=a; if(!(dmg>0)){ m.flash=.12; return; } }   /* 보호막 */   /* 위압 함성: 받는 모든 피해 증가 (파티원 피해 포함) */
   m.hp-=dmg; if((m.rk==='awk'&&!m.fake)||m.rk==='cas'){ const fl=m.rk==='cas'?casFloor(m):awkFloor(m); if(fl>0&&m.hp<m.max*fl)m.hp=m.max*fl-1; }   /* 다음 페이즈 문턱에서 한 번 멈춤 → 페이즈 전환 */
   m.flash=.12; if(slow){m.slowT=Math.max(m.slowT,slow); m.slowMax=Math.max(m.slowMax||0,slow);}
-  if(fx){ if(fx.stun){ if(m.boss){ if(!(m.stunImm>0)&&!(m.rk==='cas'&&(m.spin||m.hide))){ m.stunT=Math.max(m.stunT||0,fx.stun); m.stunImm=fx.stun+2.5; addNum(m.x,m.y-m.r-22,'💫 기절!','#ffd84a',true); } } else { m.stunT=Math.max(m.stunT||0,fx.stun); if(m.et)m.et=null; if(m.ch)m.ch=null; if(m.dash)m.dash=null; } }   /* 우두머리도 기절함 (기절이 끝난 뒤 2.5초는 다시 기절하지 않아 연속 기절 방지) */ if(fx.burn){ m.burnT=Math.max(m.burnT||0,fx.burn); m.burnD=Math.max(m.burnD||0,fx.bd||0); m.bt=m.bt>0?m.bt:.3; m.bl=fx.bl?1:0; } }
+  if(fx){ if(fx.stun){ if(m.boss){ if(!(m.stunImm>0)&&!casBusy(m)){ m.stunT=Math.max(m.stunT||0,fx.stun); m.stunImm=fx.stun+2.5; addNum(m.x,m.y-m.r-22,'💫 기절!','#ffd84a',true); } } else { m.stunT=Math.max(m.stunT||0,fx.stun); if(m.et)m.et=null; if(m.ch)m.ch=null; if(m.dash)m.dash=null; } }   /* 우두머리도 기절함 (기절이 끝난 뒤 2.5초는 다시 기절하지 않아 연속 기절 방지) */ if(fx.burn){ m.burnT=Math.max(m.burnT||0,fx.burn); m.burnD=Math.max(m.burnD||0,fx.bd||0); m.bt=m.bt>0?m.bt:.3; m.bl=fx.bl?1:0; } }
   if(m.hp<=0) killMob(m);
 }
 function killMob(m){
