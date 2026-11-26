@@ -165,6 +165,11 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
 #gmUc .tx{position:absolute;left:0;right:0;top:22px;text-align:center;font:900 min(24vw,96px)/1 'Noto Serif KR','Nanum Myeongjo','Noto Serif CJK KR',serif;letter-spacing:2px;white-space:nowrap;color:#ffd470;background:linear-gradient(180deg,#fff6c8,#ff9628);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:gmUcT 2.2s both}
 #gmUc .tx0{position:absolute;left:0;right:0;top:22px;text-align:center;font:900 min(24vw,96px)/1 'Noto Serif KR','Nanum Myeongjo','Noto Serif CJK KR',serif;letter-spacing:2px;white-space:nowrap;-webkit-text-stroke:9px #5a0a0a;color:#5a0a0a;filter:drop-shadow(0 0 10px rgba(255,60,40,.9));animation:gmUcT 2.2s both}
 #gmUc .ub{position:absolute;left:0;right:0;top:122px;text-align:center;font:700 13px var(--f-body);color:#ffdcc0;text-shadow:0 0 3px #000,0 0 3px #000}
+#gmTb{position:absolute;left:0;right:0;top:36%;height:96px;display:none;pointer-events:none;z-index:7}
+#gmTb.on{display:block;animation:gmUc 1.6s both}
+#gmTb .bd{position:absolute;left:-20px;right:-20px;top:6px;height:78px;transform:skewY(-3deg);background:linear-gradient(180deg,rgba(30,34,40,.88),rgba(16,18,22,.88));border-top:3px solid #9aa48c;border-bottom:3px solid #9aa48c;box-shadow:0 0 18px rgba(150,170,130,.45)}
+#gmTb .tx{position:absolute;left:0;right:0;top:8px;text-align:center;font:900 min(13vw,50px)/1 'Noto Serif KR','Nanum Myeongjo','Noto Serif CJK KR',serif;letter-spacing:10px;white-space:nowrap;color:#e8e2cc;text-shadow:0 0 12px rgba(160,200,120,.7),0 2px 0 #000;animation:gmUcT 1.6s both}
+#gmTb .ub{position:absolute;left:0;right:0;top:66px;text-align:center;font:700 12px var(--f-body);color:#cfd8c0;text-shadow:0 0 3px #000,0 0 3px #000}
 @keyframes gmUc{0%{opacity:0;transform:translateX(-60px)}8%{opacity:1;transform:none}82%{opacity:1}100%{opacity:0}}
 @keyframes gmUcT{0%{transform:scale(1.9);opacity:0}12%{transform:scale(.96);opacity:1}18%{transform:scale(1.04)}26%{transform:scale(1)}}
 #gmWb .ic{font-size:26px;filter:drop-shadow(0 0 4px #000)}
@@ -1580,7 +1585,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0984</div>
+    <div class="ver" id="verT">v0.7.2.0985</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3734,6 +3739,9 @@ const GMU_R=430, GMU_W=84, GMU_T=1.7, GMU_CD=25;
 function gmbUltStart(m){ const lx=GM_ARENA.x+rand(-260,260); m.fa=Math.PI/2; m.cs={k:'ult',t:0,dur:GMU_T,stage:1,lx};
   const o={sh:'ustrip',x:lx,y:GM_ARENA.y,lw:GMU_W,r:GMU_R,dur:GMU_T}; m.cs.tel=o; gmbTel(m,o); sfx('boss'); G.shake=Math.max(G.shake,.6);
   announce('⚡ 왕의 심판! 붉은 직선 위는 즉사 — 직선 밖으로!','#ff5a4a'); gmUltCut(); }
+function gmTombCut(){ const host=($('#casAl')||{}).parentNode; if(!host)return; let el=$('#gmTb');   /* 묘비 컷인: 일격필살보다 작은 얇은 석판 띠 + 「묘 비」 */
+  if(!el){ el=document.createElement('div'); el.id='gmTb'; el.setAttribute('aria-hidden','true'); el.innerHTML='<div class="bd"></div><div class="tx">묘 비</div><div class="ub">붉은 원에서 벗어나세요</div>'; host.appendChild(el); }
+  el.classList.remove('on'); void el.offsetWidth; el.classList.add('on'); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('on'),1600); }
 function gmUltCut(){ const host=($('#casAl')||{}).parentNode; if(!host)return; let vg=$('#gmVg'), uc=$('#gmUc');   /* 일격필살 발동 컷인: 붉은 띠 + 「一擊必殺」 */
   if(!vg){ vg=document.createElement('div'); vg.id='gmVg'; vg.setAttribute('aria-hidden','true'); host.appendChild(vg); }
   if(!uc){ uc=document.createElement('div'); uc.id='gmUc'; uc.setAttribute('aria-hidden','true'); uc.innerHTML='<div class="bd"></div><div class="tx0">一擊必殺</div><div class="tx">一擊必殺</div>'; host.appendChild(uc); }
@@ -3825,7 +3833,7 @@ function gmbTick(m,dt,pls){ m.kx=m.ky=0; m.dvx=m.dvy=0; if(G.phase!=='boss')retu
   else if(k==='tomb'){ tel=[{sh:'circ',x:best.x,y:best.y,r:64,dur:S.tel}]; for(let i=0;i<4;i++){ const a=rand(0,6.283), d=rand(90,300); tel.push({sh:'circ',x:best.x+Math.cos(a)*d,y:best.y+Math.sin(a)*d,r:64,dur:S.tel}); } for(const o of tel){ const q=hyp(o.x-GM_ARENA.x,o.y-GM_ARENA.y); if(q>400){ o.x=GM_ARENA.x+(o.x-GM_ARENA.x)/q*400; o.y=GM_ARENA.y+(o.y-GM_ARENA.y)/q*400; } if(o.y<GM_CLIFF+o.r+8)o.y=GM_CLIFF+o.r+8; } }   /* 묘비 예고 원이 절벽 쪽에 생기지 않게 */
   else if(k==='summon'){ tel=[]; for(let i=0;i<6;i++){ const a=i/6*6.283; tel.push({sh:'circ',x:GM_ARENA.x+Math.cos(a)*180,y:GM_CLIFF+170+Math.sin(a)*110,r:38,dur:S.tel}); } }
   else tel={sh:'circ',x:best.x,y:best.y,r:62,dur:S.tel};
-  { const N=GMB_NM[k]; if(N)casBan(N[0],N[1],1.6); }   /* 기술 이름 표시 (카스텔 철퇴 회전처럼) */
+  { const N=GMB_NM[k]; if(k==='tomb')gmTombCut(); else if(N)casBan(N[0],N[1],1.6); }   /* 기술 이름 표시 (카스텔 철퇴 회전처럼) */
   m.cs={k,t:0,dur:S.tel,mult:S.mult,stun:k==='bash'?2:0,fear:S.fear||0,bleed:S.bleed||0,tel}; for(const o of (Array.isArray(tel)?tel:[tel]))gmbTel(m,o); }
 function drawGmTel(){ for(let i=G.gmTel.length-1;i>=0;i--){ const o=G.gmTel[i], p=Math.min(1,(T-o.t0)/o.dur); if(p<0){ continue; }
     ctx.save(); ctx.translate(o.x,o.y); ctx.fillStyle='rgba(255,60,50,.15)'; ctx.strokeStyle='rgba(255,90,70,.55)'; ctx.lineWidth=2;
@@ -3835,7 +3843,7 @@ function drawGmTel(){ for(let i=G.gmTel.length-1;i>=0;i--){ const o=G.gmTel[i], 
     else if(o.sh==='fan'){ ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0,0,o.r,o.a-o.w,o.a+o.w); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.fillStyle='rgba(255,70,50,.28)'; ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0,0,o.r*p,o.a-o.w,o.a+o.w); ctx.closePath(); ctx.fill(); }
     else { ctx.rotate(o.a); ctx.fillRect(0,-o.lw/2,o.r,o.lw); ctx.strokeRect(0,-o.lw/2,o.r,o.lw); ctx.fillStyle='rgba(255,70,50,.28)'; ctx.fillRect(0,-o.lw/2,o.r*p,o.lw); }
     ctx.restore(); } }
-const GMB_NM={slam:['⚔️ 내려찍기','붉은 부채꼴 밖으로 피하세요'],sweep:['🌀 휩쓸기','붉은 원 밖으로 벗어나세요'],wave:['🌊 검기 파동','붉은 직선 밖으로 피하세요 · 출혈'],bash:['🛡️ 방패 후려치기','맞으면 2초 기절'],flame:['🔥 불꽃','맞으면 최대 생명력 33% · 7초 회복 금지'],tomb:['🪦 묘비','붉은 원에서 벗어나세요'],roar:['📢 왕의 포효','범위 안에 있으면 공포'],summon:['💀 소환','소환된 적을 처리하세요']};
+const GMB_NM={slam:['⚔️ 내려찍기','붉은 부채꼴 밖으로 피하세요'],sweep:['🌀 휩쓸기','붉은 원 밖으로 벗어나세요'],wave:['🌊 검기 파동','붉은 직선 밖으로 피하세요 · 출혈'],bash:['🛡️ 방패 후려치기','맞으면 2초 기절'],flame:['🔥 불꽃','맞으면 최대 생명력 33% · 7초 회복 금지'],roar:['📢 왕의 포효','범위 안에 있으면 공포'],summon:['💀 소환','소환된 적을 처리하세요']};
 const GMB_SW=.36;   /* 칼날 기술(내려찍기·휩쓸기·파동) 직후 휘두름 3컷: 휘두르는 중 → 내려친 순간 → 복귀 (그림만 바뀜) */
 function drawGmb(m,t){ const x=m.x, y=m.y, base=GM_ARENA.y-20, atk=m.cs||m.atk>0, hurt=m.flash>0&&!atk, ult=m.cs&&m.cs.k==='ult', swt=m.sw&&!m.cs?m.sw.t:-1, im=sprGet(ult?'boss_7_ult':swt>=0?(swt<.06?'boss_7_sw1':swt<.18?'boss_7_sw2':'boss_7_sw3'):hurt?'boss_7_hurt':atk?'boss_7_atk':'boss_7')||sprGet('boss_7'); const W=ult?300:(swt>=.06&&swt<.18?376:360);   /* 내려치는 순간 4% 커졌다 돌아와 타격감을 줘요 */
   ctx.fillStyle='rgba(0,0,0,.4)'; ctx.beginPath(); ctx.ellipse(x,base,W*.42,34,0,0,6.283); ctx.fill();
