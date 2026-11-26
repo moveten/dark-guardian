@@ -1580,7 +1580,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0982</div>
+    <div class="ver" id="verT">v0.7.2.0983</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -4862,7 +4862,7 @@ function hitMob(m,r,slow,tn,fx){
   const nhs=!!(fx&&fx.nohs);   /* 타격 정지(화면 멈춤)는 모든 공격에서 제거 — 여러 번 맞는 스킬에서 끊김처럼 보였음 */
   { const sk=smh?0:nhs?.05:r.crit?.3:.08; if(sk>G.shake){ G.shd=[Math.cos(m.sqa),Math.sin(m.sqa)]; G.shdT=T+.12; } G.shake=Math.max(G.shake,sk); }   /* 흔들림이 때린 방향으로 밀림 */
   if(r.crit&&!smh&&!nhs)critJuice(m);
-  if(me.D.ls&&!me.dead&&!smh) me.hp=Math.min(me.D.maxHp,me.hp+dmg*me.D.ls/100);
+  if(me.D.ls&&!me.dead&&!smh&&me.lsGot!==me.lsN){ me.lsGot=me.lsN; me.hp=Math.min(me.D.maxHp,me.hp+me.D.maxHp*me.D.ls/100); }   /* 적중 시 최대 생명력의 흡수 %만큼, 스킬·공격 한 번에 한 번 */
   if(G.mode==='guest'){ hitQ.push([++hitSeq,m.id,dmg,slow||0,tn?1:0,fx?Math.round((fx.stun||0)*10):0,fx?Math.round((fx.burn||0)*10):0,fx?Math.round(fx.bd||0):0]); if(hitQ.length>40)hitQ.shift(); }
   else { if(m.boss)addThreat(m,1,dmg*(TMUL[me.cls]||1)*(smh?.4:1)+(tn?m.max*.04:0)); if(tn){ m.taunt={i:1,t:5}; if(T-(me.tnAt||-9)>.3){ me.tnAt=T; addNum(me.x,me.y-44,'📣 도발!','#ffb259',true); } } applyDmg(m,m.gsh&&!r.crit?dmg*.05:m.gfr&&gmFront(m)?dmg*.4:dmg,slow||0,fx); }
   if(sp&&!G.inProc&&!me.dead&&!smh) specialProc(m,dmg,r,sp);
@@ -5286,6 +5286,7 @@ function divineStrike(lv,who,pc){ const dvF=Math.min(.9,.5+.02*(Math.max(1,lv)-1
 const roarCd=l=>Math.max(10,18-.2*((l|0)-1));
 function roarDebuff(o,lv){ const v0=(10+lv)/100; for(const q of mobsIn(o.x,o.y,320)){ if(q.dead)continue; const v=Math.min(.9,v0*(q.boss?(q.rk?1/3:.5):1)); if(!(q.rT>0)||v>=(q.rM||0)){ q.rM=v; q.rA=v; } q.rT=Math.max(q.rT||0,3); } }
 function castSkill(o,key,real,tx,ty,lv,tgt){
+  if(o===me&&real)me.lsN=(me.lsN|0)+1;   /* 생명력 흡수: 스킬·공격 한 번(여러 번 맞아도)에 한 번만 회복 */
   if(G.train&&o===me){ if(key==='atk'&&G.trNoAtk)return; TR.sk=key==='atk'?'기본공격':(SKBY[key]&&SKBY[key].n)||key; }   /* 훈련장: 기본공격 끄기 · 로그용 스킬 이름 */
   if(o===me&&real&&G.mobs.some(b=>(b.boss||b.cnD||b.gmg==='shield')&&!b.dead&&b.counter>0)){ me.cnCast=T; me.cnId=(me.cnId|0)+1; } /* 반격 태세 중에 스킬을 썼음 */
   const ang=Math.atan2(ty-o.y,tx-o.x), dx=Math.cos(ang), dy=Math.sin(ang);
