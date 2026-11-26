@@ -1580,7 +1580,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0978</div>
+    <div class="ver" id="verT">v0.7.2.0979</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3551,7 +3551,7 @@ function drawGmc(m,t){ const im=sprGet('castle_s7_'+m.gmc), r=m.hp/m.max, st=r>.
   const bw=150, by=y-112; ctx.fillStyle='rgba(0,0,0,.7)'; ctx.fillRect(x-bw/2-1,by-1,bw+2,9); ctx.fillStyle='#c0553a'; ctx.fillRect(x-bw/2,by,bw*Math.max(0,r),7);
   ctx.font='bold 12px sans-serif'; ctx.textAlign='center'; ctx.fillStyle='#ffe2b0'; ctx.fillText(m.gn,x,by-4); }
 /* ===== 성채 수문장 (7스테이지) — 성채 앞에 미리 서 있다가 반경 260 안에 들어오면 전투 ===== */
-const GMG_HP=4.5e7, GMG_AGGRO=260, GMG_CN_IV=16, GMG_CN_DUR=2.3, GMG_CN_PCT=.33, GMG_BASH_STUN=2, GMG_BLEED_IV=10, GMG_BLEED_T=5, GMG_WEAK_IV=10, GMG_WEAK_T=6, GMG_BUF_IV=15, GMG_BUF_T=5, GMG_BUF_M=1.2;   /* 칼날 수문장: 10초마다 출혈(5초 회복 금지) · 투구 수문장: 10초마다 약화(6초, 받는 피해 +20%) · 15초마다 다른 수문장 공격력 +20%를 5초 */   /* 방패 수문장 반격 태세: 16초마다 2.3초 (태세 중 쓴 스킬은 나에게 반사 — 보스 반격 태세와 같은 규칙) */
+const GMG_HP=4.5e7, GMG_AGGRO=260, GMG_LEASH=520, GMG_CN_IV=16, GMG_CN_DUR=2.3, GMG_CN_PCT=.33, GMG_BASH_STUN=2, GMG_BLEED_IV=10, GMG_BLEED_T=5, GMG_WEAK_IV=10, GMG_WEAK_T=6, GMG_BUF_IV=15, GMG_BUF_T=5, GMG_BUF_M=1.2;   /* 칼날 수문장: 10초마다 출혈(5초 회복 금지) · 투구 수문장: 10초마다 약화(6초, 받는 피해 +20%) · 15초마다 다른 수문장 공격력 +20%를 5초 */   /* 방패 수문장 반격 태세: 16초마다 2.3초 (태세 중 쓴 스킬은 나에게 반사 — 보스 반격 태세와 같은 규칙) */
 const gmgTy=()=>MT.findIndex(t=>t.gmg);
 const gmgDmg=()=>RAIDB()*Math.pow(44/34,.8)*2;   /* 수문장 카스텔 기본 피해 기준 + 스테이지 피해 배율 차이 */
 const gmFront=m=>{ const dx=me.x-m.x, dy=me.y-m.y, d=hyp(dx,dy)||1; return (Math.cos(m.fa||0)*dx+Math.sin(m.fa||0)*dy)/d>.5; };   /* 방패 수문장 정면(±60°) */
@@ -3562,7 +3562,10 @@ function gmgCircle(m,x,y,r,dur,mult,stun,st,sd){ m.cs={t:0,dur,x,y,r,mult,stun:s
 function gmgTick(m,dt,pls,sf){
   if(m.buf>0)m.buf-=dt; m.dmg=m.dmgB*(m.buf>0?GMG_BUF_M:1);   /* 투구 수문장의 공격력 강화 */
   m.kx=m.ky=0; let best=null,bd=1e9; for(const p of pls){ const d=hyp(p.x-m.x,p.y-m.y); if(d<bd){ bd=d; best=p; } }
-  if(!m.eng){ if(m.hp<m.max||(best&&hyp(best.x-m.hx,best.y-m.hy)<GMG_AGGRO)){ m.eng=1; sfx('boss'); } else { m.dvx=m.dvy=0; return; } }
+  if(!m.eng){ if((m.hp<m.max&&best&&hyp(best.x-m.hx,best.y-m.hy)<GMG_LEASH)||(best&&hyp(best.x-m.hx,best.y-m.hy)<GMG_AGGRO)){ m.eng=1; sfx('boss'); } else { const hd0=hyp(m.x-m.hx,m.y-m.hy); if(hd0>24){ m.dvx=(m.hx-m.x)/hd0*m.spd*1.8*sf; m.dvy=(m.hy-m.y)/hd0*m.spd*1.8*sf; } else m.dvx=m.dvy=0; return; } }   /* 아직 싸우는 중이 아닐 때 다른 몹에 밀려 자리를 벗어나도 천천히 자리로 돌아와요 */
+  { const hd=hyp(m.x-m.hx,m.y-m.hy);   /* 성채를 지키는 게 임무: 자기 자리에서 GMG_LEASH(520)보다 멀어지면 하던 일을 멈추고 자리로 돌아가요 (돌아가는 동안은 공격 안 함 · 생명력은 그대로) */
+    if(!m.ret&&hd>GMG_LEASH){ m.ret=1; m.cs=null; m.ds=null; m.counter=0; addNum(m.x,m.y-m.r-60,'🏰 성채로 복귀','#9ad0ff',true); }
+    if(m.ret){ if(hd<24){ m.ret=0; m.eng=0; m.dvx=m.dvy=0; return; } m.dvx=(m.hx-m.x)/hd*m.spd*1.8*sf; m.dvy=(m.hy-m.y)/hd*m.spd*1.8*sf; m.fa=Math.atan2(m.hy-m.y,m.hx-m.x); return; } }
   m.c1-=dt; m.c2-=dt; m.ba-=dt; m.c3-=dt;
   if(m.gmg==='helm'&&!m.dead){ m.c4-=dt; if(m.c4<=0){ m.c4=GMG_BUF_IV; let n=0; for(const g of G.mobs){ if(g.gmg&&g!==m&&!g.dead){ g.buf=GMG_BUF_T; n++; addNum(g.x,g.y-g.r-70,'🔺 공격력 +20%','#ff8a5a',true); efx.push({k:'ring',x:g.x,y:g.y,r0:10,r1:70,t:0,life:.5,col:'#ff8a5a',w:6}); } } if(n){ addNum(m.x,m.y-m.r-70,'📯 강화!','#ffb070',true); efx.push({k:'ring',x:m.x,y:m.y,r0:10,r1:90,t:0,life:.5,col:'#ffb070',w:6}); sfx('boss'); } } }
   if(m.counter>0){ m.counter-=dt; if(best)m.fa=Math.atan2(best.y-m.y,best.x-m.x); m.dvx=m.dvy=0; if(m.counter<=0){ m.counter=0; m.ba=Math.max(m.ba,.8); } return; }   /* 반격 태세 중에는 제자리에서 버텨요 */
