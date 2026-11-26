@@ -1580,7 +1580,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0979</div>
+    <div class="ver" id="verT">v0.7.2.0980</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -2352,7 +2352,7 @@ const csKey=(part,cls)=>part==='shield'?'csoff_'+(cls||(me&&me.cls)||'war'):part
 const awKey=(part,cls)=>part==='shield'?'awoff_'+(cls||(me&&me.cls)||'war'):AW_PART[part];
 /* ===== 도감: 스페셜 20종 · 세트 15종 — 캐릭터마다 따로, 그 캐릭터가 직접 얻은 것만(0부터 시작) · 개편 전 유니크는 제외 ===== */
 const DEX_SP=[['무기','⚔️',['butcher','bloodoath','judge','necro','frost','storm','tome','fallen','dwarf','hwang']],['방어구','🛡️',['shadow','dragon','martyr','skullcrown','frostlord','pulse','dream','inquis']],['액세서리','📿',['rage','eye','rfrost','rblood','rvoid','aignis','asekr','adeath','abyss','opal']]];
-const DEX_ST=[['행운의 도박꾼 세트','🎲',['cas_wpn','cas_armor','cas_amu']],['그림자 세트','🌑',['hdag','hhelm','harmor','hamu','hring','@hoff_']],['각성 세트','⭐',['aw_wpn','aw_helm','aw_armor','aw_amu','aw_ring','@awoff_']],['수문장 세트','🏰',['cs_mace','cs_sword','cs_helm','cs_armor','cs_amu','cs_ring','@csoff_']]];   /* '@…' = 내 직업의 보조 장비 (반지는 두 칸이어도 한 종류로 셈) */
+const DEX_ST=[['행운의 도박꾼 세트','🎲',['cas_wpn','cas_armor','cas_amu']],['그림자 세트','🌑',['hdag','hhelm','harmor','hamu','hring','@hoff_']],['각성 세트','⭐',['aw_wpn','aw_helm','aw_armor','aw_amu','aw_ring','@awoff_']],['수문장 세트','🏰',['cs_mace','cs_sword','cs_helm','cs_armor','cs_amu','cs_ring','@csoff_']]].concat(GM_ON?[['거인왕 세트','👑',['#gmw','gm_helm','gm_armor','gm_amu','gm_ring','@gmoff_']]]:[]);   /* 거인왕 세트: 관리자(연구실) 기기에서만 보여요 · '#gmw' = 내 직업의 무기(전사·드루이드=도끼, 나머지=지팡이) */   /* '@…' = 내 직업의 보조 장비 (반지는 두 칸이어도 한 종류로 셈) */
 const DEX_TITLE='포스타 수집가';
 /* 칭호: 캐릭터마다 하나를 장착(tt) · 얻은 칭호를 시작화면 카드의 칭호 칩 → 바텀시트에서 고름 · tts=이미 확인한(NEW가 꺼진) 칭호들 */
 /* 칭호 달성 기록은 캐릭터마다 따로 저장해요: tf={칭호id:1} · tpt={이 캐릭터가 지금까지 가졌던 펫 종류(펫 종류별 칭호를 만들 때 쓰려고 미리 기록)}. 상태만 봐도 아는 것(스테이지 클리어 횟수·연속 실패 아이템·펫·+10 장비)은 캐릭터를 불러올 때 바로 인정해요 */
@@ -2423,9 +2423,9 @@ function ttfAuto(p,quiet){ p=p||me; if(!p||!p.cls)return; ttAutoT=Date.now();
 const ttfAutoT=()=>{ if(Date.now()-ttAutoT>1500)ttfAuto(me); };
 const ttOwn=p=>TITLES.filter(t=>t.own(p)), ttCur=p=>{ const t=p&&p.tt&&TT_BY[p.tt]; return t&&t.own(p)?t:null; };
 const ttNew=p=>!lsGet('dkdef2.tti')||ttOwn(p).some(t=>!(p.tts&&p.tts.includes(t.id)));   /* NEW: 칭호 칩을 한 번도 안 열었을 때 + 새 칭호를 얻은 뒤 아직 확인 안 했을 때 */
-const dexKeysOf=(keys,p)=>keys.map(k=>k[0]==='@'?k.slice(1)+p.cls:k);
+const dexKeysOf=(keys,p)=>keys.map(k=>k[0]==='@'?k.slice(1)+p.cls:k==='#gmw'?(p.cls==='war'||p.cls==='druid'?'gm_axe':'gm_staff'):k);
 let DEXOK=null;
-function dexOk(k){ if(!DEXOK){ DEXOK=new Set(); DEX_SP.forEach(g=>g[2].forEach(x=>DEXOK.add(x))); DEX_ST.forEach(g=>g[2].forEach(x=>{ if(x[0]==='@')Object.keys(CLASSES).forEach(c=>DEXOK.add(x.slice(1)+c)); else DEXOK.add(x); })); } return DEXOK.has(k); }
+function dexOk(k){ if(!DEXOK){ DEXOK=new Set(); DEX_SP.forEach(g=>g[2].forEach(x=>DEXOK.add(x))); DEX_ST.forEach(g=>g[2].forEach(x=>{ if(x[0]==='@')Object.keys(CLASSES).forEach(c=>DEXOK.add(x.slice(1)+c)); else if(x[0]!=='#')DEXOK.add(x); })); DEXOK.add('gm_axe'); DEXOK.add('gm_staff'); Object.keys(CLASSES).forEach(c=>DEXOK.add('gmoff_'+c)); ['gm_helm','gm_armor','gm_amu','gm_ring'].forEach(x=>DEXOK.add(x)); } return DEXOK.has(k); }
 const dexN=(p,keys)=>dexKeysOf(keys,p).filter(k=>(p.dx&&p.dx[k]|0)>0).length;
 const DEX_SP_TOT=DEX_SP.reduce((n,g)=>n+g[2].length,0);   /* 스페셜 아이템 도감 전체 칸 수(28) · 「포스타 수집가」는 이 중 아무거나 20종 */
 const dexSpN=p=>dexN(p,DEX_SP.flatMap(g=>g[2])), dexStN=p=>dexN(p,DEX_ST.flatMap(g=>g[2]));
@@ -3729,7 +3729,7 @@ const angD=(a,b)=>{ let d=a-b; while(d>Math.PI)d-=6.283; while(d<-Math.PI)d+=6.2
    ① 아레나를 세로로 가르는 좁은 직선 예고(가로 위치 무작위) → 1.7초 뒤 직선 위 전원 즉사 → ② 직선이 사라지며 직선을 뺀 아레나 전체 예고 → 1.7초 뒤 즉사(직선 자리가 안전지대).
    기절 등에 끊기지 않음. 대상은 플레이어(우리 편 정예·소환수는 제외). */
 const GM_DROP_P=.04;
-const GMU_R=430, GMU_W=84, GMU_T=1.7, GMU_CD=30;
+const GMU_R=430, GMU_W=84, GMU_T=1.7, GMU_CD=25;
 function gmbUltStart(m){ const lx=GM_ARENA.x+rand(-260,260); m.fa=Math.PI/2; m.cs={k:'ult',t:0,dur:GMU_T,stage:1,lx};
   const o={sh:'ustrip',x:lx,y:GM_ARENA.y,lw:GMU_W,r:GMU_R,dur:GMU_T}; m.cs.tel=o; gmbTel(m,o); sfx('boss'); G.shake=Math.max(G.shake,.6);
   announce('⚡ 왕의 심판! 붉은 직선 위는 즉사 — 직선 밖으로!','#ff5a4a'); gmUltCut(); }
@@ -3764,7 +3764,7 @@ function drawGmCliff(){ if(camY>GM_CLIFF+40)return; ctx.save(); const g=ctx.crea
   ctx.strokeStyle='#5a6075'; ctx.lineWidth=5; ctx.stroke(GM_CLIFF_P); ctx.strokeStyle='rgba(120,170,255,.28)'; ctx.lineWidth=2; ctx.save(); ctx.translate(0,-4); ctx.stroke(GM_CLIFF_P); ctx.restore(); ctx.restore(); }
 function gmArenaClamp(o){ if(o.y<GM_CLIFF+20)o.y=GM_CLIFF+20; const dx=o.x-GM_ARENA.x, dy=o.y-GM_ARENA.y, d=hyp(dx,dy), R=430; if(d>R){ o.x=GM_ARENA.x+dx/d*R; o.y=GM_ARENA.y+dy/d*R; } }
 function gmbSpawn(){ const pn=1+(G.gmPen||0), m=spawnMob(gmbTy(),GM_ARENA.x,GM_ARENA.y-100,false);
-  m.gmb=1; m.boss=true; m.gmt=1; m.hp=m.max=GMB_HP*pn; m.dmg0=RAIDB()*GMB_RDM*pn; m.dmg=m.dmg0; m.spd=0; m.r=80; m.xp=Math.round(m.xp); m.fa=Math.PI/2; m.ph=1; m.cs=null; m.gap=2.5; m.cdk={slam:3,sweep:6,wave:5,bash:7,flame:9,tomb:11,roar:16,summon:10,ult:30}; m.stn=0; m.bt=99;
+  m.gmb=1; m.boss=true; m.gmt=1; m.hp=m.max=GMB_HP*pn; m.dmg0=RAIDB()*GMB_RDM*pn; m.dmg=m.dmg0; m.spd=0; m.r=80; m.xp=Math.round(m.xp); m.fa=Math.PI/2; m.ph=1; m.cs=null; m.gap=2.5; m.cdk={slam:3,sweep:6,wave:5,bash:7,flame:9,tomb:11,roar:16,summon:10,ult:25}; m.stn=0; m.bt=99;
   G.gmB=m; G.gmTel=[]; G.gmTomb=[]; for(const k of ['boss_7','boss_7_atk','boss_7_hurt','boss_7_ult','boss_7_sw1','boss_7_sw2','boss_7_sw3','relics_s7','skill_tomb','skill_tomb_fall','skill_wave','skill_wave_crack'])sprGet(k);
   sfx('boss'); G.shake=Math.max(G.shake,.8); me.god=Math.max(me.god||0,2); }
 /* ===== 묘비 (거인왕 기술) — 하늘에서 떨어져 땅에 박힌 뒤 5초간 서 있음 =====
