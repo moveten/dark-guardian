@@ -1580,7 +1580,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0972</div>
+    <div class="ver" id="verT">v0.7.2.0973</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3830,8 +3830,8 @@ function drawGmTel(){ for(let i=G.gmTel.length-1;i>=0;i--){ const o=G.gmTel[i], 
     else if(o.sh==='fan'){ ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0,0,o.r,o.a-o.w,o.a+o.w); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.fillStyle='rgba(255,70,50,.28)'; ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0,0,o.r*p,o.a-o.w,o.a+o.w); ctx.closePath(); ctx.fill(); }
     else { ctx.rotate(o.a); ctx.fillRect(0,-o.lw/2,o.r,o.lw); ctx.strokeRect(0,-o.lw/2,o.r,o.lw); ctx.fillStyle='rgba(255,70,50,.28)'; ctx.fillRect(0,-o.lw/2,o.r*p,o.lw); }
     ctx.restore(); } }
-const GMB_SW=.6;   /* 칼날 기술(내려찍기·휩쓸기·파동) 직후 휘두름 3컷: 휘두르는 중 → 내려친 순간 → 복귀 (그림만 바뀜) */
-function drawGmb(m,t){ const x=m.x, y=m.y, base=GM_ARENA.y-20, atk=m.cs||m.atk>0, hurt=m.flash>0&&!atk, ult=m.cs&&m.cs.k==='ult', swt=m.sw&&!m.cs?m.sw.t:-1, im=sprGet(ult?'boss_7_ult':swt>=0?(swt<.14?'boss_7_sw1':swt<.34?'boss_7_sw2':'boss_7_sw3'):hurt?'boss_7_hurt':atk?'boss_7_atk':'boss_7')||sprGet('boss_7'); const W=ult?300:360;
+const GMB_SW=.36;   /* 칼날 기술(내려찍기·휩쓸기·파동) 직후 휘두름 3컷: 휘두르는 중 → 내려친 순간 → 복귀 (그림만 바뀜) */
+function drawGmb(m,t){ const x=m.x, y=m.y, base=GM_ARENA.y-20, atk=m.cs||m.atk>0, hurt=m.flash>0&&!atk, ult=m.cs&&m.cs.k==='ult', swt=m.sw&&!m.cs?m.sw.t:-1, im=sprGet(ult?'boss_7_ult':swt>=0?(swt<.06?'boss_7_sw1':swt<.18?'boss_7_sw2':'boss_7_sw3'):hurt?'boss_7_hurt':atk?'boss_7_atk':'boss_7')||sprGet('boss_7'); const W=ult?300:(swt>=.06&&swt<.18?376:360);   /* 내려치는 순간 4% 커졌다 돌아와 타격감을 줘요 */
   ctx.fillStyle='rgba(0,0,0,.4)'; ctx.beginPath(); ctx.ellipse(x,base,W*.42,34,0,0,6.283); ctx.fill();
   if(im){ const H=W*im.height/im.width; ctx.save(); ctx.beginPath(); ctx.rect(x-W,0,W*2,base+4); ctx.clip(); ctx.drawImage(im,x-W/2,base-H+4,W,H); ctx.restore(); } else { circle(x,y,70,'#9aa'); }
 }
