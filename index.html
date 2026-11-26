@@ -1579,7 +1579,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0967</div>
+    <div class="ver" id="verT">v0.7.2.0968</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3734,8 +3734,24 @@ function gmUltCut(){ const host=($('#casAl')||{}).parentNode; if(!host)return; l
   if(!uc){ uc=document.createElement('div'); uc.id='gmUc'; uc.setAttribute('aria-hidden','true'); uc.innerHTML='<div class="bd"></div><div class="tx0">一擊必殺</div><div class="tx">一擊必殺</div>'; host.appendChild(uc); }
   for(const el of [vg,uc]){ el.classList.remove('on'); void el.offsetWidth; el.classList.add('on'); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('on'),2800); } }
 function gmbUltKill(pls,test){ for(const p of pls){ if(p.i<1||p.i>=10||p.mn)continue; if(!test(p))continue; mobHitPlayer(p.i,1e15); } }
+/* 일격필살 시공간 균열: 첫 번째 좁은 직선(lx)에 흰 선이 위→아래로 그어지고, 선을 기준으로 화면(게임 화면만, 조작 UI는 그대로)이 두 쪽으로 어긋났다 돌아와요. 약 0.55초, 이미지 없음 */
+const RIFT_LIFE=.55, RIFT_TILT=14*Math.PI/180, RIFT_SH=40; let _riftCv=null;
+function gmRiftPost(){ const R=G.rift; if(!R)return; const p=(performance.now()-R.t0)/1000/RIFT_LIFE; if(p>=1||p<0){ G.rift=null; return; }
+  if(!_riftCv)_riftCv=document.createElement('canvas'); if(_riftCv.width!==cv.width||_riftCv.height!==cv.height){ _riftCv.width=cv.width; _riftCv.height=cv.height; }
+  const rg=_riftCv.getContext('2d'); rg.setTransform(1,0,0,1,0,0); rg.drawImage(cv,0,0);   /* 지금까지 그린 게임 화면을 한 장 복사 */
+  const sx=(R.x-camX)*ZOOM, sy=(GM_ARENA.y-camY)*ZOOM, dx=Math.sin(RIFT_TILT), dy=-Math.cos(RIFT_TILT), nx=-dy, ny=dx, L=Math.max(VW,VH)*1.6;
+  const q=Math.min(1,p/.1), env=p<.1?0:p<.4?Math.min(1,(p-.1)/.06):1-Math.pow((p-.4)/.6,.6), sh=RIFT_SH*env;
+  const ax=sx-dx*L, ay=sy-dy*L, bx=sx+dx*L, by=sy+dy*L;
+  ctx.save(); ctx.setTransform(DPR,0,0,DPR,0,0); ctx.fillStyle='#04060e'; ctx.fillRect(0,0,VW,VH);
+  for(const sg of [1,-1]){ ctx.save(); ctx.beginPath(); ctx.moveTo(ax,ay); ctx.lineTo(bx,by); ctx.lineTo(bx+sg*nx*L,by+sg*ny*L); ctx.lineTo(ax+sg*nx*L,ay+sg*ny*L); ctx.closePath(); ctx.clip(); ctx.translate(-dx*sh*sg,-dy*sh*sg); ctx.drawImage(_riftCv,0,0,VW,VH); ctx.restore(); }
+  const ex=ax+(bx-ax)*q, ey=ay+(by-ay)*q, fade=p<.55?1:1-(p-.55)/.45;   /* 선은 위에서 아래로 그어져요 */
+  ctx.lineCap='butt'; ctx.globalAlpha=fade;
+  if(env>0){ ctx.strokeStyle='#04060e'; ctx.lineWidth=16*env; ctx.beginPath(); ctx.moveTo(ax,ay); ctx.lineTo(bx,by); ctx.stroke(); }
+  for(const [w,c,a] of [[34,'rgba(120,200,255,1)',.12],[18,'rgba(160,225,255,1)',.22],[9,'rgba(210,245,255,1)',.5],[4,'rgba(255,255,255,1)',1]]){ ctx.globalAlpha=fade*a; ctx.strokeStyle=c; ctx.lineWidth=w; ctx.beginPath(); ctx.moveTo(ax,ay); ctx.lineTo(ex,ey); ctx.stroke(); }
+  if(p<.22){ ctx.globalAlpha=.4*(1-p/.22); ctx.fillStyle='#fff'; ctx.fillRect(0,0,VW,VH); }   /* 베는 순간 한 번 번쩍 */
+  ctx.restore(); }
 function gmbUlt(m,c,pls){ const lx=c.lx, hw=GMU_W/2;
-  if(c.stage===1){ gmbUltKill(pls,p=>Math.abs(p.x-lx)<hw&&hyp(p.x-GM_ARENA.x,p.y-GM_ARENA.y)<GMU_R+40); G.gmTel=G.gmTel.filter(q=>q!==c.tel); slamFx(lx,GM_ARENA.y,120,'#ff6a5a'); for(let i=-3;i<=3;i++)burst(lx,GM_ARENA.y+i*120,'#ff8a7a',10,260); G.shake=Math.max(G.shake,.9); sfx('slam');
+  if(c.stage===1){ gmbUltKill(pls,p=>Math.abs(p.x-lx)<hw&&hyp(p.x-GM_ARENA.x,p.y-GM_ARENA.y)<GMU_R+40); G.gmTel=G.gmTel.filter(q=>q!==c.tel); slamFx(lx,GM_ARENA.y,120,'#ff6a5a'); for(let i=-3;i<=3;i++)burst(lx,GM_ARENA.y+i*120,'#ff8a7a',10,260); G.rift={t0:performance.now(),x:lx}; G.shake=Math.max(G.shake,.9); sfx('slam');
     c.stage=2; c.t=0; const o={sh:'urest',x:lx,y:GM_ARENA.y,lw:GMU_W,r:GMU_R,dur:GMU_T}; c.tel=o; gmbTel(m,o); announce('⚠ 이제 직선이 있던 자리로 들어가세요!','#ffd860'); }
   else { gmbUltKill(pls,p=>Math.abs(p.x-lx)>=hw); G.gmTel=G.gmTel.filter(q=>q!==c.tel); efx.push({k:'ring',x:GM_ARENA.x,y:GM_ARENA.y,r0:60,r1:GMU_R,t:0,life:.7,col:'#ff6a5a',w:20}); G.shake=Math.max(G.shake,1); sfx('boss'); m.cs=null; m.cdk.ult=GMU_CD; m.gap=1.6; m.atk=.4; } }
 const GM_CLIFF=GM_ARENA.y-20;   /* 고르무스 뒤쪽 절벽: 이 선(y) 위로는 못 가요 */
@@ -3893,7 +3909,7 @@ function castleTick(dt){ const c=G.castle; if(!c)return; c.fl=Math.max(0,c.fl-dt
 function castlePush(o){ if(!G.castle)return; const cx=VX, cy=VY+CAS_Y+4, rx=58, ry=26, dx=(o.x-cx)/rx, dy=(o.y-cy)/ry, q=dx*dx+dy*dy; if(q>=1)return; if(q<1e-6){ o.y=cy+ry; return; } const k=1/Math.sqrt(q); o.x=cx+dx*k*rx; o.y=cy+dy*k*ry; }
 function startStage(){
   AUD.voicePre(me.cls); setTimeout(()=>{ if(G.inGame&&!me.dead)voice('start'); },1500);
-  dmgReset(); G.firstClr=false; G.potN=0; G.stageIdx=selStage; G.stg=STAGES[selStage]; G.TW=G.stg.waves.length; worldSet(G.stg); G.gmArena=0; G.gmTel=[]; G.gmB=null; G.gmCut=null; G.gmc=null; G.gal=[]; G.galDone=0; G.gmTomb=[]; G.gmDoor=null; G.gmStones=null; G.gmCnTip=0; try{ gmCutUi(false); }catch(e){} if(G.stg.gm){ me.x=VX+rand(-30,30); me.y=VY+VR+30; } preBoss(); setTheme(selStage); castleInit(); if(G.castle)later(3.2,()=>{ if(G.inGame&&G.castle&&G.phase!=='lose')toast('🏰 중앙의 성을 지켜요 · 체력이 0이 되면 패배 · 성 둘레에서는 생명력·마나가 회복돼요','#e0c080'); }); G.gts=[]; later(.5,()=>{ if(G.inGame)banner(`${G.stg.id} ${G.stg.n}`,G.stg.tag||''); });
+  dmgReset(); G.firstClr=false; G.potN=0; G.stageIdx=selStage; G.stg=STAGES[selStage]; G.TW=G.stg.waves.length; worldSet(G.stg); G.gmArena=0; G.gmTel=[]; G.gmB=null; G.gmCut=null; G.gmc=null; G.gal=[]; G.galDone=0; G.gmTomb=[]; G.rift=null; G.gmDoor=null; G.gmStones=null; G.gmCnTip=0; try{ gmCutUi(false); }catch(e){} if(G.stg.gm){ me.x=VX+rand(-30,30); me.y=VY+VR+30; } preBoss(); setTheme(selStage); castleInit(); if(G.castle)later(3.2,()=>{ if(G.inGame&&G.castle&&G.phase!=='lose')toast('🏰 중앙의 성을 지켜요 · 체력이 0이 되면 패배 · 성 둘레에서는 생명력·마나가 회복돼요','#e0c080'); }); G.gts=[]; later(.5,()=>{ if(G.inGame)banner(`${G.stg.id} ${G.stg.n}`,G.stg.tag||''); });
   gobInit(); G.allMode=false; G.allQ=[]; G.fires=[]; G.freeRev=me.hc?0:1; G.hcWhy=''; me.rvGiven=0; me.seenRg=0; me.out=false; me.rvT=0;
   G.gemDone=false; G.wave=0;G.skipUsed=false;G.phase='prep';G.timer=2;G.mobs.length=0;G.ev=[];G.spawnQ=0;G.lastSq=-1;G.endShown=false;G.coop=!!guestPeer;
   G.waveSides=[0,1,3]; G.nextSides=sidesFor(1); G.laneShow=G.stg.gm?[]:G.nextSides;
@@ -9969,7 +9985,7 @@ function render(t){
   for(const p of parts){ if(!p.glow)continue; const a=1-p.t/p.life; ctx.globalAlpha=a; ctx.fillStyle=p.col; ctx.beginPath(); ctx.arc(p.x,p.y,p.r*(.6+a*.6),0,6.283); ctx.fill(); ctx.globalAlpha=a*.25; ctx.beginPath(); ctx.arc(p.x,p.y,p.r*2.6,0,6.283); ctx.fill(); }
   ctx.globalAlpha=1; ctx.globalCompositeOperation='source-over';
   // screen space
-  ctx.setTransform(DPR,0,0,DPR,0,0);
+  ctx.setTransform(DPR,0,0,DPR,0,0); if(G.rift)gmRiftPost();   /* 일격필살 균열은 게임 화면에만 — 아래 조작 UI는 어긋나지 않아요 */
   const px=(me.x-camX)*ZOOM, py=(me.y-camY)*ZOOM;
   if(G.mine){ const ly=py-20, vg=ctx.createRadialGradient(px,ly,0,px,ly,300);   /* 광산: 캐릭터를 따라다니는 은은한 등불빛 + 바깥은 어둡게 */
     vg.addColorStop(0,'rgba(255,190,110,.07)'); vg.addColorStop(.4,'rgba(0,0,0,0)'); vg.addColorStop(.78,'rgba(0,0,0,.25)'); vg.addColorStop(1,'rgba(0,0,0,.45)'); ctx.fillStyle=vg; ctx.fillRect(0,0,VW,VH); }
