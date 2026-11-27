@@ -1585,7 +1585,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.8.0.0991</div>
+    <div class="ver" id="verT">v0.8.0.0992</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3729,6 +3729,7 @@ function drawGmCut(t){ const c=G.gmCut; if(!c)return; const ct=c.t, ez=u=>{ u=Ma
    (부위 파괴 없음) */
 const GMB_HP=4e8, GMB_RDM=5.55, GMB_PM=[1,1.3,1.6], GMB_CF=[1,5/6,2/3];
 const GMB_SK={slam:{cd:8,tel:1.8,mult:3.2,part:'sword'},sweep:{cd:10,tel:1.8,mult:3.0,part:'sword',minPh:2},wave:{cd:12,tel:1.5,mult:3.0,part:'sword',bleed:3},bash:{cd:14,tel:1.7,mult:3.0,part:'shield'},flame:{cd:16,tel:1.7,mult:0,part:'helm',minPh:2,fix:.33,blk:7},tomb:{cd:19,tel:1.8,mult:0,part:'shield'},roar:{cd:22,tel:1.8,mult:.1,part:'helm',fear:3},summon:{cd:40,tel:1.2,mult:0,part:null,minPh:2}};
+const GMF_N=5, GMF_IV=.5, GMF_FUSE=1.2, GMF_R=62;   /* 불꽃: 내 발밑에 원 5개가 0.5초마다 생기고, 각 원은 생기고 1.2초 뒤 번호 순서대로 터져요 */
 const gmbTy=()=>MT.findIndex(t=>t.gmb);
 const angD=(a,b)=>{ let d=a-b; while(d>Math.PI)d-=6.283; while(d<-Math.PI)d+=6.283; return Math.abs(d); };
 /* ===== 일격필살 「왕의 심판」 (2페이즈부터 · 대기 30초 · 횟수 제한 없음) =====
@@ -3774,7 +3775,7 @@ function drawGmCliff(){ if(camY>GM_CLIFF+40)return; ctx.save(); const g=ctx.crea
 function gmArenaClamp(o){ if(o.y<GM_CLIFF+20)o.y=GM_CLIFF+20; const dx=o.x-GM_ARENA.x, dy=o.y-GM_ARENA.y, d=hyp(dx,dy), R=430; if(d>R){ o.x=GM_ARENA.x+dx/d*R; o.y=GM_ARENA.y+dy/d*R; } }
 function gmbSpawn(){ const pn=1+(G.gmPen||0), m=spawnMob(gmbTy(),GM_ARENA.x,GM_ARENA.y-100,false);
   m.gmb=1; m.boss=true; m.gmt=1; m.hp=m.max=GMB_HP*pn; m.dmg0=RAIDB()*GMB_RDM*pn; m.dmg=m.dmg0; m.spd=0; m.r=80; m.xp=Math.round(m.xp); m.fa=Math.PI/2; m.ph=1; m.cs=null; m.gap=2.5; m.cdk={slam:3,sweep:6,wave:5,bash:7,flame:9,tomb:11,roar:16,summon:10,ult:25}; m.stn=0; m.bt=99;
-  G.gmB=m; G.gmTel=[]; G.gmTomb=[]; for(const k of ['boss_7','boss_7_atk','boss_7_hurt','boss_7_ult','boss_7_sw1','boss_7_sw2','boss_7_sw3','relics_s7','skill_tomb','skill_tomb_fall','skill_wave','skill_wave_crack'])sprGet(k);
+  G.gmB=m; G.gmTel=[]; G.gmTomb=[]; G.gmFl=[]; for(const k of ['boss_7','boss_7_atk','boss_7_hurt','boss_7_ult','boss_7_sw1','boss_7_sw2','boss_7_sw3','relics_s7','skill_tomb','skill_tomb_fall','skill_wave','skill_wave_crack','fx_gm_flame'])sprGet(k);
   sfx('boss'); G.shake=Math.max(G.shake,.8); me.god=Math.max(me.god||0,2); }
 /* ===== 묘비 (거인왕 기술) — 하늘에서 떨어져 땅에 박힌 뒤 5초간 서 있음 =====
    박힐 때 최대 체력 1% → 0.5초마다 2배씩(1·2·4·8%…) 올라가는 장판 피해 · 맞을 때마다 7초 회복 금지(물약·치유 오라만 회복) */
@@ -3814,13 +3815,21 @@ const GMS_PCT=.05, GMS_BLK=2;
 function gmbSummon(b){ const hp=b.max*.05/6; let n=0; for(let i=0;i<6;i++){ const a=i/6*6.283+rand(-.2,.2), r=rand(150,210), x=GM_ARENA.x+Math.cos(a)*r, y=Math.max(GM_CLIFF+40,GM_CLIFF+170+Math.sin(a)*r*.6); const o=spawnMob(2,x,y,false);
     o.hp=o.max=hp; o.dmg=b.dmg0*.12; o.xp=0; o.inn=true; o.tsd=1; o.spd=o.spd*1.1; burst(x,y,'#9ad0ff',8,200); n++; }
   announce('💀 무덤 병사 6마리가 깨어났어요!','#c8d8e8'); sfx('boss'); }
+function gmbFlame(m,c,best,pls){   /* 불꽃: 0.5초마다 대상의 발밑에 원이 생기고(최대 5개), 생기고 1.2초 뒤 순서대로 터짐 — 맞으면 최대 생명력 33% + 7초 회복 금지 */
+  const L=G.gmFl||(G.gmFl=[]);
+  const hu=pls.filter(p=>p.i<=2);   /* 원은 우리 편 정예·소환수가 아니라 플레이어의 발밑에만 놓여요 (협동이면 번갈아) */
+  while(c.n<GMF_N&&(hu.length||best)&&c.t>=c.n*GMF_IV){ const tg=hu.length?hu[c.n%hu.length]:best, o={sh:'circ',x:tg.x,y:tg.y,r:GMF_R,dur:GMF_FUSE,fl:1}; gmbTel(m,o); L.push(o); c.n++; }
+  for(let i=L.length-1;i>=0;i--){ const o=L[i]; if(T-o.t0<o.dur)continue; L.splice(i,1); G.gmTel=G.gmTel.filter(q=>q!==o);
+    for(const p of pls){ if(hyp(p.x-o.x,p.y-o.y)>=o.r+14)continue; if(p.i===1){ fixDmg(GMB_SK.flame.fix,'🔥','#8fd0ff'); if(!me.dead&&me.hp>0&&me.god<=0){ me.hblk=Math.max(me.hblk||0,GMB_SK.flame.blk); me.hpLk=me.hp; addNum(me.x,me.y-66,'💔 '+GMB_SK.flame.blk+'초 봉쇄 · 물약·치유 오라만 회복','#ff8ab0',true); } } else mobHitPlayer(p.i,m.dmg*3.4); }
+    efx.push({k:'gmfl',x:o.x,y:o.y,t:0,life:.75}); efx.push({k:'ring',x:o.x,y:o.y,r0:10,r1:o.r+20,t:0,life:.35,col:'#9ad0ff',w:8}); sfx('slam'); G.shake=Math.max(G.shake,.3); }
+  if(c.n>=GMF_N&&!L.length){ m.cs=null; m.gap=rand(.6,1.1); m.atk=.35; } }
 function gmbTick(m,dt,pls){ m.kx=m.ky=0; m.dvx=m.dvy=0; if(G.phase!=='boss')return; gmTombTick(m,dt); if(m.inv>0)m.inv-=dt; if(m.sw){ m.sw.t+=dt; if(m.sw.t>=GMB_SW)m.sw=null; }
   const r=m.hp/m.max, np=r>.7?1:r>.35?2:3; if(np!==m.ph){ if(m.ph<2&&np>=2)m.cdk.ult=Math.max(m.cdk.ult,10); m.ph=np; m.dmg=m.dmg0*GMB_PM[np-1]; m.inv=1.5; announce(np===2?'💢 고르무스가 격노했다! 피해 ×1.3':'⚡ 고르무스가 최후의 힘을 끌어올린다! 피해 ×1.6','#ff7a5a'); efx.push({k:'ring',x:m.x,y:m.y,r0:20,r1:300,t:0,life:.7,col:'#9ad0ff',w:14}); G.shake=Math.max(G.shake,.8); sfx('boss'); m.gap=Math.max(m.gap,1.2); if(np===3)m.cdk.ult=6; }
   if(m.stn>0){ m.stn-=dt; for(const k in m.cdk)m.cdk[k]-=0; return; }
   for(const k in m.cdk)m.cdk[k]-=dt;
   let best=null,bd=1e9; const tz=m.taunt&&m.taunt.t>0&&pls.find(q=>q.i===m.taunt.i); if(tz){ best=tz; bd=hyp(tz.x-m.x,tz.y-m.y); } else for(const p of pls){ const d=hyp(p.x-m.x,p.y-m.y); if(d<bd){ bd=d; best=p; } }
   if(best&&!m.cs){ const ta=Math.atan2(best.y-m.y,best.x-m.x), df=((ta-m.fa+Math.PI*3)%(Math.PI*2))-Math.PI, st=1.2*dt; m.fa+=Math.abs(df)<st?df:Math.sign(df)*st; }
-  if(m.cs){ const c=m.cs; c.t+=dt; if(c.k==='ult'){ if(c.t>=c.dur)gmbUlt(m,c,pls); return; } if(c.t>=c.dur){ m.cs=null; if(GMB_SK[c.k]&&GMB_SK[c.k].part==='sword')m.sw={t:0}; gmbResolve(m,c,pls); m.gap=rand(.6,1.1); m.atk=.35; } return; }
+  if(m.cs){ const c=m.cs; c.t+=dt; if(c.k==='ult'){ if(c.t>=c.dur)gmbUlt(m,c,pls); return; } if(c.k==='flame'){ gmbFlame(m,c,best,pls); return; } if(c.t>=c.dur){ m.cs=null; if(GMB_SK[c.k]&&GMB_SK[c.k].part==='sword')m.sw={t:0}; gmbResolve(m,c,pls); m.gap=rand(.6,1.1); m.atk=.35; } return; }
   if(m.gap>0){ m.gap-=dt; return; } if(!best)return;
   if(m.ph>=2&&m.cdk.ult<=0){ gmbUltStart(m); return; }
   const ready=[]; for(const k in GMB_SK){ const S=GMB_SK[k]; if(m.cdk[k]>0)continue; if(S.minPh&&m.ph<S.minPh)continue; if(k==='summon'&&G.mobs.filter(q=>q.tsd&&!q.dead).length>=3)continue;
@@ -3832,18 +3841,19 @@ function gmbTick(m,dt,pls){ m.kx=m.ky=0; m.dvx=m.dvy=0; if(G.phase!=='boss')retu
   else if(k==='roar')tel={sh:'circ',x:m.x,y:m.y,r:560,dur:S.tel};
   else if(k==='tomb'){ tel=[{sh:'circ',x:best.x,y:best.y,r:64,dur:S.tel}]; for(let i=0;i<4;i++){ const a=rand(0,6.283), d=rand(90,300); tel.push({sh:'circ',x:best.x+Math.cos(a)*d,y:best.y+Math.sin(a)*d,r:64,dur:S.tel}); } for(const o of tel){ const q=hyp(o.x-GM_ARENA.x,o.y-GM_ARENA.y); if(q>400){ o.x=GM_ARENA.x+(o.x-GM_ARENA.x)/q*400; o.y=GM_ARENA.y+(o.y-GM_ARENA.y)/q*400; } if(o.y<GM_CLIFF+o.r+8)o.y=GM_CLIFF+o.r+8; } }   /* 묘비 예고 원이 절벽 쪽에 생기지 않게 */
   else if(k==='summon'){ tel=[]; for(let i=0;i<6;i++){ const a=i/6*6.283; tel.push({sh:'circ',x:GM_ARENA.x+Math.cos(a)*180,y:GM_CLIFF+170+Math.sin(a)*110,r:38,dur:S.tel}); } }
+  else if(k==='flame')tel=[];   /* 불꽃은 gmbFlame이 원을 차례로 만들어요 */
   else tel={sh:'circ',x:best.x,y:best.y,r:62,dur:S.tel};
   { const N=GMB_NM[k]; if(k==='tomb')gmTombCut(); else if(N)casBan(N[0],N[1],1.6); }   /* 기술 이름 표시 (카스텔 철퇴 회전처럼) */
-  m.cs={k,t:0,dur:S.tel,mult:S.mult,stun:k==='bash'?2:0,fear:S.fear||0,bleed:S.bleed||0,tel}; for(const o of (Array.isArray(tel)?tel:[tel]))gmbTel(m,o); }
+  m.cs={k,t:0,dur:S.tel,mult:S.mult,stun:k==='bash'?2:0,fear:S.fear||0,bleed:S.bleed||0,tel}; for(const o of (Array.isArray(tel)?tel:[tel]))gmbTel(m,o); if(k==='flame'){ m.cs.dur=99; m.cs.n=0; G.gmFl=[]; } }
 function drawGmTel(){ for(let i=G.gmTel.length-1;i>=0;i--){ const o=G.gmTel[i], p=Math.min(1,(T-o.t0)/o.dur); if(p<0){ continue; }
     ctx.save(); ctx.translate(o.x,o.y); ctx.fillStyle='rgba(255,60,50,.15)'; ctx.strokeStyle='rgba(255,90,70,.55)'; ctx.lineWidth=2;
-    if(o.sh==='circ'){ ctx.beginPath(); ctx.arc(0,0,o.r,0,6.283); ctx.fill(); ctx.stroke(); ctx.fillStyle='rgba(255,70,50,.28)'; ctx.beginPath(); ctx.arc(0,0,o.r*p,0,6.283); ctx.fill(); }
+    if(o.sh==='circ'){ ctx.beginPath(); ctx.arc(0,0,o.r,0,6.283); ctx.fill(); ctx.stroke(); ctx.fillStyle='rgba(255,70,50,.28)'; ctx.beginPath(); ctx.arc(0,0,o.r*p,0,6.283); ctx.fill(); if(o.fl){ const rem=o.dur-(T-o.t0); if(rem>0&&rem<.45&&Math.sin(T*50)>0){ ctx.strokeStyle='rgba(255,208,90,.95)'; ctx.lineWidth=5; ctx.beginPath(); ctx.arc(0,0,o.r,0,6.283); ctx.stroke(); } } }   /* 불꽃: 터지기 직전(0.45초) 원만 금색 테두리가 깜빡여요 */
     else if(o.sh==='ustrip'){ ctx.fillStyle='rgba(255,40,40,.2)'; ctx.strokeStyle='rgba(255,70,60,.9)'; ctx.lineWidth=3; ctx.fillRect(-o.lw/2,-GMU_R,o.lw,GMU_R*2); ctx.strokeRect(-o.lw/2,-GMU_R,o.lw,GMU_R*2); ctx.fillStyle='rgba(255,40,40,'+(.15+.4*p).toFixed(2)+')'; ctx.fillRect(-o.lw/2,-GMU_R,o.lw,GMU_R*2); }
     else if(o.sh==='urest'){ ctx.fillStyle='rgba(255,40,40,'+(.12+.38*p).toFixed(2)+')'; ctx.strokeStyle='rgba(255,70,60,.9)'; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(GM_ARENA.x-o.x,0,GMU_R,0,6.283); ctx.rect(-o.lw/2,-GMU_R,o.lw,GMU_R*2); ctx.fill('evenodd'); ctx.stroke(); }
     else if(o.sh==='fan'){ ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0,0,o.r,o.a-o.w,o.a+o.w); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.fillStyle='rgba(255,70,50,.28)'; ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0,0,o.r*p,o.a-o.w,o.a+o.w); ctx.closePath(); ctx.fill(); }
     else { ctx.rotate(o.a); ctx.fillRect(0,-o.lw/2,o.r,o.lw); ctx.strokeRect(0,-o.lw/2,o.r,o.lw); ctx.fillStyle='rgba(255,70,50,.28)'; ctx.fillRect(0,-o.lw/2,o.r*p,o.lw); }
     ctx.restore(); } }
-const GMB_NM={slam:['⚔️ 내려찍기','붉은 부채꼴 밖으로 피하세요'],sweep:['🌀 휩쓸기','붉은 원 밖으로 벗어나세요'],wave:['🌊 검기 파동','붉은 직선 밖으로 피하세요 · 출혈'],bash:['🛡️ 방패 후려치기','맞으면 2초 기절'],flame:['🔥 불꽃','맞으면 최대 생명력 33% · 7초 회복 금지'],roar:['📢 왕의 포효','범위 안에 있으면 공포'],summon:['💀 소환','소환된 적을 처리하세요']};
+const GMB_NM={slam:['⚔️ 내려찍기','붉은 부채꼴 밖으로 피하세요'],sweep:['🌀 휩쓸기','붉은 원 밖으로 벗어나세요'],wave:['🌊 검기 파동','붉은 직선 밖으로 피하세요 · 출혈'],bash:['🛡️ 방패 후려치기','맞으면 2초 기절'],flame:['🔥 불꽃','발밑 원이 차례로 터져요 · 맞으면 최대 생명력 33%'],roar:['📢 왕의 포효','범위 안에 있으면 공포'],summon:['💀 소환','소환된 적을 처리하세요']};
 const GMB_SW=.36;   /* 칼날 기술(내려찍기·휩쓸기·파동) 직후 휘두름 3컷: 휘두르는 중 → 내려친 순간 → 복귀 (그림만 바뀜) */
 function drawGmb(m,t){ const x=m.x, y=m.y, base=GM_ARENA.y-20, atk=m.cs||m.atk>0, hurt=m.flash>0&&!atk, ult=m.cs&&m.cs.k==='ult', swt=m.sw&&!m.cs?m.sw.t:-1, im=sprGet(ult?'boss_7_ult':swt>=0?(swt<.06?'boss_7_sw1':swt<.18?'boss_7_sw2':'boss_7_sw3'):hurt?'boss_7_hurt':atk?'boss_7_atk':'boss_7')||sprGet('boss_7'); const W=ult?300:(swt>=.06&&swt<.18?376:360);   /* 내려치는 순간 4% 커졌다 돌아와 타격감을 줘요 */
   ctx.fillStyle='rgba(0,0,0,.4)'; ctx.beginPath(); ctx.ellipse(x,base,W*.42,34,0,0,6.283); ctx.fill();
@@ -3925,7 +3935,7 @@ function castleTick(dt){ const c=G.castle; if(!c)return; c.fl=Math.max(0,c.fl-dt
 function castlePush(o){ if(!G.castle)return; const cx=VX, cy=VY+CAS_Y+4, rx=58, ry=26, dx=(o.x-cx)/rx, dy=(o.y-cy)/ry, q=dx*dx+dy*dy; if(q>=1)return; if(q<1e-6){ o.y=cy+ry; return; } const k=1/Math.sqrt(q); o.x=cx+dx*k*rx; o.y=cy+dy*k*ry; }
 function startStage(){
   AUD.voicePre(me.cls); setTimeout(()=>{ if(G.inGame&&!me.dead)voice('start'); },1500);
-  dmgReset(); G.firstClr=false; G.potN=0; G.stageIdx=selStage; G.stg=STAGES[selStage]; G.TW=G.stg.waves.length; worldSet(G.stg); G.gmArena=0; G.gmTel=[]; G.gmB=null; G.gmCut=null; G.gmc=null; G.gal=[]; G.galDone=0; G.gmTomb=[]; G.rift=null; G.gmDoor=null; G.gmStones=null; G.gmCnTip=0; try{ gmCutUi(false); }catch(e){} if(G.stg.gm){ me.x=VX+rand(-30,30); me.y=VY+VR+30; } preBoss(); setTheme(selStage); castleInit(); if(G.castle)later(3.2,()=>{ if(G.inGame&&G.castle&&G.phase!=='lose')toast('🏰 중앙의 성을 지켜요 · 체력이 0이 되면 패배 · 성 둘레에서는 생명력·마나가 회복돼요','#e0c080'); }); G.gts=[]; later(.5,()=>{ if(G.inGame)banner(`${G.stg.id} ${G.stg.n}`,G.stg.tag||''); });
+  dmgReset(); G.firstClr=false; G.potN=0; G.stageIdx=selStage; G.stg=STAGES[selStage]; G.TW=G.stg.waves.length; worldSet(G.stg); G.gmArena=0; G.gmTel=[]; G.gmB=null; G.gmCut=null; G.gmc=null; G.gal=[]; G.galDone=0; G.gmTomb=[]; G.gmFl=[]; G.rift=null; G.gmDoor=null; G.gmStones=null; G.gmCnTip=0; try{ gmCutUi(false); }catch(e){} if(G.stg.gm){ me.x=VX+rand(-30,30); me.y=VY+VR+30; } preBoss(); setTheme(selStage); castleInit(); if(G.castle)later(3.2,()=>{ if(G.inGame&&G.castle&&G.phase!=='lose')toast('🏰 중앙의 성을 지켜요 · 체력이 0이 되면 패배 · 성 둘레에서는 생명력·마나가 회복돼요','#e0c080'); }); G.gts=[]; later(.5,()=>{ if(G.inGame)banner(`${G.stg.id} ${G.stg.n}`,G.stg.tag||''); });
   gobInit(); G.allMode=false; G.allQ=[]; G.fires=[]; G.freeRev=me.hc?0:1; G.hcWhy=''; me.rvGiven=0; me.seenRg=0; me.out=false; me.rvT=0;
   G.gemDone=false; G.wave=0;G.skipUsed=false;G.phase='prep';G.timer=2;G.mobs.length=0;G.ev=[];G.spawnQ=0;G.lastSq=-1;G.endShown=false;G.coop=!!guestPeer;
   G.waveSides=[0,1,3]; G.nextSides=sidesFor(1); G.laneShow=G.stg.gm?[]:G.nextSides;
@@ -9695,6 +9705,7 @@ function drawEfx(t){
       ctx.font=`800 ${12*z}px "Noto Sans KR",sans-serif`; ctx.lineWidth=3*z; ctx.strokeText('📜 퀘스트 완료!',0,-24*z); ctx.fillStyle='#ffe9b0'; ctx.fillText('📜 퀘스트 완료!',0,-24*z);
       ctx.font=`900 ${21*z}px "Noto Sans KR",sans-serif`; ctx.lineWidth=4.5*z; const tx='+'+e.xp.toLocaleString()+' EXP'; ctx.strokeText(tx,0,0); ctx.fillStyle='#9fd0ff'; ctx.fillText(tx,0,0); ctx.restore(); }
     else if(e.k==='spr'){ const n=e.c1-e.c0+1, f=e.loop?e.c0+Math.floor(t*10)%n:e.c0+Math.min(n-1,Math.floor(p*n)), x=e.o&&e.o.x!==undefined?e.o.x:e.x, y=e.o&&e.o.y!==undefined?e.o.y+(e.dy||0):e.y; fxFrame(e.row,f,x,y,e.sz,e.sz,e.rot,e.fade?Math.min(1,p*6,(1-p)*4):1,e.flip,e.at); }
+    else if(e.k==='gmfl'){ const im=sprGet('fx_gm_flame'); if(im){ const fw=im.width/6, fi=Math.min(5,Math.floor(p*6)), dw=170, dh=dw*im.height/fw; ctx.drawImage(im,fi*fw,0,fw,im.height,e.x-dw/2,e.y-dh*.61,dw,dh); } }   /* 거인왕 불꽃 폭발: 6프레임 */
     else if(e.k==='gmw'){ const iw=sprGet('skill_wave'), ic=sprGet('skill_wave_crack'), sp=Math.min(1,e.t/.3), pos=e.len*(1-Math.pow(1-sp,2)), ca=Math.cos(e.a), sa=Math.sin(e.a);   /* 거인왕 파동: 청백 충격파가 직선으로 날아가고 지나간 자리에 균열이 잠깐 남음 */
       if(ic){ for(const f of [.28,.6,.92]){ const d=e.len*f; if(pos<d)continue; const al=Math.min(1,(pos-d)/50)*Math.max(0,1-Math.max(0,(e.t-.3)/(e.life-.3))); ctx.save(); ctx.translate(e.x+ca*d,e.y+sa*d); ctx.rotate(e.a); ctx.globalAlpha=al; ctx.drawImage(ic,-130,-52,260,107); ctx.restore(); } }
       if(iw&&sp<1){ ctx.save(); ctx.translate(e.x+ca*pos,e.y+sa*pos); ctx.rotate(e.a); ctx.globalAlpha=Math.min(1,sp*8)*(sp>.85?(1-sp)/.15:1); ctx.drawImage(iw,-200,-64,240,136); ctx.restore(); ctx.globalAlpha=1; } }
