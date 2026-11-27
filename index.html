@@ -1585,7 +1585,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.8.0.0988</div>
+    <div class="ver" id="verT">v0.8.0.0989</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -4103,7 +4103,7 @@ function updateMobs(dt){
   const pls=playersForAI().concat(minionTargets()); /* 소환수도 몹의 공격 대상 */
   for(let i=shots.length-1;i>=0;i--){ const sh=shots[i]; sh.t+=dt; if(sh.t>=sh.dur){ shots.splice(i,1); if(sh.rift){ spawnMob(0,sh.x,sh.y,true); for(let k=0;k<4;k++)spawnMob(k%2?10:0,sh.x+rand(-40,40),sh.y+rand(-40,40),false); burst(sh.x,sh.y,'#c070ff',40,320); efx.push({k:'ring',x:sh.x,y:sh.y,r0:10,r1:110,t:0,life:.5,col:'#c070ff',w:12}); sfx('slam'); G.shake=Math.max(G.shake,.4); continue; } for(const p of pls){ if(hyp(p.x-sh.x,p.y-sh.y)<sh.r+10) mobHitPlayer(p.i,sh.dmg*(sh.dv&&p.i===1&&me.D&&me.D.sp&&me.D.sp.cs_armor?.7:1),sh.st||0,sh.sd||0); } if(G.castle){ if(sh.cas)castleHit(sh.dmg*.4); else if(sh.vil)castleHit(sh.dmg*.35); } pushEv(['bx',Math.round(sh.x),Math.round(sh.y),sh.r]); bombFx(sh.x,sh.y,sh.r); if(sh.ar){ addNum(sh.x,sh.y-30,'🏹 화살 피격!','#ffb070',true); pushEv(['am',Math.round(sh.x),Math.round(sh.y)]); } } }
   RAID_HIT=0; if(G.gal&&G.gal.length)galTick(dt);
-  if(G.stg&&G.stg.gm){ const cy=GM_CLIFF+20; for(const a of (G.gal||[]))if(!a.dead&&a.y<cy)a.y=cy; for(const m of G.mobs)if(m.gob&&m.y<cy)m.y=cy; for(const q of minions)if(q.y<cy)q.y=cy; }   /* 소환수(곰·혼불 등)·우리 편 정예·황금 고블린도 거인왕 뒤 절벽(위쪽)으로는 못 가요 */
+  if(G.stg&&G.stg.gm&&G.gmArena){ const cy=GM_CLIFF+20; for(const a of (G.gal||[]))if(!a.dead&&a.y<cy)a.y=cy; for(const m of G.mobs)if(m.gob&&m.y<cy)m.y=cy; for(const q of minions)if(q.y<cy)q.y=cy; }   /* 소환수(곰·혼불 등)·우리 편 정예·황금 고블린도 거인왕 뒤 절벽(위쪽)으로는 못 가요 */
   for(const m of G.mobs){ if(m.dead)continue; RAID_HIT=m.rk?1:0;
     if(m.gob){ gobStep(m,dt); continue; }
     if(m.slowT>0)m.slowT-=dt; if(m.shockT>0)m.shockT-=dt; if(m.shockP>0)m.shockP-=dt; if(m.mark&&m.mark.t>0)m.mark.t-=dt; if(m.vuln&&m.vuln.t>0)m.vuln.t-=dt;
