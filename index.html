@@ -1008,6 +1008,7 @@ body.land #bBas{position:absolute;width:calc(var(--u) + 4px);height:calc(var(--u
 .ban span{display:block;font-size:12px;color:#e8dcc4;margin-top:5px}
 .ban i{display:block;font-style:normal;font-size:11.5px;color:#9fd18b;font-weight:700;margin-top:4px}
 .ban i.warn{color:#e07060}.ban .t i.warn{display:flex;align-items:center;gap:4px;width:max-content;max-width:none;overflow:visible;position:relative;z-index:3;font-size:11px;text-shadow:0 0 4px #000,0 0 6px #000}.ban .gmtip,.gmtip{flex:none;display:inline-grid;place-items:center;box-sizing:border-box;width:22px;height:22px;padding:0;margin:0;border-radius:50%;border:2px solid #fff2c4;background:#e0b060;color:#1a1008;font:900 14px/1 sans-serif;font-style:normal;letter-spacing:0;text-indent:0;text-shadow:none;box-shadow:0 0 8px #e0b060cc,0 0 2px #000;cursor:pointer;margin-top:0}.gmtp .r{display:flex;justify-content:space-between;border-bottom:1px solid #3a2c1c;padding:4px 0}.gmtp .r b{color:#ffd860}.gmtp p{margin:8px 0 0;line-height:1.5;font-size:13px}.gmtp p.ok{color:#9fd18b}
+.ban i.warn.gmok{color:#7fe08a}   /* 7스테이지 영웅아이템 점수 21점(만점): 초록 */
 .ban .t.gmt{padding-bottom:4px}   /* 7스테이지: 안내가 두 줄이라 아래 여백을 줄여 다른 카드와 같은 높이로 */
 .ban .t i.wrap{white-space:normal;overflow:visible;line-height:1.15;margin-top:0}   /* 긴 안내(수문장 세트 점수 · 몬스터 강화)는 잘리지 않게 두 줄로 */
 .ban.trio .t{padding-right:150px}
@@ -1590,7 +1591,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.8.0.1005</div>
+    <div class="ver" id="verT">v0.8.0.1006</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -7687,7 +7688,7 @@ function fitBan(root){ try{ (root||document).querySelectorAll('.ban .t b,.ban .t
 try{ document.fonts&&document.fonts.ready.then(()=>fitBan($('#stageBan'))); }catch(e){}
 window.addEventListener('resize',()=>fitBan($('#stageBan')));
 function banCard(cur,i,role){ const T=STAGES[i], bi=T.bs||MAPBOSS[T.id], tr=BANTRIO[T.id], gq=cur.eq?gearPenOf(cur.eq,T.icap):null, gv=!!gq&&gq.wm<.97, cl=i<stageClear;
-        return `<div class="ban ${role}${!bi&&!tr?' noimg':''}${tr?' trio':''}${role==='bk nx'&&i>stageClear?' lk':''}" data-i="${i}"${role==='cu'?'':' aria-hidden="true"'}><div class="t${T.gm?' gmt':''}"><div class="sid">${esc(T.id)}</div><span class="sn">${esc(T.n)}${T.id==='4'?' (권장Lv95↑)':''}</span><b>${esc(T.bn||'')}</b>${T.gm?(()=>{ const q=gmPenOf(cur.eq); return `<i class="warn">영웅아이템 점수 ${q.pts}/21 · 몬스터 강화 ${q.pct}% <span class="gmtip" role="button" aria-label="영웅아이템 점수 안내">?</span></i>`; })():`<i class="${gv?'warn':''}">권장 장비 Lv 합 ${Math.max(1,T.icap-12)*EQSL.length}↑${gv?' · 부족':''}</i>`}</div>${cl?'<div class="st clr"><b>클리어</b></div>':'<div class="st nc"><b>미클리어</b></div>'}${tr?`<span class="tri">${tr.map(k=>`<img src="img/${k}.png" alt="" onerror="this.remove()">`).join('')}</span>`:bi?`<img src="img/${bi}.png" alt="" onerror="this.remove()">`:''}</div>`; }
+        return `<div class="ban ${role}${!bi&&!tr?' noimg':''}${tr?' trio':''}${role==='bk nx'&&i>stageClear?' lk':''}" data-i="${i}"${role==='cu'?'':' aria-hidden="true"'}><div class="t${T.gm?' gmt':''}"><div class="sid">${esc(T.id)}</div><span class="sn">${esc(T.n)}${T.id==='4'?' (권장Lv95↑)':''}</span><b>${esc(T.bn||'')}</b>${T.gm?(()=>{ const q=gmPenOf(cur.eq); const full=q.pts>=21; return `<i class="warn${full?' gmok':''}">${full?'✔ ':''}영웅아이템 점수 ${q.pts}/21 · ${full?'몬스터 강화 없음':`몬스터 강화 ${q.pct}%`} <span class="gmtip" role="button" aria-label="영웅아이템 점수 안내">?</span></i>`; })():`<i class="${gv?'warn':''}">권장 장비 Lv 합 ${Math.max(1,T.icap-12)*EQSL.length}↑${gv?' · 부족':''}</i>`}</div>${cl?'<div class="st clr"><b>클리어</b></div>':'<div class="st nc"><b>미클리어</b></div>'}${tr?`<span class="tri">${tr.map(k=>`<img src="img/${k}.png" alt="" onerror="this.remove()">`).join('')}</span>`:bi?`<img src="img/${bi}.png" alt="" onerror="this.remove()">`:''}</div>`; }
 function renderStagePanel(){
   const chars=charIds().map(loadChar).filter(Boolean);
   $('#playPanel').hidden=!selId;
