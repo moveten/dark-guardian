@@ -1590,7 +1590,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.8.0.1004</div>
+    <div class="ver" id="verT">v0.8.0.1005</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -2922,8 +2922,8 @@ function packChar(p){ const {apb,arv,id,cls,lvl,xp,stats,statPts,skillPts,skills
 function saveChar(){ if(!me||!me.id)return; try{ ttfAutoT(); }catch(e){} lsSet(charKey(me.id),JSON.stringify(packChar(me))); }
 const dispName=p=>(p&&p.name)||CLASSES[p.cls].n;
 const isHc=p=>!!(p&&p.hc), hcDead=p=>!!(p&&p.hc&&p.hd>0);   /* 하드코어 캐릭터 · 사망한 하드코어 캐릭터 */
-const SELLBASE=[100,200,400,800,3000], ADVAFX=['ls','crit','ias','ms','mf','pr','mr'];
-function sellInfo(it){ let base=SELLBASE[it.rar]||100, ex=0; for(const a of it.aff){ if(a.t==='all')ex+=200+150*a.v; else if(a.t==='cls'||a.t==='sk')ex+=100+100*a.v; else if(ADVAFX.includes(a.t))ex+=200; } return {base,ex,total:Math.round((base+ex)*(1+((me&&me.D&&me.D.sellP)||0)/100))}; }
+const SELLBASE=[100,200,400,800,3000,6000], ADVAFX=['ls','crit','ias','ms','mf','pr','mr'];
+function sellInfo(it){ let base=SELLBASE[rarV(it)]||100, ex=0; for(const a of it.aff){ if(a.t==='all')ex+=200+150*a.v; else if(a.t==='cls'||a.t==='sk')ex+=100+100*a.v; else if(ADVAFX.includes(a.t))ex+=200; } return {base,ex,total:Math.round((base+ex)*(1+((me&&me.D&&me.D.sellP)||0)/100))}; }
 const need=l=>l<=58?Math.floor(23*Math.pow(l,1.92)):Math.floor(23*Math.pow(58,1.92)*Math.pow(l/58,9.5)); /* 레벨업 경험치: 계수 23 · 지수 1.92 · 전환 레벨 58 · 전환 후 지수 9.5 */
 /* ===== 펫 (유니크 '아자젤'): 캐릭터마다 따로 · 도박장에서만 · 경험치 = 그 캐릭터가 얻는 경험치와 같은 양 (펫 Lv10 = 캐릭터 Lv99까지의 누적 경험치) ===== */
 const PETS={azazel:{n:'아자젤',rn:'유니크',col:'#ff9a3a',pn:'지옥불의 가호',an:'업화의 낙인',im:'pet_azazel',un:{3:'지옥불의 가호',5:'업화의 낙인'}},
@@ -6913,7 +6913,7 @@ function sendPick(){
 }
 /* 조각 교환: 유니크 이상 +10강 장비 1개 → 원하는 종류의 조각 SHEX_N개. 조각 종류는 SHDK 에 추가되는 대로 목록에 자동으로 늘어남 */
 const SHEX_N=10, SHEX_RAR=3, SHEX_ENH=10;
-const canShEx=it=>!!(it&&!isShard(it)&&it.slot!=='mat'&&(it.rar|0)>=SHEX_RAR&&(it.enh|0)>=SHEX_ENH);
+const canShEx=it=>!!(it&&!it.ep&&!isShard(it)&&it.slot!=='mat'&&(it.rar|0)>=SHEX_RAR&&(it.enh|0)>=SHEX_ENH);
 function shExModal(){ const it=selItem&&selItem.it, ix=selItem&&selItem.inv; if(!canShEx(it)||ix===undefined||selItem.store||me.inv[ix]!==it)return;
   if(it.lock){ sheetToast('🔒 잠긴 아이템이에요. 잠금을 먼저 풀어 주세요','#ff8a7a'); return; }
   const ks=Object.keys(SHDK).filter(k=>k!=='cshard'); let pick=null;   /* 수문장 조각은 6스테이지 공개 전이라 목록에서 뺌 */
