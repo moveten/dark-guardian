@@ -1590,7 +1590,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.8.0.0997</div>
+    <div class="ver" id="verT">v0.8.0.0998</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3789,6 +3789,8 @@ const GM_CLIFF=GM_ARENA.y-20;   /* 고르무스 뒤쪽 절벽: 이 선(y) 위로
 const GM_CLIFF_P=(()=>{ const p=new Path2D(); p.moveTo(-30,-30); p.lineTo(WW+30,-30); p.lineTo(WW+30,GM_CLIFF); for(let x=WW+30;x>=-30;x-=20){ p.lineTo(x,GM_CLIFF+Math.sin(x*.045)*9+Math.sin(x*.13+1)*5+Math.sin(x*.31)*3); } p.closePath(); return p; })();
 function drawGmCliff(){ if(camY>GM_CLIFF+40)return; ctx.save(); const g=ctx.createLinearGradient(0,GM_CLIFF-260,0,GM_CLIFF+12); g.addColorStop(0,'#000'); g.addColorStop(.7,'#05060b'); g.addColorStop(1,'#141826'); ctx.fillStyle=g; ctx.fill(GM_CLIFF_P);
   ctx.strokeStyle='#5a6075'; ctx.lineWidth=5; ctx.stroke(GM_CLIFF_P); ctx.strokeStyle='rgba(120,170,255,.28)'; ctx.lineWidth=2; ctx.save(); ctx.translate(0,-4); ctx.stroke(GM_CLIFF_P); ctx.restore(); ctx.restore(); }
+/* 7스테이지 아레나가 정말 진행 중일 때만 true — 광산·훈련장·다른 스테이지에서는 아레나 흔적(G.gmArena)이 남아 있어도 절벽·이동 제한을 쓰지 않아요 */
+const gmArenaOn=()=>!!(G.gmArena&&G.stg&&G.stg.gm&&!G.mine&&!G.train);
 function gmArenaClamp(o){ if(o.y<GM_CLIFF+20)o.y=GM_CLIFF+20; const dx=o.x-GM_ARENA.x, dy=o.y-GM_ARENA.y, d=hyp(dx,dy), R=430; if(d>R){ o.x=GM_ARENA.x+dx/d*R; o.y=GM_ARENA.y+dy/d*R; } }
 function gmbSpawn(){ const pn=1+(G.gmPen||0), m=spawnMob(gmbTy(),GM_ARENA.x,GM_ARENA.y-100,false);
   m.gmb=1; m.boss=true; m.gmt=1; m.hp=m.max=GMB_HP*pn; m.dmg0=RAIDB()*GMB_RDM*pn; m.dmg=m.dmg0; m.spd=0; m.r=80; m.xp=Math.round(m.xp); m.fa=Math.PI/2; m.ph=1; m.cs=null; m.gap=2.5; m.cdk={slam:3,sweep:6,wave:5,bash:7,flame:9,tomb:11,roar:16,summon:10,ult:25}; m.stn=0; m.bt=99;
@@ -4130,7 +4132,7 @@ function updateMobs(dt){
   const pls=playersForAI().concat(minionTargets()); /* 소환수도 몹의 공격 대상 */
   for(let i=shots.length-1;i>=0;i--){ const sh=shots[i]; sh.t+=dt; if(sh.t>=sh.dur){ shots.splice(i,1); if(sh.rift){ spawnMob(0,sh.x,sh.y,true); for(let k=0;k<4;k++)spawnMob(k%2?10:0,sh.x+rand(-40,40),sh.y+rand(-40,40),false); burst(sh.x,sh.y,'#c070ff',40,320); efx.push({k:'ring',x:sh.x,y:sh.y,r0:10,r1:110,t:0,life:.5,col:'#c070ff',w:12}); sfx('slam'); G.shake=Math.max(G.shake,.4); continue; } for(const p of pls){ if(hyp(p.x-sh.x,p.y-sh.y)<sh.r+10) mobHitPlayer(p.i,sh.dmg*(sh.dv&&p.i===1&&me.D&&me.D.sp&&me.D.sp.cs_armor?.7:1),sh.st||0,sh.sd||0); } if(G.castle){ if(sh.cas)castleHit(sh.dmg*.4); else if(sh.vil)castleHit(sh.dmg*.35); } pushEv(['bx',Math.round(sh.x),Math.round(sh.y),sh.r]); bombFx(sh.x,sh.y,sh.r); if(sh.ar){ addNum(sh.x,sh.y-30,'🏹 화살 피격!','#ffb070',true); pushEv(['am',Math.round(sh.x),Math.round(sh.y)]); } } }
   RAID_HIT=0; if(G.gal&&G.gal.length)galTick(dt);
-  if(G.stg&&G.stg.gm&&G.gmArena){ const cy=GM_CLIFF+20; for(const a of (G.gal||[]))if(!a.dead&&a.y<cy)a.y=cy; for(const m of G.mobs)if(m.gob&&m.y<cy)m.y=cy; for(const q of minions)if(q.y<cy)q.y=cy; }   /* 소환수(곰·혼불 등)·우리 편 정예·황금 고블린도 거인왕 뒤 절벽(위쪽)으로는 못 가요 */
+  if(gmArenaOn()){ const cy=GM_CLIFF+20; for(const a of (G.gal||[]))if(!a.dead&&a.y<cy)a.y=cy; for(const m of G.mobs)if(m.gob&&m.y<cy)m.y=cy; for(const q of minions)if(q.y<cy)q.y=cy; }   /* 소환수(곰·혼불 등)·우리 편 정예·황금 고블린도 거인왕 뒤 절벽(위쪽)으로는 못 가요 */
   for(const m of G.mobs){ if(m.dead)continue; RAID_HIT=m.rk?1:0;
     if(m.gob){ gobStep(m,dt); continue; }
     if(m.slowT>0)m.slowT-=dt; if(m.shockT>0)m.shockT-=dt; if(m.shockP>0)m.shockP-=dt; if(m.mark&&m.mark.t>0)m.mark.t-=dt; if(m.vuln&&m.vuln.t>0)m.vuln.t-=dt;
@@ -4595,7 +4597,7 @@ function updateMe(dt){
   else if(autoMode>0&&!G.mine&&!autoBlocked()&&!(me.stun>0||me.formLock>0)){ const a=autoDir(); if(a){mx=a[0];my=a[1];ml=1;} }   /* AUTO: 조이스틱·키보드·전리품 터치가 없을 때만 자동 이동 */
   if(hazards.length&&!me.dead){ for(const h of hazards){ if(hyp(me.x-h.x,me.y-h.y)<h.r*.9){ if(h.k==='lava'){ me.lavaT=(me.lavaT||0)-dt; if(me.lavaT<=0){ me.lavaT=.5; takeDmg(me.D.maxHp*.05*GZM,true); me.burn=.4; addNum(me.x,me.y-30,'🔥','#ff8a3a',false); } } else me.slowP=Math.max(me.slowP||0,.3); break; } } }
   { const sp=D.spd*(me.slowP>0?.5:1)*(me.erode>0?.6:1)*(me.buffs.rage&&me.buffs.rage.t>0?1+me.buffs.rage.ms:1)*(me.buffs.fury&&me.buffs.fury.t>0&&me.buffs.fury.ms?1+me.buffs.fury.ms:1)*(me.buffs.hf&&me.buffs.hf.t>0?1+me.buffs.hf.ms:1), kv=1-Math.exp(-dt*(ml>0.08?20:26)); me.vx=(me.vx||0)+((ml>0.08?mx*sp:0)-(me.vx||0))*kv; me.vy=(me.vy||0)+((ml>0.08?my*sp:0)-(me.vy||0))*kv; if(Math.abs(me.vx)<1)me.vx=0; if(Math.abs(me.vy)<1)me.vy=0;
-    if(me.vx||me.vy){ me.x=clamp(me.x+me.vx*dt,16,WW-16); me.y=clamp(me.y+me.vy*dt,16,WH-16); } castlePush(me); if(G.gmArena)gmArenaClamp(me); }
+    if(me.vx||me.vy){ me.x=clamp(me.x+me.vx*dt,16,WW-16); me.y=clamp(me.y+me.vy*dt,16,WH-16); } castlePush(me); if(gmArenaOn())gmArenaClamp(me); }
   if(ml>0.08){ me.moveDir=Math.atan2(my,mx); me.faceT=Math.max(0,(me.faceT||0)-dt); if(me.swing<=0&&!(me.faceT>0))me.face=me.moveDir; me.walk=(me.walk||0)+dt*ml*10; }
   // held buttons
   autoPick(); autoSkills(dt);
@@ -7885,9 +7887,10 @@ function trAcc(nm,d){ TR.sum[nm]=(TR.sum[nm]||0)+d; const ev=TR.ev; ev.push([T,d
 zones.push=function(...a){ if(G.train)for(const z of a)if(z&&z.sk==null)z.sk=TR.sk; return Array.prototype.push.apply(this,a); };   /* 훈련장: 장판에 만든 스킬 이름을 붙여요 */
 const TR_CN=[0,-480];   /* 반격 허수아비: 중심에서 위로 480 */
 const TR_D=45.25, TR_POS=[[-320,0],[320,0],[320-TR_D,-TR_D],[320+TR_D,-TR_D],[320-TR_D,TR_D],[320+TR_D,TR_D]];   /* 왼쪽 1기 · 오른쪽 X자 5기(반경 64) */
+function gmArenaClear(){ G.gmArena=0; G.gmTel=[]; G.gmB=null; G.gmCut=null; G.gmFl=[]; G.gmc=null; G.gal=[]; if(!G.mine)worldSet(null); }   /* 광산·훈련장 들어갈 때 7스테이지 아레나 흔적 한 번 더 정리 */
 function startTraining(){
   if(!rsLab()||G.inGame||!selId)return; if(hcDead(loadChar(selId)))return;
-  closeModal(); G.mode='solo'; prepMe(); ally=null; resetWorld(); G.train=1; { const pb=$('#trPp'); if(pb)pb.textContent=PPR?'🥨 빼빼로 미적용 OFF':'🥨 빼빼로 미적용 ON'; } TR.log=[]; TR.sk='기본공격'; TR.dirty=true; TR.sum={}; TR.ev=[]; TR.dps=0; TR.dpsAt=0;
+  closeModal(); G.mode='solo'; prepMe(); ally=null; resetWorld(); gmArenaClear(); G.train=1; { const pb=$('#trPp'); if(pb)pb.textContent=PPR?'🥨 빼빼로 미적용 OFF':'🥨 빼빼로 미적용 ON'; } TR.log=[]; TR.sk='기본공격'; TR.dirty=true; TR.sum={}; TR.ev=[]; TR.dps=0; TR.dpsAt=0;
   dmgReset(); G.firstClr=false; G.potN=0; G.stageIdx=selStage; G.stg=TRAIN_STG; G.TW=0; setTheme(0); G.castle=null; G.gts=[];
   G.allMode=false; G.allQ=[]; G.fires=[]; G.freeRev=me.hc?0:1; G.hcWhy=''; me.rvGiven=0; me.seenRg=0; me.out=false; me.rvT=0;
   G.gemDone=true; G.wave=0; G.skipUsed=true; G.phase='train'; G.timer=0; G.mobs.length=0; G.ev=[]; G.spawnQ=0; G.lastSq=-1; G.endShown=false; G.coop=false;
@@ -7912,7 +7915,7 @@ const oreTone=(O,p)=>{ if(O.sp)return'#ff5cd0'; const d=minerLv(p)-O.lv; return 
 function startMine(){ oreWarm();
   if(G.inGame||!selId)return; const c=loadChar(selId); if(!c||hcDead(c))return;
   if(!mineCanEnter(c)){ sheetToast('⛏️ 곡괭이를 가지고 있어야 광산에 들어갈 수 있어요','#ff8a7a'); return; }
-  closeModal(); G.mode='solo'; prepMe(); ally=null; resetWorld(); if(!me.mine)me.mine={lv:1,xp:0}; if(!me.ore)me.ore={}; minerPre();
+  closeModal(); G.mode='solo'; prepMe(); ally=null; resetWorld(); gmArenaClear(); if(!me.mine)me.mine={lv:1,xp:0}; if(!me.ore)me.ore={}; minerPre();
   for(const k in me.ore)if(!ORES[k]){ const nk=ORE_OLD[k]; if(nk)me.ore[nk]=(me.ore[nk]|0)+(me.ore[k]|0); delete me.ore[k]; }   /* 시범 1차 조각 이름 정리 */
   oreFold(me);   /* 예전 숫자 보관분 → 기타 칸 */
   me.mine.lv=Math.min(MINE_MAXLV,Math.max(1,me.mine.lv|0));
@@ -9073,7 +9076,7 @@ function buildGround(th,seed){ const c=document.createElement('canvas'); c.width
   else for(let i=0;i<40;i++){g.strokeStyle=th.tuft; g.lineWidth=1; const x=r()*256,y=r()*256; g.beginPath(); for(let j=0;j<4;j++){g.moveTo(x+j*2,y);g.lineTo(x+j*2+r()*4-2,y-4-r()*4);} g.stroke();}
   return ctx.createPattern(c,'repeat'); }
 const FLD={};
-function fieldGet(i){ const gmS=STAGES[i]&&STAGES[i].gm; if(gmS&&G.gmArena)i='a'+i; let e=FLD[i]; if(!e){ e=FLD[i]={ok:false,im:new Image()}; e.im.onload=()=>{e.ok=true;}; e.im.onerror=()=>{e.bad=true;}; e.im.src=gmS?(G.gmArena?'img/field_7_2.jpg':'img/field_7_1.jpg'):'img/field_'+((i/5|0)+1)+'_'+(i%5+1)+'.jpg'; } return e.ok?e.im:null; }  /* 스테이지별 필드 배경 이미지(1000×1000) */
+function fieldGet(i){ const gmS=STAGES[i]&&STAGES[i].gm; if(gmS&&gmArenaOn())i='a'+i; let e=FLD[i]; if(!e){ e=FLD[i]={ok:false,im:new Image()}; e.im.onload=()=>{e.ok=true;}; e.im.onerror=()=>{e.bad=true;}; e.im.src=gmS?(String(i)[0]==='a'?'img/field_7_2.jpg':'img/field_7_1.jpg'):'img/field_'+((i/5|0)+1)+'_'+(i%5+1)+'.jpg'; } return e.ok?e.im:null; }  /* 스테이지별 필드 배경 이미지(1000×1000) */
 function setTheme(i){ i=Math.max(0,Math.min(STAGES.length-1,i|0)); if(themeIdx===i&&groundPat)return; themeIdx=i; const S=STAGES[i], th=S.th; try{fieldGet(i);}catch(e){}
   groundPat=buildGround(th,7+i*13);
   const r=mulberry(42+i*101); decor=[]; const tot=th.dec.reduce((a,d)=>a+d[1],0);
@@ -9102,7 +9105,7 @@ function drawWorld(t){
   for(const [w,c] of [[86,TH().road[0]],[64,TH().road[1]]]){ctx.strokeStyle=c;ctx.lineWidth=w;ctx.beginPath();ctx.moveTo(VX,0);ctx.lineTo(VX,VY);ctx.moveTo(0,VY);ctx.lineTo(WW,VY);ctx.stroke();} }
   // world edge
   ctx.strokeStyle='#000';ctx.lineWidth=40;ctx.strokeRect(-20,-20,WW+40,WH+40);
-  if(G.gmArena)drawGmCliff();
+  if(gmArenaOn())drawGmCliff();
   // decor
   const x0=camX-60,x1=camX+VW/ZOOM+60,y0=camY-60,y1=camY+VH/ZOOM+60;
   for(const d of (MB?[]:decor)){ if(d.x<x0||d.x>x1||d.y<y0||d.y>y1)continue;   /* 광산 배경 그림이 있으면 스테이지 장식(묘비·나무 등)은 생략 */
@@ -9161,7 +9164,7 @@ function drawHealFx(t){ const H=HEALFX; if(!me||me.dead||!G.inGame){ H.i=0; H.ps
   ctx.globalAlpha=1; ctx.restore(); }
 function drawVillage(t){ // 중앙 포털
   if(G.mine)return;   /* 광산엔 중앙 포털 없음 */
-  if(G.gmArena)return;   /* 7스테이지 아레나: 중앙 포털 없음(고르무스가 솟는 자리) */
+  if(gmArenaOn())return;   /* 7스테이지 아레나: 중앙 포털 없음(고르무스가 솟는 자리) */
   const col=TH().pc||'110,180,255';
   if(G.castle){ ctx.globalCompositeOperation='lighter'; { const g=ctx.createRadialGradient(VX,CAS_HY,20,VX,CAS_HY,CAS_HR+14); g.addColorStop(0,`rgba(${col},.16)`); g.addColorStop(.8,`rgba(${col},.1)`); g.addColorStop(1,`rgba(${col},0)`); ctx.fillStyle=g; ctx.beginPath(); ctx.arc(VX,CAS_HY,CAS_HR+14,0,6.283); ctx.fill(); } ctx.globalCompositeOperation='source-over';
     ctx.save(); ctx.strokeStyle=`rgba(${col},.32)`; ctx.lineWidth=2; ctx.setLineDash([7,7]); ctx.lineDashOffset=-t*8; ctx.beginPath(); ctx.arc(hzX(),hzY(),CAS_HR,0,6.283); ctx.stroke(); ctx.restore(); return; }   /* 성이 있으면 포털 대신 성 앞마당(회복 구역) 표시 */
