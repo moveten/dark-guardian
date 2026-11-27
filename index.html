@@ -1590,7 +1590,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.8.0.1000</div>
+    <div class="ver" id="verT">v0.8.0.1001</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3854,7 +3854,7 @@ function gmbTick(m,dt,pls){ m.kx=m.ky=0; m.dvx=m.dvy=0; if(G.phase!=='boss')retu
   const ready=[]; for(const k in GMB_SK){ const S=GMB_SK[k]; if(m.cdk[k]>0)continue; if(S.minPh&&m.ph<S.minPh)continue; if(k==='summon'&&G.mobs.filter(q=>q.tsd&&!q.dead).length>=3)continue;
     if(k==='slam'&&bd>440)continue; if(k==='sweep'&&bd>400)continue; if(k==='bash'&&bd>320)continue; ready.push(k); }
   if(!ready.length){ m.gap=.4; return; }
-  const k=pick(ready), S=GMB_SK[k], ta=Math.atan2(best.y-m.y,best.x-m.x); m.cdk[k]=k==='summon'?S.cd:S.cd*GMB_CF[m.ph-1]; m.fa=ta;
+  const k=pick(ready), S=k==='wave'&&m.ph>=3?{...GMB_SK[k],tel:1.3}:GMB_SK[k], ta=Math.atan2(best.y-m.y,best.x-m.x); m.cdk[k]=k==='summon'?S.cd:S.cd*GMB_CF[m.ph-1]; m.fa=ta;
   let tel; if(k==='slam')tel={sh:'fan',x:m.x,y:m.y,a:ta,w:.7,r:420,dur:S.tel}; else if(k==='sweep')tel={sh:'circ',x:m.x,y:m.y,r:340,dur:S.tel}; else if(k==='wave')tel={sh:'line',x:m.x,y:m.y,a:ta,r:760,lw:76,dur:S.tel};
   else if(k==='bash')tel={sh:'fan',x:m.x,y:m.y,a:ta,w:.95,r:280,dur:S.tel};
   else if(k==='roar')tel={sh:'circ',x:m.x,y:m.y,r:560,dur:S.tel};
