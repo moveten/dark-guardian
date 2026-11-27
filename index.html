@@ -1585,7 +1585,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.7.2.0986</div>
+    <div class="ver" id="verT">v0.7.2.0987</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -1863,7 +1863,7 @@ const SK={
 /* 드루이드 형태 수치 (derive와 설명이 같이 씀) */
 const BRB=l=>.9+.03*(l-1), BRS=.8; /* 곰 변신 평타 피해 배율(무기 피해 대비): 주 대상 = 곰 변신 레벨당 +3% · 주변 적 = 주 대상의 80% */
 const BEAR_T=l=>Math.round((18+.5*l)*10)/10, BRV=.2; /* 곰세마리: 곰 가족이 머무는 시간(초) / 엄마곰 포효의 '받는 피해 증가' 비율은 20% 고정(우두머리는 절반) · 엄마곰 = 아빠곰의 60%, 아기곰 = 아빠곰의 40% (생명력·평타) */
-var ADMX=0;   /* 관리자(연구실 켜짐) 전용 시험 수치 스위치 — def2Sync에서 갱신 */
+var ADMX=1;   /* 곰·광란 새 수치 스위치 — 11/27부터 전체 적용(이전: 연구실 기기만) */
 const FRV=l=>ADMX?5+l:10+2*l, FRD=l=>ADMX?0:Math.min(50,Math.round(25+1.2*l));   /* 광란: 주는 피해 증가(%) / 받는 피해 감소(%) — 관리자(연구실)는 5+Lv, 감소 없음 */
 const BRH=l=>(ADMX?5:25)+1.2*l, BRD=l=>(ADMX?2:30)+2*l, BRR=l=>8+.4*l;           /* 곰: 최대 생명력 / 방어력 / 받는 피해 감소 (%) */
 const SBHP=l=>Math.min(2,.4+.08*l); /* 수호 폭발: 수호 영혼 현재 생명력 반영 비율 (1레벨 48% → 20레벨 200%) */
@@ -7110,7 +7110,7 @@ try{ localStorage.removeItem('dkdef2.cl.labpw'); localStorage.removeItem('dkdef2
 const RS_KEY='dkdef2.lab', RS_ON='928', RS_PT='dkdef2.labpt',   /* 연구실이 열린 표시: dkdef2.lab 값이 '928' 일 때만 (비밀번호가 아니라 단순히 조금 어렵게 만든 표식 — 예전 값 '1' 은 더 이상 인정하지 않아요) */ RS_H=1197519288, RS_WD=['일','월','화','수','목','금','토'];
 const rsLab=()=>lsGet(RS_KEY)===RS_ON,   /* rsLab: 연구실이 열려 있는가(연구실 화면·훈련장·연구실 스위치) */
   rsOn=()=>rsLab()&&lsGet(RS_PT)!=='1', PPR_KEY='dkdef2.cl.pprOff', DEF2_KEY='dkdef2.cl.def2';
-let DEF2V=true; const def2On=()=>DEF2V, def2Sync=()=>{ DEF2V=!(rsOn()&&lsGet(DEF2_KEY)==='0'); ADMX=rsLab()?1:0; };   /* 🛡️ 새 방어 공식: 이 기기에서 연구실이 켜져 있고 스위치를 켰을 때만 (매 피격마다 저장소를 읽지 않게 값으로 보관) */
+let DEF2V=true; const def2On=()=>DEF2V, def2Sync=()=>{ DEF2V=!(rsOn()&&lsGet(DEF2_KEY)==='0'); };   /* 🛡️ 새 방어 공식: 이 기기에서 연구실이 켜져 있고 스위치를 켰을 때만 (매 피격마다 저장소를 읽지 않게 값으로 보관) */
 const pprSync=()=>{ PPR=(rsOn()&&lsGet(PPR_KEY)==='1')?0:1; def2Sync(); };   /* 패치 이전 상태 비교(미적용 ON)는 이 기기에서 연구실이 켜진 동안만 — 나가면 자동으로 새 밸런스 */
 const pprSet=old=>{ if(old)lsSet(PPR_KEY,'1'); else lsDel(PPR_KEY); pprSync(); const b=document.getElementById('trPp'); if(b)b.textContent=PPR?'🥨 빼빼로 미적용 OFF':'🥨 빼빼로 미적용 ON'; if(G.train){ TR.dirty=true; trRender(true); } };
 pprSync();
