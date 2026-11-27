@@ -228,3 +228,4 @@
 - v0.8.0.0992: 거인왕 불꽃 개편 — gmbFlame(원 5개, 0.5초 간격, 퓨즈 1.2초, 플레이어(i<=2) 발밑, 33%·7초 봉쇄), 금색 깜빡임은 drawGmTel(o.fl), 폭발 스프라이트 img/fx_gm_flame.png(6프레임, efx k=gmfl).
 - v0.8.0.0993: 불꽃 → 「연옥의 불꽃」 개명, 컷인 #gmFc(gmFlameCut, 1.6초), 원 등장 0.2초 확대(drawGmTel o.fl).
 - v0.8.0.0994: 연옥의 불꽃 폭발 0.4초(프레임 1~5, 끝 페이드), 금색 깜빡임 삭제.
+- v0.8.0.0995: resetWorld/게스트 시작에서 G.gmArena·gmTel·gmB·gmCut·gmFl·gmc·gal 초기화 (7스테이지 아레나 상태가 광산으로 넘어가던 버그).

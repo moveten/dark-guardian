@@ -1590,7 +1590,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.8.0.0994</div>
+    <div class="ver" id="verT">v0.8.0.0995</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -7859,7 +7859,7 @@ function noticeShow(){ if(lsGet(NT_KEY)===ntDay())return;
 window.__noticeShow=noticeShow;
 function prepMe(){ me=loadChar(selId); me.D=derive(me); spawnMe(); }
 function resetWorld(){
-  G.mine=null; worldSet(null); { const mh=$('#mineHud'); if(mh)mh.hidden=true; document.body.classList.remove('mining'); dockSkill(null); } GB=null; G.gobRoll=false; G.train=0; G.trNoAtk=false; G.trNoPet=false; G.trPet=null; trUi();
+  G.mine=null; worldSet(null); G.gmArena=0; G.gmTel=[]; G.gmB=null; G.gmCut=null; G.gmFl=[]; G.gmc=null; G.gal=[];   /* 7스테이지 아레나 흔적(절벽·이동 제한)이 광산·다른 모드로 넘어가지 않게 */ { const mh=$('#mineHud'); if(mh)mh.hidden=true; document.body.classList.remove('mining'); dockSkill(null); } GB=null; G.gobRoll=false; G.train=0; G.trNoAtk=false; G.trNoPet=false; G.trPet=null; trUi();
   storyStop(); G.stZ=0; G.aim=null; G.lostBoss=false; G.castle=null; G.lostCastle=false; G.awz=null; G.awc=null; { const ac=$('#awCut'); if(ac)ac.classList.remove('on'); for(const q of ['#casAl','#casMs','#gmVg','#gmWb','#gmUc']){ const z=$(q); if(z)z.classList.remove('on'); } const hc=$('#hCastle'); if(hc)hc.classList.remove('atk'); } if(me){ me.erode=me.hblk=me.mblk=me.hbStrict=me.bleed=me.bleedN=0; me.hpLk=me.mpLk=null; }
   projs.length=zones.length=timers.length=parts.length=nums.length=ground.length=efx.length=0; G.casWreck=[]; G.casDvLv={};   /* 6스테이지 공성탑 잔해는 다른 스테이지로 넘어가지 않게 */
   G.mobs=[]; G.mobMap=new Map(); G.gemDone=false; G.stKills=0; G.stDrops=0; G.stCap=0; G.runT=0; G.stGot=[0,0,0,0,0,0]; G.stGem=null; G.sib=0; G.endShown=false; G.clrDone=false; alClear(); G.stRev=0; G.stTaken=0; G.stGold0=me?(me.gold|0):0; G.paused=false; G.bt=null; G.shake=0;
@@ -9006,7 +9006,7 @@ $('#bStart').onclick=()=>{ if(G.mode!=='host')return; ally=null; const gp=others
 $('#bLeave').onclick=()=>quitToTitle();
 function startGuestGame(pr){ dmgReset(); G.potN=0; resetWorld(); G.phase=pr.ph; toast('게임이 시작됐어요'); }
 async function quitToTitle(){
-  G.mine=null; worldSet(null); { const mh=$('#mineHud'); if(mh)mh.hidden=true; document.body.classList.remove('mining'); dockSkill(null); } G.train=0; G.trNoAtk=false; G.trNoPet=false; G.trPet=null; trUi(); storyStop(); if(autoMode)setAuto(0,true); setSpd(false); G.inGame=false; G.phase='title'; G.aim=null; saveChar(); ally=null; autoBuyShop(); if(me){ const pl=G.mode==='guest'?-1:(G.stageIdx|0); selStage=Math.max(0,Math.min(STAGES.length-1,G.firstClr?(me.clear|0):pl>=0?Math.min(pl,me.clear|0):(me.clear|0)-1)); G.firstClr=false; }   /* 방금 처음 깼다면 다음 스테이지, 이미 깬 스테이지(또는 진 판)면 했던 스테이지 그대로, 손님은 가장 높이 깬 스테이지 */
+  G.mine=null; worldSet(null); G.gmArena=0; G.gmTel=[]; G.gmB=null; G.gmCut=null; G.gmFl=[]; G.gmc=null; G.gal=[];   /* 7스테이지 아레나 흔적(절벽·이동 제한)이 광산·다른 모드로 넘어가지 않게 */ { const mh=$('#mineHud'); if(mh)mh.hidden=true; document.body.classList.remove('mining'); dockSkill(null); } G.train=0; G.trNoAtk=false; G.trNoPet=false; G.trPet=null; trUi(); storyStop(); if(autoMode)setAuto(0,true); setSpd(false); G.inGame=false; G.phase='title'; G.aim=null; saveChar(); ally=null; autoBuyShop(); if(me){ const pl=G.mode==='guest'?-1:(G.stageIdx|0); selStage=Math.max(0,Math.min(STAGES.length-1,G.firstClr?(me.clear|0):pl>=0?Math.min(pl,me.clear|0):(me.clear|0)-1)); G.firstClr=false; }   /* 방금 처음 깼다면 다음 스테이지, 이미 깬 스테이지(또는 진 판)면 했던 스테이지 그대로, 손님은 가장 높이 깬 스테이지 */
   if(R){try{R.presence({role:null,pl:null,m:null,ev:null,h:null,bt:null}).catch(()=>{}); await R.leave();}catch(e){} R=null;}
   show('#sTitle'); renderClassCards(); rkSubmitAll();
 }
