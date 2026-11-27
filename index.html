@@ -1590,7 +1590,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.8.0.0995</div>
+    <div class="ver" id="verT">v0.8.0.0996</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -2547,6 +2547,9 @@ function genHero(key){ const H=HEROI[key], S=SPFX[key]; if(!H||!S)return null;
     else it.aff.push({t,v}); }
   return it; }
 const MAXENH=10, ENHBASE=[5000,7000,10000,15000];
+/* 전설(★6, it.ep) 장비 6~10강 추가 재료 — 같은 등급 장비 외에 필요: 6강 수문장 조각 30 · 7강 청옥 200 · 8강 영혼석 200 · 9강 멸화석 200 · 10강 성운석 200 */
+const ENH_EX={6:{k:'cshard',n:30},7:{k:'sapphire',n:200},8:{k:'soul',n:200},9:{k:'ember',n:200},10:{k:'nebula',n:200}};
+const enhExOf=(it,L)=>it&&it.ep?(ENH_EX[L]||null):null, enhExHave=e=>e.k==='cshard'?shardCount(me,'cshard'):oreCount(me,e.k), enhExNm=e=>e.k==='cshard'?'수문장 조각':ORES[e.k].n+' 조각', enhExTake=e=>e.k==='cshard'?shardTake(me,e.n,'cshard'):oreTake(me,e.k,e.n);
 /* 무기·보조장비 기본 수치 개편(v0.5.0) 보정: 이미 가진 아이템의 기본 공격력/방어력/마나를 새 표로 다시 계산 (아이템 레벨·등급·강화 단계 그대로).
    아이템 생성 식(genItem)과 같은 식이라 몇 번을 해도 결과가 같아요. 영웅 아이템은 heroFix 가 따로 맞춰요. 바뀌었으면 true */
 function baseFix(it){ if(!it||!(it.rar>=0&&it.rar<=3)||it.mat)return false; const il=it.ilvl||1, u=it.rar===3?1.3:1, R=Math.round; let b;
@@ -7293,29 +7296,29 @@ function enhModal(){
   const it=selItem&&selItem.it; if(!it||!canEnh(it))return; const L=(it.enh|0)+1;
   if(L>MAXENH){ warn(`최대 강화(+${MAXENH})예요`); return; }
   tutEv('enh');
-  const need=enhNeed(L), cost=enhCost(it,L), rate=enhRate(L);
+  const need=enhNeed(L), cost=enhCost(it,L), rate=enhRate(L), ex=enhExOf(it,L);
   const elig=me.inv.map((x,i)=>({x,i})).filter(o=>o.x&&!isShard(o.x)&&o.x!==it&&o.x.rar===it.rar&&!!o.x.ep===!!it.ep&&!o.x.lock).sort((a,b)=>(a.x.ilvl|0)-(b.x.ilvl|0)||sellInfo(a.x).total-sellInfo(b.x).total||a.i-b.i); /* 레벨 오름차순 — 낮은 레벨부터 자동 선택 (잠그지 않은 강화 아이템도 똑같이 재료) */
   const sel=new Set(elig.slice(0,need).map(o=>o.i)); const matObj=new Map(elig.map(o=>[o.i,o.x]));
   const k2=1+.1*L, k1=1+.1*(L-1), b0=it.b0||{mn:it.mn,mx:it.mx,df:it.df,dm:it.dm,om:it.om};
   const eff=it.slot==='amulet'?`올스탯 +${L-1} → <b style="color:#9fd18b">+${L}</b>`:it.slot==='ring'?'':it.dm?`공격력 +${it.dm} → <b style="color:#9fd18b">+${Math.round(b0.dm*k2)}</b>`:(it.om&&it.df)?`방어력 ${it.df} → <b style="color:#9fd18b">${Math.round(b0.df*k2)}</b> · 마나 +${it.om} → <b style="color:#9fd18b">+${Math.round(b0.om*k2)}</b>`:it.om?`마나 +${it.om} → <b style="color:#9fd18b">+${Math.round(b0.om*k2)}</b>`:it.b0&&it.b0.mx||it.mx?`공격력 ${it.mn}–${it.mx} → <b style="color:#9fd18b">${Math.max(1,Math.round(b0.mn*k2))}–${Math.max(Math.max(1,Math.round(b0.mn*k2))+1,Math.round(b0.mx*k2))}</b>`:`방어력 ${it.df} → <b style="color:#9fd18b">${Math.round(b0.df*k2)}</b>`;
   const rows=elig.map(o=>`<label style="display:flex;gap:8px;align-items:center;padding:0 6px;height:36px;box-sizing:border-box;flex:none;border:1px solid var(--line2);border-radius:7px;font-size:12.5px"><input type="checkbox" data-m="${o.i}" ${sel.has(o.i)?'checked':''}><span style="color:${RARC[o.x.rar]};flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${o.x.enh>0?`<b style="color:#ffb259">+${o.x.enh}</b> `:''}${esc(o.x.name)}</span><span class="meta">${slotLbl(o.x)} · Lv ${o.x.ilvl}</span></label>`).join('');
   modal(`<h3>⚒ 강화 +${L-1} → +${L}</h3><div class="meta" style="margin:0 0 6px"><span style="color:${rcol(it)};font-weight:700">${esc(dn(it))}</span>${eff?` · ${eff}`:''}<br>${it.slot==='amulet'?'강화 1회마다 힘·민첩·체력·에너지가 +1씩 올라요.':it.slot==='ring'?(L>=10?'이번 강화에 성공하면 <b style="color:#9fd18b">+10강 달성!</b> 모든 스킬 레벨이 +1 돼요.':`+10강을 달성하면 모든 스킬 레벨이 +1 돼요. (현재 +${L-1}강)`):'강화 1회마다 공격력/방어력이 10%씩 올라요.'}</div>
-   <div style="font-size:13px;line-height:1.7">성공 확률 <b style="color:${rate>=80?'#9fd18b':rate>=50?'#ffd84a':'#ff8a7a'}">${rate}%</b> · 필요 골드 <b id="enC" style="color:#ffd84a">${cost.toLocaleString()}G</b> <span class="meta">(보유 ${me.gold.toLocaleString()}G)</span>${(it.ef|0)>=2?` <b style="color:#ff8a7a;white-space:nowrap">· 연속 실패 ${it.ef}회</b>`:''}<br>재료 : 같은 <b style="color:${rcol(it)}">${rn(it)}</b> 등급 아이템 <b>${need}개</b> <span id="enSel" class="meta"></span></div>
+   <div style="font-size:13px;line-height:1.7">성공 확률 <b style="color:${rate>=80?'#9fd18b':rate>=50?'#ffd84a':'#ff8a7a'}">${rate}%</b> · 필요 골드 <b id="enC" style="color:#ffd84a">${cost.toLocaleString()}G</b> <span class="meta">(보유 ${me.gold.toLocaleString()}G)</span>${(it.ef|0)>=2?` <b style="color:#ff8a7a;white-space:nowrap">· 연속 실패 ${it.ef}회</b>`:''}<br>재료 : 같은 <b style="color:${rcol(it)}">${rn(it)}</b> 등급 아이템 <b>${need}개</b> <span id="enSel" class="meta"></span>${ex?`<br>추가 재료 : <b style="color:#ffc870">${enhExNm(ex)} ${ex.n}개</b> <span id="enEx" class="meta"></span>`:''}</div>
    <div class="enlist" style="display:grid;grid-auto-rows:36px;align-content:start;gap:4px;max-height:200px;overflow:auto;margin:8px 0;touch-action:pan-y">${rows||'<div class="meta">재료로 쓸 수 있는 아이템이 없어요 (🔒잠근 아이템 제외)</div>'}</div>
    <div class="meta enn" style="margin-bottom:8px">실패하면 재료와 골드만 사라지고 강화 단계는 그대로예요.</div>
    <div class="row2"><button class="btn" id="enNo">취소</button><button class="btn primary" id="enGo">강화하기</button></div>`,m=>{
     m.querySelector('.card').classList.add('enc');   /* 가로 모드: 목록만 스크롤, 버튼은 항상 보임 */
-    const draw=()=>{ const ok=sel.size===need&&me.gold>=cost; m.querySelector('#enSel').textContent=`(선택 ${sel.size}/${need})`; const g=m.querySelector('#enGo'); g.disabled=!ok; g.style.opacity=ok?1:.45; m.querySelector('#enC').style.color=me.gold>=cost?'#ffd84a':'#ff8a7a'; };
+    const draw=()=>{ const ok=sel.size===need&&me.gold>=cost&&(!ex||enhExHave(ex)>=ex.n); m.querySelector('#enSel').textContent=`(선택 ${sel.size}/${need})`; if(ex){ const h=enhExHave(ex), e2=m.querySelector('#enEx'); e2.textContent=`(보유 ${h.toLocaleString()}/${ex.n})`; e2.style.color=h>=ex.n?'#9fd18b':'#ff8a7a'; } const g=m.querySelector('#enGo'); g.disabled=!ok; g.style.opacity=ok?1:.45; m.querySelector('#enC').style.color=me.gold>=cost?'#ffd84a':'#ff8a7a'; };
     m.querySelectorAll('[data-m]').forEach(c=>c.onchange=()=>{ const i=+c.dataset.m; if(c.checked){ if(sel.size>=need){ c.checked=false; return; } sel.add(i); } else sel.delete(i); draw(); });
     m.querySelector('#enNo').onclick=closeModal; draw();
-    m.querySelector('#enGo').onclick=()=>{ if(sel.size!==need||me.gold<cost)return;
+    m.querySelector('#enGo').onclick=()=>{ if(sel.size!==need||me.gold<cost||(ex&&enhExHave(ex)<ex.n))return;
       const mats=[...sel].map(i=>me.inv[i]).filter(Boolean);
-      modal(`<h3>⚠️ 정말 강화할까요?</h3><p style="margin:0 0 8px;font-size:14px"><b style="color:${rcol(it)}">${esc(it.name)}</b> +${L-1} → +${L}<br>성공 확률 <b>${rate}%</b> · <b style="color:#ffd84a">${cost.toLocaleString()}G</b> 소모</p><div class="meta enlist" style="margin-bottom:8px;max-height:30vh;overflow:auto;touch-action:pan-y">아래 재료가 사라져요${rate<100?' (실패해도 사라져요)':''}:<br>${mats.map(x=>`<span style="color:${RARC[x.rar]}">${x.enh>0?`<b style="color:#ffb259">+${x.enh}</b> `:''}${esc(x.name)}</span>`).join(', ')}${mats.some(x=>x.enh>0)?'<br><span style="color:#ffb259">⚠️ 강화한 아이템이 재료에 포함돼 있어요</span>':''}</div><div class="row2"><button class="btn" id="en2No">취소</button><button class="btn primary" id="en2Yes">강화 시도</button></div>`,m2=>{
+      modal(`<h3>⚠️ 정말 강화할까요?</h3><p style="margin:0 0 8px;font-size:14px"><b style="color:${rcol(it)}">${esc(it.name)}</b> +${L-1} → +${L}<br>성공 확률 <b>${rate}%</b> · <b style="color:#ffd84a">${cost.toLocaleString()}G</b> 소모</p><div class="meta enlist" style="margin-bottom:8px;max-height:30vh;overflow:auto;touch-action:pan-y">아래 재료가 사라져요${rate<100?' (실패해도 사라져요)':''}:<br>${mats.map(x=>`<span style="color:${RARC[x.rar]}">${x.enh>0?`<b style="color:#ffb259">+${x.enh}</b> `:''}${esc(x.name)}</span>`).join(', ')}${ex?`, <b style="color:#ffc870">${enhExNm(ex)} ${ex.n}개</b>`:''}${mats.some(x=>x.enh>0)?'<br><span style="color:#ffb259">⚠️ 강화한 아이템이 재료에 포함돼 있어요</span>':''}</div><div class="row2"><button class="btn" id="en2No">취소</button><button class="btn primary" id="en2Yes">강화 시도</button></div>`,m2=>{
         m2.querySelector('.card').classList.add('enc'); m2.querySelector('#en2No').onclick=closeModal; m2.querySelector('#en2Yes').onclick=()=>doEnh(); }); };
-    const doEnh=()=>{ if(sel.size!==need||me.gold<cost)return;
+    const doEnh=()=>{ if(sel.size!==need||me.gold<cost||(ex&&enhExHave(ex)<ex.n))return;
       /* 강화창이 열린 사이 자동합성/판매로 인벤이 바뀌었으면 중단 (골드·재료 보호) */
       const own=me.inv.includes(it)||Object.values(me.eq).includes(it); if(!own||[...sel].some(i=>!matObj.get(i)||me.inv[i]!==matObj.get(i))){ closeModal(); renderBag(); sheetToast('인벤토리가 바뀌어 강화를 취소했어요 (골드·재료 그대로)','#ffb259'); return; }
-      me.gold-=cost; for(const i of sel)me.inv[i]=null;
+      me.gold-=cost; for(const i of sel)me.inv[i]=null; if(ex)enhExTake(ex);
       const ok=Math.random()*100<rate; const hr=me.hp/me.D.maxHp, mr=me.mp/me.D.maxMp;
       if(ok){ it.enh=L; it.ef=0; enhApply(it); sfx('lvl'); if(L>=MAXENH)ttfGlit(me); } else{ it.ef=(it.ef|0)+1; if(it.ef>=10)ttfSet('enf'); sfx('hurt'); }
       me.D=derive(me); me.hp=me.D.maxHp*hr; me.mp=me.D.maxMp*mr; saveChar(); uiDirty=true; closeModal();
