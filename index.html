@@ -1585,7 +1585,7 @@ body:not(.mining) #mkBtn{display:none}   /* 조합법 버튼: 광산 안(관리�
     <div id="a2g" hidden><div class="c"><h3 id="a2gH"></h3><ol id="a2gL"></ol><button class="ok" id="a2gOk" type="button">확인</button></div></div>
   </section>
   <section class="screen" id="sTitle">
-    <div class="ver" id="verT">v0.8.0.0989</div>
+    <div class="ver" id="verT">v0.8.0.0990</div>
     <button class="gearT" id="bSet" aria-label="메뉴"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="mnew" id="menuB" hidden>NEW</i></button>
     <button class="gearT" id="bFull" aria-label="전체화면" hidden></button>
     <div class="eyebrow">DARK GUARDIAN</div>
@@ -3662,7 +3662,7 @@ const GAL={royal:{n:'방패 근위대장',hp:1.2e5,dmg:9000,iv:1.2,spd:72,r:30,h
 function galSpawn(quiet){ if(G.stg&&G.stg.gm!==1||G.mode==='guest')return; let n=0;
   for(const k of ['royal','cleric']){ const C=GAL[k], x=CAS_T.x+(n-.5)*80, y=CAS_T.y+62; G.gal.push({k,i:100+n,x,y,hp:C.hp,max:C.hp,r:C.r,cd:rand(.4,1),flash:0,atk:0,mv:0,bar:0,tc:0,tt:0,heal:3,shd:6,seal:null,spd0:C.spd,buf:0}); burst(x,y,'#bfe0ff',22,260); efx.push({k:'ring',x,y,r0:10,r1:90,t:0,life:.6,col:'#cfe8ff',w:8}); n++; }
   if(!quiet){ banner('🛡️ 지원군 도착!','우리 편 정예가 성문에서 나왔어요'); sfx('boss'); } }
-function galHit(id,raw){ const a=G.gal&&G.gal.find(q=>q.i===id); if(!a||a.dead)return; let d=raw*(a.k==='royal'?.75:1); if(a.bar>0){ const t=Math.min(a.bar,d); a.bar-=t; d-=t; } if(d<=0){ a.flash=.12; return; }
+function galHit(id,raw){ const a=G.gal&&G.gal.find(q=>q.i===id); if(!a||a.dead)return; let d=raw*(a.k==='royal'?.85:1); if(a.bar>0){ const t=Math.min(a.bar,d); a.bar-=t; d-=t; } if(d<=0){ a.flash=.12; return; }
   a.hp-=d; a.flash=.12; if(d>=1)addNum(a.x,a.y-60,Math.round(d),'#8fe6ff',false,'g'+a.i);
   if(a.hp<=0){ a.dead=true; burst(a.x,a.y,'#bfe0ff',26,300); announce(`💀 ${GAL[a.k].n}가 쓰러졌어요`,'#ff8a7a'); } }
 function galFoe(a,pref){ let b=null,bs=1e9; for(const m of G.mobs){ if(m.dead||m.gmc||m.gmd||m.hp<=0)continue; const d=hyp(m.x-a.x,m.y-a.y); if(d>900)continue; const sc=d-(pref&&(m.elite||m.boss||m.gmg)?420:0); if(sc<bs){ bs=sc; b=m; } } return b; }
