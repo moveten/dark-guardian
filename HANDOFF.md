@@ -241,3 +241,4 @@
 - v0.8.0.1005: SELLBASE[5]=6000, sellInfo가 rarV 사용(전설 6,000G). canShEx에 !it.ep → 전설은 조각 교환 버튼 없음.
 - v0.8.0.1006: 7스테이지 카드 영웅아이템 점수 21점이면 class gmok(초록 #7fe08a) + "✔ … · 몬스터 강화 없음". 20점 이하는 기존 빨간 warn.
 - v0.8.0.1007: vercel.json 추가(img/audio/아이콘 max-age 1일 + SWR 7일 → 304 급감, 이미지 교체 시 새 파일명 또는 ?v= 필수 — CLAUDE.md에 규칙 추가). RK_UP_GAP 3→10분. 강화: ★5 이상(enhStar=rarV+1, 5~7) +2~+10강은 enhRoll → cyrb53(me.eseed[(★-5)*9+(L-2)], it.id, it.et, it.ef). eseed 27개 packChar 저장. ★4 이하·훈련장은 Math.random. 분포 실측 68%→67.6%, 28%→28.2%.
+- v0.8.0.1008: 마을 건물(data-tbld) 클릭 시 B.n>0이면 townPick(받기) 먼저, 0이면 townInfo. 연구소는 그대로 labInfo.
